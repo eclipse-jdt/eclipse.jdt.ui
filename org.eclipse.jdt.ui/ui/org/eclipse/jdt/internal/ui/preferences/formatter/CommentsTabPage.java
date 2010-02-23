@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -176,10 +176,12 @@ public class CommentsTabPage extends FormatterTabPage {
 		final CheckboxPreference indentDesc= createPrefFalseTrue(settingsGroup, numColumns , FormatterMessages.CommentsTabPage_indent_description_after_param, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION, false);
 		((GridData)indentDesc.getControl().getLayoutData()).horizontalIndent= fPixelConverter.convertWidthInCharsToPixels(4);
 		final CheckboxPreference nlParam= createPrefInsert(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_new_line_after_param_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER);
+		final CheckboxPreference nlBoundariesJavadoc= createPrefFalseTrue(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_new_lines_at_javadoc_boundaries, DefaultCodeFormatterConstants.FORMATTER_COMMENT_NEW_LINES_AT_JAVADOC_BOUNDARIES, false);
 		final CheckboxPreference blankLinesJavadoc= createPrefFalseTrue(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_clear_blank_lines, DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_JAVADOC_COMMENT, false);
 
 		// block comment settings
 		final Group blockSettingsGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group4_title);
+		final CheckboxPreference nlBoundariesBlock= createPrefFalseTrue(blockSettingsGroup, numColumns, FormatterMessages.CommentsTabPage_new_lines_at_comment_boundaries, DefaultCodeFormatterConstants.FORMATTER_COMMENT_NEW_LINES_AT_BLOCK_BOUNDARIES, false);
 		final CheckboxPreference blankLinesBlock= createPrefFalseTrue(blockSettingsGroup, numColumns, FormatterMessages.CommentsTabPage_remove_blank_block_comment_lines, DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_BLOCK_COMMENT, false);
 
 		final Group widthGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group3_title);
@@ -196,6 +198,7 @@ public class CommentsTabPage extends FormatterTabPage {
 		javaDocSlaves.add(blankJavadoc);
 		javaDocSlaves.add(indentJavadoc);
 		javaDocSlaves.add(nlParam);
+		javaDocSlaves.add(nlBoundariesJavadoc);
 		javaDocSlaves.add(blankLinesJavadoc);
 
 		new OrController(javaDocMaster, javaDocSlaves);
@@ -220,6 +223,7 @@ public class CommentsTabPage extends FormatterTabPage {
 
 		ArrayList blockSlaves= new ArrayList();
 		blockSlaves.add(blockSettingsGroup);
+		blockSlaves.add(nlBoundariesBlock);
 		blockSlaves.add(blankLinesBlock);
 
 		new OrController(blockMasters, blockSlaves);
