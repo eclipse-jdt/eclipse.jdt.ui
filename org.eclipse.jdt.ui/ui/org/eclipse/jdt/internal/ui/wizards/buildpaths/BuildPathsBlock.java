@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -747,7 +747,7 @@ public class BuildPathsBlock {
 	 * 
 	 * @param classPathEntries the new classpath entries (list of {@link CPListElement})
 	 * @param outputLocation the output location
-	 * @param javaProject the Java project 
+	 * @param javaProject the Java project
 	 * @param newProjectCompliance compliance to set for a new project, can be <code>null</code>
 	 * @param monitor a progress monitor, or <code>null</code>
 	 * @throws CoreException if flushing failed
@@ -783,7 +783,7 @@ public class BuildPathsBlock {
 					if (folder.members().length == 0) {
 						BuildPathsBlock.removeOldClassfiles(folder);
 					} else {
-						if (BuildPathsBlock.getRemoveOldBinariesQuery(JavaPlugin.getActiveWorkbenchShell()).doQuery(true, oldOutputLocation)) {
+						if (BuildPathsBlock.getRemoveOldBinariesQuery(JavaPlugin.getActiveWorkbenchShell()).doQuery(folder.isDerived(), oldOutputLocation)) {
 							BuildPathsBlock.removeOldClassfiles(folder);
 						}
 					}
@@ -1050,7 +1050,7 @@ public class BuildPathsBlock {
 				if (currPath.equals(entryPath)) {
 					return curr;
 				}
-				// in case there's no full match, look for a similar container (same ID segment): 
+				// in case there's no full match, look for a similar container (same ID segment):
 				if (prefixMatch == null && entryKind == IClasspathEntry.CPE_CONTAINER) {
 					int n= entryPath.segmentCount();
 					if (n > 0) {
