@@ -1024,6 +1024,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	public void unselected(ITextViewer viewer) {
 		if (fTextPresentationListener != null) {
 			((ITextViewerExtension4)viewer).removeTextPresentationListener(fTextPresentationListener);
+			fTextPresentationListener= null;
 		}
 		repairPresentation(viewer);
 		fRememberedStyleRange= null;
