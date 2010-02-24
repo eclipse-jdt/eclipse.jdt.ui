@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -623,46 +623,22 @@ public class JavaElementLabelComposer {
 		try {
 			fBuffer.append(getElementName(typeParameter));
 
-			// ITypeParameter#getSignature() would make things easier here, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=246594
-
-			IMember declaringMember= typeParameter.getDeclaringMember();
-			ITypeParameter[] params= null;
-			String[] paramSigs= null;
-			if (declaringMember instanceof IType) {
-				IType type= (IType)declaringMember;
-				params= type.getTypeParameters();
-				paramSigs= type.getTypeParameterSignatures();
-			} else if (declaringMember instanceof IMethod) {
-				IMethod method= (IMethod)declaringMember;
-				params= method.getTypeParameters();
-				paramSigs= method.getTypeParameterSignatures(); // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=246594
-			}
-			if (params != null) {
-				for (int i= 0; i < params.length; i++) {
-					if (params[i].equals(typeParameter)) {
-						if (paramSigs.length > i) {
-							String paramSig= paramSigs[i];
-							String[] bounds= Signature.getTypeParameterBounds(paramSig);
-							if (bounds.length > 0) {
-								if (bounds.length == 1 && "Ljava.lang.Object;".equals(bounds[0])) //$NON-NLS-1$
-									continue;
-								fBuffer.append(" extends "); //$NON-NLS-1$
-								for (int j= 0; j < bounds.length; j++) {
-									if (j > 0) {
-										fBuffer.append(JavaElementLabels.COMMA_STRING);
-									}
-									appendTypeSignatureLabel(typeParameter, bounds[j], flags);
-								}
-							}
-						}
-						break;
+			String[] bounds= typeParameter.getBoundsSignatures();
+			if (bounds.length > 0 &&
+					! (bounds.length == 1 && "Ljava.lang.Object;".equals(bounds[0]))) { //$NON-NLS-1$
+				fBuffer.append(" extends "); //$NON-NLS-1$
+				for (int j= 0; j < bounds.length; j++) {
+					if (j > 0) {
+						fBuffer.append(JavaElementLabels.COMMA_STRING);
 					}
+					appendTypeSignatureLabel(typeParameter, bounds[j], flags);
 				}
 			}
 
 			// post qualification
 			if (getFlag(flags, JavaElementLabels.TP_POST_QUALIFIED)) {
 				fBuffer.append(JavaElementLabels.CONCAT_STRING);
+				IMember declaringMember= typeParameter.getDeclaringMember();
 				appendElementLabel(declaringMember, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
 			}
 

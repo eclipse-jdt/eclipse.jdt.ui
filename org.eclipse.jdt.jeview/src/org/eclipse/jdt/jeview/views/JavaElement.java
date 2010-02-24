@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -490,6 +490,12 @@ public class JavaElement extends JEAttribute {
 				return createJavaElements(this, method.getTypeParameters());
 			}
 		});
+		result.add(new JavaElementChildrenProperty(this, "TYPE PARAMETER SIGNATURES") {
+			@Override @Deprecated
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createStrings(this, method.getTypeParameterSignatures());
+			}
+		});
 		try {
 			result.add(new JEMemberValuePair(this, "DEFAULT_VALUE", method.getDefaultValue()));
 		} catch (JavaModelException e) {
@@ -503,6 +509,12 @@ public class JavaElement extends JEAttribute {
 			@Override
 			protected JEAttribute[] computeChildren() throws JavaModelException {
 				return createStrings(this, typeParameter.getBounds());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "BOUNDS SIGNATURES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createStrings(this, typeParameter.getBoundsSignatures());
 			}
 		});
 	}
