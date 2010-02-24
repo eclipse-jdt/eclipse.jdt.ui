@@ -262,6 +262,7 @@ final class FormatterMessages extends NLS {
 	public static String WhiteSpaceOptions_return_with_parenthesized_expression;
 	public static String WhiteSpaceOptions_throw_with_parenthesized_expression;
 	public static String LineWrappingTabPage_compact_if_else;
+	public static String LineWrappingTabPage_declaration;
 	public static String LineWrappingTabPage_extends_clause;
 	public static String LineWrappingTabPage_enum_constant_arguments;
 	public static String LineWrappingTabPage_enum_constants;

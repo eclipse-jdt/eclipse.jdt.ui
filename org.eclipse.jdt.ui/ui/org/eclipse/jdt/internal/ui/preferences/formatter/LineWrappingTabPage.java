@@ -433,6 +433,12 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	    FormatterMessages.LineWrappingTabPage_parameters
 	);
 
+	private final Category fMethodDeclarationsCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_METHOD_DECLARATION,
+	    "class Example {public final synchronized java.lang.String a_method_with_a_long_name() {}}", //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_declaration
+	);
+
 	private final Category fMethodDeclarationsParametersCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_METHOD_DECLARATION,
 	    "class Example {void foo(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {}}", //$NON-NLS-1$
@@ -647,6 +653,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		constructorDeclarations.children.add(fConstructorThrowsClauseCategory);
 
 		final Category methodDeclarations= new Category(null, null, FormatterMessages.LineWrappingTabPage_method_decls);
+		methodDeclarations.children.add(fMethodDeclarationsCategory);
 		methodDeclarations.children.add(fMethodDeclarationsParametersCategory);
 		methodDeclarations.children.add(fMethodThrowsClauseCategory);
 
@@ -765,8 +772,11 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	protected Composite doCreatePreviewPane(Composite composite, int numColumns) {
 
 		super.doCreatePreviewPane(composite, numColumns);
-
-		final NumberPreference previewLineWidth= new NumberPreference(composite, numColumns / 2, fPreviewPreferences, LINE_SPLIT,
+		
+		Composite previewLineWidthContainer= new Composite(composite, SWT.NONE);
+		previewLineWidthContainer.setLayout(createGridLayout(2, false));
+		
+		final NumberPreference previewLineWidth= new NumberPreference(previewLineWidthContainer, 2, fPreviewPreferences, LINE_SPLIT,
 		    0, 9999, FormatterMessages.LineWrappingTabPage_line_width_for_preview_label_text);
 		fDefaultFocusManager.add(previewLineWidth);
 		previewLineWidth.addObserver(fUpdater);
