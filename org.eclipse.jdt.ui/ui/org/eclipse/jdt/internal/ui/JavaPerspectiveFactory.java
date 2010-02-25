@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,8 +28,6 @@ import org.eclipse.jdt.ui.JavaUI;
 
 public class JavaPerspectiveFactory implements IPerspectiveFactory {
 
-	// located in 'org.eclipse.ui.navigator.resources (ProjectExplorer)' which we don't need to import at the moment
-	public static final String ID_PROJECT_EXPLORER= "org.eclipse.ui.navigator.ProjectExplorer"; //$NON-NLS-1$
 
 	/**
 	 * Constructs a new Default layout engine.
@@ -44,8 +42,8 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		IFolderLayout folder= layout.createFolder("left", IPageLayout.LEFT, (float)0.25, editorArea); //$NON-NLS-1$
 		folder.addView(JavaUI.ID_PACKAGES);
 		folder.addPlaceholder(JavaUI.ID_TYPE_HIERARCHY);
-		folder.addPlaceholder(IPageLayout.ID_RES_NAV);
-		folder.addPlaceholder(ID_PROJECT_EXPLORER);
+		folder.addPlaceholder(JavaPlugin.ID_RES_NAV);
+		folder.addPlaceholder(IPageLayout.ID_PROJECT_EXPLORER);
 
 		IFolderLayout outputfolder= layout.createFolder("bottom", IPageLayout.BOTTOM, (float)0.75, editorArea); //$NON-NLS-1$
 		outputfolder.addView(IPageLayout.ID_PROBLEM_VIEW);
@@ -84,10 +82,10 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		// views - standard workbench
 		layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
 		layout.addShowViewShortcut(IPageLayout.ID_PROBLEM_VIEW);
-		layout.addShowViewShortcut(IPageLayout.ID_RES_NAV);
+		layout.addShowViewShortcut(JavaPlugin.ID_RES_NAV);
 		layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
 		layout.addShowViewShortcut(IProgressConstants.PROGRESS_VIEW_ID);
-		layout.addShowViewShortcut(ID_PROJECT_EXPLORER);
+		layout.addShowViewShortcut(IPageLayout.ID_PROJECT_EXPLORER);
 		layout.addShowViewShortcut(TemplatesView.ID);
 
 		// new actions - Java project creation wizard

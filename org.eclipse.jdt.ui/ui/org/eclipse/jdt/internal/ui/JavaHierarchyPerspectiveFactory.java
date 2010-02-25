@@ -42,8 +42,8 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		folder.addView(JavaUI.ID_TYPE_HIERARCHY);
 		folder.addPlaceholder(IPageLayout.ID_OUTLINE);
 		folder.addPlaceholder(JavaUI.ID_PACKAGES);
-		folder.addPlaceholder(IPageLayout.ID_RES_NAV);
-		folder.addPlaceholder(JavaPerspectiveFactory.ID_PROJECT_EXPLORER);
+		folder.addPlaceholder(JavaPlugin.ID_RES_NAV);
+		folder.addPlaceholder(IPageLayout.ID_PROJECT_EXPLORER);
 
 		IPlaceholderFolderLayout outputfolder= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, editorArea); //$NON-NLS-1$
 		outputfolder.addPlaceholder(IPageLayout.ID_PROBLEM_VIEW);
@@ -70,10 +70,10 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		// views - standard workbench
 		layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
 		layout.addShowViewShortcut(IPageLayout.ID_PROBLEM_VIEW);
-		layout.addShowViewShortcut(IPageLayout.ID_RES_NAV);
+		layout.addShowViewShortcut(JavaPlugin.ID_RES_NAV);
 		layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
 		layout.addShowViewShortcut(IProgressConstants.PROGRESS_VIEW_ID);
-		layout.addShowViewShortcut(JavaPerspectiveFactory.ID_PROJECT_EXPLORER);
+		layout.addShowViewShortcut(IPageLayout.ID_PROJECT_EXPLORER);
 		layout.addShowViewShortcut(TemplatesView.ID);
 
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.JavaProjectWizard"); //$NON-NLS-1$

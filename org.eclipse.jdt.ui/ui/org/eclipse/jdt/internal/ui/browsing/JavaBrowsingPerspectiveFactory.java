@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPerspectiveFactory;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
@@ -78,10 +78,10 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		// views - standard workbench
 		layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
 		layout.addShowViewShortcut(IPageLayout.ID_PROBLEM_VIEW);
-		layout.addShowViewShortcut(IPageLayout.ID_RES_NAV);
+		layout.addShowViewShortcut(JavaPlugin.ID_RES_NAV);
 		layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
 		layout.addShowViewShortcut(IProgressConstants.PROGRESS_VIEW_ID);
-		layout.addShowViewShortcut(JavaPerspectiveFactory.ID_PROJECT_EXPLORER);
+		layout.addShowViewShortcut(IPageLayout.ID_PROJECT_EXPLORER);
 
 		// new actions - Java project creation wizard
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.JavaProjectWizard"); //$NON-NLS-1$
@@ -106,8 +106,8 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		placeHolderLeft.addPlaceholder(JavaUI.ID_TYPE_HIERARCHY);
 		placeHolderLeft.addPlaceholder(IPageLayout.ID_OUTLINE);
 		placeHolderLeft.addPlaceholder(JavaUI.ID_PACKAGES);
-		placeHolderLeft.addPlaceholder(IPageLayout.ID_RES_NAV);
-		placeHolderLeft.addPlaceholder(JavaPerspectiveFactory.ID_PROJECT_EXPLORER);
+		placeHolderLeft.addPlaceholder(JavaPlugin.ID_RES_NAV);
+		placeHolderLeft.addPlaceholder(IPageLayout.ID_PROJECT_EXPLORER);
 
 		if (shouldShowProjectsView()) {
 			layout.addView(JavaUI.ID_PROJECTS_VIEW, IPageLayout.LEFT, (float)0.25, IPageLayout.ID_EDITOR_AREA);
@@ -153,8 +153,8 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		placeHolderLeft.addPlaceholder(JavaUI.ID_TYPE_HIERARCHY);
 		placeHolderLeft.addPlaceholder(IPageLayout.ID_OUTLINE);
 		placeHolderLeft.addPlaceholder(JavaUI.ID_PACKAGES);
-		placeHolderLeft.addPlaceholder(IPageLayout.ID_RES_NAV);
-		placeHolderLeft.addPlaceholder(JavaPerspectiveFactory.ID_PROJECT_EXPLORER);
+		placeHolderLeft.addPlaceholder(JavaPlugin.ID_RES_NAV);
+		placeHolderLeft.addPlaceholder(IPageLayout.ID_PROJECT_EXPLORER);
 
 
 		IPlaceholderFolderLayout placeHolderBottom= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
