@@ -91,6 +91,8 @@ public class JavaMergeViewer extends TextMergeViewer {
 	private Map /*<CompilationUnitEditorAdapter>*/ fEditor;
 	private ArrayList /*<SourceViewer>*/ fSourceViewer;
 
+	private IWorkbenchPartSite fSite;
+
 
 	public JavaMergeViewer(Composite parent, int styles, CompareConfiguration mp) {
 		super(parent, styles | SWT.LEFT_TO_RIGHT, mp);
@@ -112,6 +114,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 			}
 			fEditor= null;
 		}
+		fSite= null;
 		super.handleDispose(event);
 	}
 
@@ -253,8 +256,11 @@ public class JavaMergeViewer extends TextMergeViewer {
 	}
 
 	private IWorkbenchPartSite getSite() {
-		IWorkbenchPart workbenchPart= getCompareConfiguration().getContainer().getWorkbenchPart();
-		return workbenchPart != null ? workbenchPart.getSite() : null;
+		if (fSite == null) {
+			IWorkbenchPart workbenchPart= getCompareConfiguration().getContainer().getWorkbenchPart();
+			fSite= workbenchPart != null ? workbenchPart.getSite() : null;
+		}
+		return fSite;
 	}
 
 	private JavaSourceViewerConfiguration getSourceViewerConfiguration(SourceViewer sourceViewer, IEditorInput editorInput) {
