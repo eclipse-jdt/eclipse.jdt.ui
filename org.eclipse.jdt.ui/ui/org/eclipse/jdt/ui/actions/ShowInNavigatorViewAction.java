@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchSite;
@@ -32,11 +31,13 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
 
 /**
  * Reveals the selected element in the resource navigator view.
@@ -138,7 +139,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 			return;
 		try {
 			IWorkbenchPage page= getSite().getWorkbenchWindow().getActivePage();
-			IViewPart view= page.showView(IPageLayout.ID_RES_NAV);
+			IViewPart view= page.showView(JavaPlugin.ID_RES_NAV);
 			if (view instanceof ISetSelectionTarget) {
 				ISelection selection= new StructuredSelection(resource);
 				((ISetSelectionTarget)view).selectReveal(selection);

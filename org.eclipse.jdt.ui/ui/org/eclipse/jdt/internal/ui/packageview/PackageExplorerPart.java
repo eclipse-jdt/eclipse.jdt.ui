@@ -70,7 +70,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IViewPart;
@@ -138,6 +137,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.ConfigureWorkingSetAction;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
+
 
 /**
  * The ViewPart for the Package Explorer. It listens to part activation events. When selection
@@ -679,7 +679,7 @@ public class PackageExplorerPart extends ViewPart
 		if (key == IShowInTargetList.class) {
 			return new IShowInTargetList() {
 				public String[] getShowInTargetIds() {
-					return new String[] { IPageLayout.ID_RES_NAV };
+					return new String[] { JavaPlugin.ID_RES_NAV };
 				}
 
 			};
