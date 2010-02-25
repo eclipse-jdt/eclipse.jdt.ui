@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.swt.graphics.Image;
@@ -20,6 +19,7 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.ui.texteditor.IAnnotationImageProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
 
 /**
  * Image provider for {@link org.eclipse.jdt.internal.ui.javaeditor.OverrideIndicatorManager.OverrideIndicator} annotations.
@@ -63,7 +63,7 @@ public class OverrideIndicatorImageProvider implements IAnnotationImageProvider 
 	}
 
 	private boolean isImageProviderFor(Annotation annotation) {
-		return annotation instanceof OverrideIndicatorManager.OverrideIndicator && OverrideIndicatorManager.ANNOTATION_TYPE.equals(annotation.getType());
+		return annotation != null && OverrideIndicatorManager.ANNOTATION_TYPE.equals(annotation.getType());
 	}
 
 	private boolean isOverwriting(Annotation annotation) {
