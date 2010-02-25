@@ -505,9 +505,7 @@ public final class ASTProvider {
 	 * @return <code>true</code> if reported as currently being reconciled
 	 */
 	private boolean isReconciling(ITypeRoot javaElement) {
-		synchronized (fReconcileLock) {
-			return javaElement != null && javaElement.equals(fReconcilingJavaElement) && fIsReconciling;
-		}
+		return javaElement != null && javaElement.equals(fReconcilingJavaElement) && fIsReconciling;
 	}
 
 	/**
