@@ -737,31 +737,31 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		fWrappingStyleCombo.setItems(WRAPPING_NAMES);
 		fWrappingStyleCombo.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, 0));
 
-		// label "Select indentation style:"
-		fIndentStylePolicy= createLabel(numColumns, fOptionsGroup, FormatterMessages.LineWrappingTabPage_indentation_policy_label_text);
-
-		// combo SplitStyleCombo
-		fIndentStyleCombo= new Combo(fOptionsGroup, SWT.SINGLE | SWT.READ_ONLY);
-		SWTUtil.setDefaultVisibleItemCount(fIndentStyleCombo);
-		fIndentStyleCombo.setItems(INDENT_NAMES);
-		fIndentStyleCombo.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, 0));
-
+		// button "Force split"
+		fForceSplit= new Button(fOptionsGroup, SWT.CHECK);
+		String label= FormatterMessages.LineWrappingTabPage_force_split_checkbox_text;
+		fForceSplit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, numColumns - 1, 1));
+		fForceSplit.setText(label);
+		
+		// button "Wrap before operator"
 		Preference expressionWrapPositionPreference= createCheckboxPref(fOptionsGroup, 1, FormatterMessages.LineWrappingTabPage_binary_expression_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_BINARY_OPERATOR, FALSE_TRUE);
 		Control control= expressionWrapPositionPreference.getControl();
 		control.setVisible(false);
 		GridData layoutData= (GridData)control.getLayoutData();
 		layoutData.exclude= true;
 		layoutData.horizontalAlignment= SWT.BEGINNING;
+		layoutData.horizontalSpan= numColumns - 1;
 		layoutData.grabExcessHorizontalSpace= false;
 		fBinaryExpressionCategory.addPreference(expressionWrapPositionPreference);
+		
+		// label "Select indentation style:"
+		fIndentStylePolicy= createLabel(numColumns, fOptionsGroup, FormatterMessages.LineWrappingTabPage_indentation_policy_label_text);
 
-		// button "Force split"
-		fForceSplit= new Button(fOptionsGroup, SWT.CHECK);
-		String label= FormatterMessages.LineWrappingTabPage_force_split_checkbox_text;
-		GridData gridData= new GridData(SWT.FILL, SWT.CENTER, true, false);
-		gridData.horizontalSpan= numColumns - 1;
-		fForceSplit.setLayoutData(gridData);
-		fForceSplit.setText(label);
+		// combo IndentStyleCombo
+		fIndentStyleCombo= new Combo(fOptionsGroup, SWT.SINGLE | SWT.READ_ONLY);
+		SWTUtil.setDefaultVisibleItemCount(fIndentStyleCombo);
+		fIndentStyleCombo.setItems(INDENT_NAMES);
+		fIndentStyleCombo.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, 0));
 
 		// selection state object
 		fSelectionState= new SelectionState();
