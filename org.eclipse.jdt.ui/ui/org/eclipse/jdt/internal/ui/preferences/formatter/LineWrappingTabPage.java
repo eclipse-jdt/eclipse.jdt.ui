@@ -341,7 +341,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
                 fForceSplit.setSelection(nrOfTrue.intValue() > nrOfFalse.intValue());
 
             int max= getMax(nrOfTrue, nrOfFalse);
-            String label= FormatterMessages.LineWrappingTabPage_force_split_checkbox_multi_text;
+            String label= FormatterMessages.LineWrappingTabPage_force_split_checkbox_text;
             fForceSplit.setText(getLabelText(label, max, fElements.size()));
         }
 
