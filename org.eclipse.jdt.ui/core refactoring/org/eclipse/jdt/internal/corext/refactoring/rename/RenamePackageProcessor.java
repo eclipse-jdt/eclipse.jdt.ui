@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,8 +17,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -34,6 +34,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.jface.util.Util;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -312,23 +314,10 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 				for (int i= 0; i < oldParameterTypes.length; i++) {
 					newparams[i]= oldParameterTypes[i];
 					for (int j= 0; j < possibleOldSigs.length; j++) {
-						newparams[i]= replaceAll(newparams[i], possibleOldSigs[j], possibleNewSigs[j]);
+						newparams[i]= Util.replaceAll(newparams[i], possibleOldSigs[j], possibleNewSigs[j]);
 					}
 				}
 				return newparams;
-			}
-
-		    private String replaceAll(final String source, final String replaceFrom, final String replaceTo) {
-				final StringBuffer buf= new StringBuffer(source.length());
-				int currentIndex= 0;
-				int matchIndex;
-				while ((matchIndex= source.indexOf(replaceFrom, currentIndex)) != -1) {
-					buf.append(source.substring(currentIndex, matchIndex));
-					buf.append(replaceTo);
-					currentIndex= matchIndex + replaceFrom.length();
-				}
-				buf.append(source.substring(currentIndex));
-				return buf.toString();
 			}
 		}.transplantHandle(original);
 	}
