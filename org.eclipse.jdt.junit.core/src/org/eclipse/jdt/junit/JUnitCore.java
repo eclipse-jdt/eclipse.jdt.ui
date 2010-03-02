@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,9 +16,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 
@@ -38,6 +41,30 @@ import org.eclipse.jdt.internal.junit.launcher.JUnit4TestFinder;
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 public class JUnitCore {
+
+	/**
+	 * ID of the JUnit {@linkplain IClasspathContainer classpath container}.
+	 * The general format of classpath entries using this container is unspecified.
+	 * 
+	 * @see #JUNIT3_CONTAINER_PATH
+	 * @see #JUNIT4_CONTAINER_PATH
+	 * @since 3.6
+	 */
+	public static final String JUNIT_CONTAINER_ID= "org.eclipse.jdt.junit.JUNIT_CONTAINER"; //$NON-NLS-1$
+	
+	/**
+	 * Path of the JUnit 3 {@linkplain IClasspathContainer classpath container}.
+	 * 
+	 * @since 3.6
+	 */
+	public final static IPath JUNIT3_CONTAINER_PATH= new Path(JUNIT_CONTAINER_ID).append("3"); //$NON-NLS-1$
+	
+	/**
+	 * Path of the JUnit 4 {@linkplain IClasspathContainer classpath container}.
+	 * 
+	 * @since 3.6
+	 */
+	public final static IPath JUNIT4_CONTAINER_PATH= new Path(JUNIT_CONTAINER_ID).append("4"); //$NON-NLS-1$
 
 	/**
 	 * Adds a listener for test runs.

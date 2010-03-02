@@ -19,6 +19,7 @@ import java.net.URL;
 import org.osgi.framework.Version;
 
 import org.eclipse.equinox.internal.provisional.frameworkadmin.BundleInfo;
+import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.osgi.service.resolver.VersionRange;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -146,14 +147,14 @@ public class BuildPathSupport {
 	 * @return the JUnit3 classpath container
 	 */
 	public static IClasspathEntry getJUnit3ClasspathEntry() {
-		return JavaCore.newContainerEntry(JUnitContainerInitializer.JUNIT3_PATH);
+		return JavaCore.newContainerEntry(JUnitCore.JUNIT3_CONTAINER_PATH);
 	}
 
 	/**
 	 * @return the JUnit4 classpath container
 	 */
 	public static IClasspathEntry getJUnit4ClasspathEntry() {
-		return JavaCore.newContainerEntry(JUnitContainerInitializer.JUNIT4_PATH);
+		return JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH);
 	}
 
 	/**

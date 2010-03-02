@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,11 @@ package org.eclipse.jdt.internal.junit.buildpath;
 
 import java.util.ArrayList;
 
+import org.eclipse.jdt.junit.JUnitCore;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -30,13 +31,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.junit.JUnitMessages;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.JUnitMessages;
 import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 
 public class JUnitContainerInitializer extends ClasspathContainerInitializer {
-
-	public static final String JUNIT_CONTAINER_ID= "org.eclipse.jdt.junit.JUNIT_CONTAINER"; //$NON-NLS-1$
 
 	private static final IStatus NOT_SUPPORTED= new Status(IStatus.ERROR, JUnitCorePlugin.CORE_PLUGIN_ID, ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED, new String(), null);
 	private static final IStatus READ_ONLY= new Status(IStatus.ERROR, JUnitCorePlugin.CORE_PLUGIN_ID, ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY, new String(), null);
@@ -47,9 +46,6 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	private final static String JUNIT3_8_1= "3.8.1"; //$NON-NLS-1$
 	private final static String JUNIT3= "3"; //$NON-NLS-1$
 	private final static String JUNIT4= "4"; //$NON-NLS-1$
-
-	public final static IPath JUNIT3_PATH= new Path(JUNIT_CONTAINER_ID).append(JUNIT3);
-	public final static IPath JUNIT4_PATH= new Path(JUNIT_CONTAINER_ID).append(JUNIT4);
 
 	private static class JUnitContainer implements IClasspathContainer {
 
@@ -66,7 +62,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 		}
 
 		public String getDescription() {
-			if (JUNIT4_PATH.equals(fPath)) {
+			if (JUnitCore.JUNIT4_CONTAINER_PATH.equals(fPath)) {
 				return JUnitMessages.JUnitContainerInitializer_description_junit4;
 			}
 			return JUnitMessages.JUnitContainerInitializer_description_junit3;
@@ -117,7 +113,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 
 
 	private static boolean isValidJUnitContainerPath(IPath path) {
-		return path != null && path.segmentCount() == 2 && JUNIT_CONTAINER_ID.equals(path.segment(0));
+		return path != null && path.segmentCount() == 2 && JUnitCore.JUNIT_CONTAINER_ID.equals(path.segment(0));
 	}
 
 	/* (non-Javadoc)

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.buildpath;
 
+import org.eclipse.jdt.junit.JUnitCore;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -61,7 +63,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		setDescription(JUnitMessages.JUnitContainerWizardPage_wizard_description);
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
 
-		fContainerEntryResult= JavaCore.newContainerEntry(JUnitContainerInitializer.JUNIT3_PATH);
+		fContainerEntryResult= JavaCore.newContainerEntry(JUnitCore.JUNIT3_CONTAINER_PATH);
 	}
 
 	public static IJavaProject getPlaceholderProject() {
@@ -120,7 +122,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		data.widthHint= converter.convertWidthInCharsToPixels(15);
 		fVersionCombo.setLayoutData(data);
 
-		if (fContainerEntryResult != null && JUnitContainerInitializer.JUNIT4_PATH.equals(fContainerEntryResult.getPath())) {
+		if (fContainerEntryResult != null && JUnitCore.JUNIT4_CONTAINER_PATH.equals(fContainerEntryResult.getPath())) {
 			fVersionCombo.select(1);
 		} else {
 			fVersionCombo.select(0);
@@ -164,16 +166,16 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		IClasspathEntry libEntry;
 		IPath containerPath;
 		if (fVersionCombo != null && fVersionCombo.getSelectionIndex() == 1) {
-			containerPath= JUnitContainerInitializer.JUNIT4_PATH;
+			containerPath= JUnitCore.JUNIT4_CONTAINER_PATH;
 			libEntry= BuildPathSupport.getJUnit4LibraryEntry();
 		} else {
-			containerPath= JUnitContainerInitializer.JUNIT3_PATH;
+			containerPath= JUnitCore.JUNIT3_CONTAINER_PATH;
 			libEntry= BuildPathSupport.getJUnit3LibraryEntry();
 		}
 
 		if (libEntry == null) {
 			status.setError(JUnitMessages.JUnitContainerWizardPage_error_version_not_available);
-		} else if (JUnitContainerInitializer.JUNIT4_PATH.equals(containerPath)) {
+		} else if (JUnitCore.JUNIT4_CONTAINER_PATH.equals(containerPath)) {
 			if (fProject != null && !JUnitStubUtility.is50OrHigher(fProject)) {
 				status.setWarning(JUnitMessages.JUnitContainerWizardPage_warning_java5_required);
 			}
