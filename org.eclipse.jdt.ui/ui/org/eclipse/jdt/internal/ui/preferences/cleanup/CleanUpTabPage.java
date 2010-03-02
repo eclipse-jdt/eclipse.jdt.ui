@@ -164,13 +164,6 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 			for (int i= 0; i < slaves.length; i++) {
 				if (slaves[i].getChecked() && master.getEnabled()) {
 					setSelectedCleanUpCount(fSelectedCount + 1);
-					if (subSlaves != null) {
-						for (int j= 0; j < subSlaves[i].length; j++) {
-							if (subSlaves[i][j].getChecked()) {
-								setSelectedCleanUpCount(fSelectedCount + 1);
-							}
-						}
-					}
 				}
 			}
 		}
