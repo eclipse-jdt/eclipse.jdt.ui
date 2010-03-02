@@ -130,6 +130,22 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	 * 		First index into array is the subSlave's master's index. subSlaves can also be <code>null</code>.
 	 */
 	protected void registerSlavePreference(final CheckboxPreference master, final CheckboxPreference[] slaves, final CheckboxPreference[][] subSlaves) {
+		if (subSlaves != null) {
+			// Need to add subSlave observers before registering slaves below, since java.util.Observable notifies in wrong order!
+			for (int i= 0; i < slaves.length; i++) {
+				final CheckboxPreference slave= slaves[i];
+				for (int j= 0; j < subSlaves[i].length; j++) {
+					final CheckboxPreference subSlave= subSlaves[i][j];
+					master.addObserver(new Observer() {
+						public void update(Observable o, Object arg) {
+							boolean enabled= slave.getEnabled() && slave.getChecked();
+							subSlave.setEnabled(enabled);
+						}
+					});
+				}
+			}
+		}
+		
 		internalRegisterSlavePreference(master, slaves);
 		fCount+= slaves.length;
 		

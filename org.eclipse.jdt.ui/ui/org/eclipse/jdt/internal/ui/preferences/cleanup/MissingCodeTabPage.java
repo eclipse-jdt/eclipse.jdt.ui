@@ -11,8 +11,6 @@
 package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
@@ -50,17 +48,6 @@ public final class MissingCodeTabPage extends AbstractCleanUpTabPage {
 		
 		intent(annotationsGroup);
 		final CheckboxPreference deprecatedPref= createCheckboxPref(annotationsGroup, numColumns - 1, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMissingDeprecatedAnnotations, CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED, CleanUpModifyDialog.FALSE_TRUE);
-		
-		/* This observable preferences framework is over-designed but under-performing.
-		 * I didn't find an easy way to make it work for non-trivial (3-level) dependencies, so I just do it by hand for now...
-		 */
-		// Need to add observer before registering slaves below, since java.util.Observable notifies in wrong order!
-		annotationsPref.addObserver(new Observer() {
-			public void update(Observable o, Object arg) {
-				boolean enabled= overridePref.getEnabled() && overridePref.getChecked();
-				overrideInterfacePref.setEnabled(enabled);
-			}
-		});
 		
 		registerSlavePreference(annotationsPref, new CheckboxPreference[] {overridePref, deprecatedPref}, new CheckboxPreference[][] {{overrideInterfacePref}, {}});
 		registerSlavePreference(overridePref, new CheckboxPreference[] {overrideInterfacePref});
