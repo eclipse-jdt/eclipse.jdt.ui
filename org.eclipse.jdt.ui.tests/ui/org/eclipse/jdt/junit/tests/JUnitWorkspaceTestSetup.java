@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,13 +8,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.junit.tests;
-
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
+import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
@@ -25,7 +24,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.junit.buildpath.JUnitContainerInitializer;
 
 public class JUnitWorkspaceTestSetup extends TestSetup {
 
@@ -60,13 +58,13 @@ public class JUnitWorkspaceTestSetup extends TestSetup {
 		if (fJUnit4) {
 			fgProject= JavaProjectHelper.createJavaProject(PROJECT_NAME_4, "bin");
 			JavaProjectHelper.addRTJar(fgProject);
-			IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitContainerInitializer.JUNIT4_PATH);
+			IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH);
 			JavaProjectHelper.addToClasspath(fgProject, cpe);
 
 		} else {
 			fgProject= JavaProjectHelper.createJavaProject(PROJECT_NAME_3, "bin");
 			JavaProjectHelper.addRTJar13(fgProject);
-			IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitContainerInitializer.JUNIT3_PATH);
+			IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitCore.JUNIT3_CONTAINER_PATH);
 			JavaProjectHelper.addToClasspath(fgProject, cpe);
 		}
 		fgRoot= JavaProjectHelper.addSourceContainer(fgProject, SRC_NAME);

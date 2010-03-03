@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.util.Iterator;
 import junit.framework.Test;
 import junit.framework.TestCase;
 
+import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
 
@@ -29,10 +30,10 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.junit.buildpath.JUnitContainerInitializer;
 import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
+
 
 public class JUnit3TestFinderTest extends TestCase {
 	private IJavaProject fProject;
@@ -46,7 +47,7 @@ public class JUnit3TestFinderTest extends TestCase {
 		super.setUp();
 		fProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar(fProject);
-		IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitContainerInitializer.JUNIT3_PATH);
+		IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitCore.JUNIT3_CONTAINER_PATH);
 		JavaProjectHelper.addToClasspath(fProject, cpe);
 
 		fRoot= JavaProjectHelper.addSourceContainer(fProject, "src");

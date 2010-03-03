@@ -34,10 +34,10 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.junit.buildpath.JUnitContainerInitializer;
 import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
+
 
 public class JUnit4TestFinderTest extends TestCase {
 
@@ -52,7 +52,7 @@ public class JUnit4TestFinderTest extends TestCase {
 		super.setUp();
 		fProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar(fProject);
-		IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitContainerInitializer.JUNIT4_PATH);
+		IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH);
 		JavaProjectHelper.addToClasspath(fProject, cpe);
 		JavaProjectHelper.set15CompilerOptions(fProject);
 
