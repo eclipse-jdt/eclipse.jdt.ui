@@ -358,6 +358,7 @@ final class FormatterMessages extends NLS {
 	public static String CommentsTabPage_format_header;
 	public static String CommentsTabPage_format_html;
 	public static String CommentsTabPage_format_code_snippets;
+	public static String CommentsTabPage_format_line_comments_on_first_column;
 	public static String CommentsTabPage_group2_title;
 	public static String CommentsTabPage_clear_blank_lines;
 	public static String CommentsTabPage_blank_line_before_javadoc_tags;
