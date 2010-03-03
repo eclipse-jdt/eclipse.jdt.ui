@@ -22,7 +22,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 
@@ -30,31 +29,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
  * Tab page for the comment formatter settings.
  */
 public class CommentsTabPage extends FormatterTabPage {
-
-	/**
-	 * Constant array for boolean selection
-	 */
-	private static String[] FALSE_TRUE = {
-		DefaultCodeFormatterConstants.FALSE,
-		DefaultCodeFormatterConstants.TRUE
-	};
-	
-	/**
-	 * Constant array for boolean selection.
-	 * @since 3.5
-	 */
-	private static String[] TRUE_FALSE = {
-		DefaultCodeFormatterConstants.TRUE,
-		DefaultCodeFormatterConstants.FALSE
-	};
-
-    /**
-     * Constant array for insert / not_insert.
-     */
-    private static String[] DO_NOT_INSERT_INSERT = {
-        JavaCore.DO_NOT_INSERT,
-        JavaCore.INSERT
-    };
 
 	private static abstract class Controller implements Observer {
 
