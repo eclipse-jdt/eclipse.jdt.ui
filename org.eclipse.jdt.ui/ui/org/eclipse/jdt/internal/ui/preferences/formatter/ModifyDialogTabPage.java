@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,7 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.layout.PixelConverter;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -58,6 +59,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 
 public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
+
 
 	/**
 	 * This is the default listener for any of the Preference
@@ -454,6 +456,147 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 
 
 	/**
+	 * Wrapper around a text field which requests a string input.
+	 * 
+	 * @since 3.6
+	 */
+	protected final class StringPreference extends Preference {
+
+		/**
+		 * Validates the input.
+		 * <p>
+		 * The default implementation declares all non-<code>null</code> values as valid.
+		 * </p>
+		 * 
+		 * @since 3.6
+		 */
+		protected class Validator {
+			boolean isValid(String input) {
+				return input != null;
+			}
+		}
+
+		private final Label fLabel;
+
+		private final Text fText;
+
+		private IInputValidator fInputValidator;
+
+		protected String fSelected;
+
+		protected String fOldSelected;
+
+		/**
+		 * Creates a new <code>StringPreference</code>.
+		 * 
+		 * @param composite the composite on which the SWT widgets are added.
+		 * @param numColumns the number of columns in the composite's {@link GridLayout}
+		 * @param preferences the map to store the values.
+		 * @param key the key to store the values.
+		 * @param text the label text for this Preference.
+		 * @param inputValidator the input validator or <code>null</code> if none
+		 */
+		public StringPreference(Composite composite, int numColumns, Map preferences, String key, String text, IInputValidator inputValidator) {
+			super(preferences, key);
+
+			fInputValidator= inputValidator;
+
+			fLabel= new Label(composite, SWT.NONE);
+			fLabel.setFont(composite.getFont());
+			fLabel.setText(text);
+
+			fLabel.setLayoutData(createGridData(numColumns - 1, GridData.HORIZONTAL_ALIGN_BEGINNING, SWT.DEFAULT));
+
+			fText= new Text(composite, SWT.SINGLE | SWT.BORDER);
+			fText.setFont(composite.getFont());
+
+			final int length= 30;
+			fText.setLayoutData(createGridData(1, GridData.HORIZONTAL_ALIGN_BEGINNING, fPixelConverter.convertWidthInCharsToPixels(length)));
+
+			updateWidget();
+
+			fText.addFocusListener(new FocusListener() {
+				public void focusGained(FocusEvent e) {
+					StringPreference.this.focusGained();
+				}
+
+				public void focusLost(FocusEvent e) {
+					StringPreference.this.focusLost();
+				}
+			});
+
+			fText.addModifyListener(new ModifyListener() {
+				public void modifyText(ModifyEvent e) {
+					fieldModified();
+				}
+			});
+		}
+
+		private IStatus createErrorStatus(String errorText) {
+			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, errorText, null);
+
+		}
+
+		protected void focusGained() {
+			fOldSelected= fSelected;
+			fText.setSelection(0, fText.getCharCount());
+		}
+
+		protected void focusLost() {
+			updateStatus(null);
+			final String input= fText.getText();
+			if (fInputValidator != null && fInputValidator.isValid(input) != null)
+				fSelected= fOldSelected;
+			else
+				fSelected= input;
+			if (fSelected != fOldSelected) {
+				saveSelected();
+				fText.setText(fSelected);
+			}
+		}
+
+
+		protected void fieldModified() {
+			final String text= fText.getText();
+			final String errorText= fInputValidator != null ? fInputValidator.isValid(text) : null;
+
+			updateStatus(createErrorStatus(errorText));
+
+			if (errorText == null) {
+				if (fSelected != text) {
+					fSelected= text;
+					saveSelected();
+				}
+			}
+		}
+
+		private void saveSelected() {
+			getPreferences().put(getKey(), fSelected);
+			setChanged();
+			notifyObservers();
+		}
+
+		protected void updateWidget() {
+			final boolean hasKey= getKey() != null;
+
+			fLabel.setEnabled(hasKey && getEnabled());
+			fText.setEnabled(hasKey && getEnabled());
+
+			if (hasKey) {
+				fSelected= (String)getPreferences().get(getKey());
+				fText.setText(fSelected);
+			} else {
+				fText.setText(""); //$NON-NLS-1$
+			}
+		}
+
+		public Control getControl() {
+			return fText;
+		}
+	}
+
+
+	/**
 	 * This class provides the default way to preserve and re-establish the focus
 	 * over multiple modify sessions. Each ModifyDialogTabPage has its own instance,
 	 * and it should add all relevant controls upon creation, always in the same sequence.
@@ -638,13 +781,16 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	}
 
 	/**
-	 * Create the contents of this tab page. Subclasses cannot override this,
-	 * instead they must implement <code>doCreatePreferences</code>. <code>doCreatePreview</code> may also
-	 * be overridden as necessary.
+	 * Create the contents of this tab page.
+	 * <p>
+	 * Subclasses should implement <code>doCreatePreferences</code> and <code>doCreatePreview</code>
+	 * may also be overridden as necessary.
+	 * </p>
+	 * 
 	 * @param parent The parent composite
 	 * @return Created content control
 	 */
-	public final Composite createContents(Composite parent) {
+	public Composite createContents(Composite parent) {
 		final int numColumns= 4;
 
 		if (fPixelConverter == null) {
@@ -886,6 +1032,18 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 												int minValue, int maxValue) {
 		final NumberPreference pref= new NumberPreference(composite, numColumns, fWorkingValues,
 			key, minValue, maxValue, name);
+		fDefaultFocusManager.add(pref);
+		pref.addObserver(fUpdater);
+		return pref;
+	}
+
+	/*
+	 * Convenience method to create a StringPreference. The widget is registered as
+	 * a potential focus holder, and the default updater is added.
+	 * @since 3.6
+	 */
+	protected StringPreference createStringPref(Composite composite, int numColumns, String name, String key, IInputValidator inputValidator) {
+		StringPreference pref= new StringPreference(composite, numColumns, fWorkingValues, key, name, inputValidator);
 		fDefaultFocusManager.add(pref);
 		pref.addObserver(fUpdater);
 		return pref;
