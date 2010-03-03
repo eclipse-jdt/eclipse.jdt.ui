@@ -559,15 +559,14 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		protected void fieldModified() {
 			final String text= fText.getText();
 			final String errorText= fInputValidator != null ? fInputValidator.isValid(text) : null;
-
-			updateStatus(createErrorStatus(errorText));
-
 			if (errorText == null) {
+				updateStatus(null);
 				if (fSelected != text) {
 					fSelected= text;
 					saveSelected();
 				}
-			}
+			} else
+				updateStatus(createErrorStatus(errorText));
 		}
 
 		private void saveSelected() {
