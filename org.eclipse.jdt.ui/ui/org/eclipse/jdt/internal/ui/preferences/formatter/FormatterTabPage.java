@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,13 +21,34 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+
 public abstract class FormatterTabPage extends ModifyDialogTabPage {
 
 	private final static String SHOW_INVISIBLE_PREFERENCE_KEY= JavaUI.ID_PLUGIN + ".formatter_page.show_invisible_characters"; //$NON-NLS-1$
+
+	/**
+	 * Constant array for boolean false/true selection.
+	 */
+	protected static String[] FALSE_TRUE= { DefaultCodeFormatterConstants.FALSE, DefaultCodeFormatterConstants.TRUE };
+
+	/**
+	 * Constant array for boolean true/false selection.
+	 * 
+	 * @since 3.5
+	 */
+	protected static String[] TRUE_FALSE= { DefaultCodeFormatterConstants.TRUE, DefaultCodeFormatterConstants.FALSE };
+
+	/**
+	 * Constant array for insert / not_insert.
+	 */
+	protected static String[] DO_NOT_INSERT_INSERT= { JavaCore.DO_NOT_INSERT, JavaCore.INSERT };
 
 	private JavaPreview fPreview;
 	private final IDialogSettings fDialogSettings;

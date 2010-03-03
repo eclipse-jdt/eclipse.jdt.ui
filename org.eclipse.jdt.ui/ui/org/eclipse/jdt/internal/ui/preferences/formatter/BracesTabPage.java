@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,15 +20,8 @@ import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-public class BracesTabPage extends FormatterTabPage {
 
-	/**
-	 * Constant array for boolean selection
-	 */
-	private static String[] FALSE_TRUE = {
-		DefaultCodeFormatterConstants.FALSE,
-		DefaultCodeFormatterConstants.TRUE
-	};
+public class BracesTabPage extends FormatterTabPage {
 
 	private final String PREVIEW=
 	createPreviewHeader(FormatterMessages.BracesTabPage_preview_header) +
@@ -97,9 +90,10 @@ public class BracesTabPage extends FormatterTabPage {
 
 
 	/**
-	 * Create a new BracesTabPage.
-	 * @param modifyDialog
-	 * @param workingValues
+	 * Creates a new BracesTabPage.
+	 * 
+	 * @param modifyDialog the modify dialog
+	 * @param workingValues the working values
 	 */
 	public BracesTabPage(ModifyDialog modifyDialog, Map workingValues) {
 		super(modifyDialog, workingValues);
@@ -130,10 +124,6 @@ public class BracesTabPage extends FormatterTabPage {
 		updateOptionEnablement(arrayInitOption, arrayInitCheckBox);
 	}
 
-	/**
-	 * @param arrayInitOption
-	 * @param arrayInitCheckBox
-	 */
 	protected final void updateOptionEnablement(ComboPreference arrayInitOption, CheckboxPreference arrayInitCheckBox) {
 		arrayInitCheckBox.setEnabled(!arrayInitOption.hasValue(DefaultCodeFormatterConstants.END_OF_LINE));
 	}

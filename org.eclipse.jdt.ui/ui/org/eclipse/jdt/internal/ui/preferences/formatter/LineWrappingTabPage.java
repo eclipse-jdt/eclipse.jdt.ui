@@ -61,21 +61,6 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
  */
 public class LineWrappingTabPage extends FormatterTabPage {
 	/**
-	 * Constant array for boolean selection
-	 */
-	private static String[] FALSE_TRUE = {
-		DefaultCodeFormatterConstants.FALSE,
-		DefaultCodeFormatterConstants.TRUE
-	};
-
-	/**
-	 * Constant array for boolean selection.
-	 * 
-	 * @since 3.5
-	 */
-	private static String[] TRUE_FALSE= { DefaultCodeFormatterConstants.TRUE, DefaultCodeFormatterConstants.FALSE };
-
-    /**
      * Represents a line wrapping category. All members are final.
      */
 	private final static class Category {
