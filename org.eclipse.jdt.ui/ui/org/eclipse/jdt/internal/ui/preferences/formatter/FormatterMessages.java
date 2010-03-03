@@ -407,11 +407,11 @@ final class FormatterMessages extends NLS {
     public static String IndentationTabPage_indent_empty_lines;
 	public static String IndentationTabPage_use_tabs_only_for_leading_indentations;
 	
-	public static String  OnOffTagsTabPage_description;
-	public static String  OnOffTagsTabPage_disableTag;
-	public static String  OnOffTagsTabPage_enableTag;
-	public static String  OnOffTagsTabPage_error_startsWithWhitespace;
-	public static String  OnOffTagsTabPage_error_endsWithWhitespace;
+	public static String  OffOnTagsTabPage_description;
+	public static String  OffOnTagsTabPage_disableTag;
+	public static String  OffOnTagsTabPage_enableTag;
+	public static String  OffOnTagsTabPage_error_startsWithWhitespace;
+	public static String  OffOnTagsTabPage_error_endsWithWhitespace;
 
 	public static String ModifyDialog_tabpage_braces_title;
 	public static String ModifyDialog_tabpage_indentation_title;
@@ -421,7 +421,7 @@ final class FormatterMessages extends NLS {
 	public static String ModifyDialog_tabpage_control_statements_title;
 	public static String ModifyDialog_tabpage_line_wrapping_title;
 	public static String ModifyDialog_tabpage_comments_title;
-	public static String ModifyDialog_tabpage_onOffTags_title;
+	public static String ModifyDialog_tabpage_OffOnTags_title;
 
 	public static String NewLinesTabPage_preview_header;
 	public static String NewLinesTabPage_newlines_group_title;

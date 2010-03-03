@@ -33,7 +33,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 		addTabPage(FormatterMessages.ModifyDialog_tabpage_control_statements_title, new ControlStatementsTabPage(this, values));
 		addTabPage(FormatterMessages.ModifyDialog_tabpage_line_wrapping_title, new LineWrappingTabPage(this, values));
 		addTabPage(FormatterMessages.ModifyDialog_tabpage_comments_title, new CommentsTabPage(this, values));
-		addTabPage(FormatterMessages.ModifyDialog_tabpage_onOffTags_title, new OnOffTagsTabPage(this, values));
+		addTabPage(FormatterMessages.ModifyDialog_tabpage_OffOnTags_title, new OffOnTagsTabPage(this, values));
 	}
 
 	/**

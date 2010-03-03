@@ -29,14 +29,14 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
  * 
  * @since 3.6
  */
-public class OnOffTagsTabPage extends FormatterTabPage {
+public class OffOnTagsTabPage extends FormatterTabPage {
 
-	public OnOffTagsTabPage(ModifyDialog modifyDialog, Map workingValues) {
+	public OffOnTagsTabPage(ModifyDialog modifyDialog, Map workingValues) {
 		super(modifyDialog, workingValues);
 	}
 
 	protected void doCreatePreferences(Composite composite, int numColumns) {
-		createLabel(numColumns, composite, FormatterMessages.OnOffTagsTabPage_description);
+		createLabel(numColumns, composite, FormatterMessages.OffOnTagsTabPage_description);
 
 		IInputValidator inputValidator= new IInputValidator() {
 			/*
@@ -48,17 +48,17 @@ public class OnOffTagsTabPage extends FormatterTabPage {
 					return null;
 
 				if (Character.isWhitespace(input.charAt(0)))
-					return FormatterMessages.OnOffTagsTabPage_error_startsWithWhitespace;
+					return FormatterMessages.OffOnTagsTabPage_error_startsWithWhitespace;
 
 				if (Character.isWhitespace(input.charAt(input.length() - 1)))
-					return FormatterMessages.OnOffTagsTabPage_error_endsWithWhitespace;
+					return FormatterMessages.OffOnTagsTabPage_error_endsWithWhitespace;
 
 				return null;
 			}
 		};
 
-		createStringPref(composite, numColumns, FormatterMessages.OnOffTagsTabPage_disableTag, DefaultCodeFormatterConstants.FORMATTER_DISABLING_TAG, inputValidator);
-		createStringPref(composite, numColumns, FormatterMessages.OnOffTagsTabPage_enableTag, DefaultCodeFormatterConstants.FORMATTER_ENABLING_TAG, inputValidator);
+		createStringPref(composite, numColumns, FormatterMessages.OffOnTagsTabPage_disableTag, DefaultCodeFormatterConstants.FORMATTER_DISABLING_TAG, inputValidator);
+		createStringPref(composite, numColumns, FormatterMessages.OffOnTagsTabPage_enableTag, DefaultCodeFormatterConstants.FORMATTER_ENABLING_TAG, inputValidator);
 	}
 
 	public final Composite createContents(Composite parent) {
