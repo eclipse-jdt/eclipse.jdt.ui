@@ -11,28 +11,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.buildpath;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
 
-import org.eclipse.equinox.internal.provisional.frameworkadmin.BundleInfo;
-import org.eclipse.equinox.internal.provisional.simpleconfigurator.manipulator.SimpleConfiguratorManipulator;
-import org.eclipse.osgi.service.datalocation.Location;
+import org.eclipse.equinox.frameworkadmin.BundleInfo;
+import org.eclipse.equinox.simpleconfigurator.manipulator.SimpleConfiguratorManipulator;
 import org.eclipse.osgi.service.resolver.VersionRange;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.URIUtil;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
@@ -40,21 +33,10 @@ import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 
 /**
  * Utilities to read and write bundle and source information files.
- * <p>
- * This class currently uses provisional p2 API for which official API has been requested:
- * https://bugs.eclipse.org/bugs/show_bug.cgi?id=269496
- * </p>
  * 
  * @since 3.5
  */
 class P2Utils {
-
-	private static final String SRC_INFO_FOLDER = "org.eclipse.equinox.source"; //$NON-NLS-1$
-	private static final String SRC_INFO_PATH= SRC_INFO_FOLDER + File.separator + "source.info"; //$NON-NLS-1$
-
-	private static final String BUNDLE_INFO_FOLDER= "org.eclipse.equinox.simpleconfigurator"; //$NON-NLS-1$
-	private static final String BUNDLE_INFO_PATH = BUNDLE_INFO_FOLDER + File.separator + "bundles.info"; //$NON-NLS-1$
-
 
 	/**
 	 * Finds the bundle info for the given arguments.
@@ -72,31 +54,6 @@ class P2Utils {
 		Assert.isLegal(version != null);
 
 		return findBundle(symbolicName, new VersionRange(version, true, version, true), isSourceBundle);
-	}
-
-	/**
-	 * Adds the directories (as <code>java.io.File</code>) for the given location and all of its parents to the given list.
-	 * 
-	 * @param locations the list to add the URLs to
-	 * @param location the location
-	 * @param useParent <code>true</code> if location's parent directory should be used <code>false</code> otherwise
-	 */
-	private static void addLocationDirs(List locations, Location location, boolean useParent) {
-		while (location != null) {
-			URL url= location.getURL();
-			if (url != null) {
-				try {
-					File dir = new File(FileLocator.toFileURL(url).getPath());
-					if (useParent)
-						dir = dir.getParentFile();
-					if (!locations.contains(dir))
-						locations.add(dir);
-				} catch (IOException e) {
-					JUnitCorePlugin.log(e);
-				}
-			}
-			location= location.getParentLocation();
-		}
 	}
 
 	/**
@@ -118,54 +75,40 @@ class P2Utils {
 		if (manipulator == null)
 			return null;
 
-		List bundleLocations = new ArrayList();
-		addLocationDirs(bundleLocations, Platform.getConfigurationLocation(), true);
-		addLocationDirs(bundleLocations, Platform.getInstallLocation(), false);
-
 		BundleInfo bestMatch= null;
 		Version bestVersion= null;
-		for (Location configLocation= Platform.getConfigurationLocation(); configLocation != null; configLocation= configLocation.getParentLocation()) {
-			URL configUrl= configLocation.getURL();
-			if (configUrl == null)
-				continue;
 
-			try {
-				String bundleInfoPath= null;
-				if (isSourceBundle)
-					bundleInfoPath= SRC_INFO_PATH;
-				else
-					bundleInfoPath= BUNDLE_INFO_PATH;
+		// A null bundleInfoPath means load the bundles.info according to the BundleContext property "org.eclipse.equinox.simpleconfigurator.configUrl"
+		String bundleInfoPath= null;
+		if (isSourceBundle)
+			bundleInfoPath= SimpleConfiguratorManipulator.SOURCE_INFO;
 
-				URL bundlesTxt = new URL(configUrl.getProtocol(), configUrl.getHost(), new File(configUrl.getPath(), bundleInfoPath).getAbsolutePath());
-
-				for (Iterator i= bundleLocations.iterator(); i.hasNext(); ) {
-					File home= (File) i.next();
-					BundleInfo bundles[]= manipulator.loadConfiguration(bundlesTxt, home);
-					if (bundles != null) {
-						for (int j= 0; j < bundles.length; j++) {
-							BundleInfo bundleInfo= bundles[j];
-							if (symbolicName.equals(bundleInfo.getSymbolicName())) {
-								Version version= new Version(bundleInfo.getVersion());
-								if (versionRange.isIncluded(version)) {
-									IPath path= getBundleLocationPath(bundleInfo);
-									if (path.toFile().exists()) {
-										if (bestMatch == null || bestVersion.compareTo(version) < 0) {
-											bestMatch= bundleInfo;
-											bestVersion= version;
-										}
-									}
-								}
+		BundleContext context= JUnitCorePlugin.getDefault().getBundle().getBundleContext();
+		BundleInfo bundles[]= null;
+		try {
+			bundles= manipulator.loadConfiguration(context, bundleInfoPath);
+		} catch (IOException e) {
+			JUnitCorePlugin.log(e);
+		}
+		
+		if (bundles != null) {
+			for (int j= 0; j < bundles.length; j++) {
+				BundleInfo bundleInfo= bundles[j];
+				if (symbolicName.equals(bundleInfo.getSymbolicName())) {
+					Version version= new Version(bundleInfo.getVersion());
+					if (versionRange.isIncluded(version)) {
+						IPath path= getBundleLocationPath(bundleInfo);
+						if (path.toFile().exists()) {
+							if (bestMatch == null || bestVersion.compareTo(version) < 0) {
+								bestMatch= bundleInfo;
+								bestVersion= version;
 							}
 						}
 					}
 				}
-			} catch (MalformedURLException e) {
-				JUnitCorePlugin.log(e);
-			} catch (IOException e) {
-				JUnitCorePlugin.log(e);
 			}
 		}
-		
+
 		return bestMatch;
 	}
 

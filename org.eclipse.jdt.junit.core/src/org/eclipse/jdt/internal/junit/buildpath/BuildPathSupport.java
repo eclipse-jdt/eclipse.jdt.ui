@@ -18,7 +18,7 @@ import java.net.URL;
 
 import org.osgi.framework.Version;
 
-import org.eclipse.equinox.internal.provisional.frameworkadmin.BundleInfo;
+import org.eclipse.equinox.frameworkadmin.BundleInfo;
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.osgi.service.resolver.VersionRange;
 
@@ -65,8 +65,6 @@ public class BuildPathSupport {
 		public IPath getSourceBundleLocation() {
 			return getSourceLocation(P2Utils.findBundle(bundleId, versionRange, false));
 		}
-		
-		//XXX: Official API has been requested for the provisional p2 APIs: https://bugs.eclipse.org/bugs/show_bug.cgi?id=269496
 		
 		public IClasspathEntry getLibraryEntry() {
 			BundleInfo bundleInfo= P2Utils.findBundle(bundleId, versionRange, false);
