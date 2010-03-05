@@ -39,6 +39,8 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class MoveInnerToTopLevelTests extends RefactoringTest {
 
+	private static final boolean BUG_304827= true; // too many imports, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=304827
+	
 	private static final String FIELD_COMMENT= "/** Comment */";
 	private static final Class clazz= MoveInnerToTopLevelTests.class;
 	private static final String REFACTORING_PATH= "MoveInnerToTopLevel/";
@@ -89,6 +91,12 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 	private IType getClassFromTestFile(IPackageFragment pack, String className) throws Exception{
 		return getType(createCUfromTestFile(pack, className), className);
+	}
+
+	private void validatePassingTestSecondaryType(String primaryTypeName, String secondaryTypeName, String packageName, String[] cuNames, String[] packageNames, String enclosingInstanceName, boolean makeFinal, boolean possible, boolean mandatory, boolean createFieldIfPossible) throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackage(packageName), primaryTypeName);
+		IType secType= getType(cu, secondaryTypeName);
+		validatePassingTest(secondaryTypeName, secType, cuNames, packageNames, enclosingInstanceName, makeFinal, possible, mandatory, createFieldIfPossible);
 	}
 
 	private void validatePassingTest(String parentClassName, String className, String packageName, String[] cuNames, String[] packageNames, String enclosingInstanceName, boolean makeFinal, boolean possible, boolean mandatory, boolean createFieldIfPossible) throws Exception {
@@ -540,5 +548,50 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 		MoveInnerToTopRefactoring ref= ((RefactoringAvailabilityTester.isMoveInnerAvailable(nestedLocal)) ? new MoveInnerToTopRefactoring(nestedLocal, JavaPreferencesSettings.getCodeGenerationSettings(parentClas.getJavaProject())) : null);
 		assertNull("refactoring was not supposed to be available", ref);
+	}
+
+	// --- Secondary classes
+	public void test_secondary_0() throws Exception {
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_1() throws Exception {
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_2() throws Exception {
+		if (BUG_304827)
+			return;
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_3() throws Exception {
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A", "S" }, new String[] { "p", "q" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_4() throws Exception {
+		if (BUG_304827)
+			return;
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_5() throws Exception {
+		if (BUG_304827)
+			return;
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_6() throws Exception {
+		if (BUG_304827)
+			return;
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_7() throws Exception {
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A", "S", "T" }, new String[] { "p", "q", "q" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_8() throws Exception {
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A", "S", "T" }, new String[] { "p", "q", "q" }, null, false, false, false, false);
 	}
 }

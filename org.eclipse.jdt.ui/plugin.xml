@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <!-- ====================================================================== -->
-<!-- Copyright (c) 2000, 2009 IBM Corporation and others.                   -->
+<!-- Copyright (c) 2000, 2010 IBM Corporation and others.                   -->
 <!-- All rights reserved. This program and the accompanying materials       -->
 <!-- are made available under the terms of the Eclipse Public License v1.0  -->
 <!-- which accompanies this distribution, and is available at               -->
@@ -2458,13 +2458,6 @@
          
 <!-- reorg group 2 -->
          <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
-               label="%Refactoring.convertLocalToFieldAction.label"
-               retarget="true"
-               menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup2"
-               id="org.eclipse.jdt.ui.actions.ConvertLocalToField">
-         </action>
-         <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"
                label="%Refactoring.convertNestedToTopAction.label"
                retarget="true"
@@ -2478,6 +2471,13 @@
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup2"
                id="org.eclipse.jdt.ui.actions.ConvertAnonymousToNested">
          </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
+               label="%Refactoring.convertLocalToFieldAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup2"
+               id="org.eclipse.jdt.ui.actions.ConvertLocalToField">
+         </action>    
          
          
          

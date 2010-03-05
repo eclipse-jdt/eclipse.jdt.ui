@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -512,7 +512,7 @@ public final class MemberVisibilityAdjustor {
 		final ModifierKeyword threshold= getVisibilityThreshold(element, referencedMovedElement, monitor);
 		int flags= referencedMovedElement.getFlags();
 		IType declaring= referencedMovedElement.getDeclaringType();
-		if (declaring.isInterface() || referencedMovedElement instanceof IField && Flags.isEnum(referencedMovedElement.getFlags()))
+		if (declaring != null && declaring.isInterface() || referencedMovedElement instanceof IField && Flags.isEnum(referencedMovedElement.getFlags()))
 			return;
 		if (hasLowerVisibility(flags, threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(referencedMovedElement, threshold))
 			fAdjustments.put(referencedMovedElement, new IncomingMemberVisibilityAdjustment(referencedMovedElement, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, Messages.format(getMessage(referencedMovedElement), new String[] { getLabel(referencedMovedElement), getLabel(threshold)}), JavaStatusContext.create(referencedMovedElement), null, RefactoringStatusEntry.NO_CODE, null)));

@@ -71,6 +71,7 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -86,7 +87,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -524,7 +524,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		fQualifiedTypeName= JavaModelUtil.concatenateName(fType.getPackageFragment().getElementName(), fType.getElementName());
 		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
 		fSourceRewrite= new CompilationUnitRewrite(fType.getCompilationUnit());
-		fIsInstanceFieldCreationPossible= !(JdtFlags.isStatic(fType) || fType.isAnnotation() || fType.isEnum());
+		fIsInstanceFieldCreationPossible= !(JdtFlags.isStatic(fType) || fType.isAnnotation() || fType.isEnum() || (fType.getDeclaringType() == null && !JavaElementUtil.isMainType(fType)));
 		fIsInstanceFieldCreationMandatory= fIsInstanceFieldCreationPossible && isInstanceFieldCreationMandatory();
 		fCreateInstanceField= fIsInstanceFieldCreationMandatory;
 	}
@@ -733,8 +733,9 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 	private RefactoringStatus checkTypeNameInPackage() throws JavaModelException {
 		IType type= Checks.findTypeInPackage(fType.getPackageFragment(), fType.getElementName());
-		if (type == null || !type.exists())
+		if (type == null || !type.exists() || fType.equals(type)) {
 			return null;
+		}
 		String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_type_exists, new String[] { BasicElementLabels.getJavaElementName(fType.getElementName()), JavaElementLabels.getElementLabel(fType.getPackageFragment(), JavaElementLabels.ALL_DEFAULT)});
 		return RefactoringStatus.createErrorStatus(message);
 	}

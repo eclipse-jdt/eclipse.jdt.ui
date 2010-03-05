@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -246,9 +246,7 @@ public final class RefactoringAvailabilityTester {
 			return false;
 		if (element instanceof IPackageFragmentRoot) {
 			IPackageFragmentRoot root= (IPackageFragmentRoot) element;
-			if (root.isExternal() || Checks.isClasspathDelete(root)) // TODO
-				// rename
-				// isClasspathDelete
+			if (root.isExternal() || Checks.isClasspathDelete(root)) // TODO: rename isClasspathDelete
 				return false;
 
 			if (root.getResource().equals(root.getJavaProject().getProject()))
@@ -809,7 +807,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isMoveInnerAvailable(final IType type) throws JavaModelException {
-		return Checks.isAvailable(type) && !Checks.isAnonymous(type) && !Checks.isTopLevel(type) && !Checks.isInsideLocalType(type);
+		return Checks.isAvailable(type) && !Checks.isAnonymous(type) && !JavaElementUtil.isMainType(type) && !Checks.isInsideLocalType(type);
 	}
 
 	public static boolean isMoveInnerAvailable(final JavaTextSelection selection) throws JavaModelException {
