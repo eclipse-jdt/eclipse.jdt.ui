@@ -90,8 +90,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -138,6 +138,9 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectio
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.ChangeDescription;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.InsertDescription;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.RemoveDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ConstructorFromSuperclassProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
@@ -145,9 +148,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistPr
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingAnnotationAttributesProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.ChangeDescription;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.InsertDescription;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.RemoveDescription;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
@@ -216,6 +216,7 @@ public class LocalCorrectionsSubProcessor {
 			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 7, image);
 
 			ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
+			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(decl, imports);
 
 			AST ast= astRoot.getAST();
 			ListRewrite clausesRewrite= rewrite.getListRewrite(surroundingTry, TryStatement.CATCH_CLAUSES_PROPERTY);
@@ -224,7 +225,7 @@ public class LocalCorrectionsSubProcessor {
 				String varName= StubUtility.getExceptionVariableName(cu.getJavaProject());
 				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 				var.setName(ast.newSimpleName(varName));
-				var.setType(imports.addImport(excBinding, ast));
+				var.setType(imports.addImport(excBinding, ast, importRewriteContext));
 				CatchClause newClause= ast.newCatchClause();
 				newClause.setException(var);
 				String catchBody = StubUtility.getCatchBodyContent(cu, excBinding.getName(), varName, selectedNode, String.valueOf('\n'));

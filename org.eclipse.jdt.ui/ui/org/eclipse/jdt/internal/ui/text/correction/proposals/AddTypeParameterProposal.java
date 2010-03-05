@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,8 +31,10 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -87,8 +89,9 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 		newTypeParam.setName(ast.newSimpleName(fTypeParamName));
 		if (fBounds != null && fBounds.length > 0) {
 			List typeBounds= newTypeParam.typeBounds();
+			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(declNode, getImportRewrite());
 			for (int i= 0; i < fBounds.length; i++) {
-				Type newBound= getImportRewrite().addImport(fBounds[i], ast);
+				Type newBound= getImportRewrite().addImport(fBounds[i], ast, importRewriteContext);
 				typeBounds.add(newBound);
 			}
 		}

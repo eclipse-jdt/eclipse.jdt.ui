@@ -169,12 +169,13 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 		Type newTypeNode= null;
 		ITypeBinding[] otherProposals= null;
 
+		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, getImportRewrite());
 		if (node.getParent() instanceof MethodInvocation) {
 			MethodInvocation parent= (MethodInvocation) node.getParent();
 			if (parent.getExpression() == node) {
 				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), parent.getName().getIdentifier(), parent.arguments(), getSenderBinding());
 				if (bindings.length > 0) {
-					newTypeNode= getImportRewrite().addImport(bindings[0], ast);
+					newTypeNode= getImportRewrite().addImport(bindings[0], ast, importRewriteContext);
 					otherProposals= bindings;
 				}
 			}
@@ -185,7 +186,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 				binding= ASTResolving.normalizeWildcardType(binding, false, ast);
 			}
 			if (binding != null) {
-				newTypeNode= getImportRewrite().addImport(binding, ast);
+				newTypeNode= getImportRewrite().addImport(binding, ast, importRewriteContext);
 			} else {
 				ASTNode parent= node.getParent();
 				if (parent instanceof ExpressionStatement) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,8 +61,10 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -691,7 +693,8 @@ public class JavadocTagsSubProcessor {
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
 
 		ImportRewrite importRewrite= proposal.createImportRewrite(context.getASTRoot());
-		String importedType= importRewrite.addImport(outerClass);
+		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, importRewrite);
+		String importedType= importRewrite.addImport(outerClass, importRewriteContext);
 		if (importedType.equals(outerClass.getName())) {
 			rewrite.replace(name, ast.newName(typeQualifiedName), null);
 		} else {

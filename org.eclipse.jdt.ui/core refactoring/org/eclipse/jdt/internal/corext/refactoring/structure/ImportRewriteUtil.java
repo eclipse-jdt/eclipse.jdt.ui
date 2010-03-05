@@ -95,14 +95,14 @@ public final class ImportRewriteUtil {
 				final IVariableBinding variable= (IVariableBinding) binding;
 				final ITypeBinding declaring= variable.getDeclaringClass();
 				if (declaring != null && (excludeBindings == null || !excludeBindings.contains(variable))) {
-					staticImports.put(name, rewriter.addStaticImport(variable));
+					staticImports.put(name, rewriter.addStaticImport(variable, context));
 					remover.registerAddedStaticImport(declaring.getQualifiedName(), variable.getName(), true);
 				}
 			} else if (binding instanceof IMethodBinding) {
 				final IMethodBinding method= (IMethodBinding) binding;
 				final ITypeBinding declaring= method.getDeclaringClass();
 				if (declaring != null && (excludeBindings == null || !excludeBindings.contains(method))) {
-					staticImports.put(name, rewriter.addStaticImport(method));
+					staticImports.put(name, rewriter.addStaticImport(method, context));
 					remover.registerAddedStaticImport(declaring.getQualifiedName(), method.getName(), false);
 				}
 			}

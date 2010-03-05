@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,8 +29,10 @@ import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
@@ -109,7 +111,8 @@ public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
 			binding= ((Expression) fInvocationNode).resolveTypeBinding();
 		}
 		if (binding != null) {
-			newTypeNode= getImportRewrite().addImport(binding, ast);
+			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(fInvocationNode, getImportRewrite());
+			newTypeNode= getImportRewrite().addImport(binding, ast, importRewriteContext);
 		}
 		if (newTypeNode == null) {
 			newTypeNode= ast.newSimpleType(ast.newSimpleName("String")); //$NON-NLS-1$

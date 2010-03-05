@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,8 +40,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
@@ -226,8 +228,9 @@ public abstract class SurroundWith {
 		moveToBlock(selectedStatements, inserted, accessedAfter, readInside, rewrite);
 		if (fIsNewContext) {
 			ImportRewrite importRewrite= StubUtility.createImportRewrite((CompilationUnit)selectedStatements[0].getRoot(), false);
+			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(selectedStatements[0], importRewrite);
 			for (int i= 0; i < selectedStatements.length; i++) {
-				qualifyThisExpressions(selectedStatements[i], rewrite, importRewrite);
+				qualifyThisExpressions(selectedStatements[i], rewrite, importRewrite, importRewriteContext);
 			}
 		}
 
@@ -494,7 +497,7 @@ public abstract class SurroundWith {
 		}
 	}
 
-	private void qualifyThisExpressions(ASTNode node, final ASTRewrite rewrite, final ImportRewrite importRewrite) {
+	private void qualifyThisExpressions(ASTNode node, final ASTRewrite rewrite, final ImportRewrite importRewrite, final ImportRewriteContext importRewriteContext) {
 		node.accept(new GenericVisitor() {
 			/**
 			 * {@inheritDoc}
@@ -503,7 +506,7 @@ public abstract class SurroundWith {
 				if (thisExpr.getQualifier() == null) {
 					ITypeBinding typeBinding= thisExpr.resolveTypeBinding();
 					if (typeBinding != null) {
-						String typeName= importRewrite.addImport(typeBinding.getTypeDeclaration());
+						String typeName= importRewrite.addImport(typeBinding.getTypeDeclaration(), importRewriteContext);
 						SimpleName simpleName= thisExpr.getAST().newSimpleName(typeName);
 						rewrite.set(thisExpr, ThisExpression.QUALIFIER_PROPERTY, simpleName, null);
 					}

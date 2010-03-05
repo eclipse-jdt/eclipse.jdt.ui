@@ -49,6 +49,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -71,11 +72,10 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -1544,8 +1544,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			ITypeBinding elseBinding= elseExpression.resolveTypeBinding();
 			if (thenBinding != null && elseBinding != null && exprBinding != null && !elseBinding.isAssignmentCompatible(thenBinding)) {
 				CastExpression castException= ast.newCastExpression();
-				proposal.createImportRewrite(context.getASTRoot());
-				castException.setType(proposal.getImportRewrite().addImport(exprBinding, ast));
+				ImportRewrite importRewrite= proposal.createImportRewrite(context.getASTRoot());
+				ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, importRewrite);
+				castException.setType(importRewrite.addImport(exprBinding, ast, importRewriteContext));
 				castException.setExpression(elseCopy);
 				elseCopy= castException;
 			}

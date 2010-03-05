@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,8 +58,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -127,9 +129,10 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
 			ImportRewrite imports= createImportRewrite((CompilationUnit) decl.getRoot());
+			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(decl, imports);
 
 			SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
-			newDecl.setType(evaluateVariableType(ast, imports, methodDeclaration.resolveBinding()));
+			newDecl.setType(evaluateVariableType(ast, imports, importRewriteContext, methodDeclaration.resolveBinding()));
 			newDecl.setName(ast.newSimpleName(node.getIdentifier()));
 
 			ListRewrite listRewriter= rewrite.getListRewrite(decl, MethodDeclaration.PARAMETERS_PROPERTY);
@@ -210,6 +213,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
 		ImportRewrite imports= createImportRewrite((CompilationUnit) decl.getRoot());
+		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(decl, imports);
 
 		SimpleName[] names= getAllReferences(body);
 		ASTNode dominant= getDominantNode(names);
@@ -229,7 +233,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			// and replace the assignment with an VariableDeclarationExpression
 			VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 			VariableDeclarationExpression newDecl= ast.newVariableDeclarationExpression(newDeclFrag);
-			newDecl.setType(evaluateVariableType(ast, imports, targetContext));
+			newDecl.setType(evaluateVariableType(ast, imports, importRewriteContext, targetContext));
 
 			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
 			newDeclFrag.setInitializer(placeholder);
@@ -252,7 +256,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			frag.setName(ast.newSimpleName(node.getIdentifier()));
 			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
 			frag.setInitializer(placeholder);
-			expression.setType(evaluateVariableType(ast, imports, targetContext));
+			expression.setType(evaluateVariableType(ast, imports, importRewriteContext, targetContext));
 
 			rewrite.replace(assignment, expression, null);
 
@@ -269,7 +273,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
 
 		newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
-		newDecl.setType(evaluateVariableType(ast, imports, targetContext));
+		newDecl.setType(evaluateVariableType(ast, imports, importRewriteContext, targetContext));
 //		newDeclFrag.setInitializer(ASTNodeFactory.newDefaultExpression(ast, newDecl.getType(), 0));
 
 		addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
@@ -352,6 +356,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			isInDifferentCU= true;
 		}
 		ImportRewrite imports= createImportRewrite(astRoot);
+		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(node), imports);
 
 		if (newTypeDecl != null) {
 			AST ast= newTypeDecl.getAST();
@@ -361,7 +366,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 			fragment.setName(ast.newSimpleName(node.getIdentifier()));
 
-			Type type= evaluateVariableType(ast, imports, fSenderBinding);
+			Type type= evaluateVariableType(ast, imports, importRewriteContext, fSenderBinding);
 
 			FieldDeclaration newDecl= ast.newFieldDeclaration(fragment);
 			newDecl.setType(type);
@@ -410,7 +415,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		return ASTNodes.getInsertionIndex(newDecl, decls);
 	}
 
-	private Type evaluateVariableType(AST ast, ImportRewrite imports, IBinding targetContext) {
+	private Type evaluateVariableType(AST ast, ImportRewrite imports, ImportRewriteContext importRewriteContext, IBinding targetContext) {
 		if (fOriginalNode.getParent() instanceof MethodInvocation) {
 			MethodInvocation parent= (MethodInvocation) fOriginalNode.getParent();
 			if (parent.getExpression() == fOriginalNode) {
@@ -420,7 +425,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 					for (int i= 0; i < bindings.length; i++) {
 						addLinkedPositionProposal(KEY_TYPE, bindings[i]);
 					}
-					return imports.addImport(bindings[0], ast);
+					return imports.addImport(bindings[0], ast, importRewriteContext);
 				}
 			}
 		}

@@ -32,8 +32,10 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -104,8 +106,9 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		if (!settings.createComments) {
 			settings= null;
 		}
+		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(fTypeNode, getImportRewrite());
 
-		MethodDeclaration newMethodDecl= createNewMethodDeclaration(ast, fSuperConstructor, rewrite, settings);
+		MethodDeclaration newMethodDecl= createNewMethodDeclaration(ast, fSuperConstructor, rewrite, importRewriteContext, settings);
 		rewrite.getListRewrite(fTypeNode, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertFirst(newMethodDecl, null);
 
 		addLinkedRanges(rewrite, newMethodDecl);
@@ -123,7 +126,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		}
 	}
 
-	private MethodDeclaration createNewMethodDeclaration(AST ast, IMethodBinding binding, ASTRewrite rewrite, CodeGenerationSettings commentSettings) throws CoreException {
+	private MethodDeclaration createNewMethodDeclaration(AST ast, IMethodBinding binding, ASTRewrite rewrite, ImportRewriteContext importRewriteContext, CodeGenerationSettings commentSettings) throws CoreException {
 		String name= fTypeNode.getName().getIdentifier();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.setConstructor(true);
@@ -138,7 +141,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 
 		ITypeBinding enclosingInstance= getEnclosingInstance();
 		if (enclosingInstance != null) {
-			invocation= addEnclosingInstanceAccess(rewrite, parameters, paramNames, enclosingInstance);
+			invocation= addEnclosingInstanceAccess(rewrite, importRewriteContext, parameters, paramNames, enclosingInstance);
 		}
 
 		if (binding == null) {
@@ -149,7 +152,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 			ITypeBinding[] params= binding.getParameterTypes();
 			for (int i= 0; i < params.length; i++) {
 				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-				var.setType(getImportRewrite().addImport(params[i], ast));
+				var.setType(getImportRewrite().addImport(params[i], ast, importRewriteContext));
 				var.setName(ast.newSimpleName(paramNames[i]));
 				parameters.add(var);
 			}
@@ -157,7 +160,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 			List thrownExceptions= decl.thrownExceptions();
 			ITypeBinding[] excTypes= binding.getExceptionTypes();
 			for (int i= 0; i < excTypes.length; i++) {
-				String excTypeName= getImportRewrite().addImport(excTypes[i]);
+				String excTypeName= getImportRewrite().addImport(excTypes[i], importRewriteContext);
 				thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
 			}
 
@@ -189,12 +192,12 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		return decl;
 	}
 
-	private SuperConstructorInvocation addEnclosingInstanceAccess(ASTRewrite rewrite, List parameters, String[] paramNames, ITypeBinding enclosingInstance) {
+	private SuperConstructorInvocation addEnclosingInstanceAccess(ASTRewrite rewrite, ImportRewriteContext importRewriteContext, List parameters, String[] paramNames, ITypeBinding enclosingInstance) {
 		AST ast= rewrite.getAST();
 		SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();
 
 		SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-		var.setType(getImportRewrite().addImport(enclosingInstance, ast));
+		var.setType(getImportRewrite().addImport(enclosingInstance, ast, importRewriteContext));
 		String[] enclosingArgNames= StubUtility.getArgumentNameSuggestions(getCompilationUnit().getJavaProject(), enclosingInstance.getTypeDeclaration().getName(), 0, paramNames);
 		String firstName= enclosingArgNames[0];
 		var.setName(ast.newSimpleName(firstName));
