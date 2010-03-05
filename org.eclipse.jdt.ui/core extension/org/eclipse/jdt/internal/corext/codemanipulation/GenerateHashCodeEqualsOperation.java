@@ -47,11 +47,13 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
@@ -67,10 +69,8 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
-import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -206,6 +206,9 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	/** <code>true</code> to use blocks for then */
 	private boolean fUseBlocksForThen;
 
+	/** The import rewrite context, only initialized in {@link #run(IProgressMonitor)}. */
+	private ImportRewriteContext fImportRewriteContext;
+
 	/**
 	 * Creates a new add hash code equals operation.
 	 *
@@ -298,8 +301,8 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 				ITypeBinding[] objectAsParam= { declaration.getAST().resolveWellKnownType(JAVA_LANG_OBJECT) };
 				BodyDeclaration oldEquals= fForce ? findMethodToReplace(list, METHODNAME_EQUALS, objectAsParam) : null;
 
-				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(declaration, fRewrite.getImportRewrite());
-				MethodDeclaration equalsMethod= createEqualsMethod(context);
+				fImportRewriteContext= new ContextSensitiveImportRewriteContext(declaration, fRewrite.getImportRewrite());
+				MethodDeclaration equalsMethod= createEqualsMethod();
 				addMethod(rewriter, insertion, equalsMethod, oldEquals);
 
 				if (monitor.isCanceled())
@@ -761,7 +764,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 	// *************** EQUALS ***************
 
-	private MethodDeclaration createEqualsMethod(ImportRewriteContext context) throws CoreException {
+	private MethodDeclaration createEqualsMethod() throws CoreException {
 
 		MethodDeclaration equalsMethodDeclaration= fAst.newMethodDeclaration();
 		equalsMethodDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(fAst, Modifier.PUBLIC));
@@ -771,7 +774,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		List parameters= equalsMethodDeclaration.parameters();
 		SingleVariableDeclaration equalsParam= fAst.newSingleVariableDeclaration();
-		equalsParam.setType(fAst.newSimpleType(fAst.newSimpleName("Object"))); //$NON-NLS-1$
+		equalsParam.setType(fRewrite.getImportRewrite().addImport(fAst.resolveWellKnownType(JAVA_LANG_OBJECT), fAst, fImportRewriteContext));
 		equalsParam.setName(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM));
 		parameters.add(equalsParam);
 
@@ -808,7 +811,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			// if (!(obj instanceof Type)) return false;
 			InstanceofExpression expression= fAst.newInstanceofExpression();
 			expression.setLeftOperand(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM));
-			expression.setRightOperand(fRewrite.getImportRewrite().addImport(fType, fAst, context));
+			expression.setRightOperand(fRewrite.getImportRewrite().addImport(fType, fAst, fImportRewriteContext));
 
 			PrefixExpression notExpression= fAst.newPrefixExpression();
 			notExpression.setOperator(org.eclipse.jdt.core.dom.PrefixExpression.Operator.NOT);
@@ -1069,7 +1072,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	}
 
 	private Name getQualifiedName(String name) {
-		String importedType= fRewrite.getImportRewrite().addImport(name);
+		String importedType= fRewrite.getImportRewrite().addImport(name, fImportRewriteContext);
 		return ASTNodeFactory.newName(fAst, importedType);
 	}
 
