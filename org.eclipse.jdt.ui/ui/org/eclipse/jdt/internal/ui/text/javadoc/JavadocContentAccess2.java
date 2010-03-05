@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1032,7 +1032,14 @@ public class JavadocContentAccess2 {
 			if (previousNode != null) {
 				int previousEnd= previousNode.getStartPosition() + previousNode.getLength();
 				int childStart= child.getStartPosition();
-				if (previousEnd != childStart) {
+				if (previousEnd > childStart) {
+					// should never happen, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=304826
+					Exception exception= new Exception("Illegal ASTNode positions: previousEnd=" + previousEnd //$NON-NLS-1$
+							+ ", childStart=" + childStart //$NON-NLS-1$
+							+ ", member=" + fMember.getHandleIdentifier() //$NON-NLS-1$
+							+ ", Javadoc:\n" + fSource); //$NON-NLS-1$
+					JavaPlugin.log(exception);
+				} else if (previousEnd != childStart) {
 					// Need to preserve whitespace before a node that's not
 					// directly following the previous node (e.g. on a new line)
 					// due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=206518 :
