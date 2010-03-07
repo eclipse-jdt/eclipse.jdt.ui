@@ -818,7 +818,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isMoveMethodAvailable(final IMethod method) throws JavaModelException {
-		return method.exists() && !method.isConstructor() && !method.isBinary() && !method.getDeclaringType().isAnnotation() && !method.isReadOnly() && !JdtFlags.isStatic(method);
+		return method.exists() && !method.isConstructor() && !method.isBinary() && !method.getDeclaringType().isInterface() && !method.isReadOnly() && !JdtFlags.isStatic(method);
 	}
 
 	public static boolean isMoveMethodAvailable(final IStructuredSelection selection) throws JavaModelException {
