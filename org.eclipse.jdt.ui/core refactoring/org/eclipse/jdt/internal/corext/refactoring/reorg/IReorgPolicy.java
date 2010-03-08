@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,9 +60,7 @@ public interface IReorgPolicy extends IReorgDestinationValidator {
 	/**
 	 * @return the save mode required for this reorg policy
 	 *
-	 * @see RefactoringSaveHelper#SAVE_ALL
-	 * @see RefactoringSaveHelper#SAVE_JAVA_ONLY_UPDATES
-	 * @see RefactoringSaveHelper#SAVE_NON_JAVA_UPDATES
+	 * @see RefactoringSaveHelper
 	 */
 	public int getSaveMode();
 
