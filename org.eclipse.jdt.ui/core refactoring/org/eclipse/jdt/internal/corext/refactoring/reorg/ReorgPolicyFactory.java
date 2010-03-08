@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Carsten Pfeiffer <carsten.pfeiffer@gebit.de> - [ccp] ReorgPolicies' canEnable() methods return true too often - https://bugs.eclipse.org/bugs/show_bug.cgi?id=303698
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
@@ -97,8 +98,8 @@ import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
@@ -1656,7 +1657,7 @@ public final class ReorgPolicyFactory {
 						return false;
 				}
 			}
-			return true;
+			return roots.length > 0;
 		}
 
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
@@ -2771,7 +2772,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		public boolean canEnable() throws JavaModelException {
-			if (!super.canEnable())
+			if (!super.canEnable() || fPackageFragmentRoots.length == 0)
 				return false;
 			for (int i= 0; i < fPackageFragmentRoots.length; i++) {
 				IPackageFragmentRoot root= fPackageFragmentRoots[i];
@@ -2989,6 +2990,8 @@ public final class ReorgPolicyFactory {
 		}
 
 		public boolean canEnable() throws JavaModelException {
+			if (fPackageFragments.length == 0)
+				return false;
 			for (int i= 0; i < fPackageFragments.length; i++) {
 				if (JavaElementUtil.isDefaultPackage(fPackageFragments[i]) || fPackageFragments[i].isReadOnly())
 					return false;
@@ -3266,7 +3269,7 @@ public final class ReorgPolicyFactory {
 				if (!element.exists())
 					return false;
 			}
-			return true;
+			return resources.length > 0 || javaElements.length > 0;
 		}
 
 		/**
@@ -3524,7 +3527,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		public boolean canEnable() throws JavaModelException {
-			if (!super.canEnable())
+			if (!super.canEnable() || fJavaElements.length == 0)
 				return false;
 
 			for (int i= 0; i < fJavaElements.length; i++) {
