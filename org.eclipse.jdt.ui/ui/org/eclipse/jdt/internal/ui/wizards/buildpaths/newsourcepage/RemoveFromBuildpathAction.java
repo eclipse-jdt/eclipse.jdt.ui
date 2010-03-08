@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.CPJavaProject;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -254,10 +255,11 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 						return false;
 
 				} else if (element instanceof IPackageFragmentRoot) {
-					IClasspathEntry entry= ((IPackageFragmentRoot) element).getRawClasspathEntry();
-					if (entry != null && entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+					IClasspathEntry entry= JavaModelUtil.getClasspathEntry((IPackageFragmentRoot) element);
+					if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER)
 						return false;
-					}
+					if (entry.getReferencingEntry() != null)
+						return false;
 				} else if (element instanceof ClassPathContainer) {
 					return true;
 				} else {

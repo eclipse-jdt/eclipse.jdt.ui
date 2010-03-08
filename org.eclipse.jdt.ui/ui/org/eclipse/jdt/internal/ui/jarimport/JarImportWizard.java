@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -383,7 +383,8 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 				final IPackageFragmentRoot root= (IPackageFragmentRoot) element;
 				try {
 					final IClasspathEntry entry= root.getRawClasspathEntry();
-					if (isValidClassPathEntry(entry))
+					if (isValidClassPathEntry(entry)
+							&& root.getResolvedClasspathEntry().getReferencingEntry() == null)
 						fImportData.setPackageFragmentRoot(root);
 				} catch (JavaModelException exception) {
 					JavaPlugin.log(exception);
