@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,9 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 
@@ -124,7 +126,47 @@ public class JEClasspathEntry extends JEAttribute {
 				return children;
 			}
 		});
+		result.add(create(this, "REFERENCING ENTRY", fEntry.getReferencingEntry()));
+		result.add(new JavaElementChildrenProperty(this, "JavaCore.getReferencedClasspathEntries(this)") {
+			@Override protected JEAttribute[] computeChildren() throws CoreException {
+				IJavaProject project= null;
+				JEAttribute parent= JEClasspathEntry.this;
+				while ((parent= parent.getParent()) != null) {
+					if (parent instanceof JavaElement) {
+						project= ((JavaElement) parent).getJavaElement().getJavaProject();
+						break;
+					}
+				}
+				IClasspathEntry[] referencedEntries= JavaCore.getReferencedClasspathEntries(fEntry, project);
+				JEAttribute[] children= new JEAttribute[referencedEntries.length];
+				for (int i= 0; i < referencedEntries.length; i++) {
+					children[i]= new JEClasspathEntry(this, null, referencedEntries[i]);
+				}
+				return children;
+			}
+		});
 		result.add(new JEClasspathEntry(this, "JavaCore.getResolvedClasspathEntry(this)", JavaCore.getResolvedClasspathEntry(fEntry)));
+		result.add(new JavaElementChildrenProperty(this, "JavaCore.getClasspathContainer(..).getClasspathEntries()") {
+			@Override protected JEAttribute[] computeChildren() throws CoreException {
+				IJavaProject project= null;
+				JEAttribute parent= JEClasspathEntry.this;
+				while ((parent= parent.getParent()) != null) {
+					if (parent instanceof JavaElement) {
+						project= ((JavaElement) parent).getJavaElement().getJavaProject();
+						break;
+					}
+				}
+				IClasspathContainer classpathContainer= JavaCore.getClasspathContainer(fEntry.getPath(), project);
+				if (classpathContainer == null)
+					return null;
+				IClasspathEntry[] referencedEntries= classpathContainer.getClasspathEntries();
+				JEAttribute[] children= new JEAttribute[referencedEntries.length];
+				for (int i= 0; i < referencedEntries.length; i++) {
+					children[i]= new JEClasspathEntry(this, null, referencedEntries[i]);
+				}
+				return children;
+			}
+		});
 		
 		return result.toArray(new JEAttribute[result.size()]);
 	}

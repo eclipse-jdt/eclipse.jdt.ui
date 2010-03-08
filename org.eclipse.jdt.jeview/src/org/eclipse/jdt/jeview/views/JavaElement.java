@@ -274,6 +274,12 @@ public class JavaElement extends JEAttribute {
 				return createCPEntries(this, project.getRawClasspath());
 			}
 		});
+		result.add(new JavaElementChildrenProperty(this, "REFERENCED CLASSPATH ENTRIES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createCPEntries(this, project.getReferencedClasspathEntries());
+			}
+		});
 		result.add(new JavaElementChildrenProperty(this, "RESOLVED CLASSPATH") {
 			@Override
 			protected JEAttribute[] computeChildren() throws JavaModelException {
@@ -292,6 +298,11 @@ public class JavaElement extends JEAttribute {
 		result.add(JEClasspathEntry.compute(this, "RAW CLASSPATH ENTRY", new Callable<IClasspathEntry>() {
 			public IClasspathEntry call() throws JavaModelException {
 				return packageFragmentRoot.getRawClasspathEntry();
+			}
+		}));
+		result.add(JEClasspathEntry.compute(this, "RESOLVED CLASSPATH ENTRY", new Callable<IClasspathEntry>() {
+			public IClasspathEntry call() throws JavaModelException {
+				return packageFragmentRoot.getResolvedClasspathEntry();
 			}
 		}));
 	}
