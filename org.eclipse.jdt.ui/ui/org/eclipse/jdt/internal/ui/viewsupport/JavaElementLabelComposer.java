@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import java.util.jar.Attributes.Name;
+
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IProject;
@@ -1050,7 +1052,11 @@ public class JavaElementLabelComposer {
 	private boolean appendVariableLabel(IPackageFragmentRoot root, long flags) {
 		try {
 			IClasspathEntry rawEntry= root.getRawClasspathEntry();
-			if (rawEntry != null && rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+			if (rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+				IClasspathEntry entry= JavaModelUtil.getClasspathEntry(root);
+				if (entry.getReferencingEntry() != null) {
+					return false; // not the variable entry itself, but a referenced entry
+				}
 				IPath path= rawEntry.getPath().makeRelative();
 
 				if (getFlag(flags, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED)) {
@@ -1092,10 +1098,11 @@ public class JavaElementLabelComposer {
 
 	private void appendExternalArchiveLabel(IPackageFragmentRoot root, long flags) {
 		IPath path;
+		IClasspathEntry classpathEntry= null;
 		try {
-			IClasspathEntry rawClasspathEntry= root.getRawClasspathEntry();
-			IPath rawPath= rawClasspathEntry.getPath();
-			if (rawClasspathEntry.getEntryKind() != IClasspathEntry.CPE_CONTAINER && !rawPath.isAbsolute())
+			classpathEntry= JavaModelUtil.getClasspathEntry(root);
+			IPath rawPath= classpathEntry.getPath();
+			if (classpathEntry.getEntryKind() != IClasspathEntry.CPE_CONTAINER && !rawPath.isAbsolute())
 				path= rawPath;
 			else
 				path= root.getPath();
@@ -1111,6 +1118,12 @@ public class JavaElementLabelComposer {
 					fBuffer.append(JavaElementLabels.CONCAT_STRING);
 					fBuffer.append(path.removeLastSegments(1).toOSString());
 				}
+				if (classpathEntry != null) {
+					IClasspathEntry referencingEntry= classpathEntry.getReferencingEntry();
+					if (referencingEntry != null) {
+						fBuffer.append(Messages.format(JavaUIMessages.JavaElementLabels_onClassPathOf, new Object[] { Name.CLASS_PATH.toString(), referencingEntry.getPath().lastSegment() }));
+					}
+				}
 				if (getFlag(flags, JavaElementLabels.COLORIZE)) {
 					fBuffer.setStyle(offset, fBuffer.length() - offset, QUALIFIER_STYLE);
 				}
@@ -1125,20 +1138,28 @@ public class JavaElementLabelComposer {
 	private void appendInternalArchiveLabel(IPackageFragmentRoot root, long flags) {
 		IResource resource= root.getResource();
 		boolean rootQualified= getFlag(flags, JavaElementLabels.ROOT_QUALIFIED);
-		boolean referencedQualified= getFlag(flags, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED) && isReferenced(root);
 		if (rootQualified) {
 			fBuffer.append(root.getPath().makeRelative().toString());
 		} else {
 			fBuffer.append(root.getElementName());
 			int offset= fBuffer.length();
-			if (referencedQualified) {
+			boolean referencedPostQualified= getFlag(flags, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED);
+			if (referencedPostQualified && isReferenced(root)) {
 				fBuffer.append(JavaElementLabels.CONCAT_STRING);
 				fBuffer.append(resource.getParent().getFullPath().makeRelative().toString());
 			} else if (getFlag(flags, JavaElementLabels.ROOT_POST_QUALIFIED)) {
 				fBuffer.append(JavaElementLabels.CONCAT_STRING);
 				fBuffer.append(root.getParent().getPath().makeRelative().toString());
-			} else {
-				return;
+			}
+			if (referencedPostQualified) {
+				try {
+					IClasspathEntry referencingEntry= JavaModelUtil.getClasspathEntry(root).getReferencingEntry();
+					if (referencingEntry != null) {
+						fBuffer.append(Messages.format(JavaUIMessages.JavaElementLabels_onClassPathOf, new Object[] { Name.CLASS_PATH.toString(), referencingEntry.getPath().lastSegment() }));
+					}
+				} catch (JavaModelException e) {
+					// ignore
+				}
 			}
 			if (getFlag(flags, JavaElementLabels.COLORIZE)) {
 				fBuffer.setStyle(offset, fBuffer.length() - offset, QUALIFIER_STYLE);
@@ -1184,7 +1205,7 @@ public class JavaElementLabelComposer {
 
 	/**
 	 * Returns <code>true</code> if the given package fragment root is
-	 * referenced. This means it is own by a different project but is referenced
+	 * referenced. This means it is a descendant of a different project but is referenced
 	 * by the root's parent. Returns <code>false</code> if the given root
 	 * doesn't have an underlying resource.
 	 *

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -586,6 +586,33 @@ public final class JavaModelUtil {
 			}
 		}
 		return null; // attachment not possible
+	}
+
+	/**
+	 * Returns the classpath entry of the given package fragment root. This is the raw entry, except
+	 * if the root is a referenced library, in which case it's the resolved entry.
+	 * 
+	 * @param root a package fragment root
+	 * @return the corresponding classpath entry
+	 * @throws JavaModelException if accessing the entry failed
+	 * @since 3.6
+	 */
+	public static IClasspathEntry getClasspathEntry(IPackageFragmentRoot root) throws JavaModelException {
+		IClasspathEntry rawEntry= root.getRawClasspathEntry();
+		int rawEntryKind= rawEntry.getEntryKind();
+		switch (rawEntryKind) {
+			case IClasspathEntry.CPE_LIBRARY:
+			case IClasspathEntry.CPE_VARIABLE:
+			case IClasspathEntry.CPE_CONTAINER: // should not happen, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=305037
+				if (root.isArchive() && root.getKind() == IPackageFragmentRoot.K_BINARY) {
+					IClasspathEntry resolvedEntry= root.getResolvedClasspathEntry();
+					if (resolvedEntry.getReferencingEntry() != null)
+						return resolvedEntry;
+					else
+						return rawEntry;
+				}
+		}
+		return rawEntry;
 	}
 
 	/**
