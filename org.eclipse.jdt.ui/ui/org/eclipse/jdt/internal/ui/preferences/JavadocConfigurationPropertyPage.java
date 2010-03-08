@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,7 +86,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 			if (elem instanceof IPackageFragmentRoot && ((IPackageFragmentRoot) elem).getKind() == IPackageFragmentRoot.K_BINARY) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) elem;
 
-				IClasspathEntry entry= root.getRawClasspathEntry();
+				IClasspathEntry entry= JavaModelUtil.getClasspathEntry(root);
 				if (entry == null) {
 					fIsValidElement= false;
 					setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsIncorrectElement_description);
@@ -241,7 +241,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 						cpElem.setAttribute(CPListElement.JAVADOC, loc);
 						IClasspathEntry newEntry= cpElem.getClasspathEntry();
 						String[] changedAttributes= { CPListElement.JAVADOC };
-						BuildPathSupport.modifyClasspathEntry(shell, newEntry, changedAttributes, project, containerPath, monitor);
+						BuildPathSupport.modifyClasspathEntry(shell, newEntry, changedAttributes, project, containerPath, entry.getReferencingEntry() != null, monitor);
 					} else {
 						JavaUI.setProjectJavadocLocation(project, javadocLocation);
 					}

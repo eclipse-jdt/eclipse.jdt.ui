@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -192,29 +192,18 @@ public class BuildPathSupport {
 	 * @param changedAttributes The attributes that have changed. See {@link CPListElement} for constants values.
 	 * @param jproject Project where the entry belongs to
 	 * @param containerPath The path of the entry's parent container or <code>null</code> if the entry is not in a container
+	 * @param isReferencedEntry <code>true</code> iff the entry has a {@link IClasspathEntry#getReferencingEntry() referencing entry}
 	 * @param monitor The progress monitor to use
 	 * @throws CoreException if the update failed
 	 */
-	public static void modifyClasspathEntry(Shell shell, IClasspathEntry newEntry, String[] changedAttributes, IJavaProject jproject, IPath containerPath, IProgressMonitor monitor) throws CoreException {
+	public static void modifyClasspathEntry(Shell shell, IClasspathEntry newEntry, String[] changedAttributes, IJavaProject jproject, IPath containerPath, boolean isReferencedEntry, IProgressMonitor monitor) throws CoreException {
 		if (containerPath != null) {
 			updateContainerClasspath(jproject, containerPath, newEntry, changedAttributes, monitor);
+		} else if (isReferencedEntry) {
+			updateReferencedClasspathEntry(jproject, newEntry, changedAttributes, monitor);
 		} else {
 			updateProjectClasspath(shell, jproject, newEntry, changedAttributes, monitor);
 		}
-	}
-
-
-	/**
-	 * Apply a modified classpath entry to the classpath. The classpath entry can also be from a classpath container.
-	 * @param shell If not null and the entry could not be found on the projects classpath, a dialog will ask to put the entry on the classpath
-	 * @param newEntry The modified entry. The entry's kind or path must be unchanged.
-	 * @param jproject Project where the entry belongs to
-	 * @param containerPath The path of the entry's parent container or <code>null</code> if the entry is not in a container
-	 * @param monitor The progress monitor to use
-	 * @throws CoreException if the update failed
-	 */
-	public static void modifyClasspathEntry(Shell shell, IClasspathEntry newEntry, IJavaProject jproject, IPath containerPath, IProgressMonitor monitor) throws CoreException {
-		modifyClasspathEntry(shell, newEntry, null, jproject, containerPath, monitor);
 	}
 
 	private static void updateContainerClasspath(IJavaProject jproject, IPath containerPath, IClasspathEntry newEntry, String[] changedAttributes, IProgressMonitor monitor) throws CoreException {
@@ -309,6 +298,39 @@ public class BuildPathSupport {
 		return result[0];
 	}
 
+	/**
+	 * Apply a modified referenced classpath entry to the classpath.
+	 * @param newReferencedEntry the modified entry. The entry's kind or path must be unchanged.
+	 * @param changedAttributes the attributes that have changed. See {@link CPListElement} for constants values.
+	 * @param jproject project where the entry belongs to
+	 * @param monitor the progress monitor to use
+	 * @throws CoreException if the update failed
+	 */
+	private static void updateReferencedClasspathEntry(IJavaProject jproject, IClasspathEntry newReferencedEntry, String[] changedAttributes, IProgressMonitor monitor) throws CoreException {
+		IClasspathEntry[] oldReferencedClasspath= jproject.getReferencedClasspathEntries();
+		int nEntries= oldReferencedClasspath.length;
+		ArrayList newReferencedEntries= new ArrayList(nEntries + 1);
+		int entryKind= newReferencedEntry.getEntryKind();
+		IPath jarPath= newReferencedEntry.getPath();
+		boolean found= false;
+		for (int i= 0; i < nEntries; i++) {
+			IClasspathEntry curr= oldReferencedClasspath[i];
+			if (curr.getEntryKind() == entryKind && curr.getPath().equals(jarPath)) {
+				// add modified entry
+				newReferencedEntries.add(getUpdatedEntry(curr, newReferencedEntry, changedAttributes, jproject));
+				found= true;
+			} else {
+				newReferencedEntries.add(curr);
+			}
+		}
+		if (!found) {
+			newReferencedEntries.add(newReferencedEntry);
+		}
+		IClasspathEntry[] newReferencedClasspath= (IClasspathEntry[]) newReferencedEntries.toArray(new IClasspathEntry[newReferencedEntries.size()]);
+		
+		jproject.setRawClasspath(jproject.getRawClasspath(), newReferencedClasspath, jproject.getOutputLocation(), monitor);
+	}
+	
 	/**
 	 * Sets the default compiler compliance options iff <code>modifiedClassPathEntries</code>
 	 * contains a classpath container entry that is modified or new and that points to an execution

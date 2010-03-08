@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,6 +64,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 	private boolean fIsValidElement;
 	private IClasspathEntry fEntry;
 	private IPath fContainerPath;
+	private String fInitialNativeLibPath;
 
 	/**
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
@@ -74,7 +75,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 			if (elem instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) elem;
 
-				IClasspathEntry entry= root.getRawClasspathEntry();
+				IClasspathEntry entry= JavaModelUtil.getClasspathEntry(root);
 				if (entry == null) {
 					fIsValidElement= false;
 					setDescription(PreferencesMessages.NativeLibrariesPropertyPage_invalidElementSelection_desription);
@@ -133,15 +134,15 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 		if (elem == null)
 			return new Composite(parent, SWT.NONE);
 
-		String nativeLibPath= null;
+		fInitialNativeLibPath= null;
 		IClasspathAttribute[] extraAttributes= fEntry.getExtraAttributes();
 		for (int i= 0; i < extraAttributes.length; i++) {
 			if (extraAttributes[i].getName().equals(JavaRuntime.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY)) {
-				nativeLibPath= extraAttributes[i].getValue();
+				fInitialNativeLibPath= extraAttributes[i].getValue();
 				break;
 			}
 		}
-		fConfigurationBlock= new NativeLibrariesConfigurationBlock(this, getShell(), nativeLibPath, fEntry);
+		fConfigurationBlock= new NativeLibrariesConfigurationBlock(this, getShell(), fInitialNativeLibPath, fEntry);
 		Control control= fConfigurationBlock.createContents(parent);
 
 		Dialog.applyDialogFont(control);
@@ -172,13 +173,14 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 	public boolean performOk() {
 		if (fConfigurationBlock != null) {
 			String nativeLibraryPath= fConfigurationBlock.getNativeLibraryPath();
-			if (nativeLibraryPath == null) {
-				return true;//no change
+			if (nativeLibraryPath == null && fInitialNativeLibPath == null
+					|| nativeLibraryPath != null && fInitialNativeLibPath != null && nativeLibraryPath.equals(fInitialNativeLibPath)) {
+				return true; //no change
 			}
 
 			IJavaElement elem= getJavaElement();
 			try {
-				IRunnableWithProgress runnable= getRunnable(getShell(), elem, nativeLibraryPath, fEntry, fContainerPath);
+				IRunnableWithProgress runnable= getRunnable(getShell(), elem, nativeLibraryPath, fEntry, fContainerPath, fEntry.getReferencingEntry() != null);
 				PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);
 			} catch (InvocationTargetException e) {
 				String title= PreferencesMessages.NativeLibrariesPropertyPage_errorAttaching_title;
@@ -193,7 +195,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 		return true;
 	}
 
-	private static IRunnableWithProgress getRunnable(final Shell shell, final IJavaElement elem, final String nativeLibraryPath, final IClasspathEntry entry, final IPath containerPath) {
+	private static IRunnableWithProgress getRunnable(final Shell shell, final IJavaElement elem, final String nativeLibraryPath, final IClasspathEntry entry, final IPath containerPath, final boolean isReferencedEntry) {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
@@ -203,7 +205,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 						cpElem.setAttribute(CPListElement.NATIVE_LIB_PATH, nativeLibraryPath);
 						IClasspathEntry newEntry= cpElem.getClasspathEntry();
 						String[] changedAttributes= { CPListElement.NATIVE_LIB_PATH };
-						BuildPathSupport.modifyClasspathEntry(shell, newEntry, changedAttributes, project, containerPath, monitor);
+						BuildPathSupport.modifyClasspathEntry(shell, newEntry, changedAttributes, project, containerPath, isReferencedEntry,  monitor);
 					}
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);

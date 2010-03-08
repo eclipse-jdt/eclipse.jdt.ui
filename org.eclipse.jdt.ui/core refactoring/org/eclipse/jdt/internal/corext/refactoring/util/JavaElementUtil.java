@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -151,6 +151,8 @@ public class JavaElementUtil {
 	 */
 	public static IJavaProject[] getReferencingProjects(IPackageFragmentRoot root) throws JavaModelException {
 		IClasspathEntry cpe= root.getRawClasspathEntry();
+		if (cpe.getEntryKind() == IClasspathEntry.CPE_LIBRARY)
+			cpe= root.getResolvedClasspathEntry();
 		IJavaProject[] allJavaProjects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
 		List result= new ArrayList(allJavaProjects.length);
 		for (int i= 0; i < allJavaProjects.length; i++) {

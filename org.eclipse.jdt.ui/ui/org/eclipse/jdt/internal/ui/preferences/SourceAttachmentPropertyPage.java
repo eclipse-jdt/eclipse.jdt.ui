@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
@@ -96,30 +95,24 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 
 			IPath containerPath= null;
 			IJavaProject jproject= fRoot.getJavaProject();
-			IClasspathEntry entry= fRoot.getRawClasspathEntry();
-			if (entry == null) {
-				// use a dummy entry to use for initialization
-				entry= JavaCore.newLibraryEntry(fRoot.getPath(), null, null);
-			} else {
-				if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-					containerPath= entry.getPath();
-					ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
-					IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
-					if (initializer == null || container == null) {
-						return createMessageContent(composite, Messages.format(PreferencesMessages.SourceAttachmentPropertyPage_invalid_container, BasicElementLabels.getPathLabel(containerPath, false)));
-					}
-					String containerName= container.getDescription();
-
-					IStatus status= initializer.getSourceAttachmentStatus(containerPath, jproject);
-					if (status.getCode() == ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED) {
-						return createMessageContent(composite, Messages.format(PreferencesMessages.SourceAttachmentPropertyPage_not_supported, containerName));
-					}
-					if (status.getCode() == ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY) {
-						return createMessageContent(composite, Messages.format(PreferencesMessages.SourceAttachmentPropertyPage_read_only, containerName));
-					}
-					entry= JavaModelUtil.findEntryInContainer(container, fRoot.getPath());
-					Assert.isNotNull(entry);
+			IClasspathEntry entry= JavaModelUtil.getClasspathEntry(fRoot);
+			if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+				containerPath= entry.getPath();
+				ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
+				IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
+				if (initializer == null || container == null) {
+					return createMessageContent(composite, Messages.format(PreferencesMessages.SourceAttachmentPropertyPage_invalid_container, BasicElementLabels.getPathLabel(containerPath, false)));
 				}
+				String containerName= container.getDescription();
+
+				IStatus status= initializer.getSourceAttachmentStatus(containerPath, jproject);
+				if (status.getCode() == ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED) {
+					return createMessageContent(composite, Messages.format(PreferencesMessages.SourceAttachmentPropertyPage_not_supported, containerName));
+				}
+				if (status.getCode() == ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY) {
+					return createMessageContent(composite, Messages.format(PreferencesMessages.SourceAttachmentPropertyPage_read_only, containerName));
+				}
+				entry= JavaModelUtil.findEntryInContainer(container, fRoot.getPath());
 			}
 			fContainerPath= containerPath;
 			fEntry= entry;
@@ -161,7 +154,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 					return true; // no change
 				}
 
-				IRunnableWithProgress runnable= SourceAttachmentBlock.getRunnable(getShell(), entry, fRoot.getJavaProject(), fContainerPath);
+				IRunnableWithProgress runnable= SourceAttachmentBlock.getRunnable(getShell(), entry, fRoot.getJavaProject(), fContainerPath, fEntry.getReferencingEntry() != null);
 				PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);
 			} catch (InvocationTargetException e) {
 				String title= PreferencesMessages.SourceAttachmentPropertyPage_error_title;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -215,7 +215,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		private void createSourceAttachmentControls(Composite composite, IPackageFragmentRoot root) throws JavaModelException {
 			IClasspathEntry entry;
 			try {
-				entry= root.getRawClasspathEntry();
+				entry= JavaModelUtil.getClasspathEntry(root);
 			} catch (JavaModelException ex) {
 				if (ex.isDoesNotExist())
 					entry= null;
@@ -282,7 +282,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					try {
 						IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(shell, entry);
 						if (result != null) {
-							applySourceAttachment(shell, result, jproject, containerPath);
+							applySourceAttachment(shell, result, jproject, containerPath, entry.getReferencingEntry() != null);
 							verifyInput(getEditorInput());
 						}
 					} catch (CoreException e) {
@@ -296,9 +296,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			};
 		}
 
-		protected void applySourceAttachment(Shell shell, IClasspathEntry newEntry, IJavaProject project, IPath containerPath) {
+		protected void applySourceAttachment(Shell shell, IClasspathEntry newEntry, IJavaProject project, IPath containerPath, boolean isReferencedEntry) {
 			try {
-				IRunnableWithProgress runnable= SourceAttachmentBlock.getRunnable(shell, newEntry, project, containerPath);
+				IRunnableWithProgress runnable= SourceAttachmentBlock.getRunnable(shell, newEntry, project, containerPath, isReferencedEntry);
 				PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);
 
 			} catch (InvocationTargetException e) {

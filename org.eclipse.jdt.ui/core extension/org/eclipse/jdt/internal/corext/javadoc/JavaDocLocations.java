@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -304,14 +304,16 @@ public class JavaDocLocations {
 
 		if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
 			IClasspathEntry entry= root.getRawClasspathEntry();
-			if (entry == null) {
-				return null;
-			}
-			if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-				entry= getRealClasspathEntry(root.getJavaProject(), entry.getPath(), root.getPath());
-				if (entry == null) {
-					return null;
-				}
+			switch (entry.getEntryKind()) {
+				case IClasspathEntry.CPE_LIBRARY:
+				case IClasspathEntry.CPE_VARIABLE:
+					entry= root.getResolvedClasspathEntry();
+					break;
+				case IClasspathEntry.CPE_CONTAINER:
+					entry= getRealClasspathEntry(root.getJavaProject(), entry.getPath(), root.getPath());
+					if (entry == null) {
+						return null;
+					}
 			}
 			return getLibraryJavadocLocation(entry);
 		} else {
