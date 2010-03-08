@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Carsten Pfeiffer <carsten.pfeiffer@gebit.de> - [search] Custom search results not shown hierarchically in the java search results view - https://bugs.eclipse.org/bugs/show_bug.cgi?id=303705
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.search;
@@ -16,6 +17,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IResource;
 
@@ -56,7 +59,20 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	private int fCurrentLevel;
 	static class FastJavaElementProvider extends StandardJavaElementContentProvider {
 		public Object getParent(Object element) {
-			return internalGetParent(element);
+			Object parent= internalGetParent(element);
+			if (parent == null && element instanceof IAdaptable) {
+				IAdaptable adaptable = (IAdaptable)element;
+				Object javaElement= adaptable.getAdapter(IJavaElement.class);
+				if (javaElement != null) {
+					parent= internalGetParent(javaElement);
+				} else {
+					Object resource= adaptable.getAdapter(IResource.class);
+					if (resource != null) {
+						parent= internalGetParent(resource);
+					}
+				}
+			}
+			return parent;
 		}
 	}
 
@@ -179,8 +195,10 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	}
 
 	/**
-	 * @param element
-	 * @param parent
+	 * Tries to remove the given element from the list of stored siblings.
+	 * 
+	 * @param element potential child
+	 * @param parent potential parent
 	 * @return returns true if it really was a remove (i.e. element was a child of parent).
 	 */
 	private boolean removeFromSiblings(Object element, Object parent) {
