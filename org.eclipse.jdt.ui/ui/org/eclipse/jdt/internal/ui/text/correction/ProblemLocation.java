@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,8 @@ public class ProblemLocation implements IProblemLocation {
 
 	public ProblemLocation(int offset, int length, IJavaAnnotation annotation) {
 		fId= annotation.getId();
-		fArguments= annotation.getArguments();
+		String[] arguments= annotation.getArguments();
+		fArguments= arguments != null ? arguments : new String[0];
 		fOffset= offset;
 		fLength= length;
 		fIsError= JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotation.getType());
@@ -129,11 +130,9 @@ public class ProblemLocation implements IProblemLocation {
 		buf.append("Id: ").append(getErrorCode(fId)).append('\n'); //$NON-NLS-1$
 		buf.append('[').append(fOffset).append(", ").append(fLength).append(']').append('\n'); //$NON-NLS-1$
 		String[] arg= fArguments;
-		if (arg != null) {
-			for (int i= 0; i < arg.length; i++) {
-				buf.append(arg[i]);
-				buf.append('\n');
-			}
+		for (int i= 0; i < arg.length; i++) {
+			buf.append(arg[i]);
+			buf.append('\n');
 		}
 		return buf.toString();
 	}
