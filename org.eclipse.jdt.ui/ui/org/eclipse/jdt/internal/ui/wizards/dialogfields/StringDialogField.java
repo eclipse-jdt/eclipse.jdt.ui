@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -99,17 +99,18 @@ public class StringDialogField extends DialogField {
 	 * Creates or returns the created text control.
 	 * @param parent The parent composite or <code>null</code> when the widget has
 	 * already been created.
+	 * @return the text control
 	 */
 	public Text getTextControl(Composite parent) {
 		if (fTextControl == null) {
 			assertCompositeNotNull(parent);
 			fModifyListener= new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
-					doModifyText(e);
+					doModifyText();
 				}
 			};
 
-			fTextControl= new Text(parent, SWT.SINGLE | SWT.BORDER);
+			fTextControl= createTextControl(parent);
 			// moved up due to 1GEUNW2
 			fTextControl.setText(fText);
 			fTextControl.setFont(parent.getFont());
@@ -123,7 +124,18 @@ public class StringDialogField extends DialogField {
 		return fTextControl;
 	}
 
-	private void doModifyText(ModifyEvent e) {
+	/**
+	 * Creates and returns a new text control.
+	 * 
+	 * @param parent the parent
+	 * @return the text control
+	 * @since 3.6
+	 */
+	protected Text createTextControl(Composite parent) {
+		return new Text(parent, SWT.SINGLE | SWT.BORDER);
+	}
+
+	private void doModifyText() {
 		if (isOkToUse(fTextControl)) {
 			fText= fTextControl.getText();
 		}
@@ -145,7 +157,7 @@ public class StringDialogField extends DialogField {
 	// ------ text access
 
 	/**
-	 * Gets the text. Can not be <code>null</code>
+	 * @return the text, can not be <code>null</code>
 	 */
 	public String getText() {
 		return fText;
@@ -153,6 +165,7 @@ public class StringDialogField extends DialogField {
 
 	/**
 	 * Sets the text. Triggers a dialog-changed event.
+	 * @param text the new text
 	 */
 	public void setText(String text) {
 		fText= text;
@@ -165,6 +178,7 @@ public class StringDialogField extends DialogField {
 
 	/**
 	 * Sets the text without triggering a dialog-changed event.
+	 * @param text the new text
 	 */
 	public void setTextWithoutUpdate(String text) {
 		fText= text;

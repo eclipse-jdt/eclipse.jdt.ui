@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
@@ -63,7 +64,8 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 		if (!store.getBoolean(PreferenceConstants.APPEARANCE_METHOD_TYPEPARAMETERS)) {
 			fTextFlagMask ^= JavaElementLabels.M_APP_TYPE_PARAMETERS;
 		}
-		if (!store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)) {
+		if (!(store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)
+				|| store.getBoolean(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES))) {
 			fTextFlagMask ^= JavaElementLabels.P_COMPRESSED;
 		}
 		if (!store.getBoolean(PreferenceConstants.APPEARANCE_CATEGORY)) {
@@ -82,7 +84,9 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 				|| property.equals(PreferenceConstants.APPEARANCE_METHOD_TYPEPARAMETERS)
 				|| property.equals(PreferenceConstants.APPEARANCE_CATEGORY)
 				|| property.equals(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW)
-				|| property.equals(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)) {
+				|| property.equals(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)
+				|| property.equals(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW)
+				|| property.equals(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES)) {
 			initMasks();
 			LabelProviderChangedEvent lpEvent= new LabelProviderChangedEvent(this, null); // refresh all
 			fireLabelProviderChanged(lpEvent);

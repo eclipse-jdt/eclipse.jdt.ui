@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
@@ -52,6 +53,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
 
 
 /**
@@ -132,6 +134,31 @@ public class PreferenceConstants {
 	 * @see #APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW
 	 */
 	public static final String APPEARANCE_COMPRESS_PACKAGE_NAMES= "org.eclipse.jdt.ui.compresspackagenames";//$NON-NLS-1$
+
+	/**
+	 * A named preference that defines the patterns used for package name abbreviation.
+	 * <p>
+	 * Value is of type <code>String</code>. Value is a newline separated list of
+	 * packagePrefix=abbreviation pairs. For example, a pattern of
+	 * 'javax.management=&lt;JMX&gt;' will abbreviate 'javax.management.monitor' to
+	 * '&lt;JMX&gt;.monitor'. A '#' at the beginning of a line disables an entry.
+	 * </p>
+	 * @since 3.6
+	 */
+	//TODO: make API in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
+	static final String APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW;
+
+	/**
+	 * A named preference that controls if package name abbreviation is turned on or off.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @see #APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW
+	 * @since 3.6
+	 */
+	//TODO: make API in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
+	static final String APPEARANCE_ABBREVIATE_PACKAGE_NAMES= JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES;
 
 	/**
 	 * A named preference that controls if empty inner packages are folded in
@@ -3616,6 +3643,8 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.BROWSING_STACK_VERTICALLY, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, true);
+		store.setDefault(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES, false);
+		store.setDefault(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
 
 		// ImportOrganizePreferencePage
 		store.setDefault(PreferenceConstants.ORGIMPORTS_IMPORTORDER, "java;javax;org;com"); //$NON-NLS-1$

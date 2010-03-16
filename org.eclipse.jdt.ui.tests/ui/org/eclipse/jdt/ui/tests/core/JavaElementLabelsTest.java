@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,8 @@ import org.eclipse.jdt.core.ITypeParameter;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
 
 
 public class JavaElementLabelsTest extends CoreTests {
@@ -472,9 +474,30 @@ public class JavaElementLabelsTest extends CoreTests {
 			assertExpectedLabel(packOrgTest, "org.test", JavaElementLabels.P_COMPRESSED);
 			assertExpectedLabel(packOrgTestLongname, "org.te*.longname", JavaElementLabels.P_COMPRESSED);
 
+
+			store.setValue(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES, true);
+			
+			assertExpectedLabel(packOrgTestLongname, "org.te*.longname", JavaElementLabels.P_COMPRESSED);
+			
+			store.setValue(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, "#com=@C\norg=@O");
+			
+			assertExpectedLabel(packDefault, "(default package)", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrg, "@O", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrgTest, "@O.test", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrgTestLongname, "@O.te*.longname", JavaElementLabels.P_COMPRESSED);
+			
+			store.setValue(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, "org=@O\n\norg.test=@OT\n");
+			
+			assertExpectedLabel(packDefault, "(default package)", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrg, "@O", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrgTest, "@OT", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrgTestLongname, "@OT.longname", JavaElementLabels.P_COMPRESSED);
+			
 		} finally {
 			store.setToDefault(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW);
 			store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
+			store.setToDefault(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW);
+			store.setValue(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES, false);
 		}
 	}
 

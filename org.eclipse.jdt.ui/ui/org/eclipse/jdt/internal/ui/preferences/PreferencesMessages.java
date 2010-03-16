@@ -10,6 +10,7 @@
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
  *     Sebastian Davids, sdavids@gmx.de - 187316 [preferences] Mark Occurences Pref Page; Link to
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [preferences] Add preference for new compiler warning: MissingSynchronizedModifierInInheritedMethod - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245240
+ *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -289,11 +290,14 @@ public final class PreferencesMessages extends NLS {
 	public static String AppearancePreferencePage_methodtypeparams_label;
 	public static String AppearancePreferencePage_pkgNamePatternEnable_label;
 	public static String AppearancePreferencePage_pkgNamePattern_label;
+	public static String AppearancePreferencePage_pkgNamePatternAbbreviateEnable_label;
+	public static String AppearancePreferencePage_pkgNamePatternAbbreviate_label;
 	public static String AppearancePreferencePage_showMembersInPackagesView;
 	public static String AppearancePreferencePage_stackViewsVerticallyInTheJavaBrowsingPerspective;
 	public static String AppearancePreferencePage_note;
 	public static String AppearancePreferencePage_preferenceOnlyEffectiveForNewPerspectives;
 	public static String AppearancePreferencePage_packageNameCompressionPattern_error_isEmpty;
+	public static String AppearancePreferencePage_packageNameAbbreviationPattern_error_isInvalid;
 	public static String AppearancePreferencePage_foldEmptyPackages;
 	public static String CodeFormatterPreferencePage_title;
 	public static String SourceAttachmentPropertyPage_not_supported;

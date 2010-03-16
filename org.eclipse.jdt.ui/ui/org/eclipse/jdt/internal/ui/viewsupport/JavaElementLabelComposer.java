@@ -7,9 +7,13 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.jar.Attributes.Name;
 
 import org.eclipse.core.runtime.IPath;
@@ -55,6 +59,31 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  * @since 3.5
  */
 public class JavaElementLabelComposer {
+
+	/**
+	 * A named preference that defines the patterns used for package name abbreviation.
+	 * <p>
+	 * Value is of type <code>String</code>. Value is a newline separated list of
+	 * packagePrefix=abbreviation pairs. For example, a pattern of
+	 * 'javax.management=&lt;JMX&gt;' will abbreviate 'javax.management.monitor' to
+	 * '&lt;JMX&gt;.monitor'. A '#' at the beginning of a line disables an entry.
+	 * </p>
+	 * @since 3.6
+	 */
+	//TODO: make API in PreferenceConstants in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
+	public static final String APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= "org.eclipse.jdt.ui.abbreviatepackagenames pkgNameAbbreviationPatternForPackagesView";//$NON-NLS-1$
+
+	/**
+	 * A named preference that controls if package name abbreviation is turned on or off.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @see #APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW
+	 * @since 3.6
+	 */
+	//TODO: make API in PreferenceConstants in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
+	public static final String APPEARANCE_ABBREVIATE_PACKAGE_NAMES= "org.eclipse.jdt.ui.abbreviatepackagenames";//$NON-NLS-1$
 
 	/**
 	 * An adapter for buffer supported by the label composer.
@@ -158,6 +187,24 @@ public class JavaElementLabelComposer {
 		}
 	}
 
+	private static class PackageNameAbbreviation {
+		private String fPackagePrefix;
+
+		private String fAbbreviation;
+
+		public PackageNameAbbreviation(String packagePrefix, String abbreviation) {
+			fPackagePrefix= packagePrefix;
+			fAbbreviation= abbreviation;
+		}
+
+		public String getPackagePrefix() {
+			return fPackagePrefix;
+		}
+
+		public String getAbbreviation() {
+			return fAbbreviation;
+		}
+	}
 
 	/**
 	 * Additional delimiters used in this class, for use in {@link Strings#markLTR(String, String)}
@@ -172,8 +219,7 @@ public class JavaElementLabelComposer {
 	private static final Styler QUALIFIER_STYLE= StyledString.QUALIFIER_STYLER;
 	private static final Styler COUNTER_STYLE= StyledString.COUNTER_STYLER;
 	private static final Styler DECORATIONS_STYLE= StyledString.DECORATIONS_STYLER;
-
-
+	
 	/*
 	 * Package name compression
 	 */
@@ -182,6 +228,12 @@ public class JavaElementLabelComposer {
 	private static String fgPkgNamePostfix;
 	private static int fgPkgNameChars;
 	private static int fgPkgNameLength= -1;
+	
+	/*
+	 * Package name abbreviation
+	 */
+	private static String fgPkgNameAbbreviationPattern= ""; //$NON-NLS-1$
+	private static PackageNameAbbreviation[] fgPkgNameAbbreviation;
 
 	private final FlexibleBuffer fBuffer;
 
@@ -987,7 +1039,10 @@ public class JavaElementLabelComposer {
 		if (pack.isDefaultPackage()) {
 			fBuffer.append(JavaElementLabels.DEFAULT_PACKAGE);
 		} else if (getFlag(flags, JavaElementLabels.P_COMPRESSED)) {
-			appendCompressedPackageFragment(pack);
+			if (isPackageNameAbbreviationEnabled())
+				appendAbbreviatedPackageFragment(pack);
+			else
+				appendCompressedPackageFragment(pack);
 		} else {
 			fBuffer.append(pack.getElementName());
 		}
@@ -1002,12 +1057,16 @@ public class JavaElementLabelComposer {
 	}
 
 	private void appendCompressedPackageFragment(IPackageFragment pack) {
+		appendCompressedPackageFragment(pack.getElementName());
+	}
+	
+	private void appendCompressedPackageFragment(String elementName) {
 		refreshPackageNamePattern();
 		if (fgPkgNameLength < 0) {
-			fBuffer.append(pack.getElementName());
+			fBuffer.append(elementName);
 			return;
 		}
-		String name= pack.getElementName();
+		String name= elementName;
 		int start= 0;
 		int dot= name.indexOf('.', start);
 		while (dot > 0) {
@@ -1024,6 +1083,47 @@ public class JavaElementLabelComposer {
 		fBuffer.append(name.substring(start));
 	}
 
+	private void appendAbbreviatedPackageFragment(IPackageFragment pack) {
+		refreshPackageNameAbbreviation();
+
+		String pkgName= pack.getElementName();
+
+		if (fgPkgNameAbbreviation != null && fgPkgNameAbbreviation.length != 0) {
+
+			for (int i= 0; i < fgPkgNameAbbreviation.length; i++) {
+				PackageNameAbbreviation abbr= fgPkgNameAbbreviation[i];
+
+				String abbrPrefix= abbr.getPackagePrefix();
+				if (pkgName.startsWith(abbrPrefix)) {
+					int abbrPrefixLength= abbrPrefix.length();
+					int pkgLength= pkgName.length();
+					if (!(pkgLength == abbrPrefixLength || pkgName.charAt(abbrPrefixLength) == '.'))
+						continue;
+
+					fBuffer.append(abbr.getAbbreviation());
+
+					if (pkgLength > abbrPrefixLength) {
+						fBuffer.append('.');
+
+						String remaining= pkgName.substring(abbrPrefixLength + 1);
+
+						if (isPackageNameCompressionEnabled())
+							appendCompressedPackageFragment(remaining);
+						else
+							fBuffer.append(remaining);
+					}
+
+					return;
+				}
+			}
+		}
+
+		if (isPackageNameCompressionEnabled()) {
+			appendCompressedPackageFragment(pkgName);
+		} else {
+			fBuffer.append(pkgName);
+		}
+	}
 
 	/**
 	 * Appends the label for a package fragment root. Considers the ROOT_* flags.
@@ -1253,12 +1353,90 @@ public class JavaElementLabelComposer {
 		fgPkgNamePrefix= pattern;
 		fgPkgNameLength= pattern.length();
 	}
+	
+	private void refreshPackageNameAbbreviation() {
+		String pattern= getPkgNameAbbreviationPatternForPackagesView();
+
+		if (fgPkgNameAbbreviationPattern.equals(pattern))
+			return;
+
+		fgPkgNameAbbreviationPattern= pattern;
+
+		if (pattern == null || pattern.length() == 0) {
+			fgPkgNameAbbreviationPattern= ""; //$NON-NLS-1$
+			fgPkgNameAbbreviation= null;
+			return;
+		}
+
+		PackageNameAbbreviation[] abbrs= parseAbbreviationPattern(pattern);
+
+		if (abbrs == null)
+			abbrs= new PackageNameAbbreviation[0];
+
+		fgPkgNameAbbreviation= abbrs;
+	}
+
+	public static PackageNameAbbreviation[] parseAbbreviationPattern(String pattern) {
+		String[] parts= pattern.split("\\s*\n\\s*"); //$NON-NLS-1$
+
+		ArrayList result= new ArrayList();
+
+		for (int i= 0; i < parts.length; i++) {
+			String part= parts[i].trim();
+
+			if (part.length() == 0)
+				continue;
+
+			String[] parts2= part.split("\\s*=\\s*", 2); //$NON-NLS-1$
+
+			if (parts2.length != 2)
+				return null;
+
+			String prefix= parts2[0].trim();
+			String abbr= parts2[1].trim();
+
+			if (prefix.startsWith("#")) //$NON-NLS-1$
+				continue;
+
+			PackageNameAbbreviation pkgAbbr= new PackageNameAbbreviation(prefix, abbr);
+
+			result.add(pkgAbbr);
+		}
+
+		Collections.sort(result, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				PackageNameAbbreviation a1= (PackageNameAbbreviation)o1;
+				PackageNameAbbreviation a2= (PackageNameAbbreviation)o2;
+
+				return a2.getPackagePrefix().length() - a1.getPackagePrefix().length();
+			}
+		});
+
+		return (PackageNameAbbreviation[])result.toArray(new PackageNameAbbreviation[0]);
+	}
+	
+	private boolean isPackageNameCompressionEnabled() {
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		return store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES);
+	}
 
 	private String getPkgNamePatternForPackagesView() {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		if (!store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES))
 			return ""; //$NON-NLS-1$
 		return store.getString(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW);
+	}
+
+	private boolean isPackageNameAbbreviationEnabled() {
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		return store.getBoolean(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES);
+	}
+
+	private String getPkgNameAbbreviationPatternForPackagesView() {
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		if (!store.getBoolean(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES))
+			return ""; //$NON-NLS-1$
+		return store.getString(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW);
 	}
 
 }

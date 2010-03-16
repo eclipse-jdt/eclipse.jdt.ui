@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 
@@ -126,6 +127,19 @@ public class LayoutUtil {
 		Object ld= control.getLayoutData();
 		if (ld instanceof GridData) {
 			((GridData)ld).grabExcessHorizontalSpace= true;
+		}
+	}
+
+	/**
+	 * Sets the vertical grabbing of a control to true. Assumes that GridData is used.
+	 * @since 3.6
+	 */
+	public static void setVerticalGrabbing(Control control) {
+		Object ld= control.getLayoutData();
+		if (ld instanceof GridData) {
+			GridData gd= ((GridData)ld);
+			gd.grabExcessVerticalSpace= true;
+			gd.verticalAlignment= SWT.FILL;
 		}
 	}
 

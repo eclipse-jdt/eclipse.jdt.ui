@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -15,6 +16,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.IStatus;
 
@@ -34,12 +36,14 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.TextBoxDialogField;
 
 public class AppearancePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -47,7 +51,9 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	private static final String PREF_METHOD_RETURNTYPE= PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE;
 	private static final String PREF_METHOD_TYPEPARAMETERS= PreferenceConstants.APPEARANCE_METHOD_TYPEPARAMETERS;
 	private static final String PREF_COMPRESS_PACKAGE_NAMES= PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES;
+	private static final String PREF_ABBREVIATE_PACKAGE_NAMES= JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES;
 	private static final String PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW= PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW;
+	private static final String PREF_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW;
 	private static final String STACK_BROWSING_VIEWS_VERTICALLY= PreferenceConstants.BROWSING_STACK_VERTICALLY;
 	private static final String PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER;
 	private static final String PREF_CATEGORY= PreferenceConstants.APPEARANCE_CATEGORY;
@@ -55,9 +61,11 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	private SelectionButtonDialogField fShowMethodReturnType;
 	private SelectionButtonDialogField fShowCategory;
 	private SelectionButtonDialogField fCompressPackageNames;
+	private SelectionButtonDialogField fAbbreviatePackageNames;
 	private SelectionButtonDialogField fStackBrowsingViewsVertically;
 	private SelectionButtonDialogField fShowMembersInPackageView;
 	private StringDialogField fPackageNamePattern;
+	private StringDialogField fAbbreviatePackageNamePattern;
 	private SelectionButtonDialogField fFoldPackagesInPackageExplorer;
 	private SelectionButtonDialogField fShowMethodTypeParameters;
 
@@ -102,6 +110,14 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fPackageNamePattern= new StringDialogField();
 		fPackageNamePattern.setDialogFieldListener(listener);
 		fPackageNamePattern.setLabelText(PreferencesMessages.AppearancePreferencePage_pkgNamePattern_label);
+
+		fAbbreviatePackageNames= new SelectionButtonDialogField(SWT.CHECK);
+		fAbbreviatePackageNames.setDialogFieldListener(listener);
+		fAbbreviatePackageNames.setLabelText(PreferencesMessages.AppearancePreferencePage_pkgNamePatternAbbreviateEnable_label);
+		
+		fAbbreviatePackageNamePattern= new TextBoxDialogField();
+		fAbbreviatePackageNamePattern.setDialogFieldListener(listener);
+		fAbbreviatePackageNamePattern.setLabelText(PreferencesMessages.AppearancePreferencePage_pkgNamePatternAbbreviate_label);
 	}
 
 	private void initFields() {
@@ -114,6 +130,10 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fPackageNamePattern.setText(prefs.getString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW));
 		fCompressPackageNames.setSelection(prefs.getBoolean(PREF_COMPRESS_PACKAGE_NAMES));
 		fPackageNamePattern.setEnabled(fCompressPackageNames.isSelected());
+		fAbbreviatePackageNamePattern.setText(prefs.getString(PREF_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW));
+		fAbbreviatePackageNames.setSelection(prefs.getBoolean(PREF_ABBREVIATE_PACKAGE_NAMES));
+		doDialogFieldChanged(fAbbreviatePackageNames);
+		fAbbreviatePackageNamePattern.setEnabled(fAbbreviatePackageNames.isSelected());
 		fFoldPackagesInPackageExplorer.setSelection(prefs.getBoolean(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER));
 	}
 
@@ -151,8 +171,22 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 
 		fCompressPackageNames.doFillIntoGrid(result, nColumns);
 		fPackageNamePattern.doFillIntoGrid(result, 2);
-		LayoutUtil.setHorizontalGrabbing(fPackageNamePattern.getTextControl(null));
+		LayoutUtil.setHorizontalIndent(fPackageNamePattern.getLabelControl(null), AbstractConfigurationBlock.INDENT);
+		Text packageNamePatternControl= fPackageNamePattern.getTextControl(null);
+		LayoutUtil.setHorizontalIndent(packageNamePatternControl, AbstractConfigurationBlock.INDENT);
+		LayoutUtil.setHorizontalGrabbing(packageNamePatternControl);
 		LayoutUtil.setWidthHint(fPackageNamePattern.getLabelControl(null), convertWidthInCharsToPixels(65));
+
+		new Separator().doFillIntoGrid(result, nColumns);
+		fAbbreviatePackageNames.doFillIntoGrid(result, nColumns);
+		fAbbreviatePackageNamePattern.doFillIntoGrid(result, 2);
+		LayoutUtil.setHorizontalIndent(fAbbreviatePackageNamePattern.getLabelControl(null), AbstractConfigurationBlock.INDENT);
+		Text abbreviatePackageNamePatternControl= fAbbreviatePackageNamePattern.getTextControl(null);
+		LayoutUtil.setHorizontalIndent(abbreviatePackageNamePatternControl, AbstractConfigurationBlock.INDENT);
+		LayoutUtil.setHorizontalGrabbing(abbreviatePackageNamePatternControl);
+		LayoutUtil.setWidthHint(fAbbreviatePackageNamePattern.getLabelControl(null), convertWidthInCharsToPixels(65));
+		LayoutUtil.setVerticalGrabbing(abbreviatePackageNamePatternControl);
+		LayoutUtil.setHeightHint(abbreviatePackageNamePatternControl, convertHeightInCharsToPixels(3));
 
 		new Separator().doFillIntoGrid(result, nColumns);
 		fStackBrowsingViewsVertically.doFillIntoGrid(result, nColumns);
@@ -162,6 +196,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		Composite noteControl= createNoteComposite(JFaceResources.getDialogFont(), result, noteTitle, noteMessage);
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
+		gd.horizontalIndent= AbstractConfigurationBlock.INDENT;
 		noteControl.setLayoutData(gd);
 
 		initFields();
@@ -174,14 +209,22 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		if (field == fCompressPackageNames)
 			fPackageNamePattern.setEnabled(fCompressPackageNames.isSelected());
 
+		if (field == fAbbreviatePackageNames)
+			fAbbreviatePackageNamePattern.setEnabled(fAbbreviatePackageNames.isSelected());
+
 		updateStatus(getValidationStatus());
 	}
 
-	private IStatus getValidationStatus(){
+	private IStatus getValidationStatus() {
+		if (fAbbreviatePackageNames.isSelected()
+				&& JavaElementLabelComposer.parseAbbreviationPattern(fAbbreviatePackageNamePattern.getText()) == null) {
+			return new StatusInfo(IStatus.ERROR, PreferencesMessages.AppearancePreferencePage_packageNameAbbreviationPattern_error_isInvalid);
+		}
+
 		if (fCompressPackageNames.isSelected() && fPackageNamePattern.getText().equals("")) //$NON-NLS-1$
 			return new StatusInfo(IStatus.ERROR, PreferencesMessages.AppearancePreferencePage_packageNameCompressionPattern_error_isEmpty);
-		else
-			return new StatusInfo();
+
+		return new StatusInfo();
 	}
 
 	private void updateStatus(IStatus status) {
@@ -207,6 +250,8 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		prefs.setValue(STACK_BROWSING_VIEWS_VERTICALLY, fStackBrowsingViewsVertically.isSelected());
 		prefs.setValue(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, fPackageNamePattern.getText());
 		prefs.setValue(PREF_COMPRESS_PACKAGE_NAMES, fCompressPackageNames.isSelected());
+		prefs.setValue(PREF_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, fAbbreviatePackageNamePattern.getText());
+		prefs.setValue(PREF_ABBREVIATE_PACKAGE_NAMES, fAbbreviatePackageNames.isSelected());
 		prefs.setValue(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fFoldPackagesInPackageExplorer.isSelected());
 		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
@@ -224,6 +269,8 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fStackBrowsingViewsVertically.setSelection(prefs.getDefaultBoolean(STACK_BROWSING_VIEWS_VERTICALLY));
 		fPackageNamePattern.setText(prefs.getDefaultString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW));
 		fCompressPackageNames.setSelection(prefs.getDefaultBoolean(PREF_COMPRESS_PACKAGE_NAMES));
+		fAbbreviatePackageNamePattern.setText(prefs.getDefaultString(PREF_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW));
+		fAbbreviatePackageNames.setSelection(prefs.getDefaultBoolean(PREF_ABBREVIATE_PACKAGE_NAMES));
 		fFoldPackagesInPackageExplorer.setSelection(prefs.getDefaultBoolean(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER));
 		super.performDefaults();
 	}
