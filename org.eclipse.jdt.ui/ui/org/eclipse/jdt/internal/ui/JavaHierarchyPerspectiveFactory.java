@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui;
+
+import org.eclipse.team.ui.history.IHistoryView;
 
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
@@ -75,6 +77,7 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(IProgressConstants.PROGRESS_VIEW_ID);
 		layout.addShowViewShortcut(IPageLayout.ID_PROJECT_EXPLORER);
 		layout.addShowViewShortcut(TemplatesView.ID);
+		layout.addShowViewShortcut("org.eclipse.pde.runtime.LogView"); //$NON-NLS-1$
 
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.JavaProjectWizard"); //$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewPackageCreationWizard"); //$NON-NLS-1$
@@ -88,5 +91,17 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.folder");//$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.file");//$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.ui.editors.wizards.UntitledTextFileWizard");//$NON-NLS-1$
+
+		// 'Window' > 'Open Perspective' contributions
+		layout.addPerspectiveShortcut(JavaUI.ID_PERSPECTIVE);
+		layout.addPerspectiveShortcut(JavaUI.ID_BROWSING_PERSPECTIVE);
+		layout.addPerspectiveShortcut(IDebugUIConstants.ID_DEBUG_PERSPECTIVE);
+
+		// 'Show In' menu contributions
+		layout.addShowInPart(JavaUI.ID_PACKAGES);
+		layout.addShowInPart(IPageLayout.ID_PROJECT_EXPLORER);
+		layout.addShowInPart(JavaPlugin.ID_RES_NAV);
+		layout.addShowInPart(IHistoryView.VIEW_ID);
+
 	}
 }

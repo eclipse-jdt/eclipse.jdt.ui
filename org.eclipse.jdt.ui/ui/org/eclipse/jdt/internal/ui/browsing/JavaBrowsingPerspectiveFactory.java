@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.browsing;
 
+import org.eclipse.team.ui.history.IHistoryView;
+
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.ui.IPageLayout;
@@ -82,6 +84,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
 		layout.addShowViewShortcut(IProgressConstants.PROGRESS_VIEW_ID);
 		layout.addShowViewShortcut(IPageLayout.ID_PROJECT_EXPLORER);
+		layout.addShowViewShortcut("org.eclipse.pde.runtime.LogView"); //$NON-NLS-1$
 
 		// new actions - Java project creation wizard
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.JavaProjectWizard"); //$NON-NLS-1$
@@ -96,6 +99,16 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.folder");//$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.file");//$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.ui.editors.wizards.UntitledTextFileWizard");//$NON-NLS-1$
+
+		// 'Window' > 'Open Perspective' contributions
+		layout.addPerspectiveShortcut(JavaUI.ID_PERSPECTIVE);
+		layout.addPerspectiveShortcut(IDebugUIConstants.ID_DEBUG_PERSPECTIVE);
+
+		// 'Show In' menu contributions
+		layout.addShowInPart(JavaUI.ID_PACKAGES);
+		layout.addShowInPart(IPageLayout.ID_PROJECT_EXPLORER);
+		layout.addShowInPart(JavaPlugin.ID_RES_NAV);
+		layout.addShowInPart(IHistoryView.VIEW_ID);
 	}
 
 	private void createVerticalLayout(IPageLayout layout) {

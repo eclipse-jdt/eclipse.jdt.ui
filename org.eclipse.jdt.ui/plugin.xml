@@ -546,36 +546,8 @@
          <actionSet id="org.eclipse.jdt.ui.JavaActionSet"/>
          <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
       </perspectiveExtension>
-
-      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
-         <perspectiveShortcut id="org.eclipse.debug.ui.DebugPerspective"/>
-         <perspectiveShortcut id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
-         <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
-         <showInPart id="org.eclipse.team.ui.GenericHistoryView"/>
-         <showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
-         <viewShortcut id="org.eclipse.pde.runtime.LogView"/>
-      </perspectiveExtension>
-      
-      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
-         <perspectiveShortcut id="org.eclipse.jdt.ui.JavaPerspective"/>
-         <perspectiveShortcut id="org.eclipse.debug.ui.DebugPerspective"/>
-         <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
-         <showInPart id="org.eclipse.team.ui.GenericHistoryView"/>
-         <showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
-         <viewShortcut id="org.eclipse.pde.runtime.LogView"/>
-      </perspectiveExtension>
-      
-      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
-         <perspectiveShortcut id="org.eclipse.jdt.ui.JavaPerspective"/>
-         <perspectiveShortcut id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
-         <perspectiveShortcut id="org.eclipse.debug.ui.DebugPerspective"/>
-         <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
-         <showInPart id="org.eclipse.team.ui.GenericHistoryView"/>        
-         <showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
-         <viewShortcut id="org.eclipse.pde.runtime.LogView"/>
-      </perspectiveExtension>
-            
    </extension>
+   
    <extension
          point="org.eclipse.ui.ide.projectNatureImages">
       <image
