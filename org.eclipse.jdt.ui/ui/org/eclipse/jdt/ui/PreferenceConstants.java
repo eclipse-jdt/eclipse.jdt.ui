@@ -3643,8 +3643,8 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.BROWSING_STACK_VERTICALLY, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, true);
-		store.setDefault(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES, false);
-		store.setDefault(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES, false);
+		store.setDefault(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
 
 		// ImportOrganizePreferencePage
 		store.setDefault(PreferenceConstants.ORGIMPORTS_IMPORTORDER, "java;javax;org;com"); //$NON-NLS-1$
@@ -3937,7 +3937,7 @@ public class PreferenceConstants {
 		if (str.length() > 0) {
 			String[] oldPrefStr= str.split(";"); //$NON-NLS-1$
 			for (int i= 0; i < oldPrefStr.length; i++) {
-				oldPrefStr[i]= oldPrefStr[i] + (".*"); //$NON-NLS-1$				
+				oldPrefStr[i]= oldPrefStr[i] + (".*"); //$NON-NLS-1$
 			}
 			store.setValue(PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS_MEMBERS, ExpandWithConstructorsConfigurationBlock.serializeMembers(Arrays.asList(oldPrefStr)));
 			store.setToDefault(CallHierarchyContentProvider.OLD_PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS);
