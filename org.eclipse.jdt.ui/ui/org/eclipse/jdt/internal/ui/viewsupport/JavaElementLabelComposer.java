@@ -71,7 +71,7 @@ public class JavaElementLabelComposer {
 	 * @since 3.6
 	 */
 	//TODO: make API in PreferenceConstants in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
-	public static final String APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= "org.eclipse.jdt.ui.abbreviatepackagenames pkgNameAbbreviationPatternForPackagesView";//$NON-NLS-1$
+	public static final String APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= "org.eclipse.jdt.ui.pkgNameAbbreviationPatternForPackagesView";//$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if package name abbreviation is turned on or off.
