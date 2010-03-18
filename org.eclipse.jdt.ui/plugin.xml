@@ -6642,6 +6642,8 @@
                   <key name="org.eclipse.jdt.ui.visibility.order"/>
                   <key name="org.eclipse.jdt.ui.enable.visibility.order"/>
                   <key name="outlinesortoption"/>
+                  <key name="org.eclipse.jdt.ui.abbreviatepackagenames"/>
+                  <key name="org.eclipse.jdt.ui.pkgNameAbbreviationPatternForPackagesView"/>
                </entry>
             </mapping>
             <description>
