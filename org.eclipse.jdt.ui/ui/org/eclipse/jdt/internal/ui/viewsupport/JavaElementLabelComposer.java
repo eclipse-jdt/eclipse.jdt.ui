@@ -61,28 +61,21 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 public class JavaElementLabelComposer {
 
 	/**
-	 * A named preference that defines the patterns used for package name abbreviation.
+	 * Use of this constant is <b>FORBIDDEN</b> for external clients.
 	 * <p>
-	 * Value is of type <code>String</code>. Value is a newline separated list of
-	 * packagePrefix=abbreviation pairs. For example, a pattern of
-	 * 'javax.management=&lt;JMX&gt;' will abbreviate 'javax.management.monitor' to
-	 * '&lt;JMX&gt;.monitor'. A '#' at the beginning of a line disables an entry.
-	 * </p>
-	 * @since 3.6
+	 * TODO: Make API in PreferenceConstants in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
+	 * 
+	 * @see PreferenceConstants#APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW
 	 */
-	//TODO: make API in PreferenceConstants in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
 	public static final String APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= "org.eclipse.jdt.ui.pkgNameAbbreviationPatternForPackagesView";//$NON-NLS-1$
 
 	/**
-	 * A named preference that controls if package name abbreviation is turned on or off.
+	 * Use of this constant is <b>FORBIDDEN</b> for external clients.
 	 * <p>
-	 * Value is of type <code>Boolean</code>.
-	 * </p>
-	 *
-	 * @see #APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW
-	 * @since 3.6
+	 * TODO: Make API in PreferenceConstants in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
+	 * 
+	 * @see PreferenceConstants#APPEARANCE_ABBREVIATE_PACKAGE_NAMES
 	 */
-	//TODO: make API in PreferenceConstants in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
 	public static final String APPEARANCE_ABBREVIATE_PACKAGE_NAMES= "org.eclipse.jdt.ui.abbreviatepackagenames";//$NON-NLS-1$
 
 	/**
