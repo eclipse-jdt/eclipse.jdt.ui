@@ -530,8 +530,14 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			int start= problem.getSourceStart();
 			int end= problem.getSourceEnd();
 
-			if (end == 0 && start == 0)
-				return new Position(0, 0);
+			if (start == -1 && end == -1)
+				return new Position(0);
+
+			if (start == -1)
+				return new Position(end);
+
+			if (end == -1)
+				return new Position(start);
 
 			int length= end - start + 1;
 			if (length < 0)
