@@ -3766,13 +3766,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
 
 		// Set the value for the deprecated color constants
-		if (PlatformUI.isWorkbenchRunning()) {
-			setRGBValue(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, JFaceResources.getColorRegistry().getRGB(JFacePreferences.CONTENT_ASSIST_BACKGROUND_COLOR));
-			setRGBValue(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, JFaceResources.getColorRegistry().getRGB(JFacePreferences.CONTENT_ASSIST_FOREGROUND_COLOR));
-		} else {
-			setRGBValue(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, new RGB(255, 255, 255));
-			setRGBValue(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, new RGB(0, 0, 0));
-		}
+		initializeDeprecatedColorConstants(store);
 
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, "."); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, "@#"); //$NON-NLS-1$
@@ -4075,6 +4069,33 @@ public class PreferenceConstants {
 		PreferenceConverter.setDefault(store, key, rgb);
 		String value= store.getString(key);
 		store.putValue(key, value);
+	}
+
+	/**
+	 * Initializes deprecated color constants.
+	 * 
+	 * @param store the preference store
+	 * @since 3.6
+	 */
+	private static void initializeDeprecatedColorConstants(IPreferenceStore store) {
+		RGB bgRGB= null;
+		RGB fgRGB= null;
+
+		// Don't fail in headless mode
+		if (PlatformUI.isWorkbenchRunning()) {
+			bgRGB= JFaceResources.getColorRegistry().getRGB(JFacePreferences.CONTENT_ASSIST_BACKGROUND_COLOR);
+			fgRGB= JFaceResources.getColorRegistry().getRGB(JFacePreferences.CONTENT_ASSIST_FOREGROUND_COLOR);
+		}
+
+		// Workaround for https://bugs.eclipse.org/306736
+		if (bgRGB == null)
+			bgRGB= new RGB(255, 255, 255);
+		if (fgRGB == null)
+			fgRGB= new RGB(0, 0, 0);
+
+		setRGBValue(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, bgRGB);
+		setRGBValue(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, fgRGB);
+
 	}
 
 }
