@@ -303,39 +303,17 @@ public class JavaDocLocations {
 		}
 
 		if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
-			IClasspathEntry entry= root.getRawClasspathEntry();
-			switch (entry.getEntryKind()) {
-				case IClasspathEntry.CPE_LIBRARY:
-				case IClasspathEntry.CPE_VARIABLE:
-					entry= root.getResolvedClasspathEntry();
-					break;
-				case IClasspathEntry.CPE_CONTAINER:
-					entry= getRealClasspathEntry(root.getJavaProject(), entry.getPath(), root.getPath());
-					if (entry == null) {
-						return null;
-					}
+			IClasspathEntry entry= root.getResolvedClasspathEntry();
+			URL javadocLocation= getLibraryJavadocLocation(entry);
+			if (javadocLocation != null) {
+				return getLibraryJavadocLocation(entry);
 			}
+			entry= root.getRawClasspathEntry();
 			return getLibraryJavadocLocation(entry);
 		} else {
 			return getProjectJavadocLocation(root.getJavaProject());
 		}
 	}
-
-	private static IClasspathEntry getRealClasspathEntry(IJavaProject jproject, IPath containerPath, IPath libPath) throws JavaModelException {
-		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
-		if (container != null) {
-			IClasspathEntry[] entries= container.getClasspathEntries();
-			for (int i= 0; i < entries.length; i++) {
-				IClasspathEntry curr= entries[i];
-				IClasspathEntry resolved= JavaCore.getResolvedClasspathEntry(curr);
-				if (resolved != null && libPath.equals(resolved.getPath())) {
-					return curr; // return the real entry
-				}
-			}
-		}
-		return null; // not found
-	}
-
 
 	// loading for compatibility
 
