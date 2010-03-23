@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,7 +69,7 @@ public class CompletionProposalLabelProvider {
 	 * Examples:
 	 * 
 	 * <pre>
-	 *   &quot;void method(int i, Strings)&quot; -&gt; &quot;int i, String s&quot;
+	 *   &quot;void method(int i, String s)&quot; -&gt; &quot;int i, String s&quot;
 	 *   &quot;? extends Number method(java.lang.String s, ? super Number n)&quot; -&gt; &quot;String s, Number n&quot;
 	 * </pre>
 	 * 
@@ -79,16 +79,20 @@ public class CompletionProposalLabelProvider {
 	 * @return the list of comma-separated parameters suitable for display
 	 */
 	public String createParameterList(CompletionProposal proposal) {
+		String paramList;
 		int kind= proposal.getKind();
 		switch (kind) {
 			case CompletionProposal.METHOD_REF:
 			case CompletionProposal.CONSTRUCTOR_INVOCATION:
-				return appendUnboundedParameterList(new StyledString(), proposal).getString();
+				paramList= appendUnboundedParameterList(new StyledString(), proposal).getString();
+				return Strings.markLTR(paramList, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
 			case CompletionProposal.TYPE_REF:
-				return appendTypeParameterList(new StyledString(), proposal).getString();
+				paramList= appendTypeParameterList(new StyledString(), proposal).getString();
+				return Strings.markLTR(paramList, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
 			case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION:
-				return appendUnboundedParameterList(new StyledString(), proposal).getString();
+				paramList= appendUnboundedParameterList(new StyledString(), proposal).getString();
+				return Strings.markLTR(paramList, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
 			default:
 				Assert.isLegal(false);
 				return null; // dummy
