@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.osgi.util.TextProcessor;
+
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
@@ -314,10 +316,10 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			);
 		}
 		private String getName(IResource resource){
-			return fLabelProvider.getText(resource);
+			return TextProcessor.deprocess(fLabelProvider.getText(resource));
 		}
 		private String getName(IJavaElement javaElement){
-			return fLabelProvider.getText(javaElement);
+			return TextProcessor.deprocess(fLabelProvider.getText(javaElement));
 		}
 		/**
 		 * Gets the name of the jar entry resource.
@@ -326,7 +328,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		 * @since 3.6
 		 */
 		private String getName(IJarEntryResource resource) {
-			return fLabelProvider.getText(resource);
+			return TextProcessor.deprocess(fLabelProvider.getText(resource));
 		}
 	}
 
@@ -365,7 +367,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			}
 			for (int i= 0; i < fJarEntryResources.length; i++) {
 				if (fJarEntryResources[i] == null) return false;
-			}			
+			}
 			return true;
 		}
 

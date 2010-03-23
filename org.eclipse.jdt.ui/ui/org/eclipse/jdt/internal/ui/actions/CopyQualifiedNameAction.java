@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.osgi.util.TextProcessor;
+
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
@@ -75,11 +77,14 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
+
 public class CopyQualifiedNameAction extends SelectionDispatchAction {
 
-	private static final long LABEL_FLAGS= new Long(JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED | JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.CU_QUALIFIED | JavaElementLabels.CF_QUALIFIED).longValue();
+	private static final long LABEL_FLAGS= new Long(JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED
+			| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED | JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.CU_QUALIFIED
+			| JavaElementLabels.CF_QUALIFIED).longValue();
 
-    //TODO: Make API
+	//TODO: Make API
 	public static final String ACTION_DEFINITION_ID= "org.eclipse.jdt.ui.edit.text.java.copy.qualified.name"; //$NON-NLS-1$
 
 	//TODO: Make API
@@ -87,8 +92,8 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 
 	private JavaEditor fEditor;
 
-    public CopyQualifiedNameAction(JavaEditor editor) {
-    	this(editor.getSite());
+	public CopyQualifiedNameAction(JavaEditor editor) {
+		this(editor.getSite());
 		fEditor= editor;
 		setEnabled(true);
 	}
@@ -158,11 +163,11 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	}
 
 	/* (non-Javadoc)
-     * @see org.eclipse.jface.action.Action#run()
-     */
-    public void run() {
+	 * @see org.eclipse.jface.action.Action#run()
+	 */
+	public void run() {
 
-    	try {
+		try {
 			Object[] elements= getSelectedElements();
 			if (elements == null) {
 				MessageDialog.openInformation(getShell(), ActionMessages.CopyQualifiedNameAction_InfoDialogTitel, ActionMessages.CopyQualifiedNameAction_NoElementToQualify);
@@ -177,24 +182,24 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 				String qualifiedName= getQualifiedName(element);
 				IResource resource;
 				if (element instanceof IJavaElement)
-					resource= ((IJavaElement) element).getCorrespondingResource();
+					resource= ((IJavaElement)element).getCorrespondingResource();
 				else if (element instanceof IJarEntryResource)
 					resource= null;
 				else
-					resource= (IResource) element;
+					resource= (IResource)element;
 
 				if (resource != null) {
 					IPath location= resource.getLocation();
 					if (location != null) {
-						data= new Object[] {qualifiedName, resource, new String[] {location.toOSString()}};
-						dataTypes= new Transfer[] {TextTransfer.getInstance(), ResourceTransfer.getInstance(), FileTransfer.getInstance()};
+						data= new Object[] { qualifiedName, resource, new String[] { location.toOSString() } };
+						dataTypes= new Transfer[] { TextTransfer.getInstance(), ResourceTransfer.getInstance(), FileTransfer.getInstance() };
 					} else {
-						data= new Object[] {qualifiedName, resource};
-						dataTypes= new Transfer[] {TextTransfer.getInstance(), ResourceTransfer.getInstance()};
+						data= new Object[] { qualifiedName, resource };
+						dataTypes= new Transfer[] { TextTransfer.getInstance(), ResourceTransfer.getInstance() };
 					}
 				} else {
-					data= new Object[] {qualifiedName};
-					dataTypes= new Transfer[] {TextTransfer.getInstance()};
+					data= new Object[] { qualifiedName };
+					dataTypes= new Transfer[] { TextTransfer.getInstance() };
 				}
 			} else {
 				StringBuffer buf= new StringBuffer();
@@ -203,8 +208,8 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 					String qualifiedName= getQualifiedName(elements[i]);
 					buf.append(System.getProperty("line.separator")).append(qualifiedName); //$NON-NLS-1$
 				}
-				data= new Object[] {buf.toString()};
-				dataTypes= new Transfer[] {TextTransfer.getInstance()};
+				data= new Object[] { buf.toString() };
+				dataTypes= new Transfer[] { TextTransfer.getInstance() };
 			}
 
 			Clipboard clipboard= new Clipboard(getShell().getDisplay());
@@ -223,7 +228,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-    }
+	}
 
 	private String getQualifiedName(Object element) throws JavaModelException {
 		if (element instanceof IResource)
@@ -233,35 +238,35 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 			return ((IJarEntryResource)element).getFullPath().toString();
 
 		if (element instanceof IJavaProject || element instanceof IPackageFragmentRoot || element instanceof ITypeRoot) {
-			IResource resource= ((IJavaElement) element).getCorrespondingResource();
+			IResource resource= ((IJavaElement)element).getCorrespondingResource();
 			if (resource != null)
 				return getQualifiedName(resource);
 		}
 
-		return JavaElementLabels.getTextLabel(element, LABEL_FLAGS);
+		return TextProcessor.deprocess(JavaElementLabels.getTextLabel(element, LABEL_FLAGS));
 	}
 
-    private Object[] getSelectedElements() {
-    	if (fEditor != null) {
-    		IJavaElement element= getSelectedElement(fEditor);
-    		if (element == null)
-    			return null;
+	private Object[] getSelectedElements() {
+		if (fEditor != null) {
+			IJavaElement element= getSelectedElement(fEditor);
+			if (element == null)
+				return null;
 
-    		return new IJavaElement[] {element};
-    	}
+			return new IJavaElement[] { element };
+		}
 
-    	ISelection selection= getSelection();
-    	if (!(selection instanceof IStructuredSelection))
-    		return null;
+		ISelection selection= getSelection();
+		if (!(selection instanceof IStructuredSelection))
+			return null;
 
-    	List result= new ArrayList();
-    	for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
+		List result= new ArrayList();
+		for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (isValidElement(element))
 				result.add(element);
 		}
-    	if (result.isEmpty())
-    		return null;
+		if (result.isEmpty())
+			return null;
 
 		return result.toArray(new Object[result.size()]);
 	}

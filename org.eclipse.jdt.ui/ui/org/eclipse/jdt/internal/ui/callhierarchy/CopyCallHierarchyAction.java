@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+
+import org.eclipse.osgi.util.TextProcessor;
 
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
@@ -37,10 +39,11 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 class CopyCallHierarchyAction extends Action {
-    private static final char INDENTATION= '\t';
+	private static final char INDENTATION= '\t';
 
-    private CallHierarchyViewPart fView;
-    private CallHierarchyViewer fViewer;
+	private CallHierarchyViewPart fView;
+
+	private CallHierarchyViewer fViewer;
 
 	private final Clipboard fClipboard;
 
@@ -50,37 +53,37 @@ class CopyCallHierarchyAction extends Action {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_COPY_ACTION);
 		fView= view;
 		fClipboard= clipboard;
-        fViewer= viewer;
+		fViewer= viewer;
 	}
 
-    public boolean canActionBeAdded() {
-        Object element = SelectionUtil.getSingleElement(getSelection());
-        return element != null;
-    }
+	public boolean canActionBeAdded() {
+		Object element= SelectionUtil.getSingleElement(getSelection());
+		return element != null;
+	}
 
-    private ISelection getSelection() {
-        ISelectionProvider provider = fView.getSite().getSelectionProvider();
+	private ISelection getSelection() {
+		ISelectionProvider provider= fView.getSite().getSelectionProvider();
 
-        if (provider != null) {
-            return provider.getSelection();
-        }
+		if (provider != null) {
+			return provider.getSelection();
+		}
 
-        return null;
-    }
+		return null;
+	}
 
 	/*
 	 * @see IAction#run()
 	 */
 	public void run() {
-        StringBuffer buf= new StringBuffer();
-        addCalls(fViewer.getTree().getSelection()[0], 0, buf);
+		StringBuffer buf= new StringBuffer();
+		addCalls(fViewer.getTree().getSelection()[0], 0, buf);
 
-		TextTransfer plainTextTransfer = TextTransfer.getInstance();
-		try{
+		TextTransfer plainTextTransfer= TextTransfer.getInstance();
+		try {
 			fClipboard.setContents(
-				new String[]{ convertLineTerminators(buf.toString()) },
-				new Transfer[]{ plainTextTransfer });
-		}  catch (SWTError e){
+					new String[] { convertLineTerminators(buf.toString()) },
+					new Transfer[] { plainTextTransfer });
+		} catch (SWTError e) {
 			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
 				throw e;
 			if (MessageDialog.openQuestion(fView.getViewSite().getShell(), CallHierarchyMessages.CopyCallHierarchyAction_problem, CallHierarchyMessages.CopyCallHierarchyAction_clipboard_busy))
@@ -90,28 +93,28 @@ class CopyCallHierarchyAction extends Action {
 
 	/**
 	 * Adds the specified {@link TreeItem}'s text to the StringBuffer.
-	 *
+	 * 
 	 * @param item the tree item
 	 * @param indent the indent size
 	 * @param buf the string buffer
 	 */
-    private void addCalls(TreeItem item, int indent, StringBuffer buf) {
-        for (int i= 0; i < indent; i++) {
-            buf.append(INDENTATION);
-        }
+	private void addCalls(TreeItem item, int indent, StringBuffer buf) {
+		for (int i= 0; i < indent; i++) {
+			buf.append(INDENTATION);
+		}
 
-        buf.append(item.getText());
-        buf.append('\n');
+		buf.append(TextProcessor.deprocess(item.getText()));
+		buf.append('\n');
 
-        if (item.getExpanded()) {
-            TreeItem[] items= item.getItems();
-            for (int i= 0; i < items.length; i++) {
-                addCalls(items[i], indent + 1, buf);
-            }
-        }
-    }
+		if (item.getExpanded()) {
+			TreeItem[] items= item.getItems();
+			for (int i= 0; i < items.length; i++) {
+				addCalls(items[i], indent + 1, buf);
+			}
+		}
+	}
 
-    static String convertLineTerminators(String in) {
+	static String convertLineTerminators(String in) {
 		StringWriter stringWriter= new StringWriter();
 		PrintWriter printWriter= new PrintWriter(stringWriter);
 		StringReader stringReader= new StringReader(in);
