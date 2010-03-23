@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -207,7 +207,6 @@ public final class NewWizardMessages extends NLS {
 	public static String NewJavaProjectWizardPageOne_DetectGroup_differendWorkspaceCC_message;
 	public static String NewJavaProjectWizardPageOne_Message_invalidProjectNameForWorkspaceRoot;
 	public static String NewJavaProjectWizardPageOne_Message_cannotCreateAtExternalLocation;
-	public static String NewJavaProjectWizardPageOne_Message_notExisingProjectOnWorkspaceRoot;
 	public static String NewJavaProjectWizardPageOne_LayoutGroup_option_separateFolders;
 	public static String NewJavaProjectWizardPageOne_LayoutGroup_title;
 	public static String NewJavaProjectWizardPageOne_WorkingSets_group;
@@ -220,7 +219,6 @@ public final class NewWizardMessages extends NLS {
 	public static String NewJavaProjectWizardPageOne_Message_enterLocation;
 	public static String NewJavaProjectWizardPageOne_Message_enterProjectName;
 	public static String NewJavaProjectWizardPageOne_Message_invalidDirectory;
-	public static String NewJavaProjectWizardPageOne_Message_notOnWorkspaceRoot;
 	public static String NewJavaProjectWizardPageOne_Message_projectAlreadyExists;
 	public static String NewJavaProjectWizardPageOne_UnknownDefaultJRE_name;
 	public static String NewJavaProjectWizardPageTwo_error_remove_message;

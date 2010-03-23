@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -234,18 +234,6 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		public boolean isUseDefaultSelected() {
 			return fUseDefaults.isSelected();
 		}
-
-		/**
-		 * Returns <code>true</code> if the location is in the workspace
-		 *
-		 * @return <code>true</code> if the location is in the workspace
-		 */
-		public boolean isLocationInWorkspace() {
-			final String location= fLocationGroup.getLocation().toOSString();
-			IPath projectPath= Path.fromOSString(location);
-			return Platform.getLocation().isPrefixOf(projectPath);
-		}
-
 
 		public void setLocation(IPath path) {
 			fUseDefaults.setSelection(path == null);
@@ -1029,35 +1017,21 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			if (fLocationGroup.isUseDefaultSelected())
 				projectPath= projectPath.append(fNameGroup.getName());
 
-			if (projectPath.toFile().exists()) {//create from existing source
-				if (Platform.getLocation().isPrefixOf(projectPath)) { //create from existing source in workspace
-					if (!Platform.getLocation().equals(projectPath.removeLastSegments(1))) {
-						setErrorMessage(NewWizardMessages.NewJavaProjectWizardPageOne_Message_notOnWorkspaceRoot);
-						setPageComplete(false);
-						return;
-					}
-
-					if (!projectPath.toFile().exists()) {
-						setErrorMessage(NewWizardMessages.NewJavaProjectWizardPageOne_Message_notExisingProjectOnWorkspaceRoot);
-						setPageComplete(false);
-						return;
-					}
-				}
-			} else if (!fLocationGroup.isUseDefaultSelected()) {//create at non existing external location
+			if (!projectPath.toFile().exists() && !fLocationGroup.isUseDefaultSelected()) {
+				// check non-existing external location
 				if (!canCreate(projectPath.toFile())) {
 					setErrorMessage(NewWizardMessages.NewJavaProjectWizardPageOne_Message_cannotCreateAtExternalLocation);
 					setPageComplete(false);
 					return;
 				}
-
-				// If we do not place the contents in the workspace validate the
-				// location.
-				final IStatus locationStatus= workspace.validateProjectLocation(handle, projectPath);
-				if (!locationStatus.isOK()) {
-					setErrorMessage(locationStatus.getMessage());
-					setPageComplete(false);
-					return;
-				}
+			}
+			
+			// validate the location
+			final IStatus locationStatus= workspace.validateProjectLocation(handle, projectPath);
+			if (!locationStatus.isOK()) {
+				setErrorMessage(locationStatus.getMessage());
+				setPageComplete(false);
+				return;
 			}
 
 			setPageComplete(true);
@@ -1270,7 +1244,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	 * @return the project location path or its anticipated initial value.
 	 */
 	public URI getProjectLocationURI() {
-		if (fLocationGroup.isLocationInWorkspace()) {
+		if (fLocationGroup.isUseDefaultSelected()) {
 			return null;
 		}
 		return URIUtil.toURI(fLocationGroup.getLocation());
