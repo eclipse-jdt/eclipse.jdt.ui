@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -470,11 +470,12 @@ public class JavaElementLinks {
 	public static String getElementLabel(IJavaElement element, long flags) {
 		StringBuffer buf= new StringBuffer();
 
-		new JavaElementLinkedLabelComposer(element, buf).appendElementLabel(element, flags);
-		return Strings.markLTR(buf.toString(), JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
-
-//		new JavaElementLabelComposer(buf).appendElementLabel(element, flags);
-//		String string= buf.toString().replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-//		return Strings.markLTR(string, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
+		if (!Strings.USE_TEXT_PROCESSOR) {
+			new JavaElementLinkedLabelComposer(element, buf).appendElementLabel(element, flags);
+			return Strings.markLTR(buf.toString(), JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
+		} else {
+			String label= JavaElementLabels.getElementLabel(element, flags);
+			return label.replaceAll("<", "&lt;").replaceAll(">", "&gt;"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		}
 	}
 }
