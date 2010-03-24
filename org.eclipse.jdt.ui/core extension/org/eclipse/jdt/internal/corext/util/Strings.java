@@ -120,15 +120,20 @@ public class Strings {
 	 * @since 3.5
 	 */
 	private static void insertMarks(StyledString styledString, String originalString, String processedString) {
-		int i= 0;
-		char orig= originalString.charAt(0);
-		int processedStringLength= originalString.length();
-		for (int processedIndex= 0; processedIndex < processedStringLength; processedIndex++) {
-			char processed= processedString.charAt(processedIndex);
-			if (orig == processed)
-				orig= originalString.charAt(++i);
-			else
-				styledString.insert(processed, processedIndex);
+		int originalLength= originalString.length();
+		int processedStringLength= processedString.length();
+		char orig= originalLength > 0 ? originalString.charAt(0) : '\0';
+		for (int o= 0, p= 0; p < processedStringLength; p++) {
+			char processed= processedString.charAt(p);
+			if (o < originalLength) {
+				if (orig == processed) {
+					o++;
+					if (o < originalLength)
+						orig= originalString.charAt(o);
+					continue;
+				}
+			}
+			styledString.insert(processed, p);
 		}
 	}
 
