@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -479,7 +479,7 @@ public class JavaElementLabels {
 	public static String getElementLabel(IJavaElement element, long flags) {
 		StringBuffer result= new StringBuffer();
 		getElementLabel(element, flags, result);
-		return Strings.markLTR(result.toString(), JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
+		return Strings.markJavaElementLabelLTR(result.toString());
 	}
 
 	/**
@@ -494,7 +494,7 @@ public class JavaElementLabels {
 	public static StyledString getStyledElementLabel(IJavaElement element, long flags) {
 		StyledString result= new StyledString();
 		getElementLabel(element, flags, result);
-		return Strings.markLTR(result, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
+		return Strings.markLTR(result);
 	}
 
 	/**

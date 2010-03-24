@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.io.File;
+
+import org.eclipse.osgi.util.TextProcessor;
 
 import org.eclipse.core.runtime.IPath;
 
@@ -32,6 +34,13 @@ import org.eclipse.jdt.ui.JavaElementLabels;
  */
 public class BasicElementLabels {
 
+
+	// TextProcessor delimiters
+	private static final String CODE_DELIMITERS= TextProcessor.getDefaultDelimiters() + "<>()?,{}+-*!%=^|&;[]~"; //$NON-NLS-1$
+	private static final String FILE_PATTERN_DELIMITERS= TextProcessor.getDefaultDelimiters() + "*.?"; //$NON-NLS-1$
+	private static final String URL_DELIMITERS= TextProcessor.getDefaultDelimiters() + ":@?-"; //$NON-NLS-1$
+
+	
 	/**
 	 * Returns the label of a path.
 	 *
@@ -66,7 +75,7 @@ public class BasicElementLabels {
 	 * @return the label of the pattern.
 	 */
 	public static String getFilePattern(String name) {
-		return Strings.markLTR(name, "*.?"); //$NON-NLS-1$
+		return Strings.markLTR(name, FILE_PATTERN_DELIMITERS);
 	}
 
 	/**
@@ -76,7 +85,7 @@ public class BasicElementLabels {
 	 * @return the label of the URL.
 	 */
 	public static String getURLPart(String name) {
-		return Strings.markLTR(name, ":@?-"); //$NON-NLS-1$
+		return Strings.markLTR(name, URL_DELIMITERS);
 	}
 
 	/**
@@ -119,7 +128,7 @@ public class BasicElementLabels {
 	 * @return the label for the Java element
 	 */
 	public static String getJavaElementName(String name) {
-		return Strings.markLTR(name, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
+		return Strings.markJavaElementLabelLTR(name);
 	}
 
 	/**
@@ -129,7 +138,7 @@ public class BasicElementLabels {
 	 * @return the label for the Java code snippet
 	 */
 	public static String getJavaCodeString(String string) {
-		return Strings.markLTR(string, "<>()?,{}+-*!%=^|&;[]~"); //$NON-NLS-1$
+		return Strings.markLTR(string, CODE_DELIMITERS);
 	}
 
 	/**

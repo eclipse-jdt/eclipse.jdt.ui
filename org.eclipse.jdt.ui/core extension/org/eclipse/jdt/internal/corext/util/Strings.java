@@ -47,10 +47,12 @@ public class Strings {
 		USE_TEXT_PROCESSOR= testString != TextProcessor.process(testString);
 	}
 
+	private static final String JAVA_ELEMENT_DELIMITERS= TextProcessor.getDefaultDelimiters() + "<>(),?{} "; //$NON-NLS-1$
 
+	
 	/**
-	 * Adds special marks so that that the given styled string is readable in a BIDI environment.
-	 *
+	 * Adds special marks so that that the given styled string is readable in a BiDi environment.
+	 * 
 	 * @param styledString the styled string
 	 * @return the processed styled string
 	 * @since 3.4
@@ -72,19 +74,38 @@ public class Strings {
 	}
 
 	/**
-	 * Adds special marks so that that the given styled string is readable in a BIDI environment.
-	 *
+	 * Adds special marks so that that the given styled Java element label is readable in a BiDi
+	 * environment.
+	 * 
 	 * @param styledString the styled string
-	 * @param additionalDelimiters the additional delimiters
 	 * @return the processed styled string
-	 * @since 3.4
+	 * @since 3.6
 	 */
-	public static StyledString markLTR(StyledString styledString, String additionalDelimiters) {
+	public static StyledString markJavaElementLabelLTR(StyledString styledString) {
 		if (!USE_TEXT_PROCESSOR)
 			return styledString;
 
 		String inputString= styledString.getString();
-		String string= TextProcessor.process(inputString, TextProcessor.getDefaultDelimiters() + additionalDelimiters);
+		String string= TextProcessor.process(inputString, JAVA_ELEMENT_DELIMITERS);
+		if (string != inputString)
+			insertMarks(styledString, inputString, string);
+		return styledString;
+	}
+
+	/**
+	 * Adds special marks so that that the given styled string is readable in a BiDi environment.
+	 * 
+	 * @param styledString the styled string
+	 * @param delimiters the additional delimiters
+	 * @return the processed styled string
+	 * @since 3.4
+	 */
+	public static StyledString markLTR(StyledString styledString, String delimiters) {
+		if (!USE_TEXT_PROCESSOR)
+			return styledString;
+
+		String inputString= styledString.getString();
+		String string= TextProcessor.process(inputString, delimiters);
 		if (string != inputString)
 			insertMarks(styledString, inputString, string);
 		return styledString;
@@ -112,8 +133,8 @@ public class Strings {
 	}
 
 	/**
-	 * Adds special marks so that that the given string is readable in a BIDI environment.
-	 *
+	 * Adds special marks so that that the given string is readable in a BiDi environment.
+	 * 
 	 * @param string the string
 	 * @return the processed styled string
 	 * @since 3.4
@@ -126,18 +147,33 @@ public class Strings {
 	}
 
 	/**
-	 * Adds special marks so that that the given string is readable in a BIDI environment.
-	 *
+	 * Adds special marks so that that the given string is readable in a BiDi environment.
+	 * 
 	 * @param string the string
-	 * @param additionalDelimiters the additional delimiters
+	 * @param delimiters the delimiters
 	 * @return the processed styled string
 	 * @since 3.4
 	 */
-	public static String markLTR(String string, String additionalDelimiters) {
+	public static String markLTR(String string, String delimiters) {
 		if (!USE_TEXT_PROCESSOR)
 			return string;
 
-		return TextProcessor.process(string, TextProcessor.getDefaultDelimiters() + additionalDelimiters);
+		return TextProcessor.process(string, delimiters);
+	}
+
+	/**
+	 * Adds special marks so that that the given Java element label is readable in a BiDi
+	 * environment.
+	 * 
+	 * @param string the string
+	 * @return the processed styled string
+	 * @since 3.6
+	 */
+	public static String markJavaElementLabelLTR(String string) {
+		if (!USE_TEXT_PROCESSOR)
+			return string;
+
+		return TextProcessor.process(string, JAVA_ELEMENT_DELIMITERS);
 	}
 
 	/**

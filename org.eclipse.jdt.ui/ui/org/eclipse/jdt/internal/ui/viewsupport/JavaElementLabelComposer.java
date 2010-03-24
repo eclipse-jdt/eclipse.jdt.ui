@@ -45,7 +45,6 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -199,13 +198,6 @@ public class JavaElementLabelComposer {
 		}
 	}
 
-	/**
-	 * Additional delimiters used in this class, for use in {@link Strings#markLTR(String, String)}
-	 * or {@link Strings#markLTR(StyledString, String)}.
-	 *
-	 * @since 3.5
-	 */
-	public static final String ADDITIONAL_DELIMITERS= "<>(),?{} "; //$NON-NLS-1$
 
 	private final static long QUALIFIER_FLAGS= JavaElementLabels.P_COMPRESSED | JavaElementLabels.USE_RESOLVED;
 

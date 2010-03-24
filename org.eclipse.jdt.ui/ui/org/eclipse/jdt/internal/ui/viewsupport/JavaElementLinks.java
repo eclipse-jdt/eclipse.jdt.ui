@@ -472,7 +472,7 @@ public class JavaElementLinks {
 
 		if (!Strings.USE_TEXT_PROCESSOR) {
 			new JavaElementLinkedLabelComposer(element, buf).appendElementLabel(element, flags);
-			return Strings.markLTR(buf.toString(), JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
+			return Strings.markJavaElementLabelLTR(buf.toString());
 		} else {
 			String label= JavaElementLabels.getElementLabel(element, flags);
 			return label.replaceAll("<", "&lt;").replaceAll(">", "&gt;"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$

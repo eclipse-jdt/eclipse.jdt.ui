@@ -63,7 +63,6 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
 
 
 /**
@@ -129,7 +128,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 					if (i < proposals.length - 1)
 						buf.append(", "); //$NON-NLS-1$
 				}
-				return Strings.markLTR(buf.toString(), JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
+				return Strings.markJavaElementLabelLTR(buf.toString());
 
 			} catch (JavaModelException e) {
 				return null;
