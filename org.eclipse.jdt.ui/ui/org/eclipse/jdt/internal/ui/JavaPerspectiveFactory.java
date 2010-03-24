@@ -60,8 +60,6 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		outlineFolder.addView(IPageLayout.ID_OUTLINE);
 
 		outlineFolder.addPlaceholder(TemplatesView.ID);
-		// XXX: in 3.4 M7 to be replaced by:
-//		outlineFolder.addView(TemplatesView.ID);
 
 		layout.addActionSet(IDebugUIConstants.LAUNCH_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ACTION_SET);
