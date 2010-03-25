@@ -592,14 +592,35 @@ public class EditTemplateDialog extends StatusDialog {
 		} else if (fNameText != null && !isValidTemplateName(fNameText.getText())) {
 			status= new StatusInfo();
 			status.setError(PreferencesMessages.EditTemplateDialog_error_invalidName);
+		} else if (!isValidPattern(fPatternEditor.getDocument().get())) {
+			status= new StatusInfo();
+			status.setError(PreferencesMessages.EditTemplateDialog_error_invalidPattern);
 		}
 		updateStatus(status);
 	}
 
 	/**
-	 * Checks whether the given string is a valid
-	 * template name.
-	 *
+	 * Validates the pattern.
+	 * <p>
+	 * This implementation rejects invalid XML characters.
+	 * </p>
+	 * 
+	 * @param pattern the pattern to verify
+	 * @return <code>true</code> if the pattern is valid
+	 * @since 3.6
+	 */
+	private boolean isValidPattern(String pattern) {
+		for (int i= 0; i < pattern.length(); i++) {
+			char ch= pattern.charAt(i);
+			if (!(ch == 9 || ch == 10 || ch == 13 || ch >= 32))
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Checks whether the given string is a valid template name.
+	 * 
 	 * @param name the string to test
 	 * @return <code>true</code> if the name is valid
 	 * @since 3.3.1
