@@ -1012,17 +1012,16 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				return;
 			}
 
-			IPath projectPath= Path.fromOSString(location);
-
-			if (fLocationGroup.isUseDefaultSelected())
-				projectPath= projectPath.append(fNameGroup.getName());
-
-			if (!projectPath.toFile().exists() && !fLocationGroup.isUseDefaultSelected()) {
-				// check non-existing external location
-				if (!canCreate(projectPath.toFile())) {
-					setErrorMessage(NewWizardMessages.NewJavaProjectWizardPageOne_Message_cannotCreateAtExternalLocation);
-					setPageComplete(false);
-					return;
+			IPath projectPath= null;
+			if (!fLocationGroup.isUseDefaultSelected()) {
+				projectPath= Path.fromOSString(location);
+				if (!projectPath.toFile().exists()) {
+					// check non-existing external location
+					if (!canCreate(projectPath.toFile())) {
+						setErrorMessage(NewWizardMessages.NewJavaProjectWizardPageOne_Message_cannotCreateAtExternalLocation);
+						setPageComplete(false);
+						return;
+					}
 				}
 			}
 			
