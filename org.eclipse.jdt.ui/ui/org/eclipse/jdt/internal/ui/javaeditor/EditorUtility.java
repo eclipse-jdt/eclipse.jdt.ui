@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -301,10 +301,14 @@ public class EditorUtility {
 		}
 
 		// Support for non-text editor - try IGotoMarker interface
-		 if (editor instanceof IGotoMarker) {
+		final IGotoMarker gotoMarkerTarget;
+		if (editor instanceof IGotoMarker)
+			gotoMarkerTarget= (IGotoMarker)editor;
+		else
+			gotoMarkerTarget= editor != null ? (IGotoMarker)editor.getAdapter(IGotoMarker.class) : null;
+		if (gotoMarkerTarget != null) {
 			final IEditorInput input= editor.getEditorInput();
 			if (input instanceof IFileEditorInput) {
-				final IGotoMarker gotoMarkerTarget= (IGotoMarker)editor;
 				WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
 					protected void execute(IProgressMonitor monitor) throws CoreException {
 						IMarker marker= null;
