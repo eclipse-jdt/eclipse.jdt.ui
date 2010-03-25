@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,8 +19,9 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -1248,7 +1249,7 @@ public class TestRunnerViewPart extends ViewPart {
 			TestElement[] failures= fTestRunSession.getAllFailedTestElements();
 			BufferedWriter bw= null;
 			try {
-				bw= new BufferedWriter(new FileWriter(file));
+				bw= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8")); //$NON-NLS-1$
 				for (int i= 0; i < failures.length; i++) {
 					TestElement testElement= failures[i];
 					bw.write(testElement.getTestName());

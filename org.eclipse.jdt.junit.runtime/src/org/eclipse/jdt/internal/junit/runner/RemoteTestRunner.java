@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.junit.runner;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -333,7 +333,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	private void readTestNames(String testNameFile) throws IOException {
-		BufferedReader br= new BufferedReader(new FileReader(new File(testNameFile)));
+		BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testNameFile)), "UTF-8")); //$NON-NLS-1$
 		try {
 			String line;
 			Vector list= new Vector();
@@ -354,7 +354,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	private void readFailureNames(String testFailureFile) throws IOException {
-		BufferedReader br= new BufferedReader(new FileReader(new File(testFailureFile)));
+		BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testFailureFile)), "UTF-8")); //$NON-NLS-1$
 		try {
 			String line;
 			Vector list= new Vector();

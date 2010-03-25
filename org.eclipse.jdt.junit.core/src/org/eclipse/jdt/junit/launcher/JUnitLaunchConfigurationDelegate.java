@@ -15,8 +15,9 @@ package org.eclipse.jdt.junit.launcher;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
@@ -56,8 +57,8 @@ import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.launcher.JUnitRuntimeClasspathEntry;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
-import org.eclipse.jdt.internal.junit.util.IJUnitStatusConstants;
 import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
+import org.eclipse.jdt.internal.junit.util.IJUnitStatusConstants;
 
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.ExecutionArguments;
@@ -331,7 +332,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			file.deleteOnExit();
 			BufferedWriter bw= null;
 			try {
-				bw= new BufferedWriter(new FileWriter(file));
+				bw= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8")); //$NON-NLS-1$
 				for (int i= 0; i < testElements.length; i++) {
 					if (testElements[i] instanceof IType) {
 						IType type= (IType) testElements[i];
