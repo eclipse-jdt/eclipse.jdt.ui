@@ -309,7 +309,13 @@ public class JavaDocLocations {
 				return getLibraryJavadocLocation(entry);
 			}
 			entry= root.getRawClasspathEntry();
-			return getLibraryJavadocLocation(entry);
+			switch (entry.getEntryKind()) {
+				case IClasspathEntry.CPE_LIBRARY:
+				case IClasspathEntry.CPE_VARIABLE:
+					return getLibraryJavadocLocation(entry);
+				default:
+					return null;
+			}
 		} else {
 			return getProjectJavadocLocation(root.getJavaProject());
 		}
