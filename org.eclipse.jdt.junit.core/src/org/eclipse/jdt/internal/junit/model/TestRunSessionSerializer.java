@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -146,16 +146,16 @@ public class TestRunSessionSerializer implements XMLReader {
 			String actual= failureTrace.getActual();
 			if (expected != null) {
 				startElement(IXMLTags.NODE_EXPECTED, NO_ATTS);
-				fHandler.characters(expected.toCharArray(), 0, expected.length());
+				addCharacters(expected);
 				endElement(IXMLTags.NODE_EXPECTED);
 			}
 			if (actual != null) {
 				startElement(IXMLTags.NODE_ACTUAL, NO_ATTS);
-				fHandler.characters(actual.toCharArray(), 0, actual.length());
+				addCharacters(actual);
 				endElement(IXMLTags.NODE_ACTUAL);
 			}
 			String trace= failureTrace.getTrace();
-			fHandler.characters(trace.toCharArray(), 0, trace.length());
+			addCharacters(trace);
 			endElement(failureKind);
 		}
 	}
@@ -174,6 +174,41 @@ public class TestRunSessionSerializer implements XMLReader {
 
 	private static void addCDATA(AttributesImpl atts, String name, String value) {
 		atts.addAttribute(EMPTY, EMPTY, name, CDATA, value);
+	}
+
+	private void addCharacters(String string) throws SAXException {
+		string= escapeNonUnicodeChars(string);
+		fHandler.characters(string.toCharArray(), 0, string.length());
+	}
+	
+	/**
+	 * Replaces all non-Unicode characters in the given string.
+	 * 
+	 * @param string a string
+	 * @return string with Java-escapes
+	 * @since 3.6
+	 */
+	private static String escapeNonUnicodeChars(String string) {
+		StringBuffer buf= null;
+		for (int i= 0; i < string.length(); i++) {
+			char ch= string.charAt(i);
+			if (!(ch == 9 || ch == 10 || ch == 13 || ch >= 32)) {
+				if (buf == null) {
+					buf= new StringBuffer(string.substring(0, i));
+				}
+				buf.append("\\u"); //$NON-NLS-1$
+				String hex= Integer.toHexString(ch);
+				for (int j= hex.length(); j < 4; j++)
+					buf.append('0');
+				buf.append(hex);
+			} else if (buf != null) {
+				buf.append(ch);
+			}
+		}
+		if (buf != null) {
+			return buf.toString();
+		}
+		return string;
 	}
 
 	public void setContentHandler(ContentHandler handler) {
