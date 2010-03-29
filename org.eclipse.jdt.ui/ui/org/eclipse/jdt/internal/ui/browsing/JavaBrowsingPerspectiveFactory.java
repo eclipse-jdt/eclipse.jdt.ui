@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.browsing;
 
-import org.eclipse.team.ui.history.IHistoryView;
-
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.ui.IPageLayout;
@@ -104,11 +102,6 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		layout.addPerspectiveShortcut(JavaUI.ID_PERSPECTIVE);
 		layout.addPerspectiveShortcut(IDebugUIConstants.ID_DEBUG_PERSPECTIVE);
 
-		// 'Show In' menu contributions
-		layout.addShowInPart(JavaUI.ID_PACKAGES);
-		layout.addShowInPart(IPageLayout.ID_PROJECT_EXPLORER);
-		layout.addShowInPart(JavaPlugin.ID_RES_NAV);
-		layout.addShowInPart(IHistoryView.VIEW_ID);
 	}
 
 	private void createVerticalLayout(IPageLayout layout) {
