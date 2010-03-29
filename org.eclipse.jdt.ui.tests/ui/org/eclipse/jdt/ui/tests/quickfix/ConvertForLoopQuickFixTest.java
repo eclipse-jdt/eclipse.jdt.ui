@@ -1800,6 +1800,25 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	public void testBodyPrecondition13() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(List<String> data) {\n");
+		buf.append("        for (Iterator<String> iterator = data.iterator(); iterator.hasNext();) {\n");
+		buf.append("            String row = iterator.next();\n");
+		buf.append("            row.equals(iterator.hasNext());\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
 	public void testBug110599() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
