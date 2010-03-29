@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -257,7 +258,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 
 			for (int i= 0; i < writingConstructors.size(); i++) {
 	            MethodDeclaration constructor= (MethodDeclaration)writingConstructors.get(i);
-	            if (callsWrittingConstructor(constructor, writingConstructorBindings))//writing constructor calls other writing constructor
+	            if (callsWritingConstructor(constructor, writingConstructorBindings))//writing constructor calls other writing constructor
 	            	return false;
             }
 
@@ -274,7 +275,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 	            		return false;
 
 	            	if (!writingConstructorBindings.contains(methodBinding)) {
-	            		if (!callsWrittingConstructor(methods[i], writingConstructorBindings))//non writing constructor does not call a writing constructor
+	            		if (!callsWritingConstructor(methods[i], writingConstructorBindings))//non writing constructor does not call a writing constructor
 	            			return false;
 	            	}
 	            }
@@ -289,7 +290,13 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 			return retFinder.foundOne;
 		}
 
-		private boolean callsWrittingConstructor(MethodDeclaration methodDeclaration, HashSet writingConstructorBindings) {
+		private boolean callsWritingConstructor(MethodDeclaration methodDeclaration, HashSet writingConstructorBindings) {
+			HashSet visitedMethodDeclarations= new HashSet();
+			visitedMethodDeclarations.add(methodDeclaration);
+			return callsWritingConstructor(methodDeclaration, writingConstructorBindings, visitedMethodDeclarations);
+		}
+
+		private boolean callsWritingConstructor(MethodDeclaration methodDeclaration, HashSet writingConstructorBindings, Set visitedMethodDeclarations) {
 			Block body= methodDeclaration.getBody();
 			if (body == null)
 				return false;
@@ -314,9 +321,13 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 				if (!(declaration instanceof MethodDeclaration))
 					return false;
 
-				return callsWrittingConstructor((MethodDeclaration)declaration, writingConstructorBindings);
+				if (visitedMethodDeclarations.contains(declaration)) {
+					return false;
+				}
+				visitedMethodDeclarations.add(methodDeclaration);
+				return callsWritingConstructor((MethodDeclaration)declaration, writingConstructorBindings, visitedMethodDeclarations);
 			}
-        }
+		}
 
 		private boolean isWrittenInTypeConstructors(ArrayList writes, ITypeBinding declaringClass) {
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -6896,7 +6896,52 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
+	
+	public void testAddFinalBug297566() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int x;\n");
+		buf.append("    public E1() {\n");
+		buf.append("        this();\n");
+		buf.append("    }\n");
+		buf.append("    public E1(int a) {\n");
+		buf.append("        x = a;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
+		
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
+	}
 
+	public void testAddFinalBug297566_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int x;\n");
+		buf.append("    public E1() {\n");
+		buf.append("        this(10);\n");
+		buf.append("    }\n");
+		buf.append("    public E1(int a) {\n");
+		buf.append("        this();\n");
+		buf.append("    }\n");
+		buf.append("    public E1(int f, int y) {\n");
+		buf.append("        x = a;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
+		
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
+	}
+	
 	public void testRemoveBlockReturnThrows01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
