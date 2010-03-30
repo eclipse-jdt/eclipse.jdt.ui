@@ -42,7 +42,9 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -242,11 +244,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return null;
 	}
 
-	private boolean noErrorsAtLocation(IProblemLocation[] locations) {
+	static boolean noErrorsAtLocation(IProblemLocation[] locations) {
 		if (locations != null) {
 			for (int i= 0; i < locations.length; i++) {
-				if (locations[i].isError()) {
-					return false;
+				IProblemLocation location= locations[i];
+				if (location.isError()) {
+					if (IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(location.getMarkerType())
+							&& JavaCore.getOptionForConfigurableSeverity(location.getProblemId()) != null) {
+						// continue (only drop out for severe (non-optional) errors)
+					} else {
+						return false;
+					}
 				}
 			}
 		}

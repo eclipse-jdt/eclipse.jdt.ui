@@ -139,7 +139,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (coveringNode != null) {
 			ArrayList coveredNodes= getFullyCoveredNodes(context, coveringNode);
 			ArrayList resultingCollections= new ArrayList();
-			if (noErrorsAtLocation(locations)) {
+			if (QuickAssistProcessor.noErrorsAtLocation(locations)) {
 				getInverseIfProposals(context, coveringNode, resultingCollections);
 				getIfReturnIntoIfElseAtEndOfVoidMethodProposals(context, coveringNode, resultingCollections);
 				getInverseIfContinueIntoIfThenInLoopsProposals(context, coveringNode, resultingCollections);
@@ -169,17 +169,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
 		return null;
-	}
-
-	private static boolean noErrorsAtLocation(IProblemLocation[] locations) {
-		if (locations != null) {
-			for (int i= 0; i < locations.length; i++) {
-				if (locations[i].isError()) {
-					return false;
-				}
-			}
-		}
-		return true;
 	}
 
 	private static boolean getIfReturnIntoIfElseAtEndOfVoidMethodProposals(IInvocationContext context, ASTNode covering, Collection resultingCollections) {
