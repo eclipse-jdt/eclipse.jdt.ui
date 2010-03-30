@@ -215,7 +215,7 @@ public final class ASTProvider {
 	private ActivationListener fActivationListener;
 	private Object fReconcileLock= new Object();
 	private Object fWaitLock= new Object();
-	private boolean fIsReconciling;
+	private volatile boolean fIsReconciling;
 	private IWorkbenchPart fActiveEditor;
 
 
