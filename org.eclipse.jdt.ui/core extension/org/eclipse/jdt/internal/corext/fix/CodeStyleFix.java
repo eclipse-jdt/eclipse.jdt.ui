@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
@@ -466,13 +467,15 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		private void extractQualifier(Expression qualifier, CompilationUnitRewrite cuRewrite, TextEditGroup group) {
+			Statement statement= ASTResolving.findParentStatement(qualifier);
+			if (statement == null)
+				return;
+			
 			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getAST();
 
 			Expression expression= (Expression) astRewrite.createMoveTarget(qualifier);
 			ExpressionStatement newStatement= ast.newExpressionStatement(expression);
-
-			Statement statement= (Statement) ASTNodes.getParent(qualifier, Statement.class);
 
 			if (statement.getParent() instanceof Block) {
 				Block block= (Block) statement.getParent();
@@ -512,7 +515,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		if (!isNonStaticAccess(problem))
 			return null;
 
-		ToStaticAccessOperation operations[]= createToStaticAccessOperations(compilationUnit, new HashMap(), problem);
+		ToStaticAccessOperation operations[]= createToStaticAccessOperations(compilationUnit, new HashMap(), problem, false);
 		if (operations == null)
 			return null;
 
@@ -543,7 +546,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		if (!isIndirectStaticAccess(problem))
 			return null;
 
-		ToStaticAccessOperation operations[]= createToStaticAccessOperations(compilationUnit, new HashMap(), problem);
+		ToStaticAccessOperation operations[]= createToStaticAccessOperations(compilationUnit, new HashMap(), problem, false);
 		if (operations == null)
 			return null;
 
@@ -628,7 +631,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 			boolean isNonStaticAccess= changeNonStaticAccessToStatic && isNonStaticAccess(problem);
 			boolean isIndirectStaticAccess= changeIndirectStaticAccessToDirect && isIndirectStaticAccess(problem);
 			if (isNonStaticAccess || isIndirectStaticAccess) {
-				ToStaticAccessOperation[] nonStaticAccessInformation= createToStaticAccessOperations(compilationUnit, createdBlocks, problem);
+				ToStaticAccessOperation[] nonStaticAccessInformation= createToStaticAccessOperations(compilationUnit, createdBlocks, problem, true);
 				if (nonStaticAccessInformation != null) {
 					ToStaticAccessOperation op= nonStaticAccessInformation[0];
 
@@ -667,7 +670,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 				|| problem.getProblemId() == IProblem.NonStaticAccessToStaticMethod);
 	}
 
-	private static ToStaticAccessOperation[] createToStaticAccessOperations(CompilationUnit astRoot, HashMap createdBlocks, IProblemLocation problem) {
+	private static ToStaticAccessOperation[] createToStaticAccessOperations(CompilationUnit astRoot, HashMap createdBlocks, IProblemLocation problem, boolean conservative) {
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (selectedNode == null) {
 			return null;
@@ -702,6 +705,9 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		if (accessBinding != null && qualifier != null) {
+			if (conservative && ASTResolving.findParentStatement(qualifier) == null)
+				return null;
+			
 			ToStaticAccessOperation declaring= null;
 			ITypeBinding declaringTypeBinding= getDeclaringTypeBinding(accessBinding);
 			if (declaringTypeBinding != null) {
