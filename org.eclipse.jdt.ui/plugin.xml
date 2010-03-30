@@ -5916,7 +5916,7 @@
 		        class="org.eclipse.jdt.internal.ui.filters.EnumFilter"
 		        name="%HideEnum.label"
 		        description="%HideEnum.description"
-		        id="org.eclipse.jdt.java.ui.filters.HideAnnotations"/>
+		        id="org.eclipse.jdt.java.ui.filters.HideEnums"/>
   		<commonFilter 
 		        class="org.eclipse.jdt.internal.ui.filters.InterfaceFilter"
 		        name="%HideInterface.label"
