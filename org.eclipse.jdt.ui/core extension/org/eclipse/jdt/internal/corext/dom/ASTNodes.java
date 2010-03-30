@@ -94,6 +94,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class ASTNodes {
 
@@ -534,6 +535,7 @@ public class ASTNodes {
 	 * <p>
 	 * <b>Warning:</b> This method does not stop at any boundaries like parentheses, statements, body declarations, etc.
 	 * The resulting node may be in a totally different scope than the given node.
+	 * Consider using one of the {@link ASTResolving}<code>.find(..)</code> methods instead.
 	 * </p>
 	 * @param node the node
 	 * @param parentClass the class of the sought ancestor node
@@ -551,6 +553,7 @@ public class ASTNodes {
 	 * <p>
 	 * <b>Warning:</b> This method does not stop at any boundaries like parentheses, statements, body declarations, etc.
 	 * The resulting node may be in a totally different scope than the given node.
+	 * Consider using one of the {@link ASTResolving}<code>.find(..)</code> methods instead.
 	 * </p>
 	 * @param node the node
 	 * @param nodeType the node type constant from {@link ASTNode}
