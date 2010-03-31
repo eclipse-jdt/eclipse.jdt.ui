@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.model;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFolder;
 
@@ -20,6 +21,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryControlConfiguration;
 import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryLabelProvider;
+
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -90,6 +93,8 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 	public Image getImage(final Object element) {
 		if (element instanceof IFolder) {
 			final IFolder folder= (IFolder) element;
+			if (!isInJavaProject(folder))
+				return null;
 			if (folder.getName().equals(NAME_SETTINGS_FOLDER)) {
 				if (fSettingsImage == null || fSettingsImage.isDisposed())
 					fSettingsImage= JavaPluginImages.DESC_OBJS_PROJECT_SETTINGS.createImage();
@@ -113,6 +118,8 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 	public String getText(final Object element) {
 		if (element instanceof IFolder) {
 			final IFolder folder= (IFolder) element;
+			if (!isInJavaProject(folder))
+				return null;
 			if (folder.getName().equals(NAME_SETTINGS_FOLDER))
 				return decorateText(fPreferencesLabel, element);
 		}
@@ -125,5 +132,20 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 			return decorateText(text, element);
 		}
 		return text;
+	}
+
+	/**
+	 * Tells whether the folder's project is a Java project.
+	 * 
+	 * @param folder the folder
+	 * @return <code>true</code> if the folder is in a Java project
+	 * @since 3.6
+	 */
+	private static boolean isInJavaProject(IFolder folder) {
+		try {
+			return folder.getProject().getNature(JavaCore.NATURE_ID) != null;
+		} catch (CoreException e) {
+			return false;
+		}
 	}
 }
