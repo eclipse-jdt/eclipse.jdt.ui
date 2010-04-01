@@ -36,6 +36,7 @@ import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.core.runtime.Assert;
@@ -281,7 +282,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     	if (members == null || members.length == 0) {
             showPage(PAGE_EMPTY);
-			fRefreshViewAction.setEnabled(false);
             return;
         }
 
@@ -565,11 +565,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	}
 
     private void showPage(int page) {
-        if (page == PAGE_EMPTY) {
-            fPagebook.showPage(fNoHierarchyShownLabel);
-        } else {
-            fPagebook.showPage(fHierarchyLocationSplitter);
-        }
+		boolean isEmpty= page == PAGE_EMPTY;
+		Control control= isEmpty ? (Control) fNoHierarchyShownLabel : fHierarchyLocationSplitter;
+		fPagebook.showPage(control);
+		if (fRefreshViewAction != null)
+			fRefreshViewAction.setEnabled(!isEmpty);
     }
 
     /**
@@ -845,6 +845,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         JavaPlugin.createStandardGroups(menu);
 
         menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fOpenLocationAction);
+		if (fRefreshSingleElementAction.canActionBeAdded()) {
+			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshSingleElementAction);
+		}
         menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fLocationCopyAction);
     }
 
@@ -970,7 +973,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      */
     private void makeActions() {
         fRefreshViewAction = new RefreshViewAction(this);
-        fRefreshSingleElementAction= new RefreshElementAction(this, fCallHierarchyViewer);
+        fRefreshSingleElementAction= new RefreshElementAction(fCallHierarchyViewer);
 
 		new CallHierarchyOpenEditorHelper(fLocationViewer);
 		new CallHierarchyOpenEditorHelper(fCallHierarchyViewer);

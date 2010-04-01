@@ -31,10 +31,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  *@since 3.6
  */
 public class RefreshElementAction extends Action {
-	/**
-	 * The call hierarchy view part.
-	 */
-	private CallHierarchyViewPart fPart;
 
 	/**
 	 * The call hierarchy viewer.
@@ -47,8 +43,7 @@ public class RefreshElementAction extends Action {
 	 * @param part the call hierarchy view part
 	 * @param viewer the call hierarchy viewer
 	 */
-	public RefreshElementAction(CallHierarchyViewPart part, CallHierarchyViewer viewer) {
-		fPart= part;
+	public RefreshElementAction(CallHierarchyViewer viewer) {
 		fViewer= viewer;
 		setText(CallHierarchyMessages.RefreshSingleElementAction_text);
 		setToolTipText(CallHierarchyMessages.RefreshSingleElementAction_tooltip);
@@ -60,7 +55,7 @@ public class RefreshElementAction extends Action {
 
 		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				setEnabled(!event.getSelection().isEmpty());
+				setEnabled(!fViewer.getSelection().isEmpty());
 			}
 		});
 	}
@@ -93,7 +88,7 @@ public class RefreshElementAction extends Action {
 	 * @return the current selection
 	 */
 	private ISelection getSelection() {
-		return fPart.getSelection();
+		return fViewer.getSelection();
 	}
 
 	/**
