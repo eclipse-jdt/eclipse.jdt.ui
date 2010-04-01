@@ -281,6 +281,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     	if (members == null || members.length == 0) {
             showPage(PAGE_EMPTY);
+			fRefreshViewAction.setEnabled(false);
             return;
         }
 
@@ -844,7 +845,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         JavaPlugin.createStandardGroups(menu);
 
         menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fOpenLocationAction);
-        menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshSingleElementAction);
         menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fLocationCopyAction);
     }
 
@@ -924,7 +924,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     protected void fillCallHierarchyViewerContextMenu(IMenuManager menu) {
         JavaPlugin.createStandardGroups(menu);
 
-        menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshSingleElementAction);
+		if (fRefreshSingleElementAction.canActionBeAdded()) {
+			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshSingleElementAction);
+		}
         menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, new Separator(GROUP_FOCUS));
 
         if (fFocusOnSelectionAction.canActionBeAdded()) {

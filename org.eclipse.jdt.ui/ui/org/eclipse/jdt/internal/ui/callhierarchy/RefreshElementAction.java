@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,9 @@ import java.util.List;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.PlatformUI;
@@ -54,6 +56,13 @@ public class RefreshElementAction extends Action {
 		JavaPluginImages.setLocalImageDescriptors(this, "refresh_nav.gif");//$NON-NLS-1$
 		setActionDefinitionId(IWorkbenchCommandConstants.FILE_REFRESH);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REFRESH_SINGLE_ELEMENT_ACTION);
+		setEnabled(!fViewer.getSelection().isEmpty());
+
+		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				setEnabled(!event.getSelection().isEmpty());
+			}
+		});
 	}
 
 	/**
@@ -85,5 +94,16 @@ public class RefreshElementAction extends Action {
 	 */
 	private ISelection getSelection() {
 		return fPart.getSelection();
+	}
+
+	/**
+	 * Returns <code>true</code> if the action can be added to the menu, <code>false</code>
+	 * otherwise.
+	 * 
+	 * @return <code>true</code> if the action can be added to the menu, <code>false</code> otherwise
+	 * @since 3.6
+	 */
+	protected boolean canActionBeAdded() {
+		return fViewer.getSelection().isEmpty() ? false : true;
 	}
 }
