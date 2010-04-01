@@ -1,4 +1,12 @@
 package p;
 
-class A<T extends A<T>> {}
-class B<T> extends A<B<T>> {}
+class A<T> {
+    class E implements I<T> {
+        public void foo() {
+            E m = (E) this;
+        }
+    }
+}
+
+interface I<K> {
+}
