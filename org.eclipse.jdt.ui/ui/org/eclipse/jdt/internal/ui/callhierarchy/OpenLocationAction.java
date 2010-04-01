@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,9 @@ import java.util.Iterator;
 
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IWorkbenchSite;
 
@@ -30,9 +32,17 @@ class OpenLocationAction extends SelectionDispatchAction {
     public OpenLocationAction(CallHierarchyViewPart part, IWorkbenchSite site) {
         super(site);
         fPart= part;
+		LocationViewer viewer= fPart.getLocationViewer();
         setText(CallHierarchyMessages.OpenLocationAction_label);
         setToolTipText(CallHierarchyMessages.OpenLocationAction_tooltip);
-    }
+		setEnabled(!fPart.getSelection().isEmpty());
+
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				setEnabled(!event.getSelection().isEmpty());
+			}
+		});
+	}
 
     private boolean checkEnabled(IStructuredSelection selection) {
         if (selection.isEmpty()) {

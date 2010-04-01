@@ -1188,4 +1188,14 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     public CallHierarchyViewer getViewer() {
     	return fCallHierarchyViewer;
     }
+
+	/**
+	 * Returns the location viewer.
+	 * 
+	 * @return the location viewer
+	 * @since 3.6
+	 */
+	protected LocationViewer getLocationViewer() {
+		return fLocationViewer;
+	}
 }
