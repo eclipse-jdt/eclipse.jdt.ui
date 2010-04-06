@@ -1113,8 +1113,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 	public String getDelegateUpdatingTitle(boolean plural) {
 		if (plural)
-			return RefactoringCoreMessages.DelegateMethodCreator_keep_original_moved_plural;
+			return RefactoringCoreMessages.DelegateMethodCreator_keep_original_moved_plural_member;
 		else
-			return RefactoringCoreMessages.DelegateMethodCreator_keep_original_moved_singular;
+			return RefactoringCoreMessages.DelegateMethodCreator_keep_original_moved_singular_member;
 	}
 }

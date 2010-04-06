@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -322,6 +322,10 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String DelegateMethodCreator_keep_original_moved_plural;
 
 	public static String DelegateMethodCreator_keep_original_moved_singular;
+
+	public static String DelegateMethodCreator_keep_original_moved_plural_member;
+
+	public static String DelegateMethodCreator_keep_original_moved_singular_member;
 
 	public static String DelegateMethodCreator_keep_original_renamed_plural;
 
