@@ -158,7 +158,7 @@ public class JEClasspathEntry extends JEAttribute {
 				}
 				IClasspathContainer classpathContainer= JavaCore.getClasspathContainer(fEntry.getPath(), project);
 				if (classpathContainer == null)
-					return null;
+					return EMPTY;
 				IClasspathEntry[] referencedEntries= classpathContainer.getClasspathEntries();
 				JEAttribute[] children= new JEAttribute[referencedEntries.length];
 				for (int i= 0; i < referencedEntries.length; i++) {
