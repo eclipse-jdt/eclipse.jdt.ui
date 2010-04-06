@@ -442,7 +442,7 @@ public class EditorUtility {
 			return null;
 
 		ICompilationUnit cu= JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput, primaryOnly);
-		if (cu != null || !primaryOnly)
+		if (cu != null)
 			return cu;
 
 		IJavaElement je= (IJavaElement)editorInput.getAdapter(IJavaElement.class);
