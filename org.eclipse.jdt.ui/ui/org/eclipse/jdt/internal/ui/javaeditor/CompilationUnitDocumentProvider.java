@@ -78,6 +78,7 @@ import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.jface.text.source.ImageUtilities;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IStorageEditorInput;
@@ -697,9 +698,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 		/**
 		 * Overlays value with problem annotation.
-		 *
+		 * 
 		 * @param value the value
-		 * @param problemAnnotation
+		 * @param problemAnnotation the problem annotation
 		 */
 		private void setOverlay(Object value, ProblemAnnotation problemAnnotation) {
 			if (value instanceof  JavaMarkerAnnotation) {
@@ -1034,6 +1035,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			final IPath documentPath;
 			if (storage instanceof IFileState)
 				documentPath= storagePath.append(Long.toString(((IFileState)storage).getModificationTime()));
+			else if (isFileRevisionEditorInput(editorInput))
+				documentPath= storagePath.append(Long.toString(System.currentTimeMillis()));
 			else
 				documentPath= storagePath;
 
@@ -1100,6 +1103,27 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		} catch (CoreException ex) {
 			JavaPlugin.log(ex.getStatus());
 			return null;
+		}
+	}
+
+	/**
+	 * Tests whether the given editor input is an instance of
+	 * <code>org.eclipse.team.internal.ui.history.FileRevisionEditorInput</code>.
+	 * <p>
+	 * XXX: Workaround for https://bugs.eclipse.org/307756, see comment 2 on how a better solution
+	 * could look like.
+	 * </p>
+	 * 
+	 * @param editorInput the editor input to test
+	 * @return <code>true</code> if it is an instance of
+	 *         <code>org.eclipse.team.internal.ui.history.FileRevisionEditorInput</code>
+	 * @since 3.6
+	 */
+	private static boolean isFileRevisionEditorInput(IEditorInput editorInput) {
+		try {
+			return Class.forName("org.eclipse.team.internal.ui.history.FileRevisionEditorInput").isInstance(editorInput); //$NON-NLS-1$
+		} catch (ClassNotFoundException ex) {
+			return false;
 		}
 	}
 
@@ -1511,22 +1535,22 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		return new DefaultLineTracker();
 	}
 
-    /**
-     * Notify post save listeners.
-     * <p>
-     * <strong>Note:</strong> Post save listeners are not
-     * allowed to save the file and they must not assumed to be
-     * called in the UI thread i.e. if they open a dialog they
-     * must ensure it ends up in the UI thread.
-     * </p>
-     * @param info compilation unit info
-     * @param changedRegions
-     * @param listeners the listeners to notify
+	/**
+	 * Notify post save listeners.
+	 * <p>
+	 * <strong>Note:</strong> Post save listeners are not allowed to save the file and they must not
+	 * assumed to be called in the UI thread i.e. if they open a dialog they must ensure it ends up
+	 * in the UI thread.
+	 * </p>
+	 * 
+	 * @param info compilation unit info
+	 * @param changedRegions the array with the changed regions
+	 * @param listeners the listeners to notify
 	 * @param monitor the progress monitor
-     * @throws CoreException
-     * @see IPostSaveListener
-     * @since 3.3
-     */
+	 * @throws CoreException if something goes wrong
+	 * @see IPostSaveListener
+	 * @since 3.3
+	 */
 	protected void notifyPostSaveListeners(final CompilationUnitInfo info, final IRegion[] changedRegions, IPostSaveListener[] listeners, final IProgressMonitor monitor) throws CoreException {
 		final ICompilationUnit unit= info.fCopy;
 		final IBuffer buffer= unit.getBuffer();
