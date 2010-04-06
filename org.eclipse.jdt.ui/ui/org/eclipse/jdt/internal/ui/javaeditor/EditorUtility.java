@@ -441,11 +441,15 @@ public class EditorUtility {
 		if (editorInput == null)
 			return null;
 
-		ITypeRoot je= JavaUI.getEditorInputTypeRoot(editorInput);
-		if (je != null || primaryOnly)
-			return je;
+		ICompilationUnit cu= JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput, primaryOnly);
+		if (cu != null || !primaryOnly)
+			return cu;
 
-		return  JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput, false);
+		IJavaElement je= (IJavaElement)editorInput.getAdapter(IJavaElement.class);
+		if (je instanceof ITypeRoot)
+			return (ITypeRoot)je;
+
+		return null;
 	}
 
 	private static IEditorInput getEditorInput(IJavaElement element) {
