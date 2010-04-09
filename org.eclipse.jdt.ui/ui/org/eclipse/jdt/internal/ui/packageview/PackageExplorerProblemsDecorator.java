@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,7 +39,7 @@ public class PackageExplorerProblemsDecorator extends TreeHierarchyLayoutProblem
 		for (int i= 0; i < elements.length; i++) {
 			IAdaptable element= elements[i];
 			int flags= super.computeAdornmentFlags(element);
-			if ((flags & JavaElementImageDescriptor.ERROR) != 0)
+			if ((flags & JavaElementImageDescriptor.ERROR) != 0 || (flags & JavaElementImageDescriptor.PROJECT_ERROR) != 0)
 				return JavaElementImageDescriptor.ERROR;
 			if ((flags & JavaElementImageDescriptor.WARNING) != 0)
 				result= JavaElementImageDescriptor.WARNING;

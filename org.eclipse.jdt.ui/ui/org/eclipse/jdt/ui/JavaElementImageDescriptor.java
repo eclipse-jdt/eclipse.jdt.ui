@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,6 +85,11 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 */
 	public final static int TRANSIENT= 	0x1000;
 
+	/**
+	 * Flag to render the project error adornment.
+	 * @since 3.6
+	 */
+	public final static int PROJECT_ERROR= 0x2000;
 
 	private ImageDescriptor fBaseImage;
 	private int fFlags;
@@ -290,6 +295,9 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		Point pos= new Point(0, getSize().y);
 		if ((fFlags & ERROR) != 0) {
 			addBottomLeftImage(JavaPluginImages.DESC_OVR_ERROR, pos);
+		}
+		if ((fFlags & PROJECT_ERROR) != 0) {
+			addBottomLeftImage(JavaPluginImages.DESC_OVR_PROJECT_ERROR, pos);
 		}
 		if ((fFlags & WARNING) != 0) {
 			addBottomLeftImage(JavaPluginImages.DESC_OVR_WARNING, pos);

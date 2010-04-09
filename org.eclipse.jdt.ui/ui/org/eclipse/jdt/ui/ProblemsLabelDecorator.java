@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.ListenerList;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceStatus;
 
@@ -105,6 +106,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 
 	private static final int ERRORTICK_WARNING= JavaElementImageDescriptor.WARNING;
 	private static final int ERRORTICK_ERROR= JavaElementImageDescriptor.ERROR;
+	private static final int ERRORTICK_PROJECT_ERROR= JavaElementImageDescriptor.PROJECT_ERROR;
 
 	private ImageDescriptorRegistry fRegistry;
 	private boolean fUseNewRegistry= false;
@@ -235,6 +237,12 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		}
 		int severity= 0;
 		if (sourceElement == null) {
+			if (res instanceof IProject) {
+				severity= res.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+				if (severity == IMarker.SEVERITY_ERROR) {
+					return ERRORTICK_PROJECT_ERROR;
+				}
+			}
 			severity= res.findMaxProblemSeverity(IMarker.PROBLEM, true, depth);
 		} else {
 			IMarker[] markers= res.findMarkers(IMarker.PROBLEM, true, depth);
@@ -398,6 +406,8 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		int adornmentFlags= computeAdornmentFlags(element);
 		if (adornmentFlags == ERRORTICK_ERROR) {
 			decoration.addOverlay(JavaPluginImages.DESC_OVR_ERROR);
+		} else if (adornmentFlags == ERRORTICK_PROJECT_ERROR) {
+			decoration.addOverlay(JavaPluginImages.DESC_OVR_PROJECT_ERROR);
 		} else if (adornmentFlags == ERRORTICK_WARNING) {
 			decoration.addOverlay(JavaPluginImages.DESC_OVR_WARNING);
 		}
