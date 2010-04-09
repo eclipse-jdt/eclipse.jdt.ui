@@ -116,6 +116,8 @@ org.apache.lucene/*
 org.apache.lucene.analysis/*
 org.junit4/*
 org.objectweb.asm/*
+org.sat4j.core/*
+org.sat4j.pb/*
 
 www*eclipse.org-eclipse-root/*
 www*eclipse.org-development/*
