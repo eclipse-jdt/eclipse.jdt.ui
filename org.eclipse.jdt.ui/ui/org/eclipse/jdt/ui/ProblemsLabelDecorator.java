@@ -49,6 +49,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerProblemsDecorator;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
@@ -106,7 +107,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 
 	private static final int ERRORTICK_WARNING= JavaElementImageDescriptor.WARNING;
 	private static final int ERRORTICK_ERROR= JavaElementImageDescriptor.ERROR;
-	private static final int ERRORTICK_PROJECT_ERROR= JavaElementImageDescriptor.PROJECT_ERROR;
+	private static final int ERRORTICK_PROJECT_ERROR= PackageExplorerProblemsDecorator.PROJECT_ERROR;
 
 	private ImageDescriptorRegistry fRegistry;
 	private boolean fUseNewRegistry= false;

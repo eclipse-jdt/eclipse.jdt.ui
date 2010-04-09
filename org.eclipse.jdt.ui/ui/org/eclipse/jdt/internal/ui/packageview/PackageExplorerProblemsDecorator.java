@@ -21,6 +21,16 @@ import org.eclipse.jdt.internal.ui.viewsupport.TreeHierarchyLayoutProblemsDecora
 
 public class PackageExplorerProblemsDecorator extends TreeHierarchyLayoutProblemsDecorator {
 
+	/**
+	 * Use of this constant is <b>FORBIDDEN</b> for external clients.
+	 * <p>
+	 * TODO: Make API in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=308672
+	 * 
+	 * @see JavaElementImageDescriptor#PROJECT_ERROR
+	 * @since 3.6
+	 */
+	public final static int PROJECT_ERROR= 0x2000;
+
 	public PackageExplorerProblemsDecorator() {
 		super();
 	}
@@ -39,11 +49,14 @@ public class PackageExplorerProblemsDecorator extends TreeHierarchyLayoutProblem
 		for (int i= 0; i < elements.length; i++) {
 			IAdaptable element= elements[i];
 			int flags= super.computeAdornmentFlags(element);
-			if ((flags & JavaElementImageDescriptor.ERROR) != 0 || (flags & JavaElementImageDescriptor.PROJECT_ERROR) != 0)
-				return JavaElementImageDescriptor.ERROR;
-			if ((flags & JavaElementImageDescriptor.WARNING) != 0)
-				result= JavaElementImageDescriptor.WARNING;
+			if ((flags & PackageExplorerProblemsDecorator.PROJECT_ERROR) != 0)
+				return PackageExplorerProblemsDecorator.PROJECT_ERROR;
+			result|= flags;
 		}
-		return result;
+		if ((result & JavaElementImageDescriptor.ERROR) != 0)
+			return JavaElementImageDescriptor.ERROR;
+		else if ((result & JavaElementImageDescriptor.WARNING) != 0)
+			return JavaElementImageDescriptor.WARNING;
+		return 0;
 	}
 }

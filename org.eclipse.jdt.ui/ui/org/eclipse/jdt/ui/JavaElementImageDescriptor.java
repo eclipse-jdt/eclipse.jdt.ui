@@ -21,6 +21,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerProblemsDecorator;
 
 /**
  * A {@link JavaElementImageDescriptor} consists of a base image and several adornments. The adornments
@@ -89,7 +90,8 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 * Flag to render the project error adornment.
 	 * @since 3.6
 	 */
-	public final static int PROJECT_ERROR= 0x2000;
+	//TODO: make API in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=308672
+	final static int PROJECT_ERROR= PackageExplorerProblemsDecorator.PROJECT_ERROR;
 
 	private ImageDescriptor fBaseImage;
 	private int fFlags;
@@ -296,7 +298,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		if ((fFlags & ERROR) != 0) {
 			addBottomLeftImage(JavaPluginImages.DESC_OVR_ERROR, pos);
 		}
-		if ((fFlags & PROJECT_ERROR) != 0) {
+		if ((fFlags & PackageExplorerProblemsDecorator.PROJECT_ERROR) != 0) {
 			addBottomLeftImage(JavaPluginImages.DESC_OVR_PROJECT_ERROR, pos);
 		}
 		if ((fFlags & WARNING) != 0) {
