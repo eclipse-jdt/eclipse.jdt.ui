@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -270,11 +270,11 @@ public class ChkpiiTests extends TestCase {
 			}
 
 			if (errors > 0) {
-				message.append("" + errors + " files containing errors\n");
+				message.append("\n" + errors + " files containing errors\n");
 				hasFailed= true;
 			}
 			if (XML != type && warnings > 0) {
-				message.append("" + errors + " files containing errors\n");
+				message.append("" + warnings + " files containing warnings\n");
 				hasFailed= true;
 			}
 			if (notProcessed > 0) {
