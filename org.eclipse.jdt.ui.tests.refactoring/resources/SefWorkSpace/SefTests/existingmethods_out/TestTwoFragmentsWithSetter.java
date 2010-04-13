@@ -1,8 +1,9 @@
 package base_out;
 
 public class TestTwoFragments {
-	int anotherField;
-	private int field;
+	@Deprecated volatile int anotherField;
+	@Deprecated
+	private volatile int field;
 	public int getField(){
 		return field;
 	}

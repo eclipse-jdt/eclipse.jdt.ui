@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -89,7 +89,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
+import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -589,20 +589,11 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 
 	private TextEditGroup makeDeclarationPrivate(ASTRewrite rewriter, FieldDeclaration decl) {
-		AST ast= rewriter.getAST();
 		TextEditGroup description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_change_visibility);
-		if (decl.fragments().size() > 1) {
-			//TODO: doesn't work for cases like this:  int field1, field2= field1, field3= field2; // keeping refs to field
-			rewriter.remove(fFieldDeclaration, description);
-			ChildListPropertyDescriptor descriptor= getBodyDeclarationsProperty(decl.getParent());
-			VariableDeclarationFragment newField= (VariableDeclarationFragment) rewriter.createCopyTarget(fFieldDeclaration);
-			FieldDeclaration fieldDecl= ast.newFieldDeclaration(newField);
-			fieldDecl.setType((Type)rewriter.createCopyTarget(decl.getType()));
-			fieldDecl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.PRIVATE));
-			rewriter.getListRewrite(decl.getParent(), descriptor).insertAfter(fieldDecl, decl, description);
-		} else {
-			ModifierRewrite.create(rewriter, decl).setVisibility(Modifier.PRIVATE, description);
-		}
+		VariableDeclarationFragment[] vdfs= new VariableDeclarationFragment[] { fFieldDeclaration };
+		int includedModifiers= Modifier.PRIVATE;
+		int excludedModifiers= Modifier.PROTECTED | Modifier.PUBLIC;
+		VariableDeclarationRewrite.rewriteModifiers(decl, vdfs, includedModifiers, excludedModifiers, rewriter, description);
 		return description;
 	}
 
