@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,7 +39,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 
 	private static final int WARM_UP_RUNS= 3;
 
-	private static final int MEASURED_RUNS= 3;
+	private static final int MEASURED_RUNS= 100;
 
 	private ITextEditor fEditor;
 
@@ -96,8 +96,8 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to type in one single method into a large file.
-	 *
-	 * @throws BadLocationException
+	 * 
+	 * @throws BadLocationException if the insert position can't be detected
 	 */
 	public void testTypeAMethod() throws BadLocationException {
 		Display display= EditorTestHelper.getActiveDisplay();
