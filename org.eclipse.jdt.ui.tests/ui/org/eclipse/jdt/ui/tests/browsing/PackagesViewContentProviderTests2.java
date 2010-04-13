@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -245,7 +245,6 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		fMyPart.fViewer.setInput(fJProject2);
 
 		fMyPart.clear();
-		fMyPart.setRefreshLoggingEnabled(true); // tracking down https://bugs.eclipse.org/bugs/show_bug.cgi?id=243132
 
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { cu }, fPack81, IJavaElementDelta.ADDED);
@@ -265,7 +264,6 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 					"PackagesViewContentProviderTests2.testAddCUFromPackageNotLogicalPackage():\n"
 					+ "Too many refreshes (" + fMyPart.getRefreshedObject().size() + "):\n" + fMyPart.getRefreshedObject());
 
-		fMyPart.setRefreshLoggingEnabled(false);
 	}
 
 	public void testAddFragmentToLogicalPackage() throws Exception {
