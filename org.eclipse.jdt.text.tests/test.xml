@@ -80,6 +80,13 @@
     </ant>
     
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="vmargs" value="-Xms250M -Xmx250M"/>
+      <property name="data-dir" value="${jdt-text-performance-folder}"/>
+      <property name="plugin-name" value="${plugin-name}"/>
+      <property name="classname" value="org.eclipse.jdt.text.tests.performance.WordRulePerformanceTestSuite"/>
+    </ant>
+    
+    <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="timeout" value="10800000"/>
       <property name="vmargs" value="-Xms250M -Xmx250M"/>
       <property name="data-dir" value="${jdt-text-performance-folder}"/>
@@ -89,7 +96,7 @@
   </target>
 
   <!-- This target holds code to cleanup the testing environment after -->
-  <!-- after all of the tests have been run. You can use this target to -->
+  <!-- all of the tests have been run. You can use this target to -->
   <!-- delete temporary files that have been created. -->
   <target name="cleanup">
   </target>
