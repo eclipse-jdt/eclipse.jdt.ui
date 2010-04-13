@@ -678,6 +678,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		final ITypeRoot inputElement= getInputJavaElement();
 
+		JavaPlugin.getDefault().getASTProvider().activeJavaEditorChanged(this);
+
 		Job job= new Job(JavaEditorMessages.OverrideIndicatorManager_intallJob) {
 			/*
 			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)

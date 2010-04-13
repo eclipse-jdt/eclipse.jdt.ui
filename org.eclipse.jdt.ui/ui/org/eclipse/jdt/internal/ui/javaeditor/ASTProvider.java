@@ -250,7 +250,7 @@ public final class ASTProvider {
 			windows[i].getPartService().addPartListener(fActivationListener);
 	}
 
-	private void activeJavaEditorChanged(IWorkbenchPart editor) {
+	void activeJavaEditorChanged(IWorkbenchPart editor) {
 
 		ITypeRoot javaElement= null;
 		if (editor instanceof JavaEditor)
