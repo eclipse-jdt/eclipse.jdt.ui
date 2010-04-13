@@ -662,15 +662,17 @@ public class JavaElementLabelComposer {
 		try {
 			fBuffer.append(getElementName(typeParameter));
 
-			String[] bounds= typeParameter.getBoundsSignatures();
-			if (bounds.length > 0 &&
-					! (bounds.length == 1 && "Ljava.lang.Object;".equals(bounds[0]))) { //$NON-NLS-1$
-				fBuffer.append(" extends "); //$NON-NLS-1$
-				for (int j= 0; j < bounds.length; j++) {
-					if (j > 0) {
-						fBuffer.append(JavaElementLabels.COMMA_STRING);
+			if (typeParameter.exists()) {
+				String[] bounds= typeParameter.getBoundsSignatures();
+				if (bounds.length > 0 &&
+						! (bounds.length == 1 && "Ljava.lang.Object;".equals(bounds[0]))) { //$NON-NLS-1$
+					fBuffer.append(" extends "); //$NON-NLS-1$
+					for (int j= 0; j < bounds.length; j++) {
+						if (j > 0) {
+							fBuffer.append(JavaElementLabels.COMMA_STRING);
+						}
+						appendTypeSignatureLabel(typeParameter, bounds[j], flags);
 					}
-					appendTypeSignatureLabel(typeParameter, bounds[j], flags);
 				}
 			}
 
