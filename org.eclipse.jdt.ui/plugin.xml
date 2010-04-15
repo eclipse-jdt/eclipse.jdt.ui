@@ -10,6 +10,7 @@
 <!-- Contributors:                                                          -->
 <!--     IBM Corporation - initial API and implementation                   -->
 <!--     Francis Upton IV, Oakland Software <francisu@ieee.org> - Add support for Go Into with the ProjectExplorer - https://bugs.eclipse.org/bugs/show_bug.cgi?id=262091 -->
+<!--     Troy Bishop <tjbishop@ca.ibm.com> - Add support for importing/exporting Java Code Style preferences - https://bugs.eclipse.org/bugs/show_bug.cgi?id=304395 -->
 <!-- ====================================================================== -->
 <plugin>
 
@@ -6671,5 +6672,46 @@
                %preferenceTransfer.java.appearance.description
             </description>
       </transfer>
+       <transfer
+             id="org.eclipse.jdt.internal.ui.transfer.codestyle"
+             icon="$nl$/icons/full/eview16/jperspective.gif"
+             name="%preferenceTransfer.java.codestyle.name">
+          <mapping scope="instance">
+             <entry node="org.eclipse.jdt.ui">
+                <key name="org.eclipse.jdt.ui.keywordthis" />
+                <key name="org.eclipse.jdt.ui.gettersetter.use.is" />
+                <key name="org.eclipse.jdt.ui.exception.name" />
+                <key name="org.eclipse.jdt.ui.overrideannotation" />
+                <key name="cleanup." match="prefix" />
+                <key name="org.eclipse.jdt.ui.cleanupprofiles" />
+                <key name="cleanup_profile" />
+                <key name="cleanup_settings_version" />
+                <key name="org.eclipse.jdt.ui.importorder" />
+                <key name="org.eclipse.jdt.ui.ondemandthreshold" />
+                <key name="org.eclipse.jdt.ui.staticondemandthreshold" />
+                <key name="org.eclipse.jdt.ui.ignorelowercasenames" />
+                <key name="formatter_profile" />
+                <key name="formatter_settings_version" />
+                <key name="org.eclipse.jdt.ui.formatterprofiles" match="prefix" />
+                <key name="org.eclipse.jdt.ui.text.custom_code_templates" />
+                <key name="org.eclipse.jdt.ui.javadoc" />
+             </entry>
+             <entry node="org.eclipse.jdt.core">
+                <key name="org.eclipse.jdt.core.codeComplete.fieldPrefixes" />
+                <key name="org.eclipse.jdt.core.codeComplete.fieldSuffixes" />
+                <key name="org.eclipse.jdt.core.codeComplete.staticFieldPrefixes" />
+                <key name="org.eclipse.jdt.core.codeComplete.staticFieldSuffixes" />
+                <key name="org.eclipse.jdt.core.codeComplete.staticFinalFieldPrefixes" />
+                <key name="org.eclipse.jdt.core.codeComplete.staticFinalFieldSuffixes" />
+                <key name="org.eclipse.jdt.core.codeComplete.argumentPrefixes" />
+                <key name="org.eclipse.jdt.core.codeComplete.argumentSuffixes" />
+                <key name="org.eclipse.jdt.core.codeComplete.localPrefixes" />
+                <key name="org.eclipse.jdt.core.codeComplete.localSuffixes" />
+             </entry>
+          </mapping>
+          <description>
+             %preferenceTransfer.java.codestyle.description
+          </description>
+       </transfer>
    </extension>
 </plugin>
