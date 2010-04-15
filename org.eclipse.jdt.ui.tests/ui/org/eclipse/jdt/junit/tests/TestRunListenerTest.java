@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,7 +46,6 @@ public class TestRunListenerTest extends AbstractTestRunListenerTest {
 	}
 
 	public void testOK() throws Exception {
-		new TestRunListeners();
 		String source=
 				"package pack;\n" +
 				"import junit.framework.TestCase;\n" +
@@ -146,7 +145,6 @@ public class TestRunListenerTest extends AbstractTestRunListenerTest {
 
 
 	public void testTreeOnSessionStarted() throws Exception {
-		new TestRunListeners();
 		String source=
 				"package pack;\n" +
 				"import junit.framework.TestCase;\n" +
@@ -165,7 +163,6 @@ public class TestRunListenerTest extends AbstractTestRunListenerTest {
 	}
 
 	public void testTreeOnSessionEnded() throws Exception {
-		new TestRunListeners();
 		String source=
 				"package pack;\n" +
 				"import junit.framework.TestCase;\n" +
@@ -184,7 +181,6 @@ public class TestRunListenerTest extends AbstractTestRunListenerTest {
 	}
 
 	public void testTreeOnSecondTestStarted() throws Exception {
-		new TestRunListeners();
 		String source=
 				"package pack;\n" +
 				"import junit.framework.TestCase;\n" +
@@ -205,7 +201,6 @@ public class TestRunListenerTest extends AbstractTestRunListenerTest {
 	}
 
 	public void testTreeOnSecondTestStarted2() throws Exception {
-		new TestRunListeners();
 		String source=
 				"package pack;\n" +
 				"import junit.framework.TestCase;\n" +
@@ -227,7 +222,6 @@ public class TestRunListenerTest extends AbstractTestRunListenerTest {
 
 	public void testTreeUnrootedEnded() throws Exception {
 		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=153807
-		new TestRunListeners();
 		String source=
 				"package pack;\n" +
 				"\n" +
