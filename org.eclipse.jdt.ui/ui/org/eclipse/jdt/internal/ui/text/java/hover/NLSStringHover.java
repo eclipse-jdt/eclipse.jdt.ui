@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,14 +36,19 @@ import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
@@ -53,6 +58,7 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.NLSKeyHyperlink;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 
 /**
@@ -158,8 +164,24 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		String identifier= null;
 		if (node instanceof StringLiteral) {
 			identifier= ((StringLiteral)node).getLiteralValue();
-		} else {
+		} else if (!(node.getParent() instanceof MethodInvocation)) {
 			identifier= ((SimpleName)node).getIdentifier();
+		} else {
+			try {
+				IType parentType= (IType)((TypeDeclaration)ASTResolving.findParentType(node)).resolveBinding().getJavaElement();
+				IField[] fields= parentType.getFields();
+				String varName= ((SimpleName)node).getIdentifier();
+				for (int i= 0; i < fields.length; i++) {
+					if (fields[i].getElementName().equals(varName)) {
+						if (!Signature.getSignatureSimpleName(fields[i].getTypeSignature()).equals("String")) //$NON-NLS-1$
+							return null;
+						Object obj= fields[i].getConstant();
+						identifier= obj instanceof String ? ((String)obj).substring(1, ((String)obj).length() - 1) : null;
+					}
+				}
+			} catch (JavaModelException e) {
+				return null;
+			}
 		}
 		if (identifier == null)
 			return null;

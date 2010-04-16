@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -101,7 +102,7 @@ public class NLSHintHelper {
 
 		ITypeBinding accessorBinding= null;
 
-		if (nlsStringLiteral instanceof SimpleName) {
+		if (nlsStringLiteral instanceof SimpleName && nlsStringLiteral.getParent() instanceof QualifiedName) {
 			SimpleName name= (SimpleName)nlsStringLiteral;
 
 			IBinding binding= name.resolveBinding();
@@ -117,8 +118,8 @@ public class NLSHintHelper {
 			if (parent instanceof MethodInvocation) {
 				MethodInvocation methodInvocation= (MethodInvocation) parent;
 				List args= methodInvocation.arguments();
-				if (args.indexOf(nlsStringLiteral) != 0) {
-					return null; // must be first argument in lookup method
+				if (args.indexOf(nlsStringLiteral) != 0 && args.size() != 1) {
+					return null; // must be the only argument in lookup method
 				}
 
 				Expression firstArgument= (Expression)args.get(0);
