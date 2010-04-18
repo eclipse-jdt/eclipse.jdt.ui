@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,6 +50,17 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 		return getClassName();
 	}
 
+	/*
+	 * @see org.eclipse.jdt.internal.junit.model.TestElement#getTestResult(boolean)
+	 * @since 3.6
+	 */
+	public Result getTestResult(boolean includeChildren) {
+		if (fIgnored)
+			return Result.IGNORED;
+		else
+			return super.getTestResult(includeChildren);
+	}
+	
 	public void setIgnored(boolean ignored) {
 		fIgnored= ignored;
 	}
