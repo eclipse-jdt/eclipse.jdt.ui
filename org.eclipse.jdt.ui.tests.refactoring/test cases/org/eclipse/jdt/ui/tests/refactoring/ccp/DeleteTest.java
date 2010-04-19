@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ui.PlatformUI;
@@ -1164,6 +1165,49 @@ public class DeleteTest extends RefactoringTest{
 		Object[] deleted= null;
 		Object[] exist= new Object[]{frags[2], frags[1], frags[0]};
 		doTestUndoRedo(deleted, exist);
+	}
+
+	public void testDeletePackageAndFolder() throws Exception {
+		// folder    <- delete
+		// and
+		// newPackage    <- delete
+		// newPackage.A
+		// newPackage.file
+		// Both the package and the folder must be deleted.
+		ParticipantTesting.reset();
+		IProject project= RefactoringTestSetup.getProject().getProject();
+		IFolder folder= project.getFolder("folder");
+		folder.create(true, true, null);
+		IPackageFragment newPackage= getRoot().createPackageFragment("newPackage", true, new NullProgressMonitor());
+		assertTrue("folder does not exist", folder.exists());
+		assertTrue("package not created", newPackage.exists());
+		String cuContents= "public class A {}";
+		ICompilationUnit cu= newPackage.createCompilationUnit("A.java", cuContents, false, null);
+		IFile file= ((IContainer)newPackage.getResource()).getFile(new Path("Z.txt"));
+		file.create(getStream("123"), true, null);
+
+		Object[] elements= { folder, newPackage };
+		verifyEnabled(elements);
+		performDummySearch();
+		String[] deleteHandles= ParticipantTesting.createHandles(folder, newPackage, newPackage.getResource());
+
+		DeleteRefactoring ref= createRefactoring(elements);
+		RefactoringStatus status= performRefactoring(ref, true);
+		assertEquals("expected to pass", null, status);
+		assertTrue("folder not deleted", !folder.exists());
+		assertTrue("package not deleted", !newPackage.exists());
+
+		ParticipantTesting.testDelete(deleteHandles);
+
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		undoManager.performUndo(null, new NullProgressMonitor());
+		assertTrue(folder.exists());
+		assertTrue(newPackage.exists());
+		assertTrue(file.exists());
+		assertEquals(cuContents, cu.getSource());
+		undoManager.performRedo(null, new NullProgressMonitor());
+		assertTrue(!folder.exists());
+		assertTrue(!newPackage.exists());
 	}
 
 	/* Don't rename! See #suite() */

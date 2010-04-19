@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -450,15 +450,14 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		// Remove resources in deleted folders
 		final List/* <IResource> */resources= new ArrayList();
 		for (int i= 0; i < fResources.length; i++) {
-			IResource parent= fResources[i];
-			if (parent.getType() == IResource.FILE)
-				parent= parent.getParent();
+			IResource resource= fResources[i];
+			IContainer parent= resource.getParent();
 			if (!deletedChildren.contains(parent))
-				resources.add(fResources[i]);
+				resources.add(resource);
 		}
 
 		fJavaElements= (IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]);
-		fResources= (IResource[]) resources.toArray(new IResource[resources.size()]);
+		fResources= (IResource[])resources.toArray(new IResource[resources.size()]);
 	}
 
 	/**
