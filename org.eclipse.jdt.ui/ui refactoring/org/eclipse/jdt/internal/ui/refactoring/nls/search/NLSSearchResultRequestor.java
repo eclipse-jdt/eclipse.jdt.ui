@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IFile;
 
@@ -50,6 +51,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 
@@ -284,7 +286,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 				return src;
 			}
 		} catch (InvalidInputException e) {
-			return null;
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		}
 	}
 
