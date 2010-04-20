@@ -19,7 +19,7 @@ public class AllAllRefactoringTests {
 	public static Test suite ( ) {
 		TestSuite suite= new TestSuite("All All Refactoring Tests");
 		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.actions.AllTests.suite());
-		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.nls.AllTests.suite());
+		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.nls.NLSTestSuite.suite());
 		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.AllTests.suite());
 		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.extensions.AllTests.suite());
 		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.changes.AllTests.suite());
