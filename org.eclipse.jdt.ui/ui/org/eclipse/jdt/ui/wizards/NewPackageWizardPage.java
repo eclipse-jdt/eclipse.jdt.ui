@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -264,6 +265,11 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageNotShown);
 					}
 				} else {
+					IResource resource= pack.getResource();
+					if (resource != null && !ResourcesPlugin.getWorkspace().validateFiltered(resource).isOK()) {
+						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageNameFiltered);
+						return status;
+					}
 					URI location= pack.getResource().getLocationURI();
 					if (location != null) {
 						IFileStore store= EFS.getStore(location);

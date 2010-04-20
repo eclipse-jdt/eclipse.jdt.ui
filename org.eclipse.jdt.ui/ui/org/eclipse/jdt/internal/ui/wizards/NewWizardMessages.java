@@ -86,6 +86,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewPackageWizardPage_error_PackageExistsDifferentCase;
 	public static String NewPackageWizardPage_error_EnterName;
 	public static String NewPackageWizardPage_error_PackageNotShown;
+	public static String NewPackageWizardPage_error_PackageNameFiltered;
 	public static String NewPackageWizardPage_warning_DiscouragedPackageName;
 	public static String NewPackageWizardPage_title;
 	public static String NewPackageWizardPage_description;
@@ -143,6 +144,8 @@ public final class NewWizardMessages extends NLS {
 	public static String NewTypeWizardPage_error_InvalidSuperInterfaceName;
 	public static String NewTypeWizardPage_error_SuperInterfaceNotParameterized;
 	public static String NewTypeWizardPage_error_ModifiersFinalAndAbstract;
+	public static String NewTypeWizardPage_error_TypeNameFiltered;
+	public static String NewTypeWizardPage_error_PackageNameFiltered;
 	public static String NewTypeWizardPage_configure_templates_message;
 	public static String NewTypeWizardPage_configure_templates_title;
 	public static String NewTypeWizardPage_SuperClassDialog_title;
@@ -261,6 +264,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewSourceFolderWizardPage_error_NotAJavaProject;
 	public static String NewSourceFolderWizardPage_error_ProjectNotExists;
 	public static String NewSourceFolderWizardPage_error_FolderIsVirtual;
+	public static String NewSourceFolderWizardPage_error_FolderNameFiltered;
 	public static String NewSourceFolderWizardPage_warning_ReplaceSFandOL;
 	public static String NewSourceFolderWizardPage_warning_ReplaceOL;
 	public static String NewSourceFolderWizardPage_warning_ReplaceSF;

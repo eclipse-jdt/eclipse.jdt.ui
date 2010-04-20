@@ -45,6 +45,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.text.edits.TextEdit;
 
@@ -1433,6 +1434,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 
 			fCurrPackage= root.getPackageFragment(packName);
+			IResource resource= fCurrPackage.getResource();
+			if (resource != null && !ResourcesPlugin.getWorkspace().validateFiltered(resource).isOK()) {
+				status.setError(NewWizardMessages.NewTypeWizardPage_error_PackageNameFiltered);
+				return status;
+			}
 		} else {
 			status.setError(""); //$NON-NLS-1$
 		}
@@ -1597,6 +1603,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 				if (resource.exists()) {
 					status.setError(NewWizardMessages.NewTypeWizardPage_error_TypeNameExists);
+					return status;
+				}
+				if (!ResourcesPlugin.getWorkspace().validateFiltered(resource).isOK()) {
+					status.setError(NewWizardMessages.NewTypeWizardPage_error_TypeNameFiltered);
 					return status;
 				}
 				URI location= resource.getLocationURI();

@@ -322,6 +322,10 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 						return;
 					}
 				} else {
+					if (!ResourcesPlugin.getWorkspace().validateFiltered(fWorkspaceRoot.getFolder(path)).isOK()) {
+						fRootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_FolderNameFiltered);
+						return;
+					}
 					URI projLocation= fCurrJProject.getProject().getLocationURI();
 					if (projLocation != null) {
 						try {
