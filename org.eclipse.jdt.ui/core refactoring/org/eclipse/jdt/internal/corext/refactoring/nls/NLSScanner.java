@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -35,16 +37,25 @@ public class NLSScanner {
 	}
 
 	public static NLSLine[] scan(ICompilationUnit cu) throws JavaModelException, BadLocationException, InvalidInputException {
-		return scan(cu.getBuffer().getCharacters());
+		IJavaProject javaProject= cu.getJavaProject();
+		IScanner scanner= null;
+		if (javaProject != null) {
+			String complianceLevel= javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+			String sourceLevel= javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
+			scanner= ToolFactory.createScanner(true, true, true, sourceLevel, complianceLevel);
+		} else {
+			scanner= ToolFactory.createScanner(true, true, false, true);
+		}
+		return scan(scanner, cu.getBuffer().getCharacters());
 	}
 
 	public static NLSLine[] scan(String s) throws InvalidInputException, BadLocationException {
-		return scan(s.toCharArray());
+		IScanner scanner= ToolFactory.createScanner(true, true, false, true);
+		return scan(scanner, s.toCharArray());
 	}
 
-	private static NLSLine[] scan(char[] content) throws InvalidInputException, BadLocationException {
+	private static NLSLine[] scan(IScanner scanner, char[] content) throws InvalidInputException, BadLocationException {
 		List lines= new ArrayList();
-		IScanner scanner= ToolFactory.createScanner(true, true, false, true);
 		scanner.setSource(content);
 		int token= scanner.getNextToken();
 		int currentLineNr= -1;

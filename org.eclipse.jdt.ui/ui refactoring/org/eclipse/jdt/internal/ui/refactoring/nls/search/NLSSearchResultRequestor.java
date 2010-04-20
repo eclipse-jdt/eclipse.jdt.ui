@@ -37,8 +37,10 @@ import org.eclipse.search.ui.text.Match;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -233,7 +235,15 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		if (source == null)
 			return null;
 
-		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+		IJavaProject javaProject= unit.getJavaProject();
+		IScanner scanner= null;
+		if (javaProject != null) {
+			String complianceLevel= javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+			String sourceLevel= javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
+			scanner= ToolFactory.createScanner(false, false, false, sourceLevel, complianceLevel);
+		} else {
+			scanner= ToolFactory.createScanner(false, false, false, false);
+		}
 		scanner.setSource(source.toCharArray());
 		scanner.resetTo(keyPositionResult.getOffset() + keyPositionResult.getLength(), source.length());
 
