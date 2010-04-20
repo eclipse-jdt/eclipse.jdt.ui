@@ -43,7 +43,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -164,20 +164,24 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		String identifier= null;
 		if (node instanceof StringLiteral) {
 			identifier= ((StringLiteral)node).getLiteralValue();
-		} else if (!(node.getParent() instanceof MethodInvocation)) {
+		} else if (node.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
 			identifier= ((SimpleName)node).getIdentifier();
 		} else {
 			try {
-				IType parentType= (IType)((TypeDeclaration)ASTResolving.findParentType(node)).resolveBinding().getJavaElement();
-				IField[] fields= parentType.getFields();
-				String varName= ((SimpleName)node).getIdentifier();
-				for (int i= 0; i < fields.length; i++) {
-					if (fields[i].getElementName().equals(varName)) {
-						if (!Signature.getSignatureSimpleName(fields[i].getTypeSignature()).equals("String")) //$NON-NLS-1$
-							return null;
-						Object obj= fields[i].getConstant();
-						identifier= obj instanceof String ? ((String)obj).substring(1, ((String)obj).length() - 1) : null;
-					}
+				ASTNode parent= ASTResolving.findParentType(node);
+				if (parent instanceof TypeDeclaration) {
+					IBinding binding= ((TypeDeclaration)parent).resolveBinding();
+					if (binding == null)
+						return null;
+					IType parentType= (IType)binding.getJavaElement();
+					if (parentType == null)
+						return null;
+					String varName= ((SimpleName)node).getIdentifier();
+					IField field= parentType.getField(varName);
+					if (!Signature.getSignatureSimpleName(field.getTypeSignature()).equals("String")) //$NON-NLS-1$
+						return null;
+					Object obj= field.getConstant();
+					identifier= obj instanceof String ? ((String)obj).substring(1, ((String)obj).length() - 1) : null;
 				}
 			} catch (JavaModelException e) {
 				return null;

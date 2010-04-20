@@ -102,7 +102,7 @@ public class NLSHintHelper {
 
 		ITypeBinding accessorBinding= null;
 
-		if (nlsStringLiteral instanceof SimpleName && nlsStringLiteral.getParent() instanceof QualifiedName) {
+		if (nlsStringLiteral instanceof SimpleName && nlsStringLiteral.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
 			SimpleName name= (SimpleName)nlsStringLiteral;
 
 			IBinding binding= name.resolveBinding();
@@ -118,7 +118,7 @@ public class NLSHintHelper {
 			if (parent instanceof MethodInvocation) {
 				MethodInvocation methodInvocation= (MethodInvocation) parent;
 				List args= methodInvocation.arguments();
-				if (args.indexOf(nlsStringLiteral) != 0 && args.size() != 1) {
+				if (args.size() != 1 && args.indexOf(nlsStringLiteral) != 0) {
 					return null; // must be the only argument in lookup method
 				}
 
