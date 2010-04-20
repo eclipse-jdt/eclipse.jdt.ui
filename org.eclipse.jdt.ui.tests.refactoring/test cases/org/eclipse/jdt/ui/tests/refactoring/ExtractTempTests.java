@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -651,6 +651,10 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(7, 21, 7, 33, true, false, "temp", "valueOf");
 	}
 
+	public void test104() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=307758
+		helper1(6, 17, 6, 24, true, false, "temp", "i");
+	}
 
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");

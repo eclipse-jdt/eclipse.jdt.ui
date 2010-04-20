@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -315,6 +315,10 @@ public class ExtractConstantTests extends RefactoringTest {
 
 	public void test36() throws Exception { // bug 218108
 		helper1(7, 20, 7, 25, true, false, "BUG", "BUG");
+	}
+
+	public void test37() throws Exception { // bug 307758
+		helper1(6, 17, 6, 24, true, false, "INT", "INT");
 	}
 
 	public void testZeroLengthSelection0() throws Exception {

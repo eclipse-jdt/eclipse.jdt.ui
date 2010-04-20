@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -374,6 +374,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 	// !! +/- same as in ExtractConstantRefactoring & ExtractTempRefactoring
 	private RefactoringStatus checkExpressionFragmentIsRValue() {
 		switch(Checks.checkExpressionIsRValue(fSelectedExpression)) {
+			case Checks.IS_RVALUE_GUESSED:
 			case Checks.NOT_RVALUE_MISC:
 				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.IntroduceParameterRefactoring_select, null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, null);
 			case Checks.NOT_RVALUE_VOID:

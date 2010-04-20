@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,8 +65,8 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractConstantDescriptor;
@@ -242,7 +242,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			try {
 				Expression expression= getSelectedExpression().getAssociatedExpression();
 				if (expression != null) {
-					ITypeBinding binding= expression.resolveTypeBinding();
+					ITypeBinding binding= guessBindingForReference(expression);
 					fGuessedConstNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_STATIC_FINAL_FIELD, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()));
 				}
 			} catch (JavaModelException e) {
@@ -348,11 +348,20 @@ public class ExtractConstantRefactoring extends Refactoring {
 				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.ExtractConstantRefactoring_select_expression, null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, null);
 			case Checks.NOT_RVALUE_VOID:
 				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.ExtractConstantRefactoring_no_void, null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID, null);
+			case Checks.IS_RVALUE_GUESSED:
 			case Checks.IS_RVALUE:
 				return new RefactoringStatus();
 			default:
 				Assert.isTrue(false); return null;
 		}
+	}
+
+	private ITypeBinding guessBindingForReference(Expression expression) {
+		ITypeBinding binding= expression.resolveTypeBinding();
+		if (binding == null) {
+			binding= ASTResolving.guessBindingForReference(expression);
+		}
+		return binding;
 	}
 
 	//	 !!! -- same as in ExtractTempRefactoring
@@ -526,7 +535,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			LinkedProposalPositionGroup typeGroup= fLinkedProposalModel.getPositionGroup(KEY_TYPE, true);
 			typeGroup.addPosition(rewrite.track(type), true);
 
-			ITypeBinding typeBinding= fragment.getAssociatedExpression().resolveTypeBinding();
+			ITypeBinding typeBinding= guessBindingForReference(fragment.getAssociatedExpression());
 			if (typeBinding != null) {
 				ITypeBinding[] relaxingTypes= ASTResolving.getNarrowingTypes(ast, typeBinding);
 				for (int i= 0; i < relaxingTypes.length; i++) {
@@ -541,7 +550,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	private Type getConstantType() throws JavaModelException {
 		if (fConstantTypeCache == null) {
 			IExpressionFragment fragment= getSelectedExpression();
-			ITypeBinding typeBinding= fragment.getAssociatedExpression().resolveTypeBinding();
+			ITypeBinding typeBinding= guessBindingForReference(fragment.getAssociatedExpression());
 			AST ast= fCuRewrite.getAST();
 			typeBinding= Bindings.normalizeForDeclarationUse(typeBinding, ast);
 			ImportRewrite importRewrite= fCuRewrite.getImportRewrite();

@@ -458,12 +458,21 @@ public class ExtractTempRefactoring extends Refactoring {
 				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.ExtractTempRefactoring_select_expression, null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, null);
 			case Checks.NOT_RVALUE_VOID:
 				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.ExtractTempRefactoring_no_void, null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID, null);
+			case Checks.IS_RVALUE_GUESSED:
 			case Checks.IS_RVALUE:
 				return new RefactoringStatus();
 			default:
 				Assert.isTrue(false);
 				return null;
 		}
+	}
+
+	private ITypeBinding guessBindingForReference(Expression expression) {
+		ITypeBinding binding= expression.resolveTypeBinding();
+		if (binding == null) {
+			binding= ASTResolving.guessBindingForReference(expression);
+		}
+		return binding;
 	}
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
@@ -906,7 +915,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			try {
 				Expression expression= getSelectedExpression().getAssociatedExpression();
 				if (expression != null) {
-					ITypeBinding binding= expression.resolveTypeBinding();
+					ITypeBinding binding= guessBindingForReference(expression);
 					fGuessedTempNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()));
 				}
 			} catch (JavaModelException e) {

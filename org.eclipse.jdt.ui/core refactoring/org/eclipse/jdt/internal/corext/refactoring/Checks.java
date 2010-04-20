@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
@@ -87,6 +88,11 @@ public class Checks {
 	public static final int IS_RVALUE= 0;
 	public static final int NOT_RVALUE_MISC= 1;
 	public static final int NOT_RVALUE_VOID= 2;
+
+	/**
+	 * @since 3.6
+	 */
+	public static final int IS_RVALUE_GUESSED= 3;
 
 	/**
 	 * Checks if method will have a constructor name after renaming.
@@ -838,9 +844,10 @@ public class Checks {
 	/**
 	 * @param e
 	 * @return int
-	 *          Checks.IS_RVALUE		if e is an rvalue
-	 *          Checks.NOT_RVALUE_VOID  if e is not an rvalue because its type is void
-	 *          Checks.NOT_RVALUE_MISC  if e is not an rvalue for some other reason
+	 *          Checks.IS_RVALUE			if e is an rvalue
+	 *          Checks.IS_RVALUE_GUESSED	if e is guessed as an rvalue 
+	 *          Checks.NOT_RVALUE_VOID  	if e is not an rvalue because its type is void
+	 *          Checks.NOT_RVALUE_MISC  	if e is not an rvalue for some other reason
 	 */
 	public static int checkExpressionIsRValue(Expression e) {
 		if(e instanceof Name) {
@@ -850,12 +857,17 @@ public class Checks {
 		}
 
 		ITypeBinding tb= e.resolveTypeBinding();
+		boolean guessingRequired= false;
+		if (tb == null) {
+			guessingRequired= true;
+			tb= ASTResolving.guessBindingForReference(e);
+		}
 		if (tb == null)
 			return NOT_RVALUE_MISC;
 		else if (tb.getName().equals("void")) //$NON-NLS-1$
 			return NOT_RVALUE_VOID;
 
-		return IS_RVALUE;
+		return guessingRequired ? IS_RVALUE_GUESSED : IS_RVALUE;
 	}
 
 	public static boolean isDeclaredIn(VariableDeclaration tempDeclaration, Class astNodeClass) {
