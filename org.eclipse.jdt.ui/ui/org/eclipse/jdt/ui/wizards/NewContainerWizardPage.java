@@ -338,6 +338,10 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 				IJavaProject jproject= JavaCore.create(proj);
 				fCurrRoot= jproject.getPackageFragmentRoot(res);
 				if (res.exists()) {
+					if (res.isVirtual()) {
+						status.setError(NewWizardMessages.NewContainerWizardPage_error_FolderIsVirtual);
+						return status;
+					}
 					try {
 						if (!proj.hasNature(JavaCore.NATURE_ID)) {
 							if (resType == IResource.PROJECT) {

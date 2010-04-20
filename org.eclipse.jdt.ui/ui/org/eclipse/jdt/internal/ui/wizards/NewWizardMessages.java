@@ -70,6 +70,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewContainerWizardPage_error_ContainerDoesNotExist;
 	public static String NewContainerWizardPage_error_NotAFolder;
 	public static String NewContainerWizardPage_error_ProjectClosed;
+	public static String NewContainerWizardPage_error_FolderIsVirtual;
 	public static String NewContainerWizardPage_warning_NotAJavaProject;
 	public static String NewContainerWizardPage_warning_NotInAJavaProject;
 	public static String NewContainerWizardPage_warning_NotOnClassPath;
@@ -259,6 +260,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewSourceFolderWizardPage_error_InvalidProjectPath;
 	public static String NewSourceFolderWizardPage_error_NotAJavaProject;
 	public static String NewSourceFolderWizardPage_error_ProjectNotExists;
+	public static String NewSourceFolderWizardPage_error_FolderIsVirtual;
 	public static String NewSourceFolderWizardPage_warning_ReplaceSFandOL;
 	public static String NewSourceFolderWizardPage_warning_ReplaceOL;
 	public static String NewSourceFolderWizardPage_warning_ReplaceSF;

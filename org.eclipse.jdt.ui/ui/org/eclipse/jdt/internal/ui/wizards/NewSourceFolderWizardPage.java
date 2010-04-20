@@ -317,6 +317,10 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 						fRootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_NotAFolder);
 						return;
 					}
+					if (res.isVirtual()) {
+						fRootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_FolderIsVirtual);
+						return;
+					}
 				} else {
 					URI projLocation= fCurrJProject.getProject().getLocationURI();
 					if (projLocation != null) {
