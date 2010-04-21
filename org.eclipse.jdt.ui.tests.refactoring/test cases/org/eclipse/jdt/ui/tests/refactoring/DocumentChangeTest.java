@@ -45,8 +45,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -104,9 +106,21 @@ public class DocumentChangeTest extends RefactoringTest {
 			}
 			
 			public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-				DocumentChange change= new DocumentChange("", document);
+				DocumentChange change= new DocumentChange("DocumentChangeTest change", document);
 				change.setEdit(new InsertEdit(prolog.length(), insertion));
-				return change;
+				
+				// need to provide a non-null affectedObjects from the undo change, otherwise the NonLocalUndoUserApprover shows a dialog.
+				CompositeChange compositeChange= new CompositeChange("DocumentChangeTest composite change") {
+					protected Change createUndoChange(Change[] childUndos) {
+						return new CompositeChange(getName(), childUndos) {
+							public Object[] getAffectedObjects() {
+								return new Object[0];
+							}
+						};
+					}
+				};
+				compositeChange.add(change);
+				return compositeChange;
 			}
 		};
 		
@@ -131,6 +145,29 @@ public class DocumentChangeTest extends RefactoringTest {
 			JavaPlugin.getActiveWorkbenchWindow().run(true, true, runnable);
 			
 			editor.doSave(new NullProgressMonitor());
+			
+			String contents= getContents(file);
+			assertEquals(prolog + insertion + epilog, contents);
+			
+			// undo:
+			
+			runnable= new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					try {
+						RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
+					} catch (Exception e) {
+						throw new InvocationTargetException(e);
+					}
+				}
+			};
+			JavaPlugin.getActiveWorkbenchWindow().run(true, true, runnable);
+			
+			editor.doSave(new NullProgressMonitor());
+			
+			contents= getContents(file);
+			assertEquals(prolog + epilog, contents);
+			
+			
 		} finally {
 			Platform.removeLogListener(logListener);
 		}
@@ -138,7 +175,5 @@ public class DocumentChangeTest extends RefactoringTest {
 			throw new CoreException(statusCollector);
 		}
 		
-		String contents= getContents(file);
-		assertEquals(prolog + insertion + epilog, contents);
 	}
 }
