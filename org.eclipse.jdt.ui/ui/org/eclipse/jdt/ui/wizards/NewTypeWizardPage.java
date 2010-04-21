@@ -1435,9 +1435,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 			fCurrPackage= root.getPackageFragment(packName);
 			IResource resource= fCurrPackage.getResource();
-			if (resource != null && !ResourcesPlugin.getWorkspace().validateFiltered(resource).isOK()) {
-				status.setError(NewWizardMessages.NewTypeWizardPage_error_PackageNameFiltered);
-				return status;
+			if (resource != null){
+				if (resource.isVirtual()){
+					status.setError(NewWizardMessages.NewTypeWizardPage_error_PackageIsVirtual);
+					return status;
+				}			
+				if (!ResourcesPlugin.getWorkspace().validateFiltered(resource).isOK()) {
+					status.setError(NewWizardMessages.NewTypeWizardPage_error_PackageNameFiltered);
+					return status;
+				}
 			}
 		} else {
 			status.setError(""); //$NON-NLS-1$

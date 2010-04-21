@@ -146,6 +146,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewTypeWizardPage_error_ModifiersFinalAndAbstract;
 	public static String NewTypeWizardPage_error_TypeNameFiltered;
 	public static String NewTypeWizardPage_error_PackageNameFiltered;
+	public static String NewTypeWizardPage_error_PackageIsVirtual;
 	public static String NewTypeWizardPage_configure_templates_message;
 	public static String NewTypeWizardPage_configure_templates_title;
 	public static String NewTypeWizardPage_SuperClassDialog_title;
