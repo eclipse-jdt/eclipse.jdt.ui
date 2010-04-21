@@ -113,11 +113,11 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -659,7 +659,8 @@ public class PasteAction extends SelectionDispatchAction{
 				} else if (javaElements.length > 0) {
 					resource= javaElements[0].getResource();
 				}
-				new ApplyPatchOperation(null, fPatchStorage, resource, new CompareConfiguration()).openWizard();
+				// XXX: This will be fixed in 3.7, see https://bugs.eclipse.org/309803
+				new org.eclipse.team.internal.ui.synchronize.patch.ApplyPatchOperation(null, fPatchStorage, resource, new CompareConfiguration()).openWizard();
 				return;
 			}
 			
