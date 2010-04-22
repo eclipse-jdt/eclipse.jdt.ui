@@ -63,6 +63,12 @@ import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
  * Utility methods for the Java Model.
  */
 public final class JavaModelUtil {
+	
+	/**
+	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=309163
+	 * @since 3.6
+	 */
+	public static final boolean HIDE_VERSION_1_7= true;
 
 	/**
 	 * Only use this suffix for creating new .java files.
@@ -749,7 +755,7 @@ public final class JavaModelUtil {
 		if (version == null) {
 			return defaultCompliance;
 		} else if (version.startsWith(JavaCore.VERSION_1_7)) {
-			return JavaCore.VERSION_1_7;
+			return HIDE_VERSION_1_7 ? JavaCore.VERSION_1_6 : JavaCore.VERSION_1_7;
 		} else if (version.startsWith(JavaCore.VERSION_1_6)) {
 			return JavaCore.VERSION_1_6;
 		} else if (version.startsWith(JavaCore.VERSION_1_5)) {
@@ -777,7 +783,7 @@ public final class JavaModelUtil {
 		// fallback:
 		String desc= executionEnvironment.getId();
 		if (desc.indexOf(JavaCore.VERSION_1_7) != -1) {
-			return JavaCore.VERSION_1_7;
+			return HIDE_VERSION_1_7 ? JavaCore.VERSION_1_6 : JavaCore.VERSION_1_7;
 		} else if (desc.indexOf(JavaCore.VERSION_1_6) != -1) {
 			return JavaCore.VERSION_1_6;
 		} else if (desc.indexOf(JavaCore.VERSION_1_5) != -1) {

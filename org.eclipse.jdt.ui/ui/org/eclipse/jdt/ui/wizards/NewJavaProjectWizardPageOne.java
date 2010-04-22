@@ -604,7 +604,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					return environments[i].getId();
 			}
 
-			return "J2SE-1.6"; //$NON-NLS-1$
+			return "JavaSE-1.6"; //$NON-NLS-1$
 		}
 
 		private String getDefaultJVMLabel() {

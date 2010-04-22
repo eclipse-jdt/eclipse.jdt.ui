@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -251,6 +251,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	private Composite createComplianceTabContent(Composite folder) {
 
+		boolean hide_1_7= JavaModelUtil.HIDE_VERSION_1_7 &&
+				!(VERSION_1_7.equals(getValue(PREF_COMPLIANCE)) || VERSION_1_7.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)));
 
 		String[] values3456= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6, VERSION_1_7 };
 		String[] values3456Labels= new String[] {
@@ -260,6 +262,10 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.ComplianceConfigurationBlock_version16,
 			PreferencesMessages.ComplianceConfigurationBlock_version17
 		};
+		if (hide_1_7) {
+			values3456= removeLast(values3456);
+			values3456Labels= removeLast(values3456Labels);
+		}
 
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
 		Composite composite= sc1.getBody();
@@ -333,6 +339,10 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.ComplianceConfigurationBlock_version16,
 			PreferencesMessages.ComplianceConfigurationBlock_version17
 		};
+		if (hide_1_7) {
+			versions= removeLast(versions);
+			versionsLabels= removeLast(versionsLabels);
+		}
 
 		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_targetplatform_label;
 		addComboBox(group, label, PREF_CODEGEN_TARGET_PLATFORM, versions, versionsLabels, indent);
@@ -420,6 +430,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		validateComplianceStatus();
 
 		return sc1;
+	}
+
+	private static String[] removeLast(String[] versions) {
+		String[] reduced= new String[versions.length - 1];
+		System.arraycopy(versions, 0, reduced, 0, reduced.length);
+		return reduced;
 	}
 
 	protected final void openBuildPathPropertyPage() {
@@ -572,6 +588,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 						fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, args));
 					}
 					isVisible= true;
+					if (JavaModelUtil.HIDE_VERSION_1_7 && VERSION_1_7.equals(compliance)) {
+						String javaVersion= ((IVMInstall2) install).getJavaVersion();
+						if (javaVersion != null && javaVersion.startsWith(VERSION_1_7)) {
+							isVisible= false;
+						}
+					}
 				}
 			}
 			fJRE50InfoText.setVisible(isVisible);
