@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -109,9 +109,9 @@ public class FileTransferDropAdapter extends JdtViewerDropAdapter implements Tra
 	 */
 	public boolean performDrop(final Object data) {
 		try {
-			int operation= getCurrentOperation();
+			final int currentOperation= getCurrentOperation();
 
-			if (data == null || !(data instanceof String[]) || operation != DND.DROP_COPY)
+			if (data == null || !(data instanceof String[]) || currentOperation != DND.DROP_COPY)
 				return false;
 
 			final IContainer target= getActualTarget(getCurrentTarget());
@@ -124,7 +124,7 @@ public class FileTransferDropAdapter extends JdtViewerDropAdapter implements Tra
 			Display.getCurrent().asyncExec(new Runnable() {
 				public void run() {
 					getShell().forceActive();
-					new CopyFilesAndFoldersOperation(getShell()).copyFiles((String[]) data, target);
+					new CopyFilesAndFoldersOperation(getShell()).copyOrLinkFiles((String[])data, target, currentOperation);
 				}
 			});
 

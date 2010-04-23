@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,13 +40,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 
 import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -63,10 +63,11 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 	private int fCanCopyElements;
 
 	public IStatus handleDrop(CommonDropAdapter dropAdapter, DropTargetEvent dropTargetEvent, Object target) {
+		int currentOperation= dropAdapter.getCurrentOperation();
 		if (LocalSelectionTransfer.getInstance().isSupportedType(dropAdapter.getCurrentTransfer())) {
 			try {
 				target= getActualTarget(target);
-				switch (dropAdapter.getCurrentOperation()) {
+				switch (currentOperation) {
 					case DND.DROP_MOVE :
 						handleDropMove(target);
 						dropTargetEvent.detail= DND.DROP_NONE;
@@ -92,7 +93,7 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 
 				getShell().forceActive();
 				final Object data= FileTransfer.getInstance().nativeToJava(dropAdapter.getCurrentTransfer());
-				new CopyFilesAndFoldersOperation(getShell()).copyFiles((String[]) data, targetContainer);
+				new CopyFilesAndFoldersOperation(getShell()).copyOrLinkFiles((String[])data, targetContainer, currentOperation);
 			} catch (JavaModelException e) {
 				String title = PackagesMessages.DropAdapter_errorTitle;
 				String message = PackagesMessages.DropAdapter_errorMessage;
