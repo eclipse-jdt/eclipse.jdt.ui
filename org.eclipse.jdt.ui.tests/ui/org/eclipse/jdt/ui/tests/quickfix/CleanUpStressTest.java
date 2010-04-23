@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
+
 public class CleanUpStressTest extends CleanUpTestCase {
 
 	private static final String SRC_CONTAINER= "src";
@@ -233,8 +234,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    }\n");
         buf.append("\n");
         buf.append("    public static void savePreferences() throws IOException {\n");
-        buf.append("        final FileOutputStream fos = new FileOutputStream(BaseTestRunner\n");
-        buf.append("                .getPreferencesFile());\n");
+        buf.append("        final FileOutputStream fos = new FileOutputStream(\n");
+        buf.append("                BaseTestRunner.getPreferencesFile());\n");
         buf.append("        try {\n");
         buf.append("            BaseTestRunner.getPreferences().store(fos, \"\"); //$NON-NLS-1$\n");
         buf.append("        } finally {\n");
@@ -492,8 +493,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    }\n");
         buf.append("\n");
         buf.append("    public void testFilter() {\n");
-        buf.append("        Assert.assertEquals(this.fFiltered, BaseTestRunner\n");
-        buf.append("                .getFilteredTrace(this.fUnfiltered));\n");
+        buf.append("        Assert.assertEquals(this.fFiltered,\n");
+        buf.append("                BaseTestRunner.getFilteredTrace(this.fUnfiltered));\n");
         buf.append("    }\n");
         buf.append("}");
         fExpectedChangesAllTests.put("junit.tests.runner.StackFilterTest.java", buf.toString());
@@ -3094,8 +3095,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    public ClassLoaderTest() {\n");
         buf.append("    }\n");
         buf.append("    private boolean isTestCaseClassLoader(final ClassLoader cl) {\n");
-        buf.append("        return ((cl != null) && cl.getClass().getName().equals(\n");
-        buf.append("                junit.runner.TestCaseClassLoader.class.getName()));\n");
+        buf.append("        return ((cl != null) && cl.getClass().getName()\n");
+        buf.append("                .equals(junit.runner.TestCaseClassLoader.class.getName()));\n");
         buf.append("    }\n");
         buf.append("    public void verify() {\n");
         buf.append("        this.verifyApplicationClassLoadedByTestLoader();\n");
@@ -3410,8 +3411,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("public class LoadedFromJar extends Assert {\n");
         buf.append("    private boolean isTestCaseClassLoader(final ClassLoader cl) {\n");
-        buf.append("        return ((cl != null) && cl.getClass().getName().equals(\n");
-        buf.append("                junit.runner.TestCaseClassLoader.class.getName()));\n");
+        buf.append("        return ((cl != null) && cl.getClass().getName()\n");
+        buf.append("                .equals(junit.runner.TestCaseClassLoader.class.getName()));\n");
         buf.append("    }\n");
         buf.append("    public void verify() {\n");
         buf.append("        this.verifyApplicationClassLoadedByTestLoader();\n");
@@ -4167,11 +4168,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        }\n");
         buf.append("        Assert.assertTrue((p.waitFor() == 0) == success);\n");
         buf.append("        if (success) {\n");
-        buf.append("            Assert.assertEquals(junit.textui.TestRunner.SUCCESS_EXIT, p\n");
-        buf.append("                    .exitValue());\n");
+        buf.append("            Assert.assertEquals(junit.textui.TestRunner.SUCCESS_EXIT,\n");
+        buf.append("                    p.exitValue());\n");
         buf.append("        } else {\n");
-        buf.append("            Assert.assertEquals(junit.textui.TestRunner.FAILURE_EXIT, p\n");
-        buf.append("                    .exitValue());\n");
+        buf.append("            Assert.assertEquals(junit.textui.TestRunner.FAILURE_EXIT,\n");
+        buf.append("                    p.exitValue());\n");
         buf.append("        }\n");
         buf.append("    }\n");
         buf.append("\n");

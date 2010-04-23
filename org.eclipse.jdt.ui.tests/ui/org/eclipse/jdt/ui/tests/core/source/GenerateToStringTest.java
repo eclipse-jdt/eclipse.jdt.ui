@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Mateusz Matela and others.
+ * Copyright (c) 2008, 2010 Mateusz Matela and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
 
 public class GenerateToStringTest extends SourceTestCase {
 
@@ -1706,8 +1707,8 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	public String toString() {\r\n"
 				+ "		final int maxLen = 10;\r\n"
 				+ "		StringBuffer buffer = new StringBuffer();\r\n"
-				+ "		buffer.append(\"A [AArray=\").append(AArray != null ? arrayToString(AArray, AArray.length, maxLen) : null).append(\", aBool=\").append(aBool).append(\", anA=\").append(anA).append(\", floatArray=\").append(floatArray != null ? arrayToString(floatArray, floatArray.length, maxLen) : null).append(\", hashMap=\").append(hashMap != null ? toString(hashMap.entrySet(), maxLen) : null).append(\", intArray=\").append(intArray != null ? arrayToString(intArray, intArray.length, maxLen) : null).append(\", integerCollection=\").append(integerCollection != null ? toString(integerCollection, maxLen) : null).append(\", list=\").append(list != null ? toString(list, maxLen) : null).append(\", object=\").append(object).append(\", stringArray=\").append(stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen) : null).append(\", wildCollection=\").append(wildCollection != null ? toString(wildCollection, maxLen) : null).append(\", charArrayMethod()=\").append(\r\n"
-				+ "				charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, maxLen) : null).append(\", floatArrayMethod()=\").append(floatArrayMethod() != null ? arrayToString(floatArrayMethod(), floatArrayMethod().length, maxLen) : null).append(\"]\");\r\n"
+				+ "		buffer.append(\"A [AArray=\").append(AArray != null ? arrayToString(AArray, AArray.length, maxLen) : null).append(\", aBool=\").append(aBool).append(\", anA=\").append(anA).append(\", floatArray=\").append(floatArray != null ? arrayToString(floatArray, floatArray.length, maxLen) : null).append(\", hashMap=\").append(hashMap != null ? toString(hashMap.entrySet(), maxLen) : null).append(\", intArray=\").append(intArray != null ? arrayToString(intArray, intArray.length, maxLen) : null).append(\", integerCollection=\").append(integerCollection != null ? toString(integerCollection, maxLen) : null).append(\", list=\").append(list != null ? toString(list, maxLen) : null).append(\", object=\").append(object).append(\", stringArray=\").append(stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen) : null).append(\", wildCollection=\").append(wildCollection != null ? toString(wildCollection, maxLen) : null).append(\", charArrayMethod()=\")\r\n"
+				+ "				.append(charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, maxLen) : null).append(\", floatArrayMethod()=\").append(floatArrayMethod() != null ? arrayToString(floatArrayMethod(), floatArrayMethod().length, maxLen) : null).append(\"]\");\r\n"
 				+ "		return buffer.toString();\r\n" + "	}\r\n" + "	private String toString(Collection collection, int maxLen) {\r\n" + "		StringBuffer buffer = new StringBuffer();\r\n"
 				+ "		buffer.append(\"[\");\r\n" + "		int i = 0;\r\n" + "		for (Iterator iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n"
 				+ "				buffer.append(\", \");\r\n" + "			}\r\n" + "			buffer.append(iterator.next());\r\n" + "		}\r\n" + "		buffer.append(\"]\");\r\n" + "		return buffer.toString();\r\n" + "	}\r\n"
@@ -2018,8 +2019,8 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	@Override\r\n"
 				+ "	public String toString() {\r\n"
 				+ "		final int maxLen = 10;\r\n"
-				+ "		return String.format(\"A [AArray=%s, aBool=%s, anA=%s, floatArray=%s, hashMap=%s, intArray=%s, integerCollection=%s, list=%s, object=%s, stringArray=%s, wildCollection=%s, charArrayMethod()=%s, floatArrayMethod()=%s]\", AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) : null, aBool, anA, floatArray != null ? Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) : null, hashMap != null ? toString(hashMap.entrySet(), maxLen) : null, intArray != null ? Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) : null, integerCollection != null ? toString(integerCollection, maxLen) : null, list != null ? toString(list, maxLen) : null, object, stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) : null, wildCollection != null ? toString(wildCollection, maxLen) : null, charArrayMethod() != null ? Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(\r\n"
-				+ "				charArrayMethod().length, maxLen))) : null, floatArrayMethod() != null ? Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : null);\r\n"
+				+ "		return String.format(\"A [AArray=%s, aBool=%s, anA=%s, floatArray=%s, hashMap=%s, intArray=%s, integerCollection=%s, list=%s, object=%s, stringArray=%s, wildCollection=%s, charArrayMethod()=%s, floatArrayMethod()=%s]\", AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) : null, aBool, anA, floatArray != null ? Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) : null, hashMap != null ? toString(hashMap.entrySet(), maxLen) : null, intArray != null ? Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) : null, integerCollection != null ? toString(integerCollection, maxLen) : null, list != null ? toString(list, maxLen) : null, object, stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) : null, wildCollection != null ? toString(wildCollection, maxLen) : null,\r\n"
+				+ "				charArrayMethod() != null ? Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))) : null, floatArrayMethod() != null ? Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : null);\r\n"
 				+ "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"[\");\r\n"
 				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n"
 				+ "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
