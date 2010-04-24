@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
@@ -103,7 +104,7 @@ public class JavaElementLinks {
 
 		public String getElementName(IJavaElement element) {
 			String elementName= element.getElementName();
-			if (fElement.equals(element)) { // linking to the member itself would be a no-op
+			if (element.equals(fElement)) { // linking to the member itself would be a no-op
 				return elementName;
 			}
 			if (elementName.length() == 0) { // anonymous
@@ -111,15 +112,11 @@ public class JavaElementLinks {
 			}
 			try {
 				String uri= createURI(JAVADOC_SCHEME, element);
-				return createLink(uri, elementName);
+				return createHeaderLink(uri, elementName);
 			} catch (URISyntaxException e) {
 				JavaPlugin.log(e);
 				return elementName;
 			}
-		}
-
-		private String createLink(String uri, String elementName) {
-			return "<a class='header' href='" + uri + ("'>" + elementName + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		protected String getGT() {
@@ -134,7 +131,7 @@ public class JavaElementLinks {
 			String typeName= super.getSimpleTypeName(enclosingElement, typeSig);
 			try {
 				String uri= createURI(JAVADOC_SCHEME, enclosingElement, typeName, null, null);
-				return createLink(uri, typeName);
+				return createHeaderLink(uri, typeName);
 			} catch (URISyntaxException e) {
 				JavaPlugin.log(e);
 				return typeName;
@@ -319,7 +316,10 @@ public class JavaElementLinks {
 					JavaPlugin.log(e);
 				}
 			}
-
+			if (element instanceof IAnnotation) {
+				element= element.getParent();
+			}
+			
 			if (element instanceof ILocalVariable) {
 				element= element.getAncestor(IJavaElement.TYPE);
 			} else if (element instanceof ITypeParameter) {
@@ -459,8 +459,33 @@ public class JavaElementLinks {
 	}
 
 	/**
+	 * Creates a link with the given URI and label text.
+	 * 
+	 * @param uri the URI
+	 * @param label the label
+	 * @return the HTML link
+	 * @since 3.6
+	 */
+	public static String createLink(String uri, String label) {
+		return "<a href='" + uri + "'>" + label + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+	
+	/**
+	 * Creates a header link with the given URI and label text.
+	 * 
+	 * @param uri the URI
+	 * @param label the label
+	 * @return the HTML link
+	 * @since 3.6
+	 */
+	public static String createHeaderLink(String uri, String label) {
+		return "<a class='header' href='" + uri + "'>" + label + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+	
+	/**
 	 * Returns the label for a Java element with the flags as defined by {@link JavaElementLabels}.
-	 * Referenced element names in the label (except the given element's name) are rendered as Javadoc links.
+	 * Referenced element names in the label (except the given element's name) are rendered as 
+	 * header links.
 	 *
 	 * @param element the element to render
 	 * @param flags the rendering flags
@@ -468,10 +493,25 @@ public class JavaElementLinks {
 	 * @since 3.5
 	 */
 	public static String getElementLabel(IJavaElement element, long flags) {
+		return getElementLabel(element, flags, false);
+	}
+
+	/**
+	 * Returns the label for a Java element with the flags as defined by {@link JavaElementLabels}.
+	 * Referenced element names in the label are rendered as header links.
+	 * If <code>linkAllNames</code> is <code>false</code>, don't link the name of the given element
+	 *
+	 * @param element the element to render
+	 * @param flags the rendering flags
+	 * @param linkAllNames if <code>true</code>, link all names; if <code>false</code>, link all names except original element's name
+	 * @return the label of the Java element
+	 * @since 3.6
+	 */
+	public static String getElementLabel(IJavaElement element, long flags, boolean linkAllNames) {
 		StringBuffer buf= new StringBuffer();
 
 		if (!Strings.USE_TEXT_PROCESSOR) {
-			new JavaElementLinkedLabelComposer(element, buf).appendElementLabel(element, flags);
+			new JavaElementLinkedLabelComposer(linkAllNames ? null : element, buf).appendElementLabel(element, flags);
 			return Strings.markJavaElementLabelLTR(buf.toString());
 		} else {
 			String label= JavaElementLabels.getElementLabel(element, flags);

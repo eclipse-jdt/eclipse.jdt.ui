@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,6 +76,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
@@ -103,12 +104,15 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -893,6 +897,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @see AbstractInfoView#computeInput(Object)
 	 */
 	protected Object computeInput(Object input) {
+		//TODO: never used?
 		if (getControl() == null || ! (input instanceof IJavaElement))
 			return null;
 
@@ -1062,6 +1067,19 @@ public class JavadocView extends AbstractInfoView {
 				}
 
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(member, constantValue, true));
+
+				try {
+					ISourceRange nameRange= ((IMember)curr).getNameRange();
+					if (SourceRange.isAvailable(nameRange)) {
+						ITypeRoot typeRoot= ((IMember)curr).getTypeRoot();
+						Region hoverRegion= new Region(nameRange.getOffset(), nameRange.getLength());
+						buffer.append("<br>"); //$NON-NLS-1$
+						JavadocHover.addAnnotations(buffer, curr, typeRoot, hoverRegion);
+					}
+				} catch (JavaModelException e) {
+					// no annotations this time...
+				}
+				
 				Reader reader;
 				try {
 					String content= JavadocContentAccess2.getHTMLContent(member, true);
@@ -1095,8 +1113,16 @@ public class JavadocView extends AbstractInfoView {
 				if (reader != null) {
 					HTMLPrinter.addParagraph(buffer, reader);
 				}
+
 			} else if (curr.getElementType() == IJavaElement.LOCAL_VARIABLE || curr.getElementType() == IJavaElement.TYPE_PARAMETER) {
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr, null, true));
+				if (curr instanceof ILocalVariable) {
+					ISourceRange nameRange= ((ILocalVariable) curr).getNameRange();
+					ITypeRoot typeRoot= ((IMember) curr.getParent()).getTypeRoot();
+					Region hoverRegion= new Region(nameRange.getOffset(), nameRange.getLength());
+					buffer.append("<br>"); //$NON-NLS-1$
+					JavadocHover.addAnnotations(buffer, curr, typeRoot, hoverRegion);
+				}
 			}
 		}
 
@@ -1137,7 +1163,7 @@ public class JavadocView extends AbstractInfoView {
 		}
 
 		StringBuffer buf= new StringBuffer();
-		JavadocHover.addImageAndLabel(buf, imageName, 16, 16, 8, 5, label.toString(), 22, 0);
+		JavadocHover.addImageAndLabel(buf, imageName, 16, 16, label.toString(), 20, 2);
 		return buf.toString();
 	}
 
@@ -1288,6 +1314,8 @@ public class JavadocView extends AbstractInfoView {
 					return null;
 
 				VariableDeclarationFragment fieldDecl= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(constantField, ast);
+				if (fieldDecl == null)
+					return null;
 				Expression initializer= fieldDecl.getInitializer();
 				if (initializer == null)
 					return null;
@@ -1491,7 +1519,7 @@ public class JavadocView extends AbstractInfoView {
 			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleExternalLink(java.net.URL, org.eclipse.swt.widgets.Display)
 			 */
 			public boolean handleExternalLink(final URL url, Display display) {
-				if (fCurrent == null || !url.equals(fCurrent.getInputElement())) {
+				if (fCurrent == null || (fCurrent.getInputElement() instanceof URL && !url.toExternalForm().equals(((URL) fCurrent.getInputElement()).toExternalForm()))) {
 					fCurrent= new URLBrowserInput(fCurrent, url);
 
 					if (fBackAction != null) {
