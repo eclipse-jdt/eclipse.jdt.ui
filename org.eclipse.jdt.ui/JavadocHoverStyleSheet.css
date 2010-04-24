@@ -12,10 +12,10 @@ h4           { margin-top: 2em; margin-bottom: 0.3em; }
 h5           { margin-top: 0px; margin-bottom: 0px; }
 p            { margin-top: 1em; margin-bottom: 1em; }
 pre          { margin-left: 0.6em; }
-ul	         { margin-top: 0px; margin-bottom: 1em; }
+ul	         { margin-top: 0px; margin-bottom: 1em; margin-left: 1em; padding-left: 1em;}
 li	         { margin-top: 0px; margin-bottom: 0px; } 
 li p	     { margin-top: 0px; margin-bottom: 0px; } 
-ol	         { margin-top: 0px; margin-bottom: 1em; }
+ol	         { margin-top: 0px; margin-bottom: 1em; margin-left: 1em; padding-left: 1em; }
 dl	         { margin-top: 0px; margin-bottom: 1em; }
 dt	         { margin-top: 0px; margin-bottom: 0px; font-weight: bold; }
 dd	         { margin-top: 0px; margin-bottom: 0px; }
