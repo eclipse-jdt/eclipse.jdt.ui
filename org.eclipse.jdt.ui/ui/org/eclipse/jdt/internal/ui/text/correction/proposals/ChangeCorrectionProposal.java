@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.jface.util.Util;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 
@@ -297,8 +298,18 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	 * @throws CoreException thrown when the change could not be created
 	 */
 	public synchronized final Change getChange() throws CoreException {
-		if (fChange == null) {
-			fChange= createChange();
+		if (Util.isGtk()) {
+			// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=293995 :
+			// [Widgets] Deadlock while UI thread displaying/computing a change proposal and non-UI thread creating image
+			if (fChange == null) {
+				fChange= createChange();
+			}
+		} else {
+			synchronized (this) {
+				if (fChange == null) {
+					fChange= createChange();
+				}
+			}
 		}
 		return fChange;
 	}
