@@ -27,7 +27,9 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -38,17 +40,22 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 
@@ -60,6 +67,7 @@ import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.JavadocContentAccess;
+import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
@@ -1112,9 +1120,10 @@ public class JavadocContentAccess2 {
 	}
 
 	private void handleInlineTagElement(TagElement node) {
-		//TODO: TagElement.TAG_VALUE
-
 		String name= node.getTagName();
+		
+		if (TagElement.TAG_VALUE.equals(name) && handleValueTag(node))
+			return;
 
 		boolean isLink= TagElement.TAG_LINK.equals(name);
 		boolean isLinkplain= TagElement.TAG_LINKPLAIN.equals(name);
@@ -1146,6 +1155,75 @@ public class JavadocContentAccess2 {
 		if (isLiteral || isCode)
 			fLiteralContent--;
 
+	}
+
+	private boolean handleValueTag(TagElement node) {
+		
+		List fragments= node.fragments();
+		try {
+			if (fragments.isEmpty()) {
+				if (fMember instanceof IField && Flags.isStatic(fMember.getFlags()) && Flags.isFinal(fMember.getFlags())) {
+					IField field= (IField) fMember;
+					return handleConstantValue(field, false);
+				}
+			} else if (fragments.size() == 1) {
+				Object first= fragments.get(0);
+				if (first instanceof MemberRef) {
+					MemberRef memberRef= (MemberRef) first;
+					if (memberRef.getQualifier() == null) {
+						SimpleName name= memberRef.getName();
+						IField field= fMember.getDeclaringType().getField(name.getIdentifier());
+						if (field != null && field.exists() && Flags.isStatic(fMember.getFlags()) && Flags.isFinal(fMember.getFlags()))
+							return handleConstantValue(field, true);
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		
+		return false;
+	}
+
+	private boolean handleConstantValue(IField field, boolean link) throws JavaModelException {
+		ISourceRange nameRange= field.getNameRange();
+		if (SourceRange.isAvailable(nameRange)) {
+			CompilationUnit cuNode= SharedASTProvider.getAST(field.getTypeRoot(), SharedASTProvider.WAIT_ACTIVE_ONLY, null);
+			if (cuNode != null) {
+				ASTNode nameNode= NodeFinder.perform(cuNode, nameRange);
+				if (nameNode instanceof SimpleName) {
+					IBinding binding= ((SimpleName) nameNode).resolveBinding();
+					if (binding instanceof IVariableBinding) {
+						IVariableBinding variableBinding= (IVariableBinding) binding;
+						Object constantValue= variableBinding.getConstantValue();
+						if (constantValue != null) {
+							String text;
+							if (constantValue instanceof String) {
+								StringLiteral stringLiteral= AST.newAST(AST.JLS3).newStringLiteral();
+								stringLiteral.setLiteralValue((String) constantValue);
+								text= stringLiteral.getEscapedValue();
+							} else {
+								text= constantValue.toString(); // Javadoc tool is even worse for chars...
+							}
+							if (link) {
+								String uri;
+								try {
+									uri= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, field);
+									fBuf.append(JavaElementLinks.createLink(uri, text));
+								} catch (URISyntaxException e) {
+									JavaPlugin.log(e);
+									return false;
+								}
+							} else {
+								handleText(text);
+							}
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	private boolean handleDocRoot(TagElement node) {
