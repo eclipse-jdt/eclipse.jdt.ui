@@ -297,7 +297,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	 * @return returns the change for this proposal.
 	 * @throws CoreException thrown when the change could not be created
 	 */
-	public synchronized final Change getChange() throws CoreException {
+	public final Change getChange() throws CoreException {
 		if (Util.isGtk()) {
 			// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=293995 :
 			// [Widgets] Deadlock while UI thread displaying/computing a change proposal and non-UI thread creating image
