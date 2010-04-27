@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,8 @@ public class AllChangeTests {
 		suite.addTest(new TestSuite(RenameResourceChangeTests.class));
 		suite.addTest(new TestSuite(RenameSourceFolderChangeTests.class));
 		suite.addTest(new TestSuite(CopyPackageChangeTest.class));
+		suite.addTest(new TestSuite(CopyPackageChangeTest.class));
+		suite.addTest(DocumentChangeTest.suite());
 		return new RefactoringTestSetup(suite);
 	}
 }
