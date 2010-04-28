@@ -1364,7 +1364,7 @@ public class JavaElementLabelComposer {
 	}
 
 	public static PackageNameAbbreviation[] parseAbbreviationPattern(String pattern) {
-		String[] parts= pattern.split("\\s*\n\\s*"); //$NON-NLS-1$
+		String[] parts= pattern.split("\\s*(?:\r\n?|\n)\\s*"); //$NON-NLS-1$
 
 		ArrayList result= new ArrayList();
 
