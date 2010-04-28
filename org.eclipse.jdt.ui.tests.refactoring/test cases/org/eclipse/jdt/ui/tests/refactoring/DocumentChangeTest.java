@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
 
+import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -41,6 +42,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
@@ -67,6 +69,21 @@ public class DocumentChangeTest extends RefactoringTest {
 		return setUpTest(new TestSuite(DocumentChangeTest.class));
 	}
 
+	public static Test suiteWithoutRefactoringTestSetup() {
+		return new TestSetup(new TestSuite(DocumentChangeTest.class)) {
+			protected void setUp() throws Exception {
+				PlatformUI.getWorkbench().showPerspective(JavaUI.ID_PERSPECTIVE, JavaPlugin.getActiveWorkbenchWindow());
+			}
+			
+			protected void tearDown() throws Exception {
+				IWorkbenchPage activePage= JavaPlugin.getActivePage();
+				if (activePage != null) {
+					activePage.closeAllPerspectives(true, true);
+				}
+			}
+		};
+	}
+	
 	public static Test setUpTest(Test test) {
 		return new RefactoringTestSetup(test) {
 			protected void setUp() throws Exception {

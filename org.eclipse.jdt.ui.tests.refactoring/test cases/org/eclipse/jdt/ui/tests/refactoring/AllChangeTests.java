@@ -22,7 +22,7 @@ public class AllChangeTests {
 		suite.addTest(new TestSuite(RenameSourceFolderChangeTests.class));
 		suite.addTest(new TestSuite(CopyPackageChangeTest.class));
 		suite.addTest(new TestSuite(CopyPackageChangeTest.class));
-		suite.addTest(DocumentChangeTest.suite());
+		suite.addTest(DocumentChangeTest.suiteWithoutRefactoringTestSetup());
 		return new RefactoringTestSetup(suite);
 	}
 }
