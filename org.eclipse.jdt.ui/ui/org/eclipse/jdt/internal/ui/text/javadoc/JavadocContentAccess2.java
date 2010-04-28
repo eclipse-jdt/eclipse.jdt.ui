@@ -1186,6 +1186,8 @@ public class JavadocContentAccess2 {
 	}
 
 	private boolean handleConstantValue(IField field, boolean link) throws JavaModelException {
+		String text= null;
+		
 		ISourceRange nameRange= field.getNameRange();
 		if (SourceRange.isAvailable(nameRange)) {
 			CompilationUnit cuNode= SharedASTProvider.getAST(field.getTypeRoot(), SharedASTProvider.WAIT_ACTIVE_ONLY, null);
@@ -1197,7 +1199,6 @@ public class JavadocContentAccess2 {
 						IVariableBinding variableBinding= (IVariableBinding) binding;
 						Object constantValue= variableBinding.getConstantValue();
 						if (constantValue != null) {
-							String text;
 							if (constantValue instanceof String) {
 								StringLiteral stringLiteral= AST.newAST(AST.JLS3).newStringLiteral();
 								stringLiteral.setLiteralValue((String) constantValue);
@@ -1205,23 +1206,33 @@ public class JavadocContentAccess2 {
 							} else {
 								text= constantValue.toString(); // Javadoc tool is even worse for chars...
 							}
-							if (link) {
-								String uri;
-								try {
-									uri= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, field);
-									fBuf.append(JavaElementLinks.createLink(uri, text));
-								} catch (URISyntaxException e) {
-									JavaPlugin.log(e);
-									return false;
-								}
-							} else {
-								handleText(text);
-							}
-							return true;
 						}
 					}
 				}
 			}
+		}
+		
+		if (text == null) {
+			Object constant= field.getConstant();
+			if (constant != null) {
+				text= constant.toString();
+			}
+		}
+		
+		if (text != null) {
+			if (link) {
+				String uri;
+				try {
+					uri= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, field);
+					fBuf.append(JavaElementLinks.createLink(uri, text));
+				} catch (URISyntaxException e) {
+					JavaPlugin.log(e);
+					return false;
+				}
+			} else {
+				handleText(text);
+			}
+			return true;
 		}
 		return false;
 	}
