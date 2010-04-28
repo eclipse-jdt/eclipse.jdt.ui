@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -468,6 +471,11 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java"); //$NON-NLS-1$
 			if (cu.exists()) {
 				status.setWarning(WizardMessages.NewTestSuiteWizPage_typeName_warning_already_exists);
+				return status;
+			}
+			IResource resource= cu.getResource();
+			if (resource != null && !ResourcesPlugin.getWorkspace().validateFiltered(resource).isOK()) {
+				status.setError(WizardMessages.NewTestSuiteWizPage_typeName_error_filtered);
 				return status;
 			}
 		}

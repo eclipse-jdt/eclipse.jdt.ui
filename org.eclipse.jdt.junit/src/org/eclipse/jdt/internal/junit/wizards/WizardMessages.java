@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,6 +85,7 @@ public final class WizardMessages extends NLS {
 	public static String NewTestSuiteWizPage_typeName_error_name_not_valid;
 	public static String NewTestSuiteWizPage_typeName_error_name_name_discouraged;
 	public static String NewTestSuiteWizPage_typeName_warning_already_exists;
+	public static String NewTestSuiteWizPage_typeName_error_filtered;
 	public static String NewTestSuiteWizPage_cannotUpdateDialog_title;
 	public static String NewTestSuiteWizPage_cannotUpdateDialog_message;
 	public static String NewTestClassWizPage_treeCaption_classSelected;
