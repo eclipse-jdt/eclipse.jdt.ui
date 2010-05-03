@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,8 +78,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager;
-import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedRange;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.text.JavaColorManager;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
@@ -806,7 +806,9 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		fPreviewViewer.setEditable(false);
 		Cursor arrowCursor= fPreviewViewer.getTextWidget().getDisplay().getSystemCursor(SWT.CURSOR_ARROW);
 		fPreviewViewer.getTextWidget().setCursor(arrowCursor);
-		fPreviewViewer.getTextWidget().setCaret(null);
+
+		// Don't set caret to 'null' as this causes https://bugs.eclipse.org/293263
+//		fPreviewViewer.getTextWidget().setCaret(null);
 
 		String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt"); //$NON-NLS-1$
 		IDocument document= new Document(content);
