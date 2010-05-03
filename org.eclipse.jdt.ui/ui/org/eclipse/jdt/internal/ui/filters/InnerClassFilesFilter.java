@@ -10,12 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.filters;
 
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IClassFile;
+
 
 public class InnerClassFilesFilter extends ViewerFilter {
 
@@ -26,12 +25,6 @@ public class InnerClassFilesFilter extends ViewerFilter {
 		if (element instanceof IClassFile) {
 			IClassFile classFile= (IClassFile) element;
 			return classFile.getElementName().indexOf('$') == -1;
-		
-		} else if (element instanceof IFile) {
-			String name= ((IFile) element).getName();
-			if (name.indexOf('$') != -1 && name.endsWith(".class")) { //$NON-NLS-1$
-				return false;
-			}
 		}
 		return true;
 	}
