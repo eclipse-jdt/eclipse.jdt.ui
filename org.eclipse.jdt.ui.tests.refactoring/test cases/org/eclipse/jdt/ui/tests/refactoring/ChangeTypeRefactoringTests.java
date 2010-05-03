@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -571,6 +571,19 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
 
+	public void testArrayValuedAnnotations() throws Exception {
+		// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=311099
+		Collection types= helper1(3, 12, 3, 12, "java.lang.Object").getValidTypeNames();
+		String[] actual= (String[]) types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.lang.Object",
+				"java.io.Serializable",
+				"java.lang.Comparable<java.lang.String>",
+				"java.lang.CharSequence"
+		};
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
+	}
+	
 	// tests that are supposed to fail
 
 	public void testInvalidSelection() throws Exception {
