@@ -624,8 +624,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * @see IWorkbenchPart#dispose
 	 */
 	public void dispose() {
-		fHierarchyLifeCycle.freeHierarchy();
-		fHierarchyLifeCycle.removeChangedListener(fTypeHierarchyLifeCycleListener);
+		if (fHierarchyLifeCycle != null) {
+			fHierarchyLifeCycle.freeHierarchy();
+			fHierarchyLifeCycle.removeChangedListener(fTypeHierarchyLifeCycleListener);
+			fHierarchyLifeCycle= null;
+		}
 		fPaneLabelProvider.dispose();
 
 		if (fMethodsViewer != null) {
@@ -1775,10 +1778,23 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	public void showEmptyViewer() {
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
+				if (isDisposed())
+					return;
+
 				clearInput();
 				setKeepShowingEmptyViewers(true);
 			}
 		});
+	}
+
+	/**
+	 * Checks if the type hierarchy view part has been disposed.
+	 *
+	 * @return <code>true</code> if the type hierarchy view part has been disposed, <code>false</code> otherwise
+	 * @since 3.6
+	 */
+	private boolean isDisposed() {
+		return fHierarchyLifeCycle == null;
 	}
 
 	/**
@@ -1795,7 +1811,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/**
 	 * Sets the input for all the hierarchy viewers with their respective viewer instances.
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	public void setViewersInput() {
@@ -1820,12 +1836,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	/**
 	 * Returns value that determines whether the empty viewers should keep showing. If false,
 	 * replace with fEmptyTypesViewer.
-	 * 
+	 *
 	 * @return <code>true</code> if the empty viewers can be shown, <code>false otherwise
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	public boolean isKeepShowingEmptyViewers() {
 		return fKeepShowingEmptyViewers;
-	}	
+	}
 }
