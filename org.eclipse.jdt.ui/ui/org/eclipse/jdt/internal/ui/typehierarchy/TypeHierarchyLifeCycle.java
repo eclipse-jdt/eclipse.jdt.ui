@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -118,6 +118,12 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 			fHierarchy= null;
 			fInputElement= null;
 		}
+		synchronized (this) {
+			if (fRefreshHierarchyJob != null) {
+				fRefreshHierarchyJob.cancel();
+				fRefreshHierarchyJob= null;
+			}
+		}
 	}
 
 	public void removeChangedListener(ITypeHierarchyLifeCycleListener listener) {
@@ -182,35 +188,36 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				fHierarchyRefreshNeeded= true;
 				context.run(true, true, op);
 				fHierarchyRefreshNeeded= false;
-			} else {				
+			} else {
 				final String label= Messages.format(TypeHierarchyMessages.TypeHierarchyLifeCycle_computeInput, JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT));
-				fRefreshHierarchyJob= new Job(label) {					
-					/*
-					 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
-					 */
-					public IStatus run(IProgressMonitor pm) {
-						pm.beginTask(label, LONG);
-						try {
-							doHierarchyRefreshBackground(element, pm);
-						} catch (OperationCanceledException e) {
-							if (fRefreshJobCanceledExplicitly) {
-								fTypeHierarchyViewPart.showEmptyViewer();
+				synchronized (this) {
+					fRefreshHierarchyJob= new Job(label) {
+						/*
+						 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+						 */
+						public IStatus run(IProgressMonitor pm) {
+							pm.beginTask(label, LONG);
+							try {
+								doHierarchyRefreshBackground(element, pm);
+							} catch (OperationCanceledException e) {
+								if (fRefreshJobCanceledExplicitly) {
+									fTypeHierarchyViewPart.showEmptyViewer();
+								}
+								return Status.CANCEL_STATUS;
+							} catch (JavaModelException e) {
+								return e.getStatus();
+							} finally {
+								fHierarchyRefreshNeeded= true;
+								pm.done();
 							}
-							return Status.CANCEL_STATUS;
-						} catch (JavaModelException e) {
-							return e.getStatus();
-						} finally {
-							fHierarchyRefreshNeeded= true;
-							pm.done();
+							return Status.OK_STATUS;
 						}
-						return Status.OK_STATUS;
-					}
-				};
-				fRefreshHierarchyJob.setUser(true);
-				IWorkbenchSiteProgressService progressService= (IWorkbenchSiteProgressService)fTypeHierarchyViewPart.getSite()
+					};
+					fRefreshHierarchyJob.setUser(true);
+					IWorkbenchSiteProgressService progressService= (IWorkbenchSiteProgressService)fTypeHierarchyViewPart.getSite()
 														.getAdapter(IWorkbenchSiteProgressService.class);
-				progressService.schedule(fRefreshHierarchyJob, 0);
-
+					progressService.schedule(fRefreshHierarchyJob, 0);
+				}
 			}
 		}
 	}
@@ -245,12 +252,14 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				 * @see java.lang.Runnable#run()
 				 */
 				public void run() {
-					synchronized (this) {
+					synchronized (TypeHierarchyLifeCycle.this) {
 						if (fRefreshHierarchyJob == null) {
 							return;
 						}
 						fRefreshHierarchyJob= null;
 					}
+					if (pm.isCanceled())
+						return;
 					fTypeHierarchyViewPart.setViewersInput();
 					fTypeHierarchyViewPart.updateViewers();
 				}
