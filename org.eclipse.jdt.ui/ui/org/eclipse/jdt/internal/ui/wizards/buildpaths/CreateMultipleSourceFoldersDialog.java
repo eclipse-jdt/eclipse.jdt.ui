@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
@@ -135,7 +136,18 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 				rejectedElements.add(allProjects[i]);
 			}
 		}
-		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, rejectedElements.toArray());
+		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, rejectedElements.toArray()){
+
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+			 */
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				if (element instanceof IFolder && ((IFolder)element).isVirtual()) {
+					return false;
+				}
+				return super.select(viewer, parentElement, element);
+			}
+		};
 
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new FakeFolderBaseWorkbenchContentProvider();
