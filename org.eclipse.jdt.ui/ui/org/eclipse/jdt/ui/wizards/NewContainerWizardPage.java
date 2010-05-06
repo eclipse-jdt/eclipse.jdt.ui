@@ -38,6 +38,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
@@ -207,7 +208,13 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 			try {
 				IJavaProject[] projects= JavaCore.create(getWorkspaceRoot()).getJavaProjects();
 				if (projects.length == 1) {
-					jelem= projects[0];
+					IClasspathEntry[] rawClasspath= projects[0].getRawClasspath();
+					for (int i= 0; i < rawClasspath.length; i++) {
+						if (rawClasspath[i].getEntryKind() == IClasspathEntry.CPE_SOURCE) {// add only if the project contains a source folder
+							jelem= projects[0];
+							break;
+						}
+					}
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
