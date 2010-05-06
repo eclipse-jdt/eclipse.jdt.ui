@@ -688,7 +688,7 @@
       </wizard>
       <wizard
             name="%NewJavaWorkingSetWizard.label"
-            icon="$nl$/icons/full/obj16/jworkingSet_obj.gif"
+            icon="$nl$/icons/full/etool16/newjworkingSet_wiz.gif"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.internal.ui.wizards.NewJavaWorkingSetWizard"
             preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
