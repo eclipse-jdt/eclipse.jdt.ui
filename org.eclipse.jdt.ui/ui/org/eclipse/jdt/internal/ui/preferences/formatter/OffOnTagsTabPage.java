@@ -16,6 +16,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
@@ -38,6 +41,17 @@ public class OffOnTagsTabPage extends FormatterTabPage {
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 		createLabel(numColumns, composite, FormatterMessages.OffOnTagsTabPage_description);
 
+		// Add some vertical space
+		Label separator= new Label(composite, SWT.NONE);
+		separator.setVisible(false);
+		GridData data= new GridData(GridData.FILL, GridData.FILL, false, false, numColumns, 1);
+		data.heightHint= fPixelConverter.convertHeightInCharsToPixels(1) / 3;
+		separator.setLayoutData(data);
+
+		final CheckboxPreference enablePref= createCheckboxPref(composite, numColumns, FormatterMessages.OffOnTagsTabPage_enableOffOnTags, DefaultCodeFormatterConstants.FORMATTER_USE_ON_OFF_TAGS,
+				FALSE_TRUE);
+
+
 		IInputValidator inputValidator= new IInputValidator() {
 			/*
 			 * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage.StringPreference.Validator#isValid(java.lang.String)
@@ -57,8 +71,31 @@ public class OffOnTagsTabPage extends FormatterTabPage {
 			}
 		};
 
-		createStringPref(composite, numColumns, FormatterMessages.OffOnTagsTabPage_disableTag, DefaultCodeFormatterConstants.FORMATTER_DISABLING_TAG, inputValidator);
-		createStringPref(composite, numColumns, FormatterMessages.OffOnTagsTabPage_enableTag, DefaultCodeFormatterConstants.FORMATTER_ENABLING_TAG, inputValidator);
+		Composite tagComposite= new Composite(composite, SWT.NONE);
+		final int indent= fPixelConverter.convertWidthInCharsToPixels(4);
+		GridLayout layout= new GridLayout(numColumns, false);
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		layout.marginLeft= indent;
+		tagComposite.setLayout(layout);
+
+		final StringPreference disableTagPref= createStringPref(tagComposite, numColumns, FormatterMessages.OffOnTagsTabPage_disableTag, DefaultCodeFormatterConstants.FORMATTER_DISABLING_TAG,
+				inputValidator);
+		final StringPreference enableTagPref= createStringPref(tagComposite, numColumns, FormatterMessages.OffOnTagsTabPage_enableTag, DefaultCodeFormatterConstants.FORMATTER_ENABLING_TAG,
+				inputValidator);
+
+		enablePref.getControl().addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				boolean enabled= enablePref.getChecked();
+				enableTagPref.setEnabled(enabled);
+				disableTagPref.setEnabled(enabled);
+			}
+		});
+
+		boolean enabled= enablePref.getChecked();
+		enableTagPref.setEnabled(enabled);
+		disableTagPref.setEnabled(enabled);
+
 	}
 
 	public final Composite createContents(Composite parent) {

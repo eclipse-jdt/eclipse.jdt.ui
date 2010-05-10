@@ -408,6 +408,7 @@ final class FormatterMessages extends NLS {
 	public static String IndentationTabPage_use_tabs_only_for_leading_indentations;
 	
 	public static String  OffOnTagsTabPage_description;
+	public static String  OffOnTagsTabPage_enableOffOnTags;
 	public static String  OffOnTagsTabPage_disableTag;
 	public static String  OffOnTagsTabPage_enableTag;
 	public static String  OffOnTagsTabPage_error_startsWithWhitespace;
