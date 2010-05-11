@@ -68,10 +68,10 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
-import org.eclipse.jface.text.link.LinkedPosition;
-import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
+import org.eclipse.jface.text.link.LinkedPosition;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -357,11 +357,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		}
 
 		try {
-			// patch replacement length
-			int delta= offset - (getReplacementOffset() + getReplacementLength());
-			if (delta > 0)
-				setReplacementLength(getReplacementLength() + delta);
-
 			boolean isSmartTrigger= isSmartTrigger(trigger);
 
 			String replacement;
