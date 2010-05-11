@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import junit.framework.Test;
 import org.eclipse.jdt.testplugin.OrderedTestSuite;
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
 import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.Performance;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
@@ -95,6 +96,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 
 	public void testColdException() throws Exception {
 		//cold
+		joinBackgroudActivities();
 		try {
 			measureOpenType("*Exception");
 		} finally {
@@ -110,7 +112,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 			measureOpenType("*Exception");
 		} finally {
 			commitMeasurements();
-			assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -100, +10);
+			Performance.getDefault().assertPerformanceInAbsoluteBand(fPerformanceMeter, Dimension.ELAPSED_PROCESS, 0, 500);
 		}
 	}
 
@@ -147,7 +149,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 			measureOpenType("SWT", true);
 		} finally {
 			commitMeasurements();
-			assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -100, +10);
+			Performance.getDefault().assertPerformanceInAbsoluteBand(fPerformanceMeter, Dimension.ELAPSED_PROCESS, 0, 500);
 		}
 	}
 
