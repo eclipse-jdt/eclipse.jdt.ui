@@ -26,10 +26,10 @@ public class PackageExplorerProblemsDecorator extends TreeHierarchyLayoutProblem
 	 * <p>
 	 * TODO: Make API in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=308672
 	 * 
-	 * @see JavaElementImageDescriptor#PROJECT_ERROR
+	 * @see JavaElementImageDescriptor#BUILDPATH_ERROR
 	 * @since 3.6
 	 */
-	public final static int PROJECT_ERROR= 0x2000;
+	public final static int BUILDPATH_ERROR= 0x2000;
 
 	public PackageExplorerProblemsDecorator() {
 		super();
@@ -49,8 +49,8 @@ public class PackageExplorerProblemsDecorator extends TreeHierarchyLayoutProblem
 		for (int i= 0; i < elements.length; i++) {
 			IAdaptable element= elements[i];
 			int flags= super.computeAdornmentFlags(element);
-			if ((flags & PackageExplorerProblemsDecorator.PROJECT_ERROR) != 0)
-				return PackageExplorerProblemsDecorator.PROJECT_ERROR;
+			if ((flags & PackageExplorerProblemsDecorator.BUILDPATH_ERROR) != 0)
+				return PackageExplorerProblemsDecorator.BUILDPATH_ERROR;
 			result|= flags;
 		}
 		if ((result & JavaElementImageDescriptor.ERROR) != 0)

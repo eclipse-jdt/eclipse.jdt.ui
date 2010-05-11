@@ -377,7 +377,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_RUN= createUnManagedCached(T_OVR, "run_co.gif"); 							//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_WARNING= createUnManagedCached(T_OVR, "warning_co.gif"); 					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_ERROR= createUnManagedCached(T_OVR, "error_co.gif"); 						//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_PROJECT_ERROR= createUnManagedCached(T_OVR, "error_co_project.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_BUILDPATH_ERROR= createUnManagedCached(T_OVR, "error_co_buildpath.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_OVERRIDES= createUnManagedCached(T_OVR, "over_co.gif");  					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_IMPLEMENTS= createUnManagedCached(T_OVR, "implm_co.gif");  				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_SYNCH_AND_OVERRIDES= createUnManagedCached(T_OVR, "sync_over.gif");  	//$NON-NLS-1$

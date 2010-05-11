@@ -43,6 +43,7 @@ import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
@@ -107,7 +108,14 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 
 	private static final int ERRORTICK_WARNING= JavaElementImageDescriptor.WARNING;
 	private static final int ERRORTICK_ERROR= JavaElementImageDescriptor.ERROR;
-	private static final int ERRORTICK_PROJECT_ERROR= PackageExplorerProblemsDecorator.PROJECT_ERROR;
+	private static final int ERRORTICK_BUILDPATH_ERROR= PackageExplorerProblemsDecorator.BUILDPATH_ERROR;
+
+	/**
+	 * JRE container problem marker type (value
+	 * <code>"org.eclipse.jdt.launching.jreContainerMarker"</code>). This can be used to recognize
+	 * those markers in the workspace that flag problems in the JRE container.
+	 */
+	private static final String JRE_CONTAINER_PROBLEM_MARKER= "org.eclipse.jdt.launching.jreContainerMarker"; //$NON-NLS-1$
 
 	private ImageDescriptorRegistry fRegistry;
 	private boolean fUseNewRegistry= false;
@@ -239,9 +247,13 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		int severity= 0;
 		if (sourceElement == null) {
 			if (res instanceof IProject) {
-				severity= res.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+				severity= res.findMaxProblemSeverity(IJavaModelMarker.BUILDPATH_PROBLEM_MARKER, true, IResource.DEPTH_ZERO);
 				if (severity == IMarker.SEVERITY_ERROR) {
-					return ERRORTICK_PROJECT_ERROR;
+					return ERRORTICK_BUILDPATH_ERROR;
+				}
+				severity= res.findMaxProblemSeverity(JRE_CONTAINER_PROBLEM_MARKER, true, IResource.DEPTH_ZERO);
+				if (severity == IMarker.SEVERITY_ERROR) {
+					return ERRORTICK_BUILDPATH_ERROR;
 				}
 			}
 			severity= res.findMaxProblemSeverity(IMarker.PROBLEM, true, depth);
@@ -407,8 +419,8 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		int adornmentFlags= computeAdornmentFlags(element);
 		if (adornmentFlags == ERRORTICK_ERROR) {
 			decoration.addOverlay(JavaPluginImages.DESC_OVR_ERROR);
-		} else if (adornmentFlags == ERRORTICK_PROJECT_ERROR) {
-			decoration.addOverlay(JavaPluginImages.DESC_OVR_PROJECT_ERROR);
+		} else if (adornmentFlags == ERRORTICK_BUILDPATH_ERROR) {
+			decoration.addOverlay(JavaPluginImages.DESC_OVR_BUILDPATH_ERROR);
 		} else if (adornmentFlags == ERRORTICK_WARNING) {
 			decoration.addOverlay(JavaPluginImages.DESC_OVR_WARNING);
 		}

@@ -87,11 +87,11 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	public final static int TRANSIENT= 	0x1000;
 
 	/**
-	 * Flag to render the project error adornment.
+	 * Flag to render the build path error adornment.
 	 * @since 3.6
 	 */
 	//TODO: make API in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=308672
-	final static int PROJECT_ERROR= PackageExplorerProblemsDecorator.PROJECT_ERROR;
+	final static int BUILDPATH_ERROR= PackageExplorerProblemsDecorator.BUILDPATH_ERROR;
 
 	private ImageDescriptor fBaseImage;
 	private int fFlags;
@@ -298,8 +298,8 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		if ((fFlags & ERROR) != 0) {
 			addBottomLeftImage(JavaPluginImages.DESC_OVR_ERROR, pos);
 		}
-		if ((fFlags & PackageExplorerProblemsDecorator.PROJECT_ERROR) != 0) {
-			addBottomLeftImage(JavaPluginImages.DESC_OVR_PROJECT_ERROR, pos);
+		if ((fFlags & PackageExplorerProblemsDecorator.BUILDPATH_ERROR) != 0) {
+			addBottomLeftImage(JavaPluginImages.DESC_OVR_BUILDPATH_ERROR, pos);
 		}
 		if ((fFlags & WARNING) != 0) {
 			addBottomLeftImage(JavaPluginImages.DESC_OVR_WARNING, pos);
