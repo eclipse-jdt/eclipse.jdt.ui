@@ -70,15 +70,24 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
@@ -961,10 +970,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			}
 			
 		} else {
-			if (node.getNodeType() != ASTNode.SIMPLE_NAME)
-				return null;
-			
-			binding= ((SimpleName)node).resolveBinding();
+			binding= resolveBinding(node);
 		}
 		
 		if (binding == null)
@@ -982,6 +988,47 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		}
 		
 		return buf.toString();
+	}
+
+	private static IBinding resolveBinding(ASTNode node) {
+		if (node instanceof SimpleName) {
+			// workaround for https://bugs.eclipse.org/62605 (constructor name resolves to type, not method)
+			SimpleName simpleName= (SimpleName) node;
+			StructuralPropertyDescriptor loc= simpleName.getLocationInParent();
+			while (loc == QualifiedType.NAME_PROPERTY || loc == QualifiedName.NAME_PROPERTY|| loc == SimpleType.NAME_PROPERTY || loc == ParameterizedType.TYPE_PROPERTY) {
+				node= node.getParent();
+				loc= node.getLocationInParent();
+			}
+			if (loc == ClassInstanceCreation.TYPE_PROPERTY) {
+				ClassInstanceCreation cic= (ClassInstanceCreation) node.getParent();
+				IMethodBinding constructorBinding= cic.resolveConstructorBinding();
+				if (constructorBinding == null)
+					return null;
+				ITypeBinding declaringClass= constructorBinding.getDeclaringClass();
+				if (!declaringClass.isAnonymous())
+					return constructorBinding;
+				ITypeBinding superTypeDeclaration= declaringClass.getSuperclass().getTypeDeclaration();
+				return resolveSuperclassConstructor(superTypeDeclaration, constructorBinding);
+			}
+			return simpleName.resolveBinding();
+			
+		} else if (node instanceof SuperConstructorInvocation) {
+			return ((SuperConstructorInvocation) node).resolveConstructorBinding();
+		} else if (node instanceof ConstructorInvocation) {
+			return ((ConstructorInvocation) node).resolveConstructorBinding();
+		} else {
+			return null;
+		}
+	}
+
+	private static IBinding resolveSuperclassConstructor(ITypeBinding superClassDeclaration, IMethodBinding constructor) {
+		IMethodBinding[] methods= superClassDeclaration.getDeclaredMethods();
+		for (int i= 0; i < methods.length; i++) {
+			IMethodBinding method= methods[i];
+			if (method.isConstructor() && constructor.isSubsignature(method))
+				return method;
+		}
+		return null;
 	}
 
 	private static void addAnnotation(StringBuffer buf, IJavaElement element, IAnnotationBinding annotation) throws URISyntaxException {
