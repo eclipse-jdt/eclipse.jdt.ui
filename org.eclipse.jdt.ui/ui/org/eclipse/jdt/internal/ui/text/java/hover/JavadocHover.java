@@ -1010,8 +1010,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		if (value instanceof ITypeBinding) {
 			ITypeBinding typeBinding= (ITypeBinding)value;
 			IJavaElement type= typeBinding.getJavaElement();
-			String typeLabel= JavaElementLinks.getElementLabel(type, LABEL_FLAGS, true);
-			buf.append(typeLabel).append(".class"); //$NON-NLS-1$
+			String uri= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, type);
+			String name= type.getElementName();
+			addLink(buf, uri, name);
+			buf.append(".class"); //$NON-NLS-1$
 			
 		} else if (value instanceof IVariableBinding) { // only enum constants
 			IVariableBinding variableBinding= (IVariableBinding)value;
