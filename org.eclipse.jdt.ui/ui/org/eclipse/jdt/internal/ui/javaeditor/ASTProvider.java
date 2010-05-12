@@ -314,8 +314,8 @@ public final class ASTProvider {
 			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "about to reconcile: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		synchronized (fReconcileLock) {
-			fIsReconciling= true;
 			fReconcilingJavaElement= javaElement;
+			fIsReconciling= true;
 		}
 		cache(null, javaElement);
 	}
