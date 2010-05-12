@@ -618,8 +618,8 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			final IProject resource= getSingleProject();
 			final String project= resource != null ? resource.getName() : null;
 			final String source= project != null ? Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_project_pattern, BasicElementLabels.getJavaElementName(project)) : RefactoringCoreMessages.JavaDeleteProcessor_workspace;
-			final String header= fElements.length == 1 ? RefactoringCoreMessages.JavaDeleteProcessor_header_singular : Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_header_plural,
-					new String[] { String.valueOf(fElements.length), source });
+			final String header= fElements.length == 1 ? Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_header_singular, source) : Messages.format(
+					RefactoringCoreMessages.JavaDeleteProcessor_header_plural, new String[] { String.valueOf(fElements.length), source });
 			int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			if (fDeleteSubPackages)
