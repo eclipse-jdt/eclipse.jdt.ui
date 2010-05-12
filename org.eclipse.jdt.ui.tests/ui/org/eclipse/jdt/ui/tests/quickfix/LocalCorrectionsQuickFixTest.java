@@ -6559,7 +6559,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -6599,7 +6599,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -6783,9 +6783,20 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot, 1);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
-		String[] expected= new String[2];
+		String[] expected= new String[3];
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void test() {\n");
+		buf.append("        @SuppressWarnings(\"rawtypes\")\n");
+		buf.append("        List l;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
 
 		buf= new StringBuffer();
 		buf.append("package pack;\n");
@@ -6796,7 +6807,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        List l;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[1]= buf.toString();
 
 		buf= new StringBuffer();
 		buf.append("package pack;\n");
@@ -6806,7 +6817,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        List<?> l;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[2]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -6831,9 +6842,20 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot, 1);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
-		String[] expected= new String[2];
+		String[] expected= new String[3];
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    private class E1<P1, P2> {}\n");
+		buf.append("    public void test() {\n");
+		buf.append("        @SuppressWarnings(\"rawtypes\")\n");
+		buf.append("        E1 e1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
 
 		buf= new StringBuffer();
 		buf.append("package pack;\n");
@@ -6844,7 +6866,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        E1 e1;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[1]= buf.toString();
 
 		buf= new StringBuffer();
 		buf.append("package pack;\n");
@@ -6854,7 +6876,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        E1<?, ?> e1;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[2]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -7227,10 +7249,20 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
-		String[] expected= new String[1];
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(@SuppressWarnings(\"rawtypes\") List<List> list) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.List;\n");
@@ -7240,7 +7272,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    public void foo(List<List> list) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[1]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}

@@ -39,7 +39,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
@@ -47,6 +46,7 @@ import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -106,34 +106,22 @@ public class SuppressWarningsSubProcessor {
 		if (node == null) {
 			return;
 		}
-		if (node.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
-			ASTNode parent= node.getParent();
-			if (parent.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-				addSuppressWarningsProposal(context.getCompilationUnit(), parent.getParent(), warningToken, -2, proposals);
+		
+		ASTNode target= node;
+		int relevance= -2;
+		do {
+			relevance= addSuppressWarningsProposalIfPossible(context.getCompilationUnit(), target, warningToken, relevance, proposals);
+			if (relevance == 0)
 				return;
+			target= target.getParent();
+		} while (target != null);
+		
+		ASTNode importStatement= ASTNodes.getParent(node, ImportDeclaration.class);
+		if (importStatement != null && !context.getASTRoot().types().isEmpty()) {
+			target= (ASTNode) context.getASTRoot().types().get(0);
+			if (target != null) {
+				addSuppressWarningsProposalIfPossible(context.getCompilationUnit(), target, warningToken, -2, proposals);
 			}
-		} else if (node.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY) {
-			addSuppressWarningsProposal(context.getCompilationUnit(), node.getParent(), warningToken, -2, proposals);
-			return;
-		} else if (node.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			node= ASTResolving.findParentBodyDeclaration(node);
-			if (node instanceof FieldDeclaration) {
-				node= node.getParent();
-			}
-		}
-
-		ASTNode target= ASTResolving.findParentBodyDeclaration(node);
-		if (target instanceof Initializer) {
-			target= ASTResolving.findParentBodyDeclaration(target.getParent());
-		}
-		if (target == null) {
-			ASTNode importStatement= ASTNodes.getParent(node, ImportDeclaration.class);
-			if (importStatement != null && !context.getASTRoot().types().isEmpty()) {
-				target= (ASTNode) context.getASTRoot().types().get(0);
-			}
-		}
-		if (target != null) {
-			addSuppressWarningsProposal(context.getCompilationUnit(), target, warningToken, -3, proposals);
 		}
 	}
 
@@ -254,18 +242,38 @@ public class SuppressWarningsSubProcessor {
 		}
 	}
 
-	private static void addSuppressWarningsProposal(ICompilationUnit cu, ASTNode node, String warningToken, int relevance, Collection proposals) {
+	/**
+	 * Adds a SuppressWarnings proposal if possible and returns whether parent nodes should be processed or not (and with what relevance).
+	 * 
+	 * @param cu the compilation unit
+	 * @param node the node on which to add a SuppressWarning token
+	 * @param warningToken the warning token to add
+	 * @param relevance the proposal's relevance
+	 * @param proposals collector to which the proposal should be added
+	 * @return <code>0</code> if no further proposals should be added to parent nodes, or the relevance of the next proposal
+	 * 
+	 * @since 3.6
+	 */
+	private static int addSuppressWarningsProposalIfPossible(ICompilationUnit cu, ASTNode node, String warningToken, int relevance, Collection proposals) {
 
-		ChildListPropertyDescriptor property= null;
+		ChildListPropertyDescriptor property;
 		String name;
+		boolean isLocalVariable= false;
 		switch (node.getNodeType()) {
 			case ASTNode.SINGLE_VARIABLE_DECLARATION:
 				property= SingleVariableDeclaration.MODIFIERS2_PROPERTY;
 				name= ((SingleVariableDeclaration) node).getName().getIdentifier();
+				isLocalVariable= true;
 				break;
 			case ASTNode.VARIABLE_DECLARATION_STATEMENT:
 				property= VariableDeclarationStatement.MODIFIERS2_PROPERTY;
 				name= getFirstFragmentName(((VariableDeclarationStatement) node).fragments());
+				isLocalVariable= true;
+				break;
+			case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
+				property= VariableDeclarationExpression.MODIFIERS2_PROPERTY;
+				name= getFirstFragmentName(((VariableDeclarationExpression) node).fragments());
+				isLocalVariable= true;
 				break;
 			case ASTNode.TYPE_DECLARATION:
 				property= TypeDeclaration.MODIFIERS2_PROPERTY;
@@ -283,10 +291,7 @@ public class SuppressWarningsSubProcessor {
 				property= FieldDeclaration.MODIFIERS2_PROPERTY;
 				name= getFirstFragmentName(((FieldDeclaration) node).fragments());
 				break;
-			case ASTNode.INITIALIZER:
-				property= Initializer.MODIFIERS2_PROPERTY;
-				name= CorrectionMessages.SuppressWarningsSubProcessor_suppress_warnings_initializer_label;
-				break;
+			// case ASTNode.INITIALIZER: not used, because Initializer cannot have annotations
 			case ASTNode.METHOD_DECLARATION:
 				property= MethodDeclaration.MODIFIERS2_PROPERTY;
 				name= ((MethodDeclaration) node).getName().getIdentifier() + "()"; //$NON-NLS-1$
@@ -300,14 +305,14 @@ public class SuppressWarningsSubProcessor {
 				name= ((EnumConstantDeclaration) node).getName().getIdentifier();
 				break;
 			default:
-				JavaPlugin.logErrorMessage("SuppressWarning quick fix: wrong node kind: " + node.getNodeType()); //$NON-NLS-1$
-				return;
+				return relevance;
 		}
 
 		String label= Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_suppress_warnings_label, new String[] { warningToken, BasicElementLabels.getJavaElementName(name) });
 		ASTRewriteCorrectionProposal proposal= new SuppressWarningsProposal(warningToken, label, cu, node, property, relevance);
 
 		proposals.add(proposal);
+		return isLocalVariable ? relevance - 1 : 0;
 	}
 
 	/**

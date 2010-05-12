@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2538,8 +2538,17 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    static {\n");
+		buf.append("        @SuppressWarnings({\"unused\", \"nls\"}) String str= \"foo\";");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2549,7 +2558,8 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        @SuppressWarnings(\"unused\") String str= \"foo\";");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
+		expected[1]= buf.toString();
+		assertExpectedExistInProposals(proposals, expected);
 	}
 
 	public void testSuppressNLSWarningAnnotation2() throws Exception {
@@ -2577,8 +2587,8 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1; \n");
 		buf.append("public class E {\n");
-		buf.append("    @SuppressWarnings(\"nls\")\n");
 		buf.append("    private class Q {\n");
+		buf.append("        @SuppressWarnings(\"nls\")\n");
 		buf.append("        String s = \"\";\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2607,8 +2617,8 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1; \n");
-		buf.append("@SuppressWarnings(\"nls\")\n");
 		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"nls\")\n");
 		buf.append("    String s = \"\";\n");
 		buf.append("}\n");
 		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
@@ -2633,8 +2643,17 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        @SuppressWarnings({\"unused\", \"nls\"}) String s = \"\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
 
 		buf= new StringBuffer();
 		buf.append("package test1; \n");
@@ -2644,7 +2663,8 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        @SuppressWarnings(\"unused\") String s = \"\";\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
+		expected[1]= buf.toString();
+		assertExpectedExistInProposals(proposals, expected);
 	}
 
 	public void testSuppressNLSWarningAnnotation5() throws Exception {
@@ -2688,6 +2708,329 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	public void testSuppressWarningsForLocalVariables() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("         @SuppressWarnings(\"unused\")\n");
+		buf.append("         ArrayList localVar= new ArrayList();");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 4);
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("         @SuppressWarnings({\"unused\", \"rawtypes\"})\n");
+		buf.append("         ArrayList localVar= new ArrayList();");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("         @SuppressWarnings(\"unused\")\n");
+		buf.append("         ArrayList localVar= new ArrayList();");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testSuppressWarningsForFieldVariables() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    List<String> myList = new ArrayList();\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    List<String> myList = new ArrayList();\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testSuppressWarningsForFieldVariables2() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("\n");
+		buf.append("class A {\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
+		buf.append("    ArrayList array;\n");
+		buf.append("    boolean a= array.add(1), b= array.add(1);\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("\n");
+		buf.append("class A {\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
+		buf.append("    ArrayList array;\n");
+		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    boolean a= array.add(1), b= array.add(1);\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+
+	}
+
+	public void testSuppressWarningsForMethodParameters() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public int foo(int param1, List param2) {\n");
+		buf.append("         return param1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 4);
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public int foo(int param1, @SuppressWarnings(\"rawtypes\") List param2) {\n");
+		buf.append("         return param1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
+		buf.append("    public int foo(int param1, List param2) {\n");
+		buf.append("         return param1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		assertExpectedExistInProposals(proposals, expected);
+
+	}
+
+	public void testSuppressWarningsAnonymousClass1() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        @SuppressWarnings(\"unused\")\n");
+		buf.append("        final Object object = new Object() {\n");
+		buf.append("            {\n");
+		buf.append("                for (List l = new ArrayList(), x = new Vector();;) {\n");
+		buf.append("                    if (l == x)\n");
+		buf.append("                        break;\n");
+		buf.append("                }\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    };\n");
+		buf.append("};\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 3);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 5);
+		String[] expected= new String[3];
+		
+		buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        @SuppressWarnings(\"unused\")\n");
+		buf.append("        final Object object = new Object() {\n");
+		buf.append("            {\n");
+		buf.append("                for (@SuppressWarnings(\"rawtypes\")\n");
+		buf.append("                List l = new ArrayList(), x = new Vector();;) {\n");
+		buf.append("                    if (l == x)\n");
+		buf.append("                        break;\n");
+		buf.append("                }\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    };\n");
+		buf.append("};\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        @SuppressWarnings({\"unused\", \"rawtypes\"})\n");
+		buf.append("        final Object object = new Object() {\n");
+		buf.append("            {\n");
+		buf.append("                for (List l = new ArrayList(), x = new Vector();;) {\n");
+		buf.append("                    if (l == x)\n");
+		buf.append("                        break;\n");
+		buf.append("                }\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    };\n");
+		buf.append("};\n");
+		expected[1]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        @SuppressWarnings(\"unused\")\n");
+		buf.append("        final Object object = new Object() {\n");
+		buf.append("            {\n");
+		buf.append("                for (List l = new ArrayList(), x = new Vector();;) {\n");
+		buf.append("                    if (l == x)\n");
+		buf.append("                        break;\n");
+		buf.append("                }\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    };\n");
+		buf.append("};\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testSuppressWarningsAnonymousClass2() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    final Runnable r= new Runnable() {\n");
+		buf.append("        public void run() {\n");
+		buf.append("            boolean b;\n");
+		buf.append("            for (b = new ArrayList().add(1);;) {\n");
+		buf.append("                if (b)\n");
+		buf.append("                    return;\n");
+		buf.append("                        break;\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1; \n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    final Runnable r= new Runnable() {\n");
+		buf.append("        @SuppressWarnings(\"unchecked\")\n");
+		buf.append("        public void run() {\n");
+		buf.append("            boolean b;\n");
+		buf.append("            for (b = new ArrayList().add(1);;) {\n");
+		buf.append("                if (b)\n");
+		buf.append("                    return;\n");
+		buf.append("                        break;\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
 	public void testMisspelledSuppressToken() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("a", false, null);
 		StringBuffer buf= new StringBuffer();
