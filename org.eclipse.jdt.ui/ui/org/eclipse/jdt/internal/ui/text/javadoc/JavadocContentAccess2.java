@@ -1547,7 +1547,7 @@ public class JavadocContentAccess2 {
 					JavaPlugin.log(e);
 				}
 				fBuf.append("'>"); //$NON-NLS-1$
-				if (fs > 1) {
+				if (fs > 1 && !(fs == 2 && isWhitespaceTextElement(fragments.get(1)))) {
 					handleContentElements(fragments.subList(1, fs), true);
 				} else {
 					fBuf.append(refTypeName);
@@ -1578,6 +1578,14 @@ public class JavadocContentAccess2 {
 				handleContentElements(fragments);
 			}
 		}
+	}
+
+	private static boolean isWhitespaceTextElement(Object fragment) {
+		if (!(fragment instanceof TextElement))
+			return false;
+		
+		TextElement textElement= (TextElement) fragment;
+		return textElement.getText().trim().length() == 0;
 	}
 
 	private boolean containsOnlyNull(List parameterNames) {
