@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
@@ -61,6 +60,7 @@ import org.eclipse.jdt.core.dom.TextElement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
@@ -1162,7 +1162,7 @@ public class JavadocContentAccess2 {
 		List fragments= node.fragments();
 		try {
 			if (fragments.isEmpty()) {
-				if (fMember instanceof IField && Flags.isStatic(fMember.getFlags()) && Flags.isFinal(fMember.getFlags())) {
+				if (fMember instanceof IField && JdtFlags.isStatic(fMember) && JdtFlags.isFinal(fMember)) {
 					IField field= (IField) fMember;
 					return handleConstantValue(field, false);
 				}
@@ -1173,7 +1173,7 @@ public class JavadocContentAccess2 {
 					if (memberRef.getQualifier() == null) {
 						SimpleName name= memberRef.getName();
 						IField field= fMember.getDeclaringType().getField(name.getIdentifier());
-						if (field != null && field.exists() && Flags.isStatic(fMember.getFlags()) && Flags.isFinal(fMember.getFlags()))
+						if (field != null && field.exists() && JdtFlags.isStatic(field) && JdtFlags.isFinal(field))
 							return handleConstantValue(field, true);
 					}
 				}
