@@ -141,7 +141,20 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		if (node.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY)
 			return null;
 
-		AccessorClassReference ref= NLSHintHelper.getAccessorClassReference(ast, hoverRegion);
+		boolean usedFullyQualifiedName= false;
+		IBinding containingClassBinding= null;
+		ASTNode containingClass= ASTResolving.findParentType(node);
+		if (containingClass instanceof TypeDeclaration) {
+			containingClassBinding= ((TypeDeclaration)containingClass).resolveBinding();
+			ASTNode parentNode= node.getParent();
+			if (parentNode instanceof QualifiedName) {
+				IBinding qualifierBinding= (((QualifiedName)parentNode).getQualifier()).resolveBinding();
+				if (qualifierBinding != null && containingClassBinding != null) {
+					usedFullyQualifiedName= qualifierBinding.getKey().equals(containingClassBinding.getKey());
+				}
+			}
+		}
+		AccessorClassReference ref= NLSHintHelper.getAccessorClassReference(ast, hoverRegion, usedFullyQualifiedName);
 		if (ref == null)
 			return null;
 
@@ -164,25 +177,21 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		String identifier= null;
 		if (node instanceof StringLiteral) {
 			identifier= ((StringLiteral)node).getLiteralValue();
-		} else if (node.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
+		} else if (!usedFullyQualifiedName && node.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
 			identifier= ((SimpleName)node).getIdentifier();
 		} else {
 			try {
-				ASTNode parent= ASTResolving.findParentType(node);
-				if (parent instanceof TypeDeclaration) {
-					IBinding binding= ((TypeDeclaration)parent).resolveBinding();
-					if (binding == null)
-						return null;
-					IType parentType= (IType)binding.getJavaElement();
-					if (parentType == null)
-						return null;
-					String varName= ((SimpleName)node).getIdentifier();
-					IField field= parentType.getField(varName);
-					if (!Signature.getSignatureSimpleName(field.getTypeSignature()).equals("String")) //$NON-NLS-1$
-						return null;
-					Object obj= field.getConstant();
-					identifier= obj instanceof String ? ((String)obj).substring(1, ((String)obj).length() - 1) : null;
-				}
+				if (containingClassBinding == null)
+					return null;
+				IType parentType= (IType)containingClassBinding.getJavaElement();
+				if (parentType == null)
+					return null;
+				String varName= ((SimpleName)node).getIdentifier();
+				IField field= parentType.getField(varName);
+				if (!Signature.getSignatureSimpleName(field.getTypeSignature()).equals("String")) //$NON-NLS-1$
+					return null;
+				Object obj= field.getConstant();
+				identifier= obj instanceof String ? ((String)obj).substring(1, ((String)obj).length() - 1) : null;
 			} catch (JavaModelException e) {
 				return null;
 			}

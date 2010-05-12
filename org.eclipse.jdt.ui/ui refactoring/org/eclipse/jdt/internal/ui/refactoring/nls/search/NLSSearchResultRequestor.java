@@ -267,7 +267,15 @@ class NLSSearchResultRequestor extends SearchRequestor {
 
 				tokenStart= scanner.getCurrentTokenStartPosition();
 				tokenEnd= scanner.getCurrentTokenEndPosition();
-				if (scanner.getNextToken() != ITerminalSymbols.TokenNameRPAREN)
+				int token;
+				while ((token= scanner.getNextToken()) == ITerminalSymbols.TokenNameDOT) {
+					if ((nextToken= scanner.getNextToken()) != ITerminalSymbols.TokenNameIdentifier) {
+							return null;
+					}
+					tokenStart= scanner.getCurrentTokenStartPosition();
+					tokenEnd= scanner.getCurrentTokenEndPosition();
+				}
+				if (token != ITerminalSymbols.TokenNameRPAREN)
 					return null;
 				
 				if (nextToken == ITerminalSymbols.TokenNameStringLiteral) {

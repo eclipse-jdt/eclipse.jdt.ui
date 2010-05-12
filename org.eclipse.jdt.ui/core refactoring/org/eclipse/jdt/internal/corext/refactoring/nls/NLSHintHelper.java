@@ -94,15 +94,32 @@ public class NLSHintHelper {
 	 * @return the accessor class reference or <code>null</code> if this element is not a nls'ed entry
 	 */
 	public static AccessorClassReference getAccessorClassReference(CompilationUnit astRoot, IRegion region) {
+		return getAccessorClassReference(astRoot, region, false);
+	}
+
+	/**
+	 * Returns the accessor binding info or <code>null</code> if this element is not a nls'ed entry
+	 * 
+	 * @param astRoot the ast root
+	 * @param region the text region
+	 * @param usedFullyQualifiedName boolean flag to indicate that fully qualified name is used to
+	 *            refer a NLS key string constant
+	 * @return the accessor class reference or <code>null</code> if this element is not a nls'ed
+	 *         entry
+	 */
+	public static AccessorClassReference getAccessorClassReference(CompilationUnit astRoot, IRegion region, boolean usedFullyQualifiedName) {
 		ASTNode nlsStringLiteral= NodeFinder.perform(astRoot, region.getOffset(), region.getLength());
 		if (nlsStringLiteral == null)
 			return null; // not found
 
 		ASTNode parent= nlsStringLiteral.getParent();
+		if (usedFullyQualifiedName) {
+			parent= parent.getParent();
+		}
 
 		ITypeBinding accessorBinding= null;
 
-		if (nlsStringLiteral instanceof SimpleName && nlsStringLiteral.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
+		if (!usedFullyQualifiedName && nlsStringLiteral instanceof SimpleName && nlsStringLiteral.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
 			SimpleName name= (SimpleName)nlsStringLiteral;
 
 			IBinding binding= name.resolveBinding();
