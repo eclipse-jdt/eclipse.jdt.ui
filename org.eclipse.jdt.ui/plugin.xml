@@ -617,6 +617,7 @@
          <description>
             %NewJavaProject.description
          </description>
+         <keywordReference id="org.eclipse.jdt.ui.wizards.java"/>
       </wizard>
       <wizard
             name="%NewJavaPackage.label"
@@ -627,6 +628,7 @@
          <description>
             %NewJavaPackage.description
          </description>
+         <keywordReference id="org.eclipse.jdt.ui.wizards.java"/>
       </wizard>
       <wizard
             name="%NewJavaClass.label"
@@ -639,6 +641,7 @@
          <description>
             %NewJavaClass.description
          </description>
+         <keywordReference id="org.eclipse.jdt.ui.wizards.java"/>
       </wizard>
       <wizard
             name="%NewJavaInterface.label"
@@ -651,6 +654,7 @@
          <description>
             %NewJavaInterface.description
          </description>
+         <keywordReference id="org.eclipse.jdt.ui.wizards.java"/>
       </wizard>
       <wizard
             name="%NewSourceFolderCreationWizard.label"
@@ -661,6 +665,7 @@
          <description>
             %NewSourceFolderCreationWizard.description
          </description>
+         <keywordReference id="org.eclipse.jdt.ui.wizards.java"/>
       </wizard>
       <wizard
             name="%NewEnumType.label"
@@ -673,6 +678,7 @@
          <description>
             %NewEnumType.description
          </description>
+         <keywordReference id="org.eclipse.jdt.ui.wizards.java"/>
       </wizard>
       <wizard
             name="%NewAnnotationType.label"
@@ -685,6 +691,7 @@
          <description>
             %NewAnnotationType.description
          </description>
+         <keywordReference id="org.eclipse.jdt.ui.wizards.java"/>
       </wizard>
       <wizard
             name="%NewJavaWorkingSetWizard.label"
@@ -696,6 +703,7 @@
          <description>
             %NewJavaWorkingSetWizard.description
          </description>
+         <keywordReference id="org.eclipse.jdt.ui.wizards.java"/>
       </wizard>      
       
    </extension>
@@ -1687,6 +1695,13 @@
      <keyword
             label="%preferenceKeywords.classpathcontainer"
             id="org.eclipse.jdt.ui.classpathcontainer"/>
+            
+     <keyword
+            label="%preferenceKeywords.wizards.java"
+            id="org.eclipse.jdt.ui.wizards.java"/>
+     <keyword
+            label="%preferenceKeywords.jarpackager"
+            id="org.eclipse.jdt.ui.jarpackager"/>
    </extension>  
 <!-- =========================================================================== -->
 <!-- Work in Progress                                                            -->
@@ -2039,6 +2054,7 @@
          <selection
                class="org.eclipse.core.resources.IResource">
          </selection>
+         <keywordReference id="org.eclipse.jdt.ui.jarpackager"/>
       </wizard>
       <wizard
             name="%fatJarExportWizard.label"
@@ -2052,6 +2068,7 @@
          <selection
                class="org.eclipse.core.resources.IResource">
          </selection>
+         <keywordReference id="org.eclipse.jdt.ui.jarpackager"/>
       </wizard>
    </extension>
    <extension
