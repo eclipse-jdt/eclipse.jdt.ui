@@ -60,6 +60,9 @@
       <keyword
             id="org.eclipse.jdt.junit.JUnit"
             label="%preferenceKeywords.general"/>
+     <keyword
+            id="org.eclipse.jdt.junit.wizards.java"
+            label="%preferenceKeywords.wizards.java"/>
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
@@ -110,6 +113,7 @@
          <description>
             %TestWizard.description
          </description>
+         <keywordReference id="org.eclipse.jdt.junit.wizards.java"/>
       </wizard>
       <wizard
             name="%TestSuiteWizard.name"
@@ -120,6 +124,7 @@
          <description>
             %SuiteWizard.description
          </description>
+         <keywordReference id="org.eclipse.jdt.junit.wizards.java"/>
       </wizard>
    </extension>
    <extension
