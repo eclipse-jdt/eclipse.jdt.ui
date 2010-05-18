@@ -66,7 +66,8 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 		fRanges.put(fSelectedNodes[last], super.computeSourceRange(fSelectedNodes[last]));
 
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-		scanner.setSource(fDocumentPortionToScan.toCharArray());
+		char[] source= fDocumentPortionToScan.toCharArray();
+		scanner.setSource(source);
 		fDocumentPortionToScan= null; // initializeRanges() is only called once
 
 		TokenScanner tokenizer= new TokenScanner(scanner);
@@ -91,7 +92,7 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 		}
 		if (token == ITerminalSymbols.TokenNameCOMMENT_LINE) {
 			int index= pos - 1;
-			while (index >= 0 && IndentManipulation.isLineDelimiterChar(fDocumentPortionToScan.charAt(index))) {
+			while (index >= 0 && IndentManipulation.isLineDelimiterChar(source[index])) {
 				pos--;
 				index--;
 			}
