@@ -26,6 +26,8 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
@@ -66,7 +68,9 @@ public class SpellCheckingTest extends TextPerformanceTestCase {
 		super.setUp();
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
+
 		PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD, Integer.MAX_VALUE);
+		EditorsUI.getPreferenceStore().putValue(SpellingService.PREFERENCE_SPELLING_ENABLED, IPreferenceStore.TRUE);
 
 		fSpellingContext= new SpellingContext();
 		fSpellingContext.setContentType(Platform.getContentTypeManager().getContentType(IContentTypeManager.CT_TEXT));
@@ -87,6 +91,7 @@ public class SpellCheckingTest extends TextPerformanceTestCase {
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		PreferenceConstants.getPreferenceStore().setToDefault(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD);
+		EditorsUI.getPreferenceStore().setToDefault(SpellingService.PREFERENCE_SPELLING_ENABLED);
 	}
 
 	public void test() throws Exception {
