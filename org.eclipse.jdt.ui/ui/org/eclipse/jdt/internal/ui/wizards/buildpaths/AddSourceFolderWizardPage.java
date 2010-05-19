@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -168,6 +168,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		private void handleVariablesButtonPressed() {
 			int variableTypes = IResource.FOLDER;
 			PathVariableSelectionDialog dialog = new PathVariableSelectionDialog(getShell(), variableTypes);
+			dialog.setResource(fParent);
 			if (dialog.open() == IDialogConstants.OK_ID) {
 				String[] variableNames = (String[]) dialog.getResult();
 				if (variableNames != null && variableNames.length == 1) {
@@ -626,12 +627,13 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		if (folderLocation.isAbsolute())
 			return new StatusInfo(IStatus.ERROR, NewWizardMessages.AddSourceFolderWizardPage_error_NotARelativePathName);
 
-		IFolder folder= fNewElement.getJavaProject().getProject().getFolder(folderLocation);
+		IProject project= fNewElement.getJavaProject().getProject();
+		IFolder folder= project.getFolder(folderLocation);
 		IStatus locationStatus= workspace.validateLinkLocation(folder, path);
 		if (locationStatus.matches(IStatus.ERROR))
 			return locationStatus;
 
-		IPathVariableManager pathVariableManager = ResourcesPlugin.getWorkspace().getPathVariableManager();
+		IPathVariableManager pathVariableManager= project.getPathVariableManager();
 		IPath path1= Path.fromOSString(fLinkFields.fLinkLocation.getText());
 		IPath resolvedPath= pathVariableManager.resolvePath(path1);
 		// use the resolved link target name
