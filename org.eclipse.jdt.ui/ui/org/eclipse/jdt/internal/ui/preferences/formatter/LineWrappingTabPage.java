@@ -432,7 +432,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 	private final Category fMessageSendArgumentsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION,
-			"class Example {void foo() {Other.bar( 100,\n200,\n300,\n400,\n500,\n600,\n700,\n800,\n900 );}}", //$NON-NLS-1$
+			"class Example {void foo() {Other.bar( 100,\nnested(200,\n300,\n400,\n500,\n600,\n700,\n800,\n900 ));}}", //$NON-NLS-1$
 	    FormatterMessages.LineWrappingTabPage_arguments
 	);
 
@@ -686,6 +686,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.LineWrappingTabPage_width_indent_option_default_indent_wrapped, DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION, 0, 9999);
 		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.LineWrappingTabPage_width_indent_option_default_indent_array, DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION_FOR_ARRAY_INITIALIZER, 0, 9999);
 		createCheckboxPref(lineWidthGroup, numColumns, FormatterMessages.LineWrappingTabPage_do_not_join_lines, DefaultCodeFormatterConstants.FORMATTER_JOIN_WRAPPED_LINES, TRUE_FALSE);
+		createCheckboxPref(lineWidthGroup, numColumns, FormatterMessages.LineWrappingTabPage_wrap_outer_expressions_when_nested, DefaultCodeFormatterConstants.FORMATTER_WRAP_OUTER_EXPRESSIONS_WHEN_NESTED, FALSE_TRUE);
 
 		fCategoriesViewer= new TreeViewer(composite /*categoryGroup*/, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL );
 		fCategoriesViewer.setContentProvider(new ITreeContentProvider() {

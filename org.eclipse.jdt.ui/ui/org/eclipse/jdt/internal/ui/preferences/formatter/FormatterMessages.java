@@ -312,6 +312,7 @@ final class FormatterMessages extends NLS {
 	public static String LineWrappingTabPage_binary_expression_wrap_operator;
 	public static String LineWrappingTabPage_annotations;
 	public static String LineWrappingTabPage_annotations_arguments;
+	public static String LineWrappingTabPage_wrap_outer_expressions_when_nested;
 
 	public static String BlankLinesTabPage_preview_header;
 	public static String BlankLinesTabPage_compilation_unit_group_title;
