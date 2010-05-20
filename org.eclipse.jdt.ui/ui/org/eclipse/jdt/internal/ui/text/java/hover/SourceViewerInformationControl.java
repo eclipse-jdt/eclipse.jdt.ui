@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,7 +48,9 @@ import org.eclipse.jface.text.IInformationControlExtension5;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -89,6 +91,12 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @since 3.0
 	 */
 	private Font fStatusTextFont;
+	/**
+	 * The color of the optional status text label or <code>null</code> if none.
+	 * 
+	 * @since 3.6
+	 */
+	private Color fStatusTextForegroundColor;
 	/**
 	 * The width size constraint.
 	 * @since 3.2
@@ -198,15 +206,42 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 			fStatusField.setFont(fStatusTextFont);
 			GridData gd2= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 			fStatusField.setLayoutData(gd2);
-
-			// Regarding the color see bug 41128
-			fStatusField.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
+			
+			RGB javaDefaultColor= JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_DEFAULT).getRGB();
+			fStatusTextForegroundColor= new Color(fStatusField.getDisplay(), blend(fBackgroundColor.getRGB(), javaDefaultColor, 0.56f));
+			fStatusField.setForeground(fStatusTextForegroundColor);
 			fStatusField.setBackground(fBackgroundColor);
 		}
 
 		addDisposeListener(this);
 	}
 
+	/**
+	 * Returns an RGB that lies between the given foreground and background
+	 * colors using the given mixing factor. A <code>factor</code> of 1.0 will produce a
+	 * color equal to <code>fg</code>, while a <code>factor</code> of 0.0 will produce one
+	 * equal to <code>bg</code>.
+	 * @param bg the background color
+	 * @param fg the foreground color
+	 * @param factor the mixing factor, must be in [0,&nbsp;1]
+	 *
+	 * @return the interpolated color
+	 * @since 3.6
+	 */
+	private static RGB blend(RGB bg, RGB fg, float factor) {
+		// copy of org.eclipse.jface.internal.text.revisions.Colors#blend(..)
+		Assert.isLegal(bg != null);
+		Assert.isLegal(fg != null);
+		Assert.isLegal(factor >= 0f && factor <= 1f);
+		
+		float complement= 1f - factor;
+		return new RGB(
+				(int) (complement * bg.red + factor * fg.red),
+				(int) (complement * bg.green + factor * fg.green),
+				(int) (complement * bg.blue + factor * fg.blue)
+		);
+	}
+	
 	private void initializeColors() {
 		RGB bgRGB= getHoverBackgroundColorRGB();
 		if (bgRGB != null) {
@@ -274,8 +309,12 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	public void widgetDisposed(DisposeEvent event) {
 		if (fStatusTextFont != null && !fStatusTextFont.isDisposed())
 			fStatusTextFont.dispose();
-
 		fStatusTextFont= null;
+
+		if (fStatusTextForegroundColor != null && !fStatusTextForegroundColor.isDisposed())
+			fStatusTextForegroundColor.dispose();
+		fStatusTextForegroundColor= null;
+
 		fTextFont= null;
 		fShell= null;
 		fText= null;
