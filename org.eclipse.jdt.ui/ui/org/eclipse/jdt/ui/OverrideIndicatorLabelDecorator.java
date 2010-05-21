@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -150,11 +150,11 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * 
 	 * @param method The element to decorate
-	 * @return Resulting decorations (combination of JavaElementImageDescriptor.IMPLEMENTS
-	 * and JavaElementImageDescriptor.OVERRIDES)
-	 * @throws JavaModelException
-	 *
+	 * @return Resulting decorations (combination of JavaElementImageDescriptor.IMPLEMENTS and
+	 *         JavaElementImageDescriptor.OVERRIDES)
+	 * @throws JavaModelException if accessing a Java Model element fails
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	protected int getOverrideIndicators(IMethod method) throws JavaModelException {
@@ -201,14 +201,15 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * 
 	 * @param type The declaring type of the method to decorate.
 	 * @param hierarchy The type hierarchy of the declaring type.
 	 * @param name The name of the method to find.
 	 * @param paramTypes The parameter types of the method to find.
 	 * @return The resulting decoration.
-	 * @throws JavaModelException
+	 * @throws JavaModelException if accessing a Java Model element fails
 	 * @deprecated Not used anymore. This method is not accurate for methods in generic types.
-	 *
+	 * 
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	protected int findInHierarchy(IType type, ITypeHierarchy hierarchy, String name, String[] paramTypes) throws JavaModelException {
