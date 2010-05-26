@@ -2178,7 +2178,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @param lineDelimiter The line delimiter to be used.
 	 * @return String Returns the result of evaluating the new file template
 	 * with the given type content.
-	 * @throws CoreException
+	 * @throws CoreException when the evaluation of the code template fails
 	 * @since 2.1
 	 */
 	protected String constructCUContent(ICompilationUnit cu, String typeContent, String lineDelimiter) throws CoreException {
@@ -2371,7 +2371,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @param lineDelimiter the line delimiter to use
 	 * @return the file comment or <code>null</code> if a file comment
 	 * is not desired
-	 * @throws CoreException
+	 * @throws CoreException when the evaluation of the code template fails
      *
      * @since 3.1
 	 */
