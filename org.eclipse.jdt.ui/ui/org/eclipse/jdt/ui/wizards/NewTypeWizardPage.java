@@ -2172,13 +2172,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	/**
 	 * Uses the New Java file template from the code template page to generate a
 	 * compilation unit with the given type content.
+	 * 
 	 * @param cu The new created compilation unit
 	 * @param typeContent The content of the type, including signature and type
 	 * body.
 	 * @param lineDelimiter The line delimiter to be used.
 	 * @return String Returns the result of evaluating the new file template
 	 * with the given type content.
-	 * @throws CoreException when the evaluation of the code template fails
+	 * @throws CoreException when fetching the file comment fails or fetching the content for the
+	 *             new compilation unit fails
 	 * @since 2.1
 	 */
 	protected String constructCUContent(ICompilationUnit cu, String typeContent, String lineDelimiter) throws CoreException {
@@ -2371,7 +2373,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @param lineDelimiter the line delimiter to use
 	 * @return the file comment or <code>null</code> if a file comment
 	 * is not desired
-	 * @throws CoreException when the evaluation of the code template fails
+	 * @throws CoreException when fetching the file comment fails
      *
      * @since 3.1
 	 */
