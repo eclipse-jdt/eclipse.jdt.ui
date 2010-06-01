@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -147,9 +147,11 @@ public abstract class JavadocExportWizardPage {
 
 	/**
 	 * Called when the Javadoc ANT script is generated.
-	 *
-	 * @param xmlDocument The XML element for the 'javadoc' node. Clients can add or modify arguments.
-	 * See the <a href="http://ant.apache.org/manual/CoreTasks/javadoc.html">Javadoc ANT task</a> specification for the format of the arguments.
+	 * 
+	 * @param xmlDocument The XML element for the 'javadoc' node. Clients can add or modify
+	 *            arguments. See the <a
+	 *            href="http://ant.apache.org/manual/Tasks/javadoc.html">Javadoc ANT task</a>
+	 *            specification for the format of the arguments.
 	 */
 	public void updateAntScript(Element xmlDocument) {
 	}
