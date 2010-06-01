@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -480,12 +480,13 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 			if (captionLine < lastLine) {
 				int postOffset= document.getLineOffset(captionLine + 1);
-				IRegion postRegion= new Region(postOffset, offset + length - postOffset);
-
-				if (preRegion == null)
-					return new IRegion[] { postRegion };
-
-				return new IRegion[] { preRegion, postRegion };
+				int postLength= offset + length - postOffset;
+				if (postLength > 0) {
+					IRegion postRegion= new Region(postOffset, postLength);
+					if (preRegion == null)
+						return new IRegion[] { postRegion };
+					return new IRegion[] { preRegion, postRegion };
+				}
 			}
 
 			if (preRegion != null)
@@ -611,12 +612,13 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 			if (captionLine < lastLine) {
 				int postOffset= document.getLineOffset(captionLine + 1);
-				IRegion postRegion= new Region(postOffset, offset + length - postOffset);
-
-				if (preRegion == null)
-					return new IRegion[] { postRegion };
-
-				return new IRegion[] { preRegion, postRegion };
+				int postLength= offset + length - postOffset;
+				if (postLength > 0) {
+					IRegion postRegion= new Region(postOffset, postLength);
+					if (preRegion == null)
+						return new IRegion[] { postRegion };
+					return new IRegion[] { preRegion, postRegion };
+				}
 			}
 
 			if (preRegion != null)
