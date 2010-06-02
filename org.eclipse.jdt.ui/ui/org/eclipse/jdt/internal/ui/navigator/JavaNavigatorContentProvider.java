@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -324,6 +324,13 @@ public class JavaNavigatorContentProvider extends
 
 
 	protected void postRefresh(final List toRefresh, final boolean updateLabels, Collection runnables) {
+		int size= toRefresh.size();
+		for (int i= 0; i < size; i++) {
+			Object element= toRefresh.get(i);
+			if (element instanceof IJavaProject) {
+				toRefresh.set(i, ((IJavaProject) element).getProject());
+			}
+		}
 		for (Iterator iter = toRefresh.iterator(); iter.hasNext();) {
 			Object element = iter.next();
 			if (element instanceof IJavaModel) {
