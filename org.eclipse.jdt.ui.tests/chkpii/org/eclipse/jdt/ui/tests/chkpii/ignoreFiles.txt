@@ -81,7 +81,6 @@ org.eclipse.jdt.launching/*
 org.eclipse.jdt.launching.j9/*
 org.eclipse.jface/*
 org.eclipse.osgi/*
-org.eclipse.pde/*
 org.eclipse.pde.core/*
 org.eclipse.sdk/*
 org.eclipse.swt/*
