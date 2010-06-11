@@ -142,9 +142,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 
 	public void init(IStructuredSelection selection) {
 		String projPath= getProjectPath(selection);
-		if (projPath != null) {
-			fProjectField.setText(projPath);
-		}
+		fProjectField.setText(projPath != null ? projPath : ""); //$NON-NLS-1$
 		fRootDialogField.setText(""); //$NON-NLS-1$
 	}
 
@@ -205,7 +203,8 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
-			fRootDialogField.setFocus();
+			if (fProjectField.getText().length() > 0)
+				fRootDialogField.setFocus();
 		}
 	}
 
