@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -73,6 +74,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -86,6 +88,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
@@ -1326,6 +1329,18 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		} else if (outer instanceof ForStatement) {
 			body=((ForStatement) outer).getBody();
 			label= CorrectionMessages.QuickAssistProcessor_unwrap_forstatement;
+		} else if (outer instanceof EnhancedForStatement) {
+			body=((EnhancedForStatement) outer).getBody();
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_forstatement;
+		} else if (outer instanceof SynchronizedStatement) {
+			body=((SynchronizedStatement) outer).getBody();
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_synchronizedstatement;
+		} else if (outer instanceof SimpleName && outer.getParent() instanceof LabeledStatement) {
+			body=((LabeledStatement) outer.getParent()).getBody();
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_labeledstatement;
+		} else if (outer instanceof LabeledStatement) {
+			body=((LabeledStatement) outer).getBody();
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_labeledstatement;
 		} else if (outer instanceof DoStatement) {
 			body=((DoStatement) outer).getBody();
 			label= CorrectionMessages.QuickAssistProcessor_unwrap_dostatement;

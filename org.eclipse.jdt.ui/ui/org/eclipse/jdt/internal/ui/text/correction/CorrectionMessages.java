@@ -242,7 +242,9 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_unwrap_trystatement;
 	public static String QuickAssistProcessor_unwrap_anonymous;
 	public static String QuickAssistProcessor_unwrap_block;
+	public static String QuickAssistProcessor_unwrap_labeledstatement;
 	public static String QuickAssistProcessor_unwrap_methodinvocation;
+	public static String QuickAssistProcessor_unwrap_synchronizedstatement;
 	public static String QuickAssistProcessor_splitdeclaration_description;
 	public static String QuickAssistProcessor_joindeclaration_description;
 	public static String QuickAssistProcessor_addfinallyblock_description;
