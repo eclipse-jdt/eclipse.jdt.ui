@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -200,6 +202,11 @@ public class EditTemplateDialog extends StatusDialog {
 			else
 				contexts.add(0, new String[] { type.getId(), type.getName(), "" }); //$NON-NLS-1$
 		}
+		Collections.sort(contexts, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return ((String[])o1)[1].compareToIgnoreCase(((String[])o2)[1]);
+			}
+		});
 		fContextTypes= (String[][]) contexts.toArray(new String[contexts.size()][]);
 
 		fValidationStatus= new StatusInfo();
