@@ -293,7 +293,15 @@ public class NLSHintHelper {
 		Object fieldName;
 		String result;
 
-		// First try hard-coded bundle name String field names from NLS tooling:
+		result= (String)resultCollector.get(RESULT_KEY);
+		if (result != null)
+			return result;
+
+		fieldName= resultCollector.get(FIELD_KEY);
+		if (fieldName != null)
+			return (String)resultCollector.get(fieldName);
+
+		// Now try hard-coded bundle name String field names from NLS tooling:
 		Iterator iter= resultCollector.keySet().iterator();
 		while (iter.hasNext()) {
 			Object o= iter.next();
