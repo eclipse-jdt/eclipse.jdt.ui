@@ -153,7 +153,7 @@ return ${name};</template>
 }</template>
 
 <template name="Test" description="%Templates.test_junit4" id="org.eclipse.jdt.ui.templates.test_junit4" context="java-members" enabled="true" autoinsert="false">@${testType:newType(org.junit.Test)}
-public void ${testname}() throws Exception {
+public void ${testName}() throws Exception {
 	${staticImport:importStatic('org.junit.Assert.*')}${cursor} 
 }</template>
 
