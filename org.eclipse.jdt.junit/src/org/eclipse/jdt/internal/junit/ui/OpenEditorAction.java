@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -112,7 +112,10 @@ public abstract class OpenEditorAction extends Action {
 			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
-						if (project == null) {
+						if (project != null) {
+							result[0]= internalFindType(project, dottedName, new HashSet(), monitor);
+						}
+						if (result[0] == null) {
 							int lastDot= dottedName.lastIndexOf('.');
 							TypeNameMatchRequestor nameMatchRequestor= new TypeNameMatchRequestor() {
 								public void acceptTypeNameMatch(TypeNameMatch match) {
@@ -129,8 +132,6 @@ public abstract class OpenEditorAction extends Action {
 									nameMatchRequestor,
 									IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 									monitor);
-						} else {
-							result[0]= internalFindType(project, dottedName, new HashSet(), monitor);
 						}
 					} catch (JavaModelException e) {
 						throw new InvocationTargetException(e);
