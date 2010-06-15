@@ -18,6 +18,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.ibm.icu.text.Collator;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
@@ -203,8 +205,9 @@ public class EditTemplateDialog extends StatusDialog {
 				contexts.add(0, new String[] { type.getId(), type.getName(), "" }); //$NON-NLS-1$
 		}
 		Collections.sort(contexts, new Comparator() {
+			Collator fCollator= Collator.getInstance();
 			public int compare(Object o1, Object o2) {
-				return ((String[])o1)[1].compareToIgnoreCase(((String[])o2)[1]);
+				return fCollator.compare(((String[])o1)[1], ((String[])o2)[1]);
 			}
 		});
 		fContextTypes= (String[][]) contexts.toArray(new String[contexts.size()][]);
