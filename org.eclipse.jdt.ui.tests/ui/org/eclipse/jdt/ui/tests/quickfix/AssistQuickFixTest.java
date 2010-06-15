@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -533,12 +534,13 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 2);
+		int numberOfProposals= 5;
+		assertNumberOfProposals(proposals, numberOfProposals);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
-
+		ArrayList previews= new ArrayList();
+		ArrayList expecteds= new ArrayList();
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -549,10 +551,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        int indent = new MyLayout().indent;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();
-
-		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= getPreviewContent(proposal);
+		addPreviewAndExpected(proposals, buf, expecteds, previews);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -565,12 +564,50 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        indent = new MyLayout().indent;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected2= buf.toString();
+		addPreviewAndExpected(proposals, buf, expecteds, previews);
 
-
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public class MyLayout {\n");
+		buf.append("        int indent;\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        MyLayout myLayout = new MyLayout();\n");
+		buf.append("        myLayout.indent;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		addPreviewAndExpected(proposals, buf, expecteds, previews);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public class MyLayout {\n");
+		buf.append("        int indent;\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        MyLayout myLayout = new MyLayout();\n");
+		buf.append("        myLayout.indent;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		addPreviewAndExpected(proposals, buf, expecteds, previews);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static final MyLayout MY_LAYOUT = new MyLayout();\n");
+		buf.append("    public class MyLayout {\n");
+		buf.append("        int indent;\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        MY_LAYOUT.indent;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		addPreviewAndExpected(proposals, buf, expecteds, previews);
+		
+		assertEqualStringsIgnoreOrder(previews, expecteds);
 	}
-
+	
 	public void testAssignToLocal9() throws Exception {
 		// assign to local of field access
 
@@ -817,12 +854,11 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
-
+		String[] expecteds= new String[2];
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class Timer {\n");
@@ -830,10 +866,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        java.util.Timer timer = new java.util.Timer();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();
-
-		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= getPreviewContent(proposal);
+		expecteds[0]= buf.toString();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -844,9 +877,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        timer = new java.util.Timer();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected2= buf.toString();
-
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+		expecteds[1]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expecteds);
 	}
 
 	public void testAssignParamToField() throws Exception {
@@ -3024,12 +3057,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 1);
+			assertNumberOfProposals(proposals, 2);
 			assertCorrectLabels(proposals);
 
-			CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-			String preview= getPreviewContent(proposal);
-
+			ArrayList previews= new ArrayList();
+			ArrayList expecteds= new ArrayList();
+			
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("public class E {\n");
@@ -3037,7 +3070,20 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("        int[][] numbers= new int[][]{{ 1, 2 }, { 3, 4 }, { 4, 5 }};\n");
 			buf.append("    }\n");
 			buf.append("}\n");
-			assertEqualString(preview, buf.toString());
+			addPreviewAndExpected(proposals, buf, expecteds, previews);
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E {\n");
+			buf.append("    private static final int[] INTS = { 1, 2 };\n");
+			buf.append("\n");
+			buf.append("    public void foo() {\n");
+			buf.append("        int[][] numbers= {INTS, { 3, 4 }, { 4, 5 }};\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			addPreviewAndExpected(proposals, buf, expecteds, previews);
+			
+			assertEqualStringsIgnoreOrder(previews, expecteds);
 		}
 
 	public void testCreateInSuper() throws Exception {

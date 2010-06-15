@@ -305,7 +305,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractMethodRefactoring, 4, image);
-			proposal.setCommandId(EXTRACT_CONSTANT_ID);
 			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
 		}
@@ -318,7 +317,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ASTNode node= context.getCoveredNode();
 
 		if (!(node instanceof Expression)) {
-			return false;
+			if (context.getSelectionLength() != 0) {
+				return false;
+			}
+			node= context.getCoveringNode();
+			if (!(node instanceof Expression)) {
+				return false;
+			}
 		}
 		final Expression expression= (Expression) node;
 

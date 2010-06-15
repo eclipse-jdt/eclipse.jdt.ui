@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -53,11 +54,11 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.correction.GetterSetterCorrectionSubProcessor.SelfEncapsulateFieldProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.ReorgCorrectionsSubProcessor;
-import org.eclipse.jdt.internal.ui.text.correction.GetterSetterCorrectionSubProcessor.SelfEncapsulateFieldProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
@@ -140,6 +141,11 @@ public class QuickFixTest extends TestCase {
 		StringAsserts.assertEqualStringsIgnoreOrder(actuals, expecteds);
 	}
 
+	public static void assertEqualStringsIgnoreOrder(Collection actuals, Collection expecteds) {
+		String[] act= (String[]) actuals.toArray(new String[actuals.size()]);
+		String[] exp= (String[]) expecteds.toArray(new String[actuals.size()]);
+		StringAsserts.assertEqualStringsIgnoreOrder(act, exp);
+	}
 
 	public static void assertExpectedExistInProposals(List actualProposals, String[] expecteds) throws CoreException, BadLocationException {
 		StringAsserts.assertExpectedExistInProposals(getPreviewContents(actualProposals), expecteds);
@@ -326,6 +332,12 @@ public class QuickFixTest extends TestCase {
 
 	protected static CompilationUnit getASTRoot(ICompilationUnit cu) {
 		return ASTResolving.createQuickFixAST(cu, null);
+	}
+
+	public static void addPreviewAndExpected(List proposals, StringBuffer expected, ArrayList expecteds, ArrayList previews) throws CoreException {
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(expecteds.size());
+		previews.add(getPreviewContent(proposal));
+		expecteds.add(expected.toString());
 	}
 
 
