@@ -538,7 +538,7 @@ public class PasteAction extends SelectionDispatchAction{
 			}
 			
 			
-			if (selectedWorkingSets.length != 0)
+			if (selectedWorkingSets.length > 1)
 				return false;
 			if (resources.length != 0)
 				return false; //alternative: create text file?
@@ -550,6 +550,8 @@ public class PasteAction extends SelectionDispatchAction{
 			if (javaElements.length == 1) {
 				destination= javaElements[0];
 				javaProject= destination.getJavaProject();
+			} else if (selectedWorkingSets.length == 1) {
+				// OK
 			} else if (selectedElements.size() != 0) {
 				return false; // e.g. ClassPathContainer
 			}
@@ -651,7 +653,7 @@ public class PasteAction extends SelectionDispatchAction{
 			}
 		}
 
-		public void paste(IJavaElement[] javaElements, IResource[] resources, IWorkingSet[] selectedWorkingSets, TransferData[] availableTypes) throws JavaModelException, InterruptedException, InvocationTargetException{
+		public void paste(IJavaElement[] javaElements, IResource[] resources, final IWorkingSet[] selectedWorkingSets, TransferData[] availableTypes) throws JavaModelException, InterruptedException, InvocationTargetException{
 			if (fPatchStorage != null) {
 				IResource resource= null;
 				if (resources.length > 0) {
@@ -689,6 +691,15 @@ public class PasteAction extends SelectionDispatchAction{
 										cus.add(cu);
 								}
 
+								if (selectedWorkingSets.length == 1) {
+									IWorkingSet ws= selectedWorkingSets[0];
+									if (!IWorkingSetIDs.OTHERS.equals(ws.getId())) {
+										ArrayList newElements= new ArrayList();
+										newElements.addAll(Arrays.asList(ws.getElements()));
+										newElements.addAll(Arrays.asList(ws.adaptElements(new IAdaptable[] { fDestination.getJavaProject() })));
+										ws.setElements((IAdaptable[]) newElements.toArray(new IAdaptable[newElements.size()]));
+									}
+								}
 							}
 						}, monitor);
 					} catch (OperationCanceledException e) {
