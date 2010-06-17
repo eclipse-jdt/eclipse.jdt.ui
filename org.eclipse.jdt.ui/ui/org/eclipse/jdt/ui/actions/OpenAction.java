@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,7 +35,6 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
@@ -136,12 +135,12 @@ public class OpenAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(ITextSelection selection) {
-		if (!isProcessable())
-			return;
 		try {
 			IJavaElement[] elements= SelectionConverter.codeResolveForked(fEditor, false);
 			elements= selectOpenableElements(elements);
 			if (elements == null || elements.length == 0) {
+				if (!ActionUtil.isProcessable(fEditor))
+					return;
 				IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
 				if (statusLine != null)
 					statusLine.setMessage(true, ActionMessages.OpenAction_error_messageBadSelection, null);
@@ -188,15 +187,6 @@ public class OpenAction extends SelectionDispatchAction {
 			}
 		}
 		return (IJavaElement[])result.toArray(new IJavaElement[result.size()]);
-	}
-
-	private boolean isProcessable() {
-		if (fEditor != null) {
-			IJavaElement je= EditorUtility.getEditorInputJavaElement(fEditor, false);
-			if (je instanceof ICompilationUnit && !JavaModelUtil.isPrimary((ICompilationUnit)je))
-				return true; // can process non-primary working copies
-		}
-		return ActionUtil.isProcessable(fEditor);
 	}
 
 	/* (non-Javadoc)
