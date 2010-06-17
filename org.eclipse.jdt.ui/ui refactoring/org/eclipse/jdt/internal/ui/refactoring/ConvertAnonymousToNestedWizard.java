@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -32,13 +33,22 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 
 public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 
+	/**
+	 * The dialog setting section for <code>ConvertAnonymousToNestedWizard</code>.
+	 * 
+	 * @since 3.7
+	 */
+	static final String DIALOG_SETTING_SECTION= "ConvertAnonymousToNestedWizard"; //$NON-NLS-1$
+
 	public ConvertAnonymousToNestedWizard(ConvertAnonymousToNestedRefactoring ref) {
 		super(ref, PREVIEW_EXPAND_FIRST_NODE | DIALOG_BASED_USER_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.ConvertAnonymousToNestedAction_wizard_title);
+		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 	}
 
 	/* non java-doc
@@ -53,9 +63,63 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 		private static final String DESCRIPTION = RefactoringMessages.ConvertAnonymousToNestedInputPage_description;
 		public static final String PAGE_NAME= "ConvertAnonymousToNestedInputPage";//$NON-NLS-1$
 
+		/**
+		 * Stores the value of the declare as static option.
+		 * 
+		 * @since 3.7
+		 */
+		private static final String DECLARE_AS_STATIC= "DeclareAsStatic"; //$NON-NLS-1$
+
+		/**
+		 * Stores the dialog settings.
+		 * 
+		 * @since 3.7
+		 */
+		private IDialogSettings fSettings;
+
+		/**
+		 * Indicates whether declare as static is enabled.
+		 * 
+		 * @since 3.7
+		 */
+		private boolean fEnableDeclareAsStatic;
+
 		public ConvertAnonymousToNestedInputPage() {
 			super(PAGE_NAME);
 			setDescription(DESCRIPTION);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.ltk.ui.refactoring.UserInputWizardPage#performFinish()
+		 */
+		protected boolean performFinish() {
+			setDeclareAsStaticSettings(fEnableDeclareAsStatic);
+			return super.performFinish();
+		}
+
+		/**
+		 * Loads the dialog settings.
+		 * 
+		 * @since 3.7
+		 */
+		private void loadSettings() {
+			fSettings= getDialogSettings().getSection(DIALOG_SETTING_SECTION);
+			if (fSettings == null) {
+				fSettings= getDialogSettings().addNewSection(DIALOG_SETTING_SECTION);
+				setDeclareAsStaticSettings(getConvertRefactoring().getDeclareStatic());
+			}
+			fEnableDeclareAsStatic= fSettings.getBoolean(DECLARE_AS_STATIC);
+		}
+
+		/**
+		 * Sets the declare as static dialog settings.
+		 * 
+		 * @param enableDeclareAsStatic <code>true</code> if declare as static is enabled,
+		 *            <code>false</code> otherwise
+		 * @since 3.7
+		 */
+		private void setDeclareAsStaticSettings(boolean enableDeclareAsStatic) {
+			fSettings.put(DECLARE_AS_STATIC, enableDeclareAsStatic);
 		}
 
 		public void createControl(Composite parent) {
@@ -66,6 +130,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			layout.verticalSpacing= 8;
 			result.setLayout(layout);
 
+			loadSettings();
 			addVisibilityControl(result);
 			Text textField= addFieldNameField(result);
 			addDeclareFinalCheckbox(result);
@@ -138,14 +203,15 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			final Button declareAsStaticCheckbox= new Button(result, SWT.CHECK);
 			ConvertAnonymousToNestedRefactoring r= getConvertRefactoring();
 			declareAsStaticCheckbox.setEnabled((!r.mustInnerClassBeStatic() && !r.isLocalInnerType()));
-			declareAsStaticCheckbox.setSelection(getConvertRefactoring().getDeclareStatic());
+			declareAsStaticCheckbox.setSelection(fEnableDeclareAsStatic);
 			declareAsStaticCheckbox.setText(RefactoringMessages.ConvertAnonymousToNestedInputPage_declare_static);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan= 2;
 			declareAsStaticCheckbox.setLayoutData(gd);
 			declareAsStaticCheckbox.addSelectionListener(new SelectionAdapter() {
 			    public void widgetSelected(SelectionEvent e) {
-			        getConvertRefactoring().setDeclareStatic(declareAsStaticCheckbox.getSelection());
+					fEnableDeclareAsStatic= declareAsStaticCheckbox.getSelection();
+					getConvertRefactoring().setDeclareStatic(fEnableDeclareAsStatic);
 			    }
 			});
 		}
