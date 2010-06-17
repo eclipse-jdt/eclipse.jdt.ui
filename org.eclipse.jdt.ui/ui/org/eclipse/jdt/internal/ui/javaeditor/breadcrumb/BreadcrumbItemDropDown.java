@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,6 +48,8 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Platform;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.resource.CompositeImageDescriptor;
@@ -64,6 +66,9 @@ import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.forms.FormColors;
+
+import org.eclipse.jdt.core.IJarEntryResource;
+import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
@@ -367,6 +372,23 @@ class BreadcrumbItemDropDown {
 			public void mouseMove(MouseEvent e) {
 				if (tree.equals(e.getSource())) {
 					Object o= tree.getItem(new Point(e.x, e.y));
+					if ((o != null && !o.equals(fLastItem)) || (fLastItem != null && o == null)) {
+						boolean showHandPointer= false;
+						if (o instanceof TreeItem) {
+							Object itemData= ((TreeItem)o).getData();
+							if (itemData instanceof IJavaElement) {
+								int elementType= ((IJavaElement)itemData).getElementType();
+								if (elementType != IJavaElement.JAVA_PROJECT && elementType != IJavaElement.PACKAGE_FRAGMENT && elementType != IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+									showHandPointer= true;
+								}
+							} else if (itemData instanceof IFile) {
+								showHandPointer= true;
+							} else if (itemData instanceof IJarEntryResource) {
+								showHandPointer= ((IJarEntryResource)itemData).isFile();
+							}
+						}
+						tree.setCursor(showHandPointer ? tree.getDisplay().getSystemCursor(SWT.CURSOR_HAND) : null);
+					}
 					if (o instanceof TreeItem) {
 						Rectangle clientArea = tree.getClientArea();
 						TreeItem currentItem= (TreeItem) o;
@@ -408,6 +430,8 @@ class BreadcrumbItemDropDown {
 								}
 							}
 						}
+					} else if (o == null) {
+						fLastItem= null;
 					}
 				}
 			}

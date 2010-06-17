@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -232,6 +232,9 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			public void mouseMove(MouseEvent e) {
 				if (tree.equals(e.getSource())) {
 					Object o= tree.getItem(new Point(e.x, e.y));
+					if (fLastItem == null ^ o == null) {
+						tree.setCursor(o == null ? null : tree.getDisplay().getSystemCursor(SWT.CURSOR_HAND));
+					}
 					if (o instanceof TreeItem) {
 						Rectangle clientArea = tree.getClientArea();
 						if (!o.equals(fLastItem)) {
@@ -254,6 +257,8 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 								tree.setSelection(new TreeItem[] { fLastItem });
 							}
 						}
+					} else if (o == null) {
+						fLastItem= null;
 					}
 				}
 			}
