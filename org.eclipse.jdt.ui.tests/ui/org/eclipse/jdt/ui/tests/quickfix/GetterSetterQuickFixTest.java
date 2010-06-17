@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -213,11 +213,11 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		buf.append("    {\n");
 		buf.append("        System.out.println(getT());\n");
 		buf.append("    }\n");
-		buf.append("    public void setT(int t) {\n");
-		buf.append("        this.t = t;\n");
-		buf.append("    }\n");
 		buf.append("    public int getT() {\n");
 		buf.append("        return t;\n");
+		buf.append("    }\n");
+		buf.append("    public void setT(int t) {\n");
+		buf.append("        this.t = t;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		buf.append("\n");

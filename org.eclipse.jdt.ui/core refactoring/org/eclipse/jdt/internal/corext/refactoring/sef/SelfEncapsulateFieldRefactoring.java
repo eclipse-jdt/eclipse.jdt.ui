@@ -573,15 +573,15 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 		TextEditGroup description;
 		ListRewrite rewrite= fRewriter.getListRewrite(decl.getParent(), getBodyDeclarationsProperty(decl.getParent()));
+		if (!usingLocalGetter) {
+			description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_add_getter);
+			result.add(description);
+			rewrite.insertAt(createGetterMethod(ast, rewriter, lineDelimiter), position++, description);
+		}
 		if (!JdtFlags.isFinal(fField) && !usingLocalSetter) {
 			description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_add_setter);
 			result.add(description);
-			rewrite.insertAt(createSetterMethod(ast, rewriter, lineDelimiter), position++, description);
-		}
-		if (!usingLocalGetter){
-			description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_add_getter);
-			result.add(description);
-			rewrite.insertAt(createGetterMethod(ast, rewriter, lineDelimiter), position, description);
+			rewrite.insertAt(createSetterMethod(ast, rewriter, lineDelimiter), position, description);
 		}
 		if (!JdtFlags.isPrivate(fField))
 			result.add(makeDeclarationPrivate(rewriter, decl));
