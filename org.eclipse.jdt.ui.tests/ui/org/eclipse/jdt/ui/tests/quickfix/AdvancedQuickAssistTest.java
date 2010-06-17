@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -229,12 +230,12 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
-
+		ArrayList previews= new ArrayList();
+		ArrayList expecteds= new ArrayList();
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -250,10 +251,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();
-		
-		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= getPreviewContent(proposal);
+		addPreviewAndExpected(proposals, buf, expecteds, previews);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -266,9 +264,37 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected2= buf.toString();
+		addPreviewAndExpected(proposals, buf, expecteds, previews);
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean a, int b) {\n");
+		buf.append("        boolean c = a && (b == 0);\n");
+		buf.append("        if (c) {\n");
+		buf.append("            b= 9;\n");
+		buf.append("        } else {\n");
+		buf.append("            b= 2;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		addPreviewAndExpected(proposals, buf, expecteds, previews);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean a, int b) {\n");
+		buf.append("        boolean c = a && (b == 0);\n");
+		buf.append("        if (c) {\n");
+		buf.append("            b= 9;\n");
+		buf.append("        } else {\n");
+		buf.append("            b= 2;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		addPreviewAndExpected(proposals, buf, expecteds, previews);
+		
+		assertEqualStringsIgnoreOrder(previews, expecteds);
 	}
 	
 	public void testJoinAndIfStatements1() throws Exception {
