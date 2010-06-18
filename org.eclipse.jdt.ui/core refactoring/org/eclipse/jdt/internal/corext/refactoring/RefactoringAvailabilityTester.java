@@ -329,7 +329,8 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isExtractConstantAvailable(final JavaTextSelection selection) {
-		return (selection.resolveInClassInitializer() || selection.resolveInMethodBody() || selection.resolveInVariableInitializer()) && Checks.isExtractableExpression(selection.resolveSelectedNodes(), selection.resolveCoveringNode());
+		return (selection.resolveInClassInitializer() || selection.resolveInMethodBody() || selection.resolveInVariableInitializer() || selection.resolveInAnnotation())
+				&& Checks.isExtractableExpression(selection.resolveSelectedNodes(), selection.resolveCoveringNode());
 	}
 
 	public static boolean isExtractInterfaceAvailable(final IStructuredSelection selection) throws JavaModelException {
