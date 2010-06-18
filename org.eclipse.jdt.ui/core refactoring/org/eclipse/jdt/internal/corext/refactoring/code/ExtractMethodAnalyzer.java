@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -233,6 +234,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_type_reference, JavaStatusContext.create(fCUnit, node));
 			} else if (node.getLocationInParent() == SwitchCase.EXPRESSION_PROPERTY) {
 				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_switch_case, JavaStatusContext.create(fCUnit, node));
+			} else if (node instanceof Annotation || ASTNodes.getParent(node, Annotation.class) != null) {
+				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_from_annotation, JavaStatusContext.create(fCUnit, node));
 			}
 		}
 	}

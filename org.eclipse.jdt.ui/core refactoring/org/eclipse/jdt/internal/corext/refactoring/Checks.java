@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -401,7 +402,7 @@ public class Checks {
 			return false;
 		if (node instanceof Name) {
 			IBinding binding= ((Name) node).resolveBinding();
-			return !(binding instanceof ITypeBinding);
+			return binding == null || binding instanceof IVariableBinding;
 		}
 		return true;
 	}
@@ -850,11 +851,14 @@ public class Checks {
 	 *          Checks.NOT_RVALUE_MISC  	if e is not an rvalue for some other reason
 	 */
 	public static int checkExpressionIsRValue(Expression e) {
-		if(e instanceof Name) {
+		if (e instanceof Name) {
 			if(!(((Name) e).resolveBinding() instanceof IVariableBinding)) {
 				return NOT_RVALUE_MISC;
 			}
 		}
+		if (e instanceof Annotation)
+			return NOT_RVALUE_MISC;
+			
 
 		ITypeBinding tb= e.resolveTypeBinding();
 		boolean guessingRequired= false;

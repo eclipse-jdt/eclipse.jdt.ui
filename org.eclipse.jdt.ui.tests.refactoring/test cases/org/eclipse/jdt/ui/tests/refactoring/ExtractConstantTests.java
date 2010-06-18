@@ -320,6 +320,10 @@ public class ExtractConstantTests extends RefactoringTest {
 	public void test37() throws Exception { // bug 307758
 		helper1(6, 17, 6, 24, true, false, "INT", "INT");
 	}
+	
+	public void test38() throws Exception { // bug 317224
+		helper1(3, 19, 3, 24, true, false, "S_ALL", "ALL");
+	}
 
 	public void testZeroLengthSelection0() throws Exception {
 		helper1(5, 18, 5, 18, false, false, "CONSTANT", "_100");

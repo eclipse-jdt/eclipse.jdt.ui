@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
@@ -51,6 +52,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -611,7 +613,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 			SimpleName ref= ast.newSimpleName(fConstantName);
 			Name replacement= ref;
-			if (qualifyReferencesWithDeclaringClassName()) {
+			boolean qualifyReference= qualifyReferencesWithDeclaringClassName();
+			if (!qualifyReference) {
+				ASTNode enclosingAnnotation= ASTNodes.getParent(fragment.getAssociatedNode(), Annotation.class);
+				qualifyReference= enclosingAnnotation != null && enclosingAnnotation.getParent() == getContainingTypeDeclarationNode();
+			}
+			if (qualifyReference) {
 				replacement= ast.newQualifiedName(ast.newSimpleName(getContainingTypeBinding().getName()), ref);
 			}
 			TextEditGroup description= fCuRewrite.createGroupDescription(RefactoringCoreMessages.ExtractConstantRefactoring_replace);
@@ -721,8 +728,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	/*
-	 * Elements returned by next() are BodyDeclaration
-	 * instances.
+	 * Elements returned by next() are BodyDeclaration or Annotation instances.
 	 */
 	private Iterator getReplacementScope() throws JavaModelException {
 		boolean declPredecessorReached= false;
@@ -734,6 +740,13 @@ public class ExtractConstantRefactoring extends Refactoring {
 			// replace in all enum constants bodies
 			EnumDeclaration enumDeclaration= (EnumDeclaration) containingType;
 			scope.addAll(enumDeclaration.enumConstants());
+		}
+		
+		for (Iterator iter= containingType.modifiers().iterator(); iter.hasNext();) {
+			IExtendedModifier modifier= (IExtendedModifier)iter.next();
+			if (modifier instanceof Annotation) {
+				scope.add(modifier);
+			}
 		}
 
 		for (Iterator bodyDeclarations = containingType.bodyDeclarations().iterator(); bodyDeclarations.hasNext();) {
@@ -753,8 +766,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 		if (fReplaceAllOccurrences) {
 			Iterator replacementScope = getReplacementScope();
 			while(replacementScope.hasNext()) {
-				BodyDeclaration bodyDecl = (BodyDeclaration) replacementScope.next();
-				IASTFragment[] allMatches= ASTFragmentFactory.createFragmentForFullSubtree(bodyDecl).getSubFragmentsMatching(getSelectedExpression());
+				ASTNode scope= (ASTNode) replacementScope.next();
+				IASTFragment[] allMatches= ASTFragmentFactory.createFragmentForFullSubtree(scope).getSubFragmentsMatching(getSelectedExpression());
 				IASTFragment[] replaceableMatches = retainOnlyReplacableMatches(allMatches);
 				for(int i = 0; i < replaceableMatches.length; i++)
 					toReplace.add(replaceableMatches[i]);
