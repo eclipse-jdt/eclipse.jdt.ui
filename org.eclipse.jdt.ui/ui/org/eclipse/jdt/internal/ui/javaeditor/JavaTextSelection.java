@@ -232,9 +232,9 @@ public class JavaTextSelection extends TextSelection {
 	 * Resolves the selected nodes and returns <code>true</code> if the node or any of its ancestors
 	 * is of type <code>Annotation</code>, <code>false</code> otherwise.
 	 * 
-	 * @return <code>true</code> if the node or any of its ancestors
-	 * is of type <code>Annotation</code>, <code>false</code> otherwise
-	* @since 3.7
+	 * @return <code>true</code> if the node or any of its ancestors is of type
+	 *         <code>Annotation</code>, <code>false</code> otherwise
+	 * @since 3.7
 	 */
 	public boolean resolveInAnnotation() {
 		if (fInAnnotationRequested)
