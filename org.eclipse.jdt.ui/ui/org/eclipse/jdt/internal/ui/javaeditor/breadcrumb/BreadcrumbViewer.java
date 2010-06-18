@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,6 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MenuDetectEvent;
 import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.events.TraverseEvent;
@@ -121,11 +120,6 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 						fGradientBackground.dispose();
 					fGradientBackground= image;
 				}
-			}
-		});
-		fContainer.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				fGradientBackground.dispose();
 			}
 		});
 
@@ -802,4 +796,29 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		return new Color(display, blend);
 	}
 
+	/*
+	 * @see org.eclipse.jface.viewers.StructuredViewer#handleDispose(org.eclipse.swt.events.DisposeEvent)
+	 * @since 3.7
+	 */
+	protected void handleDispose(DisposeEvent event) {
+		if (fGradientBackground != null) {
+			fGradientBackground.dispose();
+			fGradientBackground= null;
+		}
+
+		if (fToolTipLabelProvider != null) {
+			fToolTipLabelProvider.dispose();
+			fToolTipLabelProvider= null;
+		}
+
+		if (fBreadcrumbItems != null) {
+			Iterator iterator= fBreadcrumbItems.iterator();
+			while (iterator.hasNext()) {
+				BreadcrumbItem item= (BreadcrumbItem)iterator.next();
+				item.dispose();
+			}
+		}
+
+		super.handleDispose(event);
+	}
 }
