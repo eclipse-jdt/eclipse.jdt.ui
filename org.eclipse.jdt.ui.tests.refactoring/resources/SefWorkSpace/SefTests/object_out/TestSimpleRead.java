@@ -7,12 +7,12 @@ public class TestSimpleRead {
 		String s= getField();
 	}
 
-	public void setField(String field) {
-		this.field = field;
-	}
-
 	public String getField() {
 		return field;
+	}
+
+	public void setField(String field) {
+		this.field = field;
 	}
 }
 

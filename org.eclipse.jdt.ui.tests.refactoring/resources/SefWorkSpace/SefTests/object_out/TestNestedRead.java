@@ -8,12 +8,12 @@ public class TestNestedRead {
 		return getField().getField().getField().getField().i;
 	}
 
-	public void setField(TestNestedRead field) {
-		this.field = field;
-	}
-
 	public TestNestedRead getField() {
 		return field;
+	}
+
+	public void setField(TestNestedRead field) {
+		this.field = field;
 	}
 }
 

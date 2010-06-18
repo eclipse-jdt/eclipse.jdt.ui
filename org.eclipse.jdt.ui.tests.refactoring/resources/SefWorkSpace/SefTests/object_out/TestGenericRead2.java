@@ -3,12 +3,12 @@ package object_out;
 public class TestGenericRead2<E> {
 	private E field;
 
-	public void setField(E field) {
-		this.field = field;
-	}
-
 	public E getField() {
 		return field;
+	}
+
+	public void setField(E field) {
+		this.field = field;
 	}
 }
 

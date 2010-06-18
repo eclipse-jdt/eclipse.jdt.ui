@@ -9,12 +9,12 @@ public class TestSetterInAssignment {
 		t= a.setField("d");
 	}
 
-	String setField(String field) {
-		this.field = field;
+	String getField() {
 		return field;
 	}
 
-	String getField() {
+	String setField(String field) {
+		this.field = field;
 		return field;
 	}
 }

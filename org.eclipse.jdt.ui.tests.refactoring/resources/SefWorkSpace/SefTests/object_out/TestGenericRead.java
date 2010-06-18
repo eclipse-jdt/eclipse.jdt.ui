@@ -7,11 +7,11 @@ public class TestGenericRead<E> {
 		E e = getField();
 	}
 
-	public void setField(E field) {
-		this.field = field;
-	}
-
 	public E getField() {
 		return field;
+	}
+
+	public void setField(E field) {
+		this.field = field;
 	}
 }

@@ -12,11 +12,11 @@ public class TestPrefixInt {
 		i= ~getField();
 	}
 
-	void setField(int field) {
-		this.field = field;
-	}
-
 	int getField() {
 		return field;
+	}
+
+	void setField(int field) {
+		this.field = field;
 	}
 }
