@@ -437,25 +437,6 @@ public class JavadocContentAccess2 {
 	 * Returns <code>null</code> if the member does not contain a Javadoc comment or if no source is available.
 	 *
 	 * @param member				the member to get the Javadoc of
-	 * @param allowInherited		for methods with no (Javadoc) comment, the comment of the overridden
-	 * 									class is returned if <code>allowInherited</code> is <code>true</code>
-	 * @param useAttachedJavadoc	if <code>true</code> Javadoc will be extracted from attached Javadoc
-	 * 									if there's no source
-	 * @return the Javadoc comment content in HTML or <code>null</code> if the member
-	 * 			does not have a Javadoc comment or if no source is available
-	 * @throws JavaModelException is thrown when the element's Javadoc can not be accessed
-	 * @deprecated use {@link #getHTMLContent(IMember, boolean)}
-	 */
-	public static String getHTMLContent(IMember member, boolean allowInherited, boolean useAttachedJavadoc) throws JavaModelException {
-		return getHTMLContent(member, useAttachedJavadoc);
-	}
-
-	/**
-	 * Gets an IMember's Javadoc comment content from the source or Javadoc attachment
-	 * and renders the tags and links in HTML.
-	 * Returns <code>null</code> if the member does not contain a Javadoc comment or if no source is available.
-	 *
-	 * @param member				the member to get the Javadoc of
 	 * @param useAttachedJavadoc	if <code>true</code> Javadoc will be extracted from attached Javadoc
 	 * 									if there's no source
 	 * @return the Javadoc comment content in HTML or <code>null</code> if the member

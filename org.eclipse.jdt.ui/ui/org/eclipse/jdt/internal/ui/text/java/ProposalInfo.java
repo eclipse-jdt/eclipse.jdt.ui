@@ -93,7 +93,7 @@ public class ProposalInfo {
 	 */
 	private String extractJavadoc(IMember member, IProgressMonitor monitor) throws JavaModelException {
 		if (member != null) {
-			return JavadocContentAccess2.getHTMLContent(member, true, true);
+			return JavadocContentAccess2.getHTMLContent(member, true);
 		}
 		return null;
 	}
