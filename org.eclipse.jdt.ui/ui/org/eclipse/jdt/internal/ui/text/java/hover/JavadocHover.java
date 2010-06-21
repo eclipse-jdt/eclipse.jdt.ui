@@ -881,10 +881,6 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		return null;
 	}
 
-	public static void addImageAndLabel(StringBuffer buf, String imageSrcPath, int imageWidth, int imageHeight, String label, int labelLeft, int labelTop) {
-		addImageAndLabel(buf, null, imageSrcPath, imageWidth, imageHeight, label, labelLeft, labelTop);
-	}
-	
 	public static void addImageAndLabel(StringBuffer buf, IJavaElement element, String imageSrcPath, int imageWidth, int imageHeight, String label, int labelLeft, int labelTop) {
 		buf.append("<div style='word-wrap: break-word; position: relative; "); //$NON-NLS-1$
 		
@@ -910,16 +906,16 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 			// hack for broken transparent PNG support in IE 6, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=223900 :
 			buf.append("<!--[if lte IE 6]><![if gte IE 5.5]>\n"); //$NON-NLS-1$
-			String tooltip= JavaHoverMessages.JavadocHover_openDeclaration;
-			buf.append("<span alt='").append(tooltip).append("' style=\"").append(imageStyle). //$NON-NLS-1$ //$NON-NLS-2$
+			String tooltip= element == null ? "" : "alt='" + JavaHoverMessages.JavadocHover_openDeclaration + "' "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			buf.append("<span ").append(tooltip).append("style=\"").append(imageStyle). //$NON-NLS-1$ //$NON-NLS-2$
 					append("filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='").append(imageSrcPath).append("')\"></span>\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			buf.append("<![endif]><![endif]-->\n"); //$NON-NLS-1$
 
 			buf.append("<!--[if !IE]>-->\n"); //$NON-NLS-1$
-			buf.append("<img alt='").append(tooltip).append("' style='").append(imageStyle).append("' src='").append(imageSrcPath).append("'/>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			buf.append("<img ").append(tooltip).append("style='").append(imageStyle).append("' src='").append(imageSrcPath).append("'/>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			buf.append("<!--<![endif]-->\n"); //$NON-NLS-1$
 			buf.append("<!--[if gte IE 7]>\n"); //$NON-NLS-1$
-			buf.append("<img alt='").append(tooltip).append("' style='").append(imageStyle).append("' src='").append(imageSrcPath).append("'/>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			buf.append("<img ").append(tooltip).append("style='").append(imageStyle).append("' src='").append(imageSrcPath).append("'/>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			buf.append("<![endif]-->\n"); //$NON-NLS-1$
 			if (element != null) {
 				buf.append("</a>"); //$NON-NLS-1$

@@ -1163,7 +1163,7 @@ public class JavadocView extends AbstractInfoView {
 		}
 
 		StringBuffer buf= new StringBuffer();
-		JavadocHover.addImageAndLabel(buf, imageName, 16, 16, label.toString(), 20, 2);
+		JavadocHover.addImageAndLabel(buf, member, imageName, 16, 16, label.toString(), 20, 2);
 		return buf.toString();
 	}
 
