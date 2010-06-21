@@ -72,8 +72,8 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
-import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility.GenStubSettings;
+import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 import org.eclipse.jdt.internal.junit.wizards.MethodStubsSelectionButtonGroup;
 import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
 
@@ -416,7 +416,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 		fClassUnderTestButton= new Button(composite, SWT.PUSH);
 		fClassUnderTestButton.setText(WizardMessages.NewTestCaseWizardPageOne_class_to_test_browse);
-		fClassUnderTestButton.setEnabled(true);
+		fClassUnderTestButton.setEnabled(getPackageFragmentRoot() != null);
 		fClassUnderTestButton.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				classToTestButtonPressed();
