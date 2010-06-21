@@ -71,30 +71,29 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 		private static final String DECLARE_AS_STATIC= "DeclareAsStatic"; //$NON-NLS-1$
 
 		/**
+		 * Stores the value of the declare as final option.
+		 * 
+		 * @since 3.7
+		 */
+		private static final String DECLARE_AS_FINAL= "DeclareAsFinal"; //$NON-NLS-1$
+
+		/**
+		 * Stores the value of visibility control option.
+		 * 
+		 * @since 3.7
+		 */
+		private static final String VISIBILITY_CONTROL= "VisibilityControl"; //$NON-NLS-1$
+
+		/**
 		 * Stores the dialog settings.
 		 * 
 		 * @since 3.7
 		 */
 		private IDialogSettings fSettings;
 
-		/**
-		 * Indicates whether declare as static is enabled.
-		 * 
-		 * @since 3.7
-		 */
-		private boolean fEnableDeclareAsStatic;
-
 		public ConvertAnonymousToNestedInputPage() {
 			super(PAGE_NAME);
 			setDescription(DESCRIPTION);
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.ltk.ui.refactoring.UserInputWizardPage#performFinish()
-		 */
-		protected boolean performFinish() {
-			setDeclareAsStaticSettings(fEnableDeclareAsStatic);
-			return super.performFinish();
 		}
 
 		/**
@@ -106,20 +105,10 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			fSettings= getDialogSettings().getSection(DIALOG_SETTING_SECTION);
 			if (fSettings == null) {
 				fSettings= getDialogSettings().addNewSection(DIALOG_SETTING_SECTION);
-				setDeclareAsStaticSettings(getConvertRefactoring().getDeclareStatic());
+				fSettings.put(DECLARE_AS_STATIC, getConvertRefactoring().getDeclareStatic());
+				fSettings.put(DECLARE_AS_FINAL, getConvertRefactoring().getDeclareFinal());
+				fSettings.put(VISIBILITY_CONTROL, getConvertRefactoring().getVisibility());
 			}
-			fEnableDeclareAsStatic= fSettings.getBoolean(DECLARE_AS_STATIC);
-		}
-
-		/**
-		 * Sets the declare as static dialog settings.
-		 * 
-		 * @param enableDeclareAsStatic <code>true</code> if declare as static is enabled,
-		 *            <code>false</code> otherwise
-		 * @since 3.7
-		 */
-		private void setDeclareAsStaticSettings(boolean enableDeclareAsStatic) {
-			fSettings.put(DECLARE_AS_STATIC, enableDeclareAsStatic);
 		}
 
 		public void createControl(Composite parent) {
@@ -165,10 +154,11 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 
 		private void addVisibilityControl(Composite result) {
 			int[] availableVisibilities= getConvertRefactoring().getAvailableVisibilities();
-			int currectVisibility= getConvertRefactoring().getVisibility();
+			int currectVisibility= fSettings.getInt(VISIBILITY_CONTROL);
 			IVisibilityChangeListener visibilityChangeListener= new IVisibilityChangeListener(){
 				public void visibilityChanged(int newVisibility) {
 					getConvertRefactoring().setVisibility(newVisibility);
+					fSettings.put(VISIBILITY_CONTROL, newVisibility);
 				}
 
 				public void modifierChanged(int modifier, boolean isChecked) {
@@ -186,14 +176,16 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			GridData gd;
 			final Button declareFinalCheckbox= new Button(result, SWT.CHECK);
 			declareFinalCheckbox.setEnabled(getConvertRefactoring().canEnableSettingFinal());
-			declareFinalCheckbox.setSelection(getConvertRefactoring().getDeclareFinal());
+			declareFinalCheckbox.setSelection(fSettings.getBoolean(DECLARE_AS_FINAL));
 			declareFinalCheckbox.setText(RefactoringMessages.ConvertAnonymousToNestedInputPage_declare_final);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan= 2;
 			declareFinalCheckbox.setLayoutData(gd);
 			declareFinalCheckbox.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
-					getConvertRefactoring().setDeclareFinal(declareFinalCheckbox.getSelection());
+					boolean declareFinal= declareFinalCheckbox.getSelection();
+					getConvertRefactoring().setDeclareFinal(declareFinal);
+					fSettings.put(DECLARE_AS_FINAL, declareFinal);
 				}
 			});
 		}
@@ -203,15 +195,16 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			final Button declareAsStaticCheckbox= new Button(result, SWT.CHECK);
 			ConvertAnonymousToNestedRefactoring r= getConvertRefactoring();
 			declareAsStaticCheckbox.setEnabled((!r.mustInnerClassBeStatic() && !r.isLocalInnerType()));
-			declareAsStaticCheckbox.setSelection(fEnableDeclareAsStatic);
+			declareAsStaticCheckbox.setSelection(fSettings.getBoolean(DECLARE_AS_STATIC));
 			declareAsStaticCheckbox.setText(RefactoringMessages.ConvertAnonymousToNestedInputPage_declare_static);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan= 2;
 			declareAsStaticCheckbox.setLayoutData(gd);
 			declareAsStaticCheckbox.addSelectionListener(new SelectionAdapter() {
 			    public void widgetSelected(SelectionEvent e) {
-					fEnableDeclareAsStatic= declareAsStaticCheckbox.getSelection();
-					getConvertRefactoring().setDeclareStatic(fEnableDeclareAsStatic);
+					boolean declareAsStatic= declareAsStaticCheckbox.getSelection();
+					getConvertRefactoring().setDeclareStatic(declareAsStatic);
+					fSettings.put(DECLARE_AS_STATIC, declareAsStatic);
 			    }
 			});
 		}
