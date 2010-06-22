@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids, sdavids@gmx.de - bug 38507
  *     Sebastian Davids, sdavids@gmx.de - 113998 [JUnit] New Test Case Wizard: Class Under Test Dialog -- allow Enums
+ *     Kris De Volder <kris.de.volder@gmail.com> - Allow changing the default superclass in NewTestCaseWizardPageOne - https://bugs.eclipse.org/312204
  *******************************************************************************/
 package org.eclipse.jdt.junit.wizards;
 
@@ -290,7 +291,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		if (fIsJunit4) {
 			setSuperClass("java.lang.Object", false); //$NON-NLS-1$
 		} else {
-			setSuperClass(JUnitCorePlugin.TEST_SUPERCLASS_NAME, true);
+			setSuperClass(getJUnit3TestSuperclassName(), true);
 		}
 		handleFieldChanged(JUNIT4TOGGLE);
 	}
@@ -1171,6 +1172,20 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			settings.put(STORE_TEARDOWN_CLASS, fMethodStubsButtons.isSelected(IDX_TEARDOWN_CLASS));
 			settings.put(STORE_CONSTRUCTOR, fMethodStubsButtons.isSelected(IDX_CONSTRUCTOR));
 		}
+	}
+
+	/**
+	 * Hook method that is called to determine the name of the superclass set for
+	 * a JUnit 3 style test case. By default, the name of the JUnit 3 TestCase class is
+	 * returned. Implementors can override this behavior to return the name of a
+	 * subclass instead.
+	 *
+	 * @return the fully qualified name of a subclass of the JUnit 3 TestCase class. 
+	 *
+	 * @since 3.7
+	 */
+	protected String getJUnit3TestSuperclassName() {
+		return JUnitCorePlugin.TEST_SUPERCLASS_NAME;
 	}
 
 }
