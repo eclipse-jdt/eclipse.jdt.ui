@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,8 +98,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	private static final Image IMG_CUNIT= JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CLASS);
 	private static final Image IMG_PKG= JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_PACKAGE);
 
-	// enable assertions widget
 	private Button fEnableAssertionsCheckBox;
+	private Button fShowInAllViewsCheckBox;
 
 	// Step filter widgets
 	private Label fFilterViewerLabel;
@@ -337,6 +337,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		composite.setLayoutData(data);
 
 		createEnableAssertionsCheckbox(composite);
+		createShowInAllViewsCheckbox(composite);
 		createStackFilterPreferences(composite);
 		Dialog.applyDialogFont(composite);
 		return composite;
@@ -351,6 +352,15 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		setAssertionCheckBoxSelection(AssertionVMArg.getEnableAssertionsPreference());
 	}
 
+	private void createShowInAllViewsCheckbox(Composite container) {
+		fShowInAllViewsCheckBox= new Button(container, SWT.CHECK | SWT.WRAP);
+		fShowInAllViewsCheckBox.setText("S&how newly launched test in all JUnit views");
+		GridData gd= getButtonGridData(fShowInAllViewsCheckBox);
+		fShowInAllViewsCheckBox.setLayoutData(gd);
+		SWTUtil.setButtonDimensionHint(fShowInAllViewsCheckBox);
+		setShowInAllViewsCheckBoxSelection(JUnitUIPreferencesConstants.getShowInAllViews());
+	}
+	
 	/**
 	 * Programatic access to enable assertions checkbox
 	 * @return boolean indicating check box selected or not
@@ -363,6 +373,14 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fEnableAssertionsCheckBox.setSelection(selected);
 	}
 
+	public boolean getShowInAllViewsCheckBoxSelection() {
+		return fShowInAllViewsCheckBox.getSelection();
+	}
+	
+	public void setShowInAllViewsCheckBoxSelection(boolean selected) {
+		fShowInAllViewsCheckBox.setSelection(selected);
+	}
+	
 	/*
 	 * Create a group to contain the step filter related widgets
 	 */
@@ -723,6 +741,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 	public boolean performOk() {
 		AssertionVMArg.setEnableAssertionsPreference(getAssertionCheckBoxSelection());
+		JUnitUIPreferencesConstants.setShowInAllViews(getShowInAllViewsCheckBoxSelection());
 		fStackFilterContentProvider.saveFilters();
 		return true;
 	}
@@ -734,6 +753,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 	private void setDefaultValues() {
 		fEnableAssertionsCheckBox.setSelection(false);
+		fShowInAllViewsCheckBox.setSelection(false);
 		fStackFilterContentProvider.setDefaults();
 	}
 
