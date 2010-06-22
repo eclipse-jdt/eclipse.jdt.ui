@@ -7,19 +7,29 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Mirko Raner <mirko@raner.ws> - Expose JUnitModel.exportTestRunSession(...) as API - https://bugs.eclipse.org/316199
  *******************************************************************************/
 
 package org.eclipse.jdt.junit;
 
 
+import java.io.File;
+import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.xml.transform.TransformerException;
+
+import org.eclipse.jdt.junit.model.ITestRunSession;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IJavaElement;
@@ -27,6 +37,9 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.launcher.JUnit4TestFinder;
+import org.eclipse.jdt.internal.junit.model.JUnitModel;
+import org.eclipse.jdt.internal.junit.model.ModelMessages;
+import org.eclipse.jdt.internal.junit.model.TestRunSession;
 
 /**
  * Class for accessing JUnit support; all functionality is provided by
@@ -130,4 +143,74 @@ public class JUnitCore {
 		return (IType[])result.toArray(new IType[result.size()]);
 	}
 
+	/**
+	 * Exports the given test run session into an XML report file.
+	 * 
+	 * @param testRunSession the test run session
+	 * @param file the destination
+	 * @throws CoreException if an error occurred
+	 * 
+	 * @since 3.7
+	 */
+	public static void exportTestRunSession(ITestRunSession testRunSession, File file) throws CoreException {
+		JUnitModel.exportTestRunSession((TestRunSession)testRunSession, file);
+	}
+
+	/**
+	 * Exports the given test run session to an output stream.
+	 * 
+	 * @param testRunSession the test run session
+	 * @param output the output stream
+	 * @throws CoreException if an error occurred
+	 * 
+	 * @since 3.7
+	 */
+	public static void exportTestRunSession(ITestRunSession testRunSession, OutputStream output) throws CoreException {
+		try {
+			JUnitModel.exportTestRunSession((TestRunSession)testRunSession, output);
+			
+		} catch (TransformerException exception) {
+			String pluginID= JUnitCorePlugin.getPluginId();
+			String message= ModelMessages.JUnitModel_could_not_export;
+			throw new CoreException(new Status(IStatus.ERROR, pluginID, message, exception));
+		}
+	}
+
+	/**
+	 * Imports a test run session from the given file.
+	 * 
+	 * @param file a file containing a test run session transcript
+	 * @return the imported test run session
+	 * @throws CoreException if the import failed
+	 * 
+	 * @since 3.7
+	 */
+	public static ITestRunSession importTestRunSession(File file) throws CoreException {
+		return JUnitModel.importTestRunSession(file);
+	}
+
+	/**
+	 * Imports a test run session from the given URL.
+	 * 
+	 * @param url an URL to a test run session transcript
+	 * @param monitor a progress monitor for cancellation
+	 * @return the imported test run session, or <code>null</code> if the import has been cancelled
+	 * @throws CoreException if the import failed
+	 * 
+	 * @since 3.7
+	 */
+	public static ITestRunSession importTestRunSession(final String url, IProgressMonitor monitor) throws CoreException {
+		try {
+			return JUnitModel.importTestRunSession(url, monitor);
+			
+		} catch (InvocationTargetException exception) {
+			String pluginID= JUnitCorePlugin.getPluginId();
+			String message= ModelMessages.JUnitModel_could_not_import;
+			Throwable throwable= exception.getCause() != null ? exception.getCause() : exception;
+			throw new CoreException(new Status(IStatus.ERROR, pluginID, message, throwable));
+			
+		} catch (InterruptedException interrupt) {
+			return null;
+		}
+	}
 }
