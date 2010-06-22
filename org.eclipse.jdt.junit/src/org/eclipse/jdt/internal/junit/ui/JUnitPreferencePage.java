@@ -354,7 +354,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 	private void createShowInAllViewsCheckbox(Composite container) {
 		fShowInAllViewsCheckBox= new Button(container, SWT.CHECK | SWT.WRAP);
-		fShowInAllViewsCheckBox.setText("S&how newly launched test in all JUnit views");
+		fShowInAllViewsCheckBox.setText(JUnitMessages.JUnitPreferencePage_showInAllViews_label);
 		GridData gd= getButtonGridData(fShowInAllViewsCheckBox);
 		fShowInAllViewsCheckBox.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fShowInAllViewsCheckBox);

@@ -586,7 +586,8 @@ public class TestRunnerViewPart extends ViewPart {
 		public void sessionAdded(final TestRunSession testRunSession) {
 			getDisplay().asyncExec(new Runnable() {
 				public void run() {
-					if (getSite().getWorkbenchWindow() == JUnitPlugin.getActiveWorkbenchWindow()) {
+					if (JUnitUIPreferencesConstants.getShowInAllViews() ||
+							getSite().getWorkbenchWindow() == JUnitPlugin.getActiveWorkbenchWindow()) {
 						if (fInfoMessage == null) {
 							String testRunLabel= BasicElementLabels.getJavaElementName(testRunSession.getTestRunName());
 							String msg;
