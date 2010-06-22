@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,8 +36,8 @@ public class JUnitPreferencesConstants {
 	public static final String SHOW_ON_ERROR_ONLY= JUnitCorePlugin.PLUGIN_ID + ".show_on_error"; //$NON-NLS-1$
 
 	/**
-	 * Boolean preference controlling whether the JUnit view should be shown on
-	 * errors only.
+	 * Boolean preference controlling whether '-ea' should be added to VM arguments when creating a
+	 * new JUnit launch configuration.
 	 */
 	public static final String ENABLE_ASSERTIONS= JUnitCorePlugin.PLUGIN_ID + ".enable_assertions"; //$NON-NLS-1$
 
