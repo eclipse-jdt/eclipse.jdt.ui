@@ -48,6 +48,8 @@ import org.eclipse.jface.text.IInformationControlExtension5;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 
+import org.eclipse.ui.texteditor.AbstractTextEditor;
+
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
@@ -243,7 +245,13 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	}
 	
 	private void initializeColors() {
-		RGB bgRGB= getHoverBackgroundColorRGB();
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		RGB bgRGB;
+		if (store.getBoolean(PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT)) {
+			bgRGB= getVisibleBackgroundColor(fShell.getDisplay());
+		} else {
+			bgRGB= PreferenceConverter.getColor(store, PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR);
+		}
 		if (bgRGB != null) {
 			fBackgroundColor= new Color(fShell.getDisplay(), bgRGB);
 			fIsSystemBackgroundColor= false;
@@ -253,11 +261,26 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		}
 	}
 
-	private RGB getHoverBackgroundColorRGB() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT)
-			? null
-			: PreferenceConverter.getColor(store, PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR);
+	/**
+	 * Returns <code>null</code> if {@link SWT#COLOR_INFO_BACKGROUND} is visibly distinct from the
+	 * default Java source text color. Otherwise, returns the editor background color.
+	 * 
+	 * @param display the display
+	 * @return an RGB or <code>null</code>
+	 * @since 3.6
+	 */
+	public static RGB getVisibleBackgroundColor(Display display) {
+		float[] infoBgHSB= display.getSystemColor(SWT.COLOR_INFO_BACKGROUND).getRGB().getHSB();
+		
+		Color javaDefaultColor= JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_DEFAULT);
+		RGB javaDefaultRGB= javaDefaultColor != null ? javaDefaultColor.getRGB() : new RGB(255, 255, 255);
+		float[] javaDefaultHSB= javaDefaultRGB.getHSB();
+		
+		if (Math.abs(infoBgHSB[2] - javaDefaultHSB[2]) < 0.5f) {
+			// workaround for dark tooltip background color, see https://bugs.eclipse.org/309334
+			return PreferenceConverter.getColor(JavaPlugin.getDefault().getCombinedPreferenceStore(), AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND);
+		}
+		return null;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.List;
@@ -40,6 +41,8 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.text.java.hover.SourceViewerInformationControl;
 
 
 /**
@@ -396,7 +399,10 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	 */
 	private void initializeDefaultColors() {
 		if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT)) {
-			RGB rgb= fAppearanceColorList.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND).getRGB();
+			Display display= fAppearanceColorList.getDisplay();
+			RGB rgb= SourceViewerInformationControl.getVisibleBackgroundColor(display);
+			if (rgb == null)
+				rgb= display.getSystemColor(SWT.COLOR_INFO_BACKGROUND).getRGB();
 			PreferenceConverter.setValue(getPreferenceStore(), PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR, rgb);
 		}
 	}
