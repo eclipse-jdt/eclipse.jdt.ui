@@ -729,6 +729,8 @@ public class CompletionProposalLabelProvider {
 			adornments |= JavaElementImageDescriptor.ABSTRACT;
 
 		if (kind == CompletionProposal.FIELD_REF) {
+			if (Flags.isFinal(flags))
+				adornments |= JavaElementImageDescriptor.FINAL;
 			if (Flags.isTransient(flags))
 				adornments |= JavaElementImageDescriptor.TRANSIENT;
 			if (Flags.isVolatile(flags))
