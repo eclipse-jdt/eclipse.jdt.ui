@@ -2,7 +2,7 @@
 package p;
 @SuppressWarnings(A.S_ALL)
 class A {
-	private static final String S_ALL= "all";
+	static final String S_ALL= "all";
 	@SuppressWarnings({S_ALL, "rawtypes"})
 	int v= 0;
 	void m() {

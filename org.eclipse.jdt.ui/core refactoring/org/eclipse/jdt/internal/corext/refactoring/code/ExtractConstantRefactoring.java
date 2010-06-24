@@ -292,8 +292,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 			if (isLiteralNodeSelected())
 				fReplaceAllOccurrences= false;
 
+			if (isInTypeDeclarationAnnotation(getSelectedExpression().getAssociatedNode())) {
+				fVisibility= JdtFlags.VISIBILITY_STRING_PACKAGE;
+			}
+			
 			ITypeBinding targetType= getContainingTypeBinding();
-			if (targetType.isAnnotation() || targetType.isInterface()) {
+			if (targetType.isInterface()) {
 				fTargetIsInterface= true;
 				fVisibility= JdtFlags.VISIBILITY_STRING_PUBLIC;
 			}
@@ -610,13 +614,16 @@ public class ExtractConstantRefactoring extends Refactoring {
 		IASTFragment[] fragmentsToReplace= getFragmentsToReplace();
 		for (int i= 0; i < fragmentsToReplace.length; i++) {
 			IASTFragment fragment= fragmentsToReplace[i];
+			ASTNode node= fragment.getAssociatedNode();
+			boolean inTypeDeclarationAnnotation= isInTypeDeclarationAnnotation(node);
+			if (inTypeDeclarationAnnotation && JdtFlags.VISIBILITY_STRING_PRIVATE == getVisibility())
+				continue;
 
 			SimpleName ref= ast.newSimpleName(fConstantName);
 			Name replacement= ref;
 			boolean qualifyReference= qualifyReferencesWithDeclaringClassName();
 			if (!qualifyReference) {
-				ASTNode enclosingAnnotation= ASTNodes.getParent(fragment.getAssociatedNode(), Annotation.class);
-				qualifyReference= enclosingAnnotation != null && enclosingAnnotation.getParent() == getContainingTypeDeclarationNode();
+				qualifyReference= inTypeDeclarationAnnotation;
 			}
 			if (qualifyReference) {
 				replacement= ast.newQualifiedName(ast.newSimpleName(getContainingTypeBinding().getName()), ref);
@@ -627,6 +634,11 @@ public class ExtractConstantRefactoring extends Refactoring {
 			if (fLinkedProposalModel != null)
 				fLinkedProposalModel.getPositionGroup(KEY_NAME, true).addPosition(astRewrite.track(ref), false);
 		}
+	}
+
+	private boolean isInTypeDeclarationAnnotation(ASTNode node) throws JavaModelException {
+		ASTNode enclosingAnnotation= ASTNodes.getParent(node, Annotation.class);
+		return enclosingAnnotation != null && enclosingAnnotation.getParent() == getContainingTypeDeclarationNode();
 	}
 
 	private void computeConstantDeclarationLocation() throws JavaModelException {
