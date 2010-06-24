@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -358,34 +358,39 @@ public class JavaElementImageProvider {
 			try {
 				IMember member= (IMember) element;
 
-				if (element.getElementType() == IJavaElement.METHOD && ((IMethod)element).isConstructor())
-					flags |= JavaElementImageDescriptor.CONSTRUCTOR;
-
 				int modifiers= member.getFlags();
 				if (Flags.isAbstract(modifiers) && confirmAbstract(member))
 					flags |= JavaElementImageDescriptor.ABSTRACT;
 				if (Flags.isFinal(modifiers) || isInterfaceOrAnnotationField(member) || isEnumConstant(member, modifiers))
 					flags |= JavaElementImageDescriptor.FINAL;
-				if (Flags.isSynchronized(modifiers) && confirmSynchronized(member))
-					flags |= JavaElementImageDescriptor.SYNCHRONIZED;
 				if (Flags.isStatic(modifiers) || isInterfaceOrAnnotationFieldOrType(member) || isEnumConstant(member, modifiers))
 					flags |= JavaElementImageDescriptor.STATIC;
 
 				if (Flags.isDeprecated(modifiers))
 					flags |= JavaElementImageDescriptor.DEPRECATED;
+				
+				int elementType= element.getElementType();
+				if (elementType == IJavaElement.METHOD) {
+					if (((IMethod)element).isConstructor())
+						flags |= JavaElementImageDescriptor.CONSTRUCTOR;
+					if (Flags.isSynchronized(modifiers)) // collides with 'super' flag
+						flags |= JavaElementImageDescriptor.SYNCHRONIZED;
+					if (Flags.isNative(modifiers))
+						flags |= JavaElementImageDescriptor.NATIVE;
+				}
+
 				if (member.getElementType() == IJavaElement.TYPE) {
 					if (JavaModelUtil.hasMainMethod((IType) member)) {
 						flags |= JavaElementImageDescriptor.RUNNABLE;
 					}
 				}
+				
 				if (member.getElementType() == IJavaElement.FIELD) {
 					if (Flags.isVolatile(modifiers))
 						flags |= JavaElementImageDescriptor.VOLATILE;
 					if (Flags.isTransient(modifiers))
 						flags |= JavaElementImageDescriptor.TRANSIENT;
 				}
-
-
 			} catch (JavaModelException e) {
 				// do nothing. Can't compute runnable adornment or get flags
 			}
@@ -425,12 +430,6 @@ public class JavaElementImageProvider {
 		}
 		return false;
 	}
-
-	private static boolean confirmSynchronized(IJavaElement member) {
-		// Synchronized types are allowed but meaningless.
-		return member.getElementType() != IJavaElement.TYPE;
-	}
-
 
 	public static ImageDescriptor getMethodImageDescriptor(boolean isInInterfaceOrAnnotation, int flags) {
 		if (Flags.isPublic(flags) || isInInterfaceOrAnnotation)

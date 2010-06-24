@@ -91,6 +91,12 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 */
 	public final static int BUILDPATH_ERROR= 0x2000;
 
+	/**
+	 * Flag to render the 'native' adornment.
+	 * @since 3.7
+	 */
+	public final static int NATIVE= 	0x4000;
+
 	private ImageDescriptor fBaseImage;
 	private int fFlags;
 	private Point fSize;
@@ -116,7 +122,8 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 * Sets the descriptors adornments. Valid values are: {@link #ABSTRACT}, {@link #FINAL},
 	 * {@link #SYNCHRONIZED}, {@link #STATIC}, {@link #RUNNABLE}, {@link #WARNING},
 	 * {@link #ERROR}, {@link #OVERRIDES}, {@link #IMPLEMENTS}, {@link #CONSTRUCTOR},
-	 * {@link #DEPRECATED}, {@link #VOLATILE}, {@link #TRANSIENT} or any combination of those.
+	 * {@link #DEPRECATED}, {@link #VOLATILE}, {@link #TRANSIENT}, {@link #BUILDPATH_ERROR},
+	 * {@link #NATIVE}, or any combination of those.
 	 *
 	 * @param adornments the image descriptors adornments
 	 */
@@ -255,7 +262,9 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		if ((fFlags & STATIC) != 0) {
 			addTopRightImage(JavaPluginImages.DESC_OVR_STATIC, pos);
 		}
-
+		if ((fFlags & NATIVE) != 0) {
+			addTopRightImage(JavaPluginImages.DESC_OVR_NATIVE, pos);
+		}
 	}
 
 	private void drawBottomRight() {
@@ -267,6 +276,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		int syncAndOver= SYNCHRONIZED | OVERRIDES;
 		int syncAndImpl= SYNCHRONIZED | IMPLEMENTS;
 
+		// methods:
 		if ((flags & syncAndOver) == syncAndOver) { // both flags set: merged overlay image
 			addBottomRightImage(JavaPluginImages.DESC_OVR_SYNCH_AND_OVERRIDES, pos);
 			flags &= ~syncAndOver; // clear to not render again
@@ -283,9 +293,13 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		if ((flags & SYNCHRONIZED) != 0) {
 			addBottomRightImage(JavaPluginImages.DESC_OVR_SYNCH, pos);
 		}
+		
+		// types:
 		if ((flags & RUNNABLE) != 0) {
 			addBottomRightImage(JavaPluginImages.DESC_OVR_RUN, pos);
 		}
+		
+		// fields:
 		if ((flags & TRANSIENT) != 0) {
 			addBottomRightImage(JavaPluginImages.DESC_OVR_TRANSIENT, pos);
 		}
