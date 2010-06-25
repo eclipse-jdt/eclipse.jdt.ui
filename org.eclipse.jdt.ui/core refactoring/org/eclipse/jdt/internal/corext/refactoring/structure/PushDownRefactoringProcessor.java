@@ -757,7 +757,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 					for (int offset= 0; offset < members.length; offset++)
 						classes[offset]= (IType) members[offset];
 					copyMembers(adjustors, adjustments, rewrites, status, getAbstractMemberInfos(), classes, sourceRewriter, rewrite, sub);
-					copyMembers(adjustors, adjustments, rewrites, status, getEffectedMemberInfos(), getAbstractDestinations(new SubProgressMonitor(monitor, 1)), sourceRewriter, rewrite, sub);
+					copyMembers(adjustors, adjustments, rewrites, status, getAffectedMemberInfos(), getAbstractDestinations(new SubProgressMonitor(monitor, 1)), sourceRewriter, rewrite, sub);
 					if (monitor.isCanceled())
 						throw new OperationCanceledException();
 				}
@@ -921,7 +921,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		return (IMember[]) result.toArray(new IMember[result.size()]);
 	}
 
-	private MemberActionInfo[] getEffectedMemberInfos() throws JavaModelException {
+	private MemberActionInfo[] getAffectedMemberInfos() throws JavaModelException {
 		List result= new ArrayList(fMemberInfos.length);
 		for (int i= 0; i < fMemberInfos.length; i++) {
 			MemberActionInfo info= fMemberInfos[i];
@@ -958,7 +958,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 
 	private MemberActionInfo[] getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass() throws JavaModelException {
 		MemberActionInfo[] abs= getAbstractMemberInfos();
-		MemberActionInfo[] nonabs= getEffectedMemberInfos();
+		MemberActionInfo[] nonabs= getAffectedMemberInfos();
 		List result= new ArrayList(abs.length + nonabs.length);
 		result.addAll(Arrays.asList(abs));
 		result.addAll(Arrays.asList(nonabs));

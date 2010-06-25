@@ -1216,7 +1216,7 @@ public class PreferenceConstants {
 
 	/**
 	 * A named preference that holds the color used as the text foreground.
-	 * This value has not effect if the system default color is used.
+	 * This value has no effect if the system default color is used.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
 	 * using class <code>PreferenceConverter</code>
@@ -1240,7 +1240,7 @@ public class PreferenceConstants {
 
 	/**
 	 * A named preference that holds the color used as the text background.
-	 * This value has not effect if the system default color is used.
+	 * This value has no effect if the system default color is used.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
 	 * using class <code>PreferenceConverter</code>

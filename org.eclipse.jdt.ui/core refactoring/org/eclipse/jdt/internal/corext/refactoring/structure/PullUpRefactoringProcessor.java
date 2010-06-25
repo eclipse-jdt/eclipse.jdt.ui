@@ -299,7 +299,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		return body;
 	}
 
-	private static Set getEffectedSubTypes(final ITypeHierarchy hierarchy, final IType type) throws JavaModelException {
+	private static Set getAffectedSubTypes(final ITypeHierarchy hierarchy, final IType type) throws JavaModelException {
 		 IType[] types= null;
 		 final boolean isInterface= type.isInterface();
 		if (isInterface) {
@@ -317,7 +317,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final Set result= new HashSet();
 		for (int index= 0; index < types.length; index++) {
 			if (!isInterface && JdtFlags.isAbstract(types[index]))
-				result.addAll(getEffectedSubTypes(hierarchy, types[index]));
+				result.addAll(getAffectedSubTypes(hierarchy, types[index]));
 			else
 				result.add(types[index]);
 		}
@@ -1079,7 +1079,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			final CompilationUnitRewrite sourceRewriter= getCompilationUnitRewrite(fCompilationUnitRewrites, source);
 			final CompilationUnitRewrite targetRewriter= getCompilationUnitRewrite(fCompilationUnitRewrites, target);
 			final Map deleteMap= createMembersToDeleteMap(new SubProgressMonitor(monitor, 1));
-			final Map effectedMap= createEffectedTypesMap(new SubProgressMonitor(monitor, 1));
+			final Map affectedMap= createAffectedTypesMap(new SubProgressMonitor(monitor, 1));
 			final ICompilationUnit[] units= getAffectedCompilationUnits(new SubProgressMonitor(monitor, 1));
 
 			final Map adjustments= new HashMap();
@@ -1089,7 +1089,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				sub.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, units.length * 11);
 				for (int index= 0; index < units.length; index++) {
 					ICompilationUnit unit= units[index];
-					if (!(source.equals(unit) || target.equals(unit) || deleteMap.containsKey(unit) || effectedMap.containsKey(unit))) {
+					if (!(source.equals(unit) || target.equals(unit) || deleteMap.containsKey(unit) || affectedMap.containsKey(unit))) {
 						sub.worked(10);
 						continue;
 					}
@@ -1189,8 +1189,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 						}
 					} else
 						sub.worked(2);
-					if (effectedMap.containsKey(unit))
-						addNecessaryMethodStubs((List) effectedMap.get(unit), root, rewrite, adjustments, new SubProgressMonitor(sub, 2), status);
+					if (affectedMap.containsKey(unit))
+						addNecessaryMethodStubs((List) affectedMap.get(unit), root, rewrite, adjustments, new SubProgressMonitor(sub, 2), status);
 					if (sub.isCanceled())
 						throw new OperationCanceledException();
 				}
@@ -1255,12 +1255,12 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		}
 	}
 
-	private Map createEffectedTypesMap(final IProgressMonitor monitor) throws JavaModelException {
+	private Map createAffectedTypesMap(final IProgressMonitor monitor) throws JavaModelException {
 		if (!(fCreateMethodStubs && getAbstractMethods().length > 0))
 			return new HashMap(0);
-		final Set effected= getEffectedSubTypes(getDestinationTypeHierarchy(monitor), getDestinationType());
+		final Set affected= getAffectedSubTypes(getDestinationTypeHierarchy(monitor), getDestinationType());
 		final Map result= new HashMap();
-		for (final Iterator iterator= effected.iterator(); iterator.hasNext();) {
+		for (final Iterator iterator= affected.iterator(); iterator.hasNext();) {
 			final IType type= (IType) iterator.next();
 			final ICompilationUnit unit= type.getCompilationUnit();
 			if (!result.containsKey(unit))
