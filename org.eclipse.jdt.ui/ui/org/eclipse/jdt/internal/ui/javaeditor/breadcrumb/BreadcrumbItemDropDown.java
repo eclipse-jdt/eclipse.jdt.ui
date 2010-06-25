@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
@@ -52,6 +53,7 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.util.Geometry;
 import org.eclipse.jface.util.OpenStrategy;
@@ -70,6 +72,7 @@ import org.eclipse.ui.forms.FormColors;
 import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
@@ -176,8 +179,14 @@ class BreadcrumbItemDropDown {
 		}
 	}
 
-	private static final int DROP_DOWN_HIGHT= 300;
-	private static final int DROP_DOWN_WIDTH= 500;
+	private static final int DROP_DOWN_MIN_WIDTH= 250;
+	private static final int DROP_DOWN_MAX_WIDTH= 500;
+	
+	private static final int DROP_DOWN_DEFAULT_MIN_HEIGHT= 200;
+	private static final int DROP_DOWN_DEFAULT_MAX_HEIGHT= 300;
+
+	private static final String DIALOG_SETTINGS= "BreadcrumbItemDropDown"; //$NON-NLS-1$
+	private static final String DIALOG_HEIGHT= "height"; //$NON-NLS-1$
 
 	private final BreadcrumbItem fParent;
 	private final Composite fParentComposite;
@@ -187,6 +196,7 @@ class BreadcrumbItemDropDown {
 	private boolean fEnabled;
 	private TreeViewer fDropDownViewer;
 	private Shell fShell;
+	private boolean isResizingProgrammatically;
 
 	public BreadcrumbItemDropDown(BreadcrumbItem parent, Composite composite) {
 		fParent= parent;
@@ -323,6 +333,19 @@ class BreadcrumbItemDropDown {
 		fDropDownViewer.setInput(input);
 
 		setShellBounds(fShell);
+		
+		fShell.addControlListener(new ControlAdapter() {
+			/*
+			 * @see org.eclipse.swt.events.ControlAdapter#controlResized(org.eclipse.swt.events.ControlEvent)
+			 */
+			public void controlResized(ControlEvent e) {
+				if (isResizingProgrammatically)
+					return;
+				
+				Point size= fShell.getSize();
+				getDialogSettings().put(DIALOG_HEIGHT, size.y);
+			}
+		});
 
 		fDropDownViewer.addOpenListener(new IOpenListener() {
 			public void open(OpenEvent event) {
@@ -630,6 +653,22 @@ class BreadcrumbItemDropDown {
 		});
 	}
 
+	private IDialogSettings getDialogSettings() {
+		IDialogSettings javaSettings= JavaPlugin.getDefault().getDialogSettings();
+		IDialogSettings settings= javaSettings.getSection(DIALOG_SETTINGS);
+		if (settings == null)
+			settings= javaSettings.addNewSection(DIALOG_SETTINGS);
+		return settings;
+	}
+	
+	private int getMaxHeight() {
+		try {
+			return getDialogSettings().getInt(DIALOG_HEIGHT);
+		} catch (NumberFormatException e) {
+			return DROP_DOWN_DEFAULT_MAX_HEIGHT;
+		}
+	}
+	
 	/**
 	 * Calculates a useful size for the given shell.
 	 *
@@ -641,8 +680,8 @@ class BreadcrumbItemDropDown {
 
 		shell.pack();
 		Point size= shell.getSize();
-		int height= Math.min(size.y, DROP_DOWN_HIGHT);
-		int width= Math.max(Math.min(size.x, DROP_DOWN_WIDTH), 250);
+		int height= Math.max(Math.min(size.y, getMaxHeight()), DROP_DOWN_DEFAULT_MIN_HEIGHT);
+		int width= Math.max(Math.min(size.x, DROP_DOWN_MAX_WIDTH), DROP_DOWN_MIN_WIDTH);
 
 		int imageBoundsX= 0;
 		if (fDropDownViewer.getTree().getItemCount() > 0) {
@@ -706,7 +745,7 @@ class BreadcrumbItemDropDown {
 
 	/**
 	 * Set the size of the given shell such that more content can be shown. The shell size does not
-	 * exceed {@link #DROP_DOWN_HIGHT} and {@link #DROP_DOWN_WIDTH}.
+	 * exceed a user-configurable maximum.
 	 *
 	 * @param shell the shell to resize
 	 */
@@ -715,33 +754,37 @@ class BreadcrumbItemDropDown {
 		int currentWidth= size.x;
 		int currentHeight= size.y;
 
-		if (currentHeight >= DROP_DOWN_HIGHT && currentWidth >= DROP_DOWN_WIDTH)
+		int maxHeight= getMaxHeight();
+		
+		if (currentHeight >= maxHeight && currentWidth >= DROP_DOWN_MAX_WIDTH)
 			return;
 
 		Point preferedSize= shell.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 
 		int newWidth;
-		if (currentWidth >= DROP_DOWN_WIDTH) {
+		if (currentWidth >= DROP_DOWN_MAX_WIDTH) {
 			newWidth= currentWidth;
 		} else {
-			newWidth= Math.min(Math.max(preferedSize.x, currentWidth), DROP_DOWN_WIDTH);
+			newWidth= Math.min(Math.max(preferedSize.x, currentWidth), DROP_DOWN_MAX_WIDTH);
 		}
 		int newHeight;
-		if (currentHeight >= DROP_DOWN_HIGHT) {
+		if (currentHeight >= maxHeight) {
 			newHeight= currentHeight;
 		} else {
-			newHeight= Math.min(Math.max(preferedSize.y, currentHeight), DROP_DOWN_HIGHT);
+			newHeight= Math.min(Math.max(preferedSize.y, currentHeight), maxHeight);
 		}
 
 		if (newHeight != currentHeight || newWidth != currentWidth) {
 			shell.setRedraw(false);
 			try {
+				isResizingProgrammatically= true;
 				shell.setSize(newWidth, newHeight);
 				if (!isLTR()) {
 					Point location= shell.getLocation();
 					shell.setLocation(location.x - (newWidth - currentWidth), location.y);
 				}
 			} finally {
+				isResizingProgrammatically= false;
 				shell.setRedraw(true);
 			}
 		}
