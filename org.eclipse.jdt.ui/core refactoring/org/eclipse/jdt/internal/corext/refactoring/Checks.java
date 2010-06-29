@@ -159,7 +159,7 @@ public class Checks {
 	 */
 	public static RefactoringStatus checkMethodName(String name, IJavaElement context) {
 		RefactoringStatus status= checkName(name, JavaConventionsUtil.validateMethodName(name, context));
-		if (status.isOK() && startsWithUpperCase(name))
+		if (status.isOK() && !startsWithLowerCase(name))
 			return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.Checks_method_names_lowercase);
 		else
 			return status;
@@ -218,16 +218,6 @@ public class Checks {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.Checks_cu_name_used, BasicElementLabels.getResourceName(newCUName)));
 		else
 			return new RefactoringStatus();
-	}
-
-	public static boolean startsWithUpperCase(String s) {
-		if (s == null)
-			return false;
-		else if ("".equals(s)) //$NON-NLS-1$
-			return false;
-		else
-			//workaround for JDK bug (see 26529)
-			return s.charAt(0) == Character.toUpperCase(s.charAt(0));
 	}
 
 	public static boolean startsWithLowerCase(String s){

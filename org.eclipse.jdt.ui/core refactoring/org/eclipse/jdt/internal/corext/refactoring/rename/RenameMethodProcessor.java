@@ -207,7 +207,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 
 		RefactoringStatus status= Checks.checkName(newName, JavaConventionsUtil.validateMethodName(newName, fMethod));
-		if (status.isOK() && Checks.startsWithUpperCase(newName))
+		if (status.isOK() && !Checks.startsWithLowerCase(newName))
 			status= RefactoringStatus.createWarningStatus(fIsComposite
 					? Messages.format(RefactoringCoreMessages.Checks_method_names_lowercase2, new String[] { BasicElementLabels.getJavaElementName(newName), getDeclaringTypeLabel()})
 					: RefactoringCoreMessages.Checks_method_names_lowercase);
