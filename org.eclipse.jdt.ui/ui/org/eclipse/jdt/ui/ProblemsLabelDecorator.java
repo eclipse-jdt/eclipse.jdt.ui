@@ -48,6 +48,8 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
@@ -108,13 +110,6 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 	private static final int ERRORTICK_WARNING= JavaElementImageDescriptor.WARNING;
 	private static final int ERRORTICK_ERROR= JavaElementImageDescriptor.ERROR;
 	private static final int ERRORTICK_BUILDPATH_ERROR= JavaElementImageDescriptor.BUILDPATH_ERROR;
-
-	/**
-	 * JRE container problem marker type (value
-	 * <code>"org.eclipse.jdt.launching.jreContainerMarker"</code>). This can be used to recognize
-	 * those markers in the workspace that flag problems in the JRE container.
-	 */
-	private static final String JRE_CONTAINER_PROBLEM_MARKER= "org.eclipse.jdt.launching.jreContainerMarker"; //$NON-NLS-1$
 
 	private ImageDescriptorRegistry fRegistry;
 	private boolean fUseNewRegistry= false;
@@ -250,7 +245,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 				if (severity == IMarker.SEVERITY_ERROR) {
 					return ERRORTICK_BUILDPATH_ERROR;
 				}
-				severity= res.findMaxProblemSeverity(JRE_CONTAINER_PROBLEM_MARKER, true, IResource.DEPTH_ZERO);
+				severity= res.findMaxProblemSeverity(JavaRuntime.JRE_CONTAINER_MARKER, true, IResource.DEPTH_ZERO);
 				if (severity == IMarker.SEVERITY_ERROR) {
 					return ERRORTICK_BUILDPATH_ERROR;
 				}
