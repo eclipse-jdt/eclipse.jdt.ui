@@ -1925,6 +1925,11 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		destinationTest(1);
 	}
 
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=318609
+	public void test1058() throws Exception {
+		destinationTest(2);
+	}
+	
 	//---- Test Generics --------------------------------------------------
 
 	public void test1100() throws Exception {

@@ -945,7 +945,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 		if (enclosingBodyDeclaration instanceof BodyDeclaration) { // should always be the case
 			int enclosingModifiers= ((BodyDeclaration)enclosingBodyDeclaration).getModifiers();
-			boolean shouldBeStatic= Modifier.isStatic(enclosingModifiers) || fAnalyzer.getForceStatic();
+			boolean shouldBeStatic= Modifier.isStatic(enclosingModifiers)
+					|| enclosingBodyDeclaration instanceof EnumDeclaration
+					|| fAnalyzer.getForceStatic();
 			if (shouldBeStatic) {
 				modifiers|= Modifier.STATIC;
 			}
