@@ -311,9 +311,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 	//---- Input checking -----------------------------------------------------------------------------------
 
-	public void checkInput(RefactoringStatus status, String methodName) {
+	public void checkInput(RefactoringStatus status, String methodName, ASTNode destination) {
 		ITypeBinding[] arguments= getArgumentTypes();
-		ITypeBinding type= ASTNodes.getEnclosingType(fEnclosingBodyDeclaration);
+		ITypeBinding type= ASTNodes.getEnclosingType(destination);
 		status.merge(Checks.checkMethodInType(type, methodName, arguments));
 		status.merge(Checks.checkMethodInHierarchy(type.getSuperclass(), methodName, null, arguments));
 	}

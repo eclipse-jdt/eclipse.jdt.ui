@@ -1578,7 +1578,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		returnTest();
 	}
 
-	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519	
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
 	public void test730() throws Exception {
 		returnTest();
 	}
@@ -1588,17 +1588,17 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		returnTest();
 	}
 
-	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519	
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
 	public void test732() throws Exception {
 		returnTest();
 	}
 
-	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413	
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413
 	public void test733() throws Exception {
 		returnTest();
 	}
 	
-	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413	
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413
 	public void test734() throws Exception {
 		returnTest();
 	}
@@ -1905,6 +1905,26 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		destinationTest(1);
 	}
 	
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=318127
+	public void test1054() throws Exception {
+		destinationTest(1);
+	}
+
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=318127
+	public void test1055() throws Exception {
+		destinationTest(2);
+	}
+
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=318127
+	public void test1056() throws Exception {
+		destinationTest(2);
+	}
+
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=318127
+	public void test1057() throws Exception {
+		destinationTest(1);
+	}
+
 	//---- Test Generics --------------------------------------------------
 
 	public void test1100() throws Exception {

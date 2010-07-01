@@ -80,6 +80,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
@@ -89,8 +90,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractMethodDescriptor;
@@ -453,7 +454,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 		BodyDeclaration node= fAnalyzer.getEnclosingBodyDeclaration();
 		if (node != null) {
-			fAnalyzer.checkInput(result, fMethodName);
+			fAnalyzer.checkInput(result, fMethodName, fDestination);
 			pm.worked(1);
 		}
 		pm.done();
@@ -517,7 +518,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				container.insert(mm, insertDesc);
 			}
 
-			replaceDuplicates(result);
+			replaceDuplicates(result, mm.getModifiers());
 			replaceBranches(result);
 
 			if (fImportRewriter.hasRecordedChanges()) {
@@ -798,7 +799,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 	//---- Code generation -----------------------------------------------------------------------
 
-	private ASTNode[] createCallNodes(SnippetFinder.Match duplicate) {
+	private ASTNode[] createCallNodes(SnippetFinder.Match duplicate, int modifiers) {
 		List result= new ArrayList(2);
 
 		IVariableBinding[] locals= fAnalyzer.getCallerLocals();
@@ -808,6 +809,24 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 		MethodInvocation invocation= fAST.newMethodInvocation();
 		invocation.setName(fAST.newSimpleName(fMethodName));
+		ASTNode typeNode= ASTResolving.findParentType(fAnalyzer.getEnclosingBodyDeclaration());
+		RefactoringStatus status= new RefactoringStatus();
+		while (fDestination != typeNode) {
+			fAnalyzer.checkInput(status, fMethodName, typeNode);
+			if (!status.isOK()) {
+				SimpleName destinationTypeName= fAST.newSimpleName(ASTNodes.getEnclosingType(fDestination).getName());
+				if ((modifiers & Modifier.STATIC) == 0) {
+					ThisExpression thisExpression= fAST.newThisExpression();
+					thisExpression.setQualifier(destinationTypeName);
+					invocation.setExpression(thisExpression);
+				} else {
+					invocation.setExpression(destinationTypeName);
+				}
+				break;
+			}
+			typeNode= typeNode.getParent();
+		}
+
 		List arguments= invocation.arguments();
 		for (int i= 0; i < fParameterInfos.size(); i++) {
 			ParameterInfo parameter= (ParameterInfo)fParameterInfos.get(i);
@@ -869,7 +888,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return duplicate.getMappedName(paramter.getOldBinding()).getIdentifier();
 	}
 
-	private void replaceDuplicates(CompilationUnitChange result) {
+	private void replaceDuplicates(CompilationUnitChange result, int modifiers) {
 		int numberOf= getNumberOfDuplicates();
 		if (numberOf == 0 || !fReplaceDuplicates)
 			return;
@@ -886,7 +905,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			SnippetFinder.Match duplicate= fDuplicates[d];
 			if (!duplicate.isMethodBody()) {
 				if (isDestinationReachable(duplicate.getEnclosingMethod())) {
-					ASTNode[] callNodes= createCallNodes(duplicate);
+					ASTNode[] callNodes= createCallNodes(duplicate, modifiers);
 					new StatementRewrite(fRewriter, duplicate.getNodes()).replace(callNodes, description);
 				}
 			}
@@ -903,7 +922,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 	private MethodDeclaration createNewMethod(ASTNode[] selectedNodes, String lineDelimiter, TextEditGroup substitute) throws CoreException {
 		MethodDeclaration result= createNewMethodDeclaration();
-		result.setBody(createMethodBody(selectedNodes, substitute));
+		result.setBody(createMethodBody(selectedNodes, substitute, result.getModifiers()));
 		if (fGenerateJavadoc) {
 			AbstractTypeDeclaration enclosingType=
 				(AbstractTypeDeclaration)ASTNodes.getParent(fAnalyzer.getEnclosingBodyDeclaration(), AbstractTypeDeclaration.class);
@@ -997,7 +1016,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 	}
 
-	private Block createMethodBody(ASTNode[] selectedNodes, TextEditGroup substitute) {
+	private Block createMethodBody(ASTNode[] selectedNodes, TextEditGroup substitute, int modifiers) {
 		Block result= fAST.newBlock();
 		ListRewrite statements= fRewriter.getListRewrite(result, Block.STATEMENTS_PROPERTY);
 
@@ -1023,7 +1042,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 
 		boolean extractsExpression= fAnalyzer.isExpressionSelected();
-		ASTNode[] callNodes= createCallNodes(null);
+		ASTNode[] callNodes= createCallNodes(null, modifiers);
 		ASTNode replacementNode;
 		if (callNodes.length == 1) {
 			replacementNode= callNodes[0];
