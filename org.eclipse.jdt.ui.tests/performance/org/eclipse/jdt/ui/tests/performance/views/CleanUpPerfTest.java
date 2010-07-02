@@ -25,7 +25,6 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.Performance;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -223,7 +222,6 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 
 	public void testCodeStyleCleanUp() throws Exception {
 		tagAsSummary("Clean Up - Code Style", Dimension.ELAPSED_PROCESS);
-		setComment(Performance.EXPLAINS_DEGRADATION_COMMENT, "Performance slowed down because the code in the baseline was not correct and got fixed in 3.6 (see bug 304193)");
 
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
