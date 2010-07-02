@@ -243,7 +243,6 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		measureApplicationWithParamterNames(getNullPerformanceMeter(), getWarmUpRuns());
 		final PerformanceMeter performanceMeter= createPerformanceMeter();
 		measureApplicationWithParamterNames(performanceMeter, getMeasuredRuns());
-		explainDegradation("Performance slowed down because the code in the baseline was not working and got fixed in 3.6", performanceMeter);
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
@@ -370,7 +369,6 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
 		measureApplicationWithParamterGuesses(getNullPerformanceMeter(), getWarmUpRuns());
 		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary("Java Editor: proposal insertion (param guessing)", Dimension.ELAPSED_PROCESS);
-		explainDegradation("Performance slowed down because the code in the baseline was not working and got fixed in 3.6", performanceMeter);
 		measureApplicationWithParamterGuesses(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();

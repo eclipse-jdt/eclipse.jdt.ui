@@ -129,7 +129,6 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 	public void testPluginXMLDirty() throws Exception {
 		measure(PLUGIN_XML_FILE, PLUGIN_XML_CONTENT_TYPE, true, getNullPerformanceMeter(), getWarmUpRuns(), PLUGIN_XML_ITERATIONS);
 		final PerformanceMeter performanceMeter= createPerformanceMeter();
-		explainDegradation("Test is slower because a new XML content types got added. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=182337", performanceMeter);
 		measure(PLUGIN_XML_FILE, PLUGIN_XML_CONTENT_TYPE, true, performanceMeter, getMeasuredRuns(), PLUGIN_XML_ITERATIONS);
 		commitAllMeasurements();
 		assertAllPerformance();
