@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -143,6 +143,16 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(inner, IJavaHelpContextIds.INCLUSION_EXCLUSION_WIZARD_PAGE);
 	}
 
+	/*
+	 * @see org.eclipse.jdt.ui.wizards.NewElementWizardPage#setVisible(boolean)
+	 * @since 3.7
+	 */
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		if (visible) {
+			fInclusionPatternList.setFocus();
+		}
+	}
 
 	private static class ExclusionInclusionLabelProvider extends LabelProvider {
 

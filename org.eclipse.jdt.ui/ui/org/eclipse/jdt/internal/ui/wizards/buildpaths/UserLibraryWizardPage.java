@@ -236,6 +236,17 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		setControl(composite);
 	}
 
+	/*
+	 * @see org.eclipse.jdt.ui.wizards.NewElementWizardPage#setVisible(boolean)
+	 * @since 3.7
+	 */
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		if (visible) {
+			fLibrarySelector.setFocus();
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPage#finish()
 	 */
