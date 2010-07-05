@@ -176,7 +176,9 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			GridData gd;
 			final Button declareFinalCheckbox= new Button(result, SWT.CHECK);
 			declareFinalCheckbox.setEnabled(getConvertRefactoring().canEnableSettingFinal());
-			declareFinalCheckbox.setSelection(fSettings.getBoolean(DECLARE_AS_FINAL));
+			boolean declareAsFinal= fSettings.getBoolean(DECLARE_AS_FINAL);
+			getConvertRefactoring().setDeclareFinal(declareAsFinal);
+			declareFinalCheckbox.setSelection(declareAsFinal);
 			declareFinalCheckbox.setText(RefactoringMessages.ConvertAnonymousToNestedInputPage_declare_final);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan= 2;
@@ -194,8 +196,12 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			GridData gd;
 			final Button declareAsStaticCheckbox= new Button(result, SWT.CHECK);
 			ConvertAnonymousToNestedRefactoring r= getConvertRefactoring();
-			declareAsStaticCheckbox.setEnabled((!r.mustInnerClassBeStatic() && !r.isLocalInnerType()));
-			declareAsStaticCheckbox.setSelection(fSettings.getBoolean(DECLARE_AS_STATIC));
+			boolean isEnabled= !r.mustInnerClassBeStatic() && !r.isLocalInnerType();
+			declareAsStaticCheckbox.setEnabled(isEnabled);
+			boolean isSelected;
+			isSelected= isEnabled ? fSettings.getBoolean(DECLARE_AS_STATIC) : getConvertRefactoring().mustInnerClassBeStatic();
+			getConvertRefactoring().setDeclareStatic(isSelected);
+			declareAsStaticCheckbox.setSelection(isSelected);
 			declareAsStaticCheckbox.setText(RefactoringMessages.ConvertAnonymousToNestedInputPage_declare_static);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan= 2;
