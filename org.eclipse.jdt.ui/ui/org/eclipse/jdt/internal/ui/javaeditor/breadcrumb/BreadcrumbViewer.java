@@ -798,7 +798,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 
 	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#handleDispose(org.eclipse.swt.events.DisposeEvent)
-	 * @since 3.7
+	 * @since 3.6.1
 	 */
 	protected void handleDispose(DisposeEvent event) {
 		if (fGradientBackground != null) {
