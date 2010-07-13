@@ -2105,15 +2105,12 @@ public class AssistQuickFixTest extends QuickFixTest {
         buf.append("}\n");
         ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-        String str= "equals";
-        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        String str= "s.equals(\"a\")";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), str.length());
         List proposals= collectAssists(context, FILTER_EQ);
 
-        assertNumberOfProposals(proposals, 1);
+        assertNumberOfProposals(proposals, 4);
         assertCorrectLabels(proposals);
-
-        CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-        String preview= getPreviewContent(proposal);
 
         buf= new StringBuffer();
         buf.append("package test1;\n");
@@ -2123,17 +2120,15 @@ public class AssistQuickFixTest extends QuickFixTest {
         buf.append("        \"a\".equals(s);\n");
         buf.append("    }\n");
         buf.append("}\n");
-        assertEqualString(preview, buf.toString());
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
 
         cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        str= "\"a\".equals(s)";
         context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
 
-        assertNumberOfProposals(proposals, 1);
+        assertNumberOfProposals(proposals, 5);
         assertCorrectLabels(proposals);
-
-        proposal= (CUCorrectionProposal) proposals.get(0);
-        preview= getPreviewContent(proposal);
 
         buf= new StringBuffer();
         buf.append("package test1;\n");
@@ -2143,7 +2138,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         buf.append("        s.equals(\"a\");\n");
         buf.append("    }\n");
         buf.append("}\n");
-        assertEqualString(preview, buf.toString());
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
     }
 
     public void testInvertEquals3() throws Exception {
@@ -2160,7 +2155,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
         String str= "equals";
-        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), str.length());
         List proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 1);
@@ -2181,7 +2176,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertEqualString(preview, buf.toString());
 
         cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
-        context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        context= getCorrectionContext(cu, buf.toString().indexOf(str), str.length());
         proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 1);

@@ -1624,11 +1624,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getInvertEqualsProposal(IInvocationContext context, ASTNode node, Collection resultingCollections) {
-		ASTNode parent= node.getParent();
-		if (!(parent instanceof MethodInvocation)) {
-			return false;
+		if (!(node instanceof MethodInvocation)) {
+			node= node.getParent();
+			if (!(node instanceof MethodInvocation)) {
+				return false;
+			}
 		}
-		MethodInvocation method= (MethodInvocation) parent;
+		MethodInvocation method= (MethodInvocation) node;
 		String identifier= method.getName().getIdentifier();
 		if (!"equals".equals(identifier) && !"equalsIgnoreCase".equals(identifier)) { //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
