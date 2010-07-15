@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -163,7 +163,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.JavaEditorPreferencePage_automaticallyAddImportInsteadOfQualifiedName;
 		Button master= addCheckBox(composite, label, PREF_CODEASSIST_ADDIMPORT, trueFalse, 0);
 
-		label= PreferencesMessages.JavaEditorPreferencePage_suggestStaticImports; //TODO: &Use <a>static imports</a> (only 1.5 or higher)
+		label= PreferencesMessages.JavaEditorPreferencePage_suggestStaticImports;
 		Button slave= addCheckBoxWithLink(composite, label, PREF_CODEASSIST_SUGGEST_STATIC_IMPORTS, enabledDisabled, 20, SWT.DEFAULT, new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				openStaticImportFavoritesPage();
