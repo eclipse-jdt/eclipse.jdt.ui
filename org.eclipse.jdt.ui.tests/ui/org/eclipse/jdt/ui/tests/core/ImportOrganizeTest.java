@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -3058,6 +3058,48 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("@MyAnnot1()\n");
 		buf.append("@MyAnnot2(File.separatorChar)\n");
 		buf.append("public @interface Test2 {\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testJavadocImports_bug319860() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack0= sourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import p.Main.I;\n");
+		buf.append("\n");
+		buf.append("/**\n");
+		buf.append(" * {@link I}.\n");
+		buf.append(" * @see C\n");
+		buf.append(" */\n");
+		buf.append("public class Main {\n");
+		buf.append("    public interface I {\n");
+		buf.append("    }\n");
+		buf.append("    public class C {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack0.createCompilationUnit("Main.java", buf.toString(), false, null);
+		
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("JavadocImports_bug319860", new String[] {}, new int[] {});
+		
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("\n");
+		buf.append("/**\n");
+		buf.append(" * {@link I}.\n");
+		buf.append(" * @see C\n");
+		buf.append(" */\n");
+		buf.append("public class Main {\n");
+		buf.append("    public interface I {\n");
+		buf.append("    }\n");
+		buf.append("    public class C {}\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
