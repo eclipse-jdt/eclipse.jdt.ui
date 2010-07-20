@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -988,18 +988,19 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	private void editAttributeEntry(CPListElementAttribute elem) {
 		String key= elem.getKey();
 		CPListElement selElement= elem.getParent();
+		Object parentContainer= selElement.getParentContainer();
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
 			IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(getShell(), selElement.getClasspathEntry());
 			if (result != null) {
 				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, result.getSourceAttachmentPath());
-				fLibraryList.refresh(elem);
+				fLibraryList.refresh(parentContainer);
 				fLibraryList.update(selElement);
 			}
 		} else if (key.equals(CPListElement.ACCESSRULES)) {
 			AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement, null, false);
 			if (dialog.open() == Window.OK) {
 				selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
-				fLibraryList.refresh(elem);
+				fLibraryList.refresh(parentContainer);
 				fLibraryList.expandElement(elem, 2);
 			}
 		} else if (!elem.isBuiltIn()) {
@@ -1008,7 +1009,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				IClasspathAttribute result= config.performEdit(getShell(), elem.getClasspathAttributeAccess());
 				if (result != null) {
 					elem.setValue(result.getValue());
-					fLibraryList.refresh(elem);
+					fLibraryList.refresh(parentContainer);
 				}
 			}
 		}
@@ -1122,6 +1123,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				}
 			} else if (curr instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) curr;
+				Object parentContainer= attrib.getParent().getParentContainer();
 				if (attrib.isBuiltIn()) {
 					Object value= null;
 					String key= attrib.getKey();
@@ -1129,14 +1131,14 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 						value= new IAccessRule[0];
 					}
 					attrib.getParent().setAttribute(key, value);
-					fLibraryList.refresh(attrib);
+					fLibraryList.refresh(parentContainer);
 				} else {
 					ClasspathAttributeConfiguration config= fAttributeDescriptors.get(attrib.getKey());
 					if (config != null) {
 						IClasspathAttribute result= config.performRemove(attrib.getClasspathAttributeAccess());
 						if (result != null) {
 							attrib.setValue(result.getValue());
-							fLibraryList.refresh(attrib);
+							fLibraryList.refresh(parentContainer);
 						}
 					}
 				}
