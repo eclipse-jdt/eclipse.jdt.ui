@@ -82,8 +82,8 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.GenerateToStringOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringTemplateParser;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringGenerationSettings.CustomBuilderSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringTemplateParser;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -813,7 +813,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 
 				if (type == null || !type.exists()) {
 					return new StatusInfo(IStatus.ERROR, MessageFormat.format(JavaUIMessages.GenerateToStringDialog_customBuilderConfig_invalidClassError,
-							new String[] { builderSettings.className }));
+							new Object[] { builderSettings.className }));
 				}
 
 				IStatus typeValidation= validateBuilderType(type);
@@ -822,14 +822,15 @@ public class GenerateToStringDialog extends SourceActionDialog {
 
 				if (!getAppendMethodSuggestions(type).contains(builderSettings.appendMethod))
 					return new StatusInfo(IStatus.ERROR, MessageFormat.format(JavaUIMessages.GenerateToStringDialog_customBuilderConfig_invalidAppendMethodError,
-							new String[] { builderSettings.appendMethod }));
+							new Object[] { builderSettings.appendMethod }));
 
 				if (!getResultMethodSuggestions(type).contains(builderSettings.resultMethod))
 					return new StatusInfo(IStatus.ERROR, MessageFormat.format(JavaUIMessages.GenerateToStringDialog_customBuilderConfig_invalidResultMethodError,
-							new String[] { builderSettings.resultMethod }));
+							new Object[] { builderSettings.resultMethod }));
 
 				if (!isValidJavaIdentifier(builderSettings.variableName))
-					return new StatusInfo(IStatus.ERROR, MessageFormat.format(JavaUIMessages.GenerateToStringDialog_customBuilderConfig_invalidVariableNameError, new String[] { builderSettings.variableName }));
+					return new StatusInfo(IStatus.ERROR, MessageFormat.format(JavaUIMessages.GenerateToStringDialog_customBuilderConfig_invalidVariableNameError,
+							new Object[] { builderSettings.variableName }));
 
 			} catch (JavaModelException e) {
 				return new StatusInfo(IStatus.WARNING, JavaUIMessages.GenerateToStringDialog_customBuilderConfig_dataValidationError);
