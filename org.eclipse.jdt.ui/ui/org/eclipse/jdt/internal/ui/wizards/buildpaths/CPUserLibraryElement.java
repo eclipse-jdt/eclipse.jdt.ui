@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -84,11 +84,21 @@ public class CPUserLibraryElement {
 		}
 	}
 
+	/**
+	 * Creates a new user library element with the given name and children and sets itself as the
+	 * parent container to each given child element.
+	 * 
+	 * @param name the name of the library element
+	 * @param isSystemLibrary <code>true</code> if the library is a system library,
+	 *            <code>false</code> otherwise
+	 * @param children the children elements of the library element or <code>null</code>
+	 */
 	public CPUserLibraryElement(String name, boolean isSystemLibrary, CPListElement[] children) {
 		fName= name;
 		fChildren= new ArrayList();
 		if (children != null) {
 			for (int i= 0; i < children.length; i++) {
+				children[i].setParentContainer(this);
 				fChildren.add(children[i]);
 			}
 		}
