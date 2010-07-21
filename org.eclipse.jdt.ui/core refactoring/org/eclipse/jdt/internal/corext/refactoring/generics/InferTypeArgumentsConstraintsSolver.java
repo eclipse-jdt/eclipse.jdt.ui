@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,13 +28,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.HierarchyType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.EnumeratedTypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.SingletonTypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet;
@@ -351,20 +349,29 @@ public class InferTypeArgumentsConstraintsSolver {
 
 		if (unresolvedTypes.size() != 0) {
 			TType[] interfaces= (TType[]) unresolvedTypes.toArray(new TType[unresolvedTypes.size()]);
-			HierarchyType firstInterface= (HierarchyType) interfaces[0];
-			IJavaProject javaProject= firstInterface.getJavaElementType().getJavaProject();
-			ITypeBinding[] interfaceBindings= TypeEnvironment.createTypeBindings(interfaces, javaProject); //expensive...
-			for (int i= 0; i < interfaceBindings.length; i++) {
-				if (interfaceBindings[i].getDeclaredMethods().length == 0) {
-					fInterfaceTaggingCache.put(interfaces[i], Boolean.TRUE);
+			for (int i= 0; i < interfaces.length; i++) {
+				TType interf= interfaces[i];
+				if (isTaggingInterface(interf)) {
+					fInterfaceTaggingCache.put(interf, Boolean.TRUE);
 				} else {
-					fInterfaceTaggingCache.put(interfaces[i], Boolean.FALSE);
-					nonTagging.add(interfaces[i]);
+					fInterfaceTaggingCache.put(interf, Boolean.FALSE);
+					nonTagging.add(interf);
 				}
 			}
 		}
 
 		return nonTagging;
+	}
+
+	private static boolean isTaggingInterface(TType interf) {
+		if (interf instanceof HierarchyType) {
+			try {
+				return ((HierarchyType) interf).getJavaElementType().getMethods().length == 0;
+			} catch (JavaModelException e) {
+				// assume it's not
+			}
+		}
+		return false;
 	}
 
 	private void findCastsToRemove(CastVariable2[] castVariables) {
