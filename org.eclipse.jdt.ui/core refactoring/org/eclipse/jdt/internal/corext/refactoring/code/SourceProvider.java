@@ -146,7 +146,7 @@ public class SourceProvider {
 	 * TODO: unit's source does not match contents of source document and declaration node.
 	 * @param typeRoot the type root
 	 * @param source document containing the content of the type root
-	 * @param declaration
+	 * @param declaration method declaration node
 	 */
 	public SourceProvider(ITypeRoot typeRoot, IDocument source, MethodDeclaration declaration) {
 		this(typeRoot, declaration);
@@ -463,13 +463,10 @@ public class SourceProvider {
 						cast.setType(importRewrite.addImport(explicitCast, ast, importRewriteContext));
 						newExpression= cast;
 					}
-					ASTNode newNode;
 					if (argumentNeedsParenthesis(newExpression, parameter)) {
-						newNode= createParenthesizedExpression(newExpression, ast);
-					} else {
-						newNode= newExpression;
+						newExpression= createParenthesizedExpression(newExpression, ast);
 					}
-					rewriter.replace(element, newNode, null);
+					rewriter.replace(element, newExpression, null);
 				}
 			}
 		} finally {
