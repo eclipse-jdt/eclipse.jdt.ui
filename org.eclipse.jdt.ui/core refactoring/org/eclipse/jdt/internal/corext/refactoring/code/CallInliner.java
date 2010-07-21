@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -80,8 +79,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -480,9 +479,9 @@ public class CallInliner {
 		}
 	}
 
-	public RefactoringStatus perform(TextEditGroup textEditGroup) {
+	public RefactoringStatus perform(TextEditGroup textEditGroup) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
-		String[] blocks= fSourceProvider.getCodeBlocks(fContext);
+		String[] blocks= fSourceProvider.getCodeBlocks(fContext, fImportRewrite);
 		if(!fFieldInitializer) {
 			initializeInsertionPoint(fSourceProvider.getNumberOfStatements() + fLocals.size());
 		}
@@ -496,24 +495,21 @@ public class CallInliner {
 		return fRewrite.rewriteAST(fBuffer.getDocument(), fCUnit.getJavaProject().getOptions(true));
 	}
 
-	private void computeRealArguments() throws BadLocationException {
+	private void computeRealArguments() {
 		List arguments= Invocations.getArguments(fInvocation);
 		Set canNotInline= crossCheckArguments(arguments);
 		boolean needsVarargBoxing= needsVarargBoxing(arguments);
 		int varargIndex= fSourceProvider.getVarargIndex();
-		String[] realArguments= new String[needsVarargBoxing ? varargIndex + 1 : arguments.size()];
+		AST ast= fInvocation.getAST();
+		Expression[] realArguments= new Expression[needsVarargBoxing ? varargIndex + 1 : arguments.size()];
 		for (int i= 0; i < (needsVarargBoxing ? varargIndex : arguments.size()); i++) {
 			Expression expression= (Expression)arguments.get(i);
 			ParameterData parameter= fSourceProvider.getParameterData(i);
 			if (canInline(expression, parameter) && !canNotInline.contains(expression)) {
-				realArguments[i] = getContent(expression);
-				// fixes bugs #35905, #38471
-				if (argumentNeedsParenthesis(expression, parameter)) {
-					realArguments[i] = "(" + realArguments[i] + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-				}
+				realArguments[i]= expression;
 			} else {
 				String name= fInvocationScope.createName(parameter.getName(), true);
-				realArguments[i]= name;
+				realArguments[i]= ast.newSimpleName(name);
 				fLocals.add(createLocalDeclaration(
 					parameter.getTypeBinding(), name,
 					(Expression)fRewrite.createCopyTarget(expression)));
@@ -522,8 +518,7 @@ public class CallInliner {
 		if (needsVarargBoxing) {
 			ParameterData parameter= fSourceProvider.getParameterData(varargIndex);
 			String name= fInvocationScope.createName(parameter.getName(), true);
-			realArguments[varargIndex]= name;
-			AST ast= fInvocation.getAST();
+			realArguments[varargIndex]= ast.newSimpleName(name);
 			Type type= fImportRewrite.addImport(parameter.getTypeBinding(), ast);
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 			fragment.setName(ast.newSimpleName(name));
@@ -536,6 +531,7 @@ public class CallInliner {
 			decl.setType(type);
 			fLocals.add(decl);
 		}
+		fContext.compilationUnit= fCUnit;
 		fContext.arguments= realArguments;
 	}
 
@@ -560,17 +556,6 @@ public class CallInliner {
 			return !fTypeEnvironment.create(argument).canAssignTo(fTypeEnvironment.create(parameter));
 		}
 		return true;
-	}
-
-	private boolean argumentNeedsParenthesis(Expression expression, ParameterData param) {
-		if (expression instanceof CastExpression || expression instanceof ArrayCreation)
-			return true;
-		int argPrecedence= OperatorPrecedence.getExpressionPrecedence(expression);
-		int paramPrecedence= param.getOperatorPrecedence();
-		if (argPrecedence != Integer.MAX_VALUE && paramPrecedence != Integer.MAX_VALUE)
-			return argPrecedence < paramPrecedence;
-
-		return false;
 	}
 
 	private void computeReceiver() throws BadLocationException {
@@ -898,10 +883,6 @@ public class CallInliner {
 		return fTargetNode.getLocationInParent() == IfStatement.THEN_STATEMENT_PROPERTY
 				&& fTargetNode.getParent().getStructuralProperty(IfStatement.ELSE_STATEMENT_PROPERTY) != null
 				&& fSourceProvider.isDangligIf();
-	}
-
-	private String getContent(ASTNode node) throws BadLocationException {
-		return fBuffer.getDocument().get(node.getStartPosition(), node.getLength());
 	}
 
 	private boolean isControlStatement(ASTNode node) {

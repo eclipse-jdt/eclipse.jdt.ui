@@ -23,6 +23,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
@@ -42,9 +45,12 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -64,6 +70,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -79,6 +86,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.refactoring.code.SourceAnalyzer.NameData;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -137,7 +145,7 @@ public class SourceProvider {
 	/**
 	 * TODO: unit's source does not match contents of source document and declaration node.
 	 * @param typeRoot the type root
-	 * @param source document contining the content of the type root
+	 * @param source document containing the content of the type root
 	 * @param declaration
 	 */
 	public SourceProvider(ITypeRoot typeRoot, IDocument source, MethodDeclaration declaration) {
@@ -340,9 +348,9 @@ public class SourceProvider {
 		return rewriter.rewriteAST(fDocument, fTypeRoot.getJavaProject().getOptions(true));
 	}
 
-	public String[] getCodeBlocks(CallContext context) {
+	public String[] getCodeBlocks(CallContext context, ImportRewrite importRewrite) throws CoreException {
 		final ASTRewrite rewriter= ASTRewrite.create(fDeclaration.getAST());
-		replaceParameterWithExpression(rewriter, context.arguments);
+		replaceParameterWithExpression(rewriter, context, importRewrite);
 		updateImplicitReceivers(rewriter, context);
 		makeNamesUnique(rewriter, context.scope);
 		updateTypeReferences(rewriter, context);
@@ -405,16 +413,67 @@ public class SourceProvider {
 		return new String[] {};
 	}
 
-	private void replaceParameterWithExpression(ASTRewrite rewriter, String[] expressions) {
-		for (int i= 0; i < expressions.length; i++) {
-			String expression= expressions[i];
-			ParameterData parameter= getParameterData(i);
-			List references= parameter.references();
-			for (Iterator iter= references.iterator(); iter.hasNext();) {
-				ASTNode element= (ASTNode) iter.next();
-				ASTNode newNode= rewriter.createStringPlaceholder(expression, element.getNodeType());
-				rewriter.replace(element, newNode, null);
+	private boolean argumentNeedsParenthesis(Expression expression, ParameterData param) {
+		if (expression instanceof CastExpression || expression instanceof ArrayCreation)
+			return true;
+		int argPrecedence= OperatorPrecedence.getExpressionPrecedence(expression);
+		int paramPrecedence= param.getOperatorPrecedence();
+		if (argPrecedence != Integer.MAX_VALUE && paramPrecedence != Integer.MAX_VALUE)
+			return argPrecedence < paramPrecedence;
+		return false;
+	}
+
+	private Expression createParenthesizedExpression(Expression newExpression, AST ast) {
+		ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
+		parenthesized.setExpression(newExpression);
+		return parenthesized;
+	}
+
+	private void replaceParameterWithExpression(ASTRewrite rewriter, CallContext context, ImportRewrite importRewrite) throws CoreException {
+		Expression[] arguments= context.arguments;
+		try {
+			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(context.compilationUnit);
+			for (int i= 0; i < arguments.length; i++) {
+				Expression expression= arguments[i];
+				String expressionString= null;
+				if (expression instanceof SimpleName) {
+					expressionString= ((SimpleName)expression).getIdentifier();
+				} else {
+					try {
+						expressionString= buffer.getDocument().get(expression.getStartPosition(), expression.getLength());
+					} catch (BadLocationException exception) {
+						JavaPlugin.log(exception);
+						continue;
+					}
+				}
+				ParameterData parameter= getParameterData(i);
+				List references= parameter.references();
+				for (Iterator iter= references.iterator(); iter.hasNext();) {
+					ASTNode element= (ASTNode)iter.next();
+					Expression newExpression= (Expression)rewriter.createStringPlaceholder(expressionString, expression.getNodeType());
+					AST ast= rewriter.getAST();
+					ITypeBinding explicitCast= ASTNodes.getExplicitCast(expression, (Expression)element);
+					if (explicitCast != null) {
+						CastExpression cast= ast.newCastExpression();
+						if (ASTNodes.substituteMustBeParenthesized(newExpression, cast)) {
+							newExpression= createParenthesizedExpression(newExpression, ast);
+						}
+						cast.setExpression(newExpression);
+						ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(expression, importRewrite);
+						cast.setType(importRewrite.addImport(explicitCast, ast, importRewriteContext));
+						newExpression= cast;
+					}
+					ASTNode newNode;
+					if (argumentNeedsParenthesis(newExpression, parameter)) {
+						newNode= createParenthesizedExpression(newExpression, ast);
+					} else {
+						newNode= newExpression;
+					}
+					rewriter.replace(element, newNode, null);
+				}
 			}
+		} finally {
+			RefactoringFileBuffers.release(context.compilationUnit);
 		}
 	}
 
