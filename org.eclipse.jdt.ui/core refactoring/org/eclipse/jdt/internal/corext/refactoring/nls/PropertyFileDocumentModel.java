@@ -262,7 +262,8 @@ public class PropertyFileDocumentModel {
 //      			return "\\#";//$NON-NLS-1$
 
 	        		default:
-	        			if (((c < 0x0020) || (c > 0x007e))){
+	        			if (((c < 0x0020) || (c > 0x007e && c <= 0x00a0) || (c > 0x00ff))) {
+	        				//NBSP (0x00a0) is escaped to differentiate from normal space character
 	        				return new StringBuffer()
 							.append('\\')
 							.append('u')
