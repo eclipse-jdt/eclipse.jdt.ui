@@ -325,7 +325,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	protected Text addLabelledTextField(Composite parent, String label, Key key, int modelTextLimit, int fieldTextLimit, int indent) {
 		PixelConverter pixelConverter= new PixelConverter(parent);
 
-		Label labelControl= new Label(parent, SWT.WRAP);
+		Label labelControl= new Label(parent, SWT.NONE);
 		labelControl.setText(label);
 		labelControl.setLayoutData(new GridData());
 
