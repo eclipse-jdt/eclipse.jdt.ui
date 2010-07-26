@@ -278,7 +278,11 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		
 		if (Math.abs(infoBgHSB[2] - javaDefaultHSB[2]) < 0.5f) {
 			// workaround for dark tooltip background color, see https://bugs.eclipse.org/309334
-			return PreferenceConverter.getColor(JavaPlugin.getDefault().getCombinedPreferenceStore(), AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND);
+			IPreferenceStore preferenceStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
+			boolean useDefault= preferenceStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT);
+			if (useDefault)
+				return display.getSystemColor(SWT.COLOR_LIST_BACKGROUND).getRGB();
+			return PreferenceConverter.getColor(preferenceStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND);
 		}
 		return null;
 	}

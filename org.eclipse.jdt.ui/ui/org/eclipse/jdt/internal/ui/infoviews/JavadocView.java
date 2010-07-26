@@ -725,6 +725,10 @@ public class JavadocView extends AbstractInfoView {
 		}
 	}
 
+	private static String getStyleSheet() {
+		return HTMLPrinter.convertInfoTextColor(fgStyleSheet);
+	}
+
 	/*
 	 * @see AbstractInfoView#createActions()
 	 */
@@ -854,7 +858,7 @@ public class JavadocView extends AbstractInfoView {
 		IJavaElement input= getInput();
 		if (input == null) {
 			StringBuffer buffer= new StringBuffer(""); //$NON-NLS-1$
-			HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, fgStyleSheet);
+			HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, getStyleSheet());
 			doSetInput(buffer.toString());
 		} else {
 			doSetInput(computeInput(input));
@@ -1128,7 +1132,7 @@ public class JavadocView extends AbstractInfoView {
 
 		boolean flushContent= true;
 		if (buffer.length() > 0 || flushContent) {
-			HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, fgStyleSheet);
+			HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, getStyleSheet());
 			if (base != null) {
 				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
 				buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
