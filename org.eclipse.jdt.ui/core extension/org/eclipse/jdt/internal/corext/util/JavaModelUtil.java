@@ -44,12 +44,17 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.CorextMessages;
 import org.eclipse.jdt.internal.corext.ValidateEditException;
@@ -531,7 +536,7 @@ public final class JavaModelUtil {
 	 *
 	 * @see IClasspathEntry#getExclusionPatterns
 	 */
-	public final static boolean isExcluded(IPath resourcePath, char[][] exclusionPatterns) {
+	public static boolean isExcluded(IPath resourcePath, char[][] exclusionPatterns) {
 		if (exclusionPatterns == null) return false;
 		char[] path = resourcePath.toString().toCharArray();
 		for (int i = 0, length = exclusionPatterns.length; i < length; i++)
@@ -887,6 +892,49 @@ public final class JavaModelUtil {
 					return true;
 			}
 		}
+		return false;
+	}
+
+	/**
+	 * Returns whether the given local variable is declared <code>final</code>.
+	 * 
+	 * @param variable the local variable
+	 * @return <code>true</code> if the local variable's source is available and the variable is
+	 *         declared <code>final</code>, <code>false</code> otherwise
+	 * @throws JavaModelException if source or name range cannot be accessed
+	 * @since 3.7
+	 */
+	public static boolean isFinal(ILocalVariable variable) throws JavaModelException {
+		String source= variable.getSource();
+		if (source == null)
+			return false;
+
+		ISourceRange sourceRange= variable.getSourceRange();
+		if (sourceRange == null)
+			return false;
+
+		int sourceRangeOffset= variable.getSourceRange().getOffset();
+		if (sourceRangeOffset == -1)
+			return false;
+
+		int nameRangeOffset= variable.getNameRange().getOffset();
+		if (nameRangeOffset == -1)
+			return false;
+
+		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+		scanner.setSource(source.toCharArray());
+		scanner.resetTo(0, nameRangeOffset - sourceRangeOffset - 1);
+
+		int token= 0;
+		do {
+			if (token == ITerminalSymbols.TokenNamefinal)
+				return true;
+			try {
+				token= scanner.getNextToken();
+			} catch (InvalidInputException e) {
+				return false;
+			}
+		} while (token != ITerminalSymbols.TokenNameEOF);
 		return false;
 	}
 
