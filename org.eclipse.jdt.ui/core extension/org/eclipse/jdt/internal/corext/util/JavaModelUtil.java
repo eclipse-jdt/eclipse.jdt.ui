@@ -925,15 +925,15 @@ public final class JavaModelUtil {
 		scanner.setSource(source.toCharArray());
 		scanner.resetTo(0, nameRangeOffset - sourceRangeOffset - 1);
 
-		int token= 0;
+		int token;
 		do {
-			if (token == ITerminalSymbols.TokenNamefinal)
-				return true;
 			try {
 				token= scanner.getNextToken();
 			} catch (InvalidInputException e) {
 				return false;
 			}
+			if (token == ITerminalSymbols.TokenNamefinal)
+				return true;
 		} while (token != ITerminalSymbols.TokenNameEOF);
 		return false;
 	}
