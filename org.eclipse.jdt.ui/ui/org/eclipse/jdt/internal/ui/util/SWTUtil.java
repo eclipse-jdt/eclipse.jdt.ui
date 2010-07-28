@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Caret;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
@@ -49,20 +48,6 @@ public class SWTUtil {
 	 * @since 3.5
 	 */
 	public static final int COMBO_VISIBLE_ITEM_COUNT= 30;
-
-	/**
-	 * Returns the standard display to be used. The method first checks, if
-	 * the thread calling this method has an associated display. If so, this
-	 * display is returned. Otherwise the method returns the default display.
-	 * @return returns the standard display to be used
-	 */
-	public static Display getStandardDisplay() {
-		Display display;
-		display= Display.getCurrent();
-		if (display == null)
-			display= Display.getDefault();
-		return display;
-	}
 
 	/**
 	 * Returns the shell for the given widget. If the widget doesn't represent

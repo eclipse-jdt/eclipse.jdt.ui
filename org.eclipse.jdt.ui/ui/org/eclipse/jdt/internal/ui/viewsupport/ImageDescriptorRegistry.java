@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * A registry that maps <code>ImageDescriptors</code> to <code>Image</code>.
@@ -31,21 +31,11 @@ public class ImageDescriptorRegistry {
 	private Display fDisplay;
 
 	/**
-	 * Creates a new image descriptor registry for the current or default display,
-	 * respectively.
-	 */
-	public ImageDescriptorRegistry() {
-		this(SWTUtil.getStandardDisplay());
-	}
-
-	/**
 	 * Creates a new image descriptor registry for the given display. All images
 	 * managed by this registry will be disposed when the display gets disposed.
-	 *
-	 * @param display the display the images managed by this registry are allocated for
 	 */
-	public ImageDescriptorRegistry(Display display) {
-		fDisplay= display;
+	public ImageDescriptorRegistry() {
+		fDisplay= PlatformUI.getWorkbench().getDisplay();
 		Assert.isNotNull(fDisplay);
 		hookDisplay();
 	}
@@ -66,7 +56,6 @@ public class ImageDescriptorRegistry {
 		if (result != null)
 			return result;
 
-		Assert.isTrue(fDisplay == SWTUtil.getStandardDisplay(), "Allocating image for wrong display."); //$NON-NLS-1$
 		result= descriptor.createImage();
 		if (result != null)
 			fRegistry.put(descriptor, result);
