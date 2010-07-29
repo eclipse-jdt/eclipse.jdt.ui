@@ -24,8 +24,10 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IShowInTargetList;
 
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
+import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.ITextEditorHelpContextIds;
 import org.eclipse.ui.editors.text.TextEditor;
 
@@ -195,5 +197,14 @@ public class PropertiesFileEditor extends TextEditor {
 		super.editorContextMenuAboutToShow(menu);
 
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, IJavaEditorActionDefinitionIds.TOGGLE_COMMENT);
+	}
+
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#isTabsToSpacesConversionEnabled()
+	 * @since 3.7
+	 */
+	protected boolean isTabsToSpacesConversionEnabled() {
+		// Can't use our own preference store because JDT disables this functionality in its preferences.
+		return EditorsUI.getPreferenceStore().getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SPACES_FOR_TABS);
 	}
 }
