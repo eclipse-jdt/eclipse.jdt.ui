@@ -2274,6 +2274,14 @@
             description="%OpenActionSet.description"
             visible="false"
             id="org.eclipse.jdt.ui.A_OpenActionSet">
+        <action
+               definitionId="org.eclipse.ui.edit.text.open.hyperlink"
+               id="org.eclipse.jdt.internal.ui.actions.OpenHyperlink"
+               label="%OpenHyperlinkAction.label"
+               menubarPath="navigate/open.ext"
+               retarget="true"
+               tooltip="%OpenHyperlinkAction.tooltip">
+         </action>
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"
                label="%OpenCallHierarchyAction.label"
