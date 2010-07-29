@@ -90,6 +90,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
+import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer.SourceRange;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ConvertMemberTypeDescriptor;
@@ -1033,7 +1035,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		parser.setResolveBindings(false);
 		parser.setSource(source.toCharArray());
 		final AbstractTypeDeclaration declaration= findTypeDeclaration(fType, (CompilationUnit) parser.createAST(null));
-		return source.substring(declaration.getStartPosition(), ASTNodes.getExclusiveEnd(declaration));
+		SourceRange sourceRange= new TargetSourceRangeComputer().computeSourceRange(declaration);
+		return source.substring(sourceRange.getStartPosition(), sourceRange.getStartPosition() + sourceRange.getLength());
 	}
 
 	private Expression createQualifiedReadAccessExpressionForEnclosingInstance(AST ast) {

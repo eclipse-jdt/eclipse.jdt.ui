@@ -531,6 +531,22 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "Inner", "MoreInner", "p2", new String[]{"A"}, new String[]{"p2"}, "p", true, true, false, true);
 	}
 
+	public void test_nonstatic_45() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, null, false, true, false, false);
+	}
+
+	public void test_nonstatic_46() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, null, false, true, false, false);
+	}
+
+	public void test_nonstatic_47() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, null, false, true, false, false);
+	}
+
+	public void test_nonstatic_48() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, null, false, true, false, false);
+	}
+
 	public void testFail_nonstatic_0() throws Exception{
 		validateFailingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", RefactoringStatus.ERROR);
 	}
@@ -593,5 +609,21 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 	public void test_secondary_8() throws Exception {
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A", "S", "T" }, new String[] { "p", "q", "q" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_9() throws Exception {
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_10() throws Exception {
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_11() throws Exception {
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_12() throws Exception {
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 }
