@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,8 +77,6 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 
 	private PixelConverter fPixelConverter;
 
-	private FilteredPreferenceTree fFilteredPrefTree;
-
 	private IStatus fMaxNumberProblemsStatus, fResourceFilterStatus;
 
 	public JavaBuildConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
@@ -113,7 +111,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		mainComp.setLayout(layout);
 
 		Composite othersComposite= createBuildPathTabContent(mainComp);
-		GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
+		GridData gridData= new GridData(GridData.FILL, GridData.FILL, true, true);
 		gridData.heightHint= fPixelConverter.convertHeightInCharsToPixels(20);
 		othersComposite.setLayoutData(gridData);
 
@@ -143,11 +141,10 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.JavaBuildConfigurationBlock_ignore
 		};
 
-		fFilteredPrefTree= new FilteredPreferenceTree(this, parent, null);
-		final ScrolledPageContent pageContent= fFilteredPrefTree.getScrolledPageContent();
-
 		int nColumns= 3;
-		
+
+		final ScrolledPageContent pageContent = new ScrolledPageContent(parent);
+
 		GridLayout layout= new GridLayout();
 		layout.numColumns= nColumns;
 		layout.marginHeight= 0;
@@ -156,81 +153,70 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		Composite composite= pageContent.getBody();
 		composite.setLayout(layout);
 
-		PreferenceTreeNode section;
-
 		String label= PreferencesMessages.JavaBuildConfigurationBlock_section_general;
-		Key key= OptionsConfigurationBlock.getLocalKey("JavaBuildConfigurationBlock_section_general"); //$NON-NLS-1$
-		section= fFilteredPrefTree.addExpandableComposite(composite, label, nColumns, key, null, false);
-		ExpandableComposite excomposite= getExpandableComposite(key);
+		ExpandableComposite excomposite= createStyleSection(composite, label, nColumns);
 
 		Composite othersComposite= new Composite(excomposite, SWT.NONE);
 		excomposite.setClient(othersComposite);
 		othersComposite.setLayout(new GridLayout(nColumns, false));
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_max_per_unit_label;
-		fFilteredPrefTree.addTextField(othersComposite, label, PREF_PB_MAX_PER_UNIT, 0, 0, section, true);
-		Text text= getTextControl(PREF_PB_MAX_PER_UNIT);
+		Text text= addTextField(othersComposite, label, PREF_PB_MAX_PER_UNIT, 0, 0);
 		GridData gd= (GridData) text.getLayoutData();
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(8);
-		gd.horizontalAlignment= SWT.END;
+		gd.horizontalAlignment= GridData.END;
 		text.setTextLimit(6);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_enable_exclusion_patterns_label;
-		fFilteredPrefTree.addCheckBox(othersComposite, label, PREF_ENABLE_EXCLUSION_PATTERNS, enableDisableValues, 0, section);
+		addCheckBox(othersComposite, label, PREF_ENABLE_EXCLUSION_PATTERNS, enableDisableValues, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_enable_multiple_outputlocations_label;
-		fFilteredPrefTree.addCheckBox(othersComposite, label, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS, enableDisableValues, 0, section);
+		addCheckBox(othersComposite, label, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS, enableDisableValues, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_section_build_path_problems;
-		key= OptionsConfigurationBlock.getLocalKey("JavaBuildConfigurationBlock_section_build_path_problems"); //$NON-NLS-1$
-		section= fFilteredPrefTree.addExpandableComposite(composite, label, nColumns, key, null, false);
-		excomposite= getExpandableComposite(key);
+		excomposite= createStyleSection(composite, label, nColumns);
 
 		othersComposite= new Composite(excomposite, SWT.NONE);
 		excomposite.setClient(othersComposite);
 		othersComposite.setLayout(new GridLayout(nColumns, false));
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_build_invalid_classpath_label;
-		fFilteredPrefTree.addCheckBox(othersComposite, label, PREF_BUILD_INVALID_CLASSPATH, abortIgnoreValues, 0, section);
+		addCheckBox(othersComposite, label, PREF_BUILD_INVALID_CLASSPATH, abortIgnoreValues, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_incomplete_build_path_label;
-		fFilteredPrefTree.addComboBox(othersComposite, label, PREF_PB_INCOMPLETE_BUILDPATH, errorWarning, errorWarningLabels, 0, section);
+		addComboBox(othersComposite, label, PREF_PB_INCOMPLETE_BUILDPATH, errorWarning, errorWarningLabels, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_build_path_cycles_label;
-		fFilteredPrefTree.addComboBox(othersComposite, label, PREF_PB_CIRCULAR_BUILDPATH, errorWarning, errorWarningLabels, 0, section);
+		addComboBox(othersComposite, label, PREF_PB_CIRCULAR_BUILDPATH, errorWarning, errorWarningLabels, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_check_prereq_binary_level_label;
-		fFilteredPrefTree.addComboBox(othersComposite, label, PREF_PB_INCOMPATIBLE_JDK_LEVEL, errorWarningIgnore, errorWarningIgnoreLabels, 0, section);
+		addComboBox(othersComposite, label, PREF_PB_INCOMPATIBLE_JDK_LEVEL, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_strictly_compatible_jre_not_available_label;
-		fFilteredPrefTree.addComboBox(othersComposite, label, PREF_PB_STRICTLY_COMPATIBLE_JRE_NOT_AVAILABLE, errorWarningIgnore, errorWarningIgnoreLabels, 0, section);
+		addComboBox(othersComposite, label, PREF_PB_STRICTLY_COMPATIBLE_JRE_NOT_AVAILABLE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_section_output_folder;
-		key= OptionsConfigurationBlock.getLocalKey("JavaBuildConfigurationBlock_section_output_folder"); //$NON-NLS-1$
-		section= fFilteredPrefTree.addExpandableComposite(composite, label, nColumns, key, null, false);
-		excomposite= getExpandableComposite(key);
+		excomposite= createStyleSection(composite, label, nColumns);
 
 		othersComposite= new Composite(excomposite, SWT.NONE);
 		excomposite.setClient(othersComposite);
 		othersComposite.setLayout(new GridLayout(nColumns, false));
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_duplicate_resources_label;
-		fFilteredPrefTree.addComboBox(othersComposite, label, PREF_PB_DUPLICATE_RESOURCE, errorWarning, errorWarningLabels, 0, section);
+		addComboBox(othersComposite, label, PREF_PB_DUPLICATE_RESOURCE, errorWarning, errorWarningLabels, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_build_clean_outputfolder_label;
-		fFilteredPrefTree.addCheckBox(othersComposite, label, PREF_BUILD_CLEAN_OUTPUT_FOLDER, cleanIgnoreValues, 0, section);
+		addCheckBox(othersComposite, label, PREF_BUILD_CLEAN_OUTPUT_FOLDER, cleanIgnoreValues, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_build_recreate_modified;
-		fFilteredPrefTree.addCheckBox(othersComposite, label, PREF_RECREATE_MODIFIED_CLASS_FILES, enableIgnoreValues, 0, section);
+		addCheckBox(othersComposite, label, PREF_RECREATE_MODIFIED_CLASS_FILES, enableIgnoreValues, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_resource_filter_label;
-		fFilteredPrefTree.addTextField(othersComposite, label, PREF_RESOURCE_FILTER, 0, 0, section, true);
-		text= getTextControl(PREF_RESOURCE_FILTER);
+		text= addTextField(othersComposite, label, PREF_RESOURCE_FILTER, 0, 0);
 		gd= (GridData) text.getLayoutData();
 		gd.grabExcessHorizontalSpace= true;
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(10);
 
-		//TODO: add support for a simple label
 		Label description= new Label(othersComposite, SWT.WRAP);
 		description.setText(PreferencesMessages.JavaBuildConfigurationBlock_resource_filter_description);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -238,8 +224,8 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
 		description.setLayoutData(gd);
 
-		IDialogSettings settingsSection= JavaPlugin.getDefault().getDialogSettings().getSection(SETTINGS_SECTION_NAME);
-		restoreSectionExpansionStates(settingsSection);
+		IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().getSection(SETTINGS_SECTION_NAME);
+		restoreSectionExpansionStates(section);
 
 		return pageContent;
 	}
