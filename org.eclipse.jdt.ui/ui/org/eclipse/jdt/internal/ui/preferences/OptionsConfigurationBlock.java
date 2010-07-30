@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
@@ -55,6 +58,7 @@ import org.eclipse.jface.action.LegacyActionTools;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.ui.forms.events.ExpansionAdapter;
@@ -63,6 +67,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.preferences.IWorkingCopyManager;
 import org.eclipse.ui.preferences.WorkingCopyManager;
+import org.eclipse.ui.progress.WorkbenchJob;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -73,6 +78,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /**
@@ -85,8 +91,8 @@ public abstract class OptionsConfigurationBlock {
 
 	public static class Key {
 
-		private String fQualifier;
-		private String fKey;
+		private final String fQualifier;
+		private final String fKey;
 
 		public Key(String qualifier, String key) {
 			fQualifier= qualifier;
@@ -144,7 +150,7 @@ public abstract class OptionsConfigurationBlock {
 	 * Key that is only managed locally and not part of preference store.
 	 */
 	private static class LocalKey extends Key {
-		private HashMap fValues;
+		private final HashMap fValues;
 
 		private LocalKey(String key) {
 			super("local", key); //$NON-NLS-1$
@@ -164,10 +170,9 @@ public abstract class OptionsConfigurationBlock {
 		}
 	}
 
-
 	protected static class ControlData {
-		private Key fKey;
-		private String[] fValues;
+		private final Key fKey;
+		private final String[] fValues;
 
 		public ControlData(Key key, String[] values) {
 			fKey= key;
@@ -215,6 +220,411 @@ public abstract class OptionsConfigurationBlock {
 		}
 	}
 
+	/**
+	 * A node in <code>FilteredPreferenceTree</code>.
+	 */
+	protected static class PreferenceTreeNode {
+
+		public static final int NONE= 0;
+
+		public static final int CHECKBOX= 1;
+
+		public static final int COMBO= 2;
+
+		public static final int EXPANDABLE_COMPOSITE= 3;
+
+		public static final int TEXT_CONTROL= 4;
+
+		/**
+		 * Tells the type of UI control corresponding to this node. One of
+		 * <ul>
+		 * <li> <code>NONE</code></li>
+		 * <li> <code>CHECKBOX</code></li>
+		 * <li> <code>COMBO</code></li>
+		 * <li> <code>EXPANDABLE_COMPOSITE</code></li>
+		 * <li> <code>TEXT_CONTROL</code></li>
+		 * </ul>
+		 */
+		private final int fControlType;
+
+		/**
+		 * Label text of the preference which is used for filtering. This text does not contain
+		 * <code>&</code> which is used to indicate mnemonics.
+		 */
+		private final String fLabel;
+
+		/**
+		 * The preference key or the local key to uniquely identify a node's corresponding UI
+		 * control. Can be <code>null</code>.
+		 */
+		private final Key fKey;
+
+		/**
+		 * Tells whether all children should be shown even if just one child matches the filter.
+		 */
+		private final boolean fShowAllChildren;
+
+		/**
+		 * Tells whether this node's UI control is visible in the UI for the current filter text.
+		 */
+		private boolean fVisible;
+
+		/**
+		 * List of children nodes.
+		 */
+		private List fChildren;
+
+		/**
+		 * Constructs a new instance of PreferenceTreeNode according to the parameters.
+		 * <p>
+		 * The <code>label</code> and the <code>key</code> must not be <code>null</code> if the node
+		 * has a corresponding UI control.
+		 * </p>
+		 * 
+		 * @param label the label text
+		 * @param key the key
+		 * @param controlType the type of UI control.
+		 * @param showAllChildren tells whether all children should be shown even if just one child
+		 *            matches the filter.
+		 */
+		public PreferenceTreeNode(String label, Key key, int controlType, boolean showAllChildren) {
+			super();
+			if (controlType != NONE && (label == null || key == null)) {
+				throw new IllegalArgumentException();
+			}
+			if (label == null) {
+				label= ""; //$NON-NLS-1$
+			}
+			fLabel= LegacyActionTools.removeMnemonics(label);
+			fKey= key;
+			fControlType= controlType;
+			fShowAllChildren= showAllChildren;
+		}
+
+		public String getLabel() {
+			return fLabel;
+		}
+
+		public Key getKey() {
+			return fKey;
+		}
+
+		public int getControlType() {
+			return fControlType;
+		}
+
+		public List getChildren() {
+			return fChildren;
+		}
+
+		public boolean isShowAllChildren() {
+			return fShowAllChildren;
+		}
+
+		public boolean isVisible() {
+			return fVisible;
+		}
+
+		private void setVisible(boolean visible, boolean recursive) {
+			fVisible= visible;
+			if (!recursive)
+				return;
+			if (fChildren != null) {
+				for (int i= 0; i < fChildren.size(); i++) {
+					((PreferenceTreeNode)fChildren.get(i)).setVisible(visible, recursive);
+				}
+			}
+		}
+
+		public PreferenceTreeNode addChild(String label, Key key, int controlType, boolean showAllChildren) {
+			if (fChildren == null) {
+				fChildren= new ArrayList();
+			}
+			PreferenceTreeNode n= new PreferenceTreeNode(label, key, controlType, showAllChildren);
+			fChildren.add(n);
+			return n;
+		}
+	}
+
+	/**
+	 * The preference page modeled as a filtered tree.
+	 * <p>
+	 * The tree consists of an optional description label, a filter text input box, and a scrolled area.
+	 * The scrolled content contains all the UI controls which participate in filtering.
+	 * </p>
+	 * <p>
+	 * Supports '*' and '?' wildcards. When filter text starts with '~', the filter is applied on
+	 * preference values, e.g. ~ignore or ~off.
+	 * </p>
+	 */
+	protected static class FilteredPreferenceTree {
+		/**
+		 * Root node for the tree. It does not have a corresponding UI control.
+		 */
+		private final PreferenceTreeNode fRoot;
+
+		/**
+		 * The string matcher.
+		 */
+		private StringMatcher fMatcher;
+
+		/**
+		 * Tells whether to match preference values, <code>true</code> if filter text starts with
+		 * '~' <code>false</code> otherwise.
+		 */
+		private boolean fMatchPreferenceValue;
+
+		/**
+		 * The Options Configuration block.
+		 */
+		private final OptionsConfigurationBlock fConfigBlock;
+
+		/**
+		 * The parent composite of <code>FilteredPreferenceTree</code>.
+		 */
+		private final Composite fParentComposite;
+
+		/**
+		 * The scrolled area of the tree.
+		 */
+		private ScrolledPageContent fScrolledPageContent;
+
+		/**
+		 * Job to update the UI in a separate thread.
+		 */
+		private final WorkbenchJob fRefreshJob;
+
+		/**
+		 * Tells whether the filter text matched at least one element.
+		 */
+		private boolean fMatchFound;
+
+		/**
+		 * Label to indicate that no option matched the filter text.
+		 */
+		private Label fNoMatchFoundLabel;
+
+		/**
+		 * Constructs a new instance of FilteredPreferenceTree according to the parameters.
+		 * 
+		 * @param configBlock the Options Configuration block
+		 * @param parentComposite the parent composite
+		 * @param label the label, or <code>null</code> if none
+		 */
+		public FilteredPreferenceTree(OptionsConfigurationBlock configBlock, Composite parentComposite, String label) {
+			fRoot= new PreferenceTreeNode(null, null, PreferenceTreeNode.NONE, false);
+			fConfigBlock= configBlock;
+			fParentComposite= parentComposite;
+
+			createDescription(label);
+			createFilterBox();
+			createScrolledArea();
+			createNoMatchFoundLabel();
+			fRefreshJob= doCreateRefreshJob();
+			fRefreshJob.setSystem(true);
+		}
+
+		private void createDescription(String label) {
+			if (label == null)
+				return;
+			
+			Label description= new Label(fParentComposite, SWT.LEFT | SWT.WRAP);
+			description.setFont(fParentComposite.getFont());
+			description.setText(label);
+			description.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, true, false));
+		}
+
+		private void createFilterBox() {
+			//TODO: Directly use the hint flags once Bug 293230 is fixed
+			FilterTextControl filterTextControl= new FilterTextControl(fParentComposite);
+
+			final Text filterBox= filterTextControl.getFilterControl();
+			filterBox.setMessage(PreferencesMessages.OptionsConfigurationBlock_TypeFilterText);
+			
+			filterBox.addModifyListener(new ModifyListener() {
+				private String fPrevFilterText;
+
+				public void modifyText(ModifyEvent e) {
+					String input= filterBox.getText();
+					if (input != null && input.equalsIgnoreCase(fPrevFilterText))
+						return;
+					fPrevFilterText= input;
+					doFilter(input);
+				}
+			});
+		}
+
+		private void createScrolledArea() {
+			fScrolledPageContent= new ScrolledPageContent(fParentComposite);
+		}
+
+		public ScrolledPageContent getScrolledPageContent() {
+			return fScrolledPageContent;
+		}
+
+		private void createNoMatchFoundLabel() {
+			fNoMatchFoundLabel= new Label(fScrolledPageContent.getBody(), SWT.NONE);
+			GridData gd= new GridData(SWT.BEGINNING, SWT.CENTER, true, false);
+			gd.horizontalSpan= 3;
+			gd.horizontalIndent= new PixelConverter(fScrolledPageContent).convertWidthInCharsToPixels(3);
+			fNoMatchFoundLabel.setLayoutData(gd);
+			fNoMatchFoundLabel.setFont(fScrolledPageContent.getFont());
+			fNoMatchFoundLabel.setText(PreferencesMessages.OptionsConfigurationBlock_NoOptionMatchesTheFilter);
+			setVisible(fNoMatchFoundLabel, false);
+		}
+
+		public PreferenceTreeNode addChild(PreferenceTreeNode parent, String label, Key key, int controlType, boolean showAllChildren) {
+			parent= (parent == null) ? fRoot : parent;
+			return parent.addChild(label, key, controlType, showAllChildren);
+		}
+
+		public PreferenceTreeNode addCheckBox(Composite parentComposite, String label, Key key, String[] values, int indent, PreferenceTreeNode parentNode, boolean showAllChildren) {
+			fConfigBlock.addCheckBox(parentComposite, label, key, values, indent);
+			return addChild(parentNode, label, key, PreferenceTreeNode.CHECKBOX, showAllChildren);
+		}
+
+		public PreferenceTreeNode addCheckBox(Composite parentComposite, String label, Key key, String[] values, int indent, PreferenceTreeNode parentNode) {
+			return addCheckBox(parentComposite, label, key, values, indent, parentNode, true);
+		}
+
+		public PreferenceTreeNode addComboBox(Composite parentComposite, String label, Key key, String[] values, String[] valueLabels, int indent, PreferenceTreeNode parentNode, boolean showAllChildren) {
+			fConfigBlock.addComboBox(parentComposite, label, key, values, valueLabels, indent);
+			return addChild(parentNode, label, key, PreferenceTreeNode.COMBO, showAllChildren);
+		}
+
+		public PreferenceTreeNode addComboBox(Composite parentComposite, String label, Key key, String[] values, String[] valueLabels, int indent, PreferenceTreeNode parentNode) {
+			return addComboBox(parentComposite, label, key, values, valueLabels, indent, parentNode, true);
+		}
+
+		public PreferenceTreeNode addTextField(Composite parentComposite, String label, Key key, int indent, int widthHint, PreferenceTreeNode parentNode, boolean showAllChildren) {
+			fConfigBlock.addTextField(parentComposite, label, key, indent, widthHint);
+			return addChild(parentNode, label, key, PreferenceTreeNode.TEXT_CONTROL, showAllChildren);
+		}
+
+		public PreferenceTreeNode addExpandableComposite(Composite parentComposite, String label, int nColumns, Key key, PreferenceTreeNode parentNode, boolean showAllChildren) {
+			fConfigBlock.createStyleSection(parentComposite, label, nColumns, key);
+			return addChild(parentNode, label, key, PreferenceTreeNode.EXPANDABLE_COMPOSITE, showAllChildren);
+		}
+
+		private boolean match(PreferenceTreeNode node) {
+			if (!fMatchPreferenceValue) {
+				return fMatcher.match(node.getLabel());
+			}
+			if (node.getKey() != null) {
+				if (node.getControlType() == PreferenceTreeNode.COMBO) {
+					return fMatcher.match(fConfigBlock.getComboBox(node.getKey()).getText());
+				} else if (node.getControlType() == PreferenceTreeNode.CHECKBOX) {
+					boolean checked= fConfigBlock.getCheckBox(node.getKey()).getSelection();
+					if (checked) {
+						return fMatcher.match(PreferencesMessages.OptionsConfigurationBlock_On) || fMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Enabled);
+					} else {
+						return fMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Off) || fMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Disabled);
+					}
+				}
+			}
+			return false;
+		}
+
+		public boolean filter(PreferenceTreeNode node) {
+			//check this node
+			boolean visible= match(node);
+			fMatchFound|= visible;
+			if (visible) {
+				node.setVisible(visible, true);
+				return visible;
+			}
+			//check children
+			List children= node.getChildren();
+			if (children != null) {
+				for (int i= 0; i < children.size(); i++) {
+					visible|= filter(((PreferenceTreeNode)children.get(i)));
+				}
+				if (node.isShowAllChildren()) {
+					for (int i= 0; i < children.size(); i++) {
+						((PreferenceTreeNode)children.get(i)).setVisible(visible, false);
+					}
+				}
+			}
+			node.setVisible(visible, false);
+			return visible;
+		}
+
+		public void doFilter(String filterText) {
+			fRefreshJob.cancel();
+			fRefreshJob.schedule(getRefreshJobDelay());
+			fMatchPreferenceValue= filterText.startsWith("~"); //$NON-NLS-1$
+			if (fMatchPreferenceValue) {
+				filterText= filterText.substring(1);
+			}
+			fMatcher= new StringMatcher("*" + filterText + "*", true, false); //$NON-NLS-1$ //$NON-NLS-2$
+			fMatchFound= false;
+			filter(fRoot);
+		}
+
+		/**
+		 * Return the time delay that should be used when scheduling the filter refresh job.
+		 * 
+		 * @return a time delay in milliseconds before the job should run
+		 */
+		private long getRefreshJobDelay() {
+			return 200;
+		}
+
+		private void updateUI(PreferenceTreeNode node) {
+			//update node
+			int controlType= node.getControlType();
+			Control control= null;
+			if (controlType == PreferenceTreeNode.CHECKBOX) {
+				control= fConfigBlock.getCheckBox(node.getKey());
+			} else if (controlType == PreferenceTreeNode.COMBO) {
+				control= fConfigBlock.getComboBox(node.getKey());
+			} else if (controlType == PreferenceTreeNode.TEXT_CONTROL) {
+				control= fConfigBlock.getTextControl(node.getKey());
+			} else if (controlType == PreferenceTreeNode.EXPANDABLE_COMPOSITE) {
+				control= fConfigBlock.getExpandableComposite(node.getKey());
+			}
+
+			if (control != null) {
+				boolean visible= node.isVisible();
+				setVisible(control, visible);
+				if (control instanceof Combo || control instanceof Text) {
+					Label label= (Label)(fConfigBlock.fLabels.get(control));
+					setVisible(label, visible);
+				}
+				if (control instanceof ExpandableComposite) {
+					((ExpandableComposite)control).setExpanded(visible);
+				}
+			}
+
+			//update children
+			List children= node.getChildren();
+			if (children != null) {
+				for (int i= 0; i < children.size(); i++) {
+					updateUI((PreferenceTreeNode)children.get(i));
+				}
+			}
+		}
+
+		private WorkbenchJob doCreateRefreshJob() {
+			return new WorkbenchJob(PreferencesMessages.OptionsConfigurationBlock_RefreshFilter) {
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					updateUI(fRoot);
+					fParentComposite.layout(true, true); //relayout
+					if (fScrolledPageContent != null) {
+						setVisible(fNoMatchFoundLabel, !fMatchFound);
+						fScrolledPageContent.reflow(true);
+					}
+					return Status.OK_STATUS;
+				}
+			};
+		}
+
+		private void setVisible(Control control, boolean visible) {
+			control.setVisible(visible);
+			((GridData)control.getLayoutData()).exclude= !visible;
+		}
+	}
+
 	private static final String REBUILD_COUNT_KEY= "preferences_build_requested"; //$NON-NLS-1$
 
 	private static final String SETTINGS_EXPANDED= "expanded"; //$NON-NLS-1$
@@ -223,7 +633,7 @@ public abstract class OptionsConfigurationBlock {
 	protected final ArrayList fComboBoxes;
 	protected final ArrayList fTextBoxes;
 	protected final HashMap fLabels;
-	protected final ArrayList fExpandedComposites;
+	protected final ArrayList fExpandableComposites;
 
 	private SelectionListener fSelectionListener;
 	private ModifyListener fTextModifyListener;
@@ -237,7 +647,7 @@ public abstract class OptionsConfigurationBlock {
 	private Shell fShell;
 
 	private final IWorkingCopyManager fManager;
-	private IWorkbenchPreferenceContainer fContainer;
+	private final IWorkbenchPreferenceContainer fContainer;
 
 	private Map fDisabledProjectSettings; // null when project specific settings are turned off
 
@@ -283,7 +693,7 @@ public abstract class OptionsConfigurationBlock {
 		fComboBoxes= new ArrayList();
 		fTextBoxes= new ArrayList(2);
 		fLabels= new HashMap();
-		fExpandedComposites= new ArrayList();
+		fExpandableComposites= new ArrayList();
 
 		fRebuildCount= getRebuildCount();
 	}
@@ -349,11 +759,11 @@ public abstract class OptionsConfigurationBlock {
 	public void selectOption(Key key) {
 		Control control= findControl(key);
 		if (control != null) {
-			if (!fExpandedComposites.isEmpty()) {
+			if (!fExpandableComposites.isEmpty()) {
 				ExpandableComposite expandable= getParentExpandableComposite(control);
 				if (expandable != null) {
-					for (int i= 0; i < fExpandedComposites.size(); i++) {
-						ExpandableComposite curr= (ExpandableComposite) fExpandedComposites.get(i);
+					for (int i= 0; i < fExpandableComposites.size(); i++) {
+						ExpandableComposite curr= (ExpandableComposite) fExpandableComposites.get(i);
 						curr.setExpanded(curr == expandable);
 					}
 					expandedStateChanged(expandable);
@@ -612,8 +1022,15 @@ public abstract class OptionsConfigurationBlock {
 	}
 
 	protected ExpandableComposite createStyleSection(Composite parent, String label, int nColumns) {
+		return createStyleSection(parent, label, nColumns, null);
+	}
+
+	protected ExpandableComposite createStyleSection(Composite parent, String label, int nColumns, Key key) {
 		ExpandableComposite excomposite= new ExpandableComposite(parent, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
 		excomposite.setText(label);
+		if (key != null) {
+			excomposite.setData(key);
+		}
 		excomposite.setExpanded(false);
 		excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
 		excomposite.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, nColumns, 1));
@@ -622,7 +1039,7 @@ public abstract class OptionsConfigurationBlock {
 				expandedStateChanged((ExpandableComposite) e.getSource());
 			}
 		});
-		fExpandedComposites.add(excomposite);
+		fExpandableComposites.add(excomposite);
 		makeScrollableCompositeAware(excomposite);
 		return excomposite;
 	}
@@ -635,8 +1052,8 @@ public abstract class OptionsConfigurationBlock {
 	}
 
 	protected void restoreSectionExpansionStates(IDialogSettings settings) {
-		for (int i= 0; i < fExpandedComposites.size(); i++) {
-			ExpandableComposite excomposite= (ExpandableComposite) fExpandedComposites.get(i);
+		for (int i= 0; i < fExpandableComposites.size(); i++) {
+			ExpandableComposite excomposite= (ExpandableComposite) fExpandableComposites.get(i);
 			if (settings == null) {
 				excomposite.setExpanded(i == 0); // only expand the first node by default
 			} else {
@@ -646,8 +1063,8 @@ public abstract class OptionsConfigurationBlock {
 	}
 
 	protected void storeSectionExpansionStates(IDialogSettings settings) {
-		for (int i= 0; i < fExpandedComposites.size(); i++) {
-			ExpandableComposite curr= (ExpandableComposite) fExpandedComposites.get(i);
+		for (int i= 0; i < fExpandableComposites.size(); i++) {
+			ExpandableComposite curr= (ExpandableComposite) fExpandableComposites.get(i);
 			settings.put(SETTINGS_EXPANDED + String.valueOf(i), curr.isExpanded());
 		}
 	}
@@ -1006,6 +1423,17 @@ public abstract class OptionsConfigurationBlock {
 		}
 	}
 
+	protected ExpandableComposite getExpandableComposite(Key key) {
+		for (int i= fExpandableComposites.size() - 1; i >= 0; i--) {
+			ExpandableComposite curr= (ExpandableComposite)fExpandableComposites.get(i);
+			Key data= (Key)curr.getData();
+			if (key.equals(data)) {
+				return curr;
+			}
+		}
+		return null;
+	}
+
 	protected Button getCheckBox(Key key) {
 		for (int i= fCheckBoxes.size() - 1; i >= 0; i--) {
 			Button curr= (Button) fCheckBoxes.get(i);
@@ -1045,8 +1473,8 @@ public abstract class OptionsConfigurationBlock {
 	protected Text getTextControl(Key key) {
 		for (int i= fTextBoxes.size() - 1; i >= 0; i--) {
 			Text curr= (Text) fTextBoxes.get(i);
-			ControlData data= (ControlData) curr.getData();
-			if (key.equals(data.getKey())) {
+			Key data= (Key)curr.getData();
+			if (key.equals(data)) {
 				return curr;
 			}
 		}

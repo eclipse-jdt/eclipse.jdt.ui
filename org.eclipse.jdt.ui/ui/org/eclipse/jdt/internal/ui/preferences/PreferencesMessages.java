@@ -771,4 +771,14 @@ public final class PreferencesMessages extends NLS {
 	public static String FavoriteStaticMemberInputDialog_error_invalidTypeName;
 	public static String FavoriteStaticMemberInputDialog_error_entryExists;
 
+	public static String OptionsConfigurationBlock_Disabled;
+	public static String OptionsConfigurationBlock_Enabled;
+	public static String OptionsConfigurationBlock_NoOptionMatchesTheFilter;
+	public static String OptionsConfigurationBlock_Off;
+	public static String OptionsConfigurationBlock_On;
+	public static String OptionsConfigurationBlock_RefreshFilter;
+	public static String OptionsConfigurationBlock_TypeFilterText;
+
+	public static String FilterTextControl_Clear;
+	public static String FilterTextControl_ClearFilterField;
 }
