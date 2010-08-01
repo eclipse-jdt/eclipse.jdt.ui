@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,10 +59,10 @@ class FiltersDialog extends StatusDialog {
      * Method declared on Dialog.
      */
     protected Control createDialogArea(Composite parent) {
-        Composite superComposite = (Composite) super.createDialogArea(parent);
+        super.createDialogArea(parent);
 
-        Composite composite = new Composite(superComposite, SWT.NONE);
-        composite.setFont(superComposite.getFont());
+        Composite composite = new Composite(parent, SWT.NONE);
+        composite.setFont(parent.getFont());
         composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         GridLayout layout = new GridLayout();

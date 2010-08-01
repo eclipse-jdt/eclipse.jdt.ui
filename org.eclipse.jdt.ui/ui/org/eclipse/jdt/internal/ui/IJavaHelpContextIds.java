@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -455,6 +455,11 @@ public interface IJavaHelpContextIds {
      * @since 3.6
      */
     public static final String CALL_HIERARCHY_REFRESH_SINGLE_ELEMENT_ACTION= PREFIX + "call_hierarchy_refresh_single_element_action_context"; //$NON-NLS-1$
+
+	/**
+	 * @since 3.7
+	 */
+    public static final String CALL_HIERARCHY_SEARCH_IN_DIALOG= PREFIX + "call_hierarchy_search_in_dialog_context"; //$NON-NLS-1$
     /**
      * @since 3.2
      */

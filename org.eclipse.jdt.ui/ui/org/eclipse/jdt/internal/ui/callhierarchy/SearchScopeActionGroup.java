@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,11 +67,15 @@ class SearchScopeActionGroup extends ActionGroup {
 	}
 
 	/**
-	 * @return IJavaSearchScope
+	 * Returns the current search scope.
+	 * 
+	 * @param includeMask the include mask
+	 * @return the current search scope
+	 * @since 3.7
 	 */
-	public IJavaSearchScope getSearchScope() {
+	public IJavaSearchScope getSearchScope(int includeMask) {
 		if (fSelectedAction != null) {
-			return fSelectedAction.getSearchScope();
+			return fSelectedAction.getSearchScope(includeMask);
 		}
 
 		return null;
@@ -86,6 +90,7 @@ class SearchScopeActionGroup extends ActionGroup {
 		if (sets != null) {
 			fSelectedWorkingSetNames = getWorkingSetNames(sets);
 			fSelectedAction = new SearchScopeWorkingSetAction(this, sets, getScopeDescription(sets));
+			fSelectedAction.run();
 		} else {
 			fSelectedWorkingSetNames = null;
 			fSelectedAction = null;
@@ -350,9 +355,16 @@ class SearchScopeActionGroup extends ActionGroup {
 		return false;
 	}
 
-	public String getFullDescription() {
+	/**
+	 * Fetches the full description of the scope with the appropriate include mask.
+	 * 
+	 * @param includeMask the include mask
+	 * @return the description of the scope with the appropriate include mask
+	 * @since 3.7
+	 */
+	public String getFullDescription(int includeMask) {
 		if (fSelectedAction != null)
-			return fSelectedAction.getFullDescription();
+			return fSelectedAction.getFullDescription(includeMask);
 		return null;
 	}
 }

@@ -231,6 +231,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private CancelSearchAction fCancelSearchAction;
     private ExpandWithConstructorsAction fExpandWithConstructorsAction;
     private RemoveFromViewAction fRemoveFromViewAction;
+    private ShowSearchInDialogAction fShowSearchInDialogAction;
     private CompositeActionGroup fActionGroups;
     private CallHierarchyViewer fCallHierarchyViewer;
     private boolean fShowCallDetails;
@@ -387,8 +388,15 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         }
     }
 
-    public IJavaSearchScope getSearchScope() {
-        return fSearchScopeActions.getSearchScope();
+	/**
+	 * Fetches the search scope with the appropriate include mask.
+	 * 
+	 * @param includeMask the include mask
+	 * @return the search scope with the appropriate include mask
+	 * @since 3.7
+	 */
+    public IJavaSearchScope getSearchScope(int includeMask) {
+        return fSearchScopeActions.getSearchScope(includeMask);
     }
 
     public void setShowCallDetails(boolean show) {
@@ -666,6 +674,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         	fieldSubMenu.add(fToggleFieldModeActions[i]);
         }
         viewMenu.add(fieldSubMenu);
+        viewMenu.add(fShowSearchInDialogAction);
     }
 
     /**
@@ -983,6 +992,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fFocusOnSelectionAction = new FocusOnSelectionAction(this);
         fCopyAction= new CopyCallHierarchyAction(this, fClipboard, fCallHierarchyViewer);
         fSearchScopeActions = new SearchScopeActionGroup(this, fDialogSettings);
+        fShowSearchInDialogAction= new ShowSearchInDialogAction(this, fCallHierarchyViewer);
         fFiltersActionGroup = new CallHierarchyFiltersActionGroup(this,
                 fCallHierarchyViewer);
         fHistoryDropDownAction = new HistoryDropDownAction(this);
@@ -1052,7 +1062,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		if (fInputElements != null) {
 			showPage(PAGE_VIEWER);
 
-			CallHierarchy.getDefault().setSearchScope(getSearchScope());
+			int includeMask= fShowSearchInDialogAction.getSearchInDialog().getIncludeMask();
+			CallHierarchy.getDefault().setSearchScope(getSearchScope(includeMask));
 
 			// set input to null so that setComparator does not cause a refresh on the old contents:
 			fCallHierarchyViewer.setInput(null);
@@ -1068,13 +1079,20 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 				fCallHierarchyViewer.setComparator(null);
 				fCallHierarchyViewer.setMethodWrappers(getCalleeRoots());
 			}
-			setContentDescription(computeContentDescription());
+			setContentDescription(computeContentDescription(includeMask));
 		}
     }
 
-	private String computeContentDescription() {
+	/**
+	 * Computes the content description for the call hierarchy computation.
+	 * 
+	 * @param includeMask the include mask
+	 * @return the content description
+	 * @since 3.7
+	 */
+	private String computeContentDescription(int includeMask) {
 		// see also HistoryAction.getElementLabel(IMember[])
-		String scopeDescription= fSearchScopeActions.getFullDescription();
+		String scopeDescription= fSearchScopeActions.getFullDescription(includeMask);
 
 		if (fInputElements.length == 1) {
 			IMember element= fInputElements[0];

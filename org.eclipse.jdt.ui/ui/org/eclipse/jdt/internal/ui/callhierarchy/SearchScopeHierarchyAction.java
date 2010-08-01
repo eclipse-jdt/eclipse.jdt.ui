@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,10 @@ class SearchScopeHierarchyAction extends SearchScopeAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
 	}
 
-	public IJavaSearchScope getSearchScope() {
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getSearchScope(int)
+	 */
+	public IJavaSearchScope getSearchScope(int includeMask) {
 		try {
 			IMember[] members = fGroup.getView().getInputElements();
 
@@ -67,13 +70,13 @@ class SearchScopeHierarchyAction extends SearchScopeAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
 	 */
-	public String getFullDescription() {
+	public String getFullDescription(int includeMask) {
 		IMember[] members= fGroup.getView().getInputElements();
 		if (members != null && members.length == 1) {
 			IType type= members[0] instanceof IType ? (IType) members[0] : members[0].getDeclaringType();
 			return JavaSearchScopeFactory.getInstance().getHierarchyScopeDescription(type);
 		} else {
-			return JavaSearchScopeFactory.getInstance().getWorkspaceScopeDescription(true);
+			return JavaSearchScopeFactory.getInstance().getWorkspaceScopeDescription(includeMask);
 		}
 	}
 

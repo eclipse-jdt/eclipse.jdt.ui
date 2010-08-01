@@ -58,6 +58,9 @@ public final class CallHierarchyMessages extends NLS {
 	public static String ToggleOrientationAction_single_label;
 	public static String ToggleOrientationAction_single_tooltip;
 	public static String ToggleOrientationAction_single_description;
+	public static String ShowSearchInDialogAction_text;
+	public static String SearchInDialog_title;
+	public static String SearchInDialog_note;
 	public static String ShowExpandWithConstructorsDialogAction_text;
 	public static String ShowFilterDialogAction_text;
 	public static String FiltersDialog_filter;

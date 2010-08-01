@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,13 +26,32 @@ abstract class SearchScopeAction extends Action {
 		this.fGroup = group;
 	}
 
-	public abstract IJavaSearchScope getSearchScope();
+	/**
+	 * Fetches the search scope with the appropriate include mask.
+	 * 
+	 * @param includeMask the include mask
+	 * @return the search scope with the appropriate include mask
+	 * @since 3.7
+	 */
+	public abstract IJavaSearchScope getSearchScope(int includeMask);
 
 	public abstract int getSearchScopeType();
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.action.Action#run()
+	 */
 	public void run() {
 		this.fGroup.setSelected(this, true);
+		CallHierarchyViewPart part= this.fGroup.getView();
+		part.setInputElements(part.getInputElements());
 	}
 
-	public abstract String getFullDescription();
+	/**
+	 * Fetches the description of the scope with the appropriate include mask.
+	 * 
+	 * @param includeMask the include mask
+	 * @return the description of the scope with the appropriate include mask
+	 * @since 3.7
+	 */
+	public abstract String getFullDescription(int includeMask);
 }
