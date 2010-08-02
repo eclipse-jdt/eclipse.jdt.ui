@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.StatusDialog;
 
 import org.eclipse.ui.PlatformUI;
@@ -54,23 +53,19 @@ class FiltersDialog extends StatusDialog {
         newShell.setText(CallHierarchyMessages.FiltersDialog_filter);
         PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.CALL_HIERARCHY_FILTERS_DIALOG);
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    protected boolean isResizable() {
+    	return true;
+    }
 
     /* (non-Javadoc)
      * Method declared on Dialog.
      */
     protected Control createDialogArea(Composite parent) {
-        super.createDialogArea(parent);
-
-        Composite composite = new Composite(parent, SWT.NONE);
-        composite.setFont(parent.getFont());
-        composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-        GridLayout layout = new GridLayout();
-        layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
-        layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
-        layout.verticalSpacing= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
-        layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
-        composite.setLayout(layout);
+    	Composite composite= (Composite) super.createDialogArea(parent);
 
         createNamesArea(composite);
         new Label(composite, SWT.NONE);         // Filler

@@ -22,7 +22,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.TrayDialog;
 
@@ -38,7 +37,7 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
  * 
  * @since 3.7
  */
-public class SearchInDialog extends TrayDialog {
+class SearchInDialog extends TrayDialog {
 
 	private Button[] fIncludeMasks;
 
@@ -118,26 +117,22 @@ public class SearchInDialog extends TrayDialog {
 		newShell.setText(CallHierarchyMessages.SearchInDialog_title);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_IN_DIALOG);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	protected boolean isResizable() {
+		return true;
+	}
 
 	/* (non-Javadoc)
 	 * Method declared on Dialog.
 	 */
 	protected Control createDialogArea(Composite parent) {
-		super.createDialogArea(parent);
-
-		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setFont(parent.getFont());
-		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		GridLayout layout= new GridLayout();
-		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
-		layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
-		layout.verticalSpacing= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
-		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
-		composite.setLayout(layout);
+		Composite composite= (Composite) super.createDialogArea(parent);
 
 		Control includeMask= createIncludeMask(composite);
-		includeMask.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 3, 2));
+		includeMask.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
 
 		return composite;
 	}
@@ -150,7 +145,6 @@ public class SearchInDialog extends TrayDialog {
 	 */
 	private Control createIncludeMask(Composite parent) {
 		Group result= new Group(parent, SWT.NONE);
-		result.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 2));
 		result.setText(SearchMessages.SearchPage_searchIn_label);
 		result.setLayout(new GridLayout(4, false));
 		fIncludeMasks= new Button[] {
@@ -162,9 +156,7 @@ public class SearchInDialog extends TrayDialog {
 
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 4;
-		composite.setLayout(layout);
+		composite.setLayout(new GridLayout());
 		fSearchInDialogText_note= new Label(composite, SWT.LEFT);
 		fSearchInDialogText_note.setFont(composite.getFont());
 		fSearchInDialogText_note.setText(CallHierarchyMessages.SearchInDialog_note);
