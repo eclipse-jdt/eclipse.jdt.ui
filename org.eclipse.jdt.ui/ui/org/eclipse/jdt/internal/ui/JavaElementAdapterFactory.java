@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,13 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
+import org.osgi.framework.Bundle;
+
 import org.eclipse.team.ui.history.IHistoryPageSource;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IAdapterFactory;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 
@@ -50,7 +52,7 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
  */
 public class JavaElementAdapterFactory implements IAdapterFactory, IContributorResourceAdapter2 {
 
-	private static Class[] PROPERTIES= new Class[] {
+	private static Class[] ADAPTER_LIST= new Class[] {
 		IPropertySource.class,
 		IResource.class,
 		IWorkbenchAdapter.class,
@@ -59,8 +61,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		IContributorResourceAdapter.class,
 		IContributorResourceAdapter2.class,
 		ITaskListResourceAdapter.class,
-		IContainmentAdapter.class,
-		IHistoryPageSource.class
+		IContainmentAdapter.class
 	};
 
 	/*
@@ -68,6 +69,8 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 	 * the Search plug-in to be loaded.
 	 */
 	private Object fSearchPageScoreComputer;
+
+	private boolean fIsTeamUILoaded;
 	private static IResourceLocator fgResourceLocator;
 	private static JavaWorkbenchAdapter fgJavaWorkbenchAdapter;
 	private static ITaskListResourceAdapter fgTaskListAdapter;
@@ -75,7 +78,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 
 	public Class[] getAdapterList() {
 		updateLazyLoadedAdapters();
-		return PROPERTIES;
+		return ADAPTER_LIST;
 	}
 
 	public Object getAdapter(Object element, Class key) {
@@ -102,7 +105,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 			return getTaskListAdapter();
 		} if (IContainmentAdapter.class.equals(key)) {
 			return getJavaElementContainmentAdapter();
-		} if (IHistoryPageSource.class.equals(key) && JavaElementHistoryPageSource.hasEdition(java)) {
+		} if (fIsTeamUILoaded && IHistoryPageSource.class.equals(key) && JavaElementHistoryPageSource.hasEdition(java)) {
 			return JavaElementHistoryPageSource.getInstance();
 		}
 		return null;
@@ -175,23 +178,27 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 	private void updateLazyLoadedAdapters() {
 		if (fSearchPageScoreComputer == null && SearchUtil.isSearchPlugInActivated())
 			createSearchPageScoreComputer();
+		if (!fIsTeamUILoaded && isTeamUIPlugInActivated()) {
+			addClassToAdapterList(IHistoryPageSource.class);
+			fIsTeamUILoaded= true;
+		}
 	}
 
 	private void createSearchPageScoreComputer() {
 		fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
-		PROPERTIES= new Class[] {
-			IPropertySource.class,
-			IResource.class,
-			ISearchPageScoreComputer.class,
-			IWorkbenchAdapter.class,
-			IResourceLocator.class,
-			IPersistableElement.class,
-			IProject.class,
-			IContributorResourceAdapter.class,
-			IContributorResourceAdapter2.class,
-			ITaskListResourceAdapter.class,
-			IContainmentAdapter.class
-		};
+		addClassToAdapterList(ISearchPageScoreComputer.class);
+	}
+
+	private static void addClassToAdapterList(Class clazz) {
+		int oldSize= ADAPTER_LIST.length;
+		Class[] oldProperties= ADAPTER_LIST;
+		ADAPTER_LIST= new Class[oldSize + 1];
+		System.arraycopy(oldProperties, 0, ADAPTER_LIST, 0, oldSize);
+		ADAPTER_LIST[oldSize]= clazz;
+	}
+
+	private static boolean isTeamUIPlugInActivated() {
+		return Platform.getBundle("org.eclipse.team.ui").getState() == Bundle.ACTIVE; //$NON-NLS-1$
 	}
 
 	private static IResourceLocator getResourceLocator() {
