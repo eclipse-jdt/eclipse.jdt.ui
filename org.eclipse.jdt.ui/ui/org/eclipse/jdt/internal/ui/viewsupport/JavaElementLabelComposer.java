@@ -726,7 +726,7 @@ public class JavaElementLabelComposer {
 				}
 				break;
 			case Signature.CLASS_TYPE_SIGNATURE:
-				String baseType= getSimpleTypeName(enclosingElement, Signature.getTypeErasure(typeSig));
+				String baseType= getSimpleTypeName(enclosingElement, typeSig);
 				fBuffer.append(baseType);
 
 				String[] typeArguments= Signature.getTypeArguments(typeSig);
@@ -765,7 +765,7 @@ public class JavaElementLabelComposer {
 	 * @return the simple name of the given type signature
 	 */
 	protected String getSimpleTypeName(IJavaElement enclosingElement, String typeSig) {
-		return Signature.getSimpleName(Signature.toString(typeSig));
+		return Signature.getSimpleName(Signature.toString(Signature.getTypeErasure(typeSig)));
 	}
 
 	private void appendTypeArgumentSignaturesLabel(IJavaElement enclosingElement, String[] typeArgsSig, long flags) {
