@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Johannes Utzig <mail@jutzig.de> - [JUnit] Update test suite wizard for JUnit 4: @RunWith(Suite.class)... - https://bugs.eclipse.org/155828
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.wizards;
 
@@ -43,6 +44,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -73,6 +75,8 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	private IMethod fSuiteMethod;
 	private static boolean fEmptySelectionAllowed= false;
 	private Object[] fSelectedTestCases;
+	private boolean fIsJunit4;
+	private IAnnotation fSuiteClasses;
 
 	private class UpdateAllTestsValidator implements ISelectionStatusValidator {
 		/*
@@ -103,7 +107,12 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 		}
 
 		private IStatus checkRecursiveSuiteInclusion(Object[] selection){
-			IType suiteClass= fSuiteMethod.getDeclaringType();
+			IType suiteClass= null;
+			if (fIsJunit4) {
+				suiteClass= (IType) fSuiteClasses.getParent();
+			} else {
+				suiteClass= fSuiteMethod.getDeclaringType();
+			}
 			for (int i= 0; i < selection.length; i++) {
 				if (selection[i] instanceof IType){
 					if (((IType)selection[i]).equals(suiteClass)){
@@ -130,43 +139,59 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	 */
 	public void run(IAction action) {
 		ILabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
-		SuiteClassesContentProvider cprovider= new SuiteClassesContentProvider();
+		SuiteClassesContentProvider cprovider= new SuiteClassesContentProvider(fIsJunit4);
 
-		/* find TestClasses already in Test Suite */
-		IType testSuiteType= fTestSuite.findPrimaryType();
-		fSuiteMethod= testSuiteType.getMethod("suite", new String[] {}); //$NON-NLS-1$
-		if (fSuiteMethod.exists()) {
-			try {
-			ISourceRange range= fSuiteMethod.getSourceRange();
-			IBuffer buf= fTestSuite.getBuffer();
-			String originalContent= buf.getText(range.getOffset(), range.getLength());
-			buf.close();
-			if (getTestSuiteClassListRange(originalContent) != null) {
-				CheckedTableSelectionDialog dialog= new CheckedTableSelectionDialog(fShell, lprovider, cprovider);
-				dialog.setValidator(new UpdateAllTestsValidator());
-				dialog.setTitle(WizardMessages.UpdateAllTests_title);
-				dialog.setMessage(WizardMessages.UpdateAllTests_message);
-				Set elements= cprovider.getTests(fPack);
-				elements.remove(testSuiteType);
-				dialog.setInitialSelections(elements.toArray());
-				dialog.setSize(60, 25);
-				dialog.setInput(fPack);
-				if (dialog.open() == Window.OK) {
-					fSelectedTestCases= dialog.getResult();
-					try {
-						PlatformUI.getWorkbench().getProgressService().busyCursorWhile(getRunnable());
-					} catch (Exception e) {
-						JUnitPlugin.log(e);
+		if (fIsJunit4) {
+			/* find TestClasses already in Test Suite */
+			IType testSuiteType= fTestSuite.findPrimaryType();
+			fSuiteClasses= testSuiteType.getAnnotation("SuiteClasses"); //$NON-NLS-1$
+			if (fSuiteClasses.exists()) {
+				openTestSelectionDialog(lprovider, cprovider, testSuiteType);
+			} else {
+				noSuiteError();
+			}
+			
+		} else{
+			/* find TestClasses already in Test Suite */
+			IType testSuiteType= fTestSuite.findPrimaryType();
+			fSuiteMethod= testSuiteType.getMethod("suite", new String[] {}); //$NON-NLS-1$
+			if (fSuiteMethod.exists()) {
+				try {
+					ISourceRange range= fSuiteMethod.getSourceRange();
+					IBuffer buf= fTestSuite.getBuffer();
+					String originalContent= buf.getText(range.getOffset(), range.getLength());
+					buf.close();
+					if (getTestSuiteClassListRange(originalContent) != null) {
+						openTestSelectionDialog(lprovider, cprovider, testSuiteType);
+					} else {
+						cannotUpdateSuiteError();
 					}
+				} catch (JavaModelException e) {
+					JUnitPlugin.log(e);
 				}
 			} else {
-				cannotUpdateSuiteError();
+				noSuiteError();
 			}
-			} catch (JavaModelException e) {
+		}
+	}
+
+	private void openTestSelectionDialog(ILabelProvider lprovider, SuiteClassesContentProvider cprovider, IType testSuiteType) {
+		CheckedTableSelectionDialog dialog= new CheckedTableSelectionDialog(fShell, lprovider, cprovider);
+		dialog.setValidator(new UpdateAllTestsValidator());
+		dialog.setTitle(WizardMessages.UpdateAllTests_title);
+		dialog.setMessage(WizardMessages.UpdateAllTests_message);
+		Set elements= cprovider.getTests(fPack);
+		elements.remove(testSuiteType);
+		dialog.setInitialSelections(elements.toArray());
+		dialog.setSize(60, 25);
+		dialog.setInput(fPack);
+		if (dialog.open() == Window.OK) {
+			fSelectedTestCases= dialog.getResult();
+			try {
+				PlatformUI.getWorkbench().getProgressService().busyCursorWhile(getRunnable());
+			} catch (Exception e) {
 				JUnitPlugin.log(e);
 			}
-		} else {
-			noSuiteError();
 		}
 	}
 
@@ -183,40 +208,68 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				if (packIJE instanceof IPackageFragment) {
 					fPack= (IPackageFragment) packIJE;
 				}
+				IType primaryType = fTestSuite.findPrimaryType();
+				if (primaryType != null) {
+					fIsJunit4 = primaryType.getAnnotation("RunWith").exists(); //$NON-NLS-1$
+				}
+				
 			}
 		}
 	}
 
-	private void updateTestCasesInSuite(IProgressMonitor monitor) {
+	public static void updateTestCasesInJunit4Suite(IProgressMonitor monitor, ICompilationUnit testSuite, IAnnotation testClassesAnnotation, Object[] selectedTestCases) throws JavaModelException {
 		try {
 			monitor.beginTask(WizardMessages.UpdateAllTests_beginTask, 5);
-			if (! checkValidateEditStatus(fTestSuite, fShell))
-				return;
 
-			ISourceRange range= fSuiteMethod.getSourceRange();
-			IDocument fullSource= new Document(fTestSuite.getBuffer().getContents());
+			ISourceRange range= testClassesAnnotation.getSourceRange();
+			IDocument fullSource= new Document(testSuite.getBuffer().getContents());
+			StringBuffer source= new StringBuffer();
+			monitor.worked(1);
+			source.append(getUpdatableAnnotations(selectedTestCases));
+			fullSource.replace(range.getOffset(), range.getLength(), source.toString());
+			monitor.worked(1);
+			String formattedContent= JUnitStubUtility.formatCompilationUnit(testSuite.getJavaProject(), fullSource.get(), testSuite.findRecommendedLineSeparator());
+			IBuffer buf= testSuite.getBuffer();
+			buf.replace(0, buf.getLength(), formattedContent);
+			monitor.worked(1);
+			testSuite.save(new SubProgressMonitor(monitor, 1), true);
+			monitor.worked(1);
+
+
+		}  catch (BadLocationException e) {
+			Assert.isTrue(false, "Should never happen"); //$NON-NLS-1$
+		} finally{
+			monitor.done();
+		}
+	}
+	
+	public static void updateTestCasesInSuite(IProgressMonitor monitor, ICompilationUnit testSuite, IMethod suiteMethod, Object[] selectedTestCases) throws JavaModelException {
+		try {
+			monitor.beginTask(WizardMessages.UpdateAllTests_beginTask, 5);
+
+			ISourceRange range= suiteMethod.getSourceRange();
+			IDocument fullSource= new Document(testSuite.getBuffer().getContents());
 			String originalContent= fullSource.get(range.getOffset(), range.getLength());
 			StringBuffer source= new StringBuffer(originalContent);
-			TestSuiteClassListRange classRange = getTestSuiteClassListRange(source.toString());
+			TestSuiteClassListRange classRange= getTestSuiteClassListRange(source.toString());
 			if (classRange != null) {
 				monitor.worked(1);
 				//					String updatableCode= source.substring(start,end+NewTestSuiteCreationWizardPage.endMarker.length());
-				source.replace(classRange.getStart(), classRange.getEnd(), getUpdatableString(fSelectedTestCases));
+				source.replace(classRange.getStart(), classRange.getEnd(), getUpdatableString(selectedTestCases));
 				fullSource.replace(range.getOffset(), range.getLength(), source.toString());
 				monitor.worked(1);
-				String formattedContent= JUnitStubUtility.formatCompilationUnit(fTestSuite.getJavaProject(), fullSource.get(), fTestSuite.findRecommendedLineSeparator());
+				String formattedContent= JUnitStubUtility.formatCompilationUnit(testSuite.getJavaProject(), fullSource.get(), testSuite.findRecommendedLineSeparator());
 				//buf.replace(range.getOffset(), range.getLength(), formattedContent);
-				IBuffer buf= fTestSuite.getBuffer();
+				IBuffer buf= testSuite.getBuffer();
 				buf.replace(0, buf.getLength(), formattedContent);
 				monitor.worked(1);
-				fTestSuite.save(new SubProgressMonitor(monitor, 1), true);
+				testSuite.save(new SubProgressMonitor(monitor, 1), true);
 				monitor.worked(1);
 			}
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, fShell, WizardMessages.UpdateTestSuite_update, WizardMessages.UpdateTestSuite_error);
+
 		} catch (BadLocationException e) {
 			Assert.isTrue(false, "Should never happen"); //$NON-NLS-1$
-		} finally{
+		} finally {
 			monitor.done();
 		}
 	}
@@ -234,6 +287,8 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 		end += NewTestSuiteWizardPage.NON_COMMENT_END_MARKER.length();
 		return new TestSuiteClassListRange(start, end);
 	}
+	
+	
 
 	/*
 	 * Returns the new code to be included in a new suite() or which replaces old code in an existing suite().
@@ -254,6 +309,25 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 		}
 		suite.append("\n"+NewTestSuiteWizardPage.END_MARKER); //$NON-NLS-1$
 		return suite.toString();
+	}
+	
+	/*
+	 * Returns the new test suite annotations which replace old annotations in the existing suite
+	 */
+	public static String getUpdatableAnnotations(Object[] selectedClasses) {
+		StringBuffer buffer = new StringBuffer("@SuiteClasses({"); //$NON-NLS-1$
+		for (int i= 0; i < selectedClasses.length; i++) {
+			if (selectedClasses[i] instanceof IType) {
+				IType testType= (IType) selectedClasses[i];
+				buffer.append(testType.getElementName());
+				buffer.append(".class"); //$NON-NLS-1$
+				if (i < selectedClasses.length - 1)
+					buffer.append(',');
+			}
+		}
+		buffer.append("})"); //$NON-NLS-1$
+		buffer.append("\n"); //$NON-NLS-1$
+		return buffer.toString();
 	}
 
 	public static boolean checkValidateEditStatus(ICompilationUnit testSuiteCu, Shell shell){
@@ -285,7 +359,16 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				if (monitor == null) {
 					monitor= new NullProgressMonitor();
 				}
-				updateTestCasesInSuite(monitor);
+				if (! checkValidateEditStatus(fTestSuite, fShell))
+					return;
+				try {
+					if (fIsJunit4)
+						updateTestCasesInJunit4Suite(monitor, fTestSuite, fSuiteClasses, fSelectedTestCases);
+					else
+						updateTestCasesInSuite(monitor, fTestSuite, fSuiteMethod, fSelectedTestCases);
+				} catch (JavaModelException e) {
+					ExceptionHandler.handle(e, fShell, WizardMessages.UpdateTestSuite_update, WizardMessages.UpdateTestSuite_error);
+				}
 			}
 		};
 	}
@@ -297,6 +380,10 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	}
 
 	private void noSuiteError() {
-		MessageDialog.openError(fShell, WizardMessages.UpdateAllTests_cannotFind_errorDialog_title, WizardMessages.UpdateAllTests_cannotFind_errorDialog_message);
+		if (fIsJunit4) {
+			MessageDialog.openError(fShell, WizardMessages.UpdateAllTests_cannotFind_annotation_errorDialog_title, WizardMessages.UpdateAllTests_cannotFind_annotation_errorDialog_message);
+		} else {
+			MessageDialog.openError(fShell, WizardMessages.UpdateAllTests_cannotFind_errorDialog_title, WizardMessages.UpdateAllTests_cannotFind_errorDialog_message);
+		}
 	}
 }

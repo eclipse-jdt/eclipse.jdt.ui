@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Johannes Utzig <mail@jutzig.de> - [JUnit] Update test suite wizard for JUnit 4: @RunWith(Suite.class)... - https://bugs.eclipse.org/155828
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.wizards;
 
@@ -85,9 +86,12 @@ public final class WizardMessages extends NLS {
 	public static String NewTestSuiteWizPage_typeName_error_name_not_valid;
 	public static String NewTestSuiteWizPage_typeName_error_name_name_discouraged;
 	public static String NewTestSuiteWizPage_typeName_warning_already_exists;
+	public static String NewTestSuiteWizPage_typeName_warning_already_exists_junit4;
 	public static String NewTestSuiteWizPage_typeName_error_filtered;
 	public static String NewTestSuiteWizPage_cannotUpdateDialog_title;
 	public static String NewTestSuiteWizPage_cannotUpdateDialog_message;
+	public static String NewTestClassWizPage_junit3_radio_label;
+	public static String NewTestClassWizPage_junit4_radio_label;
 	public static String NewTestClassWizPage_treeCaption_classSelected;
 	public static String NewTestClassWizPage_treeCaption_classesSelected;
 	public static String NewTestSuiteCreationWizardPage_infinite_recursion;
@@ -98,6 +102,8 @@ public final class WizardMessages extends NLS {
 	public static String UpdateAllTests_beginTask;
 	public static String UpdateAllTests_cannotUpdate_errorDialog_title;
 	public static String UpdateAllTests_cannotUpdate_errorDialog_message;
+	public static String UpdateAllTests_cannotFind_annotation_errorDialog_message;
+	public static String UpdateAllTests_cannotFind_annotation_errorDialog_title;
 	public static String UpdateAllTests_cannotFind_errorDialog_title;
 	public static String UpdateAllTests_cannotFind_errorDialog_message;
 	public static String NewJUnitWizard_op_error_title;
