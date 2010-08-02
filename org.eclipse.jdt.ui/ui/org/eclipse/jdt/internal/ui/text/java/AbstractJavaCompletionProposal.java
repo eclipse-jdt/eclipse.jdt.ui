@@ -621,7 +621,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		if (css != null) {
 			FontData fontData= JFaceResources.getFontRegistry().getFontData(PreferenceConstants.APPEARANCE_JAVADOC_FONT)[0];
 			css= HTMLPrinter.convertTopLevelFont(css, fontData);
-			css= HTMLPrinter.convertInfoTextColor(css);
 		}
 		return css;
 	}
