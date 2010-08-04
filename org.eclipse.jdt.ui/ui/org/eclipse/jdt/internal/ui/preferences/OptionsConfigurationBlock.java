@@ -349,12 +349,18 @@ public abstract class OptionsConfigurationBlock {
 	/**
 	 * The preference page modeled as a filtered tree.
 	 * <p>
-	 * The tree consists of an optional description label, a filter text input box, and a scrolled area.
-	 * The scrolled content contains all the UI controls which participate in filtering.
+	 * The tree consists of an optional description label, a filter text input box, and a scrolled
+	 * area. The scrolled content contains all the UI controls which participate in filtering.
 	 * </p>
 	 * <p>
-	 * Supports '*' and '?' wildcards. When filter text starts with '~', the filter is applied on
-	 * preference values, e.g. ~ignore or ~off.
+	 * Supports '*' and '?' wildcards. A word in filter text preceded by '~' is used to filter on
+	 * preference values, e.g. ~ignore or ~off. Supported filter formats are
+	 * <ul>
+	 * <li>pattern</li>
+	 * <li>~valueFilter</li>
+	 * <li>pattern ~valueFilter</li>
+	 * <li>~valueFilter pattern</li>
+	 * </ul>
 	 * </p>
 	 */
 	protected static class FilteredPreferenceTree {
@@ -364,15 +370,14 @@ public abstract class OptionsConfigurationBlock {
 		private final PreferenceTreeNode fRoot;
 
 		/**
-		 * The string matcher.
+		 * The label matcher.
 		 */
-		private StringMatcher fMatcher;
+		private StringMatcher fLabelMatcher;
 
 		/**
-		 * Tells whether to match preference values, <code>true</code> if filter text starts with
-		 * '~' <code>false</code> otherwise.
+		 * The value matcher.
 		 */
-		private boolean fMatchPreferenceValue;
+		private StringMatcher fValueMatcher;
 
 		/**
 		 * The Options Configuration block.
@@ -507,22 +512,29 @@ public abstract class OptionsConfigurationBlock {
 		}
 
 		private boolean match(PreferenceTreeNode node) {
-			if (!fMatchPreferenceValue) {
-				return fMatcher.match(node.getLabel());
+			if (node.getKey() == null) {
+				return false;
 			}
-			if (node.getKey() != null) {
+			boolean valueMatched= true;
+			boolean labelMatched= true;
+			if (fLabelMatcher != null) {
+				labelMatched= fLabelMatcher.match(node.getLabel());
+			}
+			if (fValueMatcher != null) {
 				if (node.getControlType() == PreferenceTreeNode.COMBO) {
-					return fMatcher.match(fConfigBlock.getComboBox(node.getKey()).getText());
+					valueMatched= fValueMatcher.match(fConfigBlock.getComboBox(node.getKey()).getText());
 				} else if (node.getControlType() == PreferenceTreeNode.CHECKBOX) {
 					boolean checked= fConfigBlock.getCheckBox(node.getKey()).getSelection();
 					if (checked) {
-						return fMatcher.match(PreferencesMessages.OptionsConfigurationBlock_On) || fMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Enabled);
+						valueMatched= fValueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_On) || fValueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Enabled);
 					} else {
-						return fMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Off) || fMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Disabled);
+						valueMatched= fValueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Off) || fValueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Disabled);
 					}
+				} else {
+					valueMatched= false;
 				}
 			}
-			return false;
+			return labelMatched && valueMatched;
 		}
 
 		public boolean filter(PreferenceTreeNode node) {
@@ -552,13 +564,38 @@ public abstract class OptionsConfigurationBlock {
 		public void doFilter(String filterText) {
 			fRefreshJob.cancel();
 			fRefreshJob.schedule(getRefreshJobDelay());
-			fMatchPreferenceValue= filterText.startsWith("~"); //$NON-NLS-1$
-			if (fMatchPreferenceValue) {
-				filterText= filterText.substring(1);
+			filterText= filterText.trim();
+			int index= filterText.indexOf("~"); //$NON-NLS-1$
+			fValueMatcher= null;
+			fLabelMatcher= null;
+			if (index == -1) {
+				fLabelMatcher= createStringMatcher(filterText);
+			} else {
+				if (index == 0) {
+					int i= 0;
+					for (; i < filterText.length(); i++) {
+						char ch= filterText.charAt(i);
+						if (ch == ' ' || ch == '\t') {
+							break;
+						}
+					}
+					fValueMatcher= createStringMatcher(filterText.substring(1, i));
+					fLabelMatcher= createStringMatcher(filterText.substring(i));
+				} else {
+					fLabelMatcher= createStringMatcher(filterText.substring(0, index));
+					if (index < filterText.length())
+						fValueMatcher= createStringMatcher(filterText.substring(index + 1));
+				}
 			}
-			fMatcher= new StringMatcher("*" + filterText + "*", true, false); //$NON-NLS-1$ //$NON-NLS-2$
 			fMatchFound= false;
 			filter(fRoot);
+		}
+
+		private StringMatcher createStringMatcher(String filterText) {
+			filterText= filterText.trim();
+			if (filterText != null && filterText.length() > 0)
+				return new StringMatcher("*" + filterText + "*", true, false); //$NON-NLS-1$ //$NON-NLS-2$
+			return null;
 		}
 
 		/**
