@@ -593,7 +593,7 @@ public abstract class OptionsConfigurationBlock {
 
 		private StringMatcher createStringMatcher(String filterText) {
 			filterText= filterText.trim();
-			if (filterText != null && filterText.length() > 0)
+			if (filterText.length() > 0)
 				return new StringMatcher("*" + filterText + "*", true, false); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
 		}
