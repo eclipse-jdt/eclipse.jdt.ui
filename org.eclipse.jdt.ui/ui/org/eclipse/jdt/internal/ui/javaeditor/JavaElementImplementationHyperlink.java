@@ -81,9 +81,9 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	private final boolean fQualify;
 
 	/**
-	 * The current java editor.
+	 * The editor.
 	 */
-	private JavaEditor fEditor;
+	private IEditorPart fEditor;
 
 	/**
 	 * Creates a new Java element implementation hyperlink for methods.
@@ -93,9 +93,9 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 * @param method the method to open
 	 * @param qualify <code>true</code> if the hyperlink text should show a qualified name for
 	 *            element.
-	 * @param editor the active java editor
+	 * @param editor the editor
 	 */
-	public JavaElementImplementationHyperlink(IRegion region, SelectionDispatchAction openAction, IMethod method, boolean qualify, JavaEditor editor) {
+	public JavaElementImplementationHyperlink(IRegion region, SelectionDispatchAction openAction, IMethod method, boolean qualify, IEditorPart editor) {
 		Assert.isNotNull(openAction);
 		Assert.isNotNull(region);
 		Assert.isNotNull(method);
