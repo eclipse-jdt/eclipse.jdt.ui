@@ -19,7 +19,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -40,8 +39,6 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 class SearchInDialog extends TrayDialog {
 
 	private Button[] fIncludeMasks;
-
-	private Label fSearchInDialogText_note;
 
 	private IDialogSettings fSettings;
 
@@ -71,7 +68,7 @@ class SearchInDialog extends TrayDialog {
 			fSettings= JavaPlugin.getDefault().getDialogSettings().addNewSection(DIALOG_SETTINGS_SECTION);
 			fSettings.put(SEARCH_IN_SOURCES, true);
 			fSettings.put(SEARCH_IN_PROJECTS, true);
-			fSettings.put(SEARCH_IN_JRE, false);
+			fSettings.put(SEARCH_IN_JRE, true);
 			fSettings.put(SEARCH_IN_APPLIBS, true);
 		}
 		fIncludeMask= getInt(fKeys);
@@ -153,13 +150,6 @@ class SearchInDialog extends TrayDialog {
 				createButton(result, SWT.CHECK, SearchMessages.SearchPage_searchIn_jre, JavaSearchScopeFactory.JRE, fSettings.getBoolean(SEARCH_IN_JRE)),
 				createButton(result, SWT.CHECK, SearchMessages.SearchPage_searchIn_libraries, JavaSearchScopeFactory.LIBS, fSettings.getBoolean(SEARCH_IN_APPLIBS)),
 		};
-
-		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setFont(parent.getFont());
-		composite.setLayout(new GridLayout());
-		fSearchInDialogText_note= new Label(composite, SWT.LEFT);
-		fSearchInDialogText_note.setFont(composite.getFont());
-		fSearchInDialogText_note.setText(CallHierarchyMessages.SearchInDialog_note);
 
 		SelectionAdapter listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {

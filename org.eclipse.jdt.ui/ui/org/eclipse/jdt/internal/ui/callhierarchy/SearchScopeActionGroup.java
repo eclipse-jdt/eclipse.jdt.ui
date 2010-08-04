@@ -48,14 +48,12 @@ class SearchScopeActionGroup extends ActionGroup {
 
 	static final int SEARCH_SCOPE_TYPE_WORKSPACE= 1;
 	static final int SEARCH_SCOPE_TYPE_PROJECT= 2;
-	static final int SEARCH_SCOPE_TYPE_HIERARCHY= 3;
-	static final int SEARCH_SCOPE_TYPE_WORKING_SET= 4;
+	static final int SEARCH_SCOPE_TYPE_WORKING_SET= 3;
 
 	private SearchScopeAction fSelectedAction = null;
 	private String[] fSelectedWorkingSetNames = null;
 	private CallHierarchyViewPart fView;
 	private IDialogSettings fDialogSettings;
-	private SearchScopeHierarchyAction fSearchScopeHierarchyAction;
 	private SearchScopeProjectAction fSearchScopeProjectAction;
 	private SearchScopeWorkspaceAction fSearchScopeWorkspaceAction;
 	private SelectWorkingSetAction fSelectWorkingSetAction;
@@ -200,7 +198,6 @@ class SearchScopeActionGroup extends ActionGroup {
 		List actions = new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 4);
 		addAction(actions, fSearchScopeWorkspaceAction);
 		addAction(actions, fSearchScopeProjectAction);
-		addAction(actions, fSearchScopeHierarchyAction);
 		addAction(actions, fSelectWorkingSetAction);
 
 		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
@@ -260,7 +257,6 @@ class SearchScopeActionGroup extends ActionGroup {
 	private void createActions() {
 		fSearchScopeWorkspaceAction = new SearchScopeWorkspaceAction(this);
 		fSelectWorkingSetAction = new SelectWorkingSetAction(this);
-		fSearchScopeHierarchyAction = new SearchScopeHierarchyAction(this);
 		fSearchScopeProjectAction = new SearchScopeProjectAction(this);
 
 		int searchScopeType;
@@ -308,8 +304,6 @@ class SearchScopeActionGroup extends ActionGroup {
 				return fSearchScopeWorkspaceAction;
 			case SEARCH_SCOPE_TYPE_PROJECT:
 				return fSearchScopeProjectAction;
-			case SEARCH_SCOPE_TYPE_HIERARCHY:
-				return fSearchScopeHierarchyAction;
 			case SEARCH_SCOPE_TYPE_WORKING_SET:
 				IWorkingSet[] workingSets= getWorkingSets(workingSetNames);
 				if (workingSets != null && workingSets.length > 0) {
