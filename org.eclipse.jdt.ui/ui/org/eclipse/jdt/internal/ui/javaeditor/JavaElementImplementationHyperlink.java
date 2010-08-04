@@ -34,8 +34,6 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ui.texteditor.ITextEditor;
-
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -83,9 +81,9 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	private final boolean fQualify;
 
 	/**
-	 * The current text editor.
+	 * The current java editor.
 	 */
-	private ITextEditor fEditor;
+	private JavaEditor fEditor;
 
 	/**
 	 * Creates a new Java element implementation hyperlink for methods.
@@ -97,7 +95,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 *            element.
 	 * @param editor the active java editor
 	 */
-	public JavaElementImplementationHyperlink(IRegion region, SelectionDispatchAction openAction, IMethod method, boolean qualify, ITextEditor editor) {
+	public JavaElementImplementationHyperlink(IRegion region, SelectionDispatchAction openAction, IMethod method, boolean qualify, JavaEditor editor) {
 		Assert.isNotNull(openAction);
 		Assert.isNotNull(region);
 		Assert.isNotNull(method);

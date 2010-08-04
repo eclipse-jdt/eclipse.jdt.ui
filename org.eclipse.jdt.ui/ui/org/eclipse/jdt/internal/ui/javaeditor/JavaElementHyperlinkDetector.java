@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,7 +72,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 			IHyperlink[] links= new IHyperlink[elements.length];
 			int j= 0;
 			for (int i= 0; i < elements.length; i++) {
-				IHyperlink link= createHyperlink(wordRegion, (SelectionDispatchAction)openAction, elements[i], elements.length > 1, textEditor);
+				IHyperlink link= createHyperlink(wordRegion, (SelectionDispatchAction)openAction, elements[i], elements.length > 1, (JavaEditor)textEditor);
 				if (link != null) {
 					links[j++]= link;
 				}
@@ -104,7 +104,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 	 *         given arguments
 	 * @since 3.5
 	 */
-	protected IHyperlink createHyperlink(IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, ITextEditor editor) {
+	protected IHyperlink createHyperlink(IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
 		return new JavaElementHyperlink(wordRegion, openAction, element, qualify);
 	}
 
