@@ -151,10 +151,10 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 * Hierarchy is opened.
 	 * </p>
 	 * 
-	 * @param openAction the action to use to open the methods
-	 * @param method the method
+	 * @param editor the editor
 	 * @param region the region of the selection
-	 * @param editor the active java editor
+	 * @param method the method
+	 * @param openAction the action to use to open the methods
 	 * @since 3.6
 	 */
 	public static void openImplementations(IEditorPart editor, IRegion region, final IMethod method, SelectionDispatchAction openAction) {
