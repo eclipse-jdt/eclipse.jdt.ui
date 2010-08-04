@@ -48,7 +48,8 @@ class SearchScopeActionGroup extends ActionGroup {
 
 	static final int SEARCH_SCOPE_TYPE_WORKSPACE= 1;
 	static final int SEARCH_SCOPE_TYPE_PROJECT= 2;
-	static final int SEARCH_SCOPE_TYPE_WORKING_SET= 3;
+	// static final int SEARCH_SCOPE_TYPE_HIERARCHY= 3;
+	static final int SEARCH_SCOPE_TYPE_WORKING_SET= 4;
 
 	private SearchScopeAction fSelectedAction = null;
 	private String[] fSelectedWorkingSetNames = null;
@@ -129,7 +130,7 @@ class SearchScopeActionGroup extends ActionGroup {
 	/**
 	 * Sets the new search scope type.
 	 *
-	 * @param newSelection New action which should be the checked one
+	 * @param newSelection New action which should be the checked one (can be null iff <code>ignoreUnchecked == false</code>)
 	 * @param ignoreUnchecked Ignores actions which are unchecked (necessary since both the old and the new action fires).
 	 */
 	protected void setSelected(SearchScopeAction newSelection, boolean ignoreUnchecked) {
