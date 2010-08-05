@@ -53,6 +53,12 @@ public class PropertiesFileEditor extends TextEditor {
 	/** Open action. */
 	protected OpenAction fOpenAction;
 
+	/**
+	 * Property change listener on Editors UI store.
+	 * @since 3.7
+	 */
+	private IPropertyChangeListener fPropertyChangeListener;
+
 
 	/*
 	 * @see org.eclipse.ui.editors.text.TextEditor#initializeEditor()
@@ -71,12 +77,13 @@ public class PropertiesFileEditor extends TextEditor {
 		setInsertMode(INSERT);
 
 		// Need to listen on Editors UI preference store because JDT disables this functionality in its preferences.
-		EditorsUI.getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
+		fPropertyChangeListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				if (AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SPACES_FOR_TABS.equals(event.getProperty()))
 					handlePreferenceStoreChanged(event);
 			}
-		});
+		};
+		EditorsUI.getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
 	}
 
 	/*
@@ -215,5 +222,14 @@ public class PropertiesFileEditor extends TextEditor {
 	protected boolean isTabsToSpacesConversionEnabled() {
 		// Can't use our own preference store because JDT disables this functionality in its preferences.
 		return EditorsUI.getPreferenceStore().getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SPACES_FOR_TABS);
+	}
+
+	/*
+	 * @see org.eclipse.ui.editors.text.TextEditor#dispose()
+	 * @since 3.7
+	 */
+	public void dispose() {
+		EditorsUI.getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
+		super.dispose();
 	}
 }
