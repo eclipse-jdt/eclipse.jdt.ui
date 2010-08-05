@@ -16,6 +16,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -68,6 +69,14 @@ public class PropertiesFileEditor extends TextEditor {
 		setHelpContextId(ITextEditorHelpContextIds.TEXT_EDITOR);
 		configureInsertMode(SMART_INSERT, false);
 		setInsertMode(INSERT);
+
+		// Need to listen on Editors UI preference store because JDT disables this functionality in its preferences.
+		EditorsUI.getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				if (AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SPACES_FOR_TABS.equals(event.getProperty()))
+					handlePreferenceStoreChanged(event);
+			}
+		});
 	}
 
 	/*
