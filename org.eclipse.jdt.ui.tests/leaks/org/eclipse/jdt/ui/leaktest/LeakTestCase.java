@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -124,7 +124,7 @@ public class LeakTestCase extends TestCase {
 			}
 			numTries--;
 			if (numTries == 0) {
-  				assertTrue("Expected: " + expected + ", actual: " + actual + "\n" + requestor.getResultString(), false);
+				assertTrue("Expected instance count: " + expected + ", actual: " + actual + "\n" + requestor.getResultString(), false);
 			}
   		}
 	}
@@ -156,7 +156,7 @@ public class LeakTestCase extends TestCase {
 		  		for (int k= 0; k < requestors.length; k++) {
 					int actual= requestors[k].getNumberOfResults();
 					if (expected[k] != actual) {
-						buf.append("Expected: " + expected[k] + ", actual: " + actual + "\n" + requestors[k].getResultString()).append("\n---------------------\n");
+						buf.append("Expected instance count: " + expected[k] + ", actual: " + actual + "\n" + requestors[k].getResultString()).append("\n---------------------\n");
 					}
 				}
   				assertTrue(buf.toString(), false);
@@ -176,21 +176,24 @@ public class LeakTestCase extends TestCase {
 	}
 
 	/**
-	 * Assert that two counts are different. The method does not fail if the profile connection
-	 * has not established (e.g. because profiling is not supported on the given platform)
-	 * @param startCount
-	 * @param endCount
+	 * Assert that two counts are different. The method does not fail if the profile connection has
+	 * not established (e.g. because profiling is not supported on the given platform).
+	 * 
+	 * @param startCount the start count
+	 * @param endCount the end count
 	 */
 	protected void assertDifferentCount(int startCount, int endCount) {
 		assertDifferentCount(null, startCount, endCount);
 	}
 
 	/**
-	 * Assert that two counts are different. The method does not fail if the profile connection
-	 * has not established (e.g. because profiling is not supported on the given platform)
+	 * Assert that two counts are different. The method does not fail if the profile connection has
+	 * not established (e.g. because profiling is not supported on the given platform)
+	 * 
 	 * @param message Message to be printed if the test fails.
-	 * @param startCount
-	 * @param endCount
+	 * 
+	 * @param startCount the start count
+	 * @param endCount the end count
 	 */
 	protected void assertDifferentCount(String message, int startCount, int endCount) {
 		if (startCount == endCount) {
@@ -200,21 +203,23 @@ public class LeakTestCase extends TestCase {
 	}
 
 	/**
-	 * Assert that two counts are equal. The method does not fail if the profile connection
-	 * has not established (e.g. because profiling is not supported on the given platform)
-	 * @param startCount
-	 * @param endCount
+	 * Assert that two counts are equal. The method does not fail if the profile connection has not
+	 * established (e.g. because profiling is not supported on the given platform).
+	 * 
+	 * @param startCount the start count
+	 * @param endCount the end count
 	 */
 	protected void assertEqualCount(int startCount, int endCount) {
 		assertEqualCount(null, startCount, endCount);
 	}
 
 	/**
-	 * Assert that two counts are equal. The method does not fail if the profile connection
-	 * has not established (e.g. because profiling is not supported on the given platform)
+	 * Assert that two counts are equal. The method does not fail if the profile connection has not
+	 * established (e.g. because profiling is not supported on the given platform).
+	 * 
 	 * @param message Message to be printed if the test fails.
-	 * @param startCount
-	 * @param endCount
+	 * @param startCount the start count
+	 * @param endCount the end count
 	 */
 	protected void assertEqualCount(String message, int startCount, int endCount) {
 		if (startCount != endCount) {
