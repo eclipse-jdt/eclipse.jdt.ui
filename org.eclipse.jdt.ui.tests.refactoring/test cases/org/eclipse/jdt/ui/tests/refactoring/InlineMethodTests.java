@@ -352,6 +352,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performBugTest();
 	}
 
+	public void test_267386_2() throws Exception {
+		performBugTest();
+	}
+
 	/* *********************** Argument Tests ******************************* */
 
 	private void performArgumentTest() throws Exception {

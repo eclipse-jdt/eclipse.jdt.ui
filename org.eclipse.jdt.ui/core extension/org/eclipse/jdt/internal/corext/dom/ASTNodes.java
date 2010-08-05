@@ -485,7 +485,7 @@ public class ASTNodes {
 	 * Returns the type to which an inlined variable initializer should be cast, or
 	 * <code>null</code> if no cast is necessary.
 	 * 
-	 * @param initializer the initializer expression of the variable to inline 
+	 * @param initializer the initializer expression of the variable to inline
 	 * @param reference the reference to the variable (which is to be inlined)
 	 * @return a type binding to which the initializer should be cast, or <code>null</code> iff no cast is necessary
 	 * @since 3.6
@@ -500,7 +500,7 @@ public class ASTNodes {
 			return referenceType;
 		else if (initializerType.isPrimitive() && ! referenceType.isPrimitive()) { // initializer is autoboxed
 			ITypeBinding unboxedReferenceType= Bindings.getUnboxedTypeBinding(referenceType, reference.getAST());
-			if (unboxedReferenceType != initializerType)
+			if (!unboxedReferenceType.isEqualTo(initializerType))
 				return unboxedReferenceType;
 			else if (needsExplicitBoxing(reference))
 				return referenceType;
