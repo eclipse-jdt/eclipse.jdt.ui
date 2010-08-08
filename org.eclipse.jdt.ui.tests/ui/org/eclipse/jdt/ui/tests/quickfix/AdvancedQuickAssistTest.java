@@ -1408,7 +1408,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	}
 
-	public void testReplaceReturnConditionWithIf() throws Exception {
+	public void testReplaceReturnConditionWithIf1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1439,7 +1439,73 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		String expected1= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
 
+	public void testReplaceReturnConditionWithIf2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public String foo(Object b) {\n");
+		buf.append("        return (b == null) ? null : b.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("return");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public String foo(Object b) {\n");
+		buf.append("        if (b == null)\n");
+		buf.append("            return null;\n");
+		buf.append("        else\n");
+		buf.append("            return b.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testReplaceReturnConditionWithIf3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public String foo(Object b) {\n");
+		buf.append("        return (b == null) ? null : b.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int startOffset= buf.toString().indexOf("return");
+		int endOffset= buf.toString().indexOf("    }");
+		AssistContext context= getCorrectionContext(cu, startOffset, endOffset - startOffset - 1);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public String foo(Object b) {\n");
+		buf.append("        if (b == null)\n");
+		buf.append("            return null;\n");
+		buf.append("        else\n");
+		buf.append("            return b.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
 	public void testReplaceAssignConditionWithIf1() throws Exception {
@@ -1474,7 +1540,6 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		String expected1= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
-
 	}
 
 	public void testReplaceAssignConditionWithIf2() throws Exception {
@@ -1510,7 +1575,6 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		String expected1= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
-
 	}
 
 	public void testReplaceAssignConditionWithIf3() throws Exception {
@@ -1546,12 +1610,181 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		String expected1= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
-
 	}
 
+	public void testReplaceAssignConditionWithIf4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object b) {\n");
+		buf.append("        Object res= (b == null) ? null : b.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
+		int offset= buf.toString().indexOf("res");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
 
+		assertCorrectLabels(proposals);
 
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object b) {\n");
+		buf.append("        Object res;\n");
+		buf.append("        if (b == null)\n");
+		buf.append("            res = null;\n");
+		buf.append("        else\n");
+		buf.append("            res = b.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testReplaceAssignConditionWithIf5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object b) {\n");
+		buf.append("        Object res= (b == null) ? null : b.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("Object res");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object b) {\n");
+		buf.append("        Object res;\n");
+		buf.append("        if (b == null)\n");
+		buf.append("            res = null;\n");
+		buf.append("        else\n");
+		buf.append("            res = b.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testReplaceAssignConditionWithIf6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object b) {\n");
+		buf.append("        Object res= (b == null) ? null : b.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int startOffset= buf.toString().indexOf("Object res");
+		int endOffset= buf.toString().indexOf("    }");
+		AssistContext context= getCorrectionContext(cu, startOffset, endOffset - startOffset - 1);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object b) {\n");
+		buf.append("        Object res;\n");
+		buf.append("        if (b == null)\n");
+		buf.append("            res = null;\n");
+		buf.append("        else\n");
+		buf.append("            res = b.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testReplaceAssignConditionWithIf7() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object b) {\n");
+		buf.append("        Object res;\n");
+		buf.append("        res= (b == null) ? null : b.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("res=");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object b) {\n");
+		buf.append("        Object res;\n");
+		buf.append("        if (b == null)\n");
+		buf.append("            res = null;\n");
+		buf.append("        else\n");
+		buf.append("            res = b.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testReplaceAssignConditionWithIf8() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object b) {\n");
+		buf.append("        Object res;\n");
+		buf.append("        res= (b == null) ? null : b.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int startOffset= buf.toString().indexOf("res=");
+		int endOffset= buf.toString().indexOf("    }");
+		AssistContext context= getCorrectionContext(cu, startOffset, endOffset - startOffset - 1);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object b) {\n");
+		buf.append("        Object res;\n");
+		buf.append("        if (b == null)\n");
+		buf.append("            res = null;\n");
+		buf.append("        else\n");
+		buf.append("            res = b.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
 
 	public void testReplaceReturnIfWithCondition() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

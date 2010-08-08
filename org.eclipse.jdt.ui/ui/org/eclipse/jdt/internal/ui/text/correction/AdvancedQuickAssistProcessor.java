@@ -1581,13 +1581,32 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getReplaceConditionalWithIfElseProposals(IInvocationContext context, ASTNode covering, Collection resultingCollections) {
-		// check that parent statement is assignment
-		while (!(covering instanceof ConditionalExpression) && covering instanceof Expression) {
-			covering= covering.getParent();
+		ASTNode node= covering;
+		while (!(node instanceof ConditionalExpression) && node instanceof Expression) {
+			node= node.getParent();
 		}
-		if (!(covering instanceof ConditionalExpression)) {
+		if (!(node instanceof ConditionalExpression)) {
+			node= covering;
+			while (!(node instanceof Statement)) {
+				node= node.getParent();
+			}
+			if (node instanceof VariableDeclarationStatement) {
+				node= (ASTNode)(((VariableDeclarationStatement)node).fragments().get(0));
+				node= ((VariableDeclarationFragment)node).getInitializer();
+			}
+			if (node instanceof ExpressionStatement) {
+				node= ((ExpressionStatement)node).getExpression();
+				node= ((Assignment)node).getRightHandSide();
+			}
+			if (node instanceof ReturnStatement) {
+				node= ((ReturnStatement)node).getExpression();
+			}
+		}
+
+		if (!(node instanceof ConditionalExpression)) {
 			return false;
 		}
+		covering= node;
 
 		StructuralPropertyDescriptor locationInParent= covering.getLocationInParent();
 		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
