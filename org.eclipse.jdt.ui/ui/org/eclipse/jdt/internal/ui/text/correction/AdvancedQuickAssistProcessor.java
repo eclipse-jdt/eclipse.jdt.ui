@@ -1587,7 +1587,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		if (!(node instanceof ConditionalExpression)) {
 			node= covering;
-			while (!(node instanceof Statement)) {
+			while (node != null && !(node instanceof Statement)) {
 				node= node.getParent();
 			}
 			if (node instanceof VariableDeclarationStatement) {
@@ -1596,7 +1596,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			}
 			if (node instanceof ExpressionStatement) {
 				node= ((ExpressionStatement)node).getExpression();
-				node= ((Assignment)node).getRightHandSide();
+				if (node instanceof Assignment) {
+					node= ((Assignment)node).getRightHandSide();
+				}
 			}
 			if (node instanceof ReturnStatement) {
 				node= ((ReturnStatement)node).getExpression();
