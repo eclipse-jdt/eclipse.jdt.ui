@@ -204,6 +204,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		assertNull(refactoring);
 	}
 
+	public void test_314407() throws Exception {
+		performInvalidTest();
+	}
+
 	/* *********************** Simple Tests ******************************* */
 
 	private void performSimpleTest() throws Exception {
@@ -353,6 +357,14 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}
 
 	public void test_267386_2() throws Exception {
+		performBugTest();
+	}
+
+	public void test_314407_1() throws Exception {
+		performBugTest();
+	}
+
+	public void test_314407_2() throws Exception {
 		performBugTest();
 	}
 

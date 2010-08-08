@@ -344,8 +344,7 @@ public class CallInliner {
 
 	private void checkInvocationContext(RefactoringStatus result, int severity) {
 		if (fInvocation.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			Expression exp= ((MethodInvocation)fInvocation).getExpression();
-			if (exp != null && exp.resolveTypeBinding() == null) {
+			if (((MethodInvocation)fInvocation).resolveTypeBinding() == null) {
 				addEntry(result, RefactoringCoreMessages.CallInliner_receiver_type,
 					RefactoringStatusCodes.INLINE_METHOD_NULL_BINDING, severity);
 				return;
