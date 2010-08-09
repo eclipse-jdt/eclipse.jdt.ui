@@ -599,17 +599,9 @@ public final class NewWizardMessages extends NLS {
 
 	public static String NewFolderDialog_linkTargetNonExistent;
 	public static String NewFolderDialog_linkTargetNotFolder;
-	public static String NewFolderDialog_folderNameEmpty;
 	public static String NewFolderDialog_folderNameEmpty_alreadyExists;
-	public static String NewFolderDialog_errorTitle;
-	public static String NewFolderDialog_internalError;
-	public static String NewFolderDialog_progress;
 	public static String NewFolderDialog_createIn;
 
-	public static String LinkFolderDialog_title;
-	public static String LinkFolderDialog_createIn;
-	public static String LinkFolderDialog_directory_message;
-	public static String LinkFolderDialog_folderNameGroup_label;
 	public static String LinkFolderDialog_dependenciesGroup_locationLabel_desc;
 	public static String LinkFolderDialog_dependenciesGroup_browseButton_desc;
 	public static String LinkFolderDialog_dependenciesGroup_variables_desc;
