@@ -73,7 +73,7 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 
 	public Point computeSize() {
 		Point size= super.computeSize();
-		size.y= 10;
+		size.y= 10; //see bug 294763
 		return size;
 	}
 
