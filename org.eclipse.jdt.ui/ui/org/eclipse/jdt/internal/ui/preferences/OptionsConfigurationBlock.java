@@ -22,6 +22,8 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
@@ -461,6 +463,14 @@ public abstract class OptionsConfigurationBlock {
 
 		private void createScrolledArea() {
 			fScrolledPageContent= new ScrolledPageContent(fParentComposite);
+			fScrolledPageContent.addControlListener(new ControlListener() {
+				public void controlResized(ControlEvent e) {
+					fScrolledPageContent.getVerticalBar().setVisible(true);
+				}
+
+				public void controlMoved(ControlEvent e) {
+				}
+			});
 		}
 
 		public ScrolledPageContent getScrolledPageContent() {

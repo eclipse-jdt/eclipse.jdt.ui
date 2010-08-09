@@ -65,12 +65,16 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 		} else {
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.PROBLEM_SEVERITIES_PREFERENCE_PAGE);
 		}
-		
-		setSize(new Point(10, 10)); // https://bugs.eclipse.org/bugs/show_bug.cgi?id=294763
 	}
 
 	protected Control createPreferenceContent(Composite composite) {
 		return fConfigurationBlock.createContents(composite);
+	}
+
+	public Point computeSize() {
+		Point size= super.computeSize();
+		size.y= 10;
+		return size;
 	}
 
 	protected boolean hasProjectSpecificOptions(IProject project) {
