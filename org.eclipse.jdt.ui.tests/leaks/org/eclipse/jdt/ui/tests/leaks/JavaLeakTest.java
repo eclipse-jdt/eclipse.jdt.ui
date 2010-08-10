@@ -31,6 +31,7 @@ import org.eclipse.core.resources.IProject;
 
 import org.eclipse.text.tests.Accessor;
 
+import org.eclipse.jface.util.Util;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 
@@ -414,6 +415,9 @@ public class JavaLeakTest extends LeakTestCase {
 	}
 
 	public void testJavaEditorContextMenu() throws Exception {
+		if (Util.isCocoa()) // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=322253
+			return;
+
 		//regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=166761
 
 		ICompilationUnit cu= createTestCU("Test");
