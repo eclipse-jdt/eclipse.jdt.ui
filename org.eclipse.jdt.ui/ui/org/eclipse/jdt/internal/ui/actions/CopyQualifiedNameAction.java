@@ -75,6 +75,7 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 
@@ -159,6 +160,9 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		if (element instanceof IResource)
 			return true;
 
+		if (element instanceof LogicalPackage)
+			return true;
+
 		return false;
 	}
 
@@ -180,12 +184,10 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 			if (elements.length == 1) {
 				Object element= elements[0];
 				String qualifiedName= getQualifiedName(element);
-				IResource resource;
+				IResource resource= null;
 				if (element instanceof IJavaElement)
 					resource= ((IJavaElement)element).getCorrespondingResource();
-				else if (element instanceof IJarEntryResource)
-					resource= null;
-				else
+				else if (element instanceof IResource)
 					resource= (IResource)element;
 
 				if (resource != null) {
@@ -236,6 +238,9 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 
 		if (element instanceof IJarEntryResource)
 			return ((IJarEntryResource)element).getFullPath().toString();
+
+		if (element instanceof LogicalPackage)
+			return ((LogicalPackage)element).getElementName();
 
 		if (element instanceof IJavaProject || element instanceof IPackageFragmentRoot || element instanceof ITypeRoot) {
 			IResource resource= ((IJavaElement)element).getCorrespondingResource();
