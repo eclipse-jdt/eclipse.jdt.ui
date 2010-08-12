@@ -346,6 +346,13 @@ public abstract class OptionsConfigurationBlock {
 			fChildren.add(n);
 			return n;
 		}
+
+		public boolean hasValue() {
+			if (fControlType == COMBO || fControlType == CHECKBOX || fControlType == TEXT_CONTROL) {
+				return true;
+			}
+			return false;
+		}
 	}
 
 	/**
@@ -370,16 +377,6 @@ public abstract class OptionsConfigurationBlock {
 		 * Root node for the tree. It does not have a corresponding UI control.
 		 */
 		private final PreferenceTreeNode fRoot;
-
-		/**
-		 * The label matcher.
-		 */
-		private StringMatcher fLabelMatcher;
-
-		/**
-		 * The value matcher.
-		 */
-		private StringMatcher fValueMatcher;
 
 		/**
 		 * The Options Configuration block.
@@ -518,45 +515,48 @@ public abstract class OptionsConfigurationBlock {
 			return addChild(parentNode, label, key, PreferenceTreeNode.EXPANDABLE_COMPOSITE, showAllChildren);
 		}
 
-		private boolean match(PreferenceTreeNode node) {
+		private boolean match(PreferenceTreeNode node, StringMatcher labelMatcher, StringMatcher valueMatcher) {
 			if (node.getKey() == null) {
 				return false;
 			}
 			boolean valueMatched= true;
 			boolean labelMatched= true;
-			if (fLabelMatcher != null) {
-				labelMatched= fLabelMatcher.match(node.getLabel());
+			if (labelMatcher != null) {
+				labelMatched= labelMatcher.match(node.getLabel());
 			}
-			if (fValueMatcher != null) {
+			if (valueMatcher != null) {
 				if (node.getControlType() == PreferenceTreeNode.COMBO) {
-					valueMatched= fValueMatcher.match(fConfigBlock.getComboBox(node.getKey()).getText());
+					valueMatched= valueMatcher.match(fConfigBlock.getComboBox(node.getKey()).getText());
 				} else if (node.getControlType() == PreferenceTreeNode.CHECKBOX) {
 					boolean checked= fConfigBlock.getCheckBox(node.getKey()).getSelection();
 					if (checked) {
-						valueMatched= fValueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_On) || fValueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Enabled);
+						valueMatched= valueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_On) || valueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Enabled);
 					} else {
-						valueMatched= fValueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Off) || fValueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Disabled);
+						valueMatched= valueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Off) || valueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Disabled);
 					}
-				} else {
-					valueMatched= false;
 				}
 			}
 			return labelMatched && valueMatched;
 		}
 
-		public boolean filter(PreferenceTreeNode node) {
+		public boolean filter(PreferenceTreeNode node, StringMatcher labelMatcher, StringMatcher valueMatcher) {
 			//check this node
-			boolean visible= match(node);
-			fMatchFound|= visible;
+			boolean visible= match(node, labelMatcher, valueMatcher);
 			if (visible) {
-				node.setVisible(visible, true);
-				return visible;
+				if (valueMatcher != null && !node.hasValue()) { //see bug 321818
+					labelMatcher= null;
+					visible= false;
+				} else {
+					node.setVisible(visible, true);
+					fMatchFound= true;
+					return visible;
+				}
 			}
 			//check children
 			List children= node.getChildren();
 			if (children != null) {
 				for (int i= 0; i < children.size(); i++) {
-					visible|= filter(((PreferenceTreeNode)children.get(i)));
+					visible|= filter(((PreferenceTreeNode)children.get(i)), labelMatcher, valueMatcher);
 				}
 				if (node.isShowAllChildren()) {
 					for (int i= 0; i < children.size(); i++) {
@@ -573,10 +573,10 @@ public abstract class OptionsConfigurationBlock {
 			fRefreshJob.schedule(getRefreshJobDelay());
 			filterText= filterText.trim();
 			int index= filterText.indexOf("~"); //$NON-NLS-1$
-			fValueMatcher= null;
-			fLabelMatcher= null;
+			StringMatcher labelMatcher= null;
+			StringMatcher valueMatcher= null;
 			if (index == -1) {
-				fLabelMatcher= createStringMatcher(filterText);
+				labelMatcher= createStringMatcher(filterText);
 			} else {
 				if (index == 0) {
 					int i= 0;
@@ -586,16 +586,16 @@ public abstract class OptionsConfigurationBlock {
 							break;
 						}
 					}
-					fValueMatcher= createStringMatcher(filterText.substring(1, i));
-					fLabelMatcher= createStringMatcher(filterText.substring(i));
+					valueMatcher= createStringMatcher(filterText.substring(1, i));
+					labelMatcher= createStringMatcher(filterText.substring(i));
 				} else {
-					fLabelMatcher= createStringMatcher(filterText.substring(0, index));
+					labelMatcher= createStringMatcher(filterText.substring(0, index));
 					if (index < filterText.length())
-						fValueMatcher= createStringMatcher(filterText.substring(index + 1));
+						valueMatcher= createStringMatcher(filterText.substring(index + 1));
 				}
 			}
 			fMatchFound= false;
-			filter(fRoot);
+			filter(fRoot, labelMatcher, valueMatcher);
 		}
 
 		private StringMatcher createStringMatcher(String filterText) {
