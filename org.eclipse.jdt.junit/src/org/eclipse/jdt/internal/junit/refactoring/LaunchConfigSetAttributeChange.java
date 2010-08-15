@@ -32,6 +32,7 @@ public class LaunchConfigSetAttributeChange extends LaunchConfigChange {
 		fAttributeName= attributeName;
 	}
 
+	@Override
 	protected Change getUndo(String oldValue) throws CoreException {
 		return new LaunchConfigSetAttributeChange(fConfig, fAttributeName, oldValue, shouldFlagWarning());
 	}
@@ -40,14 +41,17 @@ public class LaunchConfigSetAttributeChange extends LaunchConfigChange {
 		return fAttributeName;
 	}
 
+	@Override
 	protected void alterLaunchConfiguration(ILaunchConfigurationWorkingCopy copy) throws CoreException {
 		copy.setAttribute(fAttributeName, fNewValue);
 	}
 
+	@Override
 	protected String getOldValue(ILaunchConfiguration config) throws CoreException {
 		return config.getAttribute(fAttributeName, (String) null);
 	}
 
+	@Override
 	public String getName() {
 		return Messages.format(JUnitMessages.LaunchConfigSetAttributeChange_name, new Object[] {fAttributeName, fConfig.getName()});
 	}

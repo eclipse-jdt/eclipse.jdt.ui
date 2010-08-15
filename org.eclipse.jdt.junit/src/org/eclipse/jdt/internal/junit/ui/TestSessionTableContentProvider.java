@@ -29,12 +29,12 @@ public class TestSessionTableContentProvider implements IStructuredContentProvid
 	}
 
 	public Object[] getElements(Object inputElement) {
-		ArrayList all= new ArrayList();
+		ArrayList<ITestElement> all= new ArrayList<ITestElement>();
 		addAll(all, (TestRoot) inputElement);
 		return all.toArray();
 	}
 
-	private void addAll(ArrayList all, TestSuiteElement suite) {
+	private void addAll(ArrayList<ITestElement> all, TestSuiteElement suite) {
 		ITestElement[] children= suite.getChildren();
 		for (int i= 0; i < children.length; i++) {
 			ITestElement element= children[i];

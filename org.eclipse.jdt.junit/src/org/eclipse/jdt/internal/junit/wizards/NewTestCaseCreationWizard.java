@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,6 +77,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 		initDialogSettings();
 	}
 
+	@Override
 	protected void initializeDefaultPageImageDescriptor() {
 		setDefaultPageImageDescriptor(JUnitPlugin.getImageDescriptor("wizban/newtest_wiz.png")); //$NON-NLS-1$
 	}
@@ -84,6 +85,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 	/*
 	 * @see Wizard#createPages
 	 */
+	@Override
 	public void addPages() {
 		super.addPages();
 		fPage2= new NewTestCaseWizardPageTwo();
@@ -96,6 +98,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 	/*
 	 * @see Wizard#performFinish
 	 */
+	@Override
 	public boolean performFinish() {
 		IJavaProject project= fPage1.getJavaProject();
 		IRunnableWithProgress runnable= fPage1.getRunnable();
@@ -167,6 +170,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 
 		static class ClasspathFixLabelProvider extends LabelProvider {
 
+			@Override
 			public Image getImage(Object element) {
 				if (element instanceof ClasspathFixProposal) {
 					ClasspathFixProposal classpathFixProposal= (ClasspathFixProposal) element;
@@ -175,6 +179,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 				return null;
 			}
 
+			@Override
 			public String getText(Object element) {
 				if (element instanceof ClasspathFixProposal) {
 					ClasspathFixProposal classpathFixProposal= (ClasspathFixProposal) element;
@@ -203,6 +208,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 			fSelectedFix= null;
 		}
 
+		@Override
 		protected boolean isResizable() {
 			return true;
 		}
@@ -211,6 +217,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 			return isJunit4 ? WizardMessages.NewTestCaseCreationWizard_fix_selection_junit4_description : WizardMessages.NewTestCaseCreationWizard_fix_selection_junit3_description;
 		}
 
+		@Override
 		protected Control createCustomArea(Composite composite) {
 			fNoActionRadio= new Button(composite, SWT.RADIO);
 			fNoActionRadio.setLayoutData(new GridData(SWT.LEAD, SWT.TOP, false, false));
@@ -264,8 +271,9 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 		}
 
 		private static final String BUILD_PATH_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"; //$NON-NLS-1$
-		private static final Object BUILD_PATH_BLOCK= "block_until_buildpath_applied"; //$NON-NLS-1$
+		private static final String BUILD_PATH_BLOCK= "block_until_buildpath_applied"; //$NON-NLS-1$
 
+		@Override
 		protected void buttonPressed(int buttonId) {
 			fSelectedFix= null;
 			if (buttonId == 0) {
@@ -273,7 +281,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 					// nothing to do
 				} else if (fOpenBuildPathRadio.getSelection()) {
 					String id= BUILD_PATH_PAGE_ID;
-					Map input= new HashMap();
+					Map<String, Boolean> input= new HashMap<String, Boolean>();
 					input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
 					if (PreferencesUtil.createPropertyDialogOn(getShell(), fProject, id, new String[] { id }, input).open() != Window.OK) {
 						return;

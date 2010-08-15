@@ -39,13 +39,13 @@ public abstract class JUnitRenameParticipant extends RenameParticipant implement
 
 		private final RenameArguments fArguments;
 
-		private List fChanges;
+		private List<Change> fChanges;
 
 		private final ILaunchManager fLaunchManager;
 
 		private boolean fShouldFlagWarnings= true;
 
-		public ChangeList(RenameArguments arguments, ILaunchManager manager, List changes) {
+		public ChangeList(RenameArguments arguments, ILaunchManager manager, List<Change> changes) {
 			fArguments= arguments;
 			fLaunchManager= manager;
 			fChanges= changes;
@@ -88,19 +88,21 @@ public abstract class JUnitRenameParticipant extends RenameParticipant implement
 		}
 	}
 
+	@Override
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) {
 		return new RefactoringStatus();
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		if (!getArguments().getUpdateReferences())
 			return null;
 
 		ILaunchManager manager= getLaunchManager();
-		List launchConfigTypes= getLaunchConfigTypes();
-		List changes= new ArrayList();
-		for (Iterator types= launchConfigTypes.iterator(); types.hasNext();) {
-			String typeId= (String) types.next();
+		List<String> launchConfigTypes= getLaunchConfigTypes();
+		List<Change> changes= new ArrayList<Change>();
+		for (Iterator<String> types= launchConfigTypes.iterator(); types.hasNext();) {
+			String typeId= types.next();
 			ILaunchConfigurationType type= manager.getLaunchConfigurationType(typeId);
 			ILaunchConfiguration configs[]= manager.getLaunchConfigurations(type);
 			new ChangeList(getArguments(), getLaunchManager(), changes).createChangeForConfigs(configs, this);
@@ -108,7 +110,7 @@ public abstract class JUnitRenameParticipant extends RenameParticipant implement
 				throw new OperationCanceledException();
 		}
 		if (changes.size() > 0)
-			return new CompositeChange(getChangeName(), (Change[]) changes.toArray(new Change[changes.size()]));
+			return new CompositeChange(getChangeName(), changes.toArray(new Change[changes.size()]));
 		return null;
 	}
 
@@ -121,7 +123,7 @@ public abstract class JUnitRenameParticipant extends RenameParticipant implement
 		return JUnitMessages.TypeRenameParticipant_change_name;
 	}
 
-	protected List getLaunchConfigTypes() {
+	protected List<String> getLaunchConfigTypes() {
 		return JUnitPlugin.getDefault().getJUnitLaunchConfigTypeIDs();
 	}
 
@@ -136,6 +138,7 @@ public abstract class JUnitRenameParticipant extends RenameParticipant implement
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getName() {
 		return JUnitMessages.TypeRenameParticipant_name;
 	}

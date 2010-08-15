@@ -250,7 +250,7 @@ public class TestRunnerViewPart extends ViewPart {
 	final Image fSuiteFailIcon;
 	final Image fSuiteRunningIcon;
 
-	final List fImagesToDispose;
+	final List<Image> fImagesToDispose;
 
 	// Persistence tags.
 	static final String TAG_PAGE= "page"; //$NON-NLS-1$
@@ -337,59 +337,70 @@ public class TestRunnerViewPart extends ViewPart {
 
 	private class RunnerViewHistory extends ViewHistory {
 
+		@Override
 		public void configureHistoryListAction(IAction action) {
 			action.setText(JUnitMessages.TestRunnerViewPart_history);
 		}
 
+		@Override
 		public void configureHistoryDropDownAction(IAction action) {
 			action.setToolTipText(JUnitMessages.TestRunnerViewPart_test_run_history);
 			JUnitPlugin.setLocalImageDescriptors(action, "history_list.gif"); //$NON-NLS-1$
 		}
 
+		@Override
 		public Action getClearAction() {
 			return new ClearAction();
 		}
 
+		@Override
 		public String getHistoryListDialogTitle() {
 			return JUnitMessages.TestRunnerViewPart_test_runs;
 		}
 
+		@Override
 		public String getHistoryListDialogMessage() {
 			return JUnitMessages.TestRunnerViewPart_select_test_run;
 		}
 
+		@Override
 		public Shell getShell() {
 			return fParent.getShell();
 		}
 
+		@Override
 		public List getHistoryEntries() {
 			return JUnitCorePlugin.getModel().getTestRunSessions();
 		}
 
+		@Override
 		public Object getCurrentEntry() {
 			return fTestRunSession;
 		}
 
+		@Override
 		public void setActiveEntry(Object entry) {
 			TestRunSession deactivatedSession= setActiveTestRunSession((TestRunSession) entry);
 			if (deactivatedSession != null)
 				deactivatedSession.swapOut();
 		}
 
+		@Override
 		public void setHistoryEntries(List remainingEntries, Object activeEntry) {
 			setActiveTestRunSession((TestRunSession) activeEntry);
 
-			List testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
+			List<TestRunSession> testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
 			testRunSessions.removeAll(remainingEntries);
-			for (Iterator iter= testRunSessions.iterator(); iter.hasNext();) {
-				JUnitCorePlugin.getModel().removeTestRunSession((TestRunSession) iter.next());
+			for (Iterator<TestRunSession> iter= testRunSessions.iterator(); iter.hasNext();) {
+				JUnitCorePlugin.getModel().removeTestRunSession(iter.next());
 			}
-			for (Iterator iter= remainingEntries.iterator(); iter.hasNext();) {
-				TestRunSession remaining= (TestRunSession) iter.next();
+			for (Iterator<TestRunSession> iter= remainingEntries.iterator(); iter.hasNext();) {
+				TestRunSession remaining= iter.next();
 				remaining.swapOut();
 			}
 		}
 
+		@Override
 		public ImageDescriptor getImageDescriptor(Object element) {
 			TestRunSession session= (TestRunSession) element;
 			if (session.isStopped())
@@ -409,6 +420,7 @@ public class TestRunnerViewPart extends ViewPart {
 				return fSuiteIconDescriptor;
 		}
 
+		@Override
 		public String getText(Object element) {
 			TestRunSession session= (TestRunSession) element;
 			String testRunLabel= BasicElementLabels.getJavaElementName(session.getTestRunName());
@@ -420,6 +432,7 @@ public class TestRunnerViewPart extends ViewPart {
 			}
 		}
 
+		@Override
 		public void addMenuEntries(MenuManager manager) {
 			manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ImportTestRunSessionAction(fParent.getShell()));
 			manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ImportTestRunSessionFromURLAction(fParent.getShell()));
@@ -427,14 +440,17 @@ public class TestRunnerViewPart extends ViewPart {
 				manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ExportTestRunSessionAction(fParent.getShell(), fTestRunSession));
 		}
 
+		@Override
 		public String getMaxEntriesMessage() {
 			return JUnitMessages.TestRunnerViewPart_max_remembered;
 		}
 
+		@Override
 		public int getMaxEntries() {
 			return Platform.getPreferencesService().getInt(JUnitCorePlugin.CORE_PLUGIN_ID, JUnitPreferencesConstants.MAX_TEST_RUNS, 10, null);
 		}
 
+		@Override
 		public void setMaxEntries(int maxEntries) {
 			new InstanceScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID).putInt(JUnitPreferencesConstants.MAX_TEST_RUNS, maxEntries);
 		}
@@ -448,6 +464,7 @@ public class TestRunnerViewPart extends ViewPart {
 			fShell= shell;
 		}
 
+		@Override
 		public void run() {
 			FileDialog importDialog= new FileDialog(fShell, SWT.OPEN);
 			importDialog.setText(JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_title);
@@ -496,6 +513,7 @@ public class TestRunnerViewPart extends ViewPart {
 			fShell= shell;
 		}
 		
+		@Override
 		public void run() {
 			String title= JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_title;
 			String message= JUnitMessages.TestRunnerViewPart_ImportTestRunSessionFromURLAction_url;
@@ -506,6 +524,7 @@ public class TestRunnerViewPart extends ViewPart {
 			IInputValidator validator= new URLValidator();
 			
 			InputDialog inputDialog= new InputDialog(fShell, title, message, url, validator) {
+				@Override
 				protected Control createDialogArea(Composite parent) {
 					Control dialogArea2= super.createDialogArea(parent);
 					Object layoutData= getText().getLayoutData();
@@ -515,6 +534,7 @@ public class TestRunnerViewPart extends ViewPart {
 					}
 					return dialogArea2;
 				}
+				@Override
 				protected IDialogSettings getDialogBoundsSettings() {
 					IDialogSettings settings= dialogSettings.getSection(DIALOG_SETTINGS);
 					if (settings == null) {
@@ -522,6 +542,7 @@ public class TestRunnerViewPart extends ViewPart {
 					}
 					return settings;
 				}
+				@Override
 				protected boolean isResizable() {
 					return true;
 				}
@@ -546,6 +567,7 @@ public class TestRunnerViewPart extends ViewPart {
 			fTestRunSession= testRunSession;
 		}
 
+		@Override
 		public void run() {
 			FileDialog exportDialog= new FileDialog(fShell, SWT.SAVE);
 			exportDialog.setText(JUnitMessages.TestRunnerViewPart_ExportTestRunSessionAction_title);
@@ -610,10 +632,10 @@ public class TestRunnerViewPart extends ViewPart {
 			getDisplay().asyncExec(new Runnable() {
 				public void run() {
 					if (testRunSession.equals(fTestRunSession)) {
-						List testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
+						List<TestRunSession> testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
 						TestRunSession deactivatedSession;
 						if (! testRunSessions.isEmpty()) {
-							deactivatedSession= setActiveTestRunSession((TestRunSession) testRunSessions.get(0));
+							deactivatedSession= setActiveTestRunSession(testRunSessions.get(0));
 						} else {
 							deactivatedSession= setActiveTestRunSession(null);
 						}
@@ -744,6 +766,7 @@ public class TestRunnerViewPart extends ViewPart {
 			super(name);
 			setSystem(true);
 		}
+		@Override
 		public IStatus runInUIThread(IProgressMonitor monitor) {
 			if (!isDisposed()) {
 				processChangesInUI();
@@ -755,6 +778,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public void stop() {
 			fRunning= false;
 		}
+		@Override
 		public boolean shouldSchedule() {
 			return fRunning;
 		}
@@ -765,11 +789,13 @@ public class TestRunnerViewPart extends ViewPart {
 			super(name);
 			setSystem(true);
 		}
+		@Override
 		public IStatus run(IProgressMonitor monitor) {
 			// wait until the test run terminates
 			fJUnitIsRunningLock.acquire();
 			return Status.OK_STATUS;
 		}
+		@Override
 		public boolean belongsTo(Object family) {
 			return family == TestRunnerViewPart.FAMILY_JUNIT_RUN;
 		}
@@ -780,9 +806,9 @@ public class TestRunnerViewPart extends ViewPart {
 			setText(JUnitMessages.TestRunnerViewPart_clear_history_label);
 
 			boolean enabled= false;
-			List testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
-			for (Iterator iter= testRunSessions.iterator(); iter.hasNext();) {
-				TestRunSession testRunSession= (TestRunSession) iter.next();
+			List<TestRunSession> testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
+			for (Iterator<TestRunSession> iter= testRunSessions.iterator(); iter.hasNext();) {
+				TestRunSession testRunSession= iter.next();
 				if (! testRunSession.isRunning() && ! testRunSession.isStarting()) {
 					enabled= true;
 					break;
@@ -791,16 +817,17 @@ public class TestRunnerViewPart extends ViewPart {
 			setEnabled(enabled);
 		}
 
+		@Override
 		public void run() {
-			List testRunSessions= getRunningSessions();
+			List<TestRunSession> testRunSessions= getRunningSessions();
 			Object first= testRunSessions.isEmpty() ? null : testRunSessions.get(0);
 			fViewHistory.setHistoryEntries(testRunSessions, first);
 		}
 
-		private List getRunningSessions() {
-			List testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
-			for (Iterator iter= testRunSessions.iterator(); iter.hasNext();) {
-				TestRunSession testRunSession= (TestRunSession) iter.next();
+		private List<TestRunSession> getRunningSessions() {
+			List<TestRunSession> testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
+			for (Iterator<TestRunSession> iter= testRunSessions.iterator(); iter.hasNext();) {
+				TestRunSession testRunSession= iter.next();
 				if (! testRunSession.isRunning() && ! testRunSession.isStarting()) {
 					iter.remove();
 				}
@@ -816,6 +843,7 @@ public class TestRunnerViewPart extends ViewPart {
 			JUnitPlugin.setLocalImageDescriptors(this, "stop.gif"); //$NON-NLS-1$
 		}
 
+		@Override
 		public void run() {
 			stopTest();
 			setEnabled(false);
@@ -831,6 +859,7 @@ public class TestRunnerViewPart extends ViewPart {
 			setActionDefinitionId(RERUN_LAST_COMMAND);
 		}
 
+		@Override
 		public void run(){
 			rerunTestRun();
 		}
@@ -845,6 +874,7 @@ public class TestRunnerViewPart extends ViewPart {
 			setActionDefinitionId(RERUN_FAILED_FIRST_COMMAND);
 		}
 
+		@Override
 		public void run(){
 			rerunTestFailedFirst();
 		}
@@ -873,6 +903,7 @@ public class TestRunnerViewPart extends ViewPart {
 			return fActionOrientation;
 		}
 
+		@Override
 		public void run() {
 			if (isChecked()) {
 				fOrientation= fActionOrientation;
@@ -941,6 +972,7 @@ public class TestRunnerViewPart extends ViewPart {
 			setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/failures.gif")); //$NON-NLS-1$
 		}
 
+		@Override
 		public void run() {
 			setShowFailuresOnly(isChecked());
 		}
@@ -952,6 +984,7 @@ public class TestRunnerViewPart extends ViewPart {
 			super(JUnitMessages.TestRunnerViewPart_show_execution_time, IAction.AS_CHECK_BOX);
 		}
 
+		@Override
 		public void run() {
 			setShowExecutionTime(isChecked());
 		}
@@ -964,6 +997,7 @@ public class TestRunnerViewPart extends ViewPart {
 			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/hierarchicalLayout.gif")); //$NON-NLS-1$
 		}
 
+		@Override
 		public void run() {
 			int mode= isChecked() ? LAYOUT_HIERARCHICAL : LAYOUT_FLAT;
 			setLayoutMode(mode);
@@ -979,6 +1013,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public void update() {
 			setChecked(getShowOnErrorOnly());
 		}
+		@Override
 		public void run() {
 			boolean checked= isChecked();
 			fShowOnErrorOnly= checked;
@@ -987,7 +1022,7 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	public TestRunnerViewPart() {
-		fImagesToDispose= new ArrayList();
+		fImagesToDispose= new ArrayList<Image>();
 
 		fStackViewIcon= createManagedImage("eview16/stackframe.gif");//$NON-NLS-1$
 		fTestRunOKIcon= createManagedImage("eview16/junitsucc.gif"); //$NON-NLS-1$
@@ -1023,6 +1058,7 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 
+	@Override
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 		fMemento= memento;
@@ -1039,6 +1075,7 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 
+	@Override
 	public void saveState(IMemento memento) {
 		if (fSashForm == null) {
 			// part has not been created
@@ -1460,11 +1497,12 @@ action enablement
 
 		String testRunLabel= BasicElementLabels.getJavaElementName(fTestRunSession.getTestRunName());
 		if (testKindDisplayStr != null)
-			setTitleToolTip(MessageFormat.format(JUnitMessages.TestRunnerViewPart_titleToolTip, new String[] {testRunLabel, testKindDisplayStr}));
+			setTitleToolTip(MessageFormat.format(JUnitMessages.TestRunnerViewPart_titleToolTip, new Object[] {testRunLabel, testKindDisplayStr}));
 		else
 			setTitleToolTip(testRunLabel);
 	}
 
+	@Override
 	public synchronized void dispose(){
 		fIsDisposed= true;
 		if (fTestRunSessionListener != null)
@@ -1493,7 +1531,7 @@ action enablement
 
 	private void disposeImages() {
 		for (int i= 0; i < fImagesToDispose.size(); i++) {
-			((Image) fImagesToDispose.get(i)).dispose();
+			fImagesToDispose.get(i).dispose();
 		}
 	}
 
@@ -1599,9 +1637,11 @@ action enablement
 
 		Composite empty= new Composite(top, SWT.NONE);
 		empty.setLayout(new Layout() {
+			@Override
 			protected Point computeSize(Composite composite, int wHint, int hHint, boolean flushCache) {
 				return new Point(1, 1); // (0, 0) does not work with super-intelligent ViewForm
 			}
+			@Override
 			protected void layout(Composite composite, boolean flushCache) {
 			}
 		});
@@ -1629,11 +1669,13 @@ action enablement
 		getStatusLine().setErrorMessage(null);
 	}
 
+	@Override
 	public void setFocus() {
 		if (fTestViewer != null)
 			fTestViewer.getTestViewerControl().setFocus();
 	}
 
+	@Override
 	public void createPartControl(Composite parent) {
 		fParent= parent;
 		addResizeListener(parent);
@@ -1675,9 +1717,9 @@ action enablement
 		JUnitCorePlugin.getModel().addTestRunSessionListener(fTestRunSessionListener);
 		
 		// always show youngest test run in view. simulate "sessionAdded" event to do that
-		List testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
+		List<TestRunSession> testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
 		if (!testRunSessions.isEmpty()) {
-			fTestRunSessionListener.sessionAdded((TestRunSession)testRunSessions.get(0));
+			fTestRunSessionListener.sessionAdded(testRunSessions.get(0));
 		}
 	}
 
@@ -1685,19 +1727,23 @@ action enablement
 		DropTarget dropTarget = new DropTarget(parent, DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT);
 		dropTarget.setTransfer(new Transfer[] { TextTransfer.getInstance() });
 		class DropAdapter extends DropTargetAdapter {
-		    public void dragEnter(DropTargetEvent event) {
+		    @Override
+			public void dragEnter(DropTargetEvent event) {
 		        event.detail = DND.DROP_COPY;
 		        event.feedback = DND.FEEDBACK_NONE;
 		    }
-		    public void dragOver(DropTargetEvent event) {
+		    @Override
+			public void dragOver(DropTargetEvent event) {
 		        event.detail = DND.DROP_COPY;
 		        event.feedback = DND.FEEDBACK_NONE;
 		    }
-		    public void dragOperationChanged(DropTargetEvent event) {
+		    @Override
+			public void dragOperationChanged(DropTargetEvent event) {
 		        event.detail = DND.DROP_COPY;
 		        event.feedback = DND.FEEDBACK_NONE;
 		    }
-		    public void drop(final DropTargetEvent event) {
+		    @Override
+			public void drop(final DropTargetEvent event) {
 		        if (TextTransfer.getInstance().isSupportedType(event.currentDataType)) {
 					String url= (String) event.data;
 					importTestRunSession(url);
@@ -1709,22 +1755,27 @@ action enablement
 
 	private void initPageSwitcher() {
 		new PageSwitcher(this) {
+			@Override
 			public Object[] getPages() {
 				return fViewHistory.getHistoryEntries().toArray();
 			}
 
+			@Override
 			public String getName(Object page) {
 				return fViewHistory.getText(page);
 			}
 
+			@Override
 			public ImageDescriptor getImageDescriptor(Object page) {
 				return fViewHistory.getImageDescriptor(page);
 			}
 
+			@Override
 			public void activatePage(Object page) {
 				fViewHistory.setActiveEntry(page);
 			}
 
+			@Override
 			public int getCurrentPageIndex() {
 				return fViewHistory.getHistoryEntries().indexOf(fViewHistory.getCurrentEntry());
 			}
@@ -1780,6 +1831,7 @@ action enablement
 				fRerunLastTestAction.run();
 				return null;
 			}
+			@Override
 			public boolean isEnabled() {
 				return fRerunLastTestAction.isEnabled();
 			}
@@ -1792,6 +1844,7 @@ action enablement
 				fRerunFailedFirstAction.run();
 				return null;
 			}
+			@Override
 			public boolean isEnabled() {
 				return fRerunFailedFirstAction.isEnabled();
 			}
@@ -1920,6 +1973,7 @@ action enablement
 	/*
 	 * @see IWorkbenchPart#getTitleImage()
 	 */
+	@Override
 	public Image getTitleImage() {
 		if (fOriginalViewImage == null)
 			fOriginalViewImage= super.getTitleImage();

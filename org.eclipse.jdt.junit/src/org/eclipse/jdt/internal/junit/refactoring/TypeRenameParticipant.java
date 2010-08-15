@@ -23,6 +23,7 @@ public class TypeRenameParticipant extends JUnitRenameParticipant {
 
 	private IType fType;
 
+	@Override
 	protected boolean initialize(Object element) {
 		fType= (IType) element;
 		return isTestOrTestSuite();
@@ -36,6 +37,7 @@ public class TypeRenameParticipant extends JUnitRenameParticipant {
 		}
 	}
 
+	@Override
 	public void createChangeForConfig(ChangeList list, LaunchConfigurationContainer config) throws CoreException {
 		String typeName= fType.getFullyQualifiedName('.');
 		String mainType= config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String) null);

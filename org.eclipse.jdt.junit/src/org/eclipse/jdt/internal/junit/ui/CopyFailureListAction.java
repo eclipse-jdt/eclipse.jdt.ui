@@ -43,6 +43,7 @@ public class CopyFailureListAction extends Action {
 	/*
 	 * @see IAction#run()
 	 */
+	@Override
 	public void run() {
 		TextTransfer plainTextTransfer = TextTransfer.getInstance();
 

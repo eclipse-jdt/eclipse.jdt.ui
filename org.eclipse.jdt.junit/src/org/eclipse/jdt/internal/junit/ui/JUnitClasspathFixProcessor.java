@@ -46,6 +46,7 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 			fRelevance= relevance;
 		}
 
+		@Override
 		public String getAdditionalProposalInfo() {
 			if (fIsJunit4) {
 				return JUnitMessages.JUnitAddLibraryProposal_junit4_info;
@@ -53,6 +54,7 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 			return JUnitMessages.JUnitAddLibraryProposal_info;
 		}
 
+		@Override
 		public Change createChange(IProgressMonitor monitor) throws CoreException {
 			if (monitor == null) {
 				monitor= new NullProgressMonitor();
@@ -66,7 +68,7 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 					entry= BuildPathSupport.getJUnit3ClasspathEntry();
 				}
 				IClasspathEntry[] oldEntries= fProject.getRawClasspath();
-				ArrayList newEntries= new ArrayList(oldEntries.length + 1);
+				ArrayList<IClasspathEntry> newEntries= new ArrayList<IClasspathEntry>(oldEntries.length + 1);
 				boolean added= false;
 				for (int i= 0; i < oldEntries.length; i++) {
 					IClasspathEntry curr= oldEntries[i];
@@ -101,7 +103,7 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 					newEntries.add(entry);
 				}
 
-				final IClasspathEntry[] newCPEntries= (IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]);
+				final IClasspathEntry[] newCPEntries= newEntries.toArray(new IClasspathEntry[newEntries.size()]);
 				Change newClasspathChange= newClasspathChange(fProject, newCPEntries, fProject.getOutputLocation());
 				if (newClasspathChange != null) {
 					return newClasspathChange;
@@ -112,6 +114,7 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 			return new NullChange();
 		}
 
+		@Override
 		public String getDisplayString() {
 			if (fIsJunit4) {
 				return JUnitMessages.JUnitAddLibraryProposa_junit4_label;
@@ -119,10 +122,12 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 			return JUnitMessages.JUnitAddLibraryProposal_label;
 		}
 
+		@Override
 		public Image getImage() {
 			return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_LIBRARY);
 		}
 
+		@Override
 		public int getRelevance() {
 			return fRelevance;
 		}
@@ -132,6 +137,7 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 	private static final int JUNIT4= 2;
 
 
+	@Override
 	public ClasspathFixProposal[] getFixImportProposals(IJavaProject project, String missingType) throws CoreException {
 		String s= missingType;
 		int res= 0;
@@ -145,14 +151,14 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 			res= JUNIT4;
 		}
 		if (res != 0) {
-			ArrayList proposals= new ArrayList();
+			ArrayList<JUnitClasspathFixProposal> proposals= new ArrayList<JUnitClasspathFixProposal>();
 			if ((res & JUNIT4) != 0 && JUnitStubUtility.is50OrHigher(project)) {
 				proposals.add(new JUnitClasspathFixProposal(project, true, 15));
 			}
 			if ((res & JUNIT3) != 0) {
 				proposals.add(new JUnitClasspathFixProposal(project, false, 15));
 			}
-			return (ClasspathFixProposal[]) proposals.toArray(new ClasspathFixProposal[proposals.size()]);
+			return proposals.toArray(new ClasspathFixProposal[proposals.size()]);
 		}
 		return null;
 	}

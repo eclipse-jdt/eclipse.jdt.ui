@@ -47,6 +47,7 @@ public class RerunAction extends Action {
 	/*
 	 * @see IAction#run()
 	 */
+	@Override
 	public void run() {
 		fTestRunner.rerunTest(fTestId, fClassName, fTestName, fLaunchMode);
 	}

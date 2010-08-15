@@ -92,7 +92,7 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 
 	private static boolean addToClasspath(Shell shell, final IJavaProject project, IClasspathEntry entry, IRunnableContext context) throws JavaModelException {
 		IClasspathEntry[] oldEntries= project.getRawClasspath();
-		ArrayList newEntries= new ArrayList(oldEntries.length + 1);
+		ArrayList<IClasspathEntry> newEntries= new ArrayList<IClasspathEntry>(oldEntries.length + 1);
 		boolean added= false;
 		for (int i= 0; i < oldEntries.length; i++) {
 			IClasspathEntry curr= oldEntries[i];
@@ -127,7 +127,7 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 			newEntries.add(entry);
 		}
 
-		final IClasspathEntry[] newCPEntries= (IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]);
+		final IClasspathEntry[] newCPEntries= newEntries.toArray(new IClasspathEntry[newEntries.size()]);
 		// fix for 64974 OCE in New JUnit Test Case wizard while workspace is locked [JUnit]
 		try {
 			context.run(true, false, new IRunnableWithProgress() {

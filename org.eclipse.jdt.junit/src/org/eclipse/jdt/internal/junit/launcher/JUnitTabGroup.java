@@ -48,6 +48,7 @@ public class JUnitTabGroup extends AbstractLaunchConfigurationTabGroup {
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup#setDefaults(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
 	 */
+	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
 		super.setDefaults(config);
 		AssertionVMArg.setArgDefault(config);

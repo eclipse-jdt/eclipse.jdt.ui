@@ -46,6 +46,7 @@ public class JUnitProgressBar extends Canvas {
 		super(parent, SWT.NONE);
 
 		addControlListener(new ControlAdapter() {
+			@Override
 			public void controlResized(ControlEvent e) {
 				fColorBarWidth= scale(fCurrentTickCount);
 				redraw();
@@ -150,6 +151,7 @@ public class JUnitProgressBar extends Canvas {
 		gc.fillRectangle(1, 1, fColorBarWidth, rect.height-2);
 	}
 
+	@Override
 	public Point computeSize(int wHint, int hHint, boolean changed) {
 		checkWidget();
 		Point size= new Point(DEFAULT_WIDTH, DEFAULT_HEIGHT);

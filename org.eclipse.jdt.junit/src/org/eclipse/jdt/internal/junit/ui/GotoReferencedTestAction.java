@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -110,12 +110,12 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 	}
 
 	private IJavaElement[] getSelectedElements(IStructuredSelection selection) {
-		List elements= selection.toList();
+		List<?> elements= selection.toList();
 		int size= elements.size();
 		if (size == 0)
 			return new IJavaElement[0];
 
-		ArrayList result= new ArrayList(size);
+		ArrayList<IJavaElement> result= new ArrayList<IJavaElement>(size);
 
 		for (int i= 0; i < size; i++) {
 			Object e= elements.get(i);
@@ -131,12 +131,12 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 				}
 			}
 			else if (e instanceof IMethod || e instanceof IType || e instanceof IField) {
-				result.add(e);
+				result.add((IMember) e);
 			} else {
 				return new IJavaElement[0];
 			}
 		}
-		return (IJavaElement[])result.toArray(new IJavaElement[result.size()]);
+		return result.toArray(new IJavaElement[result.size()]);
 	}
 
 	public void run(IAction action) {

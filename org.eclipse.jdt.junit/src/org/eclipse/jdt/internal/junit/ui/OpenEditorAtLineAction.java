@@ -37,6 +37,7 @@ public class OpenEditorAtLineAction extends OpenEditorAction {
 		fLineNumber= line;
 	}
 
+	@Override
 	protected void reveal(ITextEditor textEditor) {
 		if (fLineNumber >= 0) {
 			try {
@@ -48,6 +49,7 @@ public class OpenEditorAtLineAction extends OpenEditorAction {
 		}
 	}
 
+	@Override
 	protected IJavaElement findElement(IJavaProject project, String className) throws CoreException {
 		return findType(project, className);
 	}

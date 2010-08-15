@@ -67,7 +67,8 @@ public class CompareResultDialog extends TrayDialog {
              super(parent, style, configuration);
          }
 
-     	protected void createControls(Composite composite) {
+     	@Override
+		protected void createControls(Composite composite) {
      		super.createControls(composite);
     		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJUnitHelpContextIds.RESULT_COMPARE_DIALOG);
      	}
@@ -78,7 +79,8 @@ public class CompareResultDialog extends TrayDialog {
 //    		super.createToolItems(tbm);
 //        }
 
-        protected void configureTextViewer(TextViewer textViewer) {
+        @Override
+		protected void configureTextViewer(TextViewer textViewer) {
             if (textViewer instanceof SourceViewer) {
                 int[] prefixSuffixOffsets= (int[]) getCompareConfiguration().getProperty(PREFIX_SUFFIX_PROPERTY);
 				((SourceViewer)textViewer).configure(new CompareResultViewerConfiguration(prefixSuffixOffsets));
@@ -118,6 +120,7 @@ public class CompareResultDialog extends TrayDialog {
 			fPrefixSuffixOffsets= prefixSuffixOffsets;
 		}
 
+		@Override
 		public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
             PresentationReconciler reconciler= new PresentationReconciler();
             SimpleDamagerRepairer dr= new SimpleDamagerRepairer(fPrefixSuffixOffsets);
@@ -176,6 +179,7 @@ public class CompareResultDialog extends TrayDialog {
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
@@ -190,6 +194,7 @@ public class CompareResultDialog extends TrayDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#getDialogBoundsSettings()
 	 */
+	@Override
 	protected IDialogSettings getDialogBoundsSettings() {
 		return JUnitPlugin.getDefault().getDialogSettingsSection(getClass().getName());
 	}
@@ -213,16 +218,19 @@ public class CompareResultDialog extends TrayDialog {
 		fPrefixSuffix[1]= l;
 	}
 
-    protected void configureShell(Shell newShell) {
+    @Override
+	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setText(JUnitMessages.CompareResultDialog_title);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJUnitHelpContextIds.RESULT_COMPARE_DIALOG);
 	}
 
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, IDialogConstants.OK_ID, JUnitMessages.CompareResultDialog_labelOK, true);
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite)super.createDialogArea(parent);
 		GridLayout layout= new GridLayout();

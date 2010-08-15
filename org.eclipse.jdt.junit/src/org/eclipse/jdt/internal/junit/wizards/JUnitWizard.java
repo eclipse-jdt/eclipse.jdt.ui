@@ -54,6 +54,7 @@ public abstract class JUnitWizard extends Wizard implements INewWizard {
 	/*
 	 * @see IWizard#performFinish()
 	 */
+	@Override
 	public abstract boolean performFinish();
 
 	/*

@@ -38,6 +38,7 @@ public abstract class LaunchConfigChange extends Change {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Object getModifiedElement() {
 		return fConfig;
 	}
@@ -45,10 +46,12 @@ public abstract class LaunchConfigChange extends Change {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void initializeValidationData(IProgressMonitor pm) {
 		// must be implemented to decide correct value of isValid
 	}
 
+	@Override
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus refactoringStatus= new RefactoringStatus();
 		if (!fConfig.getConfiguration().exists() && fShouldFlagWarning)
@@ -56,6 +59,7 @@ public abstract class LaunchConfigChange extends Change {
 		return refactoringStatus;
 	}
 
+	@Override
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		if (!fConfig.getConfiguration().exists())
 			return new NullChange();

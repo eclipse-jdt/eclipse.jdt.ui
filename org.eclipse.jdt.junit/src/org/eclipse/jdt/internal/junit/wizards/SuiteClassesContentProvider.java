@@ -48,24 +48,20 @@ public class SuiteClassesContentProvider implements IStructuredContentProvider {
 		IPackageFragment pack= (IPackageFragment) parent;
 		if (! pack.exists())
 			return new Object[0];
-		Object[] result= getTests(pack).toArray();
-		Arrays.sort(result, new Comparator() {
+		Set<IType> tests= getTests(pack);
+		IType[] result= tests.toArray(new IType[tests.size()]);
+		Arrays.sort(result, new Comparator<IType>() {
 			private Collator fCollator= Collator.getInstance();
-			public int compare(Object o1, Object o2) {
-				if (o1 instanceof IType && o2 instanceof IType) {
-					IType t1= (IType) o1;
-					IType t2= (IType) o2;
-					return fCollator.compare(t1.getElementName(), t2.getElementName());
-				}
-				return 0;
+			public int compare(IType t1, IType t2) {
+				return fCollator.compare(t1.getElementName(), t2.getElementName());
 			}
 		});
 		return result;
 	}
 
-	public Set getTests(IPackageFragment pack) {
+	public Set<IType> getTests(IPackageFragment pack) {
 		try {
-			HashSet result= new HashSet();
+			HashSet<IType> result= new HashSet<IType>();
 			
 			if (isIncludeJunit4Tests()) {
 				new JUnit4TestFinder().findTestsInContainer(pack, result, null);
@@ -76,7 +72,7 @@ public class SuiteClassesContentProvider implements IStructuredContentProvider {
 			return result;
 		} catch (CoreException e) {
 			JUnitPlugin.log(e);
-			return Collections.EMPTY_SET;
+			return Collections.emptySet();
 		}
 	}
 

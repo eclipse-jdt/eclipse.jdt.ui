@@ -151,6 +151,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 			fChecked= checked;
 		}
 
+		@Override
 		public boolean equals(Object o) {
 			if (!(o instanceof Filter))
 				return false;
@@ -159,6 +160,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 			return (getName().equals(other.getName()));
 		}
 
+		@Override
 		public int hashCode() {
 			return fName.hashCode();
 		}
@@ -168,6 +170,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	 * Sorter for the filter table; sorts alphabetically ascending.
 	 */
 	private static class FilterViewerSorter extends ViewerComparator {
+		@Override
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			ILabelProvider lprov= (ILabelProvider) ((ContentViewer) viewer).getLabelProvider();
 			String name1= lprov.getText(e1);
@@ -200,6 +203,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 			return (column == 0) ? getText(object) : ""; //$NON-NLS-1$
 		}
 
+		@Override
 		public String getText(Object element) {
 			return TextProcessor.process(((Filter) element).getName());
 		}
@@ -232,33 +236,33 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	 */
 	private class StackFilterContentProvider implements IStructuredContentProvider {
 
-		private List fFilters;
+		private List<Filter> fFilters;
 
 		public StackFilterContentProvider() {
-			List active= createActiveStackFiltersList();
-			List inactive= createInactiveStackFiltersList();
+			List<String> active= createActiveStackFiltersList();
+			List<String> inactive= createInactiveStackFiltersList();
 			populateFilters(active, inactive);
 		}
 
 		public void setDefaults() {
 			fFilterViewer.remove(fFilters.toArray());
-			List active= JUnitPreferencesConstants.createDefaultStackFiltersList();
-			List inactive= new ArrayList();
+			List<String> active= JUnitPreferencesConstants.createDefaultStackFiltersList();
+			List<String> inactive= new ArrayList<String>();
 			populateFilters(active, inactive);
 		}
 
-		protected void populateFilters(List activeList, List inactiveList) {
-			fFilters= new ArrayList(activeList.size() + inactiveList.size());
+		protected void populateFilters(List<String> activeList, List<String> inactiveList) {
+			fFilters= new ArrayList<Filter>(activeList.size() + inactiveList.size());
 			populateList(activeList, true);
 			if (inactiveList.size() != 0)
 				populateList(inactiveList, false);
 		}
 
-		protected void populateList(List list, boolean checked) {
-			Iterator iterator= list.iterator();
+		protected void populateList(List<String> list, boolean checked) {
+			Iterator<String> iterator= list.iterator();
 
 			while (iterator.hasNext()) {
-				String name= (String) iterator.next();
+				String name= iterator.next();
 				addFilter(name, checked);
 			}
 		}
@@ -275,20 +279,20 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		}
 
 		public void saveFilters() {
-			List active= new ArrayList(fFilters.size());
-			List inactive= new ArrayList(fFilters.size());
-			Iterator iterator= fFilters.iterator();
+			List<String> active= new ArrayList<String>(fFilters.size());
+			List<String> inactive= new ArrayList<String>(fFilters.size());
+			Iterator<Filter> iterator= fFilters.iterator();
 			while (iterator.hasNext()) {
-				Filter filter= (Filter) iterator.next();
+				Filter filter= iterator.next();
 				String name= filter.getName();
 				if (filter.isChecked())
 					active.add(name);
 				else
 					inactive.add(name);
 			}
-			String pref= JUnitPreferencesConstants.serializeList((String[]) active.toArray(new String[active.size()]));
+			String pref= JUnitPreferencesConstants.serializeList(active.toArray(new String[active.size()]));
 			getPreferenceStore().setValue(JUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST, pref);
-			pref= JUnitPreferencesConstants.serializeList((String[]) inactive.toArray(new String[inactive.size()]));
+			pref= JUnitPreferencesConstants.serializeList(inactive.toArray(new String[inactive.size()]));
 			getPreferenceStore().setValue(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST, pref);
 		}
 
@@ -322,6 +326,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		setPreferenceStore(new ScopedPreferenceStore(new InstanceScope(),JUnitCorePlugin.CORE_PLUGIN_ID));
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJUnitHelpContextIds.JUNIT_PREFERENCE_PAGE);
 
@@ -561,6 +566,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	private void setEditorListeners(Text text) {
 		// CR means commit the changes, ESC means abort and don't commit
 		text.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyReleased(KeyEvent event) {
 				if (event.character == SWT.CR) {
 					if (fInvalidEditorText != null) {
@@ -576,6 +582,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		});
 		// Consider loss of focus on the editor to mean the same as CR
 		text.addFocusListener(new FocusAdapter() {
+			@Override
 			public void focusLost(FocusEvent event) {
 				if (fInvalidEditorText != null) {
 					fEditorText.setText(fInvalidEditorText);
@@ -739,6 +746,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fFilterViewer.setAllChecked(check);
 	}
 
+	@Override
 	public boolean performOk() {
 		AssertionVMArg.setEnableAssertionsPreference(getAssertionCheckBoxSelection());
 		JUnitUIPreferencesConstants.setShowInAllViews(getShowInAllViewsCheckBoxSelection());
@@ -746,6 +754,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		return true;
 	}
 
+	@Override
 	protected void performDefaults() {
 		setDefaultValues();
 		super.performDefaults();
@@ -762,7 +771,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	 *
 	 * @return list
 	 */
-	protected List createActiveStackFiltersList() {
+	protected List<String> createActiveStackFiltersList() {
 		return Arrays.asList(JUnitPreferencesConstants.getFilterPatterns());
 	}
 
@@ -771,7 +780,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	 *
 	 * @return list
 	 */
-	protected List createInactiveStackFiltersList() {
+	protected List<String> createInactiveStackFiltersList() {
 		String[] strings=
 			JUnitPreferencesConstants.parseList(getPreferenceStore().getString(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST));
 		return Arrays.asList(strings);

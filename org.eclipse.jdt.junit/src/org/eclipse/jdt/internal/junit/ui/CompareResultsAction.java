@@ -41,6 +41,7 @@ public class CompareResultsAction extends Action {
 	/*
 	 * @see Action#actionPerformed
 	 */
+	@Override
 	public void run() {
 		TestElement failedTest= fView.getFailedTest();
 		if (fOpenDialog != null) {

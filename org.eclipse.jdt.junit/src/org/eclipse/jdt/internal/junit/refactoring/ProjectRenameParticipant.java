@@ -37,11 +37,13 @@ public class ProjectRenameParticipant extends JUnitRenameParticipant {
 		return JavaCore.create(project);
 	}
 
+	@Override
 	protected boolean initialize(Object element) {
 		fProject= (IJavaProject) element;
 		return true;
 	}
 
+	@Override
 	public void createChangeForConfig(JUnitRenameParticipant.ChangeList changeList, LaunchConfigurationContainer config) throws CoreException {
 
 		changeList.addAttributeChangeIfNeeded(config, IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fProject.getElementName(), getNewName());

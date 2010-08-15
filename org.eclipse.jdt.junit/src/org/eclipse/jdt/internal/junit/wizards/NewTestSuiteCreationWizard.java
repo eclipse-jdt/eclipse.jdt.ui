@@ -54,6 +54,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 	/*
 	 * @see Wizard#createPages
 	 */
+	@Override
 	public void addPages() {
 		super.addPages();
 		fPage= new NewTestSuiteWizardPage();
@@ -64,6 +65,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 	/*
 	 * @see Wizard#performFinish
 	 */
+	@Override
 	public boolean performFinish() {
 		IPackageFragment pack= fPage.getPackageFragment();
 		String filename= fPage.getTypeName() + ".java"; //$NON-NLS-1$
@@ -133,6 +135,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 		return fPage;
 	}
 
+	@Override
 	protected void initializeDefaultPageImageDescriptor() {
 		setDefaultPageImageDescriptor(JUnitPlugin.getImageDescriptor("wizban/newtest_wiz.png")); //$NON-NLS-1$
 	}

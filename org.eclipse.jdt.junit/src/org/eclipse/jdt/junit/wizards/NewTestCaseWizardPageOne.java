@@ -114,8 +114,8 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	private static final String COMPLIANCE_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"; //$NON-NLS-1$
 	private static final String BUILD_PATH_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"; //$NON-NLS-1$
-	private static final Object BUILD_PATH_KEY_ADD_ENTRY= "add_classpath_entry"; //$NON-NLS-1$
-	private static final Object BUILD_PATH_BLOCK= "block_until_buildpath_applied"; //$NON-NLS-1$
+	private static final String BUILD_PATH_KEY_ADD_ENTRY= "add_classpath_entry"; //$NON-NLS-1$
+	private static final String BUILD_PATH_BLOCK= "block_until_buildpath_applied"; //$NON-NLS-1$
 
 	private static final String KEY_NO_LINK= "PropertyAndPreferencePage.nolink"; //$NON-NLS-1$
 
@@ -299,6 +299,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#handleFieldChanged(String)
 	 */
+	@Override
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 		if (fieldName.equals(CONTAINER)) {
@@ -454,6 +455,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		inner.setLayout(layout);
 
 		SelectionAdapter listener= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean isSelected= ((Button) e.widget).getSelection();
 				internalSetJUnit4(isSelected);
@@ -498,6 +500,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		fLink= new Link(inner, SWT.WRAP);
 		fLink.setText("\n\n"); //$NON-NLS-1$
 		fLink.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				performBuildpathConfiguration(e.text);
 			}
@@ -517,27 +520,27 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 		if ("a3".equals(data)) { // add and configure JUnit 3 //$NON-NLS-1$
 			String id= BUILD_PATH_PAGE_ID;
-			Map input= new HashMap();
+			Map<String, Object> input= new HashMap<String, Object>();
 			IClasspathEntry newEntry= BuildPathSupport.getJUnit3ClasspathEntry();
 			input.put(BUILD_PATH_KEY_ADD_ENTRY, newEntry);
 			input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
 			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, id, new String[] { id }, input).open();
 		} else if ("a4".equals(data)) { // add and configure JUnit 4 //$NON-NLS-1$
 			String id= BUILD_PATH_PAGE_ID;
-			Map input= new HashMap();
+			Map<String, Object> input= new HashMap<String, Object>();
 			IClasspathEntry newEntry= BuildPathSupport.getJUnit4ClasspathEntry();
 			input.put(BUILD_PATH_KEY_ADD_ENTRY, newEntry);
 			input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
 			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, id, new String[] { id }, input).open();
 		} else if ("b".equals(data)) { // open build path //$NON-NLS-1$
 			String id= BUILD_PATH_PAGE_ID;
-			Map input= new HashMap();
+			Map<String, Object> input= new HashMap<String, Object>();
 			input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
 			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, id, new String[] { id }, input).open();
 		} else if ("c".equals(data)) { // open compliance //$NON-NLS-1$
 			String buildPath= BUILD_PATH_PAGE_ID;
 			String complianceId= COMPLIANCE_PAGE_ID;
-			Map input= new HashMap();
+			Map<String, Boolean> input= new HashMap<String, Boolean>();
 			input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
 			input.put(KEY_NO_LINK, Boolean.TRUE);
 			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, complianceId, new String[] { buildPath, complianceId  }, data).open();
@@ -605,6 +608,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#packageChanged()
 	 */
+	@Override
 	protected IStatus packageChanged() {
 		IStatus status= super.packageChanged();
 		fClassToTestCompletionProcessor.setPackageFragment(getPackageFragment());
@@ -703,6 +707,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#createTypeMembers(org.eclipse.jdt.core.IType, org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		if (fMethodStubsButtons.isSelected(IDX_CONSTRUCTOR))
 			createConstructor(type, imports);
@@ -869,15 +874,15 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			return;
 		/* find overloaded methods */
 		IMethod[] allMethodsArray= fPage2.getAllMethods();
-		List allMethods= new ArrayList();
+		List<IMethod> allMethods= new ArrayList<IMethod>();
 		allMethods.addAll(Arrays.asList(allMethodsArray));
-		List overloadedMethods= getOverloadedMethods(allMethods);
+		List<IMethod> overloadedMethods= getOverloadedMethods(allMethods);
 
 		/* used when for example both sum and Sum methods are present. Then
 		 * sum -> testSum
 		 * Sum -> testSum1
 		 */
-		List names= new ArrayList();
+		List<String> names= new ArrayList<String>();
 		for (int i = 0; i < methods.length; i++) {
 			IMethod method= methods[i];
 			String elementName= method.getElementName();
@@ -1006,14 +1011,14 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	}
 
 
-	private List getOverloadedMethods(List allMethods) {
-		List overloadedMethods= new ArrayList();
+	private List<IMethod> getOverloadedMethods(List<IMethod> allMethods) {
+		List<IMethod> overloadedMethods= new ArrayList<IMethod>();
 		for (int i= 0; i < allMethods.size(); i++) {
-			IMethod current= (IMethod) allMethods.get(i);
+			IMethod current= allMethods.get(i);
 			String currentName= current.getElementName();
 			boolean currentAdded= false;
-			for (ListIterator iter= allMethods.listIterator(i+1); iter.hasNext(); ) {
-				IMethod iterMethod= (IMethod) iter.next();
+			for (ListIterator<IMethod> iter= allMethods.listIterator(i+1); iter.hasNext(); ) {
+				IMethod iterMethod= iter.next();
 				if (iterMethod.getElementName().equals(currentName)) {
 					//method is overloaded
 					if (!currentAdded) {
@@ -1031,6 +1036,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (!visible) {
@@ -1078,6 +1084,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#superClassChanged()
 	 */
+	@Override
 	protected IStatus superClassChanged() {
 		// replaces the super class validation of of the normal type wizard
 		if (isJUnit4()) {
@@ -1115,6 +1122,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizardPage#canFlipToNextPage()
 	 */
+	@Override
 	public boolean canFlipToNextPage() {
 		return super.canFlipToNextPage() && getClassUnderTest() != null;
 	}

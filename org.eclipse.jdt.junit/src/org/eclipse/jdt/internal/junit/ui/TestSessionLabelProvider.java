@@ -104,6 +104,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 		return null;
 	}
 
+	@Override
 	public String getText(Object element) {
 		String label= getSimpleLabel(element);
 		if (label == null) {
@@ -126,6 +127,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 		return addElapsedTime(label, testElement.getElapsedTimeInSeconds());
 	}
 
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof TestCaseElement) {
 			TestCaseElement testCaseElement= ((TestCaseElement) element);

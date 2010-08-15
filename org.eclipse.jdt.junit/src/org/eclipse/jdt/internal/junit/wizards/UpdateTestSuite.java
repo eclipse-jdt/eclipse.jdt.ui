@@ -180,7 +180,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 		dialog.setValidator(new UpdateAllTestsValidator());
 		dialog.setTitle(WizardMessages.UpdateAllTests_title);
 		dialog.setMessage(WizardMessages.UpdateAllTests_message);
-		Set elements= cprovider.getTests(fPack);
+		Set<IType> elements= cprovider.getTests(fPack);
 		elements.remove(testSuiteType);
 		dialog.setInitialSelections(elements.toArray());
 		dialog.setSize(60, 25);

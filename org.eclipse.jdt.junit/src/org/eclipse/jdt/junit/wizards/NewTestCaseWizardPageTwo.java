@@ -124,6 +124,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		prefixContainer.setLayout(layout);
 
 		SelectionListener listener= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				doCheckBoxSelected(e.widget);
 			}
@@ -174,6 +175,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 			}
 		});
 		fMethodsTree.addFilter(new ViewerFilter() {
+			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				if (element instanceof IMethod) {
 					IMethod method = (IMethod) element;
@@ -197,6 +199,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fSelectAllButton.setLayoutData(gd);
 		fSelectAllButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fMethodsTree.setCheckedElements((Object[]) fMethodsTree.getInput());
 				doCheckedStateChanged();
@@ -209,6 +212,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fDeselectAllButton.setLayoutData(gd);
 		fDeselectAllButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fMethodsTree.setCheckedElements(new Object[0]);
 				doCheckedStateChanged();
@@ -253,6 +257,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
@@ -260,7 +265,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 				return;
 			}
 
-			ArrayList types= null;
+			ArrayList<IType> types= null;
 			try {
 				ITypeHierarchy hierarchy= fClassToTest.newSupertypeHierarchy(null);
 				IType[] superTypes;
@@ -270,14 +275,14 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 					superTypes= hierarchy.getAllSuperInterfaces(fClassToTest);
 				else
 					superTypes= new IType[0];
-				types= new ArrayList(superTypes.length+1);
+				types= new ArrayList<IType>(superTypes.length+1);
 				types.add(fClassToTest);
 				types.addAll(Arrays.asList(superTypes));
 			} catch(JavaModelException e) {
 				JUnitPlugin.log(e);
 			}
 			if (types == null)
-				types= new ArrayList();
+				types= new ArrayList<IType>();
 			fMethodsTree.setContentProvider(new MethodsTreeContentProvider(types.toArray()));
 			fMethodsTree.setInput(types.toArray());
 			fMethodsTree.setSelection(new StructuredSelection(fClassToTest), true);
@@ -316,7 +321,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 
 		public MethodsTreeContentProvider(Object[] types) {
 			fTypes= types;
-			Vector methods= new Vector();
+			Vector<IMethod> methods= new Vector<IMethod>();
 			for (int i = types.length-1; i > -1; i--) {
 				Object object = types[i];
 				if (object instanceof IType) {
@@ -329,7 +334,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 							int flags= currMethod.getFlags();
 							if (!Flags.isPrivate(flags) && !Flags.isSynthetic(flags)) {
 								for (int k = 0; k < methods.size(); k++) {
-									IMethod m= ((IMethod)methods.get(k));
+									IMethod m= methods.get(k);
 									if (m.getElementName().equals(currMethod.getElementName())
 										&& m.getSignature().equals(currMethod.getSignature())) {
 										methods.set(k,currMethod);
@@ -354,7 +359,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof IType) {
 				IType parentType= (IType)parentElement;
-				ArrayList result= new ArrayList(fMethods.length);
+				ArrayList<IMethod> result= new ArrayList<IMethod>(fMethods.length);
 				for (int i= 0; i < fMethods.length; i++) {
 					if (fMethods[i].getDeclaringType().equals(parentType)) {
 						result.add(fMethods[i]);

@@ -43,14 +43,17 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 			fBaseLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_POST_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT);
 		}
 
+		@Override
 		public Image getImage(Object element) {
 			return fBaseLabelProvider.getImage(((IType)element).getPackageFragment());
 		}
 
+		@Override
 		public String getText(Object element) {
 			return fBaseLabelProvider.getText(((IType)element).getPackageFragment());
 		}
 
+		@Override
 		public void dispose() {
 			fBaseLabelProvider.dispose();
 		}
@@ -66,6 +69,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 	/**
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		//PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, new Object[] { IJavaHelpContextIds.MAINTYPE_SELECTION_DIALOG });
@@ -74,6 +78,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 	/*
 	 * @see Window#open()
 	 */
+	@Override
 	public int open() {
 		setElements(fTypes);
 		return super.open();

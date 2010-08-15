@@ -34,21 +34,25 @@ public class LaunchConfigRenameChange extends LaunchConfigChange {
 		fLaunchManager = lm;
 	}
 
+	@Override
 	protected void alterLaunchConfiguration(ILaunchConfigurationWorkingCopy copy)
 			throws CoreException {
 		if (!fLaunchManager.isExistingLaunchConfigurationName(fNewName))
 			copy.rename(fNewName);
 	}
 
+	@Override
 	protected String getOldValue(ILaunchConfiguration config) {
 		return fConfig.getName();
 	}
 
+	@Override
 	public Change getUndo(String oldValue) throws CoreException {
 		return new LaunchConfigRenameChange(fConfig, oldValue, fLaunchManager,
 				shouldFlagWarning());
 	}
 
+	@Override
 	public String getName() {
 		return Messages.format(JUnitMessages.LaunchConfigRenameChange_name,
 				new Object[] { fConfig.getName(), fNewName });

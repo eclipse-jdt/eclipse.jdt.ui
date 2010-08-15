@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,8 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+
+import org.eclipse.jdt.junit.model.ITestElement;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
@@ -58,10 +60,10 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
+import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.model.TestRoot;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
-import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 
 import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
@@ -75,12 +77,14 @@ public class TestViewer {
 	}
 
 	private final class TestOpenListener extends SelectionAdapter {
+		@Override
 		public void widgetDefaultSelected(SelectionEvent e) {
 			handleDefaultSelected();
 		}
 	}
 
 	private final class FailuresOnlyFilter extends ViewerFilter {
+		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			return select(((TestElement) element));
 		}
@@ -94,14 +98,16 @@ public class TestViewer {
 		}
 	}
 
-	private static class ReverseList extends AbstractList {
-		private final List fList;
-		public ReverseList(List list) {
+	private static class ReverseList<E> extends AbstractList<E> {
+		private final List<E> fList;
+		public ReverseList(List<E> list) {
 			fList= list;
 		}
-		public Object get(int index) {
+		@Override
+		public E get(int index) {
 			return fList.get(fList.size() - index - 1);
 		}
+		@Override
 		public int size() {
 			return fList.size();
 		}
@@ -113,6 +119,7 @@ public class TestViewer {
 			setToolTipText(JUnitMessages.ExpandAllAction_tooltip);
 		}
 
+		@Override
 		public void run(){
 			fTreeViewer.expandAll();
 		}
@@ -140,11 +147,11 @@ public class TestViewer {
 
 	private boolean fTreeNeedsRefresh;
 	private boolean fTableNeedsRefresh;
-	private HashSet/*<TestElement>*/ fNeedUpdate;
+	private HashSet<TestElement> fNeedUpdate;
 	private TestCaseElement fAutoScrollTarget;
 
-	private LinkedList/*<TestSuiteElement>*/ fAutoClose;
-	private HashSet/*<TestSuite>*/ fAutoExpand;
+	private LinkedList<TestSuiteElement> fAutoClose;
+	private HashSet<TestSuiteElement> fAutoExpand;
 
 
 	public TestViewer(Composite parent, Clipboard clipboard, TestRunnerViewPart runner) {
@@ -437,7 +444,7 @@ public class TestViewer {
 					for (int i= 0; i < toUpdate.length; i++)
 						updateElementInTree((TestElement) toUpdate[i]);
 				else {
-					HashSet toUpdateWithParents= new HashSet();
+					HashSet<Object> toUpdateWithParents= new HashSet<Object>();
 					toUpdateWithParents.addAll(Arrays.asList(toUpdate));
 					for (int i= 0; i < toUpdate.length; i++) {
 						TestElement parent= ((TestElement) toUpdate[i]).getParent();
@@ -529,8 +536,8 @@ public class TestViewer {
 		}
 
 		synchronized (this) {
-			for (Iterator iter= fAutoExpand.iterator(); iter.hasNext();) {
-				TestSuiteElement suite= (TestSuiteElement) iter.next();
+			for (Iterator<TestSuiteElement> iter= fAutoExpand.iterator(); iter.hasNext();) {
+				TestSuiteElement suite= iter.next();
 				fTreeViewer.setExpandedState(suite, true);
 			}
 			clearAutoExpand();
@@ -542,8 +549,8 @@ public class TestViewer {
 		TestSuiteElement parent= current == null ? null : (TestSuiteElement) fTreeContentProvider.getParent(current);
 		if (fAutoClose.isEmpty() || ! fAutoClose.getLast().equals(parent)) {
 			// we're in a new branch, so let's close old OK branches:
-			for (ListIterator iter= fAutoClose.listIterator(fAutoClose.size()); iter.hasPrevious();) {
-				TestSuiteElement previousAutoOpened= (TestSuiteElement) iter.previous();
+			for (ListIterator<TestSuiteElement> iter= fAutoClose.listIterator(fAutoClose.size()); iter.hasPrevious();) {
+				TestSuiteElement previousAutoOpened= iter.previous();
 				if (previousAutoOpened.equals(parent))
 					break;
 
@@ -598,9 +605,9 @@ public class TestViewer {
 		if (parent == null)
 			return null;
 
-		List siblings= Arrays.asList(parent.getChildren());
+		List<ITestElement> siblings= Arrays.asList(parent.getChildren());
 		if (! showNext)
-			siblings= new ReverseList(siblings);
+			siblings= new ReverseList<ITestElement>(siblings);
 
 		int nextIndex= siblings.indexOf(current) + 1;
 		for (int i= nextIndex; i < siblings.size(); i++) {
@@ -617,9 +624,9 @@ public class TestViewer {
 	}
 
 	private TestCaseElement getNextChildFailure(TestSuiteElement root, boolean showNext) {
-		List children= Arrays.asList(root.getChildren());
+		List<ITestElement> children= Arrays.asList(root.getChildren());
 		if (! showNext)
-			children= new ReverseList(children);
+			children= new ReverseList<ITestElement>(children);
 		for (int i= 0; i < children.size(); i++) {
 			TestElement child= (TestElement) children.get(i);
 			if (child.getStatus().isErrorOrFailure()) {
@@ -640,9 +647,9 @@ public class TestViewer {
 	}
 
 	private void clearUpdateAndExpansion() {
-		fNeedUpdate= new LinkedHashSet();
-		fAutoClose= new LinkedList();
-		fAutoExpand= new HashSet();
+		fNeedUpdate= new LinkedHashSet<TestElement>();
+		fAutoClose= new LinkedList<TestSuiteElement>();
+		fAutoExpand= new HashSet<TestSuiteElement>();
 	}
 
 	/**
@@ -667,7 +674,7 @@ public class TestViewer {
 	}
 
 	public synchronized void registerFailedForAutoScroll(TestElement testElement) {
-		Object parent= fTreeContentProvider.getParent(testElement);
+		TestSuiteElement parent= (TestSuiteElement) fTreeContentProvider.getParent(testElement);
 		if (parent != null)
 			fAutoExpand.add(parent);
 	}

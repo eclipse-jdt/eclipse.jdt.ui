@@ -65,6 +65,7 @@ public abstract class OpenEditorAction extends Action {
 	/*
 	 * @see IAction#run()
 	 */
+	@Override
 	public void run() {
 		IEditorPart editor= null;
 		try {
@@ -113,11 +114,12 @@ public abstract class OpenEditorAction extends Action {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						if (project != null) {
-							result[0]= internalFindType(project, dottedName, new HashSet(), monitor);
+							result[0]= internalFindType(project, dottedName, new HashSet<IJavaProject>(), monitor);
 						}
 						if (result[0] == null) {
 							int lastDot= dottedName.lastIndexOf('.');
 							TypeNameMatchRequestor nameMatchRequestor= new TypeNameMatchRequestor() {
+								@Override
 								public void acceptTypeNameMatch(TypeNameMatch match) {
 									result[0]= match.getType();
 								}
@@ -146,7 +148,7 @@ public abstract class OpenEditorAction extends Action {
 		return result[0];
 	}
 
-	private IType internalFindType(IJavaProject project, String className, Set/*<IJavaProject>*/ visitedProjects, IProgressMonitor monitor) throws JavaModelException {
+	private IType internalFindType(IJavaProject project, String className, Set/*<IJavaProject>*/<IJavaProject> visitedProjects, IProgressMonitor monitor) throws JavaModelException {
 		try {
 			if (visitedProjects.contains(project))
 				return null;

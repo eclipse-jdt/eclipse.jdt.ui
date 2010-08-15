@@ -74,7 +74,7 @@ import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
 
 public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 
-	private static final HashSet ASSERT_METHOD_NAMES= new HashSet();
+	private static final HashSet<String> ASSERT_METHOD_NAMES= new HashSet<String>();
 
 	public JUnitQuickFixProcessor() {
 		ASSERT_METHOD_NAMES.add("fail"); //$NON-NLS-1$
@@ -101,7 +101,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 	 * @see org.eclipse.jdt.ui.text.java.IQuickFixProcessor#getCorrections(org.eclipse.jdt.ui.text.java.IInvocationContext, org.eclipse.jdt.ui.text.java.IProblemLocation[])
 	 */
 	public IJavaCompletionProposal[] getCorrections(final IInvocationContext context, IProblemLocation[] locations)  {
-		ArrayList res= null;
+		ArrayList<IJavaCompletionProposal> res= null;
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
 			int id= problem.getProblemId();
@@ -114,16 +114,16 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 		if (res == null || res.isEmpty()) {
 			return null;
 		}
-		return (IJavaCompletionProposal[]) res.toArray(new IJavaCompletionProposal[res.size()]);
+		return res.toArray(new IJavaCompletionProposal[res.size()]);
 	}
 
-	private ArrayList getAddAssertImportProposals(IInvocationContext context, IProblemLocation problem, ArrayList proposals) {
+	private ArrayList<IJavaCompletionProposal> getAddAssertImportProposals(IInvocationContext context, IProblemLocation problem, ArrayList<IJavaCompletionProposal> proposals) {
 		String[] args= problem.getProblemArguments();
 		if (args.length > 1) {
 			String methodName= args[1];
 			if (ASSERT_METHOD_NAMES.contains(methodName) && isInsideJUnit4Test(context)) {
 				if (proposals == null) {
-					proposals= new ArrayList();
+					proposals= new ArrayList<IJavaCompletionProposal>();
 				}
 				proposals.add(new AddAssertProposal(context.getASTRoot(), methodName, 9));
 				proposals.add(new AddAssertProposal(context.getASTRoot(), "*", 10)); //$NON-NLS-1$
@@ -132,7 +132,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 		return proposals;
 	}
 
-	private ArrayList getAddJUnitToBuildPathProposals(IInvocationContext context, IProblemLocation location, ArrayList proposals) {
+	private ArrayList<IJavaCompletionProposal> getAddJUnitToBuildPathProposals(IInvocationContext context, IProblemLocation location, ArrayList<IJavaCompletionProposal> proposals) {
 		try {
 			ICompilationUnit unit= context.getCompilationUnit();
 			String qualifiedName= null;
@@ -158,7 +158,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 				ClasspathFixProposal[] fixProposals= ClasspathFixProcessor.getContributedFixImportProposals(javaProject, qualifiedName, null);
 				for (int i= 0; i < fixProposals.length; i++) {
 					if (proposals == null)
-						proposals= new ArrayList();
+						proposals= new ArrayList<IJavaCompletionProposal>();
 					proposals.add(new JUnitClasspathFixCorrectionProposal(javaProject, fixProposals[i], getImportRewrite(context.getASTRoot(), qualifiedName)));
 				}
 			}

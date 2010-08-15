@@ -24,6 +24,7 @@ public class UITestRunListener extends TestRunListener {
 	 * @see org.eclipse.jdt.junit.TestRunListener#sessionLaunched(org.eclipse.jdt.junit.model.ITestRunSession)
 	 * @since 3.6
 	 */
+	@Override
 	public void sessionLaunched(ITestRunSession session) {
 		JUnitPlugin.asyncShowTestRunnerViewPart();
 	}

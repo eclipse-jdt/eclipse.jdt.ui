@@ -209,6 +209,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#handleFieldChanged(java.lang.String)
 	 */
+	@Override
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 		if (fieldName.equals(PACKAGE) || fieldName.equals(CONTAINER) || fieldName.equals(JUNIT4TOGGLE)) {
@@ -239,6 +240,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
 			setFocus();
@@ -321,6 +323,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			bgd.widthHint = LayoutUtil.getButtonWidthHint(selectAllButton);
 			selectAllButton.setLayoutData(bgd);
 			selectAllButton.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fClassesInSuiteTable.setAllChecked(true);
 					handleFieldChanged(CLASSES_IN_SUITE);
@@ -333,6 +336,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			bgd.widthHint = LayoutUtil.getButtonWidthHint(deselectAllButton);
 			deselectAllButton.setLayoutData(bgd);
 			deselectAllButton.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fClassesInSuiteTable.setAllChecked(false);
 					handleFieldChanged(CLASSES_IN_SUITE);
@@ -353,6 +357,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#createTypeMembers(org.eclipse.jdt.core.IType, org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		writeImports(imports);
 		if(!isJUnit4())
@@ -377,6 +382,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#createType(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		IPackageFragment pack= getPackageFragment();
 		ICompilationUnit cu= pack.getCompilationUnit(getTypeName() + ".java"); //$NON-NLS-1$
@@ -467,6 +473,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#typeNameChanged()
 	 */
+	@Override
 	protected IStatus typeNameChanged() {
 		super.typeNameChanged();
 
@@ -595,6 +602,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		inner.setLayout(layout);
 
 		SelectionAdapter listener= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean isSelected= ((Button) e.widget).getSelection();
 				internalSetJUnit4(isSelected);
@@ -661,6 +669,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		handleFieldChanged(JUNIT4TOGGLE);
 	}
 	
+	@Override
 	protected String constructCUContent(ICompilationUnit cu, String typeContent, String lineDelimiter) throws CoreException {
 		if (isJUnit4()) {
 			typeContent= appendAnnotations(typeContent, lineDelimiter);

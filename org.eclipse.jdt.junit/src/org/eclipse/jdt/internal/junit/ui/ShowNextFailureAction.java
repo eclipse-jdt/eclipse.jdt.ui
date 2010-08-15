@@ -25,6 +25,7 @@ class ShowNextFailureAction extends Action {
 		fPart= part;
 	}
 
+	@Override
 	public void run() {
 		fPart.selectNextFailure();
 	}

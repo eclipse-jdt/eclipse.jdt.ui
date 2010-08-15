@@ -52,6 +52,7 @@ public class JUnitCopyAction extends SelectionListenerAction {
 	/*
 	 * @see IAction#run()
 	 */
+	@Override
 	public void run() {
 		String trace= fView.getTrace();
 		String source= null;

@@ -257,7 +257,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 * @return ILaunchConfiguration
 	 * @throws InterruptedException if cancelled by the user
 	 */
-	private ILaunchConfiguration chooseConfiguration(List configList, String mode) throws InterruptedException {
+	private ILaunchConfiguration chooseConfiguration(List<ILaunchConfiguration> configList, String mode) throws InterruptedException {
 		IDebugModelPresentation labelProvider= DebugUITools.newDebugModelPresentation();
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
 		dialog.setElements(configList.toArray());
@@ -376,7 +376,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 
 	private ILaunchConfiguration findExistingLaunchConfiguration(ILaunchConfigurationWorkingCopy temporary, String mode) throws InterruptedException, CoreException {
-		List candidateConfigs= findExistingLaunchConfigurations(temporary);
+		List<ILaunchConfiguration> candidateConfigs= findExistingLaunchConfigurations(temporary);
 
 		// If there are no existing configs associated with the IType, create
 		// one.
@@ -388,7 +388,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		if (candidateCount == 0) {
 			return null;
 		} else if (candidateCount == 1) {
-			return (ILaunchConfiguration) candidateConfigs.get(0);
+			return candidateConfigs.get(0);
 		} else {
 			// Prompt the user to choose a config. A null result means the user
 			// cancelled the dialog, in which case this method returns null,
@@ -402,13 +402,13 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		return null;
 	}
 
-	private List findExistingLaunchConfigurations(ILaunchConfigurationWorkingCopy temporary) throws CoreException {
+	private List<ILaunchConfiguration> findExistingLaunchConfigurations(ILaunchConfigurationWorkingCopy temporary) throws CoreException {
 		ILaunchConfigurationType configType= temporary.getType();
 
 		ILaunchConfiguration[] configs= getLaunchManager().getLaunchConfigurations(configType);
 		String[] attributeToCompare= getAttributeNamesToCompare();
 
-		ArrayList candidateConfigs= new ArrayList(configs.length);
+		ArrayList<ILaunchConfiguration> candidateConfigs= new ArrayList<ILaunchConfiguration>(configs.length);
 		for (int i= 0; i < configs.length; i++) {
 			ILaunchConfiguration config= configs[i];
 			if (hasSameAttributes(config, temporary, attributeToCompare)) {
@@ -490,8 +490,8 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 					return null;
 				}
 				ILaunchConfigurationWorkingCopy workingCopy= createLaunchConfiguration(elementToLaunch);
-				List list= findExistingLaunchConfigurations(workingCopy);
-				return (ILaunchConfiguration[]) list.toArray(new ILaunchConfiguration[list.size()]);
+				List<ILaunchConfiguration> list= findExistingLaunchConfigurations(workingCopy);
+				return list.toArray(new ILaunchConfiguration[list.size()]);
 			} catch (CoreException e) {
 			}
 		}

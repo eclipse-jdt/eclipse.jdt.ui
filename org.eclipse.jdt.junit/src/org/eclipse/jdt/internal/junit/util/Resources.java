@@ -101,7 +101,7 @@ public class Resources {
 	 * @see org.eclipse.core.resources.IWorkspace#validateEdit(org.eclipse.core.resources.IFile[], java.lang.Object)
 	 */
 	public static IStatus makeCommittable(IResource[] resources, Object context) {
-		List readOnlyFiles= new ArrayList();
+		List<IResource> readOnlyFiles= new ArrayList<IResource>();
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
 			if (resource.getType() == IResource.FILE && resource.getResourceAttributes().isReadOnly())
@@ -110,16 +110,16 @@ public class Resources {
 		if (readOnlyFiles.size() == 0)
 			return Status.OK_STATUS;
 
-		Map oldTimeStamps= createModificationStampMap(readOnlyFiles);
+		Map<IFile, Long> oldTimeStamps= createModificationStampMap(readOnlyFiles);
 		IStatus status= ResourcesPlugin.getWorkspace().validateEdit(
-			(IFile[]) readOnlyFiles.toArray(new IFile[readOnlyFiles.size()]), context);
+			readOnlyFiles.toArray(new IFile[readOnlyFiles.size()]), context);
 		if (!status.isOK())
 			return status;
 
 		IStatus modified= null;
-		Map newTimeStamps= createModificationStampMap(readOnlyFiles);
-		for (Iterator iter= oldTimeStamps.keySet().iterator(); iter.hasNext();) {
-			IFile file= (IFile) iter.next();
+		Map<IFile, Long> newTimeStamps= createModificationStampMap(readOnlyFiles);
+		for (Iterator<IFile> iter= oldTimeStamps.keySet().iterator(); iter.hasNext();) {
+			IFile file= iter.next();
 			if (!oldTimeStamps.get(file).equals(newTimeStamps.get(file)))
 				modified= addModified(modified, file);
 		}
@@ -128,9 +128,9 @@ public class Resources {
 		return Status.OK_STATUS;
 	}
 
-	private static Map createModificationStampMap(List files){
-		Map map= new HashMap();
-		for (Iterator iter= files.iterator(); iter.hasNext(); ) {
+	private static Map<IFile, Long> createModificationStampMap(List<IResource> files){
+		Map<IFile, Long> map= new HashMap<IFile, Long>();
+		for (Iterator<IResource> iter= files.iterator(); iter.hasNext(); ) {
 			IFile file= (IFile)iter.next();
 			map.put(file, new Long(file.getModificationStamp()));
 		}

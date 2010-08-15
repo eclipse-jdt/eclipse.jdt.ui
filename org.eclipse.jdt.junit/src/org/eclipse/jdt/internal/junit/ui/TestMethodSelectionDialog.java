@@ -59,8 +59,9 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 	private IJavaElement fElement;
 
 	public static class TestReferenceCollector extends SearchRequestor {
-		Set fResult= new HashSet(200);
+		Set<IJavaElement> fResult= new HashSet<IJavaElement>(200);
 
+		@Override
 		public void acceptSearchMatch(SearchMatch match) throws CoreException {
 			IJavaElement enclosingElement= (IJavaElement) match.getElement();
 			if (enclosingElement.getElementName().startsWith("test")) //$NON-NLS-1$
@@ -80,6 +81,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 	/*
 	 * @see Windows#configureShell
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJUnitHelpContextIds.TEST_SELECTION_DIALOG);
@@ -88,6 +90,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 	/*
 	 * @see Window#open()
 	 */
+	@Override
 	public int open() {
 		Object[] elements;
 		IType testType= findTestType();
@@ -116,7 +119,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 	private IType findTestType() {
 		String qualifiedName= JUnitCorePlugin.TEST_INTERFACE_NAME;
 		IJavaProject[] projects;
-		Set result= new HashSet();
+		Set<IType> result= new HashSet<IType>();
 		try {
 			projects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
 			for (int i= 0; i < projects.length; i++) {
@@ -140,14 +143,14 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		return selectTestType(result);
 	}
 
-	private IType selectTestType(Set result) {
+	private IType selectTestType(Set<IType> result) {
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_ROOT);
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getParentShell(), labelProvider);
 		dialog.setTitle(JUnitMessages.TestMethodSelectionDialog_dialog_title);
 		String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_testproject, BasicElementLabels.getJavaElementName("junit.framework.Test")); //$NON-NLS-1$
 		dialog.setMessage(msg);
 		IJavaProject[] projects= new IJavaProject[result.size()];
-		IType[] testTypes= (IType[]) result.toArray(new IType[result.size()]);
+		IType[] testTypes= result.toArray(new IType[result.size()]);
 		for (int i= 0; i < projects.length; i++)
 			projects[i]= testTypes[i].getJavaProject();
 		dialog.setElements(projects);

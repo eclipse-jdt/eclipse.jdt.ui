@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,7 +64,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	/**
 	 * List storing the registered JUnit launch configuration types
 	 */
-	private List fJUnitLaunchConfigTypeIDs;
+	private List<String> fJUnitLaunchConfigTypeIDs;
 
 	private BundleContext fBundleContext;
 
@@ -190,6 +190,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	/**
 	 * @see AbstractUIPlugin#start(BundleContext)
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		fBundleContext= context;
@@ -198,6 +199,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	/**
 	 * @see AbstractUIPlugin#stop(BundleContext)
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		fIsStopped= true;
 		super.stop(context);
@@ -212,7 +214,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 * @since 3.5
 	 */
 	public Object getService(String serviceName) {
-		ServiceReference reference= fBundleContext.getServiceReference(serviceName);
+		ServiceReference<?> reference= fBundleContext.getServiceReference(serviceName);
 		if (reference == null)
 			return null;
 		return fBundleContext.getService(reference);
@@ -222,7 +224,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 * Loads the registered JUnit launch configurations
 	 */
 	private void loadLaunchConfigTypeIDs() {
-		fJUnitLaunchConfigTypeIDs= new ArrayList();
+		fJUnitLaunchConfigTypeIDs= new ArrayList<String>();
 		IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_JUNIT_LAUNCHCONFIGS);
 		if (extensionPoint == null) {
 			return;
@@ -238,7 +240,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	/**
 	 * @return a list of all JUnit launch configuration types
 	 */
-	public List/*<String>*/ getJUnitLaunchConfigTypeIDs() {
+	public List/*<String>*/<String> getJUnitLaunchConfigTypeIDs() {
 		if (fJUnitLaunchConfigTypeIDs == null) {
 			loadLaunchConfigTypeIDs();
 		}
@@ -273,8 +275,8 @@ public class JUnitPlugin extends AbstractUIPlugin {
 			return bundles;
 
 		// Accessing unresolved bundle
-		ServiceReference serviceRef= fBundleContext.getServiceReference(PackageAdmin.class.getName());
-		PackageAdmin admin= (PackageAdmin)fBundleContext.getService(serviceRef);
+		ServiceReference<PackageAdmin> serviceRef= fBundleContext.getServiceReference(PackageAdmin.class);
+		PackageAdmin admin= fBundleContext.getService(serviceRef);
 		bundles= admin.getBundles(bundleName, version);
 		if (bundles != null && bundles.length > 0)
 			return bundles;

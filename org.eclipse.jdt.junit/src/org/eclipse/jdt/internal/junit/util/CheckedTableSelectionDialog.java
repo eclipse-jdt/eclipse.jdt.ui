@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,7 +57,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	private String fEmptyListMessage= WizardMessages.CheckedTableSelectionDialog_emptyListMessage;
 
 	private IStatus fCurrStatus= new JUnitStatus();
-	private List fFilters;
+	private List<ViewerFilter> fFilters;
 	private Object fInput;
 	private boolean fIsEmpty;
 
@@ -77,7 +77,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		fLabelProvider= labelProvider;
 		fContentProvider= contentProvider;
 
-		setResult(new ArrayList(0));
+		setResult(new ArrayList<Object>(0));
 		setStatusLineAboveButtons(true);
 	}
 
@@ -104,7 +104,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	 */
 	public void addFilter(ViewerFilter filter) {
 		if (fFilters == null)
-			fFilters= new ArrayList(4);
+			fFilters= new ArrayList<ViewerFilter>(4);
 
 		fFilters.add(filter);
 	}
@@ -153,6 +153,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	/*
 	 * @see Window#open()
 	 */
+	@Override
 	public int open() {
 		fIsEmpty= evaluateIfTableEmpty(fInput);
 		BusyIndicator.showWhile(null, new Runnable() {
@@ -170,6 +171,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	/**
 	 * Handles cancel button pressed event.
 	 */
+	@Override
 	protected void cancelPressed() {
 		setResult(null);
 		super.cancelPressed();
@@ -178,6 +180,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	/*
 	 * @see SelectionStatusDialog#computeResult()
 	 */
+	@Override
 	protected void computeResult() {
 		setResult(Arrays.asList(fViewer.getCheckedElements()));
 	}
@@ -185,10 +188,11 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	/*
 	 * @see Window#create()
 	 */
+	@Override
 	public void create() {
 		super.create();
 
-		List initialSelections= getInitialElementSelections();
+		List<?> initialSelections= getInitialElementSelections();
 		if (initialSelections.size() > 0) {
 			fViewer.setCheckedElements(initialSelections.toArray());
 		}
@@ -199,6 +203,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	/*
 	 * @see Dialog#createDialogArea(Composite)
 	 */
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
 
@@ -233,7 +238,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 
 		if (fFilters != null) {
 			for (int i= 0; i != fFilters.size(); i++)
-				fViewer.addFilter((ViewerFilter) fFilters.get(i));
+				fViewer.addFilter(fFilters.get(i));
 		}
 
 		fViewer.setInput(fInput);
@@ -257,6 +262,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		Button selectButton= createButton(buttonComposite, IDialogConstants.SELECT_ALL_ID, WizardMessages.CheckedTableSelectionDialog_selectAll, false);
 
 		SelectionListener listener= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fViewer.setCheckedElements(fContentProvider.getElements(fInput));
 				updateOKStatus();
@@ -267,6 +273,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		Button deselectButton= createButton(buttonComposite, IDialogConstants.DESELECT_ALL_ID, WizardMessages.CheckedTableSelectionDialog_deselectAll, false);
 
 		listener= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fViewer.setCheckedElements(new Object[0]);
 				updateOKStatus();
@@ -281,7 +288,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		if (elements.length > 0) {
 			if (fFilters != null) {
 				for (int i= 0; i < fFilters.size(); i++) {
-					ViewerFilter curr= (ViewerFilter)fFilters.get(i);
+					ViewerFilter curr= fFilters.get(i);
 					elements= curr.filter(fViewer, input, elements);
 				}
 			}

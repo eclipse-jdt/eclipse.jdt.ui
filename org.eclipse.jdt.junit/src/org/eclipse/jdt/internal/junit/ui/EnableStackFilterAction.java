@@ -41,6 +41,7 @@ public class EnableStackFilterAction extends Action {
 	/*
 	 * @see Action#actionPerformed
 	 */
+	@Override
 	public void run() {
 		JUnitPreferencesConstants.setFilterStack(isChecked());
 		fView.refresh();
