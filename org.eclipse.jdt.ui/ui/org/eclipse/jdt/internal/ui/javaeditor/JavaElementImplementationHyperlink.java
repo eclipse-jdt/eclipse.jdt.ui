@@ -34,6 +34,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -158,6 +159,15 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 * @since 3.6
 	 */
 	public static void openImplementations(IEditorPart editor, IRegion region, final IMethod method, SelectionDispatchAction openAction) {
+		try {
+			if (cannotBeOverriddenMethod(method)) {
+				openAction.run(new StructuredSelection(method));
+				return;
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			return;
+		}
 		ITypeRoot editorInput= EditorUtility.getEditorInputJavaElement(editor, false);
 
 		CompilationUnit ast= SharedASTProvider.getAST(editorInput, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
@@ -271,6 +281,20 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 			openAction.run(new StructuredSelection(links.get(0)));
 		else
 			openQuickHierarchy(editor);
+	}
+
+	/**
+	 * Checks whether or not a method can be overridden.
+	 * 
+	 * @param method the method
+	 * @return <code>true</code> if the method cannot be overridden, <code>false</code> otherwise
+	 * @throws JavaModelException if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource
+	 * @since 3.7
+	 */
+	private static boolean cannotBeOverriddenMethod(IMethod method) throws JavaModelException {
+		return JdtFlags.isPrivate(method) || JdtFlags.isFinal(method) || JdtFlags.isStatic(method) || method.isConstructor()
+				|| JdtFlags.isFinal((IMember)method.getParent());
 	}
 
 	/**

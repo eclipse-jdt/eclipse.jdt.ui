@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,14 +23,9 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -114,7 +109,7 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 			return;
 		}
 
-		if (element == null || !((element instanceof IMethod) && canBeOverriddenMethod((IMethod)element))) {
+		if (element == null || !(element instanceof IMethod)) {
 			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OpenImplementationAction_not_applicable);
 			return;
 		}
@@ -136,21 +131,5 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 	 */
 	private String getDialogTitle() {
 		return ActionMessages.OpenImplementationAction_error_title;
-	}
-
-	/**
-	 * Checks whether a method can be overridden.
-	 * 
-	 * @param method the method
-	 * @return <code>true</code> if the method can be overridden, <code>false</code> otherwise
-	 */
-	private boolean canBeOverriddenMethod(IMethod method) {
-		try {
-			return !(JdtFlags.isPrivate(method) || JdtFlags.isFinal(method) || JdtFlags.isStatic(method) ||
-					method.isConstructor() || JdtFlags.isFinal((IMember)method.getParent()));
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-			return false;
-		}
 	}
 }
