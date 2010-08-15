@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.junit.refactoring;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -59,9 +58,9 @@ public abstract class JUnitRenameParticipant extends RenameParticipant implement
 		}
 
 		public void createChangeForConfigs(ILaunchConfiguration[] configs, IChangeAdder changeCreator) throws CoreException {
-			for (int i= 0; i < configs.length; i++) {
+			for (ILaunchConfiguration config : configs) {
 				fShouldFlagWarnings= true;
-				changeCreator.createChangeForConfig(this, new LaunchConfigurationContainer(configs[i]));
+				changeCreator.createChangeForConfig(this, new LaunchConfigurationContainer(config));
 			}
 		}
 
@@ -101,8 +100,7 @@ public abstract class JUnitRenameParticipant extends RenameParticipant implement
 		ILaunchManager manager= getLaunchManager();
 		List<String> launchConfigTypes= getLaunchConfigTypes();
 		List<Change> changes= new ArrayList<Change>();
-		for (Iterator<String> types= launchConfigTypes.iterator(); types.hasNext();) {
-			String typeId= types.next();
+		for (String typeId : launchConfigTypes) {
 			ILaunchConfigurationType type= manager.getLaunchConfigurationType(typeId);
 			ILaunchConfiguration configs[]= manager.getLaunchConfigurations(type);
 			new ChangeList(getArguments(), getLaunchManager(), changes).createChangeForConfigs(configs, this);

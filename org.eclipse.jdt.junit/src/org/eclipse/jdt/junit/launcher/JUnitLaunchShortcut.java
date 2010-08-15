@@ -360,9 +360,9 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 	private static boolean hasSameAttributes(ILaunchConfiguration config1, ILaunchConfiguration config2, String[] attributeToCompare) {
 		try {
-			for (int i= 0; i < attributeToCompare.length; i++) {
-				String val1= config1.getAttribute(attributeToCompare[i], EMPTY_STRING);
-				String val2= config2.getAttribute(attributeToCompare[i], EMPTY_STRING);
+			for (String element : attributeToCompare) {
+				String val1= config1.getAttribute(element, EMPTY_STRING);
+				String val2= config2.getAttribute(element, EMPTY_STRING);
 				if (!val1.equals(val2)) {
 					return false;
 				}
@@ -409,8 +409,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		String[] attributeToCompare= getAttributeNamesToCompare();
 
 		ArrayList<ILaunchConfiguration> candidateConfigs= new ArrayList<ILaunchConfiguration>(configs.length);
-		for (int i= 0; i < configs.length; i++) {
-			ILaunchConfiguration config= configs[i];
+		for (ILaunchConfiguration config : configs) {
 			if (hasSameAttributes(config, temporary, attributeToCompare)) {
 				candidateConfigs.add(config);
 			}

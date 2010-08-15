@@ -231,8 +231,8 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		}
 		IConfigurationElement[] configs= extensionPoint.getConfigurationElements();
 
-		for (int i= 0; i < configs.length; i++) {
-			String configTypeID= configs[i].getAttribute("configTypeID"); //$NON-NLS-1$
+		for (IConfigurationElement config : configs) {
+			String configTypeID= config.getAttribute("configTypeID"); //$NON-NLS-1$
 			fJUnitLaunchConfigTypeIDs.add(configTypeID);
 		}
 	}

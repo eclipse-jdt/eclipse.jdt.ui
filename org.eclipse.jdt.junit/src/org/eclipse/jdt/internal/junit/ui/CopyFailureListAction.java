@@ -64,8 +64,7 @@ public class CopyFailureListAction extends Action {
 		TestElement[] failures= fRunner.getAllFailures();
 
 		String lineDelim= System.getProperty("line.separator", "\n");  //$NON-NLS-1$//$NON-NLS-2$
-		for (int i= 0; i < failures.length; i++) {
-			TestElement failure= failures[i];
+		for (TestElement failure : failures) {
 			buf.append(failure.getTestName()).append(lineDelim);
 			String failureTrace= failure.getTrace();
 			if (failureTrace != null) {

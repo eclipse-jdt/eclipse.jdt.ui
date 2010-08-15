@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.junit.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -101,11 +100,10 @@ public class Resources {
 	 * @see org.eclipse.core.resources.IWorkspace#validateEdit(org.eclipse.core.resources.IFile[], java.lang.Object)
 	 */
 	public static IStatus makeCommittable(IResource[] resources, Object context) {
-		List<IResource> readOnlyFiles= new ArrayList<IResource>();
-		for (int i= 0; i < resources.length; i++) {
-			IResource resource= resources[i];
+		List<IFile> readOnlyFiles= new ArrayList<IFile>();
+		for (IResource resource : resources) {
 			if (resource.getType() == IResource.FILE && resource.getResourceAttributes().isReadOnly())
-				readOnlyFiles.add(resource);
+				readOnlyFiles.add((IFile) resource);
 		}
 		if (readOnlyFiles.size() == 0)
 			return Status.OK_STATUS;
@@ -118,8 +116,7 @@ public class Resources {
 
 		IStatus modified= null;
 		Map<IFile, Long> newTimeStamps= createModificationStampMap(readOnlyFiles);
-		for (Iterator<IFile> iter= oldTimeStamps.keySet().iterator(); iter.hasNext();) {
-			IFile file= iter.next();
+		for (IFile file : oldTimeStamps.keySet()) {
 			if (!oldTimeStamps.get(file).equals(newTimeStamps.get(file)))
 				modified= addModified(modified, file);
 		}
@@ -128,10 +125,9 @@ public class Resources {
 		return Status.OK_STATUS;
 	}
 
-	private static Map<IFile, Long> createModificationStampMap(List<IResource> files){
+	private static Map<IFile, Long> createModificationStampMap(List<IFile> files){
 		Map<IFile, Long> map= new HashMap<IFile, Long>();
-		for (Iterator<IResource> iter= files.iterator(); iter.hasNext(); ) {
-			IFile file= (IFile)iter.next();
+		for (IFile file : files) {
 			map.put(file, new Long(file.getModificationStamp()));
 		}
 		return map;

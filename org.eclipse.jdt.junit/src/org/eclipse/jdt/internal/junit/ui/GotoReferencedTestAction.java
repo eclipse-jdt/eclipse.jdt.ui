@@ -126,8 +126,8 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 					types= unit.getTypes();
 				} catch (JavaModelException ex) {
 				}
-				for (int j= 0; j < types.length; j++) {
-					result.add(types[j]);
+				for (IType type : types) {
+					result.add(type);
 				}
 			}
 			else if (e instanceof IMethod || e instanceof IType || e instanceof IField) {

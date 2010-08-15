@@ -578,8 +578,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		}
 
 		final HashSet<String> typeLookup= new HashSet<String>();
-		for (int i= 0; i < types.length; i++) {
-			IType type= types[i];
+		for (IType type : types) {
 			typeLookup.add(type.getPackageFragment().getElementName() + '/' + type.getTypeQualifiedName('.'));
 		}
 		SelectionDialog dialog= null;
@@ -678,8 +677,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 		while (type != null) {
 			IMethod[] methods= type.getMethods();
-			for (int i= 0; i < methods.length; i++) {
-				IMethod method= methods[i];
+			for (IMethod method : methods) {
 				int flags= method.getFlags();
 				// Only include public, non-static, no-arg methods that return void and start with "test":
 				if (Modifier.isPublic(flags) && !Modifier.isStatic(flags) &&

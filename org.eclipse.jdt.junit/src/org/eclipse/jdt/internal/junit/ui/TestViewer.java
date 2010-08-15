@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.junit.ui;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -441,13 +440,13 @@ public class TestViewer {
 			}
 			if (! fTreeNeedsRefresh && toUpdate.length > 0) {
 				if (fTreeHasFilter)
-					for (int i= 0; i < toUpdate.length; i++)
-						updateElementInTree((TestElement) toUpdate[i]);
+					for (Object element : toUpdate)
+						updateElementInTree((TestElement) element);
 				else {
 					HashSet<Object> toUpdateWithParents= new HashSet<Object>();
 					toUpdateWithParents.addAll(Arrays.asList(toUpdate));
-					for (int i= 0; i < toUpdate.length; i++) {
-						TestElement parent= ((TestElement) toUpdate[i]).getParent();
+					for (Object element : toUpdate) {
+						TestElement parent= ((TestElement) element).getParent();
 						while (parent != null) {
 							toUpdateWithParents.add(parent);
 							parent= parent.getParent();
@@ -458,8 +457,8 @@ public class TestViewer {
 			}
 			if (! fTableNeedsRefresh && toUpdate.length > 0) {
 				if (fTableHasFilter)
-					for (int i= 0; i < toUpdate.length; i++)
-						updateElementInTable((TestElement) toUpdate[i]);
+					for (Object element : toUpdate)
+						updateElementInTable((TestElement) element);
 				else
 					fTableViewer.update(toUpdate, null);
 			}
@@ -536,8 +535,7 @@ public class TestViewer {
 		}
 
 		synchronized (this) {
-			for (Iterator<TestSuiteElement> iter= fAutoExpand.iterator(); iter.hasNext();) {
-				TestSuiteElement suite= iter.next();
+			for (TestSuiteElement suite : fAutoExpand) {
 				fTreeViewer.setExpandedState(suite, true);
 			}
 			clearAutoExpand();

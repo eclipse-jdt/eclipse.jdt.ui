@@ -84,8 +84,8 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 		 */
 		public IStatus validate(Object[] selection) {
 			int count= 0;
-			for (int i= 0; i < selection.length; i++) {
-				if (selection[i] instanceof IType) {
+			for (Object element : selection) {
+				if (element instanceof IType) {
 					count++;
 				}
 			}
@@ -113,9 +113,9 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			} else {
 				suiteClass= fSuiteMethod.getDeclaringType();
 			}
-			for (int i= 0; i < selection.length; i++) {
-				if (selection[i] instanceof IType){
-					if (((IType)selection[i]).equals(suiteClass)){
+			for (Object element : selection) {
+				if (element instanceof IType){
+					if (((IType)element).equals(suiteClass)){
 						return new JUnitStatus(IStatus.WARNING, WizardMessages.UpdateTestSuite_infinite_recursion);
 					}
 				}
@@ -296,9 +296,9 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	public static String getUpdatableString(Object[] selectedClasses) {
 		StringBuffer suite= new StringBuffer();
 		suite.append(NewTestSuiteWizardPage.START_MARKER+"\n"); //$NON-NLS-1$
-		for (int i= 0; i < selectedClasses.length; i++) {
-			if (selectedClasses[i] instanceof IType) {
-				IType testType= (IType) selectedClasses[i];
+		for (Object selectedClasse : selectedClasses) {
+			if (selectedClasse instanceof IType) {
+				IType testType= (IType) selectedClasse;
 				IMethod suiteMethod= testType.getMethod("suite", new String[] {}); //$NON-NLS-1$
 				if (!suiteMethod.exists()) {
 					suite.append("suite.addTestSuite("+testType.getElementName()+".class);"); //$NON-NLS-1$ //$NON-NLS-2$

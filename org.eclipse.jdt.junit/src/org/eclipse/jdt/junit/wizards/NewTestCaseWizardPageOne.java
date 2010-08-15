@@ -746,9 +746,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		if (type.exists()) {
 			typeHierarchy= type.newSupertypeHierarchy(null);
 			superTypes= typeHierarchy.getAllSuperclasses(type);
-			for (int i= 0; i < superTypes.length; i++) {
-				if (superTypes[i].exists()) {
-					IMethod constrMethod= superTypes[i].getMethod(superTypes[i].getElementName(), new String[] {"Ljava.lang.String;"}); //$NON-NLS-1$
+			for (IType superType : superTypes) {
+				if (superType.exists()) {
+					IMethod constrMethod= superType.getMethod(superType.getElementName(), new String[] {"Ljava.lang.String;"}); //$NON-NLS-1$
 					if (constrMethod.exists() && constrMethod.isConstructor()) {
 						methodTemplate= constrMethod;
 						break;
@@ -790,9 +790,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		if (type.exists()) {
 			typeHierarchy= type.newSupertypeHierarchy(null);
 			superTypes= typeHierarchy.getAllSuperclasses(type);
-			for (int i= 0; i < superTypes.length; i++) {
-				if (superTypes[i].exists()) {
-					IMethod testMethod= superTypes[i].getMethod(methodName, new String[] {});
+			for (IType superType : superTypes) {
+				if (superType.exists()) {
+					IMethod testMethod= superType.getMethod(methodName, new String[] {});
 					if (testMethod.exists()) {
 						return testMethod;
 					}
@@ -883,8 +883,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		 * Sum -> testSum1
 		 */
 		List<String> names= new ArrayList<String>();
-		for (int i = 0; i < methods.length; i++) {
-			IMethod method= methods[i];
+		for (IMethod method : methods) {
 			String elementName= method.getElementName();
 			StringBuffer name= new StringBuffer(PREFIX).append(Character.toUpperCase(elementName.charAt(0))).append(elementName.substring(1));
 			StringBuffer buffer= new StringBuffer();
@@ -971,13 +970,13 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	}
 
 	private void appendParameterNamesToMethodName(StringBuffer buffer, String[] parameters) {
-		for (int i= 0; i < parameters.length; i++) {
-			final StringBuffer buf= new StringBuffer(Signature.getSimpleName(Signature.toString(Signature.getElementType(parameters[i]))));
+		for (String parameter : parameters) {
+			final StringBuffer buf= new StringBuffer(Signature.getSimpleName(Signature.toString(Signature.getElementType(parameter))));
 			final char character= buf.charAt(0);
 			if (buf.length() > 0 && !Character.isUpperCase(character))
 				buf.setCharAt(0, Character.toUpperCase(character));
 			buffer.append(buf.toString());
-			for (int j= 0, arrayCount= Signature.getArrayCount(parameters[i]); j < arrayCount; j++) {
+			for (int j= 0, arrayCount= Signature.getArrayCount(parameter); j < arrayCount; j++) {
 				buffer.append("Array"); //$NON-NLS-1$
 			}
 		}

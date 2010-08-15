@@ -122,8 +122,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		Set<IType> result= new HashSet<IType>();
 		try {
 			projects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
-			for (int i= 0; i < projects.length; i++) {
-				IJavaProject project= projects[i];
+			for (IJavaProject project : projects) {
 				IType type= project.findType(qualifiedName);
 				if (type != null)
 					result.add(type);
@@ -157,9 +156,9 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		if (dialog.open() == Window.CANCEL)
 			return null;
 		IJavaProject project= (IJavaProject) dialog.getFirstResult();
-		for (int i= 0; i < testTypes.length; i++) {
-			if (testTypes[i].getJavaProject().equals(project))
-				return testTypes[i];
+		for (IType testType : testTypes) {
+			if (testType.getJavaProject().equals(project))
+				return testType;
 		}
 		return null;
 	}

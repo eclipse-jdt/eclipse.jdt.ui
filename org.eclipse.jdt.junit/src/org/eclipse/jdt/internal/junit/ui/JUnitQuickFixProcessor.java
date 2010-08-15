@@ -102,8 +102,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 	 */
 	public IJavaCompletionProposal[] getCorrections(final IInvocationContext context, IProblemLocation[] locations)  {
 		ArrayList<IJavaCompletionProposal> res= null;
-		for (int i= 0; i < locations.length; i++) {
-			IProblemLocation problem= locations[i];
+		for (IProblemLocation problem : locations) {
 			int id= problem.getProblemId();
 			if (IProblem.UndefinedType == id) {
 				res= getAddJUnitToBuildPathProposals(context, problem, res);
@@ -156,10 +155,10 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 					return proposals;
 				}
 				ClasspathFixProposal[] fixProposals= ClasspathFixProcessor.getContributedFixImportProposals(javaProject, qualifiedName, null);
-				for (int i= 0; i < fixProposals.length; i++) {
+				for (ClasspathFixProposal fixProposal : fixProposals) {
 					if (proposals == null)
 						proposals= new ArrayList<IJavaCompletionProposal>();
-					proposals.add(new JUnitClasspathFixCorrectionProposal(javaProject, fixProposals[i], getImportRewrite(context.getASTRoot(), qualifiedName)));
+					proposals.add(new JUnitClasspathFixCorrectionProposal(javaProject, fixProposal, getImportRewrite(context.getASTRoot(), qualifiedName)));
 				}
 			}
 		} catch (JavaModelException e) {
@@ -190,8 +189,8 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			IMethodBinding binding= ((MethodDeclaration) node).resolveBinding();
 			if (binding != null) {
 				IAnnotationBinding[] annotations= binding.getAnnotations();
-				for (int i= 0; i < annotations.length; i++) {
-					final ITypeBinding annotationType= annotations[i].getAnnotationType();
+				for (IAnnotationBinding annotation : annotations) {
+					final ITypeBinding annotationType= annotation.getAnnotationType();
 					if (annotationType != null && JUnitCorePlugin.JUNIT4_ANNOTATION_NAME.equals(annotationType.getQualifiedName()))
 						return true;
 				}

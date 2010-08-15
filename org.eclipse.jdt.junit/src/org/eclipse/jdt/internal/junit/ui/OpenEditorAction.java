@@ -162,8 +162,8 @@ public abstract class OpenEditorAction extends Action {
 			String[] requiredProjectNames= project.getRequiredProjectNames();
 			IProgressMonitor reqMonitor= new SubProgressMonitor(monitor, 1);
 			reqMonitor.beginTask("", requiredProjectNames.length); //$NON-NLS-1$
-			for (int i= 0; i < requiredProjectNames.length; i++) {
-				IJavaProject requiredProject= javaModel.getJavaProject(requiredProjectNames[i]);
+			for (String requiredProjectName : requiredProjectNames) {
+				IJavaProject requiredProject= javaModel.getJavaProject(requiredProjectName);
 				if (requiredProject.exists()) {
 					type= internalFindType(requiredProject, className, visitedProjects, new SubProgressMonitor(reqMonitor, 1));
 					if (type != null)

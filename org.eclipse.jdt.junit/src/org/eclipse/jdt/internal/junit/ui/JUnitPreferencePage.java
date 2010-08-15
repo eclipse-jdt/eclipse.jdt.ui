@@ -616,8 +616,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 			// otherwise, commit the new value if not a duplicate
 		} else {
 			Object[] filters= fStackFilterContentProvider.getElements(null);
-			for (int i= 0; i < filters.length; i++) {
-				Filter filter= (Filter) filters[i];
+			for (Object filter2 : filters) {
+				Filter filter= (Filter) filter2;
 				if (filter.getName().equals(trimmedValue)) {
 					removeNewFilter();
 					cleanupEditor();
@@ -721,8 +721,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		if (packages == null)
 			return;
 
-		for (int i= 0; i < packages.length; i++) {
-			IJavaElement pkg= (IJavaElement) packages[i];
+		for (Object package1 : packages) {
+			IJavaElement pkg= (IJavaElement) package1;
 
 			String filter= pkg.getElementName();
 			if (filter.length() < 1)

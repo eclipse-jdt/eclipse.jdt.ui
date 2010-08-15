@@ -391,8 +391,8 @@ public class TestRunnerViewPart extends ViewPart {
 
 			List<TestRunSession> testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
 			testRunSessions.removeAll(remainingEntries);
-			for (Iterator<TestRunSession> iter= testRunSessions.iterator(); iter.hasNext();) {
-				JUnitCorePlugin.getModel().removeTestRunSession(iter.next());
+			for (TestRunSession testRunSession : testRunSessions) {
+				JUnitCorePlugin.getModel().removeTestRunSession(testRunSession);
 			}
 			for (Iterator<TestRunSession> iter= remainingEntries.iterator(); iter.hasNext();) {
 				TestRunSession remaining= iter.next();
@@ -807,8 +807,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 			boolean enabled= false;
 			List<TestRunSession> testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
-			for (Iterator<TestRunSession> iter= testRunSessions.iterator(); iter.hasNext();) {
-				TestRunSession testRunSession= iter.next();
+			for (TestRunSession testRunSession : testRunSessions) {
 				if (! testRunSession.isRunning() && ! testRunSession.isStarting()) {
 					enabled= true;
 					break;
@@ -1288,8 +1287,7 @@ public class TestRunnerViewPart extends ViewPart {
 			BufferedWriter bw= null;
 			try {
 				bw= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8")); //$NON-NLS-1$
-				for (int i= 0; i < failures.length; i++) {
-					TestElement testElement= failures[i];
+				for (TestElement testElement : failures) {
 					bw.write(testElement.getTestName());
 					bw.newLine();
 				}
