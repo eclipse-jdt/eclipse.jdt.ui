@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,40 +77,134 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 
 		fHelper.createPackageFragment("p2", "/TestSetupProject/src2"); //$NON-NLS-1$//$NON-NLS-2$
 
+		// class to NLS
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\r\n");
+		buf.append("class Test {\n");
+		buf.append("	String hello=\"helloworld\";\n");
+		buf.append("}");
 		ICompilationUnit cu= RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", //$NON-NLS-1$//$NON-NLS-2$
-				"package p;\r\nclass Test {String hello=\"helloworld\";}"); //$NON-NLS-1$
+				buf.toString());
 
 		NLSRefactoring nls= createDefaultNls(cu);
 		nls.setAccessorClassPackage(fHelper.getPackageFragment("/TestSetupProject/src2/p2")); //$NON-NLS-1$
 
 		performChange(nls);
 
-		checkContentOfCu("manipulated class", cu, "package p;\r\n\r\nimport p2.Messages;\r\n\r\nclass Test {String hello=Messages.getString(\"test0\");} //$NON-NLS-1$"); //$NON-NLS-1$ //$NON-NLS-2$
-		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), "test0=helloworld\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		buf= new StringBuffer();
+		buf.append("package p;\r\n\r\n");
+		buf.append("import p2.Messages;\r\n\r\n");
+		buf.append("class Test {\n");
+		buf.append("	String hello=Messages.getString(\"test0\"); //$NON-NLS-1$\n");
+		buf.append("}");
+		checkContentOfCu("manipulated class", cu, buf.toString()); //$NON-NLS-1$
+
+		buf= new StringBuffer();
+		buf.append("test0=helloworld\n");
+		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), buf.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 
 	public void testCreateChangeWithCollidingImport() throws Exception {
-		String testClass= "package p;\n" + "import p.another.Messages;\n" + "class Test {" + "String hello=\"helloworld\";\r\n" + "}";
-		ICompilationUnit cu= RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", testClass); //$NON-NLS-1$ //$NON-NLS-2$
+		//class to NLS
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import p.another.Messages;\n");
+		buf.append("class Test {");
+		buf.append("	String hello=\"helloworld\";\r\n");
+		buf.append("}");
+		ICompilationUnit cu= RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", buf.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 
 		NLSRefactoring nls= createDefaultNls(cu);
 
 		performChange(nls);
 
-		checkContentOfCu("manipulated class", cu, "package p;\n" + "import p.another.Messages;\n" + "class Test {" + "String hello=p.Messages.getString(\"test0\"); //$NON-NLS-1$\n" + "}");
-		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), "test0=helloworld\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		buf=new StringBuffer();
+		buf.append("package p;\n" );
+		buf.append("import p.another.Messages;\n");
+		buf.append("class Test {" );
+		buf.append("	String hello=p.Messages.getString(\"test0\"); //$NON-NLS-1$\n");
+		buf.append("}");
+		checkContentOfCu("manipulated class", cu, buf.toString());
+
+		buf= new StringBuffer();
+		buf.append("test0=helloworld\n");
+		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), buf.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 
 	// BUG 59156
 	public void testCreateChangeWithExistingAccessorclassInDifferentPackage() throws Exception {
-		String accessorKlazz= "package test;\n" + "public class Accessor {\n" + "		 private static final String BUNDLE_NAME = \"test.test\";//$NON-NLS-1$\n" + "		 public static String getString(String s) {\n" + "		 		 return \"\";\n" + "		 }\n" + "}\n";
-		RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Accessor.java", accessorKlazz);
+		//Accessor class
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("public class Accessor {\n");
+		buf.append("		 private static final String BUNDLE_NAME = \"test.test\";//$NON-NLS-1$\n");
+		buf.append("		 public static String getString(String s) {\n");
+		buf.append("		 		 return \"\";\n");
+		buf.append("		 }\n");
+		buf.append("}\n");
+		RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Accessor.java", buf.toString());
 
-		String nlsMe= "package test;\n" + "class Test {\n" + "  String hello=\"helloworld\";\n" + "}\n";
+		//class to NLS
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("class Test {\n");
+		buf.append("  String hello=\"hello\";\n");
+		buf.append("  String world=\"world\";\n");
+		buf.append("}\n");
 		fHelper.createPackageFragment("test", "/TestSetupProject/src1");
-		ICompilationUnit testClass= RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/test"), "AClass.java", nlsMe);
+		ICompilationUnit testClass= RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/test"), "AClass.java", buf.toString());
+
+		NLSRefactoring nls= NLSRefactoring.create(testClass);
+
+		nls.setAccessorClassPackage(fHelper.getPackageFragment("/TestSetupProject/src1/p"));
+		nls.setResourceBundlePackage(fHelper.getPackageFragment("/TestSetupProject/src2/p"));
+		nls.setResourceBundleName("test.properties");
+		nls.setAccessorClassName("Accessor");
+
+		Properties properties= new Properties();
+		NLSSubstitution[] substitutions= nls.getSubstitutions();
+		nls.setPrefix("test");
+		substitutions[0].setState(NLSSubstitution.EXTERNALIZED);
+		substitutions[0].generateKey(substitutions, properties);
+		substitutions[1].setState(NLSSubstitution.EXTERNALIZED);
+		substitutions[1].generateKey(substitutions, properties);
+
+		performChange(nls);
+
+		//class to NLS
+		buf= new StringBuffer();
+		buf.append("package test;\n\n");
+		buf.append("import p.Accessor;\n\n");
+		buf.append("class Test {\n");
+		buf.append("  String hello=Accessor.getString(\"test0\"); //$NON-NLS-1$\n");
+		buf.append("  String world=Accessor.getString(\"test1\"); //$NON-NLS-1$\n");
+		buf.append("}\n");
+		checkContentOfCu("manipulated class", testClass, buf.toString());
+	}
+
+	// BUG 202566
+	public void testCreateChangeWithExistingAccessorclassInDifferentPackage_1() throws Exception {
+		//Accessor class
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("public class Accessor {\n");
+		buf.append("		 private static final String BUNDLE_NAME = \"test.test\";//$NON-NLS-1$\n");
+		buf.append("		 public static String getString(String s) {\n");
+		buf.append("		 		 return \"\";\n");
+		buf.append("		 }\n");
+		buf.append("}\n");
+		RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Accessor.java", buf.toString());
+
+		//class to NLS
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("class Test {\n");
+		buf.append("  String hello=\"helloworld\";\n");
+		buf.append("}\n");
+		fHelper.createPackageFragment("test", "/TestSetupProject/src1");
+		ICompilationUnit testClass= RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/test"), "AClass.java", buf.toString());
 
 		NLSRefactoring nls= NLSRefactoring.create(testClass);
 
@@ -121,26 +215,46 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 
 		NLSSubstitution[] substitutions= nls.getSubstitutions();
 		nls.setPrefix("test");
-		substitutions[0].setState(NLSSubstitution.EXTERNALIZED);
-		substitutions[0].generateKey(substitutions, new Properties());
+		substitutions[0].setState(NLSSubstitution.IGNORED);
 
 		performChange(nls);
 
-		checkContentOfCu("manipulated class", testClass, "package test;\n\n" + "import p.Accessor;\n\n" + "class Test {\n" + "  String hello=Accessor.getString(\"test0\"); //$NON-NLS-1$\n" + "}\n");
+		//class to NLS
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("class Test {\n");
+		buf.append("  String hello=\"helloworld\"; //$NON-NLS-1$\n");
+		buf.append("}\n");
+		checkContentOfCu("manipulated class", testClass, buf.toString());
 	}
-
 	public void testCreateChangeWithNonDefaultSubstitution() throws Exception {
+		//class to NLS
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import p.another.Messages;\n");
+		buf.append("class Test {\n");
+		buf.append("	String hello=\"helloworld\";\n");
+		buf.append("}");
 		ICompilationUnit cu= RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", //$NON-NLS-1$ //$NON-NLS-2$
-				"package p;\nimport p.another.Messages;\nclass Test {String hello=\"helloworld\";}"); //$NON-NLS-1$
+				buf.toString());
 		NLSRefactoring nls= createDefaultNls(cu);
 
 		String string= "nonDefault(" + NLSRefactoring.KEY + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		nls.setSubstitutionPattern(string);
 
 		performChange(nls);
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import p.another.Messages;\n");
+		buf.append("class Test {\n");
+		buf.append("	String hello=p.Messages.nonDefault(\"test0\"); //$NON-NLS-1$\n");
+		buf.append("}");
 		checkContentOfCu("manipulated class", //$NON-NLS-1$
-				cu, "package p;\nimport p.another.Messages;\nclass Test {String hello=p.Messages.nonDefault(\"test0\");} //$NON-NLS-1$"); //$NON-NLS-1$
-		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), "test0=helloworld\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				cu, buf.toString());
+		
+		buf=new StringBuffer();
+		buf.append("test0=helloworld\n");
+		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), buf.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private void createDefaultAccessor(IPackageFragment pack1) throws JavaModelException {
