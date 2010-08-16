@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.junit.buildpath;
 
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -44,16 +45,18 @@ public class BuildPathSupport {
 		
 		private final String bundleId;
 		private final VersionRange versionRange;
-		private final String sourceBundleId;
 		private final String bundleRoot;
+		private final String binaryImportedRoot;
+		private final String sourceBundleId;
 		private final String repositorySource;
 		private final String javadocPreferenceKey;
 
-		public JUnitPluginDescription(String bundleId, VersionRange versionRange, String bundleRoot, String sourceBundleId, String repositorySource, String javadocPreferenceKey) {
+		public JUnitPluginDescription(String bundleId, VersionRange versionRange, String bundleRoot, String binaryImportedRoot, String sourceBundleId, String repositorySource, String javadocPreferenceKey) {
 			this.bundleId= bundleId;
 			this.versionRange= versionRange;
-			this.sourceBundleId= sourceBundleId;
 			this.bundleRoot= bundleRoot;
+			this.binaryImportedRoot= binaryImportedRoot;
+			this.sourceBundleId= sourceBundleId;
 			this.repositorySource= repositorySource;
 			this.javadocPreferenceKey= javadocPreferenceKey;
 		}
@@ -71,10 +74,7 @@ public class BuildPathSupport {
 			IPath bundleLocation= P2Utils.getBundleLocationPath(bundleInfo);
 			if (bundleLocation != null) {
 				
-				IPath bundleRootLocation= bundleLocation;
-				if (bundleRoot != null)
-					bundleRootLocation= bundleLocation.append(bundleRoot);
-				
+				IPath bundleRootLocation= getLibraryLocation(bundleInfo, bundleLocation);
 				IPath srcLocation= getSourceLocation(bundleInfo);
 				
 				IAccessRule[] accessRules= { };
@@ -92,30 +92,24 @@ public class BuildPathSupport {
 			return null;
 		}
 
-		private IPath getSourceLocation(BundleInfo bundleInfo) {
-			if (bundleInfo == null)
-				return null;
+		private IPath getLibraryLocation(BundleInfo bundleInfo, IPath bundleLocation) {
+			IPath bundleRootLocation= null;
+			if (bundleRoot != null)
+				bundleRootLocation= getLocationIfExists(bundleInfo, bundleRoot);
 			
+			if (bundleRootLocation == null && binaryImportedRoot != null)
+				bundleRootLocation= getLocationIfExists(bundleInfo, binaryImportedRoot);
+			
+			if (bundleRootLocation == null)
+				bundleRootLocation= bundleLocation;
+			return bundleRootLocation;
+		}
+
+		private IPath getSourceLocation(BundleInfo bundleInfo) {
 			IPath srcLocation= null;
 			if (repositorySource != null) {
 				// Try source in workspace (from repository)
-				try {
-					URL bundleUrl= FileLocator.toFileURL(URIUtil.toURL(bundleInfo.getLocation()));
-					File bundleFile= new File(bundleUrl.getFile());
-					if (bundleFile.isDirectory()) {
-						File srcFile= new File(bundleFile, repositorySource);
-						if (srcFile.exists()) {
-							srcLocation= new Path(srcFile.getPath());
-							if (srcFile.isDirectory()) {
-								srcLocation= srcLocation.addTrailingSeparator();
-							}
-						}
-					}
-				} catch (MalformedURLException e) {
-					//continue
-				} catch (IOException e) {
-					//continue
-				}
+				srcLocation= getLocationIfExists(bundleInfo, repositorySource);
 			}
 			
 			if (srcLocation == null) {
@@ -129,17 +123,54 @@ public class BuildPathSupport {
 			}
 			return srcLocation;
 		}
+
+		private IPath getLocationIfExists(BundleInfo bundleInfo, final String entryInBundle) {
+			IPath srcLocation= null;
+			try {
+				URL bundleUrl= FileLocator.toFileURL(URIUtil.toURL(bundleInfo.getLocation()));
+				File bundleFile= new File(bundleUrl.getFile());
+				if (bundleFile.isDirectory()) {
+					File srcFile= null;
+					final int starIdx= entryInBundle.indexOf('*');
+					if (starIdx != -1) {
+						File[] files= bundleFile.listFiles(new FilenameFilter() {
+							private String pre= entryInBundle.substring(0, starIdx);
+							private String post= entryInBundle.substring(starIdx + 1);
+							public boolean accept(File dir, String name) {
+								return name.startsWith(pre) && name.endsWith(post);
+							}
+						});
+						if (files.length > 0) {
+							srcFile= files[0];
+						}
+					}
+					if (srcFile == null)
+						srcFile= new File(bundleFile, entryInBundle);
+					if (srcFile.exists()) {
+						srcLocation= new Path(srcFile.getPath());
+						if (srcFile.isDirectory()) {
+							srcLocation= srcLocation.addTrailingSeparator();
+						}
+					}
+				}
+			} catch (MalformedURLException e) {
+				//continue
+			} catch (IOException e) {
+				//continue
+			}
+			return srcLocation;
+		}
 	}
 
 	
 	public static final JUnitPluginDescription JUNIT3_PLUGIN= new JUnitPluginDescription(
-			"org.junit", new VersionRange("[3.8.2,3.9)"), "junit.jar", "org.junit.source", "source-bundle/", JUnitPreferencesConstants.JUNIT3_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			"org.junit", new VersionRange("[3.8.2,3.9)"), "junit.jar", "junit.jar", "org.junit.source", "source-bundle/", JUnitPreferencesConstants.JUNIT3_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 	
 	private static final JUnitPluginDescription JUNIT4_PLUGIN= new JUnitPluginDescription(
-			"org.junit", new VersionRange("[4.7.0,5.0.0)"), "junit.jar", "org.junit.source", "source-bundle/", JUnitPreferencesConstants.JUNIT4_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			"org.junit", new VersionRange("[4.7.0,5.0.0)"), "junit.jar", "junit.jar", "org.junit.source", "source-bundle/", JUnitPreferencesConstants.JUNIT4_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 	
 	private static final JUnitPluginDescription HAMCREST_CORE_PLUGIN= new JUnitPluginDescription(
-			"org.hamcrest.core", new VersionRange("[1.1.0,2.0.0)"), null, "org.hamcrest.core.source", "source-bundle/", JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			"org.hamcrest.core", new VersionRange("[1.1.0,2.0.0)"), null, "org.hamcrest.core_1.*.jar", "org.hamcrest.core.source", "source-bundle/", JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
 	/**
 	 * @return the JUnit3 classpath container
