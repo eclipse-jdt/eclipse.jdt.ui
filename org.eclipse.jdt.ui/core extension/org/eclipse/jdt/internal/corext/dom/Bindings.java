@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1041,7 +1041,8 @@ public class Bindings {
 	}
 
 	/**
-	 * Returns the type binding of the node's type context or null if the node is an annotation, type parameter or super type declaration of a top level type.
+	 * Returns the type binding of the node's type context or null if the node is inside
+	 * an annotation, type parameter, super type declaration, or Javadoc of a top level type.
 	 * The result of this method is equal to the result of {@link #getBindingOfParentType(ASTNode)} for nodes in the type's body.
 	 * 
 	 * @param node an AST node
@@ -1053,7 +1054,8 @@ public class Bindings {
 		while (node != null) {
 			if (node instanceof AbstractTypeDeclaration) {
 				AbstractTypeDeclaration decl= (AbstractTypeDeclaration) node;
-				if (lastLocation == decl.getBodyDeclarationsProperty()) {
+				if (lastLocation == decl.getBodyDeclarationsProperty()
+						|| lastLocation == decl.getJavadocProperty()) {
 					return decl.resolveBinding();
 				} else if (decl instanceof EnumDeclaration && lastLocation == EnumDeclaration.ENUM_CONSTANTS_PROPERTY) {
 					return decl.resolveBinding();
