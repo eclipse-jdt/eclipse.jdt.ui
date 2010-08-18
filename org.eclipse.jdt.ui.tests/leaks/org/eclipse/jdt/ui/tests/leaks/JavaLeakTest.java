@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 
+import org.eclipse.jface.util.Util;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 
@@ -327,6 +328,9 @@ public class JavaLeakTest extends LeakTestCase {
 	}
 
 	public void testJavaEditorContextMenu() throws Exception {
+		if (Util.isCocoa()) // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=322253
+			return;
+
 		//regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=166761
 
 		ICompilationUnit cu= createTestCU("Test");
