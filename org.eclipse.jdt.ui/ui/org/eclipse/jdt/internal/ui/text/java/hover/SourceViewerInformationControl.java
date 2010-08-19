@@ -267,7 +267,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * 
 	 * @param display the display
 	 * @return an RGB or <code>null</code>
-	 * @since 3.6
+	 * @since 3.6.1
 	 */
 	public static RGB getVisibleBackgroundColor(Display display) {
 		float[] infoBgHSB= display.getSystemColor(SWT.COLOR_INFO_BACKGROUND).getRGB().getHSB();
