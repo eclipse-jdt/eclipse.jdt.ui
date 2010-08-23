@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
 
@@ -126,6 +127,7 @@ public class JUnitCorePlugin extends Plugin {
 	public void stop(BundleContext context) throws Exception {
 		fIsStopped= true;
 		try {
+			new InstanceScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID).flush();
 			fJUnitModel.stop();
 		} finally {
 			super.stop(context);
