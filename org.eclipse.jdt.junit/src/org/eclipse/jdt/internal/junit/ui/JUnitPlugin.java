@@ -309,8 +309,13 @@ public class JUnitPlugin extends AbstractUIPlugin {
 			IWorkbenchPage page= JUnitPlugin.getActivePage();
 			if (page == null)
 				return null;
-			//	show the result view if it isn't shown yet.
-			return (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME, null, IWorkbenchPage.VIEW_VISIBLE);
+			TestRunnerViewPart view= (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
+			if (view == null) {
+				// create and show the result view if it isn't created yet.
+				return (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME, null, IWorkbenchPage.VIEW_VISIBLE);
+			} else {
+				return view;
+			}
 		} catch (PartInitException pie) {
 			JUnitPlugin.log(pie);
 			return null;
