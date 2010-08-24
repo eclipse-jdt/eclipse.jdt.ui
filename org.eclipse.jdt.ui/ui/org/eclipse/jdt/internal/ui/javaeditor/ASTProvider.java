@@ -592,8 +592,15 @@ public final class ASTProvider {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(org.eclipse.jdt.core.dom.CompilationUnit)
+	/**
+	 * Update internal structures after reconcile.
+	 * 
+	 * @param ast the compilation unit AST or <code>null</code> if the working copy was consistent
+	 *            or reconciliation has been cancelled
+	 * @param javaElement the Java element for which the AST was built
+	 * @param progressMonitor the progress monitor
+	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(CompilationUnit,
+	 *      boolean, IProgressMonitor)
 	 */
 	void reconciled(CompilationUnit ast, ITypeRoot javaElement, IProgressMonitor progressMonitor) {
 		if (DEBUG)
@@ -612,7 +619,7 @@ public final class ASTProvider {
 
 				return;
 			}
-			fIsReconciling= progressMonitor != null && progressMonitor.isCanceled();
+			fIsReconciling= false;
 			cache(ast, javaElement);
 		}
 	}
