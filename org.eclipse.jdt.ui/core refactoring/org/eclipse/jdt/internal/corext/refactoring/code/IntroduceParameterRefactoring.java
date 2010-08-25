@@ -11,7 +11,6 @@
  *       o introduce parameter throws NPE if there are compiler errors
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=48325)
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.Arrays;
@@ -91,6 +90,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 
 public class IntroduceParameterRefactoring extends Refactoring implements IDelegateUpdating {
 
@@ -566,7 +566,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 			if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
 				return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getName(), IJavaRefactorings.INTRODUCE_PARAMETER);
 			else
-				fSourceCU= ((IMethod) element).getCompilationUnit();
+				fSourceCU= (ICompilationUnit)element;
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
 		final String name= arguments.getAttribute(ATTRIBUTE_ARGUMENT);
