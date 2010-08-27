@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-
-import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -99,19 +97,6 @@ public class MockPluginView extends PackageExplorerPart {
 
 	public TreeViewer getTreeViewer(){
 		return fViewer;
-	}
-
-
-	protected IJavaElement findElementToSelect(IJavaElement je) {
-		return null;
-	}
-
-	protected String getHelpContextId() {
-		return null;
-	}
-
-	protected boolean isValidInput(Object element) {
-		return false;
 	}
 
 	private class TestProblemTreeViewer extends ProblemTreeViewer{
