@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.util;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.accessibility.ACC;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.dnd.DragSource;
@@ -120,7 +121,9 @@ public class SWTUtil {
 	public static void setAccessibilityText(Control control, final String text) {
 		control.getAccessible().addAccessibleListener(new AccessibleAdapter() {
 			public void getName(AccessibleEvent e) {
-				e.result= text;
+				if (e.childID == ACC.CHILDID_SELF) {
+					e.result= text;
+				}
 			}
 		});
 	}
