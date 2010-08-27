@@ -38,7 +38,6 @@ public class TestCreateParticipantSingle extends CreateParticipant {
 	public boolean initialize(Object element) {
 		fgInstances.add(this);
 		fElement= element;
-		ref(fElement);
 		if (fElement instanceof IJavaElement) {
 			fHandle= ((IJavaElement)fElement).getHandleIdentifier();
 		} else {
@@ -84,8 +83,5 @@ public class TestCreateParticipantSingle extends CreateParticipant {
 
 	private static TestCreateParticipantSingle getInstance(int i) {
 		return ((TestCreateParticipantSingle)fgInstances.get(i));
-	}
-
-	/* package */ void ref(Object element) {
 	}
 }

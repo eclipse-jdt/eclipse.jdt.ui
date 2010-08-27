@@ -38,7 +38,6 @@ public class TestDeleteParticipantSingle extends DeleteParticipant {
 	public boolean initialize(Object element) {
 		fgInstances.add(this);
 		fElement= element;
-		ref(fElement);
 		if (fElement instanceof IJavaElement) {
 			fHandle= ((IJavaElement)fElement).getHandleIdentifier();
 		} else {
@@ -84,8 +83,5 @@ public class TestDeleteParticipantSingle extends DeleteParticipant {
 
 	private static TestDeleteParticipantSingle getInstance(int i) {
 		return ((TestDeleteParticipantSingle)fgInstances.get(i));
-	}
-
-	/* package */ void ref(Object element) {
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -167,9 +167,6 @@ public class PushDownTests extends RefactoringTest {
 
 	private void failActivationHelper(String[] selectedMethodNames, String[][] selectedMethodSignatures,
 										String[] selectedFieldNames,
-										String[] namesOfMethodsToPullUp, String[][] signaturesOfMethodsToPullUp,
-										String[] namesOfFieldsToPullUp, String[] namesOfMethodsToDeclareAbstract,
-										String[][] signaturesOfMethodsToDeclareAbstract,
 										int expectedSeverity) throws Exception{
 
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
@@ -867,17 +864,9 @@ public class PushDownTests extends RefactoringTest {
 		String[] selectedMethodNames= {"f"};
 		String[][] selectedMethodSignatures= {new String[0]};
 		String[] selectedFieldNames= {};
-		String[] namesOfMethodsToPushDown= selectedMethodNames;
-		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
-		String[] namesOfFieldsToPushDown= {};
-		String[] namesOfMethodsToDeclareAbstract= {};
-		String[][] signaturesOfMethodsToDeclareAbstract= {};
 
 		failActivationHelper(selectedMethodNames, selectedMethodSignatures,
 			   selectedFieldNames,
-			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown,
-			   namesOfFieldsToPushDown,
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
 			   RefactoringStatus.FATAL);
 	}
 
@@ -885,17 +874,9 @@ public class PushDownTests extends RefactoringTest {
 		String[] selectedMethodNames= {"f"};
 		String[][] selectedMethodSignatures= {new String[0]};
 		String[] selectedFieldNames= {};
-		String[] namesOfMethodsToPushDown= selectedMethodNames;
-		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
-		String[] namesOfFieldsToPushDown= {};
-		String[] namesOfMethodsToDeclareAbstract= {};
-		String[][] signaturesOfMethodsToDeclareAbstract= {};
 
 		failActivationHelper(selectedMethodNames, selectedMethodSignatures,
 			   selectedFieldNames,
-			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown,
-			   namesOfFieldsToPushDown,
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
 			   RefactoringStatus.FATAL);
 	}
 

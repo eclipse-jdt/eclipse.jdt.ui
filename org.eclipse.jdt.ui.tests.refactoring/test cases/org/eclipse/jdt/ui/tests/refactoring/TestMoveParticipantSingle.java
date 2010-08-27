@@ -39,7 +39,6 @@ public class TestMoveParticipantSingle extends MoveParticipant {
 	public boolean initialize(Object element) {
 		fgInstances.add(this);
 		fElement= element;
-		ref(fElement);
 		if (fElement instanceof IJavaElement) {
 			fHandle= ((IJavaElement)fElement).getHandleIdentifier();
 		} else {
@@ -88,8 +87,5 @@ public class TestMoveParticipantSingle extends MoveParticipant {
 
 	private static TestMoveParticipantSingle getInstance(int i) {
 		return ((TestMoveParticipantSingle)fgInstances.get(i));
-	}
-
-	/* package */ void ref(Object element) {
 	}
 }
