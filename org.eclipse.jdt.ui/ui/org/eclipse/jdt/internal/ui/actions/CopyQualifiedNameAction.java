@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -63,6 +64,8 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
@@ -77,6 +80,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
 public class CopyQualifiedNameAction extends SelectionDispatchAction {
@@ -248,16 +252,19 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 				return getQualifiedName(resource);
 		}
 
+		if (element instanceof IBinding)
+			return BindingLabelProvider.getBindingLabel((IBinding)element, LABEL_FLAGS);
+
 		return TextProcessor.deprocess(JavaElementLabels.getTextLabel(element, LABEL_FLAGS));
 	}
 
 	private Object[] getSelectedElements() {
 		if (fEditor != null) {
-			IJavaElement element= getSelectedElement(fEditor);
+			Object element= getSelectedElement(fEditor);
 			if (element == null)
 				return null;
 
-			return new IJavaElement[] { element };
+			return new Object[] { element };
 		}
 
 		ISelection selection= getSelection();
@@ -276,7 +283,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		return result.toArray(new Object[result.size()]);
 	}
 
-	private IJavaElement getSelectedElement(JavaEditor editor) {
+	private Object getSelectedElement(JavaEditor editor) {
 		ISourceViewer viewer= editor.getViewer();
 		if (viewer == null)
 			return null;
@@ -298,6 +305,9 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 
 		IBinding binding= null;
 		if (node instanceof Name) {
+			binding= getConstructorBindingIfAvailable((Name)node);
+			if (binding != null)
+				return binding;
 			binding= ((Name)node).resolveBinding();
 		} else if (node instanceof MethodInvocation) {
 			binding= ((MethodInvocation)node).resolveMethodBinding();
@@ -330,6 +340,25 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		if (binding != null)
 			return binding.getJavaElement();
 
+		return null;
+	}
+
+	/**
+	 * Checks whether the given name belongs to a {@link ClassInstanceCreation} and if so, returns
+	 * its constructor binding.
+	 * 
+	 * @param nameNode the name node
+	 * @return the constructor binding or <code>null</code> if not found
+	 * @since 3.7
+	 */
+	private IBinding getConstructorBindingIfAvailable(Name nameNode) {
+		StructuralPropertyDescriptor loc= nameNode.getLocationInParent();
+		if (loc == SimpleType.NAME_PROPERTY) {
+			ASTNode parent= nameNode.getParent();
+			loc= parent.getLocationInParent();
+			if (loc == ClassInstanceCreation.TYPE_PROPERTY)
+				return ((ClassInstanceCreation)parent.getParent()).resolveConstructorBinding();
+		}
 		return null;
 	}
 
