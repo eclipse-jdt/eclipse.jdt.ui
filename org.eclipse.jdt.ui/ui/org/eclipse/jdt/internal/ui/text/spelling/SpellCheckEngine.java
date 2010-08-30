@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.spelling;
 
 import java.io.File;
@@ -23,8 +22,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.variables.IStringVariableManager;
 import org.eclipse.core.variables.VariablesPlugin;
@@ -49,6 +48,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.LocaleSensitiveSpellDictionary;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.PersistentSpellDictionary;
+
 
 /**
  * Spell check engine for Java source spell checking.
@@ -338,8 +338,15 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		if (locale.equals(defaultLocale.toString()))
 			return defaultLocale;
 
-		if (locale.length() >= 5)
+		int length= locale.length();
+		if (length >= 5)
 			return new Locale(locale.substring(0, 2), locale.substring(3, 5));
+
+		if (length == 2 && locale.indexOf('_') == -1)
+			return new Locale(locale);
+
+		if (length == 3 && locale.charAt(0) == '_')
+			return new Locale("", locale.substring(1)); //$NON-NLS-1$
 
 		return new Locale(""); //$NON-NLS-1$
 	}
