@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.TreeEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
@@ -26,6 +27,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IWorkbenchPartSite;
 
+import org.eclipse.jdt.internal.corext.callhierarchy.CallerMethodWrapper;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
@@ -33,8 +35,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 class CallHierarchyViewer extends TreeViewer {
 
-	private CallHierarchyViewPart fPart;
-	private CallHierarchyContentProvider fContentProvider;
+	private final CallHierarchyViewPart fPart;
+	private final CallHierarchyContentProvider fContentProvider;
+
+	private CallerMethodWrapper fConstructorToExpand;
 
 
     /**
@@ -63,6 +67,7 @@ class CallHierarchyViewer extends TreeViewer {
         setFocus();
         if (wrappers != null && wrappers.length > 0)
         	setSelection(new StructuredSelection(wrappers[0]), true);
+		expandConstructorNode();
     }
 
     CallHierarchyViewPart getPart() {
@@ -122,4 +127,53 @@ class CallHierarchyViewer extends TreeViewer {
         fContentProvider.cancelJobs(fPart.getCurrentMethodWrappers());
     }
 
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @since 3.7
+	 */
+	protected Object[] getSortedChildren(Object parentElementOrTreePath) {
+		Object[] sortedChildren= super.getSortedChildren(parentElementOrTreePath);
+		if (parentElementOrTreePath instanceof CallerMethodWrapper) {
+			CallerMethodWrapper parentWrapper= (CallerMethodWrapper)parentElementOrTreePath;
+			if (parentWrapper.getExpandWithConstructors() && sortedChildren.length == 2 && sortedChildren[0] instanceof CallerMethodWrapper) {
+				setConstructorToExpand((CallerMethodWrapper)sortedChildren[0]);
+			}
+		}
+		return sortedChildren;
+	}
+
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @since 3.7
+	 */
+	protected void handleTreeExpand(TreeEvent event) {
+		super.handleTreeExpand(event);
+		expandConstructorNode();
+	}
+
+	/**
+	 * Sets the constructor node.
+	 * 
+	 * @param wrapper the constructor caller method wrapper
+	 * @since 3.7
+	 */
+	private void setConstructorToExpand(CallerMethodWrapper wrapper) {
+		fConstructorToExpand= wrapper;
+		
+	}
+
+	/**
+	 * Expands the constructor node when in expand with constructors mode.
+	 * 
+	 * @since 3.7
+	 */
+	void expandConstructorNode() {
+		if (fConstructorToExpand != null) {
+			setExpandedState(fConstructorToExpand, true);
+			fConstructorToExpand= null;
+		}
+	}
 }
