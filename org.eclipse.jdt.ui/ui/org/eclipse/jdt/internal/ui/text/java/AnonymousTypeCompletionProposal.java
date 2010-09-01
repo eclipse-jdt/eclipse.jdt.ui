@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -385,7 +385,20 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, DefaultCodeFormatterConstants.TRUE);
 		String replacementString= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, buf.toString(), 0, lineDelim, options);
 
-		if (document.getChar(offset) != ')')
+		int lineEndOffset= lineInfo.getOffset() + lineInfo.getLength();
+
+		int p= offset;
+		int pos= offset;
+		char ch= document.getChar(p);
+		while (p < lineEndOffset) {
+			if (Character.isWhitespace(ch))
+				pos++;
+			if (ch == '(' || ch == ';')
+				break;
+			ch= document.getChar(++p);
+		}
+
+		if (ch != ';')
 			replacementString= replacementString + ';';
 
 		replacementString= Strings.changeIndent(replacementString, 0, project, CodeFormatterUtil.createIndentString(indent, project), lineDelim);
@@ -395,16 +408,10 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			beginIndex++;
 		replacementString= replacementString.substring(beginIndex);
 
-		int lineEndOffset= lineInfo.getOffset() + lineInfo.getLength();
-		int pos= offset;
-		while (pos < lineEndOffset && Character.isWhitespace(document.getChar(pos))) {
-			pos++;
-		}
-
 		if (isAnonymousConstructorInvoc && (insertCompletion() ^ isInsertModeToggled())) {
 			// Keep existing code
 			int endPos= pos;
-			while (endPos < lineEndOffset && document.getChar(endPos) != '(' && document.getChar(endPos) != ')') {
+			while (endPos < lineEndOffset && document.getChar(endPos) != '(' && document.getChar(endPos) != ')' && document.getChar(endPos) != ';') {
 				endPos++;
 			}
 			int keepLength= endPos - pos;
