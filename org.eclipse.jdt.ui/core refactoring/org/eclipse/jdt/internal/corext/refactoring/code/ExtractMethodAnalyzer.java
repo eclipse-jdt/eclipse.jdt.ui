@@ -753,7 +753,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 	public boolean visit(Assignment node) {
 		boolean result= super.visit(node);
-		if (getSelection().getVisitSelectionMode(node.getLeftHandSide()) == Selection.SELECTED) {
+		if (getSelection().covers(node.getLeftHandSide()) || getSelection().coveredBy(node.getLeftHandSide())) {
 			invalidSelection(
 				RefactoringCoreMessages.ExtractMethodAnalyzer_leftHandSideOfAssignment,
 				JavaStatusContext.create(fCUnit, node));
