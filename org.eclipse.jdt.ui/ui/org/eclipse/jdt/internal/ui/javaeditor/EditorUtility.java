@@ -80,16 +80,12 @@ import org.eclipse.compare.rangedifferencer.IRangeComparator;
 import org.eclipse.compare.rangedifferencer.RangeDifference;
 import org.eclipse.compare.rangedifferencer.RangeDifferencer;
 
-import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.ILocalVariable;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -259,16 +255,9 @@ public class EditorUtility {
 				return;
 			else if (element instanceof IClassFile)
 				return;
-			else if (element instanceof ILocalVariable)
-				range= ((ILocalVariable)element).getNameRange();
-			else if (element instanceof IMember)
-				range= ((IMember)element).getNameRange();
-			else if (element instanceof ITypeParameter)
-				range= ((ITypeParameter)element).getNameRange();
-			else if (element instanceof IAnnotation)
-				range= ((IAnnotation)element).getNameRange();
-			else if (element instanceof ISourceReference)
-				range= ((ISourceReference)element).getSourceRange();
+
+			if (element instanceof ISourceReference)
+				range= ((ISourceReference)element).getNameRange();
 
 			if (range != null)
 				revealInEditor(part, range.getOffset(), range.getLength());

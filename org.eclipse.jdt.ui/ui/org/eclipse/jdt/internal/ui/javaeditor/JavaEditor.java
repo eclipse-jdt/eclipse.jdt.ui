@@ -167,8 +167,6 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.ITypeParameter;
@@ -218,10 +216,10 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectio
 import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder;
+import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.ui.search.ImplementOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
 import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
-import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
@@ -2296,42 +2294,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				offset= -1;
 				length= -1;
 
-				if (reference instanceof IMember) {
-					range= ((IMember) reference).getNameRange();
-					if (range != null) {
-						offset= range.getOffset();
-						length= range.getLength();
-					}
-				} else if (reference instanceof ITypeParameter) {
-					range= ((ITypeParameter) reference).getNameRange();
-					if (range != null) {
-						offset= range.getOffset();
-						length= range.getLength();
-					}
-				} else if (reference instanceof ILocalVariable) {
-					range= ((ILocalVariable)reference).getNameRange();
-					if (range != null) {
-						offset= range.getOffset();
-						length= range.getLength();
-					}
-				} else if (reference instanceof IAnnotation) {
-					range= ((IAnnotation)reference).getNameRange();
-					if (range != null) {
-						offset= range.getOffset();
-						length= range.getLength();
-					}
-				} else if (reference instanceof IImportDeclaration) {
-					range= ((IImportDeclaration)reference).getNameRange();
-					if (range != null) {
-						offset= range.getOffset();
-						length= range.getLength();
-					}
-				} else if (reference instanceof IPackageDeclaration) {
-					range= ((IPackageDeclaration)reference).getNameRange();
-					if (range != null) {
-						offset= range.getOffset();
-						length= range.getLength();
-					}
+				range= reference.getNameRange();
+				if (range != null) {
+					offset= range.getOffset();
+					length= range.getLength();
 				}
 
 				if (offset > -1 && length > 0) {
