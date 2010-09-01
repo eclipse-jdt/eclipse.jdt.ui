@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.swt.SWT;
@@ -21,11 +20,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 
 /**
  * Configures Java Editor typing preferences.
@@ -92,6 +94,8 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		layout.marginHeight= 0;
 		control.setLayout(layout);
 
+		addSmartInsertModeMessage(control);
+
 		Composite composite;
 
 		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_autoclose_title);
@@ -113,6 +117,24 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		final Point size= control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		scrolled.setMinSize(size.x, size.y);
 		return scrolled;
+	}
+
+	/**
+	 * Adds the Smart Insert Mode note to the preference page.
+	 * 
+	 * @param parent the parent composite
+	 * @since 3.7
+	 */
+	private void addSmartInsertModeMessage(Composite parent) {
+		Label label= new Label(parent, SWT.LEAD | SWT.WRAP);
+		label.setText(PreferencesMessages.JavaEditorPreferencePage_smartInsertMode_message);
+
+		PixelConverter pixelConverter= new PixelConverter(parent);
+		Label fillerLabel= new Label(parent, SWT.LEFT);
+		GridData gridData= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gridData.horizontalSpan= 2;
+		gridData.heightHint= pixelConverter.convertHeightInCharsToPixels(1) / 2;
+		fillerLabel.setLayoutData(gridData);
 	}
 
 	private void addStringsSection(Composite composite) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,11 +42,14 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Region;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchCommandConstants;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartSite;
 
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.ITextEditorExtension3;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -280,9 +283,30 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		return null;
 	}
 
+	/**
+	 * Returns whether the Smart Insert Mode is selected.
+	 * 
+	 * @return <code>true</code> if the Smart Insert Mode is selected
+	 * @since 3.7
+	 */
+	private boolean isSmartInsertMode() {
+		IWorkbenchPage page= JavaPlugin.getActivePage();
+		if (page != null) {
+			IEditorPart part= page.getActiveEditor();
+			if (part instanceof ITextEditorExtension3) {
+				ITextEditorExtension3 extension= (ITextEditorExtension3)part;
+				return extension.getInsertMode() == ITextEditorExtension3.SMART_INSERT;
+			} else if (part != null && EditorUtility.isCompareEditorInput(part.getEditorInput())) {
+				ITextEditorExtension3 extension= (ITextEditorExtension3)part.getAdapter(ITextEditorExtension3.class);
+				if (extension != null)
+					return extension.getInsertMode() == ITextEditorExtension3.SMART_INSERT;
+			}
+		}
+		return false;
+	}
 
 	protected final void internalDoOperation() {
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE)) {
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE) && isSmartInsertMode()) {
 			if (fOperationCode == ITextOperationTarget.PASTE) {
 				doPasteWithImportsOperation();
 			} else {
