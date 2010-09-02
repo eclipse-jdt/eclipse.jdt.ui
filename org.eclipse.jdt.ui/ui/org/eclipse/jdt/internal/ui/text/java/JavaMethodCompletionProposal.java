@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
@@ -261,6 +262,12 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 			return true;
 
 		String word= TextProcessor.deprocess(getDisplayString());
+		if (fProposal.getKind() == CompletionProposal.CONSTRUCTOR_INVOCATION) {
+			int start= word.indexOf(JavaElementLabels.CONCAT_STRING) + JavaElementLabels.CONCAT_STRING.length();
+			word= word.substring(start);
+			return isPrefix(prefix, word) || isPrefix(prefix, new String(fProposal.getName()));
+		}
+
 		if (isInJavadoc()) {
 			int idx = word.indexOf("{@link "); //$NON-NLS-1$
 			if (idx==0) {
