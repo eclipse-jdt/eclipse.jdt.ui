@@ -388,11 +388,8 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		int lineEndOffset= lineInfo.getOffset() + lineInfo.getLength();
 
 		int p= offset;
-		int pos= offset;
 		char ch= document.getChar(p);
 		while (p < lineEndOffset) {
-			if (Character.isWhitespace(ch))
-				pos++;
 			if (ch == '(' || ch == ';')
 				break;
 			ch= document.getChar(++p);
@@ -408,12 +405,14 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			beginIndex++;
 		replacementString= replacementString.substring(beginIndex);
 
+		int pos= offset;
 		if (isAnonymousConstructorInvoc && (insertCompletion() ^ isInsertModeToggled())) {
 			// Keep existing code
 			int endPos= pos;
-			while (endPos < lineEndOffset && document.getChar(endPos) != '(' && document.getChar(endPos) != ')' && document.getChar(endPos) != ';') {
-				endPos++;
-			}
+			ch= document.getChar(endPos);
+			while (endPos < lineEndOffset && ch != '(' && ch != ')' && ch != ';' && !Character.isWhitespace(ch))
+				ch= document.getChar(++endPos);
+
 			int keepLength= endPos - pos;
 			if (keepLength > 0) {
 				String keepStr= document.get(pos, keepLength);
