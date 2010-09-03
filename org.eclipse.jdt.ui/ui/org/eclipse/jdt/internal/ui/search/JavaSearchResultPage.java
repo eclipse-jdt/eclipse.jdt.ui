@@ -542,6 +542,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 				firstElement instanceof IClassFile ||
 				firstElement instanceof IMember) {
 			if (getDisplayedMatchCount(firstElement) == 0) {
+				Viewer viewer= event.getViewer();
+				if (viewer instanceof TreeViewer) {
+					TreeViewer tv = (TreeViewer) getViewer();
+					tv.setExpandedState(firstElement, !tv.getExpandedState(firstElement));
+				}
 				try {
 					fEditorOpener.openElement(firstElement);
 				} catch (CoreException e) {
