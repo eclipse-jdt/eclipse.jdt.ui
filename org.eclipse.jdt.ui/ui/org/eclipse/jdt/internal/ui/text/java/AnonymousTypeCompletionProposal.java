@@ -390,12 +390,12 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		int p= offset;
 		char ch= document.getChar(p);
 		while (p < lineEndOffset) {
-			if (ch == '(' || ch == ';')
+			if (ch == '(' || ch == ';' || ch == ',')
 				break;
 			ch= document.getChar(++p);
 		}
 
-		if (ch != ';')
+		if (ch != ';' && ch != ',')
 			replacementString= replacementString + ';';
 
 		replacementString= Strings.changeIndent(replacementString, 0, project, CodeFormatterUtil.createIndentString(indent, project), lineDelim);
@@ -410,7 +410,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			// Keep existing code
 			int endPos= pos;
 			ch= document.getChar(endPos);
-			while (endPos < lineEndOffset && ch != '(' && ch != ')' && ch != ';' && !Character.isWhitespace(ch))
+			while (endPos < lineEndOffset && ch != '(' && ch != ')' && ch != ';' && ch != ',' && !Character.isWhitespace(ch))
 				ch= document.getChar(++endPos);
 
 			int keepLength= endPos - pos;

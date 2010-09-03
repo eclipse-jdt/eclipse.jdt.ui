@@ -514,6 +514,53 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		assertEquals("", buf.toString(), doc.get());
 	}
 
+	public void testAnonymousTypeCompletionBug324391() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Try {\n");
+		buf.append("    Object m() {\n");
+		buf.append("        take(new Run, (String) o);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("Try.java", contents, false, null);
+
+		String str= "new Run";
+		int offset= contents.indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+
+		cu.codeComplete(offset, collector, new NullProgressMonitor());
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Try {\n");
+		buf.append("    Object m() {\n");
+		buf.append("        take(new Runnable() {\n");
+		buf.append("            \n");
+		buf.append("            public void run() {\n");
+		buf.append("                //TODO\n");
+		buf.append("                \n");
+		buf.append("            }\n");
+		buf.append("        }, (String) o);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals("", buf.toString(), doc.get());
+	}
 
 	public void testConstructorCompletion() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
