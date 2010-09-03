@@ -91,6 +91,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	private boolean fCloseBrace;
 	private boolean fIsSmartMode;
 	private boolean fIsSmartTab;
+	private boolean fIsSmartIndentAfterNewline;
 
 	private String fPartitioning;
 	private final IJavaProject fProject;
@@ -1217,8 +1218,12 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		if (!fIsSmartTab && isRepresentingTab(c.text))
 			return;
 
-		if (c.length == 0 && c.text != null && isLineDelimiter(d, c.text))
-			smartIndentAfterNewLine(d, c);
+		if (c.length == 0 && c.text != null && isLineDelimiter(d, c.text)) {
+			if (fIsSmartIndentAfterNewline)
+				smartIndentAfterNewLine(d, c);
+			else
+				super.customizeDocumentCommand(d, c);
+		}
 		else if (c.text.length() == 1)
 			smartIndentOnKeypress(d, c);
 		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
@@ -1262,6 +1267,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
         IPreferenceStore preferenceStore= getPreferenceStore();
 		fCloseBrace= preferenceStore.getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACES);
 		fIsSmartTab= preferenceStore.getBoolean(PreferenceConstants.EDITOR_SMART_TAB);
+		fIsSmartIndentAfterNewline= preferenceStore.getBoolean(PreferenceConstants.EDITOR_SMART_INDENT_AFTER_NEWLINE);
 		fIsSmartMode= computeSmartMode();
 	}
 

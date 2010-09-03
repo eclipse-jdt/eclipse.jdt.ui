@@ -74,6 +74,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_SEMICOLON),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_TAB),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_OPENING_BRACE),
+				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_INDENT_AFTER_NEWLINE),
 		};
 	}
 
@@ -104,8 +105,8 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_automove_title);
 		addAutopositionSection(composite);
 
-		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_tabs_title);
-		addTabSection(composite);
+		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_indentation_title);
+		addIndentationSection(composite);
 
 		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_pasting_title);
 		addPasteSection(composite);
@@ -161,15 +162,20 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_IMPORTS_ON_PASTE, 0);
 	}
 
-	private void addTabSection(Composite composite) {
+	/**
+	 * Adds Indentation section to the preference page.
+	 * 
+	 * @param parent the parent composite
+	 * @since 3.7
+	 */
+	private void addIndentationSection(Composite parent) {
 		GridLayout layout= new GridLayout();
-		composite.setLayout(layout);
+		parent.setLayout(layout);
 
-		String label;
-		label= PreferencesMessages.JavaEditorPreferencePage_typing_smartTab;
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_TAB, 0);
+		addCheckBox(parent, PreferencesMessages.JavaEditorPreferencePage_smartAutoIndentAfterNewLine, PreferenceConstants.EDITOR_SMART_INDENT_AFTER_NEWLINE, 0);
+		addCheckBox(parent, PreferencesMessages.JavaEditorPreferencePage_typing_smartTab, PreferenceConstants.EDITOR_SMART_TAB, 0);
 
-		createMessage(composite);
+		createMessage(parent);
 	}
 
 	private void addAutopositionSection(Composite composite) {

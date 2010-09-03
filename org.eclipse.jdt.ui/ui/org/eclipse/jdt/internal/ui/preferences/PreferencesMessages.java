@@ -198,6 +198,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_typing_smartTab;
 	public static String JavaEditorPreferencePage_hoverTab_title;
 	public static String JavaEditorPreferencePage_smartInsertMode_message;
+	public static String JavaEditorPreferencePage_smartAutoIndentAfterNewLine;
 	public static String JavaEditorColoringConfigurationBlock_link;
 	public static String JavaBasePreferencePage_openTypeHierarchy;
 	public static String JavaBasePreferencePage_inView;
@@ -696,7 +697,6 @@ public final class PreferencesMessages extends NLS {
 	public static String PropertiesFileEditorPreferencePage_link_tooltip;
 	public static String SmartTypingConfigurationBlock_autoclose_title;
 	public static String SmartTypingConfigurationBlock_automove_title;
-	public static String SmartTypingConfigurationBlock_tabs_title;
 	public static String SmartTypingConfigurationBlock_tabs_message_tab_text;
 	public static String SmartTypingConfigurationBlock_tabs_message_others_text;
 	public static String SmartTypingConfigurationBlock_tabs_message_tooltip;
@@ -705,6 +705,7 @@ public final class PreferencesMessages extends NLS {
 	public static String SmartTypingConfigurationBlock_tabs_message_tabsAndSpaces;
 	public static String SmartTypingConfigurationBlock_pasting_title;
 	public static String SmartTypingConfigurationBlock_strings_title;
+	public static String SmartTypingConfigurationBlock_indentation_title;
 	public static String CodeAssistConfigurationBlock_typeFilters_link;
 	public static String CodeAssistConfigurationBlock_sortingSection_title;
 	public static String CodeAssistConfigurationBlock_autoactivationSection_title;
