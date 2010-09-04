@@ -118,6 +118,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String VERSION_1_5= JavaCore.VERSION_1_5;
 	private static final String VERSION_1_6= JavaCore.VERSION_1_6;
 	private static final String VERSION_1_7= JavaCore.VERSION_1_7;
+	private static final String VERSION_JSR14= "jsr14"; //$NON-NLS-1$
 
 	private static final String ERROR= JavaCore.ERROR;
 	private static final String WARNING= JavaCore.WARNING;
@@ -251,7 +252,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	private Composite createComplianceTabContent(Composite folder) {
 
-
 		String[] values3456= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6, VERSION_1_7 };
 		String[] values3456Labels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_version13,
@@ -333,6 +333,11 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.ComplianceConfigurationBlock_version16,
 			PreferencesMessages.ComplianceConfigurationBlock_version17
 		};
+		boolean showJsr14= ComplianceConfigurationBlock.VERSION_JSR14.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM));
+		if (showJsr14) {
+			versions= append(versions, ComplianceConfigurationBlock.VERSION_JSR14);
+			versionsLabels= append(versionsLabels, ComplianceConfigurationBlock.VERSION_JSR14);
+		}
 
 		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_targetplatform_label;
 		addComboBox(group, label, PREF_CODEGEN_TARGET_PLATFORM, versions, versionsLabels, indent);
@@ -420,6 +425,13 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		validateComplianceStatus();
 
 		return sc1;
+	}
+
+	private static String[] append(String[] versions, String version) {
+		String[] result= new String[versions.length + 1];
+		System.arraycopy(versions, 0, result, 0, versions.length);
+		result[versions.length]= version;
+		return result;
 	}
 
 	protected final void openBuildPathPropertyPage() {
@@ -590,6 +602,10 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		String compliance= getValue(PREF_COMPLIANCE);
 		String source= getValue(PREF_SOURCE_COMPATIBILITY);
 		String target= getValue(PREF_CODEGEN_TARGET_PLATFORM);
+		
+		if (ComplianceConfigurationBlock.VERSION_JSR14.equals(target)) {
+			target= source;
+		}
 
 		// compliance must not be smaller than source or target
 		if (JavaModelUtil.isVersionLessThan(compliance, source)) {
