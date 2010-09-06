@@ -153,9 +153,11 @@ public class UseSupertypeAction extends SelectionDispatchAction{
      */
 	public void run(ITextSelection selection) {
 		try {
+			if (!ActionUtil.isProcessable(fEditor))
+				return;
 			IType type= RefactoringActions.getEnclosingOrPrimaryType(fEditor);
 			if (RefactoringAvailabilityTester.isUseSuperTypeAvailable(type)) {
-				if (! ActionUtil.isEditable(fEditor, getShell(), type))
+				if (!ActionUtil.isEditable(getShell(), type))
 					return;
 				RefactoringExecutionStarter.startUseSupertypeRefactoring(type, getShell());
 			} else {
