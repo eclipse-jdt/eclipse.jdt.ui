@@ -112,6 +112,8 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 */
 	public void run(ITextSelection selection) {
 		try {
+			if (!ActionUtil.isEditable(fEditor))
+				return;
 			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 			if (elements.length != 1 || !(elements[0] instanceof IField)) {
 				MessageDialog.openInformation(getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_unavailable);
@@ -152,8 +154,12 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 */
 	public void run(IStructuredSelection selection) {
 		try {
-			if (RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection))
-				run((IField) selection.getFirstElement());
+			IField firstElement= (IField)selection.getFirstElement();
+			if (!ActionUtil.isEditable(getShell(), firstElement))
+				return;
+			if (RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection)) {
+				run(firstElement);
+			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
