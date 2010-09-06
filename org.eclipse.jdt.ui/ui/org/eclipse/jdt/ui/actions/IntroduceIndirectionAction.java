@@ -123,6 +123,8 @@ public class IntroduceIndirectionAction extends SelectionDispatchAction {
 			Assert.isTrue(RefactoringAvailabilityTester.isIntroduceIndirectionAvailable(selection));
 			Object first= selection.getFirstElement();
 			Assert.isTrue(first instanceof IMethod);
+			if (!ActionUtil.isEditable(getShell(), (IMethod)first))
+				return;
 			run((IMethod) first);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.IntroduceIndirectionAction_dialog_title, RefactoringMessages.IntroduceIndirectionAction_unknown_exception);
@@ -133,7 +135,11 @@ public class IntroduceIndirectionAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */
 	public void run(ITextSelection selection) {
+		if (!ActionUtil.isProcessable(fEditor))
+			return;
 		ITypeRoot editorInput= SelectionConverter.getInput(fEditor);
+		if (!ActionUtil.isEditable(getShell(), editorInput))
+			return;
 		if (editorInput instanceof ICompilationUnit)
 			run(selection.getOffset(), selection.getLength(), (ICompilationUnit) editorInput);
 		else if (editorInput instanceof IClassFile)
@@ -141,20 +147,14 @@ public class IntroduceIndirectionAction extends SelectionDispatchAction {
 	}
 
 	private void run(int offset, int length, ICompilationUnit unit) {
-		if (!ActionUtil.isEditable(fEditor, getShell(), unit))
-			return;
 		RefactoringExecutionStarter.startIntroduceIndirectionRefactoring(unit, offset, length, getShell());
 	}
 
 	private void run(int offset, int length, IClassFile file) {
-		if (!ActionUtil.isEditable(fEditor, getShell(), file))
-			return;
 		RefactoringExecutionStarter.startIntroduceIndirectionRefactoring(file, offset, length, getShell());
 	}
 
 	private void run(IMethod method) {
-		if (!ActionUtil.isEditable(fEditor, getShell(), method))
-			return;
 		RefactoringExecutionStarter.startIntroduceIndirectionRefactoring(method, getShell());
 	}
 }
