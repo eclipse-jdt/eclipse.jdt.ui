@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -158,10 +158,10 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	 */
 	public void run(ITextSelection selection) {
 		try {
+			if (!ActionUtil.isEditable(fEditor))
+				return;
 			IType type= RefactoringAvailabilityTester.getDeclaringType(SelectionConverter.resolveEnclosingElement(fEditor, selection));
 			if (type != null && RefactoringAvailabilityTester.isMoveInnerAvailable(type)) {
-				if (! ActionUtil.isEditable(fEditor, getShell(), type))
-					return;
 				RefactoringExecutionStarter.startMoveInnerRefactoring(type, getShell());
 			} else {
 				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.ConvertNestedToTopAction_To_activate);
