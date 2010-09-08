@@ -39,22 +39,16 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.CorextMessages;
 import org.eclipse.jdt.internal.corext.ValidateEditException;
@@ -863,73 +857,6 @@ public final class JavaModelUtil {
 		} else {
 			return storage instanceof IStorage;
 		}
-	}
-
-	/**
-	 * Returns true iff the given local variable is a parameter of its declaring method.
-	 *
-	 * TODO replace this method with new API when available:
-	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=48420
-	 *
-	 * @param currentLocal the local variable to test
-	 *
-	 * @return returns true if the variable is a parameter
-	 * @throws JavaModelException if getting the method parameter names fails
-	 */
-	public static boolean isParameter(ILocalVariable currentLocal) throws JavaModelException {
-
-		final IJavaElement parent= currentLocal.getParent();
-		if (parent instanceof IMethod) {
-			final String[] params= ((IMethod) parent).getParameterNames();
-			for (int i= 0; i < params.length; i++) {
-				if (params[i].equals(currentLocal.getElementName()))
-					return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Returns whether the given local variable is declared <code>final</code>.
-	 * 
-	 * @param variable the local variable
-	 * @return <code>true</code> if the local variable's source is available and the variable is
-	 *         declared <code>final</code>, <code>false</code> otherwise
-	 * @throws JavaModelException if source or name range cannot be accessed
-	 * @since 3.7
-	 */
-	public static boolean isFinal(ILocalVariable variable) throws JavaModelException {
-		String source= variable.getSource();
-		if (source == null)
-			return false;
-
-		ISourceRange sourceRange= variable.getSourceRange();
-		if (sourceRange == null)
-			return false;
-
-		int sourceRangeOffset= variable.getSourceRange().getOffset();
-		if (sourceRangeOffset == -1)
-			return false;
-
-		int nameRangeOffset= variable.getNameRange().getOffset();
-		if (nameRangeOffset == -1)
-			return false;
-
-		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
-		scanner.setSource(source.toCharArray());
-		scanner.resetTo(0, nameRangeOffset - sourceRangeOffset - 1);
-
-		int token;
-		do {
-			try {
-				token= scanner.getNextToken();
-			} catch (InvalidInputException e) {
-				return false;
-			}
-			if (token == ITerminalSymbols.TokenNamefinal)
-				return true;
-		} while (token != ITerminalSymbols.TokenNameEOF);
-		return false;
 	}
 
 	/**

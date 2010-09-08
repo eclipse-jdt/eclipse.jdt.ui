@@ -630,7 +630,7 @@ public class JavaElementLabelComposer {
 		}
 
 		if (getFlag(flags, JavaElementLabels.F_FULLY_QUALIFIED)) {
-			appendElementLabel(localVariable.getParent(), JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
+			appendElementLabel(localVariable.getDeclaringMember(), JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
 			fBuffer.append('.');
 		}
 
@@ -648,7 +648,7 @@ public class JavaElementLabelComposer {
 		// post qualification
 		if (getFlag(flags, JavaElementLabels.F_POST_QUALIFIED)) {
 			fBuffer.append(JavaElementLabels.CONCAT_STRING);
-			appendElementLabel(localVariable.getParent(), JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
+			appendElementLabel(localVariable.getDeclaringMember(), JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
 		}
 	}
 

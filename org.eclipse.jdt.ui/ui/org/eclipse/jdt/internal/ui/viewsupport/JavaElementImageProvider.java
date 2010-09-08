@@ -393,7 +393,7 @@ public class JavaElementImageProvider {
 						if (Flags.isTransient(modifiers))
 							flags|= JavaElementImageDescriptor.TRANSIENT;
 					}
-				} else if (element instanceof ILocalVariable && JavaModelUtil.isFinal((ILocalVariable)element)) {
+				} else if (element instanceof ILocalVariable && Flags.isFinal(((ILocalVariable)element).getFlags())) {
 					flags|= JavaElementImageDescriptor.FINAL;
 				}
 			} catch (JavaModelException e) {

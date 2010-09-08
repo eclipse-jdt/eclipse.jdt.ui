@@ -321,7 +321,7 @@ public class JavaElementLinks {
 			}
 			
 			if (element instanceof ILocalVariable) {
-				element= element.getAncestor(IJavaElement.TYPE);
+				element= ((ILocalVariable)element).getDeclaringMember();
 			} else if (element instanceof ITypeParameter) {
 				element= ((ITypeParameter)element).getDeclaringMember();
 			}

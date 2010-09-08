@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -662,7 +662,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 								final ILocalVariable currentLocal= (ILocalVariable) element;
 								final boolean isParameter;
 
-								if (JavaModelUtil.isParameter(currentLocal)) {
+								if (currentLocal.isParameter()) {
 									addMethodRename(unQualifiedTypeName, sugg, (IMethod) currentLocal.getParent());
 									isParameter= true;
 								} else

@@ -1118,7 +1118,7 @@ public class JavadocView extends AbstractInfoView {
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr, null, true));
 				if (curr instanceof ILocalVariable) {
 					ISourceRange nameRange= ((ILocalVariable) curr).getNameRange();
-					ITypeRoot typeRoot= ((IMember) curr.getParent()).getTypeRoot();
+					ITypeRoot typeRoot= ((ILocalVariable) curr).getTypeRoot();
 					Region hoverRegion= new Region(nameRange.getOffset(), nameRange.getLength());
 					buffer.append("<br>"); //$NON-NLS-1$
 					JavadocHover.addAnnotations(buffer, curr, typeRoot, hoverRegion);
