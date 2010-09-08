@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.PushbackReader;
 import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -25,14 +26,15 @@ import java.net.SocketException;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.SafeRunner;
 
-import org.eclipse.jdt.internal.junit.runner.MessageIds;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.runner.MessageIds;
 
 /**
  * The client side of the RemoteTestRunner. Handles the
  * marshaling of the different messages.
  */
 public class RemoteTestRunnerClient {
+	
 	public abstract class ListenerSafeRunnable implements ISafeRunnable {
 		public void handleException(Throwable exception) {
 			JUnitCorePlugin.log(exception);
@@ -141,7 +143,8 @@ public class RemoteTestRunnerClient {
 				return fDefaultState;
 			}
 			fBuffer.append(message);
-			fBuffer.append('\n');
+			if (fLastLineDelimiter != null)
+				fBuffer.append(fLastLineDelimiter);
 			return this;
 		}
 
@@ -171,7 +174,9 @@ public class RemoteTestRunnerClient {
 	            fExpectedResult.setLength(0);
 	            return fDefaultState;
 	        }
-	        fFailedTrace.append(message).append('\n');
+	        fFailedTrace.append(message);
+	        if (fLastLineDelimiter != null)
+	        	fFailedTrace.append(fLastLineDelimiter);
 	        return this;
 	    }
 	}
@@ -213,7 +218,8 @@ public class RemoteTestRunnerClient {
 	private Socket fSocket;
 	private int fPort= -1;
 	private PrintWriter fWriter;
-	private BufferedReader fBufferedReader;
+	private PushbackReader fPushbackReader;
+	private String fLastLineDelimiter;
 	/**
 	 * The protocol version
 	 */
@@ -251,9 +257,9 @@ public class RemoteTestRunnerClient {
 				fServerSocket= new ServerSocket(fServerPort);
 				fSocket= fServerSocket.accept();
 				try {
-				    fBufferedReader= new BufferedReader(new InputStreamReader(fSocket.getInputStream(), "UTF-8")); //$NON-NLS-1$
+				    fPushbackReader= new PushbackReader(new BufferedReader(new InputStreamReader(fSocket.getInputStream(), "UTF-8"))); //$NON-NLS-1$
 				} catch (UnsupportedEncodingException e) {
-				    fBufferedReader= new BufferedReader(new InputStreamReader(fSocket.getInputStream()));
+				    fPushbackReader= new PushbackReader(new BufferedReader(new InputStreamReader(fSocket.getInputStream())));
 				}
 				try {
 				    fWriter= new PrintWriter(new OutputStreamWriter(fSocket.getOutputStream(), "UTF-8"), true); //$NON-NLS-1$
@@ -261,7 +267,7 @@ public class RemoteTestRunnerClient {
 	                fWriter= new PrintWriter(new OutputStreamWriter(fSocket.getOutputStream()), true);
 	            }
 				String message;
-				while(fBufferedReader != null && (message= readMessage(fBufferedReader)) != null)
+				while(fPushbackReader != null && (message= readMessage(fPushbackReader)) != null)
 					receiveMessage(message);
 			} catch (SocketException e) {
 				notifyTestRunTerminated();
@@ -312,9 +318,9 @@ public class RemoteTestRunnerClient {
 			fWriter= null;
 		}
 		try {
-			if (fBufferedReader != null) {
-				fBufferedReader.close();
-				fBufferedReader= null;
+			if (fPushbackReader != null) {
+				fPushbackReader.close();
+				fPushbackReader= null;
 			}
 		} catch(IOException e) {
 		}
@@ -338,8 +344,30 @@ public class RemoteTestRunnerClient {
 		return fSocket != null;
 	}
 
-	private String readMessage(BufferedReader in) throws IOException {
-		return in.readLine();
+	private String readMessage(PushbackReader in) throws IOException {
+		StringBuffer buf= new StringBuffer(128);
+		int ch;
+		while ((ch= in.read()) != -1) {
+			if (ch == '\n') {
+				fLastLineDelimiter= "\n"; //$NON-NLS-1$
+				return buf.toString();
+			} else if (ch == '\r') {
+				ch= in.read();
+				if (ch == '\n') {
+					fLastLineDelimiter= "\r\n"; //$NON-NLS-1$
+				} else {
+					in.unread(ch);
+					fLastLineDelimiter= "\r"; //$NON-NLS-1$
+				}
+				return buf.toString();
+			} else {
+				buf.append((char) ch);
+			}
+		}
+		fLastLineDelimiter= null;
+		if (buf.length() == 0)
+			return null;
+		return buf.toString();
 	}
 
 	private void receiveMessage(String message) {
@@ -423,7 +451,7 @@ public class RemoteTestRunnerClient {
 				public void run() {
 					listener.testReran(testId,
 								className, testName, statusCode, trace,
-								fExpectedResult.toString(), fActualResult.toString());
+								nullifyEmpty(fExpectedResult), nullifyEmpty(fActualResult));
 				}
 			});
 		}
@@ -521,12 +549,37 @@ public class RemoteTestRunnerClient {
 			SafeRunner.run(new ListenerSafeRunnable() {
 				public void run() {
 			        listener.testFailed(fFailureKind, fFailedTestId,
-			        		fFailedTest, fFailedTrace.toString(), fExpectedResult.toString(), fActualResult.toString());
+			        		fFailedTest, fFailedTrace.toString(), nullifyEmpty(fExpectedResult), nullifyEmpty(fActualResult));
 				}
 			});
 		}
 	}
 
+	/**
+	 * Returns a comparison result from the given buffer.
+	 * Removes the terminating line delimiter.
+	 * 
+	 * @param buf the comparison result
+	 * @return the result or <code>null</code> if empty
+	 * @since 3.7
+	 */
+	private static String nullifyEmpty(StringBuffer buf) {
+		int length= buf.length();
+		if (length == 0)
+			return null;
+		
+		char last= buf.charAt(length - 1);
+		if (last == '\n') {
+			if (length > 1 && buf.charAt(length - 2) == '\r')
+				return buf.substring(0, length - 2);
+			else
+				return buf.substring(0, length - 1);
+		} else if (last == '\r') {
+			return buf.substring(0, length - 1);
+		}
+		return buf.toString();
+	}
+	
 	private void notifyTestRunTerminated() {
 		// fix for 77771 RemoteTestRunnerClient doing work after junit shutdown [JUnit]
 		if (JUnitCorePlugin.isStopped())

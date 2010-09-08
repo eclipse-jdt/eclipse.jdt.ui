@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,9 +30,9 @@ import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.junit.TestRunListener;
 import org.eclipse.jdt.junit.model.ITestCaseElement;
 import org.eclipse.jdt.junit.model.ITestElement;
+import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
 import org.eclipse.jdt.junit.model.ITestRunSession;
 import org.eclipse.jdt.junit.model.ITestSuiteElement;
-import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
@@ -117,6 +117,10 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 
 	private void assertEqualXML(String expected, String actual) {
 		/*
+		 * Strips &#13; and &#10; 
+		 */
+		String regex0= "&#1[03];";
+		/*
 		 * Avoid comparing stack traces (which are VM-dependent)
 		 */
 		String regex= "(?m)^\\s*at\\s+[\\w\\.\\:\\;\\$\\(\\)\\[ \\t]+$\r?\n?";
@@ -129,8 +133,8 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		 */
 		String regex3= "(?<=time=\\\")\\d+\\.\\d+(?=\\\")";
 		String replacement= "";
-		expected= expected.replaceAll(regex, replacement).replaceAll(regex2, replacement).replaceAll(regex3, replacement);
-		actual= actual.replaceAll(regex, replacement).replaceAll(regex2, replacement).replaceAll(regex3, replacement);
+		expected= expected.replaceAll(regex0, replacement).replaceAll(regex, replacement).replaceAll(regex2, replacement).replaceAll(regex3, replacement);
+		actual= actual.replaceAll(regex0, replacement).replaceAll(regex, replacement).replaceAll(regex2, replacement).replaceAll(regex3, replacement);
 		int ibmJava6BugOffset= actual.indexOf("><");
 		if (ibmJava6BugOffset > 0) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=197842
 			actual= new StringBuffer(actual).insert(ibmJava6BugOffset + 1, " ").toString();

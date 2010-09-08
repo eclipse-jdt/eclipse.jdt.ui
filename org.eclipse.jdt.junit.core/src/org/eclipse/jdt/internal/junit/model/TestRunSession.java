@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -706,22 +706,12 @@ public class TestRunSession implements ITestRunSession {
 			}
 
 			Status status= Status.convert(statusCode);
-			registerTestFailureStatus(testElement, status, trace, nullifyEmpty(expected), nullifyEmpty(actual));
+			registerTestFailureStatus(testElement, status, trace, expected, actual);
 
 			Object[] listeners= fSessionListeners.getListeners();
 			for (int i= 0; i < listeners.length; ++i) {
 				((ITestSessionListener) listeners[i]).testFailed(testElement, status, trace, expected, actual);
 			}
-		}
-
-		private String nullifyEmpty(String string) {
-			int length= string.length();
-			if (length == 0)
-				return null;
-			else if (string.charAt(length - 1) == '\n')
-				return string.substring(0, length - 1);
-			else
-				return string;
 		}
 
 		/* (non-Javadoc)
@@ -738,7 +728,7 @@ public class TestRunSession implements ITestRunSession {
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
 
 			Status status= Status.convert(statusCode);
-			registerTestFailureStatus(testElement, status, trace, nullifyEmpty(expectedResult), nullifyEmpty(actualResult));
+			registerTestFailureStatus(testElement, status, trace, expectedResult, actualResult);
 
 			Object[] listeners= fSessionListeners.getListeners();
 			for (int i= 0; i < listeners.length; ++i) {
