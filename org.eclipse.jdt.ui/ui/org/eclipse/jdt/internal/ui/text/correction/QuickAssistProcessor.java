@@ -314,6 +314,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 
 	private static boolean getExtractLocalProposal(IInvocationContext context, Collection proposals) throws CoreException {
+		
 		ASTNode node= context.getCoveredNode();
 
 		if (!(node instanceof Expression)) {
@@ -334,6 +335,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (proposals == null) {
 			return true;
 		}
+		int relevanceDrop= context.getSelectionLength() != 0 ? 0 : 6;
 
 		final ICompilationUnit cu= context.getCompilationUnit();
 		ExtractTempRefactoring extractTempRefactoring= new ExtractTempRefactoring(context.getASTRoot(), expression.getStartPosition(), expression.getLength());
@@ -344,7 +346,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_all_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractTempRefactoring, 6, image) {
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractTempRefactoring, 6 - relevanceDrop, image) {
 				protected void init(Refactoring refactoring) throws CoreException {
 					ExtractTempRefactoring etr= (ExtractTempRefactoring) refactoring;
 					etr.setTempName(etr.guessTempName()); // expensive
@@ -364,7 +366,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractTempRefactoringSelectedOnly, 5, image) {
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractTempRefactoringSelectedOnly, 5 - relevanceDrop, image) {
 				protected void init(Refactoring refactoring) throws CoreException {
 					ExtractTempRefactoring etr= (ExtractTempRefactoring) refactoring;
 					etr.setTempName(etr.guessTempName()); // expensive
@@ -383,7 +385,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 			String label= CorrectionMessages.QuickAssistProcessor_extract_to_constant_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractConstRefactoring, 4, image) {
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractConstRefactoring, 4 - relevanceDrop, image) {
 				protected void init(Refactoring refactoring) throws CoreException {
 					ExtractConstantRefactoring etr= (ExtractConstantRefactoring) refactoring;
 					etr.setConstantName(etr.guessConstantName()); // expensive
