@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,9 +23,6 @@ import org.xml.sax.InputSource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -122,16 +119,6 @@ public class FormatterProfileStore extends ProfileStore {
 			}
 			uiPreferences.putInt(PREF_FORMATTER_PROFILES + VERSION_KEY_SUFFIX, profileVersioner.getCurrentVersion());
 			savePreferences(instanceScope);
-
-			IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
-			for (int i= 0; i < projects.length; i++) {
-				IScopeContext scope= access.getProjectScope(projects[i]);
-				if (manager.hasProjectSpecificSettings(scope)) {
-					manager= new FormatterProfileManager(profiles, scope, access, profileVersioner);
-					manager.commitChanges(scope); // updates JavaCore project options
-					savePreferences(scope);
-				}
-			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		} catch (BackingStoreException e) {
