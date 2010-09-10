@@ -23,6 +23,9 @@ public class NewLinesTabPage extends FormatterTabPage {
 
 	private final String PREVIEW=
 	createPreviewHeader(FormatterMessages.NewLinesTabPage_preview_header) +
+	"@Deprecated\n" + //$NON-NLS-1$
+	"package com.example; // only allowed in package-info.java\n" + //$NON-NLS-1$
+	"\n" + //$NON-NLS-1$
 	"public class Empty {}\n" + //$NON-NLS-1$
 	"class Example {" + //$NON-NLS-1$
 	"  static int [] fArray= {1, 2, 3, 4, 5 };" + //$NON-NLS-1$
@@ -75,7 +78,10 @@ public class NewLinesTabPage extends FormatterTabPage {
 		createPref(emptyStatementsGroup, numColumns, FormatterMessages.NewLinesTabPage_emtpy_statement_group_option_empty_statement_on_new_line, DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, FALSE_TRUE);
 
 		final Group annotationsGroup= createGroup(numColumns, composite, FormatterMessages.NewLinesTabPage_annotations_group_title);
-		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_members, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER, DO_NOT_INSERT_INSERT);
+		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_packages, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PACKAGE, DO_NOT_INSERT_INSERT);
+		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_types, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_TYPE, DO_NOT_INSERT_INSERT);
+		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_fields, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_FIELD, DO_NOT_INSERT_INSERT);
+		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_methods, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD, DO_NOT_INSERT_INSERT);
 		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_paramters, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PARAMETER, DO_NOT_INSERT_INSERT);
 		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_local_variables, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE, DO_NOT_INSERT_INSERT);
 	}

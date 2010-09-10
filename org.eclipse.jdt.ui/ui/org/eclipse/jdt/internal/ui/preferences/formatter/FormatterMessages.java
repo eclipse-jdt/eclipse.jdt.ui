@@ -442,8 +442,11 @@ final class FormatterMessages extends NLS {
 	public static String NewLinesTabPage_array_group_option_after_opening_brace_of_array_initializer;
 	public static String NewLinesTabPage_array_group_option_before_closing_brace_of_array_initializer;
 	public static String NewLinesTabPage_annotations_group_local_variables;
-	public static String NewLinesTabPage_annotations_group_members;
 	public static String NewLinesTabPage_annotations_group_paramters;
+	public static String NewLinesTabPage_annotations_group_packages;
+	public static String NewLinesTabPage_annotations_group_types;
+	public static String NewLinesTabPage_annotations_group_fields;
+	public static String NewLinesTabPage_annotations_group_methods;
 	public static String NewLinesTabPage_annotations_group_title;
 	public static String ProfileManager_default_profile_name;
 	public static String ProfileManager_eclipse_profile_name;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,8 +39,9 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static final int VERSION_9= 9; // after storing project profile names in preferences
 	private static final int VERSION_10= 10; // splitting options for annotation types
 	private static final int VERSION_11= 11; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=49412
+	private static final int VERSION_12= 12; // https://bugs.eclipse.org/318010
 
-	private static final int CURRENT_VERSION= VERSION_11;
+	private static final int CURRENT_VERSION= VERSION_12;
 
 	public int getFirstVersion() {
 	    return VERSION_1;
@@ -94,6 +95,9 @@ public class ProfileVersioner implements IProfileVersioner {
 			//$FALL-THROUGH$
 		case VERSION_10 :
 			version10to11(oldSettings);
+			//$FALL-THROUGH$
+		case VERSION_11 :
+			version11to12(oldSettings);
 			//$FALL-THROUGH$
 		default:
 		    for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
@@ -171,10 +175,6 @@ public class ProfileVersioner implements IProfileVersioner {
 			}
 		}
 
-	}
-
-	private static void duplicate(Map settings, String existingKey, String newKey) {
-		checkAndReplace(settings, existingKey, new String [] {newKey});
 	}
 
 	private static void checkAndReplace(Map settings, String oldKey, String newKey) {
@@ -575,10 +575,10 @@ public class ProfileVersioner implements IProfileVersioner {
 	}
 
 	private static void version9to10(Map oldSettings) {
-		duplicate(oldSettings,
+		checkAndReplace(oldSettings,
 				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_TYPE_DECLARATION,
 				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANNOTATION_DECLARATION);
-		duplicate(oldSettings,
+		checkAndReplace(oldSettings,
 				DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_TYPE_HEADER,
 				DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_ANNOTATION_DECLARATION_HEADER);
 	}
@@ -598,7 +598,25 @@ public class ProfileVersioner implements IProfileVersioner {
 				});
 	}
 
-
+	private static void version11to12(Map oldSettings) {
+		checkAndReplace(oldSettings,
+				FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION,
+				new String[] {
+						FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER,
+						DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE,
+						DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PARAMETER
+		});
+		checkAndReplace(oldSettings,
+				FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER,
+				new String[] {
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_FIELD,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PACKAGE,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_TYPE
+		});
+	}
+	
+	
 	/* old format constant values */
 
     private static final String FORMATTER_METHOD_DECLARATION_ARGUMENTS_ALIGNMENT = JavaCore.PLUGIN_ID + ".formatter.method_declaration_arguments_alignment"; //$NON-NLS-1$
@@ -690,6 +708,18 @@ public class ProfileVersioner implements IProfileVersioner {
 	 *             {@link DefaultCodeFormatterConstants#FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_JAVADOC_COMMENT}
 	 */
 	private static final String FORMATTER_COMMENT_CLEAR_BLANK_LINES= DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES;
+
+	/**
+	 * @deprecated see https://bugs.eclipse.org/318010
+	 * @since 3.7
+	 */
+	private static final String FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER= DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER;
+
+	/**
+	 * @deprecated see https://bugs.eclipse.org/318010
+	 * @since 3.7
+	 */
+	private static final String FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION= DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION;
 
 	// Old comment formatter constants
 	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_SOURCE} */
