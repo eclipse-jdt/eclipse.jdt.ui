@@ -159,6 +159,13 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	private Label fImage;
 
 	/**
+	 * Indicates whether the super class field was explicitly modified by the user.
+	 * 
+	 * @since 3.7
+	 */
+	private boolean fSuperClassExplicitlySet= false;
+
+	/**
 	 * Creates a new <code>NewTestCaseCreationWizardPage</code>.
 	 * @param page2 The second page
 	 *
@@ -249,6 +256,8 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			}
 		}
 		setJUnit4(isJunit4, true);
+		setSuperClass(getDefaultSuperClassName(), true);
+		fSuperClassExplicitlySet= false; //set to false when default value is set
 
 		updateStatus(getStatusList());
 	}
@@ -288,11 +297,11 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	private void internalSetJUnit4(boolean isJUnit4) {
 		fIsJunit4= isJUnit4;
 		fJunit4Status= junit4Changed();
-		if (fIsJunit4) {
-			setSuperClass("java.lang.Object", false); //$NON-NLS-1$
-		} else {
-			setSuperClass(getJUnit3TestSuperclassName(), true);
+		if (!fSuperClassExplicitlySet || getSuperClass().trim().equals("")) { //$NON-NLS-1$
+			setSuperClass(getDefaultSuperClassName(), true);
+			fSuperClassExplicitlySet= false; //set back to false when default value is set
 		}
+		fSuperClassStatus= superClassChanged(); //validate superclass field when toggled
 		handleFieldChanged(JUNIT4TOGGLE);
 	}
 
@@ -315,6 +324,8 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			fMethodStubsButtons.setEnabled(IDX_SETUP_CLASS, isJUnit4());
 			fMethodStubsButtons.setEnabled(IDX_TEARDOWN_CLASS, isJUnit4());
 			fMethodStubsButtons.setEnabled(IDX_CONSTRUCTOR, !isJUnit4());
+		} else if (fieldName.equals(SUPER)) {
+			fSuperClassExplicitlySet= true;
 		}
 		updateStatus(getStatusList());
 	}
@@ -1085,17 +1096,17 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	 */
 	@Override
 	protected IStatus superClassChanged() {
-		// replaces the super class validation of of the normal type wizard
-		if (isJUnit4()) {
-			return new JUnitStatus();
-		}
-
+		super.superClassChanged();
 		String superClassName= getSuperClass();
 		JUnitStatus status= new JUnitStatus();
+		boolean isJUnit4= isJUnit4();
 		if (superClassName == null || superClassName.trim().equals("")) { //$NON-NLS-1$
-			status.setError(WizardMessages.NewTestCaseWizardPageOne_error_superclass_empty);
+			if (!isJUnit4)
+				status.setError(WizardMessages.NewTestCaseWizardPageOne_error_superclass_empty);
 			return status;
 		}
+		if (isJUnit4 && superClassName.equals("java.lang.Object")) //$NON-NLS-1$
+			return status;
 		if (getPackageFragmentRoot() != null) {
 			try {
 				IType type= resolveClassNameToType(getPackageFragmentRoot().getJavaProject(), getPackageFragment(), superClassName);
@@ -1193,6 +1204,16 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	 */
 	protected String getJUnit3TestSuperclassName() {
 		return JUnitCorePlugin.TEST_SUPERCLASS_NAME;
+	}
+
+	/**
+	 * Returns the default value for the super class field.
+	 * 
+	 * @return the default value for the super class field
+	 * @since 3.7
+	 */
+	private String getDefaultSuperClassName() {
+		return isJUnit4() ? "java.lang.Object" : getJUnit3TestSuperclassName(); //$NON-NLS-1$
 	}
 
 }
