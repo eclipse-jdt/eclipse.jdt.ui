@@ -1118,7 +1118,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 					status.setError(WizardMessages.NewTestCaseWizardPageOne_error_superclass_is_interface);
 					return status;
 				}
-				if (!CoreTestSearchEngine.isTestImplementor(type)) { // TODO: expensive!
+				if (!isJUnit4 && !CoreTestSearchEngine.isTestImplementor(type)) { // TODO: expensive!
 					status.setError(Messages.format(WizardMessages.NewTestCaseWizardPageOne_error_superclass_not_implementing_test_interface, BasicElementLabels.getJavaElementName(JUnitCorePlugin.TEST_INTERFACE_NAME)));
 					return status;
 				}
