@@ -159,13 +159,6 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	private Label fImage;
 
 	/**
-	 * Indicates whether the super class field was explicitly modified by the user.
-	 * 
-	 * @since 3.7
-	 */
-	private boolean fSuperClassExplicitlySet= false;
-
-	/**
 	 * Creates a new <code>NewTestCaseCreationWizardPage</code>.
 	 * @param page2 The second page
 	 *
@@ -256,9 +249,6 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			}
 		}
 		setJUnit4(isJunit4, true);
-		setSuperClass(getDefaultSuperClassName(), true);
-		fSuperClassExplicitlySet= false; //set to false when default value is set
-
 		updateStatus(getStatusList());
 	}
 
@@ -297,12 +287,22 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	private void internalSetJUnit4(boolean isJUnit4) {
 		fIsJunit4= isJUnit4;
 		fJunit4Status= junit4Changed();
-		if (!fSuperClassExplicitlySet || getSuperClass().trim().equals("")) { //$NON-NLS-1$
+		if (isDefaultSuperClass() || getSuperClass().trim().equals("")) //$NON-NLS-1$
 			setSuperClass(getDefaultSuperClassName(), true);
-			fSuperClassExplicitlySet= false; //set back to false when default value is set
-		}
 		fSuperClassStatus= superClassChanged(); //validate superclass field when toggled
 		handleFieldChanged(JUNIT4TOGGLE);
+	}
+
+	/**
+	 * Returns whether the super class name is one of the default super class names.
+	 * 
+	 * @return <code>true</code> if the super class name is one of the default super class names,
+	 *         <code>false</code> otherwise
+	 * @since 3.7
+	 */
+	private boolean isDefaultSuperClass() {
+		String superClass= getSuperClass();
+		return superClass.equals(getJUnit3TestSuperclassName()) || superClass.equals("java.lang.Object"); //$NON-NLS-1$
 	}
 
 	/* (non-Javadoc)
@@ -324,8 +324,6 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			fMethodStubsButtons.setEnabled(IDX_SETUP_CLASS, isJUnit4());
 			fMethodStubsButtons.setEnabled(IDX_TEARDOWN_CLASS, isJUnit4());
 			fMethodStubsButtons.setEnabled(IDX_CONSTRUCTOR, !isJUnit4());
-		} else if (fieldName.equals(SUPER)) {
-			fSuperClassExplicitlySet= true;
 		}
 		updateStatus(getStatusList());
 	}
@@ -1096,7 +1094,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	 */
 	@Override
 	protected IStatus superClassChanged() {
-		super.superClassChanged();
+		IStatus stat= super.superClassChanged();
+		if (stat.getSeverity() != IStatus.OK)
+			return stat;
 		String superClassName= getSuperClass();
 		JUnitStatus status= new JUnitStatus();
 		boolean isJUnit4= isJUnit4();
