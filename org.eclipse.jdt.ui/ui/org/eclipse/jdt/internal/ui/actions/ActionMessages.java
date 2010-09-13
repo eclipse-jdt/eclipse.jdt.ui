@@ -99,11 +99,8 @@ public final class ActionMessages extends NLS {
 	public static String OpenTypeHierarchyAction_description;
 	public static String OpenTypeHierarchyAction_dialog_title;
 	public static String OpenTypeHierarchyAction_messages_title;
-	public static String OpenTypeHierarchyAction_messages_no_java_element;
-	public static String OpenTypeHierarchyAction_messages_no_java_resources;
-	public static String OpenTypeHierarchyAction_messages_no_types;
+	public static String OpenTypeHierarchyAction_messages_no_java_elements;
 	public static String OpenTypeHierarchyAction_messages_no_valid_java_element;
-	public static String OpenTypeHierarchyAction_messages_unknown_import_decl;
 	public static String ShowInPackageViewAction_label;
 	public static String ShowInPackageViewAction_description;
 	public static String ShowInPackageViewAction_tooltip;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,7 +35,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
 
 public class OpenTypeHierarchyUtil {
@@ -54,22 +53,14 @@ public class OpenTypeHierarchyUtil {
 	public static TypeHierarchyViewPart open(IJavaElement[] candidates, IWorkbenchWindow window) {
 		Assert.isTrue(candidates != null && candidates.length != 0);
 
-		IJavaElement input= null;
-		if (candidates.length > 1) {
-			String title= JavaUIMessages.OpenTypeHierarchyUtil_selectionDialog_title;
-			String message= JavaUIMessages.OpenTypeHierarchyUtil_selectionDialog_message;
-			input= SelectionConverter.selectJavaElement(candidates, window.getShell(), title, message);
-		} else {
-			input= candidates[0];
-		}
-		if (input == null)
+		if (candidates == null)
 			return null;
 
 		try {
 			if (PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.OPEN_TYPE_HIERARCHY))) {
-				return openInPerspective(window, input);
+				return openInPerspective(window, candidates);
 			} else {
-				return openInViewPart(window, input);
+				return openInViewPart(window, candidates);
 			}
 
 		} catch (WorkbenchException e) {
@@ -84,7 +75,7 @@ public class OpenTypeHierarchyUtil {
 		return null;
 	}
 
-	private static TypeHierarchyViewPart openInViewPart(IWorkbenchWindow window, IJavaElement input) {
+	private static TypeHierarchyViewPart openInViewPart(IWorkbenchWindow window, IJavaElement[] input) {
 		IWorkbenchPage page= window.getActivePage();
 		try {
 			TypeHierarchyViewPart result= (TypeHierarchyViewPart) page.findView(JavaUI.ID_TYPE_HIERARCHY);
@@ -92,7 +83,7 @@ public class OpenTypeHierarchyUtil {
 				result.clearNeededRefresh(); // avoid refresh of old hierarchy on 'becomes visible'
 			}
 			result= (TypeHierarchyViewPart) page.showView(JavaUI.ID_TYPE_HIERARCHY);
-			result.setInputElement(input);
+			result.setInputElements(input);
 			return result;
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, window.getShell(),
@@ -101,17 +92,15 @@ public class OpenTypeHierarchyUtil {
 		return null;
 	}
 
-	private static TypeHierarchyViewPart openInPerspective(IWorkbenchWindow window, IJavaElement input) throws WorkbenchException, JavaModelException {
+	private static TypeHierarchyViewPart openInPerspective(IWorkbenchWindow window, IJavaElement[] input) throws WorkbenchException, JavaModelException {
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
-		// The problem is that the input element can be a working copy. So we first convert it to the original element if
-		// it exists.
-		IJavaElement perspectiveInput= input;
+		IJavaElement perspectiveInput= input.length == 1 ? input[0] : null;
 
-		if (input instanceof IMember) {
-			if (input.getElementType() != IJavaElement.TYPE) {
-				perspectiveInput= ((IMember)input).getDeclaringType();
+		if (perspectiveInput != null && input[0] instanceof IMember) {
+			if (input[0].getElementType() != IJavaElement.TYPE) {
+				perspectiveInput= ((IMember)input[0]).getDeclaringType();
 			} else {
-				perspectiveInput= input;
+				perspectiveInput= input[0];
 			}
 		}
 		IWorkbenchPage page= workbench.showPerspective(JavaUI.ID_HIERARCHYPERSPECTIVE, window, perspectiveInput);
@@ -121,10 +110,10 @@ public class OpenTypeHierarchyUtil {
 			part.clearNeededRefresh(); // avoid refresh of old hierarchy on 'becomes visible'
 		}
 		part= (TypeHierarchyViewPart) page.showView(JavaUI.ID_TYPE_HIERARCHY);
-		part.setInputElement(input);
-		if (input instanceof IMember) {
+		part.setInputElements(input);
+		if (perspectiveInput != null) {
 			if (page.getEditorReferences().length == 0) {
-				JavaUI.openInEditor(input, false, false); // only open when the perspecive has been created
+				JavaUI.openInEditor(input[0], false, false); // only open when the perspective has been created
 			}
 		}
 		return part;

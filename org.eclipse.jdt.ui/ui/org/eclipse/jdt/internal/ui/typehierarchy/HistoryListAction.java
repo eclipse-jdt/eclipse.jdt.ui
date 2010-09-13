@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -25,6 +26,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
@@ -47,9 +49,9 @@ public class HistoryListAction extends Action {
 
 		private ListDialogField fHistoryList;
 		private IStatus fHistoryStatus;
-		private IJavaElement fResult;
+		private IJavaElement[] fResult;
 
-		private HistoryListDialog(Shell shell, IJavaElement[] elements) {
+		private HistoryListDialog(Shell shell, IJavaElement[][] elements) {
 			super(shell);
 			setTitle(TypeHierarchyMessages.HistoryListDialog_title);
 
@@ -70,7 +72,38 @@ public class HistoryListAction extends Action {
 				}
 			};
 
-			JavaElementLabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT);
+			JavaElementLabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT) {
+				/*
+				 * @see org.eclipse.jdt.ui.JavaElementLabelProvider#getStyledText(java.lang.Object)
+				 * @since 3.7
+				 */
+				public StyledString getStyledText(Object element) {
+					IJavaElement[] elem= (IJavaElement[])element;
+					if (elem.length == 1)
+						return HistoryAction.getSingleElementLabel(elem[0]);
+					else
+						return new StyledString(HistoryAction.getElementLabel(elem));
+				}
+
+				/*
+				 * @see org.eclipse.jdt.ui.JavaElementLabelProvider#getText(java.lang.Object)
+				 * @since 3.7
+				 */
+				public String getText(Object element) {
+					IJavaElement[] elem= (IJavaElement[])element;
+					return HistoryAction.getElementLabel(elem);
+				}
+
+				/*
+				 * @see org.eclipse.jdt.ui.JavaElementLabelProvider#getImage(java.lang.Object)
+				 * @since 3.7
+				 */
+				public Image getImage(Object element) {
+					IJavaElement[] elem= (IJavaElement[])element;
+					return super.getImage(elem[0]);
+					
+				}
+			};
 
 			fHistoryList= new ListDialogField(adapter, buttonLabels, labelProvider);
 			fHistoryList.setLabelText(TypeHierarchyMessages.HistoryListDialog_label);
@@ -136,20 +169,26 @@ public class HistoryListAction extends Action {
 				status.setError(""); //$NON-NLS-1$
 				fResult= null;
 			} else {
-				fResult= (IJavaElement) selected.get(0);
+				fResult= (IJavaElement []) selected.get(0);
 			}
 			fHistoryList.enableButton(0, fHistoryList.getSize() > selected.size() && selected.size() != 0);
 			fHistoryStatus= status;
 			updateStatus(status);
 		}
 
-		public IJavaElement getResult() {
+		public IJavaElement[] getResult() {
 			return fResult;
 		}
 
-		public IJavaElement[] getRemaining() {
+		/**
+		 * Gets the remaining elements in the list.
+		 * 
+		 * @return the remaining elements in the list
+		 * @since 3.7
+		 */
+		public List getRemaining() {
 			List elems= fHistoryList.getElements();
-			return (IJavaElement[]) elems.toArray(new IJavaElement[elems.size()]);
+			return elems;
 		}
 
 		/*
@@ -174,11 +213,12 @@ public class HistoryListAction extends Action {
 	 * @see IAction#run()
 	 */
 	public void run() {
-		IJavaElement[] historyEntries= fView.getHistoryEntries();
-		HistoryListDialog dialog= new HistoryListDialog(JavaPlugin.getActiveWorkbenchShell(), historyEntries);
+		List historyEntries= fView.getHistoryEntries();
+		IJavaElement[][] entries= (IJavaElement[][])historyEntries.toArray(new IJavaElement[historyEntries.size()][]);
+		HistoryListDialog dialog= new HistoryListDialog(JavaPlugin.getActiveWorkbenchShell(), entries);
 		if (dialog.open() == Window.OK) {
 			fView.setHistoryEntries(dialog.getRemaining());
-			fView.setInputElement(dialog.getResult());
+			fView.setInputElements(dialog.getResult());
 		}
 	}
 

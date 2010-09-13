@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -201,24 +201,26 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	protected abstract IType getParentType(IType type);
 
 
-	private boolean isInScope(IType type) {
+	private boolean isInHierarchyOfInputElements(IType type) {
 		if (fWorkingSetFilter != null && !fWorkingSetFilter.select(null, null, type)) {
 			return false;
 		}
 
-		IJavaElement input= fTypeHierarchy.getInputElement();
-		int inputType= input.getElementType();
-		if (inputType ==  IJavaElement.TYPE) {
-			return true;
-		}
-
-		IJavaElement parent= type.getAncestor(input.getElementType());
-		if (inputType == IJavaElement.PACKAGE_FRAGMENT) {
-			if (parent == null || parent.getElementName().equals(input.getElementName())) {
+		IJavaElement[] input= fTypeHierarchy.getInputElements();
+		for (int i= 0; i < input.length; i++) {
+			int inputType= input[i].getElementType();
+			if (inputType == IJavaElement.TYPE && input[i].getElementName().equals(type.getElementName())) {
 				return true;
 			}
-		} else if (input.equals(parent)) {
-			return true;
+
+			IJavaElement parent= type.getAncestor(inputType);
+			if (inputType == IJavaElement.PACKAGE_FRAGMENT) {
+				if (parent == null || parent.getElementName().equals(input[i].getElementName())) {
+					return true;
+				}
+			} else if (input[i].equals(parent)) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -288,7 +290,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	}
 
 	protected final boolean isInTree(IType type) throws JavaModelException {
-		if (isInScope(type)) {
+		if (isInHierarchyOfInputElements(type)) {
 			if (fMemberFilter != null) {
 				return hasMemberFilterChildren(type) || hasTypeChildren(type);
 			} else {

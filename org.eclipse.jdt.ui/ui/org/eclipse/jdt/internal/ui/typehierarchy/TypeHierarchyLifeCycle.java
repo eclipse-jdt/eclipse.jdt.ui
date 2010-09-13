@@ -57,7 +57,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 
 	private boolean fHierarchyRefreshNeeded;
 	private ITypeHierarchy fHierarchy;
-	private IJavaElement fInputElement;
+	private IJavaElement[] fInputElements;
 	private boolean fIsSuperTypesOnly;
 
 	private List fChangeListeners;
@@ -97,7 +97,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 
 	public TypeHierarchyLifeCycle(boolean isSuperTypesOnly) {
 		fHierarchy= null;
-		fInputElement= null;
+		fInputElements= null;
 		fIsSuperTypesOnly= isSuperTypesOnly;
 		fChangeListeners= new ArrayList(2);
 	}
@@ -106,8 +106,13 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		return fHierarchy;
 	}
 
-	public IJavaElement getInputElement() {
-		return fInputElement;
+	/**
+	 * Returns the array of input elements.
+	 * 
+	 * @return the input elements
+	 */
+	public IJavaElement[] getInputElements() {
+		return fInputElements;
 	}
 
 
@@ -116,7 +121,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 			fHierarchy.removeTypeHierarchyChangedListener(this);
 			JavaCore.removeElementChangedListener(this);
 			fHierarchy= null;
-			fInputElement= null;
+			fInputElements= null;
 		}
 		synchronized (this) {
 			if (fRefreshHierarchyJob != null) {
@@ -152,6 +157,19 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	 * @throws InvocationTargetException thrown from the <code>JavaModelException</code> if the java element does not exist or if an exception occurs while accessing its corresponding resource
 	 */
 	public void ensureRefreshedTypeHierarchy(final IJavaElement element, IRunnableContext context) throws InvocationTargetException, InterruptedException {
+		ensureRefreshedTypeHierarchy(new IJavaElement[] { element }, context);
+	}
+
+	/**
+	 * Refreshes the type hierarchy for the java elements if they exist.
+	 * 
+	 * @param elements the java elements for which the type hierarchy is computed
+	 * @param context the runnable context
+	 * @throws InterruptedException thrown from the <code>OperationCanceledException</code> when the monitor is canceled
+	 * @throws InvocationTargetException thrown from the <code>JavaModelException</code> if a java element does not exist or if an exception occurs while accessing its corresponding resource
+	 * @since 3.7
+	 */
+	public void ensureRefreshedTypeHierarchy(final IJavaElement[] elements, IRunnableContext context) throws InvocationTargetException, InterruptedException {
 		synchronized (this) {
 			if (fRefreshHierarchyJob != null) {
 				fRefreshHierarchyJob.cancel();
@@ -166,18 +184,24 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				}
 			}
 		}
-		if (element == null || !element.exists()) {
+		if (elements == null || elements.length == 0) {
 			freeHierarchy();
 			return;
 		}
-		boolean hierachyCreationNeeded= (fHierarchy == null || !element.equals(fInputElement));
+		for (int i= 0; i < elements.length; i++) {
+			if (elements[i] == null || !elements[i].exists()) {
+				freeHierarchy();
+				return;
+			}
+		}
+		boolean hierachyCreationNeeded= (fHierarchy == null || !elements.equals(fInputElements));
 
 		if (hierachyCreationNeeded || fHierarchyRefreshNeeded) {
 			if (fTypeHierarchyViewPart == null) {
 				IRunnableWithProgress op= new IRunnableWithProgress() {
 					public void run(IProgressMonitor pm) throws InvocationTargetException, InterruptedException {
 						try {
-							doHierarchyRefresh(element, pm);
+							doHierarchyRefresh(elements, pm);
 						} catch (JavaModelException e) {
 							throw new InvocationTargetException(e);
 						} catch (OperationCanceledException e) {
@@ -189,7 +213,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				context.run(true, true, op);
 				fHierarchyRefreshNeeded= false;
 			} else {
-				final String label= Messages.format(TypeHierarchyMessages.TypeHierarchyLifeCycle_computeInput, JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT));
+				final String label= Messages.format(TypeHierarchyMessages.TypeHierarchyLifeCycle_computeInput, HistoryAction.concatenateElementsNames(elements, JavaElementLabels.ALL_DEFAULT));
 				synchronized (this) {
 					fRefreshHierarchyJob= new Job(label) {
 						/*
@@ -198,7 +222,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 						public IStatus run(IProgressMonitor pm) {
 							pm.beginTask(label, LONG);
 							try {
-								doHierarchyRefreshBackground(element, pm);
+								doHierarchyRefreshBackground(elements, pm);
 							} catch (OperationCanceledException e) {
 								if (fRefreshJobCanceledExplicitly) {
 									fTypeHierarchyViewPart.showEmptyViewer();
@@ -237,15 +261,15 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	 * Refreshes the hierarchy in the background and updates the hierarchy viewer asynchronously in
 	 * the UI thread.
 	 * 
-	 * @param element the java element on which the hierarchy is computed
+	 * @param elements the java elements on which the hierarchy is computed
 	 * @param pm the progress monitor
 	 * @throws JavaModelException if the java element does not exist or if an exception occurs while
 	 *             accessing its corresponding resource.
 	 * 
 	 * @since 3.6
 	 */
-	protected void doHierarchyRefreshBackground(final IJavaElement element, final IProgressMonitor pm) throws JavaModelException {
-		doHierarchyRefresh(element, pm);
+	protected void doHierarchyRefreshBackground(final IJavaElement[] elements, final IProgressMonitor pm) throws JavaModelException {
+		doHierarchyRefresh(elements, pm);
 		if (!pm.isCanceled()) {
 			Display.getDefault().asyncExec(new Runnable() {
 				/*
@@ -267,9 +291,9 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		}
 	}
 
-	private ITypeHierarchy createTypeHierarchy(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
-		if (element.getElementType() == IJavaElement.TYPE) {
-			IType type= (IType) element;
+	private ITypeHierarchy createTypeHierarchy(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
+		if (elements.length == 1 && elements[0].getElementType() == IJavaElement.TYPE) {
+			IType type= (IType)elements[0];
 			if (fIsSuperTypesOnly) {
 				return type.newSupertypeHierarchy(pm);
 			} else {
@@ -277,34 +301,43 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 			}
 		} else {
 			IRegion region= JavaCore.newRegion();
-			if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
-				// for projects only add the contained source folders
-				IPackageFragmentRoot[] roots= ((IJavaProject) element).getPackageFragmentRoots();
-				for (int i= 0; i < roots.length; i++) {
-					if (!roots[i].isExternal()) {
-						region.add(roots[i]);
+			for (int i= 0; i < elements.length; i++) {
+				if (elements[i].getElementType() == IJavaElement.JAVA_PROJECT) {
+					// for projects only add the contained source folders
+					IPackageFragmentRoot[] roots= ((IJavaProject)elements[i]).getPackageFragmentRoots();
+					for (int j= 0; j < roots.length; j++) {
+						if (!roots[j].isExternal()) {
+							region.add(roots[j]);
+						}
 					}
-				}
-			} else if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-				IPackageFragmentRoot[] roots= element.getJavaProject().getPackageFragmentRoots();
-				String name= element.getElementName();
-				for (int i= 0; i < roots.length; i++) {
-					IPackageFragment pack= roots[i].getPackageFragment(name);
-					if (pack.exists()) {
-						region.add(pack);
+				} else if (elements[i].getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+					IPackageFragmentRoot[] roots= elements[i].getJavaProject().getPackageFragmentRoots();
+					String name= elements[i].getElementName();
+					for (int j= 0; j < roots.length; j++) {
+						IPackageFragment pack= roots[j].getPackageFragment(name);
+						if (pack.exists()) {
+							region.add(pack);
+						}
 					}
+				} else if (elements[i].getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+					IPackageFragmentRoot root= (IPackageFragmentRoot)elements[i];
+					if (!root.isExternal()) {
+						region.add(root);
+					}
+				} else if (elements[i].getElementType() == IJavaElement.TYPE) {
+					IType type= (IType)elements[i];
+					region.add(type);
+				} else {
+					region.add(elements[i]);
 				}
-			} else {
-				region.add(element);
 			}
-			IJavaProject jproject= element.getJavaProject();
-			return jproject.newTypeHierarchy(region, pm);
+			return JavaCore.newTypeHierarchy(region, null, pm);
 		}
 	}
 
 
-	public void doHierarchyRefresh(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
-		boolean hierachyCreationNeeded= (fHierarchy == null || !element.equals(fInputElement));
+	public void doHierarchyRefresh(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
+		boolean hierachyCreationNeeded= (fHierarchy == null || !elements.equals(fInputElements));
 		// to ensure the order of the two listeners always remove / add listeners on operations
 		// on type hierarchies
 		if (fHierarchy != null) {
@@ -312,11 +345,11 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 			JavaCore.removeElementChangedListener(this);
 		}
 		if (hierachyCreationNeeded) {
-			fHierarchy= createTypeHierarchy(element, pm);
+			fHierarchy= createTypeHierarchy(elements, pm);
 			if (pm != null && pm.isCanceled()) {
 				throw new OperationCanceledException();
 			}
-			fInputElement= element;
+			fInputElements= elements;
 		} else {
 			fHierarchy.refresh(pm);
 			if (pm != null && pm.isCanceled())

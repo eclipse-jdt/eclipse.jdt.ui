@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -101,23 +104,25 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		fFilter= filter;
 	}
 
-	protected boolean isDifferentScope(IType type) {
+	protected boolean isInDifferentHierarchyScope(IType type) {
 		if (fFilter != null && !fFilter.select(null, null, type)) {
 			return true;
 		}
-
-		IJavaElement input= fHierarchy.getInputElement();
-		if (input == null || input.getElementType() == IJavaElement.TYPE) {
+		IJavaElement[] input= fHierarchy.getInputElements();
+		if (input == null)
 			return false;
-		}
-
-		IJavaElement parent= type.getAncestor(input.getElementType());
-		if (input.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-			if (parent == null || parent.getElementName().equals(input.getElementName())) {
+		for (int i= 0; i < input.length; i++) {
+			if (input[i] == null || input[i].getElementType() == IJavaElement.TYPE) {
 				return false;
 			}
-		} else if (input.equals(parent)) {
-			return false;
+			IJavaElement parent= type.getAncestor(input[i].getElementType());
+			if (input[i].getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+				if (parent == null || parent.getElementName().equals(input[i].getElementName())) {
+					return false;
+				}
+			} else if (input[i].equals(parent)) {
+				return false;
+			}
 		}
 		return true;
 	}
@@ -130,7 +135,8 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		if (element instanceof IType) {
 			ImageDescriptor desc= getTypeImageDescriptor((IType) element);
 			if (desc != null) {
-				if (element.equals(fHierarchy.getInputElement())) {
+				List inputElements= Arrays.asList(fHierarchy.getInputElements());
+				if (inputElements.contains(element)) {
 					desc= new FocusDescriptor(desc);
 				}
 				result= JavaPlugin.getImageDescriptorRegistry().get(desc);
@@ -169,7 +175,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			}
 		}
 
-		ImageDescriptor desc= JavaElementImageProvider.getTypeImageDescriptor(isInner, isInInterfaceOrAnnotation, flags, isDifferentScope(type));
+		ImageDescriptor desc= JavaElementImageProvider.getTypeImageDescriptor(isInner, isInInterfaceOrAnnotation, flags, isInDifferentHierarchyScope(type));
 
 		int adornmentFlags= 0;
 		if (Flags.isFinal(flags)) {
@@ -197,7 +203,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 				fSpecialColor= Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE);
 			}
 			return fSpecialColor;
-		} else if (element instanceof IType && isDifferentScope((IType) element)) {
+		} else if (element instanceof IType && isInDifferentHierarchyScope((IType) element)) {
 			return JFaceResources.getColorRegistry().get(JFacePreferences.QUALIFIER_COLOR);
 		}
 		return null;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
@@ -128,34 +129,33 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	}
 
 	private boolean isEnabled(IStructuredSelection selection) {
-		if (selection.size() != 1)
+		Object[] elements= selection.toArray();
+		if (elements.length == 0)
 			return false;
-		Object input= selection.getFirstElement();
-
-
-		if (input instanceof LogicalPackage)
-			return true;
-
-		if (!(input instanceof IJavaElement))
-			return false;
-		switch (((IJavaElement)input).getElementType()) {
-			case IJavaElement.INITIALIZER:
-			case IJavaElement.METHOD:
-			case IJavaElement.FIELD:
-			case IJavaElement.TYPE:
+		for (int j= 0; j < elements.length; j++) {
+			Object input= elements[j];
+			if (input instanceof LogicalPackage)
 				return true;
-			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-			case IJavaElement.JAVA_PROJECT:
-			case IJavaElement.PACKAGE_FRAGMENT:
-			case IJavaElement.PACKAGE_DECLARATION:
-			case IJavaElement.IMPORT_DECLARATION:
-			case IJavaElement.CLASS_FILE:
-			case IJavaElement.COMPILATION_UNIT:
-				return true;
-			case IJavaElement.LOCAL_VARIABLE:
-			default:
-				return false;
+			if (!(input instanceof IJavaElement))
+				continue;
+
+			switch (((IJavaElement)input).getElementType()) {
+				case IJavaElement.INITIALIZER:
+				case IJavaElement.METHOD:
+				case IJavaElement.FIELD:
+				case IJavaElement.TYPE:
+					return true;
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				case IJavaElement.JAVA_PROJECT:
+				case IJavaElement.PACKAGE_FRAGMENT:
+				case IJavaElement.PACKAGE_DECLARATION:
+				case IJavaElement.IMPORT_DECLARATION:
+				case IJavaElement.CLASS_FILE:
+				case IJavaElement.COMPILATION_UNIT:
+					return true;				
+			}
 		}
+		return false;
 	}
 
 	/* (non-Javadoc)
@@ -188,33 +188,36 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(IStructuredSelection selection) {
-		if (selection.size() != 1)
-			return;
-		Object input= selection.getFirstElement();
+		List validElements= new ArrayList();
+		Object[] selectedElements= selection.toArray();
 
-		if (input instanceof LogicalPackage) {
-			IPackageFragment[] fragments= ((LogicalPackage)input).getFragments();
-			if (fragments.length == 0)
-				return;
-			input= fragments[0];
+		for (int i= 0; i < selectedElements.length; i++) {
+			Object input= selectedElements[i];
+			if (input instanceof LogicalPackage) {
+				IPackageFragment[] fragments= ((LogicalPackage)input).getFragments();
+				if (fragments.length == 0)
+					continue;
+				for (int j= 0; j < fragments.length; j++) {
+					validElements.add(fragments[j]);
+				}
+			} else {
+				if (!(input instanceof IJavaElement) || !ActionUtil.isProcessable(getShell(), (IJavaElement)input))
+					continue;
+				IJavaElement element= (IJavaElement)input;
+				validElements.add(element);
+			}
 		}
-
-		if (!(input instanceof IJavaElement)) {
-			IStatus status= createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_java_element);
+		if (validElements.size() == 0) {
+			IStatus status= createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_java_elements);
 			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenTypeHierarchyAction_messages_title, status);
 			return;
 		}
-		IJavaElement element= (IJavaElement) input;
-		if (!ActionUtil.isProcessable(getShell(), element))
-			return;
-
-		List result= new ArrayList(1);
-		IStatus status= compileCandidates(result, element);
-		if (status.isOK()) {
-			run((IJavaElement[]) result.toArray(new IJavaElement[result.size()]));
-		} else {
+		List result= new ArrayList();
+		IStatus status= compileCandidates(result, validElements);
+		if (!status.isOK()) {
 			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenTypeHierarchyAction_messages_title, status);
 		}
+		run((IJavaElement[])result.toArray(new IJavaElement[result.size()]));
 	}
 
 	/*
@@ -233,55 +236,53 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		return ActionMessages.OpenTypeHierarchyAction_dialog_title;
 	}
 
-	private static IStatus compileCandidates(List result, IJavaElement elem) {
+	private static IStatus compileCandidates(List result, List elements) {
 		IStatus ok= Status.OK_STATUS;
-		try {
-			switch (elem.getElementType()) {
-				case IJavaElement.INITIALIZER:
-				case IJavaElement.METHOD:
-				case IJavaElement.FIELD:
-				case IJavaElement.TYPE:
-				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-				case IJavaElement.JAVA_PROJECT:
-					result.add(elem);
-					return ok;
-				case IJavaElement.PACKAGE_FRAGMENT:
-					if (((IPackageFragment)elem).containsJavaResources()) {
+		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			IJavaElement elem= (IJavaElement)iter.next();
+			try {
+				switch (elem.getElementType()) {
+					case IJavaElement.INITIALIZER:
+					case IJavaElement.METHOD:
+					case IJavaElement.FIELD:
+					case IJavaElement.TYPE:
+					case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+					case IJavaElement.JAVA_PROJECT:
 						result.add(elem);
-						return ok;
-					}
-					return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_java_resources);
-				case IJavaElement.PACKAGE_DECLARATION:
-					result.add(elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT));
-					return ok;
-				case IJavaElement.IMPORT_DECLARATION:
-					IImportDeclaration decl= (IImportDeclaration) elem;
-					if (decl.isOnDemand()) {
-						elem= JavaModelUtil.findTypeContainer(elem.getJavaProject(), Signature.getQualifier(elem.getElementName()));
-					} else {
-						elem= elem.getJavaProject().findType(elem.getElementName());
-					}
-					if (elem != null) {
-						result.add(elem);
-						return ok;
-					}
-					return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_unknown_import_decl);
-				case IJavaElement.CLASS_FILE:
-					result.add(((IClassFile)elem).getType());
-					return ok;
-				case IJavaElement.COMPILATION_UNIT:
-					ICompilationUnit cu= (ICompilationUnit)elem;
-					IType[] types= cu.getTypes();
-					if (types.length > 0) {
-						result.addAll(Arrays.asList(types));
-						return ok;
-					}
-					return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_types);
+						break;
+					case IJavaElement.PACKAGE_FRAGMENT:
+						if (((IPackageFragment)elem).containsJavaResources())
+							result.add(elem);
+						break;
+					case IJavaElement.PACKAGE_DECLARATION:
+						result.add(elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT));
+						break;
+					case IJavaElement.IMPORT_DECLARATION:
+						IImportDeclaration decl= (IImportDeclaration)elem;
+						if (decl.isOnDemand())
+							elem= JavaModelUtil.findTypeContainer(elem.getJavaProject(), Signature.getQualifier(elem.getElementName()));
+						else
+							elem= elem.getJavaProject().findType(elem.getElementName());
+						if (elem != null)
+							result.add(elem);
+						break;
+					case IJavaElement.CLASS_FILE:
+						result.add(((IClassFile)elem).getType());
+						break;
+					case IJavaElement.COMPILATION_UNIT:
+						ICompilationUnit cu= (ICompilationUnit)elem;
+						IType[] types= cu.getTypes();
+						if (types.length > 0) {
+							result.addAll(Arrays.asList(types));
+						}
+				}
+			} catch (JavaModelException e) {
+				return e.getStatus();
 			}
-		} catch (JavaModelException e) {
-			return e.getStatus();
 		}
-		return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_valid_java_element);
+		if (result.size() == 0)
+			return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_valid_java_element);
+		return ok;
 	}
 
 	private static IStatus createStatus(String message) {
