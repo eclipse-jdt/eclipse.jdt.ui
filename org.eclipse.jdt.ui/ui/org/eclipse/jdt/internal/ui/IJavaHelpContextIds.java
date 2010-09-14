@@ -337,6 +337,7 @@ public interface IJavaHelpContextIds {
 	public static final String JAVADOC_PROBLEMS_PREFERENCE_PAGE= PREFIX + "javadoc_problems_preference_page_context"; //$NON-NLS-1$
 	public static final String PROBLEM_SEVERITIES_PREFERENCE_PAGE= PREFIX + "problem_severities_preference_page_context"; //$NON-NLS-1$
 	public static final String TODOTASK_PREFERENCE_PAGE= PREFIX + "tasktags_preference_page_context"; //$NON-NLS-1$
+	public static final String TYPING_PREFERENCE_PAGE= PREFIX + "typing_preference_page_context"; //$NON-NLS-1$
 
 	public static final String TEMPLATE_PREFERENCE_PAGE= PREFIX + "template_preference_page_context"; //$NON-NLS-1$
 	public static final String NEW_JAVA_PROJECT_PREFERENCE_PAGE= PREFIX + "new_java_project_preference_page_context"; //$NON-NLS-1$
