@@ -29,6 +29,9 @@ public interface IJavaHelpContextIds {
 	// Actions
 	public static final String GETTERSETTER_ACTION= 											PREFIX + "getter_setter_action_context"; //$NON-NLS-1$
 	public static final String ADD_UNIMPLEMENTED_METHODS_ACTION= 					PREFIX + "add_unimplemented_methods_action_context"; //$NON-NLS-1$
+	/** @since 3.7 **/
+	public static final String SHOW_IN_BREADCRUMB_ACTION=                           PREFIX + "show_in_breadcrumb_action_context"; //$NON-NLS-1$
+	public static final String COPY_QUALIFIED_NAME_ACTION= 							PREFIX + "copy_qualified_name_action_context"; //$NON-NLS-1$
 	/** @since 3.2 **/
 	public static final String GENERATE_HASHCODE_EQUALS_ACTION=						PREFIX + "add_hashcode_equals_action_context"; //$NON-NLS-1$
 	/** @since 3.5 **/
