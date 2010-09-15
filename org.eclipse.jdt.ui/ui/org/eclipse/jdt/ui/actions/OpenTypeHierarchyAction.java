@@ -132,30 +132,53 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		Object[] elements= selection.toArray();
 		if (elements.length == 0)
 			return false;
-		for (int j= 0; j < elements.length; j++) {
-			Object input= elements[j];
+		
+		if (elements.length == 1) {
+			Object input= elements[0];
 			if (input instanceof LogicalPackage)
 				return true;
 			if (!(input instanceof IJavaElement))
-				continue;
+				return false;
 
 			switch (((IJavaElement)input).getElementType()) {
 				case IJavaElement.INITIALIZER:
 				case IJavaElement.METHOD:
 				case IJavaElement.FIELD:
 				case IJavaElement.TYPE:
+				case IJavaElement.IMPORT_DECLARATION:
+				case IJavaElement.CLASS_FILE:
+				case IJavaElement.COMPILATION_UNIT:
 					return true;
+				case IJavaElement.LOCAL_VARIABLE:
+				case IJavaElement.TYPE_PARAMETER:
+				case IJavaElement.ANNOTATION:
+					return false;
+				default:
+					// continue below
+			}
+		}
+		
+		// strategy: allow non-IJavaElements (e.g. an IResource), but stop for invalid IJavaElements
+		boolean hasValidElement= false;
+		for (int j= 0; j < elements.length; j++) {
+			Object input= elements[j];
+			if (input instanceof LogicalPackage)
+				continue;
+			if (!(input instanceof IJavaElement))
+				continue;
+			
+			switch (((IJavaElement)input).getElementType()) {
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				case IJavaElement.JAVA_PROJECT:
 				case IJavaElement.PACKAGE_FRAGMENT:
 				case IJavaElement.PACKAGE_DECLARATION:
-				case IJavaElement.IMPORT_DECLARATION:
-				case IJavaElement.CLASS_FILE:
-				case IJavaElement.COMPILATION_UNIT:
-					return true;				
+					hasValidElement= true;
+					continue;
+				default:
+					return false;
 			}
 		}
-		return false;
+		return hasValidElement;
 	}
 
 	/* (non-Javadoc)
@@ -214,10 +237,11 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		}
 		List result= new ArrayList();
 		IStatus status= compileCandidates(result, validElements);
-		if (!status.isOK()) {
+		if (status.isOK()) {
+			run((IJavaElement[])result.toArray(new IJavaElement[result.size()]));
+		} else {
 			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenTypeHierarchyAction_messages_title, status);
 		}
-		run((IJavaElement[])result.toArray(new IJavaElement[result.size()]));
 	}
 
 	/*
@@ -238,6 +262,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 
 	private static IStatus compileCandidates(List result, List elements) {
 		IStatus ok= Status.OK_STATUS;
+		boolean onlyContainers= true;
 		for (Iterator iter= elements.iterator(); iter.hasNext();) {
 			IJavaElement elem= (IJavaElement)iter.next();
 			try {
@@ -246,6 +271,8 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 					case IJavaElement.METHOD:
 					case IJavaElement.FIELD:
 					case IJavaElement.TYPE:
+						onlyContainers= false;
+						//$FALL-THROUGH$
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 					case IJavaElement.JAVA_PROJECT:
 						result.add(elem);
@@ -263,16 +290,20 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 							elem= JavaModelUtil.findTypeContainer(elem.getJavaProject(), Signature.getQualifier(elem.getElementName()));
 						else
 							elem= elem.getJavaProject().findType(elem.getElementName());
-						if (elem != null)
+						if (elem != null) {
+							onlyContainers= false;
 							result.add(elem);
+						}
 						break;
 					case IJavaElement.CLASS_FILE:
+						onlyContainers= false;
 						result.add(((IClassFile)elem).getType());
 						break;
 					case IJavaElement.COMPILATION_UNIT:
 						ICompilationUnit cu= (ICompilationUnit)elem;
 						IType[] types= cu.getTypes();
 						if (types.length > 0) {
+							onlyContainers= false;
 							result.addAll(Arrays.asList(types));
 						}
 				}
@@ -280,7 +311,8 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 				return e.getStatus();
 			}
 		}
-		if (result.size() == 0)
+		int size= result.size();
+		if (size == 0 || (size > 1 && !onlyContainers))
 			return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_valid_java_element);
 		return ok;
 	}

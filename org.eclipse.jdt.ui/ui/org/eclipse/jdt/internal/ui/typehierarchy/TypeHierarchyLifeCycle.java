@@ -319,14 +319,6 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 							region.add(pack);
 						}
 					}
-				} else if (elements[i].getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
-					IPackageFragmentRoot root= (IPackageFragmentRoot)elements[i];
-					if (!root.isExternal()) {
-						region.add(root);
-					}
-				} else if (elements[i].getElementType() == IJavaElement.TYPE) {
-					IType type= (IType)elements[i];
-					region.add(type);
 				} else {
 					region.add(elements[i]);
 				}
