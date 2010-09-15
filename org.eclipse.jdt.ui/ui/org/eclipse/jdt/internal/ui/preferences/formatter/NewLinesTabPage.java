@@ -24,11 +24,11 @@ public class NewLinesTabPage extends FormatterTabPage {
 	private final String PREVIEW=
 	createPreviewHeader(FormatterMessages.NewLinesTabPage_preview_header) +
 	"@Deprecated\n" + //$NON-NLS-1$
-	"package com.example; // only allowed in package-info.java\n" + //$NON-NLS-1$
+	"package com.example; // annotation on package is only allowed in package-info.java\n" + //$NON-NLS-1$
 	"\n" + //$NON-NLS-1$
 	"public class Empty {}\n" + //$NON-NLS-1$
-	"class Example {" + //$NON-NLS-1$
-	"  static int [] fArray= {1, 2, 3, 4, 5 };" + //$NON-NLS-1$
+	"@Deprecated class Example {" + //$NON-NLS-1$
+	"  @Deprecated static int [] fArray= {1, 2, 3, 4, 5 };" + //$NON-NLS-1$
 	"  Listener fListener= new Listener() {" + //$NON-NLS-1$
 	"  };\n" + //$NON-NLS-1$
 	"  @Deprecated @Override " + //$NON-NLS-1$
