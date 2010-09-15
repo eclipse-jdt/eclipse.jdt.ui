@@ -69,6 +69,8 @@ public class HistoryAction extends Action {
 				else
 					result= elementName;
 			}
+			if (elements.length > 2)
+				result= Messages.format(TypeHierarchyMessages.HistoryAction_javaElementConcatenationWithEllipsis, new String[] { result });
 		}
 		return result;
 	}
