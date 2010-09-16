@@ -40,6 +40,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
@@ -67,6 +68,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.MultiActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
@@ -598,55 +600,11 @@ public class PackagesView extends JavaBrowsingPart{
 	}
 
 	/*
-	 * Overridden from JavaBrowsingPart to handel LogicalPackages and tree
-	 * structure.
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#adjustInputAndSetSelection(org.eclipse.jdt.core.IJavaElement)
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#isInputResetBy(java.lang.Object, java.lang.Object, org.eclipse.ui.IWorkbenchPart)
+	 * @since 3.7
 	 */
-	void adjustInputAndSetSelection(IJavaElement je) {
-
-		IJavaElement jElementToSelect= findElementToSelect(je);
-		LogicalPackagesProvider p= (LogicalPackagesProvider) fWrappedViewer.getContentProvider();
-
-		Object elementToSelect= jElementToSelect;
-		if (jElementToSelect != null && jElementToSelect.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-			IPackageFragment pkgFragment= (IPackageFragment)jElementToSelect;
-			elementToSelect= p.findLogicalPackage(pkgFragment);
-			if (elementToSelect == null)
-				elementToSelect= pkgFragment;
-		}
-
-		IJavaElement newInput= findInputForJavaElement(je);
-		if (elementToSelect == null && !isValidInput(newInput))
-			setInput(null);
-		else if (elementToSelect == null || getViewer().testFindItem(elementToSelect) == null) {
-
-			//optimization, if you are in the same project but expansion hasn't happened
-			Object input= getViewer().getInput();
-			if (elementToSelect != null && newInput != null) {
-				if (newInput.equals(input)) {
-					getViewer().reveal(elementToSelect);
-				// Adjust input to selection
-				} else {
-					setInput(newInput);
-					getViewer().reveal(elementToSelect);
-				}
-			} else
-				setInput(newInput);
-
-			if (elementToSelect instanceof IPackageFragment) {
-				IPackageFragment pkgFragment= (IPackageFragment)elementToSelect;
-				elementToSelect= p.findLogicalPackage(pkgFragment);
-				if (elementToSelect == null)
-					elementToSelect= pkgFragment;
-			}
-		}
-
-		ISelection selection;
-		if (elementToSelect != null)
-			selection= new StructuredSelection(elementToSelect);
-		else
-			selection= StructuredSelection.EMPTY;
-		setSelection(selection, true);
+	boolean isInputResetBy(Object newInput, Object input, IWorkbenchPart part) {
+		return (!(part instanceof ProjectsView || part instanceof PackageExplorerPart)) && super.isInputResetBy(newInput, input, part);
 	}
 
 }

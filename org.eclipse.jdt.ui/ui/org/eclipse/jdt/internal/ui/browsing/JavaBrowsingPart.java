@@ -652,7 +652,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 
 	}
 
-	private boolean isInputResetBy(Object newInput, Object input, IWorkbenchPart part) {
+	boolean isInputResetBy(Object newInput, Object input, IWorkbenchPart part) {
 		if (newInput == null)
 			return part == fPreviousSelectionProvider;
 
