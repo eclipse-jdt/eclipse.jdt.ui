@@ -112,7 +112,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
-import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
@@ -606,7 +605,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 			fInputElements= inputElements;
 			fNoHierarchyShownLabel
-					.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_createinput, HistoryAction.concatenateElementsNames(fInputElements, JavaElementLabels.ALL_DEFAULT)));
+					.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_createinput, HistoryAction.getElementLabel(fInputElements)));
 			try {
 				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElements, JavaPlugin.getActiveWorkbenchWindow());
 				// fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement, getSite().getWorkbenchWindow());
@@ -1232,7 +1231,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					setViewerVisibility(true);
 				}
 			} else if (!isKeepShowingEmptyViewers()) {//Show the empty hierarchy viewer till fresh computation is done.
-				fEmptyTypesViewer.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_nodecl, HistoryAction.concatenateElementsNames(fInputElements, JavaElementLabels.ALL_DEFAULT)));
+				fEmptyTypesViewer.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_nodecl, HistoryAction.getElementLabel(fInputElements)));
 				setViewerVisibility(false);
 			}
 		}
@@ -1368,7 +1367,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		String description;
 		if (fInputElements != null) {
 			IWorkingSet workingSet= fWorkingSetActionGroup.getWorkingSet();
-			String elementName= HistoryAction.concatenateElementsNames(fInputElements, JavaElementLabels.ALL_DEFAULT);
+			String elementName= HistoryAction.getElementLabel(fInputElements);
 			if (workingSet == null) {
 				description= elementName;
 				tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_tooltip, elementName);
@@ -1657,7 +1656,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			final IJavaElement[] hierarchyInput= (IJavaElement[])inputList.toArray(new IJavaElement[inputList.size()]);
 
 			synchronized (this) {
-				String label= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_restoreinput, HistoryAction.concatenateElementsNames(hierarchyInput, JavaElementLabels.ALL_DEFAULT));
+				String label= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_restoreinput, HistoryAction.getElementLabel(hierarchyInput));
 				fNoHierarchyShownLabel.setText(label);
 
 				fRestoreStateJob= new Job(label) {

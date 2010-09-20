@@ -47,10 +47,8 @@ public final class TypeHierarchyMessages extends NLS {
 	public static String HistoryDropDownAction_tooltip;
 	public static String HistoryAction_description;
 	public static String HistoryAction_tooltip;
-	public static String HistoryAction_javaElementConcatenation;
-	public static String HistoryAction_javaElementConcatenationWithEllipsis;
+	public static String HistoryAction_inputElements_1;
 	public static String HistoryAction_inputElements_2;
-	public static String HistoryAction_inputElements_3;
 	public static String HistoryAction_inputElements_more;
 	public static String HistoryListDialog_title;
 	public static String HistoryListDialog_label;

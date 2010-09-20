@@ -40,39 +40,13 @@ public class HistoryAction extends Action {
 		fViewPart= viewPart;
 		fElements= elements;
 
-		long flags= JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.ALL_DEFAULT;
-		String elementName= concatenateElementsNames(elements, flags);
+		String elementName= getElementLabel(elements);
 		setText(elementName);
 		setImageDescriptor(getImageDescriptor(elements[0]));
 
 		setDescription(Messages.format(TypeHierarchyMessages.HistoryAction_description, elementName));
 		setToolTipText(Messages.format(TypeHierarchyMessages.HistoryAction_tooltip, elementName));
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.HISTORY_ACTION);
-	}
-
-	/**
-	 * Concatenates and returns the names of all the java elements into a single string.
-	 * 
-	 * @param elements the java elements
-	 * @param flags the rendering flags
-	 * @return the concatenated string of names of all the java elements
-	 * @since 3.7
-	 */
-	protected static String concatenateElementsNames(IJavaElement[] elements, long flags) {
-		String result= ""; //$NON-NLS-1$
-		if (elements != null && elements.length > 0) {
-			int min= Math.min(2, elements.length);
-			for (int i= 0; i < min; i++) {
-				String elementName= JavaElementLabels.getElementLabel(elements[i], flags);
-				if (i > 0)
-					result= Messages.format(TypeHierarchyMessages.HistoryAction_javaElementConcatenation, new String[] { result, elementName });
-				else
-					result= elementName;
-			}
-			if (elements.length > 2)
-				result= Messages.format(TypeHierarchyMessages.HistoryAction_javaElementConcatenationWithEllipsis, new String[] { result });
-		}
-		return result;
 	}
 
 	private ImageDescriptor getImageDescriptor(IJavaElement elem) {
@@ -114,16 +88,11 @@ public class HistoryAction extends Action {
 				return null;
 
 			case 1:
-				return JavaElementLabels.getElementLabel(elements[0], JavaElementLabels.ALL_POST_QUALIFIED);
-
+				return Messages.format(TypeHierarchyMessages.HistoryAction_inputElements_1,
+						new String[] { getShortLabel(elements[0]) });
 			case 2:
 				return Messages.format(TypeHierarchyMessages.HistoryAction_inputElements_2,
 						new String[] { getShortLabel(elements[0]), getShortLabel(elements[1]) });
-
-			case 3:
-				return Messages.format(TypeHierarchyMessages.HistoryAction_inputElements_3,
-						new String[] { getShortLabel(elements[0]), getShortLabel(elements[1]), getShortLabel(elements[2]) });
-
 			default:
 				return Messages.format(TypeHierarchyMessages.HistoryAction_inputElements_more,
 						new String[] { getShortLabel(elements[0]), getShortLabel(elements[1]), getShortLabel(elements[2]) });
@@ -138,7 +107,7 @@ public class HistoryAction extends Action {
 	 * @since 3.7
 	 */
 	private static String getShortLabel(IJavaElement element) {
-		return JavaElementLabels.getElementLabel(element, 0L);
+		return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_POST_QUALIFIED);
 	}
 
 }

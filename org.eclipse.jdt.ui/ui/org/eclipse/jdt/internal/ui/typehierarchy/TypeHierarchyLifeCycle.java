@@ -46,8 +46,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -213,7 +211,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				context.run(true, true, op);
 				fHierarchyRefreshNeeded= false;
 			} else {
-				final String label= Messages.format(TypeHierarchyMessages.TypeHierarchyLifeCycle_computeInput, HistoryAction.concatenateElementsNames(elements, JavaElementLabels.ALL_DEFAULT));
+				final String label= Messages.format(TypeHierarchyMessages.TypeHierarchyLifeCycle_computeInput, HistoryAction.getElementLabel(elements));
 				synchronized (this) {
 					fRefreshHierarchyJob= new Job(label) {
 						/*
