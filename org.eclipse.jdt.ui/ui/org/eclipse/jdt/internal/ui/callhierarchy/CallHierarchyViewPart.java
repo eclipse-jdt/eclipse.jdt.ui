@@ -65,6 +65,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchPartSite;
@@ -74,6 +75,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.PageBook;
@@ -115,7 +117,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.FileTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.PluginTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
@@ -955,13 +956,14 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fActionGroups.setContext(null);
 
 		if (fCopyAction.canActionBeAdded()) {
-			menu.insertBefore(PasteAction.ID, fCopyAction);
+			menu.appendToGroup(ICommonMenuConstants.GROUP_EDIT, fCopyAction);
 		}
     }
 
     private void fillActionBars() {
         IActionBars actionBars = getActionBars();
 		actionBars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fRefreshSingleElementAction);
+		actionBars.setGlobalActionHandler(ActionFactory.DELETE.getId(), fRemoveFromViewAction);
 
         IToolBarManager toolBar = actionBars.getToolBarManager();
 
@@ -975,9 +977,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         toolBar.add(fHistoryDropDownAction);
     }
 
-    /**
-     *
-     */
     private void makeActions() {
         fRefreshViewAction = new RefreshViewAction(this);
         fRefreshSingleElementAction= new RefreshElementAction(fCallHierarchyViewer);
@@ -1005,6 +1004,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_AUTOMATIC),
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_SINGLE)
             };
+		fRemoveFromViewAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_DELETE);
         fToggleCallModeActions = new ToggleCallModeAction[] {
                 new ToggleCallModeAction(this, CALL_MODE_CALLERS),
                 new ToggleCallModeAction(this, CALL_MODE_CALLEES)
@@ -1017,7 +1017,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fActionGroups = new CompositeActionGroup(new ActionGroup[] {
                     new OpenEditorActionGroup(this),
                     new OpenViewActionGroup(this),
-                    new CCPActionGroup(this),
+					new CCPActionGroup(this, true),
                     new GenerateActionGroup(this),
                     new RefactorActionGroup(this),
                     new JavaSearchActionGroup(this),
