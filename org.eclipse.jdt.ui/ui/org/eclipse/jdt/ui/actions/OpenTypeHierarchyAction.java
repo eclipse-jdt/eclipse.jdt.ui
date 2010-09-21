@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -222,6 +223,21 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 					continue;
 				for (int j= 0; j < fragments.length; j++) {
 					validElements.add(fragments[j]);
+				}
+			} else if (input instanceof IPackageFragment) {
+				IPackageFragment fragment= (IPackageFragment)input;
+				IPackageFragmentRoot[] roots;
+				try {
+					roots= fragment.getJavaProject().getPackageFragmentRoots();
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+					continue;
+				}
+				String name= fragment.getElementName();
+				for (int j= 0; j < roots.length; j++) {
+					IPackageFragment pack= roots[j].getPackageFragment(name);
+					if (pack.exists())
+						validElements.add(pack);
 				}
 			} else {
 				if (!(input instanceof IJavaElement) || !ActionUtil.isProcessable(getShell(), (IJavaElement)input))
