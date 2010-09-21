@@ -163,8 +163,10 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		boolean hasValidElement= false;
 		for (int j= 0; j < elements.length; j++) {
 			Object input= elements[j];
-			if (input instanceof LogicalPackage)
+			if (input instanceof LogicalPackage) {
+				hasValidElement= true;
 				continue;
+			}
 			if (!(input instanceof IJavaElement))
 				continue;
 			
