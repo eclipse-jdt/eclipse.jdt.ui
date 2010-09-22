@@ -1434,7 +1434,59 @@ public class CleanUpTest extends CleanUpTestCase {
 			JavaProjectHelper.delete(project);
 		}
 	}
-	
+
+	/**
+	 * Tests if CleanUp works when the number of problems in a single CU is greater than the
+	 * Compiler option {@link JavaCore#COMPILER_PB_MAX_PER_UNIT} which has a default value of 100,
+	 * see http://bugs.eclipse.org/322543 for details.
+	 * 
+	 * @throws Exception if the something fails while executing this test
+	 * @since 3.7
+	 */
+	public void testCleanUpWithCUProblemsGreaterThanMaxProblemsPerCUPreference() throws Exception {
+		IJavaProject project= JavaProjectHelper.createJavaProject("CleanUpTestProject", "bin");
+		try {
+			int count;
+			final int PROBLEMS_COUNT= 101;
+			JavaProjectHelper.addRTJar16(project);
+			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(project, "src");
+			IPackageFragment pack1= src.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("interface I {\n");
+			for (count= 0; count < PROBLEMS_COUNT; count++)
+				buf.append("    void m" + count + "();\n");
+			buf.append("}\n");
+			buf.append("class X implements I {\n");
+			for (count= 0; count < PROBLEMS_COUNT; count++)
+				buf.append("    public void m" + count + "() {} // @Override error in 1.5, not in 1.6\n");
+			buf.append("}\n");
+			ICompilationUnit cu1= pack1.createCompilationUnit("I.java", buf.toString(), false, null);
+
+			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
+			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
+			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("interface I {\n");
+			for (count= 0; count < PROBLEMS_COUNT; count++)
+				buf.append("    void m" + count + "();\n");
+			buf.append("}\n");
+			buf.append("class X implements I {\n");
+			for (count= 0; count < PROBLEMS_COUNT; count++) {
+				buf.append("    @Override\n");
+				buf.append("    public void m" + count + "() {} // @Override error in 1.5, not in 1.6\n");
+			}
+			buf.append("}\n");
+			String expected1= buf.toString();
+
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		} finally {
+			JavaProjectHelper.delete(project);
+		}
+	}
+
 	public void testCodeStyle01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
