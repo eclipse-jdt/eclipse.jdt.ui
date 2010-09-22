@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -89,11 +89,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 /**
  * Properties key hyperlink.
  * <p>
- * XXX:	This does not work for properties files coming from a JAR due to
- * 		missing J Core functionality. For details see:
- * 		https://bugs.eclipse.org/bugs/show_bug.cgi?id=22376
+ * XXX: This does not work for properties files coming from a JAR due to missing J Core
+ * functionality. For details see http://bugs.eclipse.org/22376
  * </p>
- *
+ * 
  * @since 3.1
  */
 public class PropertyKeyHyperlink implements IHyperlink {
