@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,7 @@ import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 
 import org.eclipse.jdt.internal.junit.model.TestElement;
+
 
 public class CompareResultDialog extends TrayDialog {
     private static final String PREFIX_SUFFIX_PROPERTY= "org.eclipse.jdt.internal.junit.ui.CompareResultDialog.prefixSuffix"; //$NON-NLS-1$
@@ -169,6 +170,8 @@ public class CompareResultDialog extends TrayDialog {
      */
     private final int[] fPrefixSuffix= new int[2];
 
+	private CompareViewerPane fCompareViewerPane;
+
 	public CompareResultDialog(Shell parentShell, TestElement element) {
 		super(parentShell);
 		setShellStyle((getShellStyle() & ~SWT.APPLICATION_MODAL) | SWT.TOOL);
@@ -237,15 +240,14 @@ public class CompareResultDialog extends TrayDialog {
 		layout.numColumns= 1;
 		composite.setLayout(layout);
 
-		CompareViewerPane pane = new CompareViewerPane(composite, SWT.BORDER | SWT.FLAT);
-		pane.setText(fTestName);
+		fCompareViewerPane= new CompareViewerPane(composite, SWT.BORDER | SWT.FLAT);
 		GridData data= new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
 		data.widthHint= convertWidthInCharsToPixels(120);
 		data.heightHint= convertHeightInCharsToPixels(13);
-		pane.setLayoutData(data);
+		fCompareViewerPane.setLayoutData(data);
 
-		Control previewer= createPreviewer(pane);
-		pane.setContent(previewer);
+		Control previewer= createPreviewer(fCompareViewerPane);
+		fCompareViewerPane.setContent(previewer);
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		previewer.setLayoutData(gd);
 		applyDialogFont(parent);
@@ -274,8 +276,10 @@ public class CompareResultDialog extends TrayDialog {
 	}
 
 	private void setCompareViewerInput() {
-		if (! fViewer.getControl().isDisposed())
+		if (!fViewer.getControl().isDisposed()) {
 			fViewer.setInput(new DiffNode(new CompareElement(fExpected), new CompareElement(fActual)));
+			fCompareViewerPane.setText(fTestName);
+		}
 	}
 
 	public void setInput(TestElement failedTest) {
