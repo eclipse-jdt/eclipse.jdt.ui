@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,6 +63,7 @@ import org.eclipse.ui.OpenAndLinkWithEditorHelper;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.handlers.CollapseAllHandler;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.model.WorkbenchAdapter;
@@ -111,6 +112,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
 import org.eclipse.jdt.internal.ui.actions.CategoryFilterActionGroup;
+import org.eclipse.jdt.internal.ui.actions.CollapseAllAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragSupport;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropSupport;
@@ -580,6 +582,13 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 	private ToggleLinkingAction fToggleLinkingAction;
 
+	/**
+	 * Action for Collapse All.
+	 * 
+	 * @since 3.7
+	 */
+	private CollapseAllAction fCollapseAllAction;
+
 	private CompositeActionGroup fActionGroups;
 
 	private IPropertyChangeListener fPropertyChangeListener;
@@ -696,6 +705,11 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 	private void registerToolbarActions(IActionBars actionBars) {
 		IToolBarManager toolBarManager= actionBars.getToolBarManager();
+
+		fCollapseAllAction= new CollapseAllAction(fOutlineViewer);
+		fCollapseAllAction.setActionDefinitionId(CollapseAllHandler.COMMAND_ID);
+		toolBarManager.add(fCollapseAllAction);
+
 		toolBarManager.add(new LexicalSortingAction());
 
 		fMemberFilterActionGroup= new MemberFilterActionGroup(fOutlineViewer, "org.eclipse.jdt.ui.JavaOutlinePage"); //$NON-NLS-1$
@@ -815,6 +829,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 		IHandlerService handlerService= (IHandlerService)site.getService(IHandlerService.class);
 		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR, new ActionHandler(fToggleLinkingAction));
+		handlerService.activateHandler(CollapseAllHandler.COMMAND_ID, new ActionHandler(fCollapseAllAction));
 
 
 		fOutlineViewer.setInput(fInput);
