@@ -684,6 +684,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      *
      */
     public void dispose() {
+		if (fPagebook != null) {
+			fPagebook.dispose();
+			fPagebook= null;
+		}
+
         if (fActionGroups != null)
             fActionGroups.dispose();
 
@@ -696,6 +701,16 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		}
         super.dispose();
     }
+
+	/**
+	 * Indicates whether the page book is disposed.
+	 * 
+	 * @return <code>true</code> if the page book is disposed, <code>false</code> otherwise
+	 * @since 3.7
+	 */
+	protected boolean isDisposed() {
+		return fPagebook == null;
+	}
 
     /**
      * Goes to the selected entry, without updating the order of history entries.
