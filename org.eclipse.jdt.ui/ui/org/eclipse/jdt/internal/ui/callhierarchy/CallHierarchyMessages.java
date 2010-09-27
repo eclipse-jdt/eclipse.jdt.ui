@@ -38,8 +38,8 @@ public final class CallHierarchyMessages extends NLS {
 	public static String SelectFieldModeAction_write_accesses_description;
 	public static String HistoryDropDownAction_tooltip;
 	public static String HistoryAction_description;
+	public static String HistoryAction_inputElements_1;
 	public static String HistoryAction_inputElements_2;
-	public static String HistoryAction_inputElements_3;
 	public static String HistoryAction_inputElements_more;
 	public static String HistoryAction_tooltip;
 	public static String HistoryListDialog_title;

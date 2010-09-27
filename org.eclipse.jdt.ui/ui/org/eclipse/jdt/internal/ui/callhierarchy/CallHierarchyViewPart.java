@@ -1136,13 +1136,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_2,
 		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
 
-		        	case 3:
-		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_3,
-		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
-
 		        	default:
 		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_more,
-		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
+		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
 				}
 			} else {
 				switch (fInputElements.length) {
@@ -1153,13 +1149,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_2,
 								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
 
-					case 3:
-						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_3,
-								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
-
 					default:
 						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_more,
-								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
+								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
 				}
 			}
 		}
