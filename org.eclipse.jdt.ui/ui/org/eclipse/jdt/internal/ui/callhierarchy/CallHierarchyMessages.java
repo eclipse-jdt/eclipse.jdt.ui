@@ -82,12 +82,10 @@ public final class CallHierarchyMessages extends NLS {
 	public static String CallHierarchyViewPart_callsToFieldRead;
 	public static String CallHierarchyViewPart_callsToFieldWrite;
 	public static String CallHierarchyViewPart_callsToMembers_2;
-	public static String CallHierarchyViewPart_callsToMembers_3;
 	public static String CallHierarchyViewPart_callsToMembers_more;
 	public static String CallHierarchyViewPart_callsToMethod;
 	public static String CallHierarchyViewPart_callsFromConstructors;
 	public static String CallHierarchyViewPart_callsFromMembers_2;
-	public static String CallHierarchyViewPart_callsFromMembers_3;
 	public static String CallHierarchyViewPart_callsFromMembers_more;
 	public static String CallHierarchyViewPart_callsFromMethod;
 	public static String ExpandWithConstructorsConfigurationBlock_description;
