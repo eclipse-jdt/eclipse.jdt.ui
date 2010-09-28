@@ -83,7 +83,8 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
 			if (!CallHierarchyContentProvider.isExpandWithConstructors(methodWrapper)) {
 	        	Display.getDefault().asyncExec(new Runnable(){
 	        		public void run(){
-						if (!fProvider.getViewPart().isDisposed())
+						CallHierarchyViewPart viewPart= fProvider.getViewPart();
+						if (viewPart != null && !viewPart.getViewer().getControl().isDisposed())
 							fProvider.collapseAndRefresh(methodWrapper);
 	        		}
 	        	});

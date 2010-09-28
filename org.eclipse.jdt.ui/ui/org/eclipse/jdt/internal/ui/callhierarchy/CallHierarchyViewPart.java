@@ -680,36 +680,18 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         viewMenu.add(fShowSearchInDialogAction);
     }
 
-    /**
-     *
-     */
-    public void dispose() {
-		if (fPagebook != null) {
-			fPagebook.dispose();
-			fPagebook= null;
-		}
-
-        if (fActionGroups != null)
-            fActionGroups.dispose();
+	public void dispose() {
+		if (fActionGroups != null)
+			fActionGroups.dispose();
 
 		if (fClipboard != null)
-	        fClipboard.dispose();
+			fClipboard.dispose();
 
 		if (fPartListener != null) {
 			getViewSite().getPage().removePartListener(fPartListener);
 			fPartListener= null;
 		}
-        super.dispose();
-    }
-
-	/**
-	 * Indicates whether the page book is disposed.
-	 * 
-	 * @return <code>true</code> if the page book is disposed, <code>false</code> otherwise
-	 * @since 3.7
-	 */
-	protected boolean isDisposed() {
-		return fPagebook == null;
+		super.dispose();
 	}
 
     /**
