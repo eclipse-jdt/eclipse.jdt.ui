@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *     Sebastian Davids, sdavids@gmx.de, - bug 38692
  *     Matt Chapman, mpchapman@gmail.com - 89977 Make JDT .java agnostic
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.io.File;
@@ -28,6 +27,8 @@ import org.xml.sax.SAXException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import org.eclipse.core.filesystem.URIUtil;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -69,6 +70,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 
 public class JavadocOptionsManager {
 
@@ -485,7 +487,7 @@ public class JavadocOptionsManager {
 		for (int i= 0; i < strings.length; i++) {
 			IPath path= makeAbsolutePathFromRelative(new Path(strings[i].trim()));
 			if (path != null) {
-				IContainer[] containers= root.findContainersForLocation(path);
+				IContainer[] containers= root.findContainersForLocationURI(URIUtil.toURI(path.makeAbsolute()));
 				for (int k= 0; k < containers.length; k++) {
 					res.add(containers[k]);
 				}
@@ -531,7 +533,7 @@ public class JavadocOptionsManager {
 					IPath path= makeAbsolutePathFromRelative(new Path(name));
 					//if unable to create an absolute path to the resource skip it
 					if (path != null) {
-						IFile[] files= root.findFilesForLocation(path);
+						IFile[] files= root.findFilesForLocationURI(URIUtil.toURI(path.makeAbsolute()));
 						for (int i= 0; i < files.length; i++) {
 							IJavaElement el= JavaCore.createCompilationUnitFrom(files[i]);
 							if (el != null) {
@@ -764,6 +766,8 @@ public class JavadocOptionsManager {
 
 		} //end standard options
 
+		String locale= null;
+
 		if (fAdditionalParams.length() + fVMParams.length() != 0) {
 			ExecutionArguments tokens= new ExecutionArguments(fVMParams, fAdditionalParams);
 			String[] vmArgsArray= tokens.getVMArgumentsArray();
@@ -772,7 +776,11 @@ public class JavadocOptionsManager {
 			}
 			String[] argsArray= tokens.getProgramArgumentsArray();
 			for (int i= 0; i < argsArray.length; i++) {
-				toolArgs.add(argsArray[i]);
+				String arg= argsArray[i];
+				if ("-locale".equals(arg) && i + 1 < argsArray.length) { //$NON-NLS-1$
+					locale= argsArray[++i];
+				} else
+					toolArgs.add(arg);
 			}
 		}
 		addProxyOptions(vmArgs);
@@ -798,6 +806,12 @@ public class JavadocOptionsManager {
 				}
 			}
 		}
+		// The locale argument needs to be first.
+		if (locale != null) {
+			toolArgs.add(0, "-locale"); //$NON-NLS-1$
+			toolArgs.add(1, locale);
+		}
+
 		return status;
 	}
 
@@ -830,7 +844,7 @@ public class JavadocOptionsManager {
 
 				IPath basePath= null;
 				IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-				if (root.findFilesForLocation(filePath).length > 0) {
+				if (root.findFilesForLocationURI(URIUtil.toURI(filePath.makeAbsolute())).length > 0) {
 					basePath= directoryPath; // only do relative path if ant file is stored in the workspace
 				}
 				JavadocWriter writer= new JavadocWriter(basePath, projects);
@@ -1107,7 +1121,7 @@ public class JavadocOptionsManager {
 	}
 
 	/**
-	 * @param project
+	 * @param project the Java project
 	 */
 	public void updateRecentSettings(IJavaProject project) {
 		fRecentSettings.setProjectSettings(project, fDestination, fAntpath, fHRefs);
