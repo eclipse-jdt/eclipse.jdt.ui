@@ -390,12 +390,12 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		int p= offset;
 		char ch= document.getChar(p);
 		while (p < lineEndOffset) {
-			if (ch == '(' || ch == ';' || ch == ',')
+			if (ch == '(' || ch == ')' || ch == ';' || ch == ',')
 				break;
 			ch= document.getChar(++p);
 		}
 
-		if (ch != ';' && ch != ',')
+		if (ch != ';' && ch != ',' && ch != ')')
 			replacementString= replacementString + ';';
 
 		replacementString= Strings.changeIndent(replacementString, 0, project, CodeFormatterUtil.createIndentString(indent, project), lineDelim);
