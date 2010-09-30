@@ -86,6 +86,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_PB_NULL_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_NULL_REFERENCE);
 	private static final Key PREF_PB_POTENTIAL_NULL_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE);
 	private static final Key PREF_PB_REDUNDANT_NULL_CHECK= getJDTCoreKey(JavaCore.COMPILER_PB_REDUNDANT_NULL_CHECK);
+
+	private static final Key PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS= getJDTCoreKey(JavaCore.COMPILER_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS);
 	private static final Key PREF_PB_REDUNDANT_SUPERINTERFACE= getJDTCoreKey(JavaCore.COMPILER_PB_REDUNDANT_SUPERINTERFACE);
 
 	private static final Key PREF_PB_UNUSED_WARNING_TOKEN= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN);
@@ -150,8 +152,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_INCLUDE_DOC_COMMENT_REFERENCE,
 				PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_EXEMPT_EXCEPTION_AND_THROWABLE,
 				PREF_PB_MISSING_SERIAL_VERSION, PREF_PB_PARAMETER_ASSIGNMENT, PREF_PB_NULL_REFERENCE, PREF_PB_POTENTIAL_NULL_REFERENCE,
-				PREF_PB_REDUNDANT_NULL_CHECK, PREF_PB_FALLTHROUGH_CASE, PREF_PB_REDUNDANT_SUPERINTERFACE,
-				PREF_PB_UNUSED_WARNING_TOKEN,
+				PREF_PB_REDUNDANT_NULL_CHECK, PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS,
+				PREF_PB_FALLTHROUGH_CASE, PREF_PB_REDUNDANT_SUPERINTERFACE, PREF_PB_UNUSED_WARNING_TOKEN,
 				PREF_15_PB_UNCHECKED_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST,
 				PREF_15_PB_AUTOBOXING_PROBLEM, PREF_15_PB_MISSING_OVERRIDE_ANNOTATION, PREF_16_PB_MISSING_OVERRIDE_ANNOTATION_FOR_INTERFACE_METHOD_IMPLEMENTATION,
 				PREF_15_PB_ANNOTATION_SUPER_INTERFACE,
@@ -479,9 +481,12 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		GridData gd= new GridData();
 		gd.verticalIndent= fPixelConverter.convertHeightInCharsToPixels(2);
 		gd.horizontalSpan= 2;
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_include_assert_in_null_analysis;
+		addCheckBox(composite, label, PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS, enabledDisabled, defaultIndent);
+		getCheckBox(PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS).setLayoutData(gd);
+
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_treat_optional_as_fatal;
 		addCheckBox(composite, label, PREF_PB_FATAL_OPTIONAL_ERROR, enabledDisabled, defaultIndent);
-		getCheckBox(PREF_PB_FATAL_OPTIONAL_ERROR).setLayoutData(gd);
 
 		IDialogSettings settingsSection= JavaPlugin.getDefault().getDialogSettings().getSection(SETTINGS_SECTION_NAME);
 		restoreSectionExpansionStates(settingsSection);
