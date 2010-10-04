@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
 
 /**
- * Action group that adds the copy, cut, paste actions to a view part's context
+ * Action group that adds copy, cut, paste, and delete actions to a view part's context
  * menu and installs handlers for the corresponding global menu actions.
  *
  * <p>
@@ -61,8 +61,8 @@ public class CCPActionGroup extends ActionGroup {
 	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
-	 * @param includeOnlyCopyActions <code>true</code> if the group only included the copy actions,
-	 *            <code>false</code> otherwise
+	 * @param includeOnlyCopyActions <code>true</code> if the group only includes the copy actions,
+	 *            <code>false</code> to include all actions
 	 * @since 3.7
 	 */
 	public CCPActionGroup(IViewPart part, boolean includeOnlyCopyActions) {
