@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,10 +33,10 @@ import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import org.eclipse.jdt.internal.ui.text.CombinedWordRule;
-import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
-import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 import org.eclipse.jdt.internal.ui.text.CombinedWordRule.CharacterBuffer;
 import org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher;
+import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
+import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 
 /**
  * A rule based JavaDoc scanner.
@@ -202,10 +202,11 @@ public final class JavaDocScanner extends JavaCommentScanner {
 						i--;
 						if (c == '*' || Character.isWhitespace((char)c)) {
 							scanner.unread();
+							i++;
 							return token;
 						}
 					} finally {
-						for (; i >= 0; i--)
+						for (; i > 0; i--)
 							scanner.read();
 					}
 				}
