@@ -110,15 +110,6 @@ public class JavaHeuristicScannerTest extends TestCase {
 		Assert.assertEquals(21, pos);
 	}
 
-	public void testPrevIndentationUnit4() {
-		fDocument.set("\tint a;\n" +
-			"\tif (true)\n" +
-			"\t\treturn a\n" +
-			"");
-
-		int pos= fScanner.findReferencePosition(29);
-		Assert.assertEquals(28, pos);
-	}
 
 	public void testPrevIndentationUnit5() {
 		fDocument.set("\tint a;\n" +
@@ -322,34 +313,6 @@ public class JavaHeuristicScannerTest extends TestCase {
 			"");
 
 		String indent= fScanner.computeIndentation(18).toString();
-		Assert.assertEquals("\t\t", indent);
-	}
-
-	public void testIndentation2() {
-		fDocument.set("\tint a;\n" +
-			"\tif (true)\n" +
-			"\t\treturn a");
-
-		String indent= fScanner.computeIndentation(28).toString();
-		Assert.assertEquals("\t\t", indent);
-	}
-
-	public void testIndentation3() {
-		fDocument.set("\tint a;\n" +
-			"\tif (true)\n" +
-			"\t\treturn a;");
-
-		String indent= fScanner.computeIndentation(29).toString();
-		Assert.assertEquals("\t\t", indent);
-	}
-
-	public void testIndentation4() {
-		fDocument.set("\tint a;\n" +
-			"\tif (true)\n" +
-			"\t\treturn a\n" +
-			"");
-
-		String indent= fScanner.computeIndentation(29).toString();
 		Assert.assertEquals("\t\t", indent);
 	}
 
@@ -873,4 +836,100 @@ public class JavaHeuristicScannerTest extends TestCase {
     	Assert.assertEquals("					", indent);
 
     }
+
+	public void testContinuationIndentationOfForStatement() throws Exception {
+		fDocument.set("\tfor (int i = (2 * 2); i < array.length; i++) {\n" +
+				"\t\t}");
+
+		String indent= fScanner.computeIndentation(22).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(27).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(39).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(40).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(5).toString();
+		Assert.assertEquals("\t", indent);
+		indent= fScanner.computeIndentation(45).toString();
+		Assert.assertEquals("\t", indent);
+	}
+
+	public void testContinuationIndentationOfBooleanExpression() throws Exception {
+		fDocument.set("\tboolean a = true || false;\n" +
+				"\tboolean b = a || false;\n");
+
+		String indent= fScanner.computeIndentation(20).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(40).toString();
+		Assert.assertEquals("\t\t", indent);
+	}
+
+	public void testContinuationIndentationOfReturnStatement() throws Exception {
+		fDocument.set("\t\treturn \"I'm such a long string that you have to split me to see the whole line without scrolling around\"\n");
+
+		String indent= fScanner.computeIndentation(8).toString();
+		Assert.assertEquals("\t\t\t", indent);
+		indent= fScanner.computeIndentation(21).toString();
+		Assert.assertEquals("\t\t\t", indent);
+		indent= fScanner.computeIndentation(38).toString();
+		Assert.assertEquals("\t\t\t", indent);
+	}
+
+	public void testContinuationIndentationOfAssignmentStatement() throws Exception {
+		fDocument.set("\tint i= 5+");
+
+		String indent= fScanner.computeIndentation(7).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(10).toString();
+		Assert.assertEquals("\t\t", indent);
+	}
+
+	public void testContinuationIndentation1() throws Exception {
+		fDocument.set("\treturn (thisIsAVeryLongName == 1 && anotherVeryLongName == 1)\n" +
+				"\t\t|| thisIsAVeryLongName == 2;");
+
+		String indent= fScanner.computeIndentation(68).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(88).toString();
+		Assert.assertEquals("\t\t", indent);
+	}
+
+	public void testContinuationIndentation2() {
+		fDocument.set("\tint a;\n" +
+				"\tif (true)\n" +
+				"\t\treturn a\n" +
+				"");
+
+		int pos= fScanner.findReferencePosition(29);
+		Assert.assertEquals(21, pos);
+	}
+
+	public void testContinuationIndentation3() {
+		fDocument.set("\tint a;\n" +
+				"\tif (true)\n" +
+				"\t\treturn a");
+
+		String indent= fScanner.computeIndentation(28).toString();
+		Assert.assertEquals("\t\t\t", indent);
+	}
+
+	public void testContinuationIndentation4() {
+		fDocument.set("\tint a;\n" +
+				"\tif (true)\n" +
+				"\t\treturn a;");
+
+		String indent= fScanner.computeIndentation(29).toString();
+		Assert.assertEquals("\t\t\t", indent);
+	}
+
+	public void testContinuationIndentation5() {
+		fDocument.set("\tint a;\n" +
+				"\tif (true)\n" +
+				"\t\treturn a\n" +
+				"");
+
+		String indent= fScanner.computeIndentation(29).toString();
+		Assert.assertEquals("\t\t\t", indent);
+	}
 }

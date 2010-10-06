@@ -693,32 +693,30 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				if (lineLength == 0) // don't modify empty lines
 					continue;
 
-				if (!isIndentDetected) {
 
-					// indent the first pasted line
-					String current= getCurrentIndent(temp, l);
-					StringBuffer correct= indenter.computeIndentation(lineOffset);
-					if (correct == null)
-						return; // bail out
+				// indent the first pasted line
+				String current= getCurrentIndent(temp, l);
+				StringBuffer correct= indenter.computeIndentation(lineOffset);
+				if (correct == null)
+					return; // bail out
 
-					insertLength= subtractIndent(correct, current, addition, tabLength);
-					if (l != first && temp.get(lineOffset, lineLength).trim().length() != 0) {
-						isIndentDetected= true;
-						if (insertLength == 0) {
-							 // no adjustment needed, bail out
-							if (firstLine == 0) {
-								// but we still need to adjust the first line
-								command.offset= newOffset;
-								command.length= newLength;
-								if (changed)
-									break; // still need to get the leading indent of the first line
-							}
-							return;
+				insertLength= subtractIndent(correct, current, addition, tabLength);
+				if (!isIndentDetected && l != first && temp.get(lineOffset, lineLength).trim().length() != 0) {
+					isIndentDetected= true;
+					if (insertLength == 0) {
+						// no adjustment needed, bail out
+						if (firstLine == 0) {
+							// but we still need to adjust the first line
+							command.offset= newOffset;
+							command.length= newLength;
+							if (changed)
+								break; // still need to get the leading indent of the first line
 						}
-						removeJavaStuff(temp);
-					} else {
-						changed= insertLength != 0;
+						return;
 					}
+					removeJavaStuff(temp);
+				} else {
+					changed= insertLength != 0;
 				}
 
 				// relatively indent all pasted lines

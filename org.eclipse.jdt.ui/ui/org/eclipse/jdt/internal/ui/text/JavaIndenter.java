@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,7 +50,6 @@ public final class JavaIndenter {
 		final boolean prefTernaryDeepAlign;
 		final int prefTernaryIndent;
 		final int prefCaseIndent;
-		final int prefAssignmentIndent;
 		final int prefCaseBlockIndent;
 		final int prefSimpleIndent;
 		final int prefBracketIndent;
@@ -110,7 +109,6 @@ public final class JavaIndenter {
 				prefTernaryDeepAlign= false;
 				prefTernaryIndent= prefContinuationIndent;
 				prefCaseIndent= 0;
-				prefAssignmentIndent= prefBlockIndent;
 				prefCaseBlockIndent= prefBlockIndent;
 				prefIndentBracesForBlocks= false;
 				prefSimpleIndent= (prefIndentBracesForBlocks && prefBlockIndent == 0) ? 1 : prefBlockIndent;
@@ -140,7 +138,6 @@ public final class JavaIndenter {
 				prefTernaryDeepAlign= prefTernaryDeepAlign();
 				prefTernaryIndent= prefTernaryIndent();
 				prefCaseIndent= prefCaseIndent();
-				prefAssignmentIndent= prefAssignmentIndent();
 				prefCaseBlockIndent= prefCaseBlockIndent();
 				prefIndentBracesForBlocks= prefIndentBracesForBlocks();
 				prefSimpleIndent= prefSimpleIndent();
@@ -229,10 +226,6 @@ public final class JavaIndenter {
 				return prefBlockIndent();
 			else
 				return 0;
-		}
-
-		private int prefAssignmentIndent() {
-			return prefBlockIndent();
 		}
 
 		private int prefCaseBlockIndent() {
@@ -887,13 +880,19 @@ public final class JavaIndenter {
 				int pos= fPosition;
 				if (!skipScope())
 					fPosition= pos;
-				//$FALL-THROUGH$
+				return skipToStatementStart(danglingElse, false);
 			case Symbols.TokenSEMICOLON:
 				// this is the 90% case: after a statement block
 				// the end of the previous statement / block previous.end
 				// search to the end of the statement / block before the previous; the token just after that is previous.start
-				return skipToStatementStart(danglingElse, false);
-
+				pos= fPosition;
+				if (isForStatement()) {
+					fIndent= fPrefs.prefContinuationIndent;
+					return fPosition;
+				} else {
+					fPosition= pos;
+					return skipToStatementStart(danglingElse, false);
+				}
 			// scope introduction: special treat who special is
 			case Symbols.TokenLPAREN:
 			case Symbols.TokenLBRACE:
@@ -906,8 +905,7 @@ public final class JavaIndenter {
 
 			case Symbols.TokenEQUAL:
 				// indent assignments
-				fIndent= fPrefs.prefAssignmentIndent;
-				return fPosition;
+				return handleEqual();
 
 			case Symbols.TokenCOLON:
 				// TODO handle ternary deep indentation
@@ -958,6 +956,9 @@ public final class JavaIndenter {
 				fLine= line;
 
 				return skipToPreviousListItemOrListStart();
+			case Symbols.TokenRETURN:
+				fIndent= fPrefs.prefContinuationIndent;
+				return fPosition;
 			case Symbols.TokenCOMMA:
 				// inside a list of some type
 				// easy if there is already a list item before with its own indentation - we just align
@@ -968,6 +969,56 @@ public final class JavaIndenter {
 				// if we are inside a continued expression, then either align with a previous line that has indentation
 				// or indent from the expression start line (either a scope introducer or the start of the expr).
 				return skipToPreviousListItemOrListStart();
+		}
+	}
+
+	/**
+	 * Checks if the statement at position is itself a continuation of the previous, else sets the
+	 * indentation to Continuation Indent.
+	 * 
+	 * @return the position of the token
+	 * @since 3.7
+	 */
+	private int handleEqual() {
+		try {
+			//If this line is itself continuation of the previous then do nothing
+			IRegion line= fDocument.getLineInformationOfOffset(fPosition);
+			int nonWS= fScanner.findNonWhitespaceBackward(line.getOffset(), JavaHeuristicScanner.UNBOUND);
+			if (nonWS != Symbols.TokenEOF) {
+				int tokenAtPreviousLine= fScanner.nextToken(nonWS, nonWS + 1);
+				if (tokenAtPreviousLine != Symbols.TokenSEMICOLON && tokenAtPreviousLine != Symbols.TokenRBRACE && tokenAtPreviousLine != Symbols.TokenLBRACE
+						&& tokenAtPreviousLine != Symbols.TokenEOF)
+					return fPosition;
+			}
+		} catch (BadLocationException e) {
+			return fPosition;
+		}
+
+		fIndent= fPrefs.prefContinuationIndent;
+		return fPosition;
+	}
+
+	/**
+	 * Checks if the semicolon at the current position is part of a for statement.
+	 * 
+	 * @return returns <code>true</code> if current position is part of for statement
+	 * @since 3.7
+	 */
+	private boolean isForStatement() {
+		int semiColonCount= 1;
+		while (true) {
+			nextToken();
+			switch (fToken) {
+				case Symbols.TokenFOR:
+					return true;
+				case Symbols.TokenSEMICOLON:
+					semiColonCount++;
+					if (semiColonCount > 2)
+						return false;
+					break;
+				case Symbols.TokenEOF:
+					return false;
+			}
 		}
 	}
 
@@ -1235,6 +1286,11 @@ public final class JavaIndenter {
 					return handleScopeIntroduction(startPosition + 1);
 
 				case Symbols.TokenSEMICOLON:
+					int savedPosition= fPosition;
+					if (isForStatement())
+						fIndent= fPrefs.prefContinuationIndent;
+					else
+						fPosition= savedPosition;
 					return fPosition;
 				case Symbols.TokenQUESTIONMARK:
 					if (fPrefs.prefTernaryDeepAlign) {
@@ -1244,6 +1300,11 @@ public final class JavaIndenter {
 						fIndent= fPrefs.prefTernaryIndent;
 						return fPosition;
 					}
+				case Symbols.TokenRETURN:
+					fIndent= fPrefs.prefContinuationIndent;
+					return fPosition;
+				case Symbols.TokenEQUAL:
+					return handleEqual();
 				case Symbols.TokenEOF:
 					return 0;
 
