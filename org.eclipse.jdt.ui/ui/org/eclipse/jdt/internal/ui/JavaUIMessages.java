@@ -186,8 +186,6 @@ public final class JavaUIMessages extends NLS {
 	public static String OpenTypeHierarchyUtil_error_open_view;
 	public static String OpenTypeHierarchyUtil_error_open_perspective;
 	public static String OpenTypeHierarchyUtil_error_open_editor;
-	public static String OpenTypeHierarchyUtil_selectionDialog_title;
-	public static String OpenTypeHierarchyUtil_selectionDialog_message;
 
 	public static String TypeInfoLabelProvider_default_package;
 
