@@ -190,7 +190,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_addJavaDocTags;
 	public static String JavaEditorPreferencePage_smartPaste;
 	public static String JavaEditorPreferencePage_link;
-	public static String JavaEditorPreferencePage_link_tooltip;
 	public static String JavaEditorPreferencePage_importsOnPaste;
 	public static String JavaEditorPreferencePage_subWordNavigation;
 	public static String JavaEditorPreferencePage_typing_smartSemicolon;
@@ -220,7 +219,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorHoverConfigurationBlock_insertDelimiterAndModifier;
 	public static String MarkOccurrencesConfigurationBlock_title;
 	public static String MarkOccurrencesConfigurationBlock_link;
-	public static String MarkOccurrencesConfigurationBlock_link_tooltip;
 	public static String MarkOccurrencesConfigurationBlock_markOccurrences;
 	public static String MarkOccurrencesConfigurationBlock_markTypeOccurrences;
 	public static String MarkOccurrencesConfigurationBlock_markMethodOccurrences;
@@ -473,7 +471,6 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_classfiles_group_label;
 	public static String CodeStylePreferencePage_title;
 	public static String CodeTemplatesPreferencePage_title;
-	public static String JavaCategoryPropertyPage_text;
 	public static String NameConventionConfigurationBlock_field_label;
 	public static String NameConventionConfigurationBlock_static_label;
 	public static String NameConventionConfigurationBlock_arg_label;
@@ -696,7 +693,6 @@ public final class PreferencesMessages extends NLS {
 	public static String PropertiesFileEditorPreferencePage_underline;
 	public static String PropertiesFileEditorPreferencePage_preview;
 	public static String PropertiesFileEditorPreferencePage_link;
-	public static String PropertiesFileEditorPreferencePage_link_tooltip;
 	public static String SmartTypingConfigurationBlock_autoclose_title;
 	public static String SmartTypingConfigurationBlock_automove_title;
 	public static String SmartTypingConfigurationBlock_tabs_message_tab_text;
