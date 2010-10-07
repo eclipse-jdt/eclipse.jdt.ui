@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.layout.PixelConverter;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
+
+import org.eclipse.ui.texteditor.AnnotationPreference;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -117,12 +121,13 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 		link.setText(PreferencesMessages.MarkOccurrencesConfigurationBlock_link);
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(parent.getShell(), e.text, null, null);
+				String data= null;
+				AnnotationPreference preference= EditorsUI.getAnnotationPreferenceLookup().getAnnotationPreference("org.eclipse.jdt.ui.occurrences"); //$NON-NLS-1$
+				if (preference != null)
+					data= preference.getPreferenceLabel();
+				PreferencesUtil.createPreferenceDialogOn(parent.getShell(), e.text, null, data);
 			}
 		});
-		// TODO replace by link-specific tooltips when
-		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
-		link.setToolTipText(PreferencesMessages.MarkOccurrencesConfigurationBlock_link_tooltip);
 
 		addFiller(composite);
 
