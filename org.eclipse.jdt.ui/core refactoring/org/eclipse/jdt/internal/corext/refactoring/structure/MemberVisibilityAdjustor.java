@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
@@ -38,25 +39,20 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
+import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -168,32 +164,8 @@ public final class MemberVisibilityAdjustor {
 			if (fMember instanceof IField && !Flags.isEnum(fMember.getFlags())) {
 				final VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) fMember, root);
 				final FieldDeclaration declaration= (FieldDeclaration) fragment.getParent();
-				if (declaration.fragments().size() == 1)
-					ModifierRewrite.create(rewrite, declaration).setVisibility(visibility, group);
-				else {
-					final VariableDeclarationFragment newFragment= rewrite.getAST().newVariableDeclarationFragment();
-					newFragment.setName((SimpleName) rewrite.createCopyTarget(fragment.getName()));
-					final FieldDeclaration newDeclaration= rewrite.getAST().newFieldDeclaration(newFragment);
-					newDeclaration.setType((Type) rewrite.createCopyTarget(declaration.getType()));
-					IExtendedModifier extended= null;
-					for (final Iterator iterator= declaration.modifiers().iterator(); iterator.hasNext();) {
-						extended= (IExtendedModifier) iterator.next();
-						if (extended.isModifier()) {
-							final Modifier modifier= (Modifier) extended;
-							final int flag= modifier.getKeyword().toFlagValue();
-							if ((flag & (Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE)) != 0)
-								continue;
-						}
-						newDeclaration.modifiers().add(rewrite.createCopyTarget((ASTNode) extended));
-					}
-					ModifierRewrite.create(rewrite, newDeclaration).setVisibility(visibility, group);
-					final AbstractTypeDeclaration type= (AbstractTypeDeclaration) declaration.getParent();
-					rewrite.getListRewrite(type, type.getBodyDeclarationsProperty()).insertAfter(newDeclaration, declaration, null);
-					final ListRewrite list= rewrite.getListRewrite(declaration, FieldDeclaration.FRAGMENTS_PROPERTY);
-					list.remove(fragment, group);
-					if (list.getRewrittenList().isEmpty())
-						rewrite.remove(declaration, null);
-				}
+				VariableDeclarationFragment[] fragmentsToChange= new VariableDeclarationFragment[] { fragment };
+				VariableDeclarationRewrite.rewriteModifiers(declaration, fragmentsToChange, visibility, ModifierRewrite.VISIBILITY_MODIFIERS, rewrite, group);
 				if (status != null)
 					adjustor.fStatus.merge(status);
 			} else if (fMember != null) {
@@ -448,7 +420,7 @@ public final class MemberVisibilityAdjustor {
 	}
 
 	/** The map of members to visibility adjustments */
-	private Map fAdjustments= new HashMap();
+	private Map fAdjustments= new LinkedHashMap(); // LinkedHashMap to preserve order of generated warnings
 
 	/** Should incoming references be adjusted? */
 	private boolean fIncoming= true;
