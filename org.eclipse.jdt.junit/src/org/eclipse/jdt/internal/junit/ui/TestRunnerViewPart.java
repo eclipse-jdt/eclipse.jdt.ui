@@ -47,6 +47,7 @@ import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.URLTransfer;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.graphics.Image;
@@ -66,6 +67,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -205,6 +207,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 	private StopAction fStopAction;
 	private JUnitCopyAction fCopyAction;
+	private Action fPasteAction;
 
 	private Action fRerunLastTestAction;
 	private IHandlerActivation fRerunLastActivation;
@@ -434,6 +437,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 		@Override
 		public void addMenuEntries(MenuManager manager) {
+			manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, fPasteAction);
 			manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ImportTestRunSessionAction(fParent.getShell()));
 			manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ImportTestRunSessionFromURLAction(fParent.getShell()));
 			if (fTestRunSession != null)
@@ -490,13 +494,54 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 	}
 	
+	private static class JUnitPasteAction extends Action {
+		private final Shell fShell;
+		private Clipboard fClipboard;
+		
+		public JUnitPasteAction(Shell shell, Clipboard clipboard) {
+			super(JUnitMessages.TestRunnerViewPart_JUnitPasteAction_label);
+			Assert.isNotNull(clipboard);
+			fShell= shell;
+			fClipboard= clipboard;
+		}
+		
+		@Override
+		public void run() {
+			String urlData= (String) fClipboard.getContents(URLTransfer.getInstance());
+			if (urlData == null) {
+				urlData= (String) fClipboard.getContents(TextTransfer.getInstance());
+			}
+			if (urlData != null && urlData.length() > 0) {
+				if (isValidUrl(urlData)) {
+					importTestRunSession(urlData);
+					return;
+				}
+			}
+			MessageDialog.openInformation(fShell,
+					JUnitMessages.TestRunnerViewPart_JUnitPasteAction_cannotpaste_title,
+					JUnitMessages.TestRunnerViewPart_JUnitPasteAction_cannotpaste_message
+			);
+		}
+
+		private boolean isValidUrl(String urlData) {
+			try {
+				@SuppressWarnings("unused")
+				URL url= new URL(urlData);
+			} catch (MalformedURLException e) {
+				return false;
+			}
+			return true;
+		}
+	}
+	
 	private static class ImportTestRunSessionFromURLAction extends Action {
 		private static class URLValidator implements IInputValidator {
 			public String isValid(String newText) {
 				if (newText.length() == 0)
 					return null;
 				try {
-					new URL(newText);
+					@SuppressWarnings("unused")
+					URL url= new URL(newText);
 					return null;
 				} catch (MalformedURLException e) {
 					return JUnitMessages.TestRunnerViewPart_ImportTestRunSessionFromURLAction_invalid_url + e.getLocalizedMessage();
@@ -1693,8 +1738,15 @@ action enablement
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		IActionBars actionBars= getViewSite().getActionBars();
+		
 		fCopyAction = new JUnitCopyAction(fFailureTrace, fClipboard);
+		fCopyAction.setActionDefinitionId(ActionFactory.COPY.getCommandId());
 		actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
+		
+		fPasteAction= new JUnitPasteAction(parent.getShell(), fClipboard);
+		fPasteAction.setActionDefinitionId(ActionFactory.PASTE.getCommandId());
+		actionBars.setGlobalActionHandler(ActionFactory.PASTE.getId(), fPasteAction);
+		
 		initPageSwitcher();
 		addDropAdapter(parent);
 

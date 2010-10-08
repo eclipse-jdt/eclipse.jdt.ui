@@ -314,5 +314,11 @@ public final class JUnitMessages extends NLS {
 
 	public static String TestRunnerViewPart_clear_history_label;
 
+	public static String TestRunnerViewPart_JUnitPasteAction_cannotpaste_message;
+
+	public static String TestRunnerViewPart_JUnitPasteAction_cannotpaste_title;
+
+	public static String TestRunnerViewPart_JUnitPasteAction_label;
+
 	public static String TestRunnerViewPart_layout_menu;
 }
