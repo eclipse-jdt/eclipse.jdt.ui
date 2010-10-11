@@ -55,6 +55,7 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 	}
 
 	protected void setUp() throws Exception {
+		super.setUp();
 		fProject= ResourceHelper.createProject("project");
 		fManager= FileBuffers.getTextFileBufferManager();
 		fProject= ResourceHelper.createProject("project");
@@ -69,6 +70,7 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 	protected void tearDown() throws Exception {
 		ResourceHelper.deleteProject("project");
 		fTempFile.delete();
+		super.tearDown();
 	}
 
 	protected IPath createPath(IProject project) throws Exception {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,12 @@ import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.core.runtime.Platform;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.ui.texteditor.spelling.SpellingService;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 
 /**
  * Superclass of Text performance test cases.
@@ -95,6 +101,7 @@ public class TextPerformanceTestCase extends TestCase {
 		super.setUp();
 
 		EditorTestHelper.forceFocus();
+		EditorsUI.getPreferenceStore().putValue(SpellingService.PREFERENCE_SPELLING_ENABLED, IPreferenceStore.FALSE);
 
 		if (DEBUG)
 			System.out.println(getClass().getName() + "." + getName() + ": " + System.currentTimeMillis());
@@ -105,6 +112,7 @@ public class TextPerformanceTestCase extends TestCase {
 	 */
 	protected void tearDown() throws Exception {
 		super.tearDown();
+		EditorsUI.getPreferenceStore().setToDefault(SpellingService.PREFERENCE_SPELLING_ENABLED);
 		if (fPerformanceMeters != null)
 			for (Iterator iter= fPerformanceMeters.iterator(); iter.hasNext();)
 				((PerformanceMeter) iter.next()).dispose();

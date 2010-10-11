@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,12 @@ package org.eclipse.jdt.text.tests.performance;
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
 import org.eclipse.core.runtime.Platform;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.ui.texteditor.spelling.SpellingService;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 
 
 /**
@@ -72,6 +78,16 @@ public class TextPerformanceTestCase2 extends PerformanceTestCase2 {
 
 	public TextPerformanceTestCase2(String name) {
 		super(name);
+	}
+
+	protected void setUp() throws Exception {
+		super.setUp();
+		EditorsUI.getPreferenceStore().putValue(SpellingService.PREFERENCE_SPELLING_ENABLED, IPreferenceStore.FALSE);
+	}
+
+	protected void tearDown() throws Exception {
+		EditorsUI.getPreferenceStore().setToDefault(SpellingService.PREFERENCE_SPELLING_ENABLED);
+		super.tearDown();
 	}
 
 	/**

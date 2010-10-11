@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -120,6 +120,7 @@ public class OpenPreferencePageTest extends TextPerformanceTestCase {
 	}
 
 	protected void setUp() throws Exception {
+		super.setUp();
 		Performance performance= Performance.getDefault();
 		fMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this, "cold"));
 		EditorTestHelper.joinJobs(1000, 10000, 100);
@@ -127,6 +128,7 @@ public class OpenPreferencePageTest extends TextPerformanceTestCase {
 
 	protected void tearDown() throws Exception {
 		fMeter.dispose();
+		super.tearDown();
 	}
 
 	private TreeItem findTreeItem(TreeItem[] items, String string) {
