@@ -437,9 +437,9 @@ public class TestRunnerViewPart extends ViewPart {
 
 		@Override
 		public void addMenuEntries(MenuManager manager) {
-			manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, fPasteAction);
 			manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ImportTestRunSessionAction(fParent.getShell()));
 			manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ImportTestRunSessionFromURLAction(fParent.getShell()));
+			manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, fPasteAction);
 			if (fTestRunSession != null)
 				manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ExportTestRunSessionAction(fParent.getShell(), fTestRunSession));
 		}
