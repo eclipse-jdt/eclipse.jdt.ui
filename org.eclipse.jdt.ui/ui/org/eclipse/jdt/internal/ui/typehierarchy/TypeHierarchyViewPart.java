@@ -112,6 +112,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
@@ -605,7 +606,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 			fInputElements= inputElements;
 			fNoHierarchyShownLabel
-					.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_createinput, HistoryAction.getElementLabel(fInputElements)));
+					.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_createinput, getElementLabel(fInputElements)));
 			try {
 				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElements, JavaPlugin.getActiveWorkbenchWindow());
 				// fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement, getSite().getWorkbenchWindow());
@@ -1231,7 +1232,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					setViewerVisibility(true);
 				}
 			} else if (!isKeepShowingEmptyViewers()) {//Show the empty hierarchy viewer till fresh computation is done.
-				fEmptyTypesViewer.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_nodecl, HistoryAction.getElementLabel(fInputElements)));
+				fEmptyTypesViewer.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_nodecl, getElementLabel(fInputElements)));
 				setViewerVisibility(false);
 			}
 		}
@@ -1367,7 +1368,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		String description;
 		if (fInputElements != null) {
 			IWorkingSet workingSet= fWorkingSetActionGroup.getWorkingSet();
-			String elementName= HistoryAction.getElementLabel(fInputElements);
+			String elementName= getElementLabel(fInputElements);
 			if (workingSet == null) {
 				description= elementName;
 				tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_tooltip, elementName);
@@ -1656,7 +1657,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			final IJavaElement[] hierarchyInput= (IJavaElement[])inputList.toArray(new IJavaElement[inputList.size()]);
 
 			synchronized (this) {
-				String label= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_restoreinput, HistoryAction.getElementLabel(hierarchyInput));
+				String label= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_restoreinput, getElementLabel(hierarchyInput));
 				fNoHierarchyShownLabel.setText(label);
 
 				fRestoreStateJob= new Job(label) {
@@ -1919,5 +1920,41 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */
 	public boolean isKeepShowingEmptyViewers() {
 		return fKeepShowingEmptyViewers;
+	}
+	
+	/**
+	 * Fetches the label for all the java elements.
+	 * 
+	 * @param elements the java elements
+	 * @return the label for all the java elements
+	 * @since 3.7
+	 */
+	static String getElementLabel(IJavaElement[] elements) {
+		switch (elements.length) {
+			case 0:
+				Assert.isTrue(false);
+				return null;
+
+			case 1:
+				return Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_inputElements_1,
+						new String[] { getShortLabel(elements[0]) });
+			case 2:
+				return Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_inputElements_2,
+						new String[] { getShortLabel(elements[0]), getShortLabel(elements[1]) });
+			default:
+				return Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_inputElements_more,
+						new String[] { getShortLabel(elements[0]), getShortLabel(elements[1]), getShortLabel(elements[2]) });
+		}
+	}
+
+	/**
+	 * Fetches the short label for the java element.
+	 * 
+	 * @param element the java element
+	 * @return the short label for the java element
+	 * @since 3.7
+	 */
+	private static String getShortLabel(IJavaElement element) {
+		return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_POST_QUALIFIED);
 	}
 }
