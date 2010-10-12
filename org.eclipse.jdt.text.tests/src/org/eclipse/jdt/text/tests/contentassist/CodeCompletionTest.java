@@ -77,10 +77,6 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		return new TestSuite(THIS, suiteName(THIS));
 	}
 
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
 	public static Test suite() {
 		return allTests();
 	}
