@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
-
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -30,7 +29,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolution2;
-import org.eclipse.ui.IMarkerResolutionGenerator;
 import org.eclipse.ui.IMarkerResolutionGenerator2;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -56,7 +54,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
-public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGenerator, IMarkerResolutionGenerator2 {
+
+public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGenerator2 {
 
 	private final static IMarkerResolution[] NO_RESOLUTION = new IMarkerResolution[0];
 
@@ -204,7 +203,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 	/**
 	 * Library quick fix base class
 	 */
-	private static abstract class UserLibraryMarkerResolution implements IMarkerResolution, IMarkerResolution2 {
+	private static abstract class UserLibraryMarkerResolution implements IMarkerResolution2 {
 
 		private final String fLabel;
 		private final Image fImage;
