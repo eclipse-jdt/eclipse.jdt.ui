@@ -372,6 +372,11 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
 	}
 	
+	// change visibility: https://bugs.eclipse.org/319069
+	public void test42() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
+	}
+	
 	// --- Non static
 
 	public void test_nonstatic_0() throws Exception{

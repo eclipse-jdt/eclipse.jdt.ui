@@ -97,17 +97,22 @@ public class VariableDeclarationRewrite {
 			boolean changeLast= fragmentsToChange.contains(lastFragment);
 			boolean changeCurrent= fragmentsToChange.contains(currentFragment);
 			if (changeLast != changeCurrent || lookup.containsKey(lastFragment)) {
-				ModifierRewrite modifierRewrite;
+				ModifierRewrite modifierRewrite= null;
 				if (currentMovedFragment != null) {
-					// Current fragment has already been moved. Need to put in the right modifiers (removing any existing ones).
-					modifierRewrite= ModifierRewrite.create(rewrite, currentMovedFragment.fDeclaration);
-					ListRewrite listRewrite= rewrite.getListRewrite(currentMovedFragment.fDeclaration, FieldDeclaration.MODIFIERS2_PROPERTY);
-					List extendedList= listRewrite.getRewrittenList();
-					for (int i= 0; i < extendedList.size(); i++) {
-						ASTNode curr= (ASTNode)extendedList.get(i);
-						if (curr instanceof Modifier)
-							rewrite.remove(curr, group);
+					// Current fragment has already been moved.
+					
+					if (currentMovedFragment.fUsesOriginalModifiers) {
+						// Need to put in the right modifiers (removing any existing ones).
+						modifierRewrite= ModifierRewrite.create(rewrite, currentMovedFragment.fDeclaration);
+						ListRewrite listRewrite= rewrite.getListRewrite(currentMovedFragment.fDeclaration, FieldDeclaration.MODIFIERS2_PROPERTY);
+						List extendedList= listRewrite.getRewrittenList();
+						for (int i= 0; i < extendedList.size(); i++) {
+							ASTNode curr= (ASTNode)extendedList.get(i);
+							if (curr instanceof Modifier)
+								rewrite.remove(curr, group);
+						}
 					}
+					// otherwise, don't need to touch the modifiers, so leave modifierRewrite null
 					
 				} else { // need to split an existing field declaration
 					VariableDeclarationFragment moveTarget;
@@ -115,7 +120,7 @@ public class VariableDeclarationRewrite {
 					
 					FieldDeclaration newStatement= (FieldDeclaration)ast.createInstance(FieldDeclaration.class);
 					rewrite.getListRewrite(newStatement, FieldDeclaration.FRAGMENTS_PROPERTY).insertLast(moveTarget, group);
-					lookup.put(currentFragment, new MovedFragment(moveTarget, newStatement));
+					lookup.put(currentFragment, new MovedFragment(moveTarget, newStatement, !changeCurrent));
 					rewrite.set(newStatement, FieldDeclaration.TYPE_PROPERTY, rewrite.createCopyTarget(declarationNode.getType()), group);
 
 					modifierRewrite= ModifierRewrite.create(rewrite, newStatement);
@@ -126,23 +131,27 @@ public class VariableDeclarationRewrite {
 					lastStatement= newStatement;
 				}
 				
-				if (changeCurrent) {
-					int newModifiers= (declarationNode.getModifiers() & ~excludedModifiers) | includedModifiers;
-					modifierRewrite.setModifiers(newModifiers, excludedModifiers, group);
-				} else {
-					int newModifiers= declarationNode.getModifiers();
-					modifierRewrite.setModifiers(newModifiers, Modifier.NONE, group);
+				if (modifierRewrite != null) {
+					if (changeCurrent) {
+						int newModifiers= (declarationNode.getModifiers() & ~excludedModifiers) | includedModifiers;
+						modifierRewrite.setModifiers(newModifiers, excludedModifiers, group);
+					} else {
+						int newModifiers= declarationNode.getModifiers();
+						modifierRewrite.setModifiers(newModifiers, Modifier.NONE, group);
+					}
 				}
 					
 			} else if (fragmentsRewrite != null) {
 				VariableDeclarationFragment fragment0;
+				boolean usesOriginalModifiers= true;
 				if (currentMovedFragment != null) {
 					fragment0= currentMovedFragment.fMoveTarget;
+					usesOriginalModifiers= currentMovedFragment.fUsesOriginalModifiers;
 					rewrite.getListRewrite(currentMovedFragment.fDeclaration, FieldDeclaration.FRAGMENTS_PROPERTY).remove(fragment0, group);
 				} else {
 					fragment0= (VariableDeclarationFragment)rewrite.createMoveTarget(currentFragment);
 				}
-				lookup.put(currentFragment, new MovedFragment(fragment0, lastStatement));
+				lookup.put(currentFragment, new MovedFragment(fragment0, lastStatement, usesOriginalModifiers));
 				fragmentsRewrite.insertLast(fragment0, group);
 			}
 			lastFragment= currentFragment;
@@ -152,10 +161,12 @@ public class VariableDeclarationRewrite {
 	private static class MovedFragment {
 		final VariableDeclarationFragment fMoveTarget;
 		final ASTNode fDeclaration;
+		boolean fUsesOriginalModifiers;
 		
-		public MovedFragment(VariableDeclarationFragment moveTarget, ASTNode declaration) {
+		public MovedFragment(VariableDeclarationFragment moveTarget, ASTNode declaration, boolean usesOriginalModifiers) {
 			fMoveTarget= moveTarget;
 			fDeclaration= declaration;
+			fUsesOriginalModifiers= usesOriginalModifiers;
 		}
 	}
 
