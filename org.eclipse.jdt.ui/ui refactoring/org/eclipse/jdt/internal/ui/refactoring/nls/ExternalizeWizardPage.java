@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -260,7 +260,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				JavaElementImageDescriptor imageDescriptor= new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.WARNING, JavaElementImageProvider.SMALL_SIZE);
 				return JavaPlugin.getImageDescriptorRegistry().get(imageDescriptor);
 			} else
-				if (sub.isConflicting(fSubstitutions) || !isKeyValid(sub, null)) {
+				if (sub.isConflicting(fSubstitutions) || !isSubstitutionValid(sub, null)) {
 					JavaElementImageDescriptor imageDescriptor= new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.ERROR, JavaElementImageProvider.SMALL_SIZE);
 					return JavaPlugin.getImageDescriptorRegistry().get(imageDescriptor);
 				} else {
@@ -339,12 +339,21 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		for (int x= 0; x < len;) {
 			aChar= s.charAt(x++);
 			if (aChar == '\\') {
+				if (x > len - 1) {
+					return outBuffer.toString();
+				}
 				aChar= s.charAt(x++);
 				if (aChar == 'u') {
 					// Read the xxxx
 					int value= 0;
+					if (x > len - 4) {
+						return outBuffer.toString() + s.substring(x - 2);
+					}
+					StringBuffer buf= new StringBuffer("\\u"); //$NON-NLS-1$
+					boolean invalid=false;
 					for (int i= 0; i < 4; i++) {
 						aChar= s.charAt(x++);
+						buf.append(aChar);
 						switch (aChar) {
 							case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
 								value= (value << 4) + aChar - '0';
@@ -356,10 +365,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 								value= (value << 4) + 10 + aChar - 'A';
 								break;
 							default:
-								throw new IllegalArgumentException("Malformed \\uxxxx encoding."); //$NON-NLS-1$
+								invalid=true;
 						}
 					}
-					outBuffer.append((char) value);
+					outBuffer.append(invalid ? buf.toString() : String.valueOf((char)value));
 				} else {
 					if (aChar == 't') {
 						outBuffer.append('\t');
@@ -917,7 +926,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private void validateKeys(boolean refreshTable) {
 		RefactoringStatus status= new RefactoringStatus();
-		checkInvalidKeys(status);
+		checkInvalidSubstitutions(status);
 		checkDuplicateKeys(status);
 		checkMissingKeys(status);
 		setPageComplete(status);
@@ -925,14 +934,14 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fTableViewer.refresh(true);
 	}
 
-	private void checkInvalidKeys(RefactoringStatus status) {
+	private void checkInvalidSubstitutions(RefactoringStatus status) {
 		for (int i= 0; i < fSubstitutions.length; i++) {
-			if (!isKeyValid(fSubstitutions[i], status))
+			if (!isSubstitutionValid(fSubstitutions[i], status))
 				return;
 		}
 	}
 
-	private boolean isKeyValid(NLSSubstitution substitution, RefactoringStatus status) {
+	private boolean isSubstitutionValid(NLSSubstitution substitution, RefactoringStatus status) {
 		if (substitution == null)
 			return false;
 
@@ -940,6 +949,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			return true;
 
 		String key= substitution.getKey();
+		String value= substitution.getValue();
 
 		if (fNLSRefactoring.isEclipseNLS()) {
 			if (key == null || key.length() == 0 || !Character.isJavaIdentifierStart(key.charAt(0))) {
@@ -968,6 +978,18 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 					return false;
 				}
 			}
+		}
+
+		if (key.indexOf("\\u") != -1) { //$NON-NLS-1$
+			if (status != null)
+				status.addFatalError(NLSUIMessages.ExternalizeWizardPage_warning_keyInvalid);
+			return false;
+		}
+
+		if (value.indexOf("\\u") != -1) { //$NON-NLS-1$
+			if (status != null)
+				status.addFatalError(NLSUIMessages.ExternalizeWizardPage_warning_valueInvalid);
+			return false;
 		}
 
 		return true;
