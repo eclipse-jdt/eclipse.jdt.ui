@@ -744,7 +744,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.ITextHoverExtension2#getInformationPresenterControlCreator()
+	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 * @since 3.4
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {

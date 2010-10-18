@@ -383,7 +383,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.ITextHoverExtension2#getInformationPresenterControlCreator()
+	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 * @since 3.5
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
