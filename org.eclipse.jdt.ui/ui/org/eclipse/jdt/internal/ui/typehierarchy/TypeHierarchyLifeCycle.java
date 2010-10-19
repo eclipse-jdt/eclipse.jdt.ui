@@ -210,7 +210,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				context.run(true, true, op);
 				fHierarchyRefreshNeeded= false;
 			} else {
-				final String label= Messages.format(TypeHierarchyMessages.TypeHierarchyLifeCycle_computeInput, TypeHierarchyViewPart.getElementLabel(elements));
+				final String label= Messages.format(TypeHierarchyMessages.TypeHierarchyLifeCycle_computeInput, HistoryAction.getElementLabel(elements));
 				synchronized (this) {
 					fRefreshHierarchyJob= new Job(label) {
 						/*
