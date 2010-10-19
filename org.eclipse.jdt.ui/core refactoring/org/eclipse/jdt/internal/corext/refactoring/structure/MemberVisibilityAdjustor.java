@@ -59,6 +59,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.LRUMap;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
@@ -450,7 +451,7 @@ public final class MemberVisibilityAdjustor {
 	private RefactoringStatus fStatus= new RefactoringStatus();
 
 	/** The type hierarchy cache */
-	private final Map fTypeHierarchies= new HashMap();
+	private final Map fTypeHierarchies= new LRUMap(10);
 
 	/** The visibility message severity */
 	private int fVisibilitySeverity= RefactoringStatus.WARNING;
@@ -493,9 +494,9 @@ public final class MemberVisibilityAdjustor {
 	/**
 	 * Check whether anyone accesses the members of the moved type from the
 	 * outside. Those may need to have their visibility adjusted.
-	 * @param member
-	 * @param monitor
-	 * @throws JavaModelException
+	 * @param member the member
+	 * @param monitor the progress monitor to use
+	 * @throws JavaModelException if an error occurs
 	 */
 	private void adjustMemberVisibility(final IMember member, final IProgressMonitor monitor) throws JavaModelException {
 
@@ -1013,10 +1014,12 @@ public final class MemberVisibilityAdjustor {
 			try {
 				hierarchy= (ITypeHierarchy) fTypeHierarchies.get(type);
 				if (hierarchy == null) {
-					if (fOwner == null)
+					if (fOwner == null) {
 						hierarchy= type.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-					else
+					} else {
 						hierarchy= type.newSupertypeHierarchy(fOwner, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+					}
+					fTypeHierarchies.put(type, hierarchy);
 				}
 			} finally {
 				monitor.done();
