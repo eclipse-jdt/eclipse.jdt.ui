@@ -229,10 +229,23 @@ public class PropertyFileDocumentModel {
 		return sb.toString();
 	}
 
+	/**
+	 * Converts the Native string to ASCII, and escapes comment characters and leading whitespace
+	 * characters.
+	 * 
+	 * @param value the native string
+	 * @return the escaped ASCII string
+	 */
 	public static String getEscapedAsciiValue(String value) {
 		return escapeLeadingWhiteSpaces(escapeCommentChars(getEscapedAsciiString(value)));
 	}
 
+	/**
+	 * Converts the Native character to ASCII string.
+	 * 
+	 * @param c the native character
+	 * @return the escaped ASCII string
+	 */
 	private static String getEscapedAsciiString(char c) {
 		switch (c) {
 			case '\b':
