@@ -32,12 +32,12 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.NativeToAscii;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class PropertyFileDocumentModel {
 
-	private static final char[] HEX_DIGITS = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
-    private List fKeyValuePairs;
+	private List fKeyValuePairs;
     private String fLineDelimiter;
 
     public PropertyFileDocumentModel(IDocument document) {
@@ -219,32 +219,32 @@ public class PropertyFileDocumentModel {
         return minIndex;
     }
 
-    public static String unwindEscapeChars(String s){
+    public static String getEscapedAsciiString(String s){
 		StringBuffer sb= new StringBuffer(s.length());
 		int length= s.length();
 		for (int i= 0; i < length; i++){
 			char c= s.charAt(i);
-			sb.append(getUnwoundString(c));
+			sb.append(getEscapedAsciiString(c));
 		}
 		return sb.toString();
 	}
 
-	public static String unwindValue(String value) {
-		return escapeLeadingWhiteSpaces(escapeCommentChars(unwindEscapeChars(value)));
+	public static String getEscapedAsciiValue(String value) {
+		return escapeLeadingWhiteSpaces(escapeCommentChars(getEscapedAsciiString(value)));
 	}
 
-	private static String getUnwoundString(char c){
-	        	switch(c){
-	        		case '\b' :
-	        			return "\\b";//$NON-NLS-1$
-	        		case '\t' :
-	        			return "\\t";//$NON-NLS-1$
-	        		case '\n' :
-	        			return "\\n";//$NON-NLS-1$
-	        		case '\f' :
-	        			return "\\f";//$NON-NLS-1$
-	        		case '\r' :
-	        			return "\\r";//$NON-NLS-1$
+	private static String getEscapedAsciiString(char c) {
+		switch (c) {
+			case '\b':
+				return "\\b";//$NON-NLS-1$
+			case '\t':
+				return "\\t";//$NON-NLS-1$
+			case '\n':
+				return "\\n";//$NON-NLS-1$
+			case '\f':
+				return "\\f";//$NON-NLS-1$
+			case '\r':
+				return "\\r";//$NON-NLS-1$
 
 //      			These can be used unescaped in properties file:
 //      			case '\"' :
@@ -252,8 +252,8 @@ public class PropertyFileDocumentModel {
 //      			case '\'' :
 //      			return "\\\'";//$NON-NLS-1$
 
-	        		case '\\' :
-	        			return "\\\\";//$NON-NLS-1$
+			case '\\':
+					return "\\\\";//$NON-NLS-1$
 
 //      			This is only done when writing to the .properties file in #unwindValue(String)
 //      			case '!':
@@ -261,24 +261,9 @@ public class PropertyFileDocumentModel {
 //      			case '#':
 //      			return "\\#";//$NON-NLS-1$
 
-	        		default:
-	        			if (((c < 0x0020) || (c > 0x007e && c <= 0x00a0) || (c > 0x00ff))) {
-	        				//NBSP (0x00a0) is escaped to differentiate from normal space character
-	        				return new StringBuffer()
-							.append('\\')
-							.append('u')
-							.append(toHex((c >> 12) & 0xF))
-							.append(toHex((c >>  8) & 0xF))
-							.append(toHex((c >>  4) & 0xF))
-							.append(toHex( c        & 0xF)).toString();
-
-	        			} else
-	        				return String.valueOf(c);
-	        	}
-	        }
-
-	private static char toHex(int halfByte) {
-		return HEX_DIGITS[(halfByte & 0xF)];
+			default:
+				return NativeToAscii.getEscapedAsciiString(c);
+		}
 	}
 
 	private static String escapeCommentChars(String string) {

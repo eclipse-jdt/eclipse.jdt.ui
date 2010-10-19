@@ -48,8 +48,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 
 		for (int i= 0; i < pairs.length; i++) {
 			KeyValuePair pair= pairs[i];
-			pair.setValue(PropertyFileDocumentModel.unwindValue(pair.getValue()) + model.getLineDelimiter());
-			pair.setKey(PropertyFileDocumentModel.unwindEscapeChars(pair.getKey()));
+			pair.setValue(PropertyFileDocumentModel.getEscapedAsciiValue(pair.getValue()) + model.getLineDelimiter());
+			pair.setKey(PropertyFileDocumentModel.getEscapedAsciiString(pair.getKey()));
 		}
 
 		DocumentChange change= new DocumentChange("", document);
@@ -320,6 +320,33 @@ public class PropertyFileDocumentModellTest extends TestCase {
 
 		RefactoringTest.assertEqualLines(
 				"key=value1\\nvalue2\\r\n", props.get());
+	}
+
+	public void testEscapingOfTab() throws Exception {
+		Document props= new Document();
+
+		insert(props, "key", "value1\tvalue2");
+
+		RefactoringTest.assertEqualLines(
+				"key=value1\\tvalue2\n", props.get());
+	}
+
+	public void testEscapingOfFormFeed() throws Exception {
+		Document props= new Document();
+
+		insert(props, "key", "value1\fvalue2");
+
+		RefactoringTest.assertEqualLines(
+				"key=value1\\fvalue2\n", props.get());
+	}
+
+	public void testEscapingOfEscapes() throws Exception {
+		Document props= new Document();
+
+		insert(props, "key", "c:\\demo\\demo.java");
+
+		RefactoringTest.assertEqualLines(
+				"key=c:\\\\demo\\\\demo.java\n", props.get());
 	}
 
 	public void testEscapingOfISO8859() throws Exception {

@@ -107,6 +107,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.NativeToAscii;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
@@ -174,7 +175,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 					return new Integer(substitution.getState());
 				}
 				if (res != null) {
-					return unwindEscapeChars(res);
+					return getEscapedAsciiString(res);
 				}
 				return ""; //$NON-NLS-1$
 			}
@@ -191,12 +192,12 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 					NLSSubstitution substitution= (NLSSubstitution) data;
 					if (PROPERTIES[KEY_PROP].equals(property)) {
 						String string = (String)value;
-						string = windEscapeChars(string);
+						string= NativeToAscii.getNativeString(string);
 						substitution.setKey(string);
 					}
 					if (PROPERTIES[VAL_PROP].equals(property)) {
 						String string = (String)value;
-						string = windEscapeChars(string);
+						string= NativeToAscii.getNativeString(string);
 						substitution.setValue(string);
 					}
 					if (PROPERTIES[STATE_PROP].equals(property)) {
@@ -233,7 +234,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 						columnText= substitution.getValue();
 					}
 			}
-			return unwindEscapeChars(columnText);
+			return getEscapedAsciiString(columnText);
 		}
 
 		public Image getColumnImage(Object element, int columnIndex) {
@@ -297,101 +298,35 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		}
 	}
 
-	private static String unwindEscapeChars(String s) {
+	private static String getEscapedAsciiString(String s) {
 		if (s != null) {
 			StringBuffer sb= new StringBuffer(s.length());
 			int length= s.length();
 			for (int i= 0; i < length; i++) {
 				char c= s.charAt(i);
-				sb.append(getUnwoundString(c));
+				sb.append(getEscapedAsciiString(c));
 			}
 			return sb.toString();
 		}
 		return null;
 	}
 
-	private static String getUnwoundString(char c) {
+	private static String getEscapedAsciiString(char c) {
 		switch (c) {
-			case '\b' :
+			case '\b':
 				return "\\b";//$NON-NLS-1$
-			case '\t' :
+			case '\t':
 				return "\\t";//$NON-NLS-1$
-			case '\n' :
+			case '\n':
 				return "\\n";//$NON-NLS-1$
-			case '\f' :
+			case '\f':
 				return "\\f";//$NON-NLS-1$
-			case '\r' :
+			case '\r':
 				return "\\r";//$NON-NLS-1$
-			case '\\' :
+			case '\\':
 				return "\\\\";//$NON-NLS-1$
 		}
 		return String.valueOf(c);
-	}
-
-	private static String windEscapeChars(String s) {
-		if (s == null)
-			return null;
-
-		char aChar;
-		int len= s.length();
-		StringBuffer outBuffer= new StringBuffer(len);
-
-		for (int x= 0; x < len;) {
-			aChar= s.charAt(x++);
-			if (aChar == '\\') {
-				if (x > len - 1) {
-					return outBuffer.toString();
-				}
-				aChar= s.charAt(x++);
-				if (aChar == 'u') {
-					// Read the xxxx
-					int value= 0;
-					if (x > len - 4) {
-						return outBuffer.toString() + s.substring(x - 2);
-					}
-					StringBuffer buf= new StringBuffer("\\u"); //$NON-NLS-1$
-					boolean invalid=false;
-					for (int i= 0; i < 4; i++) {
-						aChar= s.charAt(x++);
-						buf.append(aChar);
-						switch (aChar) {
-							case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-								value= (value << 4) + aChar - '0';
-								break;
-							case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
-								value= (value << 4) + 10 + aChar - 'a';
-								break;
-							case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
-								value= (value << 4) + 10 + aChar - 'A';
-								break;
-							default:
-								invalid=true;
-						}
-					}
-					outBuffer.append(invalid ? buf.toString() : String.valueOf((char)value));
-				} else {
-					if (aChar == 't') {
-						outBuffer.append('\t');
-					} else {
-						if (aChar == 'r') {
-							outBuffer.append('\r');
-						} else {
-							if (aChar == 'n') {
-								outBuffer.append('\n');
-							} else {
-								if (aChar == 'f') {
-									outBuffer.append('\f');
-								} else {
-									outBuffer.append(aChar);
-								}
-							}
-						}
-					}
-				}
-			} else
-				outBuffer.append(aChar);
-		}
-		return outBuffer.toString();
 	}
 
 	private class NLSInputDialog extends StatusDialog implements IDialogFieldListener {
@@ -980,13 +915,13 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			}
 		}
 
-		if (key.indexOf("\\u") != -1) { //$NON-NLS-1$
+		if (!NativeToAscii.isValidNativeString(key)) {
 			if (status != null)
 				status.addFatalError(NLSUIMessages.ExternalizeWizardPage_warning_keyInvalid);
 			return false;
 		}
 
-		if (value.indexOf("\\u") != -1) { //$NON-NLS-1$
+		if (!NativeToAscii.isValidNativeString(value)) {
 			if (status != null)
 				status.addFatalError(NLSUIMessages.ExternalizeWizardPage_warning_valueInvalid);
 			return false;

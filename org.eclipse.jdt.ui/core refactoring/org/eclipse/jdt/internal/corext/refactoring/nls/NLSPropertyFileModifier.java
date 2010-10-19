@@ -165,8 +165,8 @@ public class NLSPropertyFileModifier {
 			if (doReplace(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				KeyValuePair initialPair= new KeyValuePair(substitution.getInitialKey(), substitution.getInitialValue());
 
-				String key= PropertyFileDocumentModel.unwindEscapeChars(substitution.getKey());
-				String value= PropertyFileDocumentModel.unwindValue(substitution.getValue()) + model.getLineDelimiter();
+				String key= PropertyFileDocumentModel.getEscapedAsciiString(substitution.getKey());
+				String value= PropertyFileDocumentModel.getEscapedAsciiValue(substitution.getValue()) + model.getLineDelimiter();
 				KeyValuePair newPair= new KeyValuePair(key, value);
 				TextEdit edit= model.replace(initialPair, newPair);
 				if (edit != null) {
@@ -198,8 +198,8 @@ public class NLSPropertyFileModifier {
 			NLSSubstitution substitution= substitutions[i];
 
 			if (doInsert(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
-				String value= PropertyFileDocumentModel.unwindValue(substitution.getValueNonEmpty()) + model.getLineDelimiter();
-				String key= PropertyFileDocumentModel.unwindEscapeChars(substitution.getKey());
+				String value= PropertyFileDocumentModel.getEscapedAsciiValue(substitution.getValueNonEmpty()) + model.getLineDelimiter();
+				String key= PropertyFileDocumentModel.getEscapedAsciiString(substitution.getKey());
 				keyValuePairsToAdd.add(new KeyValuePair(key, value));
 			}
 		}

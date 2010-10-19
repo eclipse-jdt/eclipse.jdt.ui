@@ -11,21 +11,29 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.content.IContentType;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
+import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.reconciler.IReconciler;
@@ -36,6 +44,8 @@ import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
+
+import org.eclipse.ui.IFileEditorInput;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy;
@@ -320,5 +330,48 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 */
 	public String[] getDefaultPrefixes(ISourceViewer sourceViewer, String contentType) {
 		return new String[] {"#", ""}; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getAutoEditStrategies(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
+	 * @since 3.7
+	 */
+	public IAutoEditStrategy[] getAutoEditStrategies(ISourceViewer sourceViewer, String contentType) {
+		IAutoEditStrategy[] autoEditStrategies= super.getAutoEditStrategies(sourceViewer, contentType);
+
+		if (fTextEditor == null)
+			return autoEditStrategies;
+
+		IContentType javaPropertiesFileContentType= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaProperties"); //$NON-NLS-1$
+		IFileEditorInput input= (IFileEditorInput)fTextEditor.getEditorInput();
+		IFile file= input.getFile();
+		if (file == null || !file.isAccessible())
+			return autoEditStrategies;
+
+		IContentDescription description= null;
+		try {
+			description= file.getContentDescription();
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}
+		if (description == null || description.getContentType() == null || !description.getContentType().isKindOf(javaPropertiesFileContentType))
+			return autoEditStrategies;
+
+		List stratergies= new ArrayList();
+		for (int i= 0; i < autoEditStrategies.length; i++) {
+			stratergies.add(autoEditStrategies[i]);
+		}
+		stratergies.add(new PropertiesFileAutoEditStratergy());
+		return (IAutoEditStrategy[])stratergies.toArray(new IAutoEditStrategy[stratergies.size()]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getTextHover(org.eclipse.jface.text.source.ISourceViewer, java.lang.String, int)
+	 * @since 3.7
+	 */
+	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
+		return new PropertiesFileHover(super.getTextHover(sourceViewer, contentType));
 	}
 }
