@@ -98,24 +98,16 @@ public class NativeToAscii {
 						}
 					}
 					outBuffer.append(invalid ? buf.toString() : String.valueOf((char)value));
+				} else if (aChar == 't') {
+					outBuffer.append('\t');
+				} else if (aChar == 'r') {
+					outBuffer.append('\r');
+				} else if (aChar == 'n') {
+					outBuffer.append('\n');
+				} else if (aChar == 'f') {
+					outBuffer.append('\f');
 				} else {
-					if (aChar == 't') {
-						outBuffer.append('\t');
-					} else {
-						if (aChar == 'r') {
-							outBuffer.append('\r');
-						} else {
-							if (aChar == 'n') {
-								outBuffer.append('\n');
-							} else {
-								if (aChar == 'f') {
-									outBuffer.append('\f');
-								} else {
-									outBuffer.append(aChar);
-								}
-							}
-						}
-					}
+					outBuffer.append(aChar);
 				}
 			} else
 				outBuffer.append(aChar);
