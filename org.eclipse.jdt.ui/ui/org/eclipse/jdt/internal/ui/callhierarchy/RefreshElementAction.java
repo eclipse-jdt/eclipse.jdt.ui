@@ -45,7 +45,7 @@ public class RefreshElementAction extends Action {
 		setText(CallHierarchyMessages.RefreshSingleElementAction_text);
 		setToolTipText(CallHierarchyMessages.RefreshSingleElementAction_tooltip);
 		setDescription(CallHierarchyMessages.RefreshSingleElementAction_description);
-		JavaPluginImages.setLocalImageDescriptors(this, "refresh_nav.gif");//$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "refresh.gif");//$NON-NLS-1$
 		setActionDefinitionId(IWorkbenchCommandConstants.FILE_REFRESH);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REFRESH_SINGLE_ELEMENT_ACTION);
 		setEnabled(true);
