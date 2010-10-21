@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPartitioningException;
@@ -29,8 +31,6 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
 
 import org.eclipse.ui.editors.text.EditorsUI;
-
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -130,7 +130,7 @@ public class PropertiesFileHover implements ITextHover, ITextHoverExtension, ITe
 			return hoverInfo;
 		}
 
-		String value= null;
+		String unescapedString= null;
 		try {
 			ITypedRegion partition= null;
 			IDocument document= textViewer.getDocument();
@@ -143,20 +143,24 @@ public class PropertiesFileHover implements ITextHover, ITextHoverExtension, ITe
 			if (!(type.equals(IPropertiesFilePartitions.PROPERTY_VALUE) || type.equals(IDocument.DEFAULT_CONTENT_TYPE))) {
 				return null;
 			}
-			value= document.get(partition.getOffset(), partition.getLength());
+			String escapedString= document.get(partition.getOffset(), partition.getLength());
 			if (type.equals(IPropertiesFilePartitions.PROPERTY_VALUE)) {
-				value= value.substring(1); //see PropertiesFilePartitionScanner()
+				escapedString= escapedString.substring(1); //see PropertiesFilePartitionScanner()
 			}
-			value= NativeToAscii.getNativeString(value);
-			if (!NativeToAscii.isValidNativeString(value)) {
-				value= Messages.format(PropertiesFileEditorMessages.PropertiesFileHover_MalformedEncoding, value);
+
+			try {
+				unescapedString= PropertiesFileEscapes.unescape(escapedString);
+			} catch (CoreException e) {
+				return e.getStatus().getMessage();
 			}
+			if (escapedString.equals(unescapedString))
+				return null;
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		} catch (BadPartitioningException e) {
 			JavaPlugin.log(e);
 		}
-		return value;
+		return unescapedString;
 	}
 
 	/*

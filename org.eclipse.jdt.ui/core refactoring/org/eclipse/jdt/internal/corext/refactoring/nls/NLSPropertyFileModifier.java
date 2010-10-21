@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -165,8 +165,8 @@ public class NLSPropertyFileModifier {
 			if (doReplace(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				KeyValuePair initialPair= new KeyValuePair(substitution.getInitialKey(), substitution.getInitialValue());
 
-				String key= PropertyFileDocumentModel.getEscapedAsciiString(substitution.getKey());
-				String value= PropertyFileDocumentModel.getEscapedAsciiValue(substitution.getValue()) + model.getLineDelimiter();
+				String key= PropertyFileDocumentModel.escape(substitution.getKey(), false);
+				String value= PropertyFileDocumentModel.escape(substitution.getValue(), true) + model.getLineDelimiter();
 				KeyValuePair newPair= new KeyValuePair(key, value);
 				TextEdit edit= model.replace(initialPair, newPair);
 				if (edit != null) {
@@ -198,8 +198,8 @@ public class NLSPropertyFileModifier {
 			NLSSubstitution substitution= substitutions[i];
 
 			if (doInsert(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
-				String value= PropertyFileDocumentModel.getEscapedAsciiValue(substitution.getValueNonEmpty()) + model.getLineDelimiter();
-				String key= PropertyFileDocumentModel.getEscapedAsciiString(substitution.getKey());
+				String value= PropertyFileDocumentModel.escape(substitution.getValueNonEmpty(), true) + model.getLineDelimiter();
+				String key= PropertyFileDocumentModel.escape(substitution.getKey(), false);
 				keyValuePairsToAdd.add(new KeyValuePair(key, value));
 			}
 		}

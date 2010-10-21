@@ -26,20 +26,20 @@ public class PropertiesFileAutoEditStratergy implements IAutoEditStrategy {
 	 * @see org.eclipse.jface.text.IAutoEditStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.DocumentCommand)
 	 */
 	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
-		command.text= getEscapedAsciiString(command.text);
+		command.text= escape(command.text);
 	}
 
-	private static String getEscapedAsciiString(String s) {
+	private static String escape(String s) {
 		StringBuffer sb= new StringBuffer(s.length());
 		int length= s.length();
 		for (int i= 0; i < length; i++) {
 			char c= s.charAt(i);
-			sb.append(getEscapedAsciiString(c));
+			sb.append(escape(c));
 		}
 		return sb.toString();
 	}
 
-	private static String getEscapedAsciiString(char c) {
+	private static String escape(char c) {
 		switch (c) {
 			case '\b':
 				return "\b";//$NON-NLS-1$
@@ -51,9 +51,11 @@ public class PropertiesFileAutoEditStratergy implements IAutoEditStrategy {
 				return "\f";//$NON-NLS-1$
 			case '\r':
 				return "\r";//$NON-NLS-1$
+			case '\\':
+				return "\\";//$NON-NLS-1$
 
 			default:
-				return NativeToAscii.getEscapedAsciiString(c);
+				return PropertiesFileEscapes.escape(c);
 		}
 	}
 }

@@ -32,7 +32,7 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.propertiesfileeditor.NativeToAscii;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEscapes;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class PropertyFileDocumentModel {
@@ -219,64 +219,16 @@ public class PropertyFileDocumentModel {
         return minIndex;
     }
 
-    public static String getEscapedAsciiString(String s){
+	public static String escape(String s, boolean escapeCommentCharsAndLeadingWhitespaces) {
 		StringBuffer sb= new StringBuffer(s.length());
 		int length= s.length();
 		for (int i= 0; i < length; i++){
 			char c= s.charAt(i);
-			sb.append(getEscapedAsciiString(c));
+			sb.append(PropertiesFileEscapes.escape(c));
 		}
-		return sb.toString();
-	}
-
-	/**
-	 * Converts the Native string to ASCII, and escapes comment characters and leading whitespace
-	 * characters.
-	 * 
-	 * @param value the native string
-	 * @return the escaped ASCII string
-	 */
-	public static String getEscapedAsciiValue(String value) {
-		return escapeLeadingWhiteSpaces(escapeCommentChars(getEscapedAsciiString(value)));
-	}
-
-	/**
-	 * Converts the Native character to ASCII string.
-	 * 
-	 * @param c the native character
-	 * @return the escaped ASCII string
-	 */
-	private static String getEscapedAsciiString(char c) {
-		switch (c) {
-			case '\b':
-				return "\\b";//$NON-NLS-1$
-			case '\t':
-				return "\\t";//$NON-NLS-1$
-			case '\n':
-				return "\\n";//$NON-NLS-1$
-			case '\f':
-				return "\\f";//$NON-NLS-1$
-			case '\r':
-				return "\\r";//$NON-NLS-1$
-
-//      			These can be used unescaped in properties file:
-//      			case '\"' :
-//      			return "\\\"";//$NON-NLS-1$
-//      			case '\'' :
-//      			return "\\\'";//$NON-NLS-1$
-
-			case '\\':
-					return "\\\\";//$NON-NLS-1$
-
-//      			This is only done when writing to the .properties file in #unwindValue(String)
-//      			case '!':
-//      			return "\\!";//$NON-NLS-1$
-//      			case '#':
-//      			return "\\#";//$NON-NLS-1$
-
-			default:
-				return NativeToAscii.getEscapedAsciiString(c);
-		}
+		if(!escapeCommentCharsAndLeadingWhitespaces)
+			return sb.toString();
+		return escapeLeadingWhiteSpaces(escapeCommentChars(sb.toString()));
 	}
 
 	private static String escapeCommentChars(String string) {

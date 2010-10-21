@@ -95,7 +95,6 @@ final class NLSUIMessages extends NLS {
 	public static String ExternalizeWizardPage_warning_keymissing;
 	public static String ExternalizeWizardPage_warning_keyInvalid;
 	public static String ExternalizeWizardPage_warning_EclipseNLS_keyInvalid;
-	public static String ExternalizeWizardPage_warning_valueInvalid;
 	public static String ExternalizeWizardPage_filter_label;
 	public static String NLSAccessorConfigurationDialog_title;
 	public static String PackageBrowseAdapter_package_selection;

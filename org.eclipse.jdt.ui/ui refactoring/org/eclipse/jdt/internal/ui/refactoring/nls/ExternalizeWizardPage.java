@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IFile;
@@ -107,7 +108,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
-import org.eclipse.jdt.internal.ui.propertiesfileeditor.NativeToAscii;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEscapes;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
@@ -192,12 +193,22 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 					NLSSubstitution substitution= (NLSSubstitution) data;
 					if (PROPERTIES[KEY_PROP].equals(property)) {
 						String string = (String)value;
-						string= NativeToAscii.getNativeString(string);
+						try {
+							string= PropertiesFileEscapes.unescape(string);
+						} catch (CoreException e) {
+							setPageComplete(RefactoringStatus.create(e.getStatus()));
+							return;
+						}
 						substitution.setKey(string);
 					}
 					if (PROPERTIES[VAL_PROP].equals(property)) {
 						String string = (String)value;
-						string= NativeToAscii.getNativeString(string);
+						try {
+							string= PropertiesFileEscapes.unescape(string);
+						} catch (CoreException e) {
+							setPageComplete(RefactoringStatus.create(e.getStatus()));
+							return;
+						}
 						substitution.setValue(string);
 					}
 					if (PROPERTIES[STATE_PROP].equals(property)) {
@@ -261,7 +272,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				JavaElementImageDescriptor imageDescriptor= new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.WARNING, JavaElementImageProvider.SMALL_SIZE);
 				return JavaPlugin.getImageDescriptorRegistry().get(imageDescriptor);
 			} else
-				if (sub.isConflicting(fSubstitutions) || !isSubstitutionValid(sub, null)) {
+				if (sub.isConflicting(fSubstitutions) || !isKeyValid(sub, null)) {
 					JavaElementImageDescriptor imageDescriptor= new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.ERROR, JavaElementImageProvider.SMALL_SIZE);
 					return JavaPlugin.getImageDescriptorRegistry().get(imageDescriptor);
 				} else {
@@ -861,7 +872,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private void validateKeys(boolean refreshTable) {
 		RefactoringStatus status= new RefactoringStatus();
-		checkInvalidSubstitutions(status);
+		checkInvalidKeys(status);
 		checkDuplicateKeys(status);
 		checkMissingKeys(status);
 		setPageComplete(status);
@@ -869,14 +880,14 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fTableViewer.refresh(true);
 	}
 
-	private void checkInvalidSubstitutions(RefactoringStatus status) {
+	private void checkInvalidKeys(RefactoringStatus status) {
 		for (int i= 0; i < fSubstitutions.length; i++) {
-			if (!isSubstitutionValid(fSubstitutions[i], status))
+			if (!isKeyValid(fSubstitutions[i], status))
 				return;
 		}
 	}
 
-	private boolean isSubstitutionValid(NLSSubstitution substitution, RefactoringStatus status) {
+	private boolean isKeyValid(NLSSubstitution substitution, RefactoringStatus status) {
 		if (substitution == null)
 			return false;
 
@@ -884,7 +895,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			return true;
 
 		String key= substitution.getKey();
-		String value= substitution.getValue();
 
 		if (fNLSRefactoring.isEclipseNLS()) {
 			if (key == null || key.length() == 0 || !Character.isJavaIdentifierStart(key.charAt(0))) {
@@ -913,18 +923,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 					return false;
 				}
 			}
-		}
-
-		if (!NativeToAscii.isValidNativeString(key)) {
-			if (status != null)
-				status.addFatalError(NLSUIMessages.ExternalizeWizardPage_warning_keyInvalid);
-			return false;
-		}
-
-		if (!NativeToAscii.isValidNativeString(value)) {
-			if (status != null)
-				status.addFatalError(NLSUIMessages.ExternalizeWizardPage_warning_valueInvalid);
-			return false;
 		}
 
 		return true;

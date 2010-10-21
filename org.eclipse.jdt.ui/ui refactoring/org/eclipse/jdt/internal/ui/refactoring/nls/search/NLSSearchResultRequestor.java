@@ -176,7 +176,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		 * .properties file. However, this can fail if the key is escaped in a different
 		 * manner than what PropertyFileDocumentModel.unwindEscapeChars(.) produces.
 		 */
-		String escapedPropertyName= PropertyFileDocumentModel.getEscapedAsciiString(propertyName);
+		String escapedPropertyName= PropertyFileDocumentModel.escape(propertyName, false);
 		int start= findPropertyNameStartPosition(escapedPropertyName);
 		int length;
 		if (start == -1) { // not found -> report at beginning

@@ -48,8 +48,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 
 		for (int i= 0; i < pairs.length; i++) {
 			KeyValuePair pair= pairs[i];
-			pair.setValue(PropertyFileDocumentModel.getEscapedAsciiValue(pair.getValue()) + model.getLineDelimiter());
-			pair.setKey(PropertyFileDocumentModel.getEscapedAsciiString(pair.getKey()));
+			pair.setValue(PropertyFileDocumentModel.escape(pair.getValue(), true) + model.getLineDelimiter());
+			pair.setKey(PropertyFileDocumentModel.escape(pair.getKey(), false));
 		}
 
 		DocumentChange change= new DocumentChange("", document);
