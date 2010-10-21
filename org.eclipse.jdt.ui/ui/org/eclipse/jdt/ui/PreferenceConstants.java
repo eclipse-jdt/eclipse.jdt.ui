@@ -139,26 +139,25 @@ public class PreferenceConstants {
 	 * A named preference that defines the patterns used for package name abbreviation.
 	 * <p>
 	 * Value is of type <code>String</code>. Value is a newline separated list of
-	 * packagePrefix=abbreviation pairs. For example, a pattern of
-	 * 'javax.management=&lt;JMX&gt;' will abbreviate 'javax.management.monitor' to
-	 * '&lt;JMX&gt;.monitor'. A '#' at the beginning of a line disables an entry.
+	 * packagePrefix=abbreviation pairs. For example, a pattern of 'javax.management=&lt;JMX&gt;'
+	 * will abbreviate 'javax.management.monitor' to '&lt;JMX&gt;.monitor'. A '#' at the beginning
+	 * of a line disables an entry.
 	 * </p>
-	 * @since 3.6
+	 * 
+	 * @since 3.7
 	 */
-	//TODO: make API in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
-	static final String APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW;
+	public static final String APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW;
 
 	/**
 	 * A named preference that controls if package name abbreviation is turned on or off.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 *
+	 * 
 	 * @see #APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW
-	 * @since 3.6
+	 * @since 3.7
 	 */
-	//TODO: make API in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
-	static final String APPEARANCE_ABBREVIATE_PACKAGE_NAMES= JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES;
+	public static final String APPEARANCE_ABBREVIATE_PACKAGE_NAMES= JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES;
 
 	/**
 	 * A named preference that controls if empty inner packages are folded in
