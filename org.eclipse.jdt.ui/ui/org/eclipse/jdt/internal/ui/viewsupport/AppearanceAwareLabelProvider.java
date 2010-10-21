@@ -65,7 +65,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 			fTextFlagMask ^= JavaElementLabels.M_APP_TYPE_PARAMETERS;
 		}
 		if (!(store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)
-				|| store.getBoolean(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES))) {
+				|| store.getBoolean(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES))) {
 			fTextFlagMask ^= JavaElementLabels.P_COMPRESSED;
 		}
 		if (!store.getBoolean(PreferenceConstants.APPEARANCE_CATEGORY)) {
@@ -85,8 +85,8 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 				|| property.equals(PreferenceConstants.APPEARANCE_CATEGORY)
 				|| property.equals(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW)
 				|| property.equals(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)
-				|| property.equals(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW)
-				|| property.equals(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES)) {
+				|| property.equals(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW)
+				|| property.equals(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES)) {
 			initMasks();
 			LabelProviderChangedEvent lpEvent= new LabelProviderChangedEvent(this, null); // refresh all
 			fireLabelProviderChanged(lpEvent);

@@ -60,24 +60,6 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 public class JavaElementLabelComposer {
 
 	/**
-	 * Use of this constant is <b>FORBIDDEN</b> for external clients.
-	 * <p>
-	 * TODO: Make API in PreferenceConstants in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
-	 * 
-	 * @see PreferenceConstants#APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW
-	 */
-	public static final String APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= "org.eclipse.jdt.ui.pkgNameAbbreviationPatternForPackagesView";//$NON-NLS-1$
-
-	/**
-	 * Use of this constant is <b>FORBIDDEN</b> for external clients.
-	 * <p>
-	 * TODO: Make API in PreferenceConstants in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
-	 * 
-	 * @see PreferenceConstants#APPEARANCE_ABBREVIATE_PACKAGE_NAMES
-	 */
-	public static final String APPEARANCE_ABBREVIATE_PACKAGE_NAMES= "org.eclipse.jdt.ui.abbreviatepackagenames";//$NON-NLS-1$
-
-	/**
 	 * An adapter for buffer supported by the label composer.
 	 */
 	public static abstract class FlexibleBuffer {
@@ -1416,14 +1398,14 @@ public class JavaElementLabelComposer {
 
 	private boolean isPackageNameAbbreviationEnabled() {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-		return store.getBoolean(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES);
+		return store.getBoolean(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES);
 	}
 
 	private String getPkgNameAbbreviationPatternForPackagesView() {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-		if (!store.getBoolean(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES))
+		if (!store.getBoolean(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES))
 			return ""; //$NON-NLS-1$
-		return store.getString(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW);
+		return store.getString(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW);
 	}
 
 }

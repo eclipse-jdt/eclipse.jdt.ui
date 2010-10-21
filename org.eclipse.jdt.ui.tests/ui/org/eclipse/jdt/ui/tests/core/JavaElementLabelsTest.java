@@ -29,8 +29,6 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
-
 
 public class JavaElementLabelsTest extends CoreTests {
 
@@ -475,18 +473,18 @@ public class JavaElementLabelsTest extends CoreTests {
 			assertExpectedLabel(packOrgTestLongname, "org.te*.longname", JavaElementLabels.P_COMPRESSED);
 
 
-			store.setValue(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES, true);
+			store.setValue(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES, true);
 			
 			assertExpectedLabel(packOrgTestLongname, "org.te*.longname", JavaElementLabels.P_COMPRESSED);
 			
-			store.setValue(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, "#com=@C\norg=@O");
+			store.setValue(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, "#com=@C\norg=@O");
 			
 			assertExpectedLabel(packDefault, "(default package)", JavaElementLabels.P_COMPRESSED);
 			assertExpectedLabel(packOrg, "@O", JavaElementLabels.P_COMPRESSED);
 			assertExpectedLabel(packOrgTest, "@O.test", JavaElementLabels.P_COMPRESSED);
 			assertExpectedLabel(packOrgTestLongname, "@O.te*.longname", JavaElementLabels.P_COMPRESSED);
 			
-			store.setValue(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, "org=@O\n\norg.test=@OT\n");
+			store.setValue(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, "org=@O\n\norg.test=@OT\n");
 			
 			assertExpectedLabel(packDefault, "(default package)", JavaElementLabels.P_COMPRESSED);
 			assertExpectedLabel(packOrg, "@O", JavaElementLabels.P_COMPRESSED);
@@ -496,8 +494,8 @@ public class JavaElementLabelsTest extends CoreTests {
 		} finally {
 			store.setToDefault(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW);
 			store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
-			store.setToDefault(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW);
-			store.setValue(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES, false);
+			store.setToDefault(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW);
+			store.setValue(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES, false);
 		}
 	}
 
