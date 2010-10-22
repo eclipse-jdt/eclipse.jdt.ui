@@ -90,7 +90,7 @@ public class PropertiesFileHover implements ITextHover, ITextHoverExtension, ITe
 		 *            <code>null</code> to hide the status field
 		 */
 		public PropertiesFileHoverControl(Shell parent, String tooltipAffordanceString) {
-			super(parent, tooltipAffordanceString);
+			super(parent, tooltipAffordanceString, null);
 		}
 
 		/*
@@ -120,9 +120,9 @@ public class PropertiesFileHover implements ITextHover, ITextHoverExtension, ITe
 		return fHoverControlCreator;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.text.ITextHover#getHoverInfo(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
+	/**
+	 * {@inheritDoc}
+	 * @deprecated see {@link ITextHover#getHoverInfo(ITextViewer, IRegion)}
 	 */
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		String hoverInfo= fTextHover.getHoverInfo(textViewer, hoverRegion);

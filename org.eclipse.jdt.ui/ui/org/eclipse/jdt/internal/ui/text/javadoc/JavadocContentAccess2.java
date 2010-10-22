@@ -27,6 +27,8 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jface.internal.text.html.HTMLPrinter;
+
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
@@ -1201,6 +1203,7 @@ public class JavadocContentAccess2 {
 		}
 		
 		if (text != null) {
+			text= HTMLPrinter.convertToHTMLContentWithWhitespace(text);
 			if (link) {
 				String uri;
 				try {

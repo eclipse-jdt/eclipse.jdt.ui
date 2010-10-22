@@ -671,7 +671,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		if (element.getElementType() == IJavaElement.FIELD) {
 			String constantValue= getConstantValue((IField) element, editorInputElement, hoverRegion);
 			if (constantValue != null) {
-				constantValue= HTMLPrinter.convertToHTMLContent(constantValue);
+				constantValue= HTMLPrinter.convertToHTMLContentWithWhitespace(constantValue);
 				IJavaProject javaProject= element.getJavaProject();
 				if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, true)))
 					label.append(' ');

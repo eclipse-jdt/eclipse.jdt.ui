@@ -200,21 +200,21 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 			return null;
 
 		String value= properties.getProperty(identifier, null);
-		if (value != null)
-			value= HTMLPrinter.convertToHTMLContent(value);
-		else
-			value= JavaHoverMessages.NLSStringHover_NLSStringHover_missingKeyWarning;
-
 		String buffer= toHtml(propertiesFileName, value);
 		return new NLSHoverControlInput(buffer, propertiesFile, identifier, getEditor());
 	}
 
 	private String toHtml(String header, String string) {
-
 		StringBuffer buffer= new StringBuffer();
-
 		HTMLPrinter.addSmallHeader(buffer, header);
-		HTMLPrinter.addParagraph(buffer, string);
+
+		if (string != null) {
+			HTMLPrinter.addParagraph(buffer, ""); //$NON-NLS-1$
+			HTMLPrinter.addPreFormatted(buffer, HTMLPrinter.convertToHTMLContent(string));
+		} else {
+			HTMLPrinter.addParagraph(buffer, JavaHoverMessages.NLSStringHover_NLSStringHover_missingKeyWarning);
+		}
+
 		HTMLPrinter.insertPageProlog(buffer, 0);
 		HTMLPrinter.addPageEpilog(buffer);
 		return buffer.toString();
@@ -247,7 +247,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 			fActiveEditor= editor;
 		}
 	}
-	
+
 	/**
 	 * The NLS hover control.
 	 * 
