@@ -77,8 +77,6 @@ public class PropertiesFileEscapes {
 	 */
 	public static String escape(char c) {
 		switch (c) {
-			case '\b':
-				return "\\b";//$NON-NLS-1$
 			case '\t':
 				return "\\t";//$NON-NLS-1$
 			case '\n':
@@ -150,8 +148,6 @@ public class PropertiesFileEscapes {
 						buf.append(aChar);
 					}
 					outBuffer.append(digit == -1 ? buf.toString() : String.valueOf((char)value));
-				} else if (aChar == 'b') {
-					outBuffer.append('\b');
 				} else if (aChar == 't') {
 					outBuffer.append('\t');
 				} else if (aChar == 'n') {

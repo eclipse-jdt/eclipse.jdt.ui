@@ -19,7 +19,7 @@ import org.eclipse.jface.text.IDocument;
  * 
  * @since 3.7
  */
-public class PropertiesFileAutoEditStratergy implements IAutoEditStrategy {
+public class PropertiesFileAutoEditStrategy implements IAutoEditStrategy {
 
 	/*
 	 * (non-Javadoc)
@@ -41,8 +41,6 @@ public class PropertiesFileAutoEditStratergy implements IAutoEditStrategy {
 
 	private static String escape(char c) {
 		switch (c) {
-			case '\b':
-				return "\b";//$NON-NLS-1$
 			case '\t':
 				return "\t";//$NON-NLS-1$
 			case '\n':
