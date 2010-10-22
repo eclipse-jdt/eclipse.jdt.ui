@@ -83,6 +83,7 @@ import org.eclipse.ui.part.PluginTransfer;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -1268,5 +1269,28 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	 */
 	private List/*<IMember[]>*/getMethodHistory() {
 		return CallHierarchyUI.getDefault().getMethodHistory();
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.part.WorkbenchPart#showBusy(boolean)
+	 */
+	public void showBusy(boolean busy) {
+		super.showBusy(busy);
+		getProgressService().warnOfContentChange();
+	}
+
+	/**
+	 * Fetches the progress service for the workbench part site.
+	 * 
+	 * @return the progress service for the workbench part site
+	 * @since 3.7
+	 */
+	private IWorkbenchSiteProgressService getProgressService() {
+		IWorkbenchSiteProgressService service= null;
+		Object siteService= getSite().getAdapter(IWorkbenchSiteProgressService.class);
+		if (siteService != null)
+			service= (IWorkbenchSiteProgressService)siteService;
+		return service;
 	}
 }
