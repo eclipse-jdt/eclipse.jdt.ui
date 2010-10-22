@@ -340,6 +340,15 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"key=value1\\fvalue2\n", props.get());
 	}
 
+	public void testEscapingOfBackspace() throws Exception {
+		Document props= new Document();
+
+		insert(props, "key", "value1\bvalue2");
+
+		RefactoringTest.assertEqualLines(
+				"key=value1\\u0008value2\n", props.get());
+	}
+
 	public void testEscapingOfEscapes() throws Exception {
 		Document props= new Document();
 
