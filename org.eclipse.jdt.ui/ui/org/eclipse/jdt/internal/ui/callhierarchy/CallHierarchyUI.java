@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
@@ -61,6 +62,16 @@ public class CallHierarchyUI {
     private static final String PREF_MAX_CALL_DEPTH = "PREF_MAX_CALL_DEPTH"; //$NON-NLS-1$
 
     private static CallHierarchyUI fgInstance;
+    private int fViewCount= 0;
+    private final List/*<IMember[]>*/fMethodHistory= new ArrayList();
+
+	/**
+	 * List of the Call Hierarchy views in the LRU order, the activated part being the first
+	 * element.
+	 * 
+	 * @since 3.7
+	 */
+	private List fLRUCallHierarchyViews= new ArrayList();
 
     private CallHierarchyUI() {
         // Do nothing
@@ -224,16 +235,78 @@ public class CallHierarchyUI {
 			return null;
 		}
         IWorkbenchPage page= window.getActivePage();
-        try {
-            CallHierarchyViewPart result= (CallHierarchyViewPart)page.showView(CallHierarchyViewPart.ID_CALL_HIERARCHY);
-            result.setInputElements(input);
-            return result;
+		try {
+			CallHierarchyViewPart viewPart= getDefault().findLRUCallHierarchyViewPart(page); //find the first view which is not pinned
+			String secondaryId= null;
+			if (viewPart == null) {
+				if (page.findViewReference(CallHierarchyViewPart.ID_CALL_HIERARCHY) != null) //all the current views are pinned, open a new instance
+					secondaryId= String.valueOf(++getDefault().fViewCount);
+			} else
+				secondaryId= viewPart.getViewSite().getSecondaryId();
+			viewPart= (CallHierarchyViewPart)page.showView(CallHierarchyViewPart.ID_CALL_HIERARCHY, secondaryId, IWorkbenchPage.VIEW_ACTIVATE);
+			viewPart.setInputElements(input);
+			return viewPart;
         } catch (CoreException e) {
             ExceptionHandler.handle(e, window.getShell(),
                 CallHierarchyMessages.CallHierarchyUI_error_open_view, e.getMessage());
         }
         return null;
     }
+
+	/**
+	 * Finds the first Call Hierarchy view part instance that is not pinned.
+	 * 
+	 * @param page the active page
+	 * @return the Call Hierarchy view part to open or <code>null</code> if none found
+	 * @since 3.7
+	 */
+	private CallHierarchyViewPart findLRUCallHierarchyViewPart(IWorkbenchPage page) {
+		boolean viewFoundInPage= false;
+		for (Iterator iter= fLRUCallHierarchyViews.iterator(); iter.hasNext();) {
+			CallHierarchyViewPart view= (CallHierarchyViewPart)iter.next();
+			if (page.equals(view.getSite().getPage())) {
+				if (!view.isPinned()) {
+					return view;
+				}
+				viewFoundInPage= true;
+			}
+		}
+		if (!viewFoundInPage) {
+			// find unresolved views
+			IViewReference[] viewReferences= page.getViewReferences();
+			for (int i= 0; i < viewReferences.length; i++) {
+				IViewReference curr= viewReferences[i];
+				if (CallHierarchyViewPart.ID_CALL_HIERARCHY.equals(curr.getId()) && page.equals(curr.getPage())) {
+					CallHierarchyViewPart view= (CallHierarchyViewPart)curr.getView(true);
+					if (view != null && !view.isPinned()) {
+						return view;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Adds the activated view part to the head of the list.
+	 * 
+	 * @param view the Call Hierarchy view part
+	 * @since 3.7
+	 */
+	void callHierarchyViewActivated(CallHierarchyViewPart view) {
+		fLRUCallHierarchyViews.remove(view);
+		fLRUCallHierarchyViews.add(0, view);
+	}
+
+	/**
+	 * Removes the closed view part from the list.
+	 * 
+	 * @param view the closed view part
+	 * @since 3.7
+	 */
+	void callHierarchyViewClosed(CallHierarchyViewPart view) {
+		fLRUCallHierarchyViews.remove(view);
+	}
 
     /**
      * Converts an ISelection (containing MethodWrapper instances) to an ISelection
@@ -269,4 +342,27 @@ public class CallHierarchyUI {
         }
         return StructuredSelection.EMPTY;
     }
+
+	/**
+	 * Clears the history and updates all the open views.
+	 * 
+	 * @since 3.7
+	 */
+	void clearHistory() {
+		for (Iterator iter= fLRUCallHierarchyViews.iterator(); iter.hasNext();) {
+			CallHierarchyViewPart part= (CallHierarchyViewPart)iter.next();
+			part.setHistoryEntries(new IMember[0][]);
+			part.setInputElements(null);
+		}
+	}
+
+	/**
+	 * Returns the method history.
+	 * 
+	 * @return the method history
+	 * @since 3.7
+	 */
+	List/*<IMember[]>*/getMethodHistory() {
+		return fMethodHistory;
+	}
 }

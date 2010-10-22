@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,16 +36,17 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
 
 	private static class ClearHistoryAction extends Action {
 
-		private CallHierarchyViewPart fView;
-
+		/**
+		 * Creates a clear history action.
+		 * 
+		 * @param view the Call Hierarchy view part
+		 */
 		public ClearHistoryAction(CallHierarchyViewPart view) {
 			super(CallHierarchyMessages.HistoryDropDownAction_clearhistory_label);
-			fView= view;
 		}
 
 		public void run() {
-			fView.setHistoryEntries(new IMember[0][]);
-			fView.setInputElements(null);
+			CallHierarchyUI.getDefault().clearHistory();
 		}
 	}
 

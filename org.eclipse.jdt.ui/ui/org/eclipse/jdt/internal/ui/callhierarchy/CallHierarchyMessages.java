@@ -157,6 +157,8 @@ public final class CallHierarchyMessages extends NLS {
 	public static String ExpandWithConstructorsAction_expandWithConstructors_description;
 	public static String ExpandWithConstructorsAction_expandWithConstructors_tooltip;
 	public static String ExpandWithConstructorsDialog_title;
+	public static String PinCallHierarchyViewAction_label;
+	public static String PinCallHierarchyViewAction_tooltip;
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, CallHierarchyMessages.class);
 	}

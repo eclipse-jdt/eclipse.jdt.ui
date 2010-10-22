@@ -464,6 +464,7 @@ public interface IJavaHelpContextIds {
 	 * @since 3.7
 	 */
 	public static final String CALL_HIERARCHY_SEARCH_IN_DIALOG= PREFIX + "call_hierarchy_search_in_dialog_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_PIN_VIEW_ACTION= PREFIX + "call_hierarchy_pin_view_action_context"; //$NON-NLS-1$
 	/**
 	 * @since 3.2
 	 */

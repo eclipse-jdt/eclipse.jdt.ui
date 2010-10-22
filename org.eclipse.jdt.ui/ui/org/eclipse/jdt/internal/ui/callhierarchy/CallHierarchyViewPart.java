@@ -17,7 +17,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -64,6 +63,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPage;
@@ -213,7 +213,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private IMemento fMemento;
     private IMember[] fInputElements;
     private CallHierarchySelectionProvider fSelectionProviderMediator;
-    private final List/*<IMember[]>*/ fMethodHistory;
     private LocationViewer fLocationViewer;
     private SashForm fHierarchyLocationSplitter;
     private Clipboard fClipboard;
@@ -238,6 +237,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private boolean fShowCallDetails;
 	protected Composite fParent;
 	private IPartListener2 fPartListener;
+	private boolean fIsPinned;
+	private PinCallHierarchyViewAction fPinViewAction;
 
 
     public CallHierarchyViewPart() {
@@ -245,7 +246,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         fDialogSettings = JavaPlugin.getDefault().getDialogSettings();
 
-        fMethodHistory = new ArrayList();
+        fIsPinned= false;
     }
 
     public void setFocus() {
@@ -257,10 +258,10 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @param entries the new history entries
      */
     public void setHistoryEntries(IMember[][] entries) {
-        fMethodHistory.clear();
+        getMethodHistory().clear();
 
         for (int i = 0; i < entries.length; i++) {
-            fMethodHistory.add(entries[i]);
+            getMethodHistory().add(entries[i]);
         }
 
         updateHistoryEntries();
@@ -271,11 +272,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @return all history entries
      */
     public IMember[][] getHistoryEntries() {
-        if (fMethodHistory.size() > 0) {
+        if (getMethodHistory().size() > 0) {
             updateHistoryEntries();
         }
 
-        return (IMember[][]) fMethodHistory.toArray(new IMember[fMethodHistory.size()][]);
+        return (IMember[][]) getMethodHistory().toArray(new IMember[getMethodHistory().size()][]);
     }
 
     public void setInputElements(IMember[] members) {
@@ -521,21 +522,51 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	private void addPartListener() {
 		fPartListener= new IPartListener2() {
-					public void partActivated(IWorkbenchPartReference partRef) { }
-					public void partBroughtToTop(IWorkbenchPartReference partRef) { }
-					public void partClosed(IWorkbenchPartReference partRef) {
-						if (ID_CALL_HIERARCHY.equals(partRef.getId()))
-							saveViewSettings();
+			/* (non-Javadoc)
+			 * @see org.eclipse.ui.IPartListener2#partActivated(org.eclipse.ui.IWorkbenchPartReference)
+			 */
+			public void partActivated(IWorkbenchPartReference partRef) {
+				if (ID_CALL_HIERARCHY.equals(partRef.getId())){
+					String secId= ((IViewReference)partRef).getSecondaryId();
+					String secondaryId= CallHierarchyViewPart.this.getViewSite().getSecondaryId();
+					if (secondaryId == null && secId == null || secondaryId != null && secondaryId.equals(secId))
+						CallHierarchyUI.getDefault().callHierarchyViewActivated(CallHierarchyViewPart.this);
+				}
+			}
+
+			public void partBroughtToTop(IWorkbenchPartReference partRef) { }
+
+			/* (non-Javadoc)
+			 * @see org.eclipse.ui.IPartListener2#partClosed(org.eclipse.ui.IWorkbenchPartReference)
+			 */
+			public void partClosed(IWorkbenchPartReference partRef) {
+				if (ID_CALL_HIERARCHY.equals(partRef.getId())) {
+					String secId= ((IViewReference)partRef).getSecondaryId();
+					String secondaryId= CallHierarchyViewPart.this.getViewSite().getSecondaryId();
+					if (secondaryId == null && secId == null || secondaryId != null && secondaryId.equals(secId)) {
+						CallHierarchyUI.getDefault().callHierarchyViewClosed(CallHierarchyViewPart.this);
+						saveViewSettings();
 					}
-					public void partDeactivated(IWorkbenchPartReference partRef) {
-						if (ID_CALL_HIERARCHY.equals(partRef.getId()))
-							saveViewSettings();
-					}
-					public void partOpened(IWorkbenchPartReference partRef) { }
-					public void partHidden(IWorkbenchPartReference partRef) { }
-					public void partVisible(IWorkbenchPartReference partRef) { }
-					public void partInputChanged(IWorkbenchPartReference partRef) { }
-				};
+				}
+			}
+
+			/* (non-Javadoc)
+			 * @see org.eclipse.ui.IPartListener2#partDeactivated(org.eclipse.ui.IWorkbenchPartReference)
+			 */
+			public void partDeactivated(IWorkbenchPartReference partRef) {
+				if (ID_CALL_HIERARCHY.equals(partRef.getId())) {
+					String secId= ((IViewReference)partRef).getSecondaryId();
+					String secondaryId= CallHierarchyViewPart.this.getViewSite().getSecondaryId();
+					if (secondaryId == null && secId == null || secondaryId != null && secondaryId.equals(secId))
+						saveViewSettings();
+				}
+			}
+			
+			public void partOpened(IWorkbenchPartReference partRef) { }
+			public void partHidden(IWorkbenchPartReference partRef) { }
+			public void partVisible(IWorkbenchPartReference partRef) { }
+			public void partInputChanged(IWorkbenchPartReference partRef) { }
+		};
 		getViewSite().getPage().addPartListener(fPartListener);
 	}
 
@@ -699,7 +730,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @param entry the history entry
      */
     public void gotoHistoryEntry(IMember[] entry) {
-    	for (Iterator iter= fMethodHistory.iterator(); iter.hasNext(); ) {
+    	for (Iterator iter= getMethodHistory().iterator(); iter.hasNext(); ) {
 			if (Arrays.equals(entry, (IMember[]) iter.next())) {
 				setInputElements(entry);
 				return;
@@ -900,13 +931,13 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @param entry the entry to add
      */
     private void addHistoryEntry(IMember[] entry) {
-    	for (Iterator iter= fMethodHistory.iterator(); iter.hasNext(); ) {
+    	for (Iterator iter= getMethodHistory().iterator(); iter.hasNext(); ) {
 			if (Arrays.equals(entry, (IMember[]) iter.next())) {
 				iter.remove();
 			}
 		}
 
-        fMethodHistory.add(0, entry);
+        getMethodHistory().add(0, entry);
         fHistoryDropDownAction.setEnabled(true);
     }
 
@@ -972,6 +1003,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
             toolBar.add(fToggleCallModeActions[i]);
         }
         toolBar.add(fHistoryDropDownAction);
+        toolBar.add(fPinViewAction);
     }
 
     private void makeActions() {
@@ -995,6 +1027,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         setCancelEnabled(false);
         fExpandWithConstructorsAction= new ExpandWithConstructorsAction(this, fCallHierarchyViewer);
         fRemoveFromViewAction= new RemoveFromViewAction(this, fCallHierarchyViewer);
+        fPinViewAction= new PinCallHierarchyViewAction(this);
         fToggleOrientationActions = new ToggleOrientationAction[] {
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_VERTICAL),
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL),
@@ -1039,18 +1072,18 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     }
 
     private void updateHistoryEntries() {
-        for (int i = fMethodHistory.size() - 1; i >= 0; i--) {
-            IMember[] members = (IMember[]) fMethodHistory.get(i);
+        for (int i = getMethodHistory().size() - 1; i >= 0; i--) {
+            IMember[] members = (IMember[]) getMethodHistory().get(i);
             for (int j= 0; j < members.length; j++) {
 				IMember member= members[j];
 				if (! member.exists()) {
-					fMethodHistory.remove(i);
+					getMethodHistory().remove(i);
 					break;
 				}
 			}
         }
 
-        fHistoryDropDownAction.setEnabled(!fMethodHistory.isEmpty());
+        fHistoryDropDownAction.setEnabled(!getMethodHistory().isEmpty());
     }
 
 	private void updateView() {
@@ -1205,5 +1238,35 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	 */
 	protected LocationViewer getLocationViewer() {
 		return fLocationViewer;
+	}
+
+	/**
+	 * Marks the view as pinned.
+	 * 
+	 * @param pinned if <code>true</code> the view is marked as pinned
+	 * @since 3.7
+	 */
+	void setPinned(boolean pinned) {
+		fIsPinned= pinned;
+	}
+
+	/**
+	 * Indicates whether the Call Hierarchy view is pinned.
+	 * 
+	 * @return <code>true</code> if the view is pinned, <code>false</code> otherwise
+	 * @since 3.7
+	 */
+	boolean isPinned() {
+		return fIsPinned;
+	}
+
+	/**
+	 * Returns the method history.
+	 * 
+	 * @return the method history
+	 * @since 3.7
+	 */
+	private List/*<IMember[]>*/getMethodHistory() {
+		return CallHierarchyUI.getDefault().getMethodHistory();
 	}
 }
