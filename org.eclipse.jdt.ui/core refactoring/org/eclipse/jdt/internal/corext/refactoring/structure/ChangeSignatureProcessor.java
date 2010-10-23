@@ -93,9 +93,9 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ChangeMethodSignatureDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureArguments;
-import org.eclipse.jdt.core.refactoring.participants.JavaParticipantManager;
 import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureArguments.Parameter;
 import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureArguments.ThrownException;
+import org.eclipse.jdt.core.refactoring.participants.JavaParticipantManager;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.MethodReferenceMatch;
@@ -1475,8 +1475,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	}
 
 	private void addArgumentsToNewSuperConstructorCall(SuperConstructorInvocation superCall, CompilationUnitRewrite cuRewrite) {
-		int i= 0;
-		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext(); i++) {
+		Iterator iter= getNotDeletedInfos().iterator();
+		while (iter.hasNext()) {
 			ParameterInfo info= (ParameterInfo) iter.next();
 			Expression newExpression= createNewExpression(info, getParameterInfos(), superCall.arguments(), cuRewrite, (MethodDeclaration) ASTNodes.getParent(superCall, MethodDeclaration.class));
 			if (newExpression != null)
