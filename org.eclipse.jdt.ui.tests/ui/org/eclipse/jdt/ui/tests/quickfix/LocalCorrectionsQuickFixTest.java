@@ -3642,7 +3642,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("public class B {\n");
 		buf.append("    void test(){\n");
 		buf.append("        String c=\"Test\",d=String.valueOf(true),e=c;\n");
-		buf.append("        e+=\"\";\n");//makes e an used variable
+		buf.append("        e+=\"\";\n");
 		buf.append("        d=\"blubb\";\n");
 		buf.append("        d=String.valueOf(12);\n");
 		buf.append("    }\n");
@@ -3650,7 +3650,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -3754,7 +3754,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        switch (i) {\n");
 		buf.append("            case 3:\n");
 		buf.append("                String c=\"Test\",d=String.valueOf(true),e=c;\n");
-		buf.append("                e+=\"\";\n");//makes e an used variable
+		buf.append("                e+=\"\";\n");
 		buf.append("                d=\"blubb\";\n");
 		buf.append("                d=String.valueOf(12);\n");
 		buf.append("        }\n");
@@ -3763,7 +3763,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
