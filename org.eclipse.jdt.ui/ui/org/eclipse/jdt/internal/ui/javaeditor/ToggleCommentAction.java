@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -129,7 +129,6 @@ public final class ToggleCommentAction extends TextEditorAction {
 			IRegion block= getTextBlockFromSelection(textSelection, document);
 			ITypedRegion[] regions= TextUtilities.computePartitioning(document, fDocumentPartitioning, block.getOffset(), block.getLength(), false);
 
-			int lineCount= 0;
 			int[] lines= new int[regions.length * 2]; // [startline, endline, startline, endline, ...]
 			for (int i= 0, j= 0; i < regions.length; i++, j+= 2) {
 				// start line of region
@@ -140,7 +139,6 @@ public final class ToggleCommentAction extends TextEditorAction {
 				if (length > 0)
 					offset--;
 				lines[j + 1]= (lines[j] == -1 ? -1 : document.getLineOfOffset(offset));
-				lineCount += lines[j + 1] - lines[j] + 1;
 			}
 
 			// Perform the check

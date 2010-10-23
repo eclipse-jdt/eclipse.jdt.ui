@@ -2032,7 +2032,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Block defaultBlock= null;
 		InfixExpression currentCondition= null;
 		boolean defaultFound= false;
-		int caseCount= 0;
 
 		ArrayList allBlocks= new ArrayList();
 		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(covering), importRewrite);
@@ -2040,7 +2039,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			Statement statement= (Statement) iter.next();
 			if (statement instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) statement;
-				caseCount++;
 				// special case: pass through
 				if (currentBlock != null) {
 					if (!hasStopAsLastExecutableStatement) {
