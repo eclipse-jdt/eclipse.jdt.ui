@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -513,12 +513,12 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 */
 	public static final String OPEN_TYPE_HIERARCHY= "org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"; //$NON-NLS-1$
 
-    /**
-     * Action definition ID of the navigate -> open call hierarchy action
-     * (value <code>"org.eclipse.jdt.ui.edit.text.java.org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"</code>).
-     * @since 3.0
-     */
-    public static final String OPEN_CALL_HIERARCHY= "org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"; //$NON-NLS-1$
+	/**
+	 * Action definition ID of the navigate -> Open Call Hierarchy action (value
+	 * <code>"org.eclipse.jdt.ui.edit.text.java.org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"</code>).
+	 * @since 3.0
+	 */
+	public static final String OPEN_CALL_HIERARCHY= "org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"; //$NON-NLS-1$
 
 	/**
 	 * Action definition ID of the navigate -> show in package explorer action (value
