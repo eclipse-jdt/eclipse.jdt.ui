@@ -1363,18 +1363,44 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 
 	private void updateToolTipAndDescription() {
-		String tooltip;
+		String tooltip= ""; //$NON-NLS-1$
 		String description;
-		if (fInputElements != null) {
+		if (fInputElements != null && fInputElements.length != 0) {
 			IWorkingSet workingSet= fWorkingSetActionGroup.getWorkingSet();
-			String elementName= HistoryAction.getElementLabel(fInputElements);
+			String[] elementLabel= null;
 			if (workingSet == null) {
-				description= elementName;
-				tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_tooltip, elementName);
+				description= HistoryAction.getElementLabel(fInputElements);
+				switch (fInputElements.length) {
+					case 1:
+						elementLabel= new String[] { HistoryAction.getShortLabel(fInputElements[0]) };
+						tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_tooltip, elementLabel);
+						break;
+					case 2:
+						elementLabel= new String[] { HistoryAction.getShortLabel(fInputElements[0]), HistoryAction.getShortLabel(fInputElements[1]) };
+						tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_tooltip2, elementLabel);
+						break;
+					default:
+						elementLabel= new String[] { HistoryAction.getShortLabel(fInputElements[0]), HistoryAction.getShortLabel(fInputElements[1]) };
+						tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_tooltip_more, elementLabel);
+				}
 			} else {
-				String[] args= new String[] { elementName, workingSet.getLabel() };
-				description= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_description, args);
-				tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_tooltip, args);
+				switch (fInputElements.length) {
+					case 1:
+						elementLabel= new String[] { HistoryAction.getShortLabel(fInputElements[0]), workingSet.getLabel() };
+						description= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_description, elementLabel);
+						tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_tooltip, elementLabel);
+						break;
+					case 2:
+						elementLabel= new String[] { HistoryAction.getShortLabel(fInputElements[0]), HistoryAction.getShortLabel(fInputElements[1]), workingSet.getLabel() };
+						description= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_description2, elementLabel);
+						tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_tooltip2, elementLabel);
+						break;
+					default:
+						elementLabel= new String[] { HistoryAction.getShortLabel(fInputElements[0]), HistoryAction.getShortLabel(fInputElements[1]), workingSet.getLabel() };
+						description= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_description_more, elementLabel);
+						tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_tooltip_more, elementLabel);
+				}
+
 			}
 		} else {
 			description= ""; //$NON-NLS-1$

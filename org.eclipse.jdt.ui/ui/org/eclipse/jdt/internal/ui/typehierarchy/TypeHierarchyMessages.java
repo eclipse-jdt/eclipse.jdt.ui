@@ -71,8 +71,14 @@ public final class TypeHierarchyMessages extends NLS {
 	public static String TypeHierarchyViewPart_exception_title;
 	public static String TypeHierarchyViewPart_exception_message;
 	public static String TypeHierarchyViewPart_tooltip;
+	public static String TypeHierarchyViewPart_tooltip2;
+	public static String TypeHierarchyViewPart_tooltip_more;
 	public static String TypeHierarchyViewPart_ws_description;
+	public static String TypeHierarchyViewPart_ws_description2;
+	public static String TypeHierarchyViewPart_ws_description_more;
 	public static String TypeHierarchyViewPart_ws_tooltip;
+	public static String TypeHierarchyViewPart_ws_tooltip2;
+	public static String TypeHierarchyViewPart_ws_tooltip_more;
 	public static String TypeHierarchyViewPart_restoreinput;
 	public static String TypeHierarchyViewPart_layout_submenu;
 	public static String TypeHierarchyLifeCycle_computeInput;

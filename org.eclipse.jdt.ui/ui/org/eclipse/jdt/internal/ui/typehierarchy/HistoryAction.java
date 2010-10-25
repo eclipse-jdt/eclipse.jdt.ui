@@ -106,7 +106,7 @@ public class HistoryAction extends Action {
 	 * @return the short label for the java element
 	 * @since 3.7
 	 */
-	private static String getShortLabel(IJavaElement element) {
+	static String getShortLabel(IJavaElement element) {
 		return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_POST_QUALIFIED);
 	}
 
