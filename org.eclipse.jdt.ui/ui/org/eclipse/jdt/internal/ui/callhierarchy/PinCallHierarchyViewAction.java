@@ -18,6 +18,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
+
 /**
  * The action to pin the Call Hierarchy view.
  * 
@@ -39,8 +40,7 @@ class PinCallHierarchyViewAction extends Action {
 		fView= view;
 	}
 
-
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	public void run() {

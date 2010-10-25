@@ -521,18 +521,29 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		}
 	}
 
+	/**
+	 * Tells whether the given part reference references this view.
+	 * 
+	 * @param partRef the workbench part reference
+	 * @return <code>true</code> if the given part reference references this view
+	 * @since 3.7
+	 */
+	private boolean isThisView(IWorkbenchPartReference partRef) {
+		if (!ID_CALL_HIERARCHY.equals(partRef.getId()))
+			return false;
+		String partRefSecondaryId= ((IViewReference)partRef).getSecondaryId();
+		String thisSecondaryId= getViewSite().getSecondaryId();
+		return thisSecondaryId == null && partRefSecondaryId == null || thisSecondaryId != null && thisSecondaryId.equals(partRefSecondaryId);
+	}
+
 	private void addPartListener() {
 		fPartListener= new IPartListener2() {
 			/* (non-Javadoc)
 			 * @see org.eclipse.ui.IPartListener2#partActivated(org.eclipse.ui.IWorkbenchPartReference)
 			 */
 			public void partActivated(IWorkbenchPartReference partRef) {
-				if (ID_CALL_HIERARCHY.equals(partRef.getId())){
-					String secId= ((IViewReference)partRef).getSecondaryId();
-					String secondaryId= CallHierarchyViewPart.this.getViewSite().getSecondaryId();
-					if (secondaryId == null && secId == null || secondaryId != null && secondaryId.equals(secId))
-						CallHierarchyUI.getDefault().callHierarchyViewActivated(CallHierarchyViewPart.this);
-				}
+				if (isThisView(partRef))
+					CallHierarchyUI.getDefault().callHierarchyViewActivated(CallHierarchyViewPart.this);
 			}
 
 			public void partBroughtToTop(IWorkbenchPartReference partRef) { }
@@ -541,13 +552,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			 * @see org.eclipse.ui.IPartListener2#partClosed(org.eclipse.ui.IWorkbenchPartReference)
 			 */
 			public void partClosed(IWorkbenchPartReference partRef) {
-				if (ID_CALL_HIERARCHY.equals(partRef.getId())) {
-					String secId= ((IViewReference)partRef).getSecondaryId();
-					String secondaryId= CallHierarchyViewPart.this.getViewSite().getSecondaryId();
-					if (secondaryId == null && secId == null || secondaryId != null && secondaryId.equals(secId)) {
-						CallHierarchyUI.getDefault().callHierarchyViewClosed(CallHierarchyViewPart.this);
-						saveViewSettings();
-					}
+				if (isThisView(partRef)) {
+					CallHierarchyUI.getDefault().callHierarchyViewClosed(CallHierarchyViewPart.this);
+					saveViewSettings();
 				}
 			}
 
@@ -555,14 +562,10 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			 * @see org.eclipse.ui.IPartListener2#partDeactivated(org.eclipse.ui.IWorkbenchPartReference)
 			 */
 			public void partDeactivated(IWorkbenchPartReference partRef) {
-				if (ID_CALL_HIERARCHY.equals(partRef.getId())) {
-					String secId= ((IViewReference)partRef).getSecondaryId();
-					String secondaryId= CallHierarchyViewPart.this.getViewSite().getSecondaryId();
-					if (secondaryId == null && secId == null || secondaryId != null && secondaryId.equals(secId))
-						saveViewSettings();
-				}
+				if (isThisView(partRef))
+					saveViewSettings();
 			}
-			
+
 			public void partOpened(IWorkbenchPartReference partRef) { }
 			public void partHidden(IWorkbenchPartReference partRef) { }
 			public void partVisible(IWorkbenchPartReference partRef) { }
@@ -1271,13 +1274,14 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		return CallHierarchyUI.getDefault().getMethodHistory();
 	}
 
-
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.ui.part.WorkbenchPart#showBusy(boolean)
+	 * @since 3.7
 	 */
 	public void showBusy(boolean busy) {
 		super.showBusy(busy);
-		getProgressService().warnOfContentChange();
+		if (!busy)
+			getProgressService().warnOfContentChange();
 	}
 
 	/**
