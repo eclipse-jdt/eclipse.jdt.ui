@@ -296,6 +296,8 @@ public final class ActionMessages extends NLS {
 	public static String FormatAllAction_tooltip;
 	public static String FormatAllAction_description;
 
+	public static String FormatElementAction_label;
+
 	public static String SortMembersAction_label;
 	public static String SortMembersAction_tooltip;
 	public static String SortMembersAction_description;
