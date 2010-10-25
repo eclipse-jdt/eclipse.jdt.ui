@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -506,7 +506,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		private StringMatcher fMatcher1;
 		private StringMatcher fMatcher2;
 
-		private OrStringMatcher(String pattern1, String pattern2, boolean ignoreCase, boolean foo) {
+		private OrStringMatcher(String pattern1, String pattern2, boolean ignoreCase) {
 			super("", false, false); //$NON-NLS-1$
 			fMatcher1= new StringMatcher(pattern1, ignoreCase, false);
 			fMatcher2= new StringMatcher(pattern2, ignoreCase, false);
@@ -684,7 +684,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 		boolean ignoreCase= pattern.toLowerCase().equals(pattern);
 		String pattern2= "*" + JavaElementLabels.CONCAT_STRING + pattern; //$NON-NLS-1$
-		fStringMatcher= new OrStringMatcher(pattern, pattern2, ignoreCase, false);
+		fStringMatcher= new OrStringMatcher(pattern, pattern2, ignoreCase);
 
 		if (update)
 			stringMatcherUpdated();
