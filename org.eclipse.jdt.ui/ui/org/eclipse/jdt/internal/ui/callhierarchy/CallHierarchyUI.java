@@ -66,7 +66,7 @@ public class CallHierarchyUI {
     private final List/*<IMember[]>*/fMethodHistory= new ArrayList();
 
 	/**
-	 * List of the Call Hierarchy views in LRU order, where LRU is at index 0.
+	 * List of the Call Hierarchy views in LRU order, where the most recently used view is at index 0.
 	 * @since 3.7
 	 */
 	private List fLRUCallHierarchyViews= new ArrayList();
