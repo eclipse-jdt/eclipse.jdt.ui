@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -324,6 +324,14 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 						}
 					}
 				}
+			} else if (nameParentType == ASTNode.POSTFIX_EXPRESSION || nameParentType == ASTNode.PREFIX_EXPRESSION) {
+				Expression expression= (Expression)parent;
+				ASTNode expressionParent= expression.getParent();
+				if (expressionParent.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+					removeStatement(rewrite, expressionParent, group);
+				} else {
+					rewrite.remove(expression, group);
+				}
 			}
 		}
 
@@ -367,17 +375,21 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 				performRemove= sideEffectNodes.isEmpty();
 			}
 			if (performRemove) {
-				if (ASTNodes.isControlStatementBody(statementNode.getLocationInParent())) {
-					rewrite.replace(statementNode, rewrite.getAST().newBlock(), group);
-				} else {
-					rewrite.remove(statementNode, group);
-				}
+				removeStatement(rewrite, statementNode, group);
 				fRemovedAssignmentsCount++;
 			} else {
 				ASTNode initNode = rewrite.createMoveTarget(initializerNode);
 				ExpressionStatement statement = rewrite.getAST().newExpressionStatement((Expression) initNode);
 				rewrite.replace(statementNode, statement, null);
 				fAlteredAssignmentsCount++;
+			}
+		}
+
+		private void removeStatement(ASTRewrite rewrite, ASTNode statementNode, TextEditGroup group) {
+			if (ASTNodes.isControlStatementBody(statementNode.getLocationInParent())) {
+				rewrite.replace(statementNode, rewrite.getAST().newBlock(), group);
+			} else {
+				rewrite.remove(statementNode, group);
 			}
 		}
 
