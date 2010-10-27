@@ -274,6 +274,11 @@ public interface IJavaHelpContextIds {
 	public static final String NEW_CONTAINER_DIALOG= PREFIX + "new_container_dialog_context"; //$NON-NLS-1$
 	public static final String EXCLUSION_PATTERN_DIALOG= PREFIX + "exclusion_pattern_dialog_context"; //$NON-NLS-1$
 	public static final String ACCESS_RULES_DIALOG= PREFIX + "access_rules_dialog_context"; //$NON-NLS-1$
+	/**
+	 * @since 3.7
+	 */
+	public static final String ACCESS_RULES_DIALOG_COMBINE_RULES= PREFIX + "access_rules_dialog_combine_rules_context"; //$NON-NLS-1$
+
 	public static final String OUTPUT_LOCATION_DIALOG= PREFIX + "output_location_dialog_context"; //$NON-NLS-1$
 	public static final String VARIABLE_CREATION_DIALOG= PREFIX + "variable_creation_dialog_context"; //$NON-NLS-1$
 	public static final String JAVA_SEARCH_PAGE= PREFIX + "java_search_page_context"; //$NON-NLS-1$
