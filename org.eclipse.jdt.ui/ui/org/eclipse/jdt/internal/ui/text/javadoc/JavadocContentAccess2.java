@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Tom Hofmann, Google <eclipse@tom.eicher.name> - [hovering] NPE when hovering over @value reference within a type's javadoc - https://bugs.eclipse.org/bugs/show_bug.cgi?id=320084
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
@@ -1155,9 +1156,16 @@ public class JavadocContentAccess2 {
 					MemberRef memberRef= (MemberRef) first;
 					if (memberRef.getQualifier() == null) {
 						SimpleName name= memberRef.getName();
-						IField field= fMember.getDeclaringType().getField(name.getIdentifier());
-						if (field != null && field.exists() && JdtFlags.isStatic(field) && JdtFlags.isFinal(field))
-							return handleConstantValue(field, true);
+						IType type= fMember instanceof IType ? (IType)fMember : fMember.getDeclaringType();
+						while (type != null) {
+							IField field= type.getField(name.getIdentifier());
+							if (field != null && field.exists()) {
+								if (JdtFlags.isStatic(field) && JdtFlags.isFinal(field))
+									return handleConstantValue(field, true);
+								break;
+							}
+							type= type.getDeclaringType();
+						}
 					}
 				}
 			}
