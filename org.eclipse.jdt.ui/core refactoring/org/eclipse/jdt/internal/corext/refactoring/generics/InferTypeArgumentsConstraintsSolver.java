@@ -196,7 +196,7 @@ public class InferTypeArgumentsConstraintsSolver {
 			// Get a variable whose type estimate has changed
 			ConstraintVariable2 cv= (ConstraintVariable2) fWorkList.removeFirst();
 			List/*<ITypeConstraint2>*/ usedIn= fTCModel.getUsedIn(cv);
-			processConstraints(usedIn, cv);
+			processConstraints(usedIn);
 			pm.worked(1);
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
@@ -212,14 +212,13 @@ public class InferTypeArgumentsConstraintsSolver {
 	 *
 	 * @param usedIn the <code>List</code> of <code>ITypeConstraint2</code>s
 	 * to process
-	 * @param changedCv the constraint variable whose type bound has changed
 	 */
-	private void processConstraints(List/*<ITypeConstraint2>*/ usedIn, ConstraintVariable2 changedCv) {
-		int i= 0;
-		for (Iterator iter= usedIn.iterator(); iter.hasNext(); i++) {
+	private void processConstraints(List/*<ITypeConstraint2>*/ usedIn) {
+		Iterator iter= usedIn.iterator();
+		while (iter.hasNext()) {
 			ITypeConstraint2 tc= (ITypeConstraint2) iter.next();
 
-				maintainSimpleConstraint(changedCv, tc);
+				maintainSimpleConstraint(tc);
 				//TODO: prune tcs which cannot cause further changes
 				// Maybe these should be pruned after a special first loop over all ConstraintVariables,
 				// Since this can only happen once for every CV in the work list.
@@ -228,7 +227,7 @@ public class InferTypeArgumentsConstraintsSolver {
 		}
 	}
 
-	private void maintainSimpleConstraint(ConstraintVariable2 changedCv, ITypeConstraint2 stc) {
+	private void maintainSimpleConstraint(ITypeConstraint2 stc) {
 		ConstraintVariable2 left= stc.getLeft();
 		ConstraintVariable2 right= stc.getRight();
 
