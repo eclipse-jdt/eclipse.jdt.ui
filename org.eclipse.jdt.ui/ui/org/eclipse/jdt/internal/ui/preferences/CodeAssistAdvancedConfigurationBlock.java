@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -596,11 +596,6 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		PixelConverter pixelConverter= new PixelConverter(composite);
 		String str= PreferencesMessages.CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout;
 		addTextField(timeoutComposite, str, PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAME_FROM_ATTACHED_JAVADOC, 0, pixelConverter.convertWidthInCharsToPixels(7));
-
-		Label ms= new Label(timeoutComposite, SWT.NONE);
-		gd= new GridData();
-		ms.setLayoutData(gd);
-		ms.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout_ms);
 
 	}
 
