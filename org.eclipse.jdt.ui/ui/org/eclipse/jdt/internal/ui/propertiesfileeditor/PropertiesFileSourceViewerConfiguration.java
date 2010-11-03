@@ -42,6 +42,8 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 
+import org.eclipse.ui.IFileEditorInput;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy;
 import org.eclipse.ui.texteditor.spelling.SpellingService;
@@ -342,17 +344,16 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 			if (!PropertiesFileDocumentProvider.isJavaPropertiesFile(fTextEditor.getEditorInput())) {
 				return autoEditStrategies;
 			}
-		} catch (CoreException e1) {
-			JavaPlugin.log(e1);
+			List stratergies= new ArrayList();
+			for (int i= 0; i < autoEditStrategies.length; i++) {
+				stratergies.add(autoEditStrategies[i]);
+			}
+			stratergies.add(new PropertiesFileAutoEditStrategy(fPreferenceStore, ((IFileEditorInput)fTextEditor.getEditorInput()).getFile()));
+			return (IAutoEditStrategy[])stratergies.toArray(new IAutoEditStrategy[stratergies.size()]);
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
 			return autoEditStrategies;
 		}
-
-		List stratergies= new ArrayList();
-		for (int i= 0; i < autoEditStrategies.length; i++) {
-			stratergies.add(autoEditStrategies[i]);
-		}
-		stratergies.add(new PropertiesFileAutoEditStrategy());
-		return (IAutoEditStrategy[])stratergies.toArray(new IAutoEditStrategy[stratergies.size()]);
 	}
 
 	/*

@@ -21,7 +21,6 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.RGB;
@@ -359,7 +358,13 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	 */
 	private IColorManager fColorManager;
 
-
+	/**
+	 * Check box for preference that controls whether backslashes are escaped if required, when
+	 * pasting in a properties file.
+	 * 
+	 * @since 3.7
+	 */
+	private Button fCheckboxEscapeBackslash;
 
 	/**
 	 * Creates a new preference page.
@@ -383,6 +388,8 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + STRIKETHROUGH));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + UNDERLINE));
 		}
+
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.PROPERTIES_FILE_WHEN_PASTING_ESCAPE_BACKSLASH_IF_REQUIRED));
 
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
@@ -510,50 +517,35 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			}
 		});
 
-		foregroundColorButton.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
+		foregroundColorButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				PreferenceConverter.setValue(fOverlayStore, item.getColorKey(), fSyntaxForegroundColorEditor.getColorValue());
 			}
 		});
 
-		fBoldCheckBox.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
+		fBoldCheckBox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				fOverlayStore.setValue(item.getBoldKey(), fBoldCheckBox.getSelection());
 			}
 		});
 
-		fItalicCheckBox.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
+		fItalicCheckBox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				fOverlayStore.setValue(item.getItalicKey(), fItalicCheckBox.getSelection());
 			}
 		});
 
-		fStrikethroughCheckBox.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
+		fStrikethroughCheckBox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				fOverlayStore.setValue(item.getStrikethroughKey(), fStrikethroughCheckBox.getSelection());
 			}
 		});
 
-		fUnderlineCheckBox.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
+		fUnderlineCheckBox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				fOverlayStore.setValue(item.getUnderlineKey(), fUnderlineCheckBox.getSelection());
@@ -603,6 +595,8 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 
 		createSyntaxPage(contents);
 
+		createTypingPreferences(contents);
+
 		initialize();
 
 		Dialog.applyDialogFont(contents);
@@ -639,9 +633,27 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		filler.setLayoutData(gd);
 	}
 
+	private void createTypingPreferences(Composite contents) {
+		fCheckboxEscapeBackslash= new Button(contents, SWT.CHECK);
+		fCheckboxEscapeBackslash.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_when_pasting_escape_backslash_if_required);
+		GridData gd= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+		gd.verticalIndent= 10;
+		fCheckboxEscapeBackslash.setLayoutData(gd);
+		fCheckboxEscapeBackslash.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fOverlayStore.setValue(PreferenceConstants.PROPERTIES_FILE_WHEN_PASTING_ESCAPE_BACKSLASH_IF_REQUIRED, fCheckboxEscapeBackslash.getSelection());
+			}
+		});
+	}
+
+	private void resetTypingPreferences() {
+		fCheckboxEscapeBackslash.setSelection(fOverlayStore.getBoolean(PreferenceConstants.PROPERTIES_FILE_WHEN_PASTING_ESCAPE_BACKSLASH_IF_REQUIRED));
+	}
+
 	private void initialize() {
 
 		initializeFields();
+		resetTypingPreferences();
 
 		for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
 			fHighlightingColorList.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, fSyntaxColorListModel[i][1] + ITALIC, fSyntaxColorListModel[i][1] + STRIKETHROUGH, fSyntaxColorListModel[i][1] + UNDERLINE, null));
@@ -681,6 +693,8 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		initializeFields();
 
 		handleSyntaxColorListSelection();
+
+		resetTypingPreferences();
 
 		super.performDefaults();
 

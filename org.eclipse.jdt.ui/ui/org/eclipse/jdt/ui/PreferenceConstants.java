@@ -3569,6 +3569,17 @@ public class PreferenceConstants {
 	public static final String PROPERTIES_FILE_COLORING_ARGUMENT_UNDERLINE= PROPERTIES_FILE_COLORING_ARGUMENT + EDITOR_UNDERLINE_SUFFIX;
 
 	/**
+	 * A named preference that controls whether backslashes are escaped if required, when pasting in
+	 * a properties file.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.7
+	 */
+	public static final String PROPERTIES_FILE_WHEN_PASTING_ESCAPE_BACKSLASH_IF_REQUIRED= "pf_when_pasting_escape_backslash_if_required"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that stores the content assist LRU history
 	 * <p>
 	 * Value is an XML encoded version of the history.
@@ -3889,6 +3900,8 @@ public class PreferenceConstants {
 
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT_BOLD, false);
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT_ITALIC, false);
+
+		store.setDefault(PreferenceConstants.PROPERTIES_FILE_WHEN_PASTING_ESCAPE_BACKSLASH_IF_REQUIRED, true);
 
 		// semantic highlighting
 		SemanticHighlightings.initDefaults(store);
