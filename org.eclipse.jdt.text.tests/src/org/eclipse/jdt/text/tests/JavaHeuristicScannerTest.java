@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.JavaIndenter;
+
 
 /**
  * SmartSemicolonAutoEditStrategyTest
@@ -882,6 +883,15 @@ public class JavaHeuristicScannerTest extends TestCase {
 		String indent= fScanner.computeIndentation(7).toString();
 		Assert.assertEquals("\t\t", indent);
 		indent= fScanner.computeIndentation(10).toString();
+		Assert.assertEquals("\t\t", indent);
+	}
+
+	public void testContinuationIndentationOfThrowsClause() throws Exception {
+		fDocument.set("\tprivate void thrower() throws java.sql.SQLException, java.io.IOException {");
+
+		String indent= fScanner.computeIndentation(23).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(24).toString();
 		Assert.assertEquals("\t\t", indent);
 	}
 

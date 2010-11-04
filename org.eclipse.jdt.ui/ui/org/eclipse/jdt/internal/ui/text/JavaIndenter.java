@@ -743,6 +743,7 @@ public final class JavaIndenter {
 		boolean matchBrace= false;
 		boolean matchParen= false;
 		boolean matchCase= false;
+		boolean throwsClause= false;
 
 		// account for un-indentation characters already typed in, but after position
 		// if they are on a line by themselves, the indentation gets adjusted
@@ -783,6 +784,9 @@ public final class JavaIndenter {
 						if (isFirstTokenOnLine)
 							matchParen= true;
 						break;
+					case Symbols.TokenTHROWS:
+						throwsClause= true;
+						break;
 				}
 			} catch (BadLocationException e) {
 			}
@@ -791,7 +795,7 @@ public final class JavaIndenter {
 			danglingElse= false;
 		}
 
-		int ref= findReferencePosition(offset, danglingElse, matchBrace, matchParen, matchCase);
+		int ref= findReferencePosition(offset, danglingElse, matchBrace, matchParen, matchCase, throwsClause);
 		if (unindent)
 			fIndent--;
 		if (indent)
@@ -800,27 +804,54 @@ public final class JavaIndenter {
 	}
 
 	/**
-	 * Returns the reference position regarding to indentation for <code>position</code>,
-	 * or <code>NOT_FOUND</code>.<code>fIndent</code> will contain the
-	 * relative indentation (in indentation units, not characters) after the
-	 * call. If there is a special alignment (e.g. for a method declaration
-	 * where parameters should be aligned), <code>fAlign</code> will contain
-	 * the absolute position of the alignment reference in <code>fDocument</code>,
-	 * otherwise <code>fAlign</code> is set to <code>JavaHeuristicScanner.NOT_FOUND</code>.
-	 *
+	 * Returns the reference position regarding to indentation for <code>position</code>, or
+	 * <code>NOT_FOUND</code>.<code>fIndent</code> will contain the relative indentation (in
+	 * indentation units, not characters) after the call. If there is a special alignment (e.g. for
+	 * a method declaration where parameters should be aligned), <code>fAlign</code> will contain
+	 * the absolute position of the alignment reference in <code>fDocument</code>, otherwise
+	 * <code>fAlign</code> is set to <code>JavaHeuristicScanner.NOT_FOUND</code>. This method calls
+	 * {@link #findReferencePosition(int, boolean, boolean, boolean, boolean, boolean)
+	 * findReferencePosition(offset, danglingElse, matchBrace, matchParen, matchCase, throwsClause)}
+	 * where <code>throwsClause</code> indicates whether a throws clause was found at
+	 * <code>position</code>.
+	 * 
 	 * @param offset the offset for which the reference is computed
 	 * @param danglingElse whether a dangling else should be assumed at <code>position</code>
-	 * @param matchBrace whether the position of the matching brace should be
-	 *            returned instead of doing code analysis
-	 * @param matchParen whether the position of the matching parenthesis
-	 *            should be returned instead of doing code analysis
-	 * @param matchCase whether the position of a switch statement reference
-	 *            should be returned (either an earlier case statement or the
-	 *            switch block brace)
-	 * @return the reference statement relative to which <code>position</code>
-	 *         should be indented, or {@link JavaHeuristicScanner#NOT_FOUND}
+	 * @param matchBrace whether the position of the matching brace should be returned instead of
+	 *            doing code analysis
+	 * @param matchParen whether the position of the matching parenthesis should be returned instead
+	 *            of doing code analysis
+	 * @param matchCase whether the position of a switch statement reference should be returned
+	 *            (either an earlier case statement or the switch block brace)
+	 * @return the reference statement relative to which <code>position</code> should be indented,
+	 *         or {@link JavaHeuristicScanner#NOT_FOUND}
 	 */
 	public int findReferencePosition(int offset, boolean danglingElse, boolean matchBrace, boolean matchParen, boolean matchCase) {
+		return findReferencePosition(offset, danglingElse, matchBrace, matchParen, matchCase, false);
+	}
+
+	/**
+	 * Returns the reference position regarding to indentation for <code>position</code>, or
+	 * <code>NOT_FOUND</code>.<code>fIndent</code> will contain the relative indentation (in
+	 * indentation units, not characters) after the call. If there is a special alignment (e.g. for
+	 * a method declaration where parameters should be aligned), <code>fAlign</code> will contain
+	 * the absolute position of the alignment reference in <code>fDocument</code>, otherwise
+	 * <code>fAlign</code> is set to <code>JavaHeuristicScanner.NOT_FOUND</code>.
+	 * 
+	 * @param offset the offset for which the reference is computed
+	 * @param danglingElse whether a dangling else should be assumed at <code>position</code>
+	 * @param matchBrace whether the position of the matching brace should be returned instead of
+	 *            doing code analysis
+	 * @param matchParen whether the position of the matching parenthesis should be returned instead
+	 *            of doing code analysis
+	 * @param matchCase whether the position of a switch statement reference should be returned
+	 *            (either an earlier case statement or the switch block brace)
+	 * @param throwsClause whether a throws clause was found at <code>position</code>
+	 * @return the reference statement relative to which <code>position</code> should be indented,
+	 *         or {@link JavaHeuristicScanner#NOT_FOUND}
+	 * @since 3.7
+	 */
+	public int findReferencePosition(int offset, boolean danglingElse, boolean matchBrace, boolean matchParen, boolean matchCase, boolean throwsClause) {
 		fIndent= 0; // the indentation modification
 		fAlign= JavaHeuristicScanner.NOT_FOUND;
 		fPosition= offset;
@@ -846,7 +877,7 @@ public final class JavaIndenter {
 			} else {
 				// if we can't find the matching brace, the heuristic is to unindent
 				// by one against the normal position
-				int pos= findReferencePosition(offset, danglingElse, false, matchParen, matchCase);
+				int pos= findReferencePosition(offset, danglingElse, false, matchParen, matchCase, throwsClause);
 				fIndent--;
 				return pos;
 			}
@@ -859,7 +890,7 @@ public final class JavaIndenter {
 			else {
 				// if we can't find the matching paren, the heuristic is to unindent
 				// by one against the normal position
-				int pos= findReferencePosition(offset, danglingElse, matchBrace, false, matchCase);
+				int pos= findReferencePosition(offset, danglingElse, matchBrace, false, matchCase, throwsClause);
 				fIndent--;
 				return pos;
 			}
@@ -931,6 +962,10 @@ public final class JavaIndenter {
 			case Symbols.TokenTRY:
 				return skipToStatementStart(danglingElse, false);
 			case Symbols.TokenRPAREN:
+				if (throwsClause) {
+					fIndent= fPrefs.prefContinuationIndent;
+					return fPosition;
+				}
 				int line= fLine;
 				if (skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN)) {
 					int scope= fPosition;
