@@ -134,6 +134,8 @@ final class JavaEditorMessages extends NLS {
 	public static String SemanticHighlighting_interfaces;
 	public static String SemanticHighlighting_annotations;
 	public static String SemanticHighlighting_typeArguments;
+	public static String JavaEditor_FormatElementAction_description;
+	public static String JavaEditor_FormatElementAction_label;
 	public static String JavaEditor_markOccurrences_job_name;
 	public static String JavaEditorBreadcrumbActionGroup_go_to_editor_action_label;
 	public static String JavaElementHyperlink_hyperlinkText;

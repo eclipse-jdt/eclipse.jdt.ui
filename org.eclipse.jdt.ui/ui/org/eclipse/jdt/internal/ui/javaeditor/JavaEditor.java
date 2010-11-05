@@ -1172,6 +1172,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @since 3.2
 		 */
 		FormatElementAction() {
+			setText(JavaEditorMessages.JavaEditor_FormatElementAction_label);
+			setDescription(JavaEditorMessages.JavaEditor_FormatElementAction_description);
 			setEnabled(isEditorInputModifiable());
 		}
 

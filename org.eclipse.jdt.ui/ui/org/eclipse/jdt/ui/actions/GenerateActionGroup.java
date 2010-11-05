@@ -446,6 +446,7 @@ public class GenerateActionGroup extends ActionGroup {
 		source.add(new Separator(GROUP_EDIT));
 		added+= addEditorAction(source, "Indent"); //$NON-NLS-1$
 		added+= addEditorAction(source, "Format"); //$NON-NLS-1$
+		added+= addEditorAction(source, "QuickFormat"); //$NON-NLS-1$
 		source.add(new Separator(GROUP_IMPORT));
 		added+= addAction(source, fAddImport);
 		added+= addAction(source, fOrganizeImports);
