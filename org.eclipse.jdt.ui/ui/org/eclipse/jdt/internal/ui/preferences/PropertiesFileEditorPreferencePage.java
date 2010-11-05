@@ -358,13 +358,6 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	 */
 	private IColorManager fColorManager;
 
-	/**
-	 * Check box for preference that controls whether backslashes are escaped if required, when
-	 * pasting in a properties file.
-	 * 
-	 * @since 3.7
-	 */
-	private Button fCheckboxEscapeBackslash;
 
 	/**
 	 * Creates a new preference page.
@@ -388,8 +381,6 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + STRIKETHROUGH));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + UNDERLINE));
 		}
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.PROPERTIES_FILE_WHEN_PASTING_ESCAPE_BACKSLASH_IF_REQUIRED));
 
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
@@ -595,8 +586,6 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 
 		createSyntaxPage(contents);
 
-		createTypingPreferences(contents);
-
 		initialize();
 
 		Dialog.applyDialogFont(contents);
@@ -633,27 +622,9 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		filler.setLayoutData(gd);
 	}
 
-	private void createTypingPreferences(Composite contents) {
-		fCheckboxEscapeBackslash= new Button(contents, SWT.CHECK);
-		fCheckboxEscapeBackslash.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_when_pasting_escape_backslash_if_required);
-		GridData gd= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-		gd.verticalIndent= 10;
-		fCheckboxEscapeBackslash.setLayoutData(gd);
-		fCheckboxEscapeBackslash.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				fOverlayStore.setValue(PreferenceConstants.PROPERTIES_FILE_WHEN_PASTING_ESCAPE_BACKSLASH_IF_REQUIRED, fCheckboxEscapeBackslash.getSelection());
-			}
-		});
-	}
-
-	private void resetTypingPreferences() {
-		fCheckboxEscapeBackslash.setSelection(fOverlayStore.getBoolean(PreferenceConstants.PROPERTIES_FILE_WHEN_PASTING_ESCAPE_BACKSLASH_IF_REQUIRED));
-	}
-
 	private void initialize() {
 
 		initializeFields();
-		resetTypingPreferences();
 
 		for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
 			fHighlightingColorList.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, fSyntaxColorListModel[i][1] + ITALIC, fSyntaxColorListModel[i][1] + STRIKETHROUGH, fSyntaxColorListModel[i][1] + UNDERLINE, null));
@@ -693,8 +664,6 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		initializeFields();
 
 		handleSyntaxColorListSelection();
-
-		resetTypingPreferences();
 
 		super.performDefaults();
 
