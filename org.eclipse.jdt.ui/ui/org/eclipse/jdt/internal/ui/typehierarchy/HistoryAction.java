@@ -71,7 +71,7 @@ public class HistoryAction extends Action {
 	 * @since 3.7
 	 */
 	static StyledString getSingleElementLabel(IJavaElement element) {
-		return JavaElementLabels.getStyledElementLabel(element, JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.COLORIZE);
+		return JavaElementLabels.getStyledElementLabel(element, JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.COLORIZE | JavaElementLabels.P_COMPRESSED);
 	}
 
 	/**
@@ -107,7 +107,7 @@ public class HistoryAction extends Action {
 	 * @since 3.7
 	 */
 	static String getShortLabel(IJavaElement element) {
-		return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_POST_QUALIFIED);
+		return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.P_COMPRESSED);
 	}
 
 }

@@ -31,7 +31,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 class HistoryAction extends Action {
 
-	private static long LABEL_FLAGS= JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.T_TYPE_PARAMETERS;
+	private static long LABEL_FLAGS= JavaElementLabels.ALL_POST_QUALIFIED
+			| JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_APP_RETURNTYPE
+			| JavaElementLabels.T_TYPE_PARAMETERS
+			| JavaElementLabels.P_COMPRESSED
+			| JavaElementLabels.COLORIZE;
 	private CallHierarchyViewPart fView;
 	private IMember[] fMembers;
 
@@ -86,6 +90,6 @@ class HistoryAction extends Action {
     }
 
 	private static String getShortLabel(IMember member) {
-		return JavaElementLabels.getElementLabel(member, LABEL_FLAGS | JavaElementLabels.COLORIZE);
+		return JavaElementLabels.getElementLabel(member, LABEL_FLAGS);
 	}
 }
