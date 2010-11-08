@@ -411,65 +411,65 @@ public class PropertyKeyHyperlink implements IHyperlink {
 	 * @param key the properties key
 	 * @return the references or <code>null</code> if the search has been canceled by the user
 	 */
-	private KeyReference[] search(final IResource scope, String key) {
+	private KeyReference[] search(final IResource scope, final String key) {
 		if (key == null)
 			return new KeyReference[0];
 
 		final List result= new ArrayList(5);
-		final String searchString;
-
-		// XXX: This is a hack to improve the accuracy of matches, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81140
-		final boolean useDoubleQuotedKey= useDoubleQuotedKey();
-		if (useDoubleQuotedKey) {
-			StringBuffer buf= new StringBuffer("\""); //$NON-NLS-1$
-			buf.append(fPropertiesKey);
-			buf.append('"');
-			searchString= buf.toString();
-		} else
-			searchString= fPropertiesKey;
-
 		try {
 			fEditor.getEditorSite().getWorkbenchWindow().getWorkbench().getProgressService().busyCursorWhile(
 				new IRunnableWithProgress() {
-					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						if (monitor == null)
-							monitor= new NullProgressMonitor();
+						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+							if (monitor == null)
+								monitor= new NullProgressMonitor();
 
-						monitor.beginTask("", 5); //$NON-NLS-1$
-						try {
-							ResultCollector collector= new ResultCollector(result, useDoubleQuotedKey);
-							TextSearchEngine engine= TextSearchEngine.create();
-							Pattern searchPattern= PatternConstructor.createPattern(searchString, true, false);
-							engine.search(createScope(scope), collector, searchPattern, new SubProgressMonitor(monitor, 4));
+							monitor.beginTask("", 5); //$NON-NLS-1$
+							try {
+								// XXX: This is a hack to improve the accuracy of matches, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81140
+								boolean useDoubleQuotedKey= useDoubleQuotedKey();
+								if (useDoubleQuotedKey) {
+									IJavaElement element= JavaCore.create(scope);
+									if (element == null)
+										return;
 
-							if (result.size() == 0 && useDoubleQuotedKey) {
-								//Try without, maybe an eclipse style NLS string
-								IJavaElement element= JavaCore.create(scope);
-								if (element == null)
-									return;
+									int includeMask= IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.REFERENCED_PROJECTS;
+									IJavaSearchScope javaSearchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element }, includeMask);
 
-								int includeMask = IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.REFERENCED_PROJECTS;
-								IJavaSearchScope javaSearchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element }, includeMask);
-
-								SearchPattern pattern= SearchPattern.createPattern(fPropertiesKey, IJavaSearchConstants.FIELD, IJavaSearchConstants.REFERENCES, SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE);
-								if (pattern == null)
-									return;
-								try {
-									new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), javaSearchScope, new SearchRequestor() {
-										public void acceptSearchMatch(SearchMatch match) throws CoreException {
-											result.add(new KeyReference((IStorage)match.getResource(), match.getOffset(), match.getLength()));
-										}
-									}, new SubProgressMonitor(monitor, 1));
-								} catch (CoreException e) {
-									throw new InvocationTargetException(e);
+									SearchPattern pattern= SearchPattern.createPattern(key, IJavaSearchConstants.FIELD, IJavaSearchConstants.REFERENCES, SearchPattern.R_PATTERN_MATCH
+											| SearchPattern.R_CASE_SENSITIVE);
+									if (pattern == null)
+										return;
+									try {
+										new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), javaSearchScope, new SearchRequestor() {
+											public void acceptSearchMatch(SearchMatch match) throws CoreException {
+												result.add(new KeyReference((IStorage)match.getResource(), match.getOffset(), match.getLength()));
+											}
+										}, new SubProgressMonitor(monitor, 1));
+									} catch (CoreException e) {
+										throw new InvocationTargetException(e);
+									}
 								}
-							} else {
-								monitor.worked(1);
+								if (result.size() == 0) {
+									//maybe not an eclipse style NLS string
+									String searchString;
+									if (useDoubleQuotedKey) {
+										StringBuffer buf= new StringBuffer("\""); //$NON-NLS-1$
+										buf.append(key);
+										buf.append('"');
+										searchString= buf.toString();
+									} else
+										searchString= key;
+									ResultCollector collector= new ResultCollector(result, useDoubleQuotedKey);
+									TextSearchEngine engine= TextSearchEngine.create();
+									Pattern searchPattern= PatternConstructor.createPattern(searchString, true, false);
+									engine.search(createScope(scope), collector, searchPattern, new SubProgressMonitor(monitor, 4));
+								} else {
+									monitor.worked(1);
+								}
+							} finally {
+								monitor.done();
 							}
-						} finally {
-							monitor.done();
 						}
-					}
 				}
 			);
 		} catch (InvocationTargetException ex) {
