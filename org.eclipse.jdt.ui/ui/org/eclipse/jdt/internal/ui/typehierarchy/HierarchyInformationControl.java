@@ -147,7 +147,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			}
 		});
 
-		fLabelProvider.setTextFlags(JavaElementLabels.ALL_DEFAULT | JavaElementLabels.T_POST_QUALIFIED);
+		fLabelProvider.setTextFlags(JavaElementLabels.ALL_DEFAULT | JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.P_COMPRESSED);
 		fLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));
 		treeViewer.setLabelProvider(new ColoringLabelProvider(fLabelProvider));
 

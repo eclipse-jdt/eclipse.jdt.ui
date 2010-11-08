@@ -84,7 +84,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	private TypeHierarchyLifeCycle fHierarchy;
 
 	public HierarchyLabelProvider(TypeHierarchyLifeCycle lifeCycle) {
-		super(DEFAULT_TEXTFLAGS | JavaElementLabels.USE_RESOLVED, DEFAULT_IMAGEFLAGS);
+		super(DEFAULT_TEXTFLAGS | JavaElementLabels.USE_RESOLVED | JavaElementLabels.P_COMPRESSED, DEFAULT_IMAGEFLAGS);
 
 		fHierarchy= lifeCycle;
 		fFilter= null;
