@@ -611,6 +611,10 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private void showPage(int page) {
 		boolean isEmpty= page == PAGE_EMPTY;
 		Control control= isEmpty ? (Control) fNoHierarchyShownLabel : fHierarchyLocationSplitter;
+		if (isEmpty) {
+			setContentDescription(""); //$NON-NLS-1$
+			setTitleToolTip(getPartName());
+		}
 		fPagebook.showPage(control);
 		if (fRefreshViewAction != null)
 			fRefreshViewAction.setEnabled(!isEmpty);
