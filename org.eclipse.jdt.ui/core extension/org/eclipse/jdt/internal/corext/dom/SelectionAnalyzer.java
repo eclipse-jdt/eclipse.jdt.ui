@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,10 @@ public class SelectionAnalyzer extends GenericVisitor {
 		Assert.isNotNull(selection);
 		fSelection= selection;
 		fTraverseSelectedNode= traverseSelectedNode;
+	}
+
+	protected void setSelection(Selection selection) {
+		fSelection= selection;
 	}
 
 	public boolean hasSelectedNodes() {
@@ -82,7 +86,7 @@ public class SelectionAnalyzer extends GenericVisitor {
 		return fLastCoveringNode;
 	}
 
-	protected Selection getSelection() {
+	public Selection getSelection() {
 		return fSelection;
 	}
 

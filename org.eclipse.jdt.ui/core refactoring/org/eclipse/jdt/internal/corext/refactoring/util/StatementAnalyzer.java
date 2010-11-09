@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.SourceRange;
+import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -71,15 +72,20 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode node= nodes[0];
 		int selectionOffset= getSelection().getOffset();
 		try {
-			int pos= fScanner.getNextStartOffset(selectionOffset, true);
-			if (pos == node.getStartPosition()) {
+			int start= fScanner.getNextStartOffset(selectionOffset, true);
+			if (start == node.getStartPosition()) {
 				int lastNodeEnd= ASTNodes.getExclusiveEnd(nodes[nodes.length - 1]);
-
-				pos= fScanner.getNextStartOffset(lastNodeEnd, true);
+				int pos= fScanner.getNextStartOffset(lastNodeEnd, true);
 				int selectionEnd= getSelection().getInclusiveEnd();
 				if (pos <= selectionEnd) {
-					ISourceRange range= new SourceRange(lastNodeEnd, pos - lastNodeEnd);
-					invalidSelection(RefactoringCoreMessages.StatementAnalyzer_end_of_selection, JavaStatusContext.create(fCUnit, range));
+					IScanner scanner= fScanner.getScanner();
+					char[] token= scanner.getCurrentTokenSource(); //see https://bugs.eclipse.org/324237
+					if (start < lastNodeEnd && token.length == 1 && (token[0] == ';' || token[0] == ',')) {
+						setSelection(Selection.createFromStartEnd(start, lastNodeEnd - 1));
+					} else {
+						ISourceRange range= new SourceRange(lastNodeEnd, pos - lastNodeEnd);
+						invalidSelection(RefactoringCoreMessages.StatementAnalyzer_end_of_selection, JavaStatusContext.create(fCUnit, range));
+					}
 				}
 				return; // success
 			}

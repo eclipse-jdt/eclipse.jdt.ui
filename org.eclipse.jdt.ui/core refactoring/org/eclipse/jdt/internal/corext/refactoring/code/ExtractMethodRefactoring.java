@@ -294,6 +294,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fAST= fRoot.getAST();
 		fRoot.accept(createVisitor());
 
+		fSelectionStart= fAnalyzer.getSelection().getOffset();
+		fSelectionLength= fAnalyzer.getSelection().getLength();
+
 		result.merge(fAnalyzer.checkInitialConditions(fImportRewriter));
 		if (result.hasFatalError())
 			return result;
