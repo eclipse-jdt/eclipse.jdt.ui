@@ -1153,8 +1153,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		InfixExpression infixExpression= (InfixExpression) node;
 		Operator operator= infixExpression.getOperator();
-		if (operator != InfixExpression.Operator.CONDITIONAL_AND && operator != InfixExpression.Operator.AND && operator != InfixExpression.Operator.CONDITIONAL_OR
-				&& operator != InfixExpression.Operator.OR && operator != InfixExpression.Operator.EQUALS && operator != InfixExpression.Operator.PLUS && operator != InfixExpression.Operator.TIMES
+		if (operator != InfixExpression.Operator.CONDITIONAL_AND && operator != InfixExpression.Operator.AND
+				&& operator != InfixExpression.Operator.CONDITIONAL_OR && operator != InfixExpression.Operator.OR
+				&& operator != InfixExpression.Operator.EQUALS && operator != InfixExpression.Operator.NOT_EQUALS
+				&& operator != InfixExpression.Operator.PLUS && operator != InfixExpression.Operator.TIMES
 				&& operator != InfixExpression.Operator.XOR) {
 			return false;
 		}
