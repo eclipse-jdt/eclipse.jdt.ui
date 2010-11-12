@@ -1156,6 +1156,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (operator != InfixExpression.Operator.CONDITIONAL_AND && operator != InfixExpression.Operator.AND
 				&& operator != InfixExpression.Operator.CONDITIONAL_OR && operator != InfixExpression.Operator.OR
 				&& operator != InfixExpression.Operator.EQUALS && operator != InfixExpression.Operator.NOT_EQUALS
+				&& operator != InfixExpression.Operator.LESS && operator != InfixExpression.Operator.LESS_EQUALS
+				&& operator != InfixExpression.Operator.GREATER && operator != InfixExpression.Operator.GREATER_EQUALS
 				&& operator != InfixExpression.Operator.PLUS && operator != InfixExpression.Operator.TIMES
 				&& operator != InfixExpression.Operator.XOR) {
 			return false;
@@ -1190,6 +1192,16 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				rightExpression= combineOperands(rewrite, rightExpression, extendedOperand, false, operator);
 			}
 		}
+		if (operator == InfixExpression.Operator.LESS) {
+			operator= InfixExpression.Operator.GREATER_EQUALS;
+		} else if (operator == InfixExpression.Operator.LESS_EQUALS) {
+			operator= InfixExpression.Operator.GREATER;
+		} else if (operator == InfixExpression.Operator.GREATER) {
+			operator= InfixExpression.Operator.LESS_EQUALS;
+		} else if (operator == InfixExpression.Operator.GREATER_EQUALS) {
+			operator= InfixExpression.Operator.LESS;
+		}
+
 		// create new infix expression
 		InfixExpression newInfix= ast.newInfixExpression();
 		newInfix.setOperator(operator);
