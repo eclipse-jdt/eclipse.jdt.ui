@@ -1174,18 +1174,18 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Expression leftExpression= null;
 		Expression rightExpression= null;
 		InfixExpression currentExpression= infixExpression;
-		leftExpression= combineOperands(rewrite, leftExpression, infixExpression.getLeftOperand(), true, operator);
+		leftExpression= combineOperands(rewrite, leftExpression, infixExpression.getLeftOperand(), false, operator);
 		if (infixExpression.getRightOperand().getStartPosition() <= context.getSelectionOffset()) {
-			leftExpression= combineOperands(rewrite, leftExpression, infixExpression.getRightOperand(), true, operator);
+			leftExpression= combineOperands(rewrite, leftExpression, infixExpression.getRightOperand(), false, operator);
 		} else {
-			rightExpression= combineOperands(rewrite, rightExpression, infixExpression.getRightOperand(), true, operator);
+			rightExpression= combineOperands(rewrite, rightExpression, infixExpression.getRightOperand(), false, operator);
 		}
 		for (Iterator iter= currentExpression.extendedOperands().iterator(); iter.hasNext();) {
 			Expression extendedOperand= (Expression) iter.next();
 			if (extendedOperand.getStartPosition() <= context.getSelectionOffset()) {
-				leftExpression= combineOperands(rewrite, leftExpression, extendedOperand, true, operator);
+				leftExpression= combineOperands(rewrite, leftExpression, extendedOperand, false, operator);
 			} else {
-				rightExpression= combineOperands(rewrite, rightExpression, extendedOperand, true, operator);
+				rightExpression= combineOperands(rewrite, rightExpression, extendedOperand, false, operator);
 			}
 		}
 		// create new infix expression

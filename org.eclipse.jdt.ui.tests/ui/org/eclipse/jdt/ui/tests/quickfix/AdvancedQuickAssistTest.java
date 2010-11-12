@@ -257,7 +257,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(boolean a, int b) {\n");
-		buf.append("        if (b == 0 && a) {\n");
+		buf.append("        if ((b == 0) && a) {\n");
 		buf.append("            b= 9;\n");
 		buf.append("        } else {\n");
 		buf.append("            b= 2;\n");
@@ -1058,9 +1058,6 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 
-
-
-
 	public void testInverseConditionalStatement1() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=74746
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1194,6 +1191,68 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		String expected1= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
+
+	}
+
+	public void testExchangeOperands2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public boolean foo(int a, int b) {\n");
+		buf.append("        return (0 == (a & b));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("==");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public boolean foo(int a, int b) {\n");
+		buf.append("        return ((a & b) == 0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
+	public void testExchangeOperands3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int n = (2 + 3) * (4 + 5);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("*");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int n = (4 + 5) * (2 + 3);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 
 	}
 
