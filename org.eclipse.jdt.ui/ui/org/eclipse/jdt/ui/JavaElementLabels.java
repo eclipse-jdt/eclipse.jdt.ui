@@ -232,8 +232,10 @@ public class JavaElementLabels {
 	public final static long P_POST_QUALIFIED= 1L << 36;
 
 	/**
-	 * Package names are compressed.
-	 * e.g. <code>o*.e*.search</code>
+	 * Package names are abbreviated if
+	 * {@link PreferenceConstants#APPEARANCE_ABBREVIATE_PACKAGE_NAMES} is <code>true</code> and/or
+	 * compressed if {@link PreferenceConstants#APPEARANCE_COMPRESS_PACKAGE_NAMES} is
+	 * <code>true</code>.
 	 */
 	public final static long P_COMPRESSED= 1L << 37;
 
