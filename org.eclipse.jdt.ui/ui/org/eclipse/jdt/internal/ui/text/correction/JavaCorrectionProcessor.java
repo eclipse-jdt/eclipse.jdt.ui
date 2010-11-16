@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -226,15 +226,18 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(part.getEditorInput());
 		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(part.getEditorInput());
 
-		int length= viewer != null ? viewer.getSelectedRange().y : 0;
-		AssistContext context= new AssistContext(cu, viewer, part, documentOffset, length);
-
+		AssistContext context= null;
+		if (cu != null) {
+			int length= viewer != null ? viewer.getSelectedRange().y : 0;
+			context= new AssistContext(cu, viewer, part, documentOffset, length);
+		}
+		
 		Annotation[] annotations= fAssistant.getAnnotationsAtOffset();
 
 		fErrorMessage= null;
 
 		ICompletionProposal[] res= null;
-		if (model != null && annotations != null) {
+		if (model != null && context != null && annotations != null) {
 			ArrayList proposals= new ArrayList(10);
 			IStatus status= collectProposals(context, model, annotations, true, !fAssistant.isUpdatedOffset(), proposals);
 			res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
