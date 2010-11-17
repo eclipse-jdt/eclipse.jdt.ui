@@ -948,6 +948,14 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performOperatorTest();
 	}
 
+	public void testPlusDiff() throws Exception {
+		performOperatorTest();
+	}
+
+	public void testDiffDiff() throws Exception {
+		performOperatorTest();
+	}
+
 	public void testTimesPlus() throws Exception {
 		performOperatorTest();
 	}
@@ -969,6 +977,18 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}
 
 	public void testPlusPostfix() throws Exception {
+		performOperatorTest();
+	}
+
+	public void testTimesTimes() throws Exception {
+		performOperatorTest();
+	}
+
+	public void testTimesDivide() throws Exception {
+		performOperatorTest();
+	}
+
+	public void testDivideDivide() throws Exception {
 		performOperatorTest();
 	}
 

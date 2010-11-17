@@ -419,7 +419,7 @@ public class SourceProvider {
 		int argPrecedence= OperatorPrecedence.getExpressionPrecedence(expression);
 		int paramPrecedence= param.getOperatorPrecedence();
 		if (argPrecedence != Integer.MAX_VALUE && paramPrecedence != Integer.MAX_VALUE)
-			return argPrecedence < paramPrecedence;
+			return argPrecedence <= paramPrecedence;
 		return false;
 	}
 
@@ -461,9 +461,8 @@ public class SourceProvider {
 						cast.setExpression(newExpression);
 						ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(expression, importRewrite);
 						cast.setType(importRewrite.addImport(explicitCast, ast, importRewriteContext));
-						newExpression= cast;
-					}
-					if (argumentNeedsParenthesis(newExpression, parameter)) {
+						newExpression= createParenthesizedExpression(cast, ast);
+					} else if (argumentNeedsParenthesis(expression, parameter)) {
 						newExpression= createParenthesizedExpression(newExpression, ast);
 					}
 					rewriter.replace(element, newExpression, null);
