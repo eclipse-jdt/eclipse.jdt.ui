@@ -85,6 +85,7 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -585,6 +586,7 @@ public class TestRunnerViewPart extends ViewPart {
 					if (settings == null) {
 						settings= dialogSettings.addNewSection(DIALOG_SETTINGS);
 					}
+					settings.put("DIALOG_HEIGHT", Dialog.DIALOG_DEFAULT_BOUNDS); //$NON-NLS-1$
 					return settings;
 				}
 				@Override
@@ -1804,7 +1806,8 @@ action enablement
 	}
 
 	private void initPageSwitcher() {
-		new PageSwitcher(this) {
+		@SuppressWarnings("unused")
+		PageSwitcher pageSwitcher= new PageSwitcher(this) {
 			@Override
 			public Object[] getPages() {
 				return fViewHistory.getHistoryEntries().toArray();
