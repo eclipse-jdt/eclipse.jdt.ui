@@ -24,6 +24,8 @@ import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
@@ -424,8 +426,14 @@ public abstract class OptionsConfigurationBlock {
 			createFilterBox();
 			createScrolledArea();
 			createNoMatchFoundLabel();
+
 			fRefreshJob= doCreateRefreshJob();
 			fRefreshJob.setSystem(true);
+			fParentComposite.addDisposeListener(new DisposeListener() {
+				public void widgetDisposed(DisposeEvent e) {
+					fRefreshJob.cancel();
+				}
+			});
 		}
 
 		private void createDescription(String label) {
