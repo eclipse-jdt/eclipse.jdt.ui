@@ -71,7 +71,7 @@ public class ScrollTextEditorTest extends ScrollEditorTest {
 
 	/**
 	 * Measure the time spent while scrolling line wise without moving the
-	 * caret in the Java editor, holding the key combination down.
+	 * caret in the text editor, holding the key combination down.
 	 *
 	 * @throws Exception
 	 */
