@@ -21,6 +21,7 @@ public class ModelMessages extends NLS {
 	public static String JUnitModel_could_not_read;
 	public static String JUnitModel_could_not_write;
 	public static String JUnitModel_importing_from_url;
+	public static String TestRunHandler_lines_read;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, ModelMessages.class);

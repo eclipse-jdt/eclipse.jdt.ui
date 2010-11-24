@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,11 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import org.eclipse.osgi.util.NLS;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -53,10 +58,17 @@ public class TestRunHandler extends DefaultHandler {
 
 	private Status fStatus;
 
+	private IProgressMonitor fMonitor;
+	private int fLastReportedLine;
+
 	public TestRunHandler() {
 
 	}
 
+	public TestRunHandler(IProgressMonitor monitor) {
+		fMonitor= monitor;
+	}
+	
 	public TestRunHandler(TestRunSession testRunSession) {
 		fTestRunSession= testRunSession;
 	}
@@ -69,6 +81,17 @@ public class TestRunHandler extends DefaultHandler {
 	}
 
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+		if (fLocator != null && fMonitor != null) {
+			int line= fLocator.getLineNumber();
+			if (line - 20 >= fLastReportedLine) {
+				line -= line % 20;
+				fLastReportedLine= line;
+				fMonitor.subTask(NLS.bind(ModelMessages.TestRunHandler_lines_read, new Integer(line)));
+			}
+		}
+		if (Thread.interrupted())
+			throw new OperationCanceledException();
+		
 		if (qName.equals(IXMLTags.NODE_TESTRUN)) {
 			if (fTestRunSession == null) {
 				String name= attributes.getValue(IXMLTags.ATTR_NAME);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.debug.core.DebugPlugin;
@@ -395,7 +396,7 @@ public final class JUnitModel {
 	 */
 	public static TestRunSession importTestRunSession(final String url, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		monitor.beginTask(ModelMessages.JUnitModel_importing_from_url, IProgressMonitor.UNKNOWN);
-		final TestRunHandler handler= new TestRunHandler();
+		final TestRunHandler handler= new TestRunHandler(monitor);
 		
 		final CoreException[] exception= { null };
 		final TestRunSession[] session= { null };
@@ -408,6 +409,8 @@ public final class JUnitModel {
 					SAXParser parser= parserFactory.newSAXParser();
 					parser.parse(url, handler);
 					session[0]= handler.getTestRunSession();
+				} catch (OperationCanceledException e) {
+					// canceled
 				} catch (ParserConfigurationException e) {
 					storeImportError(e);
 				} catch (SAXException e) {
