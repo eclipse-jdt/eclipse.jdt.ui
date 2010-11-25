@@ -278,6 +278,13 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 					//the field. It's possible that the inner type inherits the same field. We must not remove
 					//the qualifier in this case.
 					return true;
+				
+				ITypeBinding enclosingTypeBinding= Bindings.getBindingOfParentType(node);
+				if (enclosingTypeBinding == null || Bindings.isSuperType(variablesDeclaringClass, enclosingTypeBinding))
+					//We have a reference to a field of an outer type, and this type inherited
+					//the field. The inner type inherits the same field. We must not remove
+					//the qualifier in this case.
+					return true;
 			}
 
 			fOperations.add(new CompilationUnitRewriteOperation() {

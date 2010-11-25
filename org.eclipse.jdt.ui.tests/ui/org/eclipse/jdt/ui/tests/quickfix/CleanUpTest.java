@@ -6219,6 +6219,32 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	public void testRemoveQualifierBug330754() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Test {\n");
+		buf.append("    String label = \"works\";\n");
+		buf.append("    class Nested extends Test {\n");
+		buf.append("        Nested() {\n");
+		buf.append("            label = \"broken\";\n");
+		buf.append("        }\n");
+		buf.append("        @Override\n");
+		buf.append("        public String toString() {\n");
+		buf.append("            return Test.this.label;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY);
+		
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+	
 	public void testAddFinal01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
