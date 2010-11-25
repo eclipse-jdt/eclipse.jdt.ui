@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -337,7 +337,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			fSignaturePreview= new JavaSourceViewer(composite, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP, store);
 			fSignaturePreview.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
 			fSignaturePreview.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
-			fSignaturePreview.getTextWidget().setBackground(composite.getBackground());
+			fSignaturePreview.adaptBackgroundColor(composite);
 			fSignaturePreview.setDocument(fSignaturePreviewDocument);
 			fSignaturePreview.setEditable(false);
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.Assert;
@@ -55,6 +56,8 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
@@ -324,6 +327,34 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 
         return null;
     }
+    
+	/**
+	 * Sets the viewer's background color to the given control's background color.
+	 * The background color is <em>only</em> set if it's visibly distinct from the
+	 * default Java source text color.
+	 * 
+	 * @param control the control with the default background color
+	 * @since 3.7
+	 */
+	public void adaptBackgroundColor(Control control) {
+		// workaround for dark editor background color, see https://bugs.eclipse.org/330680
+		
+		Color defaultColor= control.getBackground();
+		float[] defaultBgHSB= defaultColor.getRGB().getHSB();
+		
+		Color javaDefaultColor= JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_DEFAULT);
+		RGB javaDefaultRGB= javaDefaultColor != null ? javaDefaultColor.getRGB() : new RGB(255, 255, 255);
+		float[] javaDefaultHSB= javaDefaultRGB.getHSB();
+		
+		if (Math.abs(defaultBgHSB[2] - javaDefaultHSB[2]) >= 0.5f) {
+			getTextWidget().setBackground(defaultColor);
+			if (fBackgroundColor != null) {
+				fBackgroundColor.dispose();
+				fBackgroundColor= null;
+			}
+		}
+	}
+
 
 	/*
 	 * @see org.eclipse.jface.text.source.ISourceViewerExtension2#unconfigure()
