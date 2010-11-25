@@ -125,6 +125,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -509,6 +510,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		AST ast= statement.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
+		TightSourceRangeComputer sourceRangeComputer= new TightSourceRangeComputer();
+		sourceRangeComputer.addTightSourceNode(assignParent);
+		rewrite.setTargetSourceRangeComputer(sourceRangeComputer);
 
 		String label= CorrectionMessages.QuickAssistProcessor_joindeclaration_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
