@@ -86,6 +86,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
+import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -1528,6 +1529,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		//
 		AST ast= node.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
+		TightSourceRangeComputer sourceRangeComputer= new TightSourceRangeComputer();
+		sourceRangeComputer.addTightSourceNode(ifStatement);
+		rewrite.setTargetSourceRangeComputer(sourceRangeComputer);
 
 		String label= CorrectionMessages.AdvancedQuickAssistProcessor_replaceIfWithConditional;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
