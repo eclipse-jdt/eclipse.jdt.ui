@@ -680,11 +680,10 @@ public class Bindings {
 				return true;
 			for (int i= 0; i < m1Params.length; i++) {
 				ITypeBinding m1Param= m1Params[i];
-				if (containsTypeVariables(m1Param))
+				ITypeBinding m2Param= m2Params[i];
+				if (containsTypeVariables(m1Param) || m1Param.isRawType())
 					m1Param= m1Param.getErasure(); // try to achieve effect of "rename type variables"
-				else if (m1Param.isRawType())
-					m1Param= m1Param.getTypeDeclaration();
-				if (! (equals(m1Param, m2Params[i].getErasure()))) // can erase m2
+				if (! (equals(m1Param, m2Param) || equals(m1Param, m2Param.getErasure())))
 					return false;
 			}
 			return true;
@@ -695,9 +694,10 @@ public class Bindings {
 				return true;
 			for (int i= 0; i < m1Params.length; i++) {
 				ITypeBinding m1Param= m1Params[i];
+				ITypeBinding m2Param= m2Params[i];
 				if (m1Param.isRawType())
 					m1Param= m1Param.getTypeDeclaration();
-				if (! (equals(m1Param, m2Params[i].getErasure()))) // can erase m2
+				if (! (equals(m1Param, m2Param) || equals(m1Param, m2Param.getErasure())))
 					return false;
 			}
 			return true;

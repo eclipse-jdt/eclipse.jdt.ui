@@ -2548,6 +2548,66 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
+	public void testUnimplementedMethodsWithTypeParameters2() throws Exception {
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=330241
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public interface Inter {\n");
+		buf.append("    <T> List<T> findElements(Class<T> clazz, List<String> tagsToMatch);\n");
+		buf.append("    <T> List<T> findPerspectiveElements(Class<T> clazz, List<String> tagsToMatch);\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("Inter.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E implements Inter {\n");
+		buf.append("    public <T> List<T> findPerspectiveElements(Class<T> clazz, List<String> tagsToMatch) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public abstract class E implements Inter {\n");
+		buf.append("    public <T> List<T> findPerspectiveElements(Class<T> clazz, List<String> tagsToMatch) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E implements Inter {\n");
+		buf.append("    public <T> List<T> findPerspectiveElements(Class<T> clazz, List<String> tagsToMatch) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public <T> List<T> findElements(Class<T> clazz, List<String> tagsToMatch) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+	
 	public void testUnimplementedMethodsInEnum() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		StringBuffer buf= new StringBuffer();
