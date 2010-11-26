@@ -145,6 +145,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
@@ -223,8 +224,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (noErrorsAtLocation) {
 				getCatchClauseToThrowsProposals(context, coveringNode, resultingCollections);
 				getUnWrapProposals(context, coveringNode, resultingCollections);
-				getSplitVariableProposals(context, coveringNode, resultingCollections);
 				getJoinVariableProposals(context, coveringNode, resultingCollections);
+				getSplitVariableProposals(context, coveringNode, resultingCollections);
 				getAddFinallyProposals(context, coveringNode, resultingCollections);
 				getAddElseProposals(context, coveringNode, resultingCollections);
 				getAddBlockProposals(context, coveringNode, resultingCollections);
@@ -475,7 +476,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		IVariableBinding binding= fragment.resolveBinding();
-		if (fragment.getInitializer() != null || binding == null || binding.isField()) {
+		Expression initializer= fragment.getInitializer();
+		if ((initializer != null && initializer.getNodeType() != ASTNode.NULL_LITERAL) || binding == null || binding.isField()) {
 			return false;
 		}
 
@@ -585,7 +587,18 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		String label= CorrectionMessages.QuickAssistProcessor_splitdeclaration_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
-		proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
+		boolean commandConflict= false;
+		for (Iterator iterator= resultingCollections.iterator(); iterator.hasNext();) {
+			Object completionProposal= iterator.next();
+			if (completionProposal instanceof ChangeCorrectionProposal) {
+				if (SPLIT_JOIN_VARIABLE_DECLARATION_ID.equals(((ChangeCorrectionProposal)completionProposal).getCommandId())) {
+					commandConflict= true;
+				}
+			}
+		}
+		if (!commandConflict) {
+			proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
+		}
 
 		Statement newStatement;
 		int insertIndex= list.indexOf(statement);
