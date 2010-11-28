@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -122,12 +122,11 @@ import org.eclipse.jdt.core.dom.WildcardType;
  * </p>
  * 
  * <p>
- * This class has a visit(XX node) method for every for every class (concrete or abstract) XX in the
- * ASTNode hierarchy. In this class' default implementations of these methods, the method
- * corresponding to a given ASTNode descendant class will call (and return the return value of) the
- * visit(YY) method for it's superclass YY, with the exception of the visit(ASTNode) method which
- * simply returns true, since ASTNode doesn't have a superclass that is within the ASTNode
- * hierarchy.
+ * This class has a visit(XX node) method for every class (concrete or abstract) XX in the ASTNode
+ * hierarchy. In this class' default implementations of these methods, the method corresponding to a
+ * given ASTNode descendant class will call (and return the return value of) the visit(YY) method
+ * for it's superclass YY, with the exception of the visit(ASTNode) method which simply returns
+ * true, since ASTNode doesn't have a superclass that is within the ASTNode hierarchy.
  * </p>
  * 
  * <p>
