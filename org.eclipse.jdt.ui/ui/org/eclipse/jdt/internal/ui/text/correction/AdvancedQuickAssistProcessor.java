@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
@@ -1267,10 +1268,49 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getCastAndAssignIfStatementProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+		if (node instanceof Block) {
+			List statements= ((Block)node).statements();
+			if (statements.size() > 0) {
+				if (context.getSelectionOffset() > ((Statement)statements.get(0)).getStartPosition()) {
+					return false;
+				}
+			}
+			ASTNode parent= node.getParent();
+			Expression expression= null;
+			if (parent instanceof IfStatement) {
+				expression= ((IfStatement)parent).getExpression();
+			} else if (parent instanceof WhileStatement) {
+				expression= ((WhileStatement)parent).getExpression();
+			} else {
+				return false;
+			}
+
+			if (expression instanceof InstanceofExpression) {
+				node= expression;
+			} else {
+				final ArrayList nodes= new ArrayList();
+				expression.accept(new ASTVisitor() {
+					public boolean visit(InstanceofExpression instanceofExpression) {
+						nodes.add(instanceofExpression);
+						return false;
+					}
+				});
+
+				if (nodes.size() != 1) {
+					return false;
+				}
+				node= (ASTNode)nodes.get(0);
+			}
+		} else {
+			while (node != null && !(node instanceof InstanceofExpression) && !(node instanceof Statement)) {
+				node= node.getParent();
+			}
+		}
+
 		if (!(node instanceof InstanceofExpression)) {
 			return false;
 		}
-		InstanceofExpression expression= (InstanceofExpression) node;
+		InstanceofExpression expression= (InstanceofExpression)node;
 		// test that we are the expression of a 'while' or 'if'
 		while (node.getParent() instanceof Expression) {
 			node= node.getParent();
@@ -1284,19 +1324,19 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (negated) {
 			insertionPosition= node.getParent();
 			if (locationInParent == IfStatement.EXPRESSION_PROPERTY) {
-				body= ((IfStatement) node.getParent()).getElseStatement();
+				body= ((IfStatement)node.getParent()).getElseStatement();
 				if (body != null) {
 					negated= false;
 				}
 			}
 			if (body == null && insertionPosition.getParent() instanceof Block) {
-				body= (Statement) insertionPosition.getParent();
+				body= (Statement)insertionPosition.getParent();
 			}
 		} else {
 			if (locationInParent == IfStatement.EXPRESSION_PROPERTY) {
-				body= ((IfStatement) node.getParent()).getThenStatement();
+				body= ((IfStatement)node.getParent()).getThenStatement();
 			} else if (locationInParent == WhileStatement.EXPRESSION_PROPERTY) {
-				body= ((WhileStatement) node.getParent()).getBody();
+				body= ((WhileStatement)node.getParent()).getBody();
 			}
 		}
 		if (body == null) {
@@ -1330,15 +1370,15 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			proposal.addLinkedPositionProposal(KEY_NAME, varNames[i], null);
 		}
 		CastExpression castExpression= ast.newCastExpression();
-		castExpression.setExpression((Expression) rewrite.createCopyTarget(expression.getLeftOperand()));
-		castExpression.setType((Type) ASTNode.copySubtree(ast, originalType));
+		castExpression.setExpression((Expression)rewrite.createCopyTarget(expression.getLeftOperand()));
+		castExpression.setType((Type)ASTNode.copySubtree(ast, originalType));
 		// prepare new variable declaration
 		VariableDeclarationFragment vdf= ast.newVariableDeclarationFragment();
 		vdf.setName(ast.newSimpleName(varNames[0]));
 		vdf.setInitializer(castExpression);
 		// prepare new variable declaration statement
 		VariableDeclarationStatement vds= ast.newVariableDeclarationStatement(vdf);
-		vds.setType((Type) ASTNode.copySubtree(ast, originalType));
+		vds.setType((Type)ASTNode.copySubtree(ast, originalType));
 
 		// add new variable declaration statement
 		if (negated) {
