@@ -577,14 +577,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				} else {
 					if (expression instanceof FieldAccess) {
 						final FieldAccess access= (FieldAccess) expression;
-						if (Bindings.equals(access.resolveFieldBinding(), fTarget)) {
+						if (Bindings.equals(fTarget, access.resolveFieldBinding())) {
 							rewrite.remove(expression, null);
 							visit(node.arguments());
 							return false;
 						}
 					} else if (expression instanceof Name) {
 						final Name name= (Name) expression;
-						if (Bindings.equals(name.resolveBinding(), fTarget)) {
+						if (Bindings.equals(fTarget, name.resolveBinding())) {
 							rewrite.remove(expression, null);
 							visit(node.arguments());
 							return false;
@@ -607,7 +607,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				}
 			}
 			binding= node.getQualifier().resolveBinding();
-			if (Bindings.equals(binding, fTarget)) {
+			if (Bindings.equals(fTarget, binding)) {
 				fRewrite.replace(node, getFieldReference(node.getName(), fRewrite), null);
 				return false;
 			}
@@ -630,7 +630,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					}
 				}
 			}
-			if (Bindings.equals(binding, fTarget))
+			if (Bindings.equals(fTarget, binding))
 				if (fAnonymousClass > 0) {
 					final ThisExpression target= ast.newThisExpression();
 					target.setQualifier(ast.newSimpleName(fTargetType.getElementName()));
