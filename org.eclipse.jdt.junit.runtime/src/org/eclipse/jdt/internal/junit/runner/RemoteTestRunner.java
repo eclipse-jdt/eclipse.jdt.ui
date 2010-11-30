@@ -24,8 +24,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.util.Vector;
 
-import org.junit.runner.notification.StoppedByUserException;
-
 import org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader;
 
 /**
@@ -466,11 +464,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		sendTrees(suites);
 
 		long testStartTime= System.currentTimeMillis();
-		try {
-			execution.run(suites);
-		} catch (StoppedByUserException e) {
-			// not interesting, see https://bugs.eclipse.org/329498
-		}
+		execution.run(suites);
 		notifyListenersOfTestEnd(execution, testStartTime);
 	}
 
