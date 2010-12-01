@@ -47,8 +47,6 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 
 	private static final boolean DETERMINE_ELEMENT_TYPE_FROM_CAST= false;
 	private static final boolean BUG_86967_core_restore_binding= true;
-	private static final boolean BUG_86990_core_no_main_type= true;
-	private static final boolean BUG_87050_core_resolve_method_type_param= false;
 
 	private static final Class clazz= InferTypeArgumentsTests.class;
 	private static final String REFACTORING_PATH= "InferTypeArguments/";
@@ -219,10 +217,6 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	}
 
 	public void testCuInferTypeVariable01() throws Exception {
-		if (BUG_86990_core_no_main_type || BUG_87050_core_resolve_method_type_param) {
-			printTestDisabledMessage("BUG_86990_core_no_main_type || BUG_87050_core_resolve_method_type_param");
-			return;
-		}
 		performCuOK();
 	}
 
