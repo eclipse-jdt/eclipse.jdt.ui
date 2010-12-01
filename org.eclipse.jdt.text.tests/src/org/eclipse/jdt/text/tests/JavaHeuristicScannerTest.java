@@ -895,6 +895,27 @@ public class JavaHeuristicScannerTest extends TestCase {
 		Assert.assertEquals("\t\t", indent);
 	}
 
+	public void testContinuationIndentationOfBrackets() throws Exception {
+		fDocument.set("\tprivate void helper2(boolean[] booleans) {\n\t}");
+
+		String indent= fScanner.computeIndentation(31).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(30).toString();
+		Assert.assertEquals("\t                             ", indent);
+
+		fDocument.set("\tif (booleans[0]) {\n\t\tString[] aString= new String[]{\"a\", \"b\"};\n\t\tbooleans[5]= true;\n\t}");
+		indent= fScanner.computeIndentation(16).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(14).toString();
+		Assert.assertEquals("\t             ", indent);
+		indent= fScanner.computeIndentation(30).toString();
+		Assert.assertEquals("\t\t\t", indent);
+		indent= fScanner.computeIndentation(52).toString();
+		Assert.assertEquals("\t\t\t", indent);
+		indent= fScanner.computeIndentation(77).toString();
+		Assert.assertEquals("\t\t\t", indent);
+	}
+
 	public void testContinuationIndentation1() throws Exception {
 		fDocument.set("\treturn (thisIsAVeryLongName == 1 && anotherVeryLongName == 1)\n" +
 				"\t\t|| thisIsAVeryLongName == 2;");

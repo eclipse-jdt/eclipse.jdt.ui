@@ -771,7 +771,7 @@ public final class JavaIndenter {
 					case Symbols.TokenLBRACE: // for opening-brace-on-new-line style
 						if (bracelessBlockStart && !fPrefs.prefIndentBracesForBlocks)
 							unindent= true;
-						else if ((prevToken == Symbols.TokenCOLON || prevToken == Symbols.TokenEQUAL || prevToken == Symbols.TokenRBRACKET) && !fPrefs.prefIndentBracesForArrays)
+						else if ((prevToken == Symbols.TokenCOLON || prevToken == Symbols.TokenEQUAL) && !fPrefs.prefIndentBracesForArrays)
 							unindent= true;
 						else if (!bracelessBlockStart && fPrefs.prefIndentBracesForMethods)
 							indent= true;
@@ -961,6 +961,11 @@ public final class JavaIndenter {
 
 			case Symbols.TokenTRY:
 				return skipToStatementStart(danglingElse, false);
+
+			case Symbols.TokenRBRACKET:
+				fIndent= fPrefs.prefContinuationIndent;
+				return fPosition;
+
 			case Symbols.TokenRPAREN:
 				if (throwsClause) {
 					fIndent= fPrefs.prefContinuationIndent;
