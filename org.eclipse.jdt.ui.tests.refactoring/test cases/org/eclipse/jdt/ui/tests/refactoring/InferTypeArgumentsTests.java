@@ -46,7 +46,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.ZipTools;
 public class InferTypeArgumentsTests extends RefactoringTest {
 
 	private static final boolean DETERMINE_ELEMENT_TYPE_FROM_CAST= false;
-	private static final boolean BUG_86967_core_restore_binding= true;
+	private static final boolean BUG_map_entrySet_iterator= true;
 
 	private static final Class clazz= InferTypeArgumentsTests.class;
 	private static final String REFACTORING_PATH= "InferTypeArguments/";
@@ -429,8 +429,8 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	}
 
 	public void testCuMapEntry01() throws Exception {
-		if (BUG_86967_core_restore_binding) {
-			printTestDisabledMessage("BUG_86967_core_restore_binding");
+		if (BUG_map_entrySet_iterator) {
+			printTestDisabledMessage("BUG_map_entrySet_iterator");
 			return;
 		}
 		performCuOK();
