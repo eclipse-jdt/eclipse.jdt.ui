@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Konstantin Komissarchik <konstantin.komissarchik@oracle.com> - [build path] editing user library properties drops classpath entry attributes - http://bugs.eclipse.org/311603
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
@@ -68,7 +69,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	private Set fUsedPaths;
 	private boolean fIsEditMode;
 	private IJavaProject fProject;
-	private boolean fIsExported;
+	private IClasspathEntry fOldClasspathEntry;
 
 	public UserLibraryWizardPage() {
 		super("UserLibraryWizardPage"); //$NON-NLS-1$
@@ -259,7 +260,11 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	 */
 	public IClasspathEntry getSelection() {
 		if (fEditResult != null) {
-			return JavaCore.newContainerEntry(fEditResult.getPath(), fIsExported);
+			if (fOldClasspathEntry != null && fOldClasspathEntry.getPath().equals(fEditResult.getPath())) {
+				return JavaCore.newContainerEntry(fEditResult.getPath(), fOldClasspathEntry.getAccessRules(), fOldClasspathEntry.getExtraAttributes(), fOldClasspathEntry.isExported());
+			} else {
+				return JavaCore.newContainerEntry(fEditResult.getPath(), false);
+			}
 		}
 		return null;
 	}
@@ -272,7 +277,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		IClasspathEntry[] res= new IClasspathEntry[selected.size()];
 		for (int i= 0; i < res.length; i++) {
 			CPUserLibraryElement curr= (CPUserLibraryElement) selected.get(i);
-			res[i]= JavaCore.newContainerEntry(curr.getPath(), fIsExported);
+			res[i]= JavaCore.newContainerEntry(curr.getPath(), false);
 		}
 		return res;
 	}
@@ -281,7 +286,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPage#setSelection(org.eclipse.jdt.core.IClasspathEntry)
 	 */
 	public void setSelection(IClasspathEntry containerEntry) {
-		fIsExported= containerEntry != null && containerEntry.isExported();
+		fOldClasspathEntry= containerEntry;
 
 		updateDescription(containerEntry);
 		fIsEditMode= (containerEntry != null);
