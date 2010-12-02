@@ -6009,9 +6009,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        {\n");
-		buf.append("            System.out.println(\"b\");\n");
-		buf.append("        }\n");
+		buf.append("        System.out.println(\"b\");\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -6029,6 +6027,345 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        } else {\n");
 		buf.append("            System.out.println(\"b\");\n");
 		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+	
+	public void testRemoveDeadCodeIfThen2() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = new Object();\n");
+		buf.append("        if (o != null) {\n");
+		buf.append("            if (o == null) {\n");
+		buf.append("            	System.out.println(\"hello\");\n");
+		buf.append("        	} else {\n");
+		buf.append("            	System.out.println(\"bye\");\n");
+		buf.append("        	}\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = new Object();\n");
+		buf.append("        if (o != null) {\n");
+		buf.append("            System.out.println(\"bye\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = new Object();\n");
+		buf.append("        if (o != null) {\n");
+		buf.append("            if (o == null) {\n");
+		buf.append("            	System.out.println(\"hello\");\n");
+		buf.append("        	} else {\n");
+		buf.append("            	System.out.println(\"bye\");\n");
+		buf.append("        	}\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	public void testRemoveDeadCodeIfThen3() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = new Object();\n");
+		buf.append("        if (o != null) \n");
+		buf.append("            if (o == null) {\n");
+		buf.append("            	System.out.println(\"hello\");\n");
+		buf.append("        	} else {\n");
+		buf.append("            	System.out.println(\"bye\");\n");
+		buf.append("            	System.out.println(\"bye-bye\");\n");
+		buf.append("        	}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = new Object();\n");
+		buf.append("        if (o != null) {\n");
+		buf.append("        	System.out.println(\"bye\");\n");
+		buf.append("        	System.out.println(\"bye-bye\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = new Object();\n");
+		buf.append("        if (o != null) \n");
+		buf.append("            if (o == null) {\n");
+		buf.append("            	System.out.println(\"hello\");\n");
+		buf.append("        	} else {\n");
+		buf.append("            	System.out.println(\"bye\");\n");
+		buf.append("            	System.out.println(\"bye-bye\");\n");
+		buf.append("        	}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	public void testRemoveDeadCodeIfThen4() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = new Object();\n");
+		buf.append("        if (o != null) \n");
+		buf.append("            if (true) \n");
+		buf.append("            	if (o == null) \n");
+		buf.append("            		System.out.println(\"hello\");\n");
+		buf.append("		System.out.println(\"bye\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = new Object();\n");
+		buf.append("        if (o != null) \n");
+		buf.append("            if (true) {\n");
+		buf.append("            }\n");
+		buf.append("		System.out.println(\"bye\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = new Object();\n");
+		buf.append("        if (o != null) \n");
+		buf.append("            if (true) \n");
+		buf.append("            	if (o == null) \n");
+		buf.append("            		System.out.println(\"hello\");\n");
+		buf.append("		System.out.println(\"bye\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	public void testRemoveDeadCodeIfThen5() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = new Object();\n");
+		buf.append("        if (o != null) \n");
+		buf.append("            if (false) \n");
+		buf.append("            	if (o == null) \n");
+		buf.append("            		System.out.println(\"hello\");\n");
+		buf.append("		System.out.println(\"bye\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = new Object();\n");
+		buf.append("        if (o != null) {\n");
+		buf.append("        }\n");
+		buf.append("		System.out.println(\"bye\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = new Object();\n");
+		buf.append("        if (o != null) \n");
+		buf.append("            if (false) \n");
+		buf.append("            	if (o == null) \n");
+		buf.append("            		System.out.println(\"hello\");\n");
+		buf.append("		System.out.println(\"bye\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	public void testRemoveDeadCodeIfThenSwitch() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        switch (1) {\n");
+		buf.append("            case 1:\n");
+		buf.append("                if (false) {\n");
+		buf.append("                	foo();\n");
+		buf.append("					System.out.println(\"hi\");\n");
+		buf.append("				} else {\n");
+		buf.append("                	System.out.println(\"bye\");\n");
+		buf.append("				}\n");
+		buf.append("                break;\n");
+		buf.append("            case 2:\n");
+		buf.append("                foo();\n");
+		buf.append("                break;\n");
+		buf.append("            default:\n");
+		buf.append("                break;\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        switch (1) {\n");
+		buf.append("            case 1:\n");
+		buf.append("                System.out.println(\"bye\");\n");
+		buf.append("                break;\n");
+		buf.append("            case 2:\n");
+		buf.append("                foo();\n");
+		buf.append("                break;\n");
+		buf.append("            default:\n");
+		buf.append("                break;\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        switch (1) {\n");
+		buf.append("            case 1:\n");
+		buf.append("                if (false) {\n");
+		buf.append("                	foo();\n");
+		buf.append("					System.out.println(\"hi\");\n");
+		buf.append("				} else {\n");
+		buf.append("                	System.out.println(\"bye\");\n");
+		buf.append("				}\n");
+		buf.append("                break;\n");
+		buf.append("            case 2:\n");
+		buf.append("                foo();\n");
+		buf.append("                break;\n");
+		buf.append("            default:\n");
+		buf.append("                break;\n");
+		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
@@ -6067,9 +6404,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        {\n");
-		buf.append("            System.out.println(\"a\");\n");
-		buf.append("        }\n");
+		buf.append("        System.out.println(\"a\");\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();

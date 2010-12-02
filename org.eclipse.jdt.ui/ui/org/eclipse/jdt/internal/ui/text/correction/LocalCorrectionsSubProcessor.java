@@ -982,9 +982,24 @@ public class LocalCorrectionsSubProcessor {
 		if (replacement == null
 				|| replacement instanceof EmptyStatement
 				|| replacement instanceof Block && ((Block)replacement).statements().size() == 0) {
-			rewrite.remove(toRemove, null);
+			if (ASTNodes.isControlStatementBody(toRemove.getLocationInParent())) {
+				rewrite.replace(toRemove, toRemove.getAST().newBlock(), null);
+			} else {
+				rewrite.remove(toRemove, null);
+			}
 		} else {
-			rewrite.replace(toRemove, rewrite.createMoveTarget(replacement), null);
+			ASTNode parent= toRemove.getParent();
+			ASTNode moveTarget;
+			if ((parent instanceof Block || parent instanceof SwitchStatement) && replacement instanceof Block) {
+				ListRewrite listRewrite= rewrite.getListRewrite(replacement, Block.STATEMENTS_PROPERTY);
+				List list= ((Block)replacement).statements();
+				int lastIndex= list.size() - 1;
+				moveTarget= listRewrite.createMoveTarget((Statement)list.get(0), (Statement)list.get(lastIndex));
+			} else {
+				moveTarget= rewrite.createMoveTarget(replacement);
+			}
+
+			rewrite.replace(toRemove, moveTarget, null);
 		}
 		String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeunreachablecode_including_condition_description;
 		addRemoveProposal(context, rewrite, label, proposals);
