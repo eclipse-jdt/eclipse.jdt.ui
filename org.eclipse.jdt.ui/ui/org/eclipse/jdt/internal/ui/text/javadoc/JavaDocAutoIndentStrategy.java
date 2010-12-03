@@ -302,7 +302,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	private boolean isFirstComment(IDocument document, DocumentCommand command, IMember member, boolean ignoreNonJavadoc) throws BadLocationException, JavaModelException {
 		IRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset, false);
 		ISourceRange sourceRange= member.getSourceRange();
-		if (sourceRange == null || sourceRange.getOffset() != partition.getOffset())
+		if (sourceRange == null)
 			return false;
 		int srcOffset= sourceRange.getOffset();
 		int srcLength= sourceRange.getLength();
