@@ -32,6 +32,7 @@ public interface Symbols {
 	int TokenEQUAL= 12;
 	int TokenLESSTHAN= 13;
 	int TokenGREATERTHAN= 14;
+	int TokenPLUS= 15;
 	int TokenIF= 109;
 	int TokenDO= 1010;
 	int TokenFOR= 1011;
