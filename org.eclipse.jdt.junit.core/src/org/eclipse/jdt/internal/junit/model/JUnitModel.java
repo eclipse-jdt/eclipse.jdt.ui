@@ -394,8 +394,9 @@ public final class JUnitModel {
 	 * @throws InterruptedException if the import was cancelled
 	 * @since 3.6
 	 */
-	public static TestRunSession importTestRunSession(final String url, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+	public static TestRunSession importTestRunSession(String url, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		monitor.beginTask(ModelMessages.JUnitModel_importing_from_url, IProgressMonitor.UNKNOWN);
+		final String trimmedUrl= url.trim().replaceAll("\r\n?|\n", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		final TestRunHandler handler= new TestRunHandler(monitor);
 		
 		final CoreException[] exception= { null };
@@ -407,7 +408,7 @@ public final class JUnitModel {
 					SAXParserFactory parserFactory= SAXParserFactory.newInstance();
 //					parserFactory.setValidating(true); // TODO: add DTD and debug flag
 					SAXParser parser= parserFactory.newSAXParser();
-					parser.parse(url, handler);
+					parser.parse(trimmedUrl, handler);
 					session[0]= handler.getTestRunSession();
 				} catch (OperationCanceledException e) {
 					// canceled
