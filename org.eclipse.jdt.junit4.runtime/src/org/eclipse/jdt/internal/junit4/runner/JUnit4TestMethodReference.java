@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,8 +22,13 @@ public class JUnit4TestMethodReference extends JUnit4TestReference {
 	private final Description fDescription;
 
 	public JUnit4TestMethodReference(Class<?> clazz, String methodName, String[] failureNames) {
-		super(Request.method(clazz, methodName), failureNames);
+		super(createRequest(clazz, methodName), failureNames);
 		fDescription = Description.createTestDescription(clazz, methodName);
+	}
+
+	private static Request createRequest(final Class<?> clazz, String methodName) {
+		Description method= Description.createTestDescription(clazz, methodName);
+		return Request.classWithoutSuiteMethod(clazz).filterWith(method);
 	}
 
 	public int countTestCases() {
