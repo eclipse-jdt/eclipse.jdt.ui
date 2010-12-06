@@ -33,6 +33,7 @@ import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
+import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
@@ -348,7 +349,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 			for (int i= 0; i < autoEditStrategies.length; i++) {
 				stratergies.add(autoEditStrategies[i]);
 			}
-			stratergies.add(new PropertiesFileAutoEditStrategy(((IFileEditorInput)fTextEditor.getEditorInput()).getFile()));
+			stratergies.add(new PropertiesFileAutoEditStrategy(((IFileEditorInput)fTextEditor.getEditorInput()).getFile(), sourceViewer));
 			return (IAutoEditStrategy[])stratergies.toArray(new IAutoEditStrategy[stratergies.size()]);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
@@ -363,5 +364,19 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 */
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
 		return new PropertiesFileHover(super.getTextHover(sourceViewer, contentType));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.editors.text.TextSourceViewerConfiguration#getQuickAssistAssistant(org.eclipse.jface.text.source.ISourceViewer)
+	 * @since 3.7
+	 */
+	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
+		if (getEditor() != null) {
+			PropertiesCorrectionAssistant assistant= new PropertiesCorrectionAssistant();
+			assistant.setRestoreCompletionProposalSize(JavaPlugin.getDefault().getDialogSettingsSection("quick_assist_proposal_size")); //$NON-NLS-1$
+			return assistant;
+		}
+		return null;
 	}
 }

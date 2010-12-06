@@ -13,28 +13,59 @@ package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.VerifyKeyListener;
+import org.eclipse.swt.events.VerifyEvent;
+
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.text.DocumentCommand;
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentListener;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
+import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.ISourceViewerExtension3;
+
+import org.eclipse.ui.progress.WorkbenchJob;
 
 /**
  * Auto edit strategy that escapes a character if it cannot be encoded in the .properties file's
  * encoding.
+ * 
+ * <p>
+ * A quick assist to escape backslashes is offered iff the pasted text is not perfectly correct for
+ * the .properties file, i.e. if the text contains
+ * <ul>
+ * <li>an invalid escape sequence as defined by
+ * {@link PropertiesFileEscapes#containsInvalidEscapeSequence(String)}</li>
+ * <li>a character which requires Unicode escapes</li>
+ * </ul>
+ * </p>
  * 
  * @since 3.7
  */
 public class PropertiesFileAutoEditStrategy implements IAutoEditStrategy {
 
 	private final IFile fFile;
+
 	private String fCharsetName;
+
 	private CharsetEncoder fCharsetEncoder;
 
-	public PropertiesFileAutoEditStrategy(IFile file) {
+	private final ISourceViewer fSourceViewer;
+
+	public PropertiesFileAutoEditStrategy(IFile file, ISourceViewer sourceViewer) {
 		fFile= file;
+		fSourceViewer= sourceViewer;
 	}
 
 	/*
@@ -42,6 +73,10 @@ public class PropertiesFileAutoEditStrategy implements IAutoEditStrategy {
 	 * @see org.eclipse.jface.text.IAutoEditStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.DocumentCommand)
 	 */
 	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
+		showProposal(escape(command), document);
+	}
+
+	private ICompletionProposal escape(DocumentCommand command) {
 		try {
 			String charsetName= fFile.getCharset();
 			if (!charsetName.equals(fCharsetName)) {
@@ -49,40 +84,60 @@ public class PropertiesFileAutoEditStrategy implements IAutoEditStrategy {
 				fCharsetEncoder= Charset.forName(fCharsetName).newEncoder();
 			}
 		} catch (CoreException e) {
-			return;
+			return null;
 		}
 
-		if (fCharsetEncoder.canEncode(command.text))
-			return;
+		String text= command.text;
+		boolean escapeUnicodeChars= !fCharsetEncoder.canEncode(text);
+		boolean escapeBackslash= (text.length() > 1) && ((escapeUnicodeChars && PropertiesFileEscapes.containsUnescapedBackslash(text)) || PropertiesFileEscapes.containsInvalidEscapeSequence(text));
 
-		command.text= escape(command.text);
-	}
+		if (!escapeUnicodeChars && !escapeBackslash)
+			return null;
 
-	private static String escape(String s) {
-		StringBuffer sb= new StringBuffer(s.length());
-		int length= s.length();
-		for (int i= 0; i < length; i++) {
-			char c= s.charAt(i);
-			sb.append(escape(c));
+		command.text= PropertiesFileEscapes.escape(text, false, false, escapeUnicodeChars);
+		if (escapeBackslash) {
+			String proposalText= PropertiesFileEscapes.escape(text, false, true, escapeUnicodeChars);
+			return new EscapeBackslashCompletionProposal(proposalText, command.offset, command.text.length(), true);
 		}
-		return sb.toString();
+		return null;
 	}
 
-	private static String escape(char c) {
-		switch (c) {
-			case '\t':
-				return "\t";//$NON-NLS-1$
-			case '\n':
-				return "\n";//$NON-NLS-1$
-			case '\f':
-				return "\f";//$NON-NLS-1$
-			case '\r':
-				return "\r";//$NON-NLS-1$
-			case '\\':
-				return "\\";//$NON-NLS-1$
+	private void showProposal(final ICompletionProposal proposal, final IDocument document) {
+		if (proposal != null && fSourceViewer instanceof ISourceViewerExtension3) {
+			final WorkbenchJob job= new WorkbenchJob(PropertiesFileEditorMessages.PropertiesFileAutoEditStrategy_showQuickAssist) {
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					IQuickAssistAssistant assistant= ((ISourceViewerExtension3)fSourceViewer).getQuickAssistAssistant();
+					IQuickAssistProcessor processor= assistant.getQuickAssistProcessor();
+					if (processor instanceof PropertiesCorrectionProcessor) {
+						((PropertiesCorrectionProcessor)processor).setProposals(new ICompletionProposal[] { proposal });
+						assistant.showPossibleQuickAssists();
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			job.setSystem(true);
+			job.schedule(500);
+			final StyledText textWidget= fSourceViewer.getTextWidget();
+			textWidget.addVerifyKeyListener(new VerifyKeyListener() {
+				public void verifyKey(VerifyEvent event) {
+					job.cancel();
+					textWidget.removeVerifyKeyListener(this);
+				}
+			});
 
-			default:
-				return PropertiesFileEscapes.escape(c);
+			final IDocumentListener documentListener= new IDocumentListener() {
+				private boolean pasteComplete= false;
+				public void documentAboutToBeChanged(DocumentEvent event) {
+				}
+				public void documentChanged(DocumentEvent event) {
+					if (pasteComplete) {
+						job.cancel();
+						document.removeDocumentListener(this);
+					}
+					pasteComplete= true;
+				}
+			};
+			document.addDocumentListener(documentListener);
 		}
 	}
 }

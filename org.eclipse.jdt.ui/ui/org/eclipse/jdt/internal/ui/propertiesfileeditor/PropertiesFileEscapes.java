@@ -76,20 +76,52 @@ public class PropertiesFileEscapes {
 	 * @return escaped string
 	 */
 	public static String escape(char c) {
+		return escape(c, true, true, true);
+	}
+
+	/**
+	 * Convert characters in a Java string to the escaped form that must be used in .properties
+	 * files.
+	 * 
+	 * @param s the Java string
+	 * @param escapeWhitespaceChars if <code>true</code>, escape whitespace characters
+	 * @param escapeBackslash if <code>true</code>, escape backslash characters
+	 * @param escapeUnicodeChars if <code>true</code>, escape unicode characters
+	 * @return escaped string
+	 */
+	public static String escape(String s, boolean escapeWhitespaceChars, boolean escapeBackslash, boolean escapeUnicodeChars) {
+		StringBuffer sb= new StringBuffer(s.length());
+		int length= s.length();
+		for (int i= 0; i < length; i++) {
+			char c= s.charAt(i);
+			sb.append(escape(c, escapeWhitespaceChars, escapeBackslash, escapeUnicodeChars));
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Convert a Java char to the escaped form that must be used in .properties files.
+	 * 
+	 * @param c the Java char
+	 * @param escapeWhitespaceChars if <code>true</code>, escape whitespace characters
+	 * @param escapeBackslash if <code>true</code>, escape backslash characters
+	 * @param escapeUnicodeChars if <code>true</code>, escape unicode characters
+	 * @return escaped string
+	 */
+	public static String escape(char c, boolean escapeWhitespaceChars, boolean escapeBackslash, boolean escapeUnicodeChars) {
 		switch (c) {
 			case '\t':
-				return "\\t";//$NON-NLS-1$
+				return escapeWhitespaceChars ? "\\t" : "\t"; //$NON-NLS-1$//$NON-NLS-2$
 			case '\n':
-				return "\\n";//$NON-NLS-1$
+				return escapeWhitespaceChars ? "\\n" : "\n"; //$NON-NLS-1$//$NON-NLS-2$
 			case '\f':
-				return "\\f";//$NON-NLS-1$
+				return escapeWhitespaceChars ? "\\f" : "\r"; //$NON-NLS-1$//$NON-NLS-2$
 			case '\r':
-				return "\\r";//$NON-NLS-1$
+				return escapeWhitespaceChars ? "\\r" : "\r"; //$NON-NLS-1$//$NON-NLS-2$
 			case '\\':
-				return "\\\\";//$NON-NLS-1$
-
+				return escapeBackslash ? "\\\\" : "\\"; //$NON-NLS-1$ //$NON-NLS-2$
 			default:
-				if (((c < 0x0020) || (c > 0x007e && c <= 0x00a0) || (c > 0x00ff))) {
+				if (escapeUnicodeChars && ((c < 0x0020) || (c > 0x007e && c <= 0x00a0) || (c > 0x00ff))) {
 					//NBSP (0x00a0) is escaped to differentiate from normal space character
 					return new StringBuffer()
 							.append('\\')
@@ -164,10 +196,141 @@ public class PropertiesFileEscapes {
 		}
 		if (isValidEscapedString) {
 			return outBuffer.toString();
-		}
-		else {
+		} else {
 			String exceptionMessage= Messages.format(PropertiesFileEditorMessages.PropertiesFileHover_MalformedEncoding, outBuffer.toString());
 			throw new CoreException(new StatusInfo(IStatus.WARNING, exceptionMessage));
 		}
+	}
+
+	/**
+	 * Unescape backslash characters in a string.
+	 * 
+	 * @param s the escaped string
+	 * @return string with backslash characters unescaped
+	 */
+	public static String unescapeBackslashes(String s) {
+		if (s == null)
+			return null;
+	
+		char c;
+		int length= s.length();
+		StringBuffer outBuffer= new StringBuffer(length);
+	
+		for (int i= 0; i < length;) {
+			c= s.charAt(i++);
+			if (c == '\\') {
+				c= s.charAt(i++);
+			}
+			outBuffer.append(c);
+		}
+	
+		return outBuffer.toString();
+	}
+
+	/**
+	 * Tests if the given text contains any invalid escape sequence.
+	 * 
+	 * @param text the text
+	 * @return <code>true</code> if text contains an invalid escape sequence, <code>false</code>
+	 *         otherwise
+	 */
+	public static boolean containsInvalidEscapeSequence(String text) {
+		try {
+			//check for invalid unicode escapes
+			unescape(text);
+		} catch (CoreException e) {
+			return true;
+		}
+	
+		int length= text.length();
+		for (int i= 0; i < length; i++) {
+			char c= text.charAt(i);
+			if (c == '\\') {
+				if (i < length - 1) {
+					char nextC= text.charAt(i + 1);
+					switch (nextC) {
+						case 't':
+						case 'n':
+						case 'f':
+						case 'r':
+						case 'u':
+						case '\n':
+						case '\r':
+						case '=':
+						case ':':
+							break;
+						case '\\':
+							i++;
+							break;
+						default:
+							return true;
+					}
+				} else {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Tests if the given text contains an unescaped backslash character.
+	 * 
+	 * @param text the text
+	 * @return <code>true</code> if text contains an unescaped backslash character,
+	 *         <code>false</code> otherwise
+	 */
+	public static boolean containsUnescapedBackslash(String text) {
+		int length= text.length();
+		for (int i= 0; i < length; i++) {
+			char c= text.charAt(i);
+			if (c == '\\') {
+				if (i < length - 1) {
+					char nextC= text.charAt(i + 1);
+					switch (nextC) {
+						case '\\':
+							i++;
+							break;
+						default:
+							return true;
+					}
+				} else {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Tests if the given text contains only escaped backslash characters and no unescaped backslash
+	 * character.
+	 * 
+	 * @param text the text
+	 * @return <code>true</code> if text contains only escaped backslash characters,
+	 *         <code>false</code> otherwise
+	 */
+	public static boolean containsEscapedBackslashes(String text) {
+		boolean result= false;
+		int length= text.length();
+		for (int i= 0; i < length; i++) {
+			char c= text.charAt(i);
+			if (c == '\\') {
+				if (i < length - 1) {
+					char nextC= text.charAt(i + 1);
+					switch (nextC) {
+						case '\\':
+							i++;
+							result= true;
+							break;
+						default:
+							return false;
+					}
+				} else {
+					return false;
+				}
+			}
+		}
+		return result;
 	}
 }
