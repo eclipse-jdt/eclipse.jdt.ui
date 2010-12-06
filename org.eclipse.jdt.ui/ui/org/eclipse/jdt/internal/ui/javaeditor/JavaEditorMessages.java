@@ -157,6 +157,8 @@ final class JavaEditorMessages extends NLS {
 	public static String JavaElementReturnTypeHyperlink_hyperlinkText_qualified;
 	public static String JavaElementReturnTypeHyperlink_hyperlinkText;
 	public static String JavaElementReturnTypeHyperlink_error_msg;
+	public static String JavaElementSuperImplementationHyperlink_hyperlinkText;
+	public static String JavaElementSuperImplementationHyperlink_hyperlinkText_qualified;	
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaEditorMessages.class);
