@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.PrimitiveType;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -57,6 +56,6 @@ public class JavaElementHyperlinkReturnTypeDetector extends JavaElementHyperlink
 	 */
 	private boolean isPrimitive(IMethod method) throws JavaModelException {
 		String returnType= method.getReturnType();
-		return (PrimitiveType.toCode(Signature.toString(returnType)) != null);
+		return Signature.getTypeSignatureKind(Signature.getElementType(returnType)) == Signature.BASE_TYPE_SIGNATURE;
 	}
 }
