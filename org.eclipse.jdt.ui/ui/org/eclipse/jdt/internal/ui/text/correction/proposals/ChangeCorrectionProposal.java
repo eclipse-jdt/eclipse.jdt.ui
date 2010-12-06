@@ -17,6 +17,7 @@ import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -63,6 +64,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class ChangeCorrectionProposal implements IJavaCompletionProposal, ICommandAccess, ICompletionProposalExtension5, ICompletionProposalExtension6 {
 
+	private static final NullChange COMPUTING_CHANGE= new NullChange("ChangeCorrectionProposal computing..."); //$NON-NLS-1$
+	
 	private Change fChange;
 	private String fName;
 	private int fRelevance;
@@ -301,9 +304,53 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 		if (Util.isGtk()) {
 			// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=293995 :
 			// [Widgets] Deadlock while UI thread displaying/computing a change proposal and non-UI thread creating image
-			if (fChange == null) {
-				fChange= createChange();
+			
+			// Solution is to create the change outside a 'synchronized' block.
+			// Synchronization is achieved by polling fChange, using "fChange == COMPUTING_CHANGE" as barrier.
+			// Timeout of 10s for safety reasons (should not be reached).
+			long end= System.currentTimeMillis() + 10000;
+			do {
+				boolean computing;
+				synchronized (this) {
+					computing= fChange == COMPUTING_CHANGE;
+				}
+				if (computing) {
+					try {
+						Display display= Display.getCurrent();
+						if (display != null) {
+							while (! display.isDisposed() && display.readAndDispatch()) {
+							}
+							display.sleep();
+						} else {
+							Thread.sleep(100);
+						}
+					} catch (InterruptedException e) {
+						//continue
+					}
+				} else {
+					synchronized (this) {
+						if (fChange == COMPUTING_CHANGE) {
+							continue;
+						} else if (fChange != null) {
+							return fChange;
+						} else {
+							fChange= COMPUTING_CHANGE;
+						}
+					}
+					Change change= createChange();
+					synchronized (this) {
+						fChange= change;
+					}
+					return change;
+				}
+			} while (System.currentTimeMillis() < end);
+			
+			synchronized (this) {
+				if (fChange == COMPUTING_CHANGE) {
+					return null; //failed
+				}
 			}
+			
 		} else {
 			synchronized (this) {
 				if (fChange == null) {
