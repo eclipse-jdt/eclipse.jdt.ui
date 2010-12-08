@@ -1268,7 +1268,11 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getCastAndAssignIfStatementProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
-		if (node instanceof Block) {
+		if (node instanceof IfStatement) {
+			node= ((IfStatement)node).getExpression();
+		} else if (node instanceof WhileStatement) {
+			node= ((WhileStatement)node).getExpression();
+		} else if (node instanceof Block) {
 			List statements= ((Block)node).statements();
 			if (statements.size() > 0) {
 				if (context.getSelectionOffset() > ((Statement)statements.get(0)).getStartPosition()) {
