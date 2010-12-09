@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,8 @@ import java.util.Collection;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 
@@ -27,7 +29,18 @@ public class TypeNameMatchCollector extends TypeNameMatchRequestor {
 	}
 
 	private boolean inScope(TypeNameMatch match) {
-		return !TypeFilter.isFiltered(match);
+		if (TypeFilter.isFiltered(match))
+			return false;
+		
+		int accessibility= match.getAccessibility();
+		switch (accessibility) {
+			case IAccessRule.K_NON_ACCESSIBLE:
+				return JavaCore.DISABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_FORBIDDEN_REFERENCE_CHECK));
+			case IAccessRule.K_DISCOURAGED:
+				return JavaCore.DISABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_DISCOURAGED_REFERENCE_CHECK));
+			default:
+				return true;
+		}
 	}
 
 	/* (non-Javadoc)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,13 +12,20 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -31,8 +38,10 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
@@ -48,6 +57,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
 /*
  * The page for setting the type filters
@@ -110,6 +120,8 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 	private static final int IDX_DESELECT= 6;
 
 	private CheckedListDialogField fFilterListField;
+	private SelectionButtonDialogField fHideForbiddenField;
+	private SelectionButtonDialogField fHideDiscouragedField;
 
 	public TypeFilterPreferencePage() {
 		super();
@@ -136,6 +148,12 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		fFilterListField.setRemoveButtonIndex(IDX_REMOVE);
 
 		fFilterListField.enableButton(IDX_EDIT, false);
+		
+		fHideForbiddenField= new SelectionButtonDialogField(SWT.CHECK);
+		fHideForbiddenField.setLabelText(PreferencesMessages.TypeFilterPreferencePage_hideForbidden_label);
+		
+		fHideDiscouragedField= new SelectionButtonDialogField(SWT.CHECK);
+		fHideDiscouragedField.setLabelText(PreferencesMessages.TypeFilterPreferencePage_hideDiscouraged_label);
 
 		initialize(false);
 	}
@@ -167,9 +185,34 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		LayoutUtil.setHorizontalGrabbing(fFilterListField.getListControl(null));
 
 		fFilterListField.getTableViewer().setComparator(new ViewerComparator());
+		
+		Label spacer= new Label(composite, SWT.LEFT );
+		GridData gd= new GridData(SWT.DEFAULT, convertHeightInCharsToPixels(1) / 2);
+		gd.horizontalSpan= 2;
+		spacer.setLayoutData(gd);
+		
+		String label= PreferencesMessages.TypeFilterPreferencePage_restricted_link;
+		Map targetInfo= new java.util.HashMap(2);
+		targetInfo.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_KEY,	JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE);
+		targetInfo.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
+		createPreferencePageLink(composite, label, targetInfo);
+		
+		fHideForbiddenField.doFillIntoGrid(composite, 2);
+		fHideDiscouragedField.doFillIntoGrid(composite, 2);
 
 		Dialog.applyDialogFont(composite);
 		return composite;
+	}
+
+	private void createPreferencePageLink(Composite composite, String label, final Map targetInfo) {
+		final Link link= new Link(composite, SWT.NONE);
+		link.setText(label);
+		link.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, true, false, 2, 1));
+		link.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, targetInfo);
+			}
+		});
 	}
 
 	private void initialize(boolean fromDefault) {
@@ -191,8 +234,17 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 
 		fFilterListField.setElements(res);
 		fFilterListField.setCheckedElements(Arrays.asList(enabledEntries));
+		
+		boolean hideForbidden= getJDTCoreOption(JavaCore.CODEASSIST_FORBIDDEN_REFERENCE_CHECK, fromDefault);
+		fHideForbiddenField.setSelection(hideForbidden);
+		boolean hideDiscouraged= getJDTCoreOption(JavaCore.CODEASSIST_DISCOURAGED_REFERENCE_CHECK, fromDefault);
+		fHideDiscouragedField.setSelection(hideDiscouraged);
 	}
 
+	private boolean getJDTCoreOption(String option, boolean fromDefault) {
+		Object value= fromDefault ? JavaCore.getDefaultOptions().get(option) : JavaCore.getOption(option);
+		return JavaCore.ENABLED.equals(value);
+	}
 
 	private void doButtonPressed(int index) {
 		if (index == IDX_ADD) { // add new
@@ -276,6 +328,14 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
   		prefs.setValue(PREF_FILTER_ENABLED, packOrderList(checked));
   		prefs.setValue(PREF_FILTER_DISABLED, packOrderList(unchecked));
   		JavaPlugin.getDefault().savePluginPreferences();
+
+		Hashtable coreOptions= JavaCore.getOptions();
+		String hideForbidden= fHideForbiddenField.isSelected() ? JavaCore.ENABLED : JavaCore.DISABLED;
+		coreOptions.put(JavaCore.CODEASSIST_FORBIDDEN_REFERENCE_CHECK, hideForbidden);
+		String hideDiscouraged= fHideDiscouragedField.isSelected() ? JavaCore.ENABLED : JavaCore.DISABLED;
+		coreOptions.put(JavaCore.CODEASSIST_DISCOURAGED_REFERENCE_CHECK, hideDiscouraged);
+		JavaCore.setOptions(coreOptions);
+
         return true;
     }
 

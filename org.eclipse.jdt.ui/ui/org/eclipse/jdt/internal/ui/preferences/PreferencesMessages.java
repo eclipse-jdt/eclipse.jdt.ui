@@ -722,9 +722,9 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_unhandled_surpresswarning_tokens;
 	public static String ProblemSeveritiesConfigurationBlock_pb_enable_surpresswarning_annotation;
 	public static String SmartTypingConfigurationBlock_annotationReporting_link;
-	public static String CodeAssistConfigurationBlock_restricted_link;
-	public static String CodeAssistConfigurationBlock_hideDiscouraged_label;
-	public static String CodeAssistConfigurationBlock_hideForbidden_label;
+	public static String TypeFilterPreferencePage_restricted_link;
+	public static String TypeFilterPreferencePage_hideDiscouraged_label;
+	public static String TypeFilterPreferencePage_hideForbidden_label;
 	public static String UserLibraryPreferencePage_UserLibraryPreferencePage_libraries_up_button;
 	public static String UserLibraryPreferencePage_UserLibraryPreferencePage_libraries_down_button;
 	public static String EditTemplateDialog_autoinsert;
