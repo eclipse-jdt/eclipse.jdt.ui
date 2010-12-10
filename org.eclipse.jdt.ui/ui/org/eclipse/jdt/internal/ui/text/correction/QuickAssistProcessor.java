@@ -87,6 +87,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -1924,13 +1925,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getMissingCaseStatementProposals(IInvocationContext context, ASTNode node, Collection proposals) {
+		if (node instanceof SwitchCase) {
+			node= node.getParent();
+		}
 		if (!(node instanceof SwitchStatement))
 			return false;
 
-		SwitchStatement switchStatement= (SwitchStatement) node;
-		if (context.getSelectionOffset() + context.getSelectionLength() >= switchStatement.getExpression().getStartPosition())
-			return false;
-
+		SwitchStatement switchStatement= (SwitchStatement)node;
 		ITypeBinding expressionBinding= switchStatement.getExpression().resolveTypeBinding();
 		if (expressionBinding == null || !expressionBinding.isEnum())
 			return false;
