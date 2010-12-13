@@ -308,7 +308,7 @@ public class Bindings {
 	 * Finds the field specified by <code>fieldName</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such field
 	 * exists. If the field is defined in more than one super type only the first match is
-	 * returned. First the super class is examined and than the implemented interfaces.
+	 * returned. First the super class is examined and then the implemented interfaces.
 	 * @param type The type to search the field in
 	 * @param fieldName The name of the field to find
 	 * @return the variable binding representing the field
@@ -361,7 +361,8 @@ public class Bindings {
 	 * Finds the method specified by <code>methodName</code> and </code>parameters</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
 	 * exists. If the method is defined in more than one super type only the first match is
-	 * returned. First the super class is examined and than the implemented interfaces.
+	 * returned. First the super class is examined and then the implemented interfaces.
+	 * 
 	 * @param type The type to search the method in
 	 * @param methodName The name of the method to find
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
@@ -414,7 +415,7 @@ public class Bindings {
 	 * Finds the method specified by <code>methodName</code> and </code>parameters</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
 	 * exists. If the method is defined in more than one super type only the first match is
-	 * returned. First the super class is examined and than the implemented interfaces.
+	 * returned. First the super class is examined and then the implemented interfaces.
 	 * @param type the type to search the method in
 	 * @param methodName The name of the method to find
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
@@ -458,7 +459,7 @@ public class Bindings {
 	/**
 	 * Finds a method in the hierarchy of <code>type</code> that is overridden by </code>binding</code>.
 	 * Returns <code>null</code> if no such method exists. If the method is defined in more than one super type only the first match is
-	 * returned. First the super class is examined and than the implemented interfaces.
+	 * returned. First the super class is examined and then the implemented interfaces.
 	 * @param type The type to search the method in
 	 * @param binding The method that overrides
 	 * @return the method binding overridden the method
