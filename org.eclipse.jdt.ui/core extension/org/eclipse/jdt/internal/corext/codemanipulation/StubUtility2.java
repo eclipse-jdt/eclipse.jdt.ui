@@ -53,8 +53,8 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation.DelegateEntry;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.CodeGeneration;
 
 /**
- * Utilities for code generation based on ast rewrite.
+ * Utilities for code generation based on AST rewrite.
  *
  * @since 3.1
  */
@@ -376,24 +376,31 @@ public final class StubUtility2 {
 
 		decl.setName(ast.newSimpleName(binding.getName()));
 		decl.setConstructor(false);
-
-		ITypeBinding[] typeParams= binding.getTypeParameters();
-		List typeParameters= decl.typeParameters();
-		for (int i= 0; i < typeParams.length; i++) {
-			ITypeBinding curr= typeParams[i];
-			TypeParameter newTypeParam= ast.newTypeParameter();
-			newTypeParam.setName(ast.newSimpleName(curr.getName()));
-			ITypeBinding[] typeBounds= curr.getTypeBounds();
-			if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
-				List newTypeBounds= newTypeParam.typeBounds();
-				for (int k= 0; k < typeBounds.length; k++) {
-					newTypeBounds.add(imports.addImport(typeBounds[k], ast, context));
+		
+		ITypeBinding bindingReturnType= binding.getReturnType();
+		
+		if (JavaModelUtil.is50OrHigher(unit.getJavaProject())) {
+			ITypeBinding[] typeParams= binding.getTypeParameters();
+			List typeParameters= decl.typeParameters();
+			for (int i= 0; i < typeParams.length; i++) {
+				ITypeBinding curr= typeParams[i];
+				TypeParameter newTypeParam= ast.newTypeParameter();
+				newTypeParam.setName(ast.newSimpleName(curr.getName()));
+				ITypeBinding[] typeBounds= curr.getTypeBounds();
+				if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
+					List newTypeBounds= newTypeParam.typeBounds();
+					for (int k= 0; k < typeBounds.length; k++) {
+						newTypeBounds.add(imports.addImport(typeBounds[k], ast, context));
+					}
 				}
+				typeParameters.add(newTypeParam);
 			}
-			typeParameters.add(newTypeParam);
+			
+		} else {
+			bindingReturnType= bindingReturnType.getErasure();
 		}
-
-		decl.setReturnType2(imports.addImport(binding.getReturnType(), ast, context));
+		
+		decl.setReturnType2(imports.addImport(bindingReturnType, ast, context));
 
 		List parameters= createParameters(unit.getJavaProject(), imports, context, ast, binding, decl);
 
@@ -461,19 +468,27 @@ public final class StubUtility2 {
 	}
 
 	private static List createParameters(IJavaProject project, ImportRewrite imports, ImportRewriteContext context, AST ast, IMethodBinding binding, MethodDeclaration decl) {
+		boolean is50OrHigher= JavaModelUtil.is50OrHigher(project);
 		List parameters= decl.parameters();
 		ITypeBinding[] params= binding.getParameterTypes();
 		String[] paramNames= StubUtility.suggestArgumentNames(project, binding);
 		for (int i= 0; i < params.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			if (binding.isVarargs() && params[i].isArray() && i == params.length - 1) {
-				StringBuffer buffer= new StringBuffer(imports.addImport(params[i].getElementType(), context));
+				ITypeBinding type= params[i].getElementType();
+				if (!is50OrHigher)
+					type= type.getErasure();
+				StringBuffer buffer= new StringBuffer(imports.addImport(type, context));
 				for (int dim= 1; dim < params[i].getDimensions(); dim++)
 					buffer.append("[]"); //$NON-NLS-1$
 				var.setType(ASTNodeFactory.newType(ast, buffer.toString()));
 				var.setVarargs(true);
-			} else
-				var.setType(imports.addImport(params[i], ast, context));
+			} else {
+				ITypeBinding type= params[i];
+				if (!is50OrHigher)
+					type= type.getErasure();
+				var.setType(imports.addImport(type, ast, context));
+			}
 			var.setName(ast.newSimpleName(paramNames[i]));
 			parameters.add(var);
 		}

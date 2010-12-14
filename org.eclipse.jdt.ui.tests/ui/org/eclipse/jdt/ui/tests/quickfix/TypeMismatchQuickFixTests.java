@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,9 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -35,6 +37,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
@@ -1249,6 +1252,97 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
 
+	public void testMismatchingReturnTypeOnGenericMethod() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.Annotation;\n");
+		buf.append("import java.lang.reflect.AccessibleObject;\n");
+		buf.append("public class E {\n");
+		buf.append("    void m() {\n");
+		buf.append("        new AccessibleObject() {\n");
+		buf.append("            public <T extends Annotation> void getAnnotation(Class<T> annotationClass) {\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.Annotation;\n");
+		buf.append("import java.lang.reflect.AccessibleObject;\n");
+		buf.append("public class E {\n");
+		buf.append("    void m() {\n");
+		buf.append("        new AccessibleObject() {\n");
+		buf.append("            public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+	}
+
+	public void testMismatchingReturnTypeOnGenericMethod14() throws Exception {
+		Map<String, String> options= fJProject1.getOptions(false);
+		try {
+			Map<String, String> options14= new HashMap<String, String>(options); 
+			JavaModelUtil.setComplianceOptions(options14, JavaCore.VERSION_1_4);
+			fJProject1.setOptions(options14);
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.lang.reflect.AccessibleObject;\n");
+			buf.append("public class E {\n");
+			buf.append("    void m() {\n");
+			buf.append("        new AccessibleObject() {\n");
+			buf.append("            public void getAnnotation(Class annotationClass) {\n");
+			buf.append("            }\n");
+			buf.append("        };\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList proposals= collectCorrections(cu, astRoot);
+			assertNumberOfProposals(proposals, 1);
+			assertCorrectLabels(proposals);
+			
+			CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+			String preview1= getPreviewContent(proposal);
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.lang.annotation.Annotation;\n");
+			buf.append("import java.lang.reflect.AccessibleObject;\n");
+			buf.append("public class E {\n");
+			buf.append("    void m() {\n");
+			buf.append("        new AccessibleObject() {\n");
+			buf.append("            public Annotation getAnnotation(Class annotationClass) {\n");
+			buf.append("            }\n");
+			buf.append("        };\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+			
+			assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+		} finally {
+			fJProject1.setOptions(options);
+		}
+	}
+	
 	public void testMismatchingReturnTypeParameterized() throws Exception {
 		// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=165913
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

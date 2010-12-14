@@ -317,33 +317,37 @@ public class TypeMismatchSubProcessor {
 			return;
 		}
 
+		ITypeBinding returnType= methodDeclBinding.getReturnType();
 		IMethodBinding overridden= Bindings.findOverriddenMethod(methodDeclBinding, false);
-		if (overridden == null || overridden.getReturnType() == methodDeclBinding.getReturnType()) {
+		if (overridden == null || overridden.getReturnType() == returnType) {
 			return;
 		}
 
 
 		ICompilationUnit cu= context.getCompilationUnit();
 		IMethodBinding methodDecl= methodDeclBinding.getMethodDeclaration();
-		proposals.add(new TypeChangeCorrectionProposal(cu, methodDecl, astRoot, overridden.getReturnType(), false, 8));
+		ITypeBinding overriddenReturnType= overridden.getReturnType();
+		if (! JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {
+			overriddenReturnType= overriddenReturnType.getErasure();
+		}
+		proposals.add(new TypeChangeCorrectionProposal(cu, methodDecl, astRoot, overriddenReturnType, false, 8));
 
 		ICompilationUnit targetCu= cu;
 
 		IMethodBinding overriddenDecl= overridden.getMethodDeclaration();
 		ITypeBinding overridenDeclType= overriddenDecl.getDeclaringClass();
 
-		ITypeBinding returnType= methodDeclBinding.getReturnType();
 		if (overridenDeclType.isFromSource()) {
 			targetCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, overridenDeclType);
-		}
-		if (targetCu != null && ASTResolving.isUseableTypeInContext(returnType, overriddenDecl, false)) {
-			TypeChangeCorrectionProposal proposal= new TypeChangeCorrectionProposal(targetCu, overriddenDecl, astRoot, returnType, false, 7);
-			if (overridenDeclType.isInterface()) {
-				proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofimplemented_description, BasicElementLabels.getJavaElementName(overriddenDecl.getName())));
-			} else {
-				proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofoverridden_description, BasicElementLabels.getJavaElementName(overriddenDecl.getName())));
+			if (targetCu != null && ASTResolving.isUseableTypeInContext(returnType, overriddenDecl, false)) {
+				TypeChangeCorrectionProposal proposal= new TypeChangeCorrectionProposal(targetCu, overriddenDecl, astRoot, returnType, false, 7);
+				if (overridenDeclType.isInterface()) {
+					proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofimplemented_description, BasicElementLabels.getJavaElementName(overriddenDecl.getName())));
+				} else {
+					proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofoverridden_description, BasicElementLabels.getJavaElementName(overriddenDecl.getName())));
+				}
+				proposals.add(proposal);
 			}
-			proposals.add(proposal);
 		}
 	}
 
