@@ -65,10 +65,8 @@ import org.eclipse.search.core.text.TextSearchMatchAccess;
 import org.eclipse.search.core.text.TextSearchRequestor;
 import org.eclipse.search.core.text.TextSearchScope;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -428,19 +426,12 @@ public class PropertyKeyHyperlink implements IHyperlink {
 								// XXX: This is a hack to improve the accuracy of matches, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81140
 								boolean useDoubleQuotedKey= useDoubleQuotedKey();
 								if (useDoubleQuotedKey) {
-									IJavaElement element= JavaCore.create(scope);
-									if (element == null)
-										return;
-
-									int includeMask= IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.REFERENCED_PROJECTS;
-									IJavaSearchScope javaSearchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element }, includeMask);
-
 									SearchPattern pattern= SearchPattern.createPattern(key, IJavaSearchConstants.FIELD, IJavaSearchConstants.REFERENCES, SearchPattern.R_PATTERN_MATCH
 											| SearchPattern.R_CASE_SENSITIVE);
 									if (pattern == null)
 										return;
 									try {
-										new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), javaSearchScope, new SearchRequestor() {
+										new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), SearchEngine.createWorkspaceScope(), new SearchRequestor() {
 											public void acceptSearchMatch(SearchMatch match) throws CoreException {
 												result.add(new KeyReference((IStorage)match.getResource(), match.getOffset(), match.getLength()));
 											}
