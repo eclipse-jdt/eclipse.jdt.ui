@@ -1278,7 +1278,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public boolean foo(int a, int b) {\n");
-		buf.append("        return (b >= a);\n");
+		buf.append("        return (b > a);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -1309,7 +1309,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public boolean foo(int a, int b) {\n");
-		buf.append("        return (b > a);\n");
+		buf.append("        return (b >= a);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -1340,7 +1340,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public boolean foo(int a, int b) {\n");
-		buf.append("        return (b <= a);\n");
+		buf.append("        return (b < a);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -1371,7 +1371,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public boolean foo(int a, int b) {\n");
-		buf.append("        return (b < a);\n");
+		buf.append("        return (b <= a);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();

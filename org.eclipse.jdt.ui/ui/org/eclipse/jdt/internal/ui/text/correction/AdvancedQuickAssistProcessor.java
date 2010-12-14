@@ -1153,7 +1153,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (!(node instanceof InfixExpression)) {
 			return false;
 		}
-		InfixExpression infixExpression= (InfixExpression) node;
+		InfixExpression infixExpression= (InfixExpression)node;
 		Operator operator= infixExpression.getOperator();
 		if (operator != InfixExpression.Operator.CONDITIONAL_AND && operator != InfixExpression.Operator.AND
 				&& operator != InfixExpression.Operator.CONDITIONAL_OR && operator != InfixExpression.Operator.OR
@@ -1187,7 +1187,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			rightExpression= combineOperands(rewrite, rightExpression, infixExpression.getRightOperand(), false, operator);
 		}
 		for (Iterator iter= currentExpression.extendedOperands().iterator(); iter.hasNext();) {
-			Expression extendedOperand= (Expression) iter.next();
+			Expression extendedOperand= (Expression)iter.next();
 			if (extendedOperand.getStartPosition() <= context.getSelectionOffset()) {
 				leftExpression= combineOperands(rewrite, leftExpression, extendedOperand, false, operator);
 			} else {
@@ -1195,13 +1195,13 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		if (operator == InfixExpression.Operator.LESS) {
-			operator= InfixExpression.Operator.GREATER_EQUALS;
-		} else if (operator == InfixExpression.Operator.LESS_EQUALS) {
 			operator= InfixExpression.Operator.GREATER;
+		} else if (operator == InfixExpression.Operator.LESS_EQUALS) {
+			operator= InfixExpression.Operator.GREATER_EQUALS;
 		} else if (operator == InfixExpression.Operator.GREATER) {
-			operator= InfixExpression.Operator.LESS_EQUALS;
-		} else if (operator == InfixExpression.Operator.GREATER_EQUALS) {
 			operator= InfixExpression.Operator.LESS;
+		} else if (operator == InfixExpression.Operator.GREATER_EQUALS) {
+			operator= InfixExpression.Operator.LESS_EQUALS;
 		}
 
 		// create new infix expression
