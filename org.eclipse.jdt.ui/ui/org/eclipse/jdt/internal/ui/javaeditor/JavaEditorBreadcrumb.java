@@ -790,7 +790,6 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			}
 			return getInput(SelectionConverter.getElementAtOffset(input, selection));
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
 			return null;
 		}
 	}
@@ -830,7 +829,6 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 			return element;
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
 			return null;
 		}
 	}
