@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,9 +25,9 @@ import org.eclipse.jdt.internal.ui.preferences.ComplianceConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.JavaBuildConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.JavadocProblemsConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.NameConventionConfigurationBlock;
+import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key;
 import org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.TodoTaskConfigurationBlock;
-import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key;
 
 public class OptionsConfigurationBlockTest extends TestCase {
 
@@ -105,6 +105,9 @@ public class OptionsConfigurationBlockTest extends TestCase {
 				JavaCore.CODEASSIST_IMPLICIT_QUALIFICATION, // TODO: not used: bug?
 				
 				JavaCore.COMPILER_PB_DEAD_CODE_IN_TRIVIAL_IF_STATEMENT, // default is good (don't flag trivial 'if (DEBUG)')
+				
+				JavaCore.CODEASSIST_DISCOURAGED_REFERENCE_CHECK, // is on the Type Filters page now, see https://bugs.eclipse.org/218487
+				JavaCore.CODEASSIST_FORBIDDEN_REFERENCE_CHECK,   // is on the Type Filters page now, see https://bugs.eclipse.org/218487
 		}));
 	}
 
