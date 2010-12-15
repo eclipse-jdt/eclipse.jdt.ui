@@ -716,7 +716,7 @@ public class LocalCorrectionsSubProcessor {
 
 					rewrite.replace(parent, newPrefixExpr, null);
 
-					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
 					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
 					proposals.add(proposal);
 				}

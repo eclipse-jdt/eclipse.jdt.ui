@@ -616,7 +616,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 
 		// add correction proposal
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
 		Map options= new Hashtable();
 		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.TRUE);
