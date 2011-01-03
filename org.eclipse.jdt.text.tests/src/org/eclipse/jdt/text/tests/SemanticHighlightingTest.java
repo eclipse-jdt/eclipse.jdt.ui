@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Björn Michael <b.michael@gmx.de> - [syntax highlighting] Syntax coloring for abstract classes - https://bugs.eclipse.org/331311
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
@@ -268,6 +269,23 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 		assertEqualPositions(expected, actual);
 	}
 
+	public void testAbstractClassHighlighting() throws Exception {
+		setUpSemanticHighlighting(SemanticHighlightings.ABSTRACT_CLASS);
+		Position[] actual= getSemanticHighlightingPositions();
+		Position[] expected= new Position[] {
+				createPosition(2, 15, 6),
+				createPosition(31, 2, 6),
+				createPosition(31, 17, 6),
+				createPosition(32, 19, 6),
+				createPosition(33, 25, 6),
+				createPosition(34, 24, 6),
+				createPosition(35, 30, 6),
+				createPosition(39, 25, 6),
+		};
+//		System.out.println(toString(actual));
+		assertEqualPositions(expected, actual);
+	}
+
 	public void testClassHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.CLASS);
 		Position[] actual= getSemanticHighlightingPositions();
@@ -291,4 +309,5 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
+
 }

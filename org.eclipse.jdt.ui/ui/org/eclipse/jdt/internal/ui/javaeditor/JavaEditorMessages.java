@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Andre Soereng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
+ *     Björn Michael <b.michael@gmx.de> - [syntax highlighting] Syntax coloring for abstract classes - https://bugs.eclipse.org/331311
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
@@ -119,6 +120,7 @@ final class JavaEditorMessages extends NLS {
 	public static String SemanticHighlighting_methodDeclaration;
 	public static String SemanticHighlighting_staticMethodInvocation;
 	public static String SemanticHighlighting_annotationElementReference;
+	public static String SemanticHighlighting_abstractClasses;
 	public static String SemanticHighlighting_abstractMethodInvocation;
 	public static String SemanticHighlighting_inheritedMethodInvocation;
 	public static String SemanticHighlighting_localVariableDeclaration;

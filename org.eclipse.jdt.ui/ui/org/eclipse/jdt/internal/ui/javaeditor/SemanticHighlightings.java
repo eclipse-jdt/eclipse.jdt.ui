@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Andre Soereng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
+ *     Björn Michael <b.michael@gmx.de> - [syntax highlighting] Syntax coloring for abstract classes - https://bugs.eclipse.org/331311
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
@@ -181,6 +182,13 @@ public class SemanticHighlightings {
 	 * @since 3.4
 	 */
 	public static final String NUMBER="number"; //$NON-NLS-1$
+
+	/**
+	 * A named preference part that controls the highlighting of abstract classes.
+	 *
+	 * @since 3.7
+	 */
+	public static final String ABSTRACT_CLASS="abstractClass"; //$NON-NLS-1$
 
 	/**
 	 * Semantic highlightings
@@ -1654,6 +1662,84 @@ public class SemanticHighlightings {
 	}
 
 	/**
+	 * Semantic highlighting for classes.
+	 * @since 3.7
+	 */
+	private static final class AbstractClassHighlighting extends SemanticHighlighting {
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		public String getPreferenceKey() {
+			return ABSTRACT_CLASS;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		public RGB getDefaultDefaultTextColor() {
+			return new RGB(139, 136, 22);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		public boolean isBoldByDefault() {
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		public String getDisplayName() {
+			return JavaEditorMessages.SemanticHighlighting_abstractClasses;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
+		 */
+		public boolean consumes(SemanticToken token) {
+
+			// 1: match types
+			SimpleName name= token.getNode();
+			ASTNode node= name.getParent();
+			int nodeType= node.getNodeType();
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.THIS_EXPRESSION && nodeType != ASTNode.QUALIFIED_TYPE  && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.TYPE_DECLARATION && nodeType != ASTNode.METHOD_INVOCATION)
+				return false;
+			while (nodeType == ASTNode.QUALIFIED_NAME) {
+				node= node.getParent();
+				nodeType= node.getNodeType();
+				if (nodeType == ASTNode.IMPORT_DECLARATION)
+					return false;
+			}
+
+			// 2: match classes
+			IBinding binding= token.getBinding();
+			if (binding instanceof ITypeBinding) {
+				ITypeBinding typeBinding= (ITypeBinding) binding;
+				// see also ClassHighlighting
+				return typeBinding.isClass() && (typeBinding.getModifiers() & Modifier.ABSTRACT) != 0;
+			}
+
+			return false;
+		}
+	}
+
+	/**
 	 * A named preference that controls the given semantic highlighting's color.
 	 *
 	 * @param semanticHighlighting the semantic highlighting
@@ -1737,6 +1823,7 @@ public class SemanticHighlightings {
 				new TypeVariableHighlighting(), // before type arguments!
 				new MethodHighlighting(), // before types to get ctors
 				new TypeArgumentHighlighting(), // before other types
+				new AbstractClassHighlighting(), // before classes
 				new ClassHighlighting(),
 				new EnumHighlighting(),
 				new AnnotationHighlighting(), // before interfaces
