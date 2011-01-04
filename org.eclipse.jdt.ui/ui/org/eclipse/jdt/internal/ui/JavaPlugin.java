@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.service.prefs.BackingStoreException;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -25,6 +26,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -184,7 +186,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private WorkingCopyManager fWorkingCopyManager;
 
 	/**
-	 * @deprecated
+	 * @deprecated to avoid deprecation warning
 	 */
 	private org.eclipse.jdt.core.IBufferFactory fBufferFactory;
 	private ICompilationUnitDocumentProvider fCompilationUnitDocumentProvider;
@@ -392,21 +394,21 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Private deprecated method to avoid deprecation warnings
-	 *
+	 * 
 	 * @return the deprecated preference store
-	 * @deprecated
+	 * @deprecated to avoid deprecation warnings
 	 */
 	private static IPreferenceStore getDeprecatedWorkbenchPreferenceStore() {
 		return PlatformUI.getWorkbench().getPreferenceStore();
 	}
 
-	/** @deprecated */
+	/** @deprecated to avoid deprecation warnings */
 	private static final String DEPRECATED_EDITOR_TAB_WIDTH= PreferenceConstants.EDITOR_TAB_WIDTH;
 
-	/** @deprecated */
+	/** @deprecated to avoid deprecation warnings */
 	private static final String DEPRECATED_REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD= PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD;
 
-	/** @deprecated */
+	/** @deprecated to avoid deprecation warnings */
 	private static final String DEPRECATED_CODEASSIST_ORDER_PROPOSALS= PreferenceConstants.CODEASSIST_ORDER_PROPOSALS;
 
 	/**
@@ -627,9 +629,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Private deprecated method to avoid deprecation warnings
-	 *
+	 * 
 	 * @return the deprecated buffer factory
-	 * @deprecated
+	 * @deprecated to avoid deprecation warnings
 	 */
 	public synchronized org.eclipse.jdt.core.IBufferFactory getBufferFactory() {
 		if (fBufferFactory == null)
@@ -678,8 +680,18 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 	public synchronized JavaTextTools getJavaTextTools() {
 		if (fJavaTextTools == null)
-			fJavaTextTools= new JavaTextTools(getPreferenceStore(), JavaCore.getPlugin().getPluginPreferences());
+			fJavaTextTools= new JavaTextTools(getPreferenceStore(), getJavaCorePluginPreferences());
 		return fJavaTextTools;
+	}
+
+	/**
+	 * Returns the Java Core plug-in preferences.
+	 * 
+	 * @return the Java Core plug-in preferences
+	 * @since 3.7
+	 */
+	public static org.eclipse.core.runtime.Preferences getJavaCorePluginPreferences() {
+		return JavaCore.getPlugin().getPluginPreferences();
 	}
 
 	/**
@@ -861,9 +873,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Private deprecated method to avoid deprecation warnings
-	 *
+	 * 
 	 * @return the deprecated template store
-	 * @deprecated
+	 * @deprecated to avoid deprecation warnings
 	 */
 	private org.eclipse.jdt.internal.corext.template.java.Templates getOldTemplateStoreInstance() {
 		return org.eclipse.jdt.internal.corext.template.java.Templates.getInstance();
@@ -923,9 +935,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Private deprecated method to avoid deprecation warnings
-	 *
+	 * 
 	 * @return the deprecated code template store
-	 * @deprecated
+	 * @deprecated to avoid deprecation warnings
 	 */
 	private org.eclipse.jdt.internal.corext.template.java.CodeTemplates getOldCodeTemplateStoreInstance() {
 		return org.eclipse.jdt.internal.corext.template.java.CodeTemplates.getInstance();
@@ -947,15 +959,28 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public IPreferenceStore getCombinedPreferenceStore() {
 		if (fCombinedPreferenceStore == null) {
 			IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
-			fCombinedPreferenceStore= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(JavaCore.getPlugin().getPluginPreferences()), generalTextStore });
+			fCombinedPreferenceStore= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(getJavaCorePluginPreferences()), generalTextStore });
 		}
 		return fCombinedPreferenceStore;
 	}
 
 	/**
-	 * Returns the registry of the extensions to the <code>org.eclipse.jdt.ui.javaFoldingStructureProvider</code>
-	 * extension point.
-	 *
+	 * Flushes the instance scope of this plug-in.
+	 * 
+	 * @since 3.7
+	 */
+	public static void flushInstanceScope() {
+		try {
+			InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).flush();
+		} catch (BackingStoreException e) {
+			log(e);
+		}
+	}
+
+	/**
+	 * Returns the registry of the extensions to the
+	 * <code>org.eclipse.jdt.ui.javaFoldingStructureProvider</code> extension point.
+	 * 
 	 * @return the registry of contributed <code>IJavaFoldingStructureProvider</code>
 	 * @since 3.0
 	 */
