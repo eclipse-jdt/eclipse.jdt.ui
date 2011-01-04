@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -113,8 +113,8 @@ public class ParameterGuesser {
 
 	/**
 	 * Creates a parameter guesser
-	 *
-	 * @param enclosingElement
+	 * 
+	 * @param enclosingElement the enclosing Java element
 	 */
 	public ParameterGuesser(IJavaElement enclosingElement) {
 		fEnclosingElement= enclosingElement;
@@ -283,12 +283,12 @@ public class ParameterGuesser {
 
 	/**
 	 * Returns the matches for the type and name argument, ordered by match quality.
-	 *
+	 * 
 	 * @param expectedType - the qualified type of the parameter we are trying to match
 	 * @param paramName - the name of the parameter (used to find similarly named matches)
-	 * @param pos
+	 * @param pos the position
 	 * @param suggestions the suggestions or <code>null</code>
-	 * @param fillBestGuess
+	 * @param fillBestGuess <code>true</code> if the best guess should be filled in
 	 * @return returns the name of the best match, or <code>null</code> if no match found
 	 * @throws JavaModelException if it fails
 	 */
@@ -340,9 +340,10 @@ public class ParameterGuesser {
 		}
 
 		/**
-		 * The four order criteria as described below - put already used into bit 10, all others into
-		 * bits 0-9, 11-20, 21-30; 31 is sign - always 0
-		 * @param v
+		 * The four order criteria as described below - put already used into bit 10, all others
+		 * into bits 0-9, 11-20, 21-30; 31 is sign - always 0
+		 * 
+		 * @param v the variable
 		 * @return the score for <code>v</code>
 		 */
 		private int score(Variable v) {

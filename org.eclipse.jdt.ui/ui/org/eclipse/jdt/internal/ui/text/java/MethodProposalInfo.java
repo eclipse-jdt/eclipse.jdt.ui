@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,18 +76,16 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	/* adapted from JavaModelUtil */
 
 	/**
-	 * Finds a method in a type. This searches for a method with the same name
-	 * and signature. Parameter types are only compared by the simple name, no
-	 * resolving for the fully qualified type name is done. Constructors are
-	 * only compared by parameters, not the name.
-	 *
+	 * Finds a method in a type. This searches for a method with the same name and signature.
+	 * Parameter types are only compared by the simple name, no resolving for the fully qualified
+	 * type name is done. Constructors are only compared by parameters, not the name.
+	 * 
 	 * @param name The name of the method to find
-	 * @param paramTypes The type signatures of the parameters e.g.
-	 *        <code>{"QString;","I"}</code>
+	 * @param paramTypes The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
 	 * @param isConstructor If the method is a constructor
 	 * @param type the type
 	 * @return The first found method or <code>null</code>, if nothing found
-	 * @throws JavaModelException
+	 * @throws JavaModelException if accessing the Java model fails
 	 */
 	private IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IType type) throws JavaModelException {
 		Map typeVariables= computeTypeVariables(type);
