@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -600,7 +600,10 @@ public class JavaDocLocations {
 				if (baseURL.getProtocol().equals(JAR_PROTOCOL)) {
 					// It's a JarURLConnection, which is not known to the browser widget.
 					// Let's start the help web server:
-					baseURL= PlatformUI.getWorkbench().getHelpSystem().resolve(baseURL.toExternalForm(), true);
+					URL baseURL2= PlatformUI.getWorkbench().getHelpSystem().resolve(baseURL.toExternalForm(), true);
+					if (baseURL2 != null) { // can be null if org.eclipse.help.ui is not available
+						baseURL= baseURL2;
+					}
 				}
 				return baseURL.toExternalForm();
 			}
