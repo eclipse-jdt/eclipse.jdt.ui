@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -457,7 +457,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 		@Override
 		public void setMaxEntries(int maxEntries) {
-			new InstanceScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID).putInt(JUnitPreferencesConstants.MAX_TEST_RUNS, maxEntries);
+			InstanceScope.INSTANCE.getNode(JUnitCorePlugin.CORE_PLUGIN_ID).putInt(JUnitPreferencesConstants.MAX_TEST_RUNS, maxEntries);
 		}
 	}
 
@@ -1063,7 +1063,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public void run() {
 			boolean checked= isChecked();
 			fShowOnErrorOnly= checked;
-			new InstanceScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID).putBoolean(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, checked);
+			InstanceScope.INSTANCE.getNode(JUnitCorePlugin.CORE_PLUGIN_ID).putBoolean(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, checked);
 		}
 	}
 
