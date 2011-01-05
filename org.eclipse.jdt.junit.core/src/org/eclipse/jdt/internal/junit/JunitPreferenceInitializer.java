@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,8 +47,8 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 		prefs.put(JUnitPreferencesConstants.JUNIT4_JAVADOC, "http://www.junit.org/junit/javadoc/4.5"); //$NON-NLS-1$
 		
 		// migrate old instance scope prefs
-		IEclipsePreferences oldInstancePrefs= new InstanceScope().getNode(JUnitCorePlugin.PLUGIN_ID);
-		IEclipsePreferences newInstancePrefs= new InstanceScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID);
+		IEclipsePreferences oldInstancePrefs= InstanceScope.INSTANCE.getNode(JUnitCorePlugin.PLUGIN_ID);
+		IEclipsePreferences newInstancePrefs= InstanceScope.INSTANCE.getNode(JUnitCorePlugin.CORE_PLUGIN_ID);
 		String[] oldKeys;
 		try {
 			oldKeys= oldInstancePrefs.keys();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -442,7 +442,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		ICleanUp[] cleanUps;
 		Map settings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new ProjectScope(project));
 		if (settings == null) {
-			IEclipsePreferences contextNode= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
+			IEclipsePreferences contextNode= InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN);
 			String id= contextNode.get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, null);
 			if (id == null) {
 				id= new DefaultScope().getNode(JavaUI.ID_PLUGIN).get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, CleanUpConstants.DEFAULT_SAVE_PARTICIPANT_PROFILE);

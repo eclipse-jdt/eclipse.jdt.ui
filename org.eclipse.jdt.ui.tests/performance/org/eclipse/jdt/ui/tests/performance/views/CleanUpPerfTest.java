@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -132,14 +132,14 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 
 	private static void storeSettings(Map node) throws CoreException {
 		ProfileManager.CustomProfile profile= new ProfileManager.CustomProfile("testProfile", node, CleanUpProfileVersioner.CURRENT_VERSION, CleanUpProfileVersioner.PROFILE_KIND);
-		new InstanceScope().getNode(JavaUI.ID_PLUGIN).put(CleanUpConstants.CLEANUP_PROFILE, profile.getID());
+		InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).put(CleanUpConstants.CLEANUP_PROFILE, profile.getID());
 
 		List profiles= CleanUpPreferenceUtil.getBuiltInProfiles();
 		profiles.add(profile);
 
 		CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
 		ProfileStore profileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
-		profileStore.writeProfiles(profiles, new InstanceScope());
+		profileStore.writeProfiles(profiles, InstanceScope.INSTANCE);
 	}
 
 	public void testNullCleanUp() throws Exception {

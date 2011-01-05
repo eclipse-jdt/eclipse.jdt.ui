@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,8 +73,7 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 		IPreferenceStore store= EditorsUI.getPreferenceStore();
 		store.putValue(SpellingService.PREFERENCE_SPELLING_ENABLED, IPreferenceStore.TRUE);
 
-		InstanceScope scope= new InstanceScope();
-		IEclipsePreferences editorsNode= scope.getNode(EditorsUI.PLUGIN_ID);
+		IEclipsePreferences editorsNode= InstanceScope.INSTANCE.getNode(EditorsUI.PLUGIN_ID);
 
 		MarkerAnnotationPreferences markerAnnotationPreferences= EditorsPlugin.getDefault().getMarkerAnnotationPreferences();
 		Iterator iterator= markerAnnotationPreferences.getAnnotationPreferences().iterator();
@@ -98,8 +97,7 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 		IPreferenceStore store= EditorsUI.getPreferenceStore();
 		store.setToDefault(SpellingService.PREFERENCE_SPELLING_ENABLED);
 
-		InstanceScope scope= new InstanceScope();
-		IEclipsePreferences editorsNode= scope.getNode(EditorsUI.PLUGIN_ID);
+		IEclipsePreferences editorsNode= InstanceScope.INSTANCE.getNode(EditorsUI.PLUGIN_ID);
 
 		MarkerAnnotationPreferences markerAnnotationPreferences= EditorsPlugin.getDefault().getMarkerAnnotationPreferences();
 		Iterator iterator= markerAnnotationPreferences.getAnnotationPreferences().iterator();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,9 +79,9 @@ import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.IModifyDialogTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -116,8 +116,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				if (fProfileIdsTable == null)
 		    		fProfileIdsTable= loadProfiles();
 
-				InstanceScope instanceScope= new InstanceScope();
-	    		IEclipsePreferences instancePreferences= instanceScope.getNode(JavaUI.ID_PLUGIN);
+				IEclipsePreferences instancePreferences= InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN);
 
 	    		final String workbenchProfileId;
 	    		if (instancePreferences.get(CleanUpConstants.CLEANUP_PROFILE, null) != null) {
@@ -132,7 +131,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 
 		private Hashtable loadProfiles() {
-    		List list= CleanUpPreferenceUtil.loadProfiles(new InstanceScope());
+    		List list= CleanUpPreferenceUtil.loadProfiles(InstanceScope.INSTANCE);
 
     		Hashtable profileIdsTable= new Hashtable();
     		for (Iterator iterator= list.iterator(); iterator.hasNext();) {

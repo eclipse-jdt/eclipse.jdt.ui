@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,11 +33,11 @@ import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpMessages;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.BuiltInProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.KeySet;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 
 public class CleanUpPreferenceUtil {
 
@@ -55,7 +55,7 @@ public class CleanUpPreferenceUtil {
     		return loadFromProject(context);
     	}
 
-    	InstanceScope instanceScope= new InstanceScope();
+		IScopeContext instanceScope= InstanceScope.INSTANCE;
     	if (id == null) {
     		if (ProjectScope.SCOPE.equals(context.getName())) {
     			id= instanceScope.getNode(JavaUI.ID_PLUGIN).get(profileIdKey, null);
@@ -138,7 +138,7 @@ public class CleanUpPreferenceUtil {
 		if (hasSettingsInScope(context)) {
 			node= context.getNode(JavaUI.ID_PLUGIN);
 		} else {
-			IScopeContext instanceScope= new InstanceScope();
+			IScopeContext instanceScope= InstanceScope.INSTANCE;
 			if (hasSettingsInScope(instanceScope)) {
 				node= instanceScope.getNode(JavaUI.ID_PLUGIN);
 			} else {

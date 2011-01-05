@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -122,7 +122,7 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 		String key= getPreferenceKey();
 		boolean defaultEnabled;
 		if (ProjectScope.SCOPE.equals(fContext.getName())) {
-			defaultEnabled= new InstanceScope().getNode(JavaUI.ID_PLUGIN).getBoolean(key, false);
+			defaultEnabled= InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).getBoolean(key, false);
 		} else {
 			defaultEnabled= new DefaultScope().getNode(JavaUI.ID_PLUGIN).getBoolean(key, false);
 		}
@@ -166,7 +166,7 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 		if (hasSettingsInScope(context)) {
 			node= context.getNode(JavaUI.ID_PLUGIN);
 		} else {
-			node= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
+			node= InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN);
 		}
 		IEclipsePreferences defaultNode= new DefaultScope().getNode(JavaUI.ID_PLUGIN);
 

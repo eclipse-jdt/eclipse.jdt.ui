@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,9 +15,9 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.ui.IWorkbenchSite;
 
@@ -76,8 +76,7 @@ public class AllCleanUpsAction extends CleanUpAction {
 	}
 
 	private boolean showWizard() {
-		InstanceScope instanceScope= new InstanceScope();
-		IEclipsePreferences instanceNode= instanceScope.getNode(JavaUI.ID_PLUGIN);
+		IEclipsePreferences instanceNode= InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN);
 		if (instanceNode.get(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, null) != null)
 			return instanceNode.getBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true);
 
@@ -102,12 +101,12 @@ public class AllCleanUpsAction extends CleanUpAction {
 				}
 			}
 		};
-		new InstanceScope().getNode(JavaUI.ID_PLUGIN).addPreferenceChangeListener(fPreferenceChangeListener);
+		InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).addPreferenceChangeListener(fPreferenceChangeListener);
     }
 
 	public void dispose() {
 		if (fPreferenceChangeListener != null) {
-			new InstanceScope().getNode(JavaUI.ID_PLUGIN).removePreferenceChangeListener(fPreferenceChangeListener);
+			InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).removePreferenceChangeListener(fPreferenceChangeListener);
 			fPreferenceChangeListener= null;
 		}
 	}

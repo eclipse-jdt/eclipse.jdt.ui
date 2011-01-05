@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -3681,7 +3681,7 @@ public class PreferenceConstants {
 		if (store.getBoolean(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX)) {
 			String prefix= store.getString(PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX);
 			if (prefix.length() > 0) {
-				new InstanceScope().getNode(JavaCore.PLUGIN_ID).put(JavaCore.CODEASSIST_FIELD_PREFIXES, prefix);
+				InstanceScope.INSTANCE.getNode(JavaCore.PLUGIN_ID).put(JavaCore.CODEASSIST_FIELD_PREFIXES, prefix);
 				store.setToDefault(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX);
 				store.setToDefault(PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX);
 			}
@@ -3689,7 +3689,7 @@ public class PreferenceConstants {
 		if (store.getBoolean(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX)) {
 			String suffix= store.getString(PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX);
 			if (suffix.length() > 0) {
-				new InstanceScope().getNode(JavaCore.PLUGIN_ID).put(JavaCore.CODEASSIST_FIELD_SUFFIXES, suffix);
+				InstanceScope.INSTANCE.getNode(JavaCore.PLUGIN_ID).put(JavaCore.CODEASSIST_FIELD_SUFFIXES, suffix);
 				store.setToDefault(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX);
 				store.setToDefault(PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX);
 			}
@@ -4057,7 +4057,7 @@ public class PreferenceConstants {
 				return val;
 			}
 		}
-		val= new InstanceScope().getNode(JavaUI.ID_PLUGIN).get(key, null);
+		val= InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).get(key, null);
 		if (val != null) {
 			return val;
 		}

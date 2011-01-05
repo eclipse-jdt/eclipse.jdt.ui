@@ -145,6 +145,6 @@ public class JUnitPreferencesConstants {
 	}
 
 	public static void setFilterStack(boolean filter) {
-		new InstanceScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID).putBoolean(DO_FILTER_STACK, filter);
+		InstanceScope.INSTANCE.getNode(JUnitCorePlugin.CORE_PLUGIN_ID).putBoolean(DO_FILTER_STACK, filter);
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,7 +75,7 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 		fPage= page;
 		fLabelProviderMap= new HashMap(5);
 
-		fSearchPreferences= new ScopedPreferenceStore(new InstanceScope(), NewSearchUI.PLUGIN_ID);
+		fSearchPreferences= new ScopedPreferenceStore(InstanceScope.INSTANCE, NewSearchUI.PLUGIN_ID);
 		fSearchPropertyListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				doSearchPropertyChange(event);
