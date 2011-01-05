@@ -80,8 +80,7 @@ public class AllCleanUpsAction extends CleanUpAction {
 		if (instanceNode.get(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, null) != null)
 			return instanceNode.getBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true);
 
-		DefaultScope defaultScope= new DefaultScope();
-		IEclipsePreferences defaultNode= defaultScope.getNode(JavaUI.ID_PLUGIN);
+		IEclipsePreferences defaultNode= DefaultScope.INSTANCE.getNode(JavaUI.ID_PLUGIN);
 		return defaultNode.getBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true);
 	}
 

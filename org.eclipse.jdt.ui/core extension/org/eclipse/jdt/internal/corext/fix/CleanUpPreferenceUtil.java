@@ -61,7 +61,7 @@ public class CleanUpPreferenceUtil {
     			id= instanceScope.getNode(JavaUI.ID_PLUGIN).get(profileIdKey, null);
     		}
     		if (id == null) {
-    			id= new DefaultScope().getNode(JavaUI.ID_PLUGIN).get(profileIdKey, defaultProfileId);
+				id= DefaultScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).get(profileIdKey, defaultProfileId);
     		}
     	}
 

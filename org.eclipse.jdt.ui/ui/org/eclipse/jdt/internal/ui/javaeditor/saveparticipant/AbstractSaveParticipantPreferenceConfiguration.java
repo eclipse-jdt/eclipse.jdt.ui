@@ -124,7 +124,7 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 		if (ProjectScope.SCOPE.equals(fContext.getName())) {
 			defaultEnabled= InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).getBoolean(key, false);
 		} else {
-			defaultEnabled= new DefaultScope().getNode(JavaUI.ID_PLUGIN).getBoolean(key, false);
+			defaultEnabled= DefaultScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).getBoolean(key, false);
 		}
 		fContext.getNode(JavaUI.ID_PLUGIN).putBoolean(key, defaultEnabled);
 		fEnableField.setSelection(defaultEnabled);
@@ -168,7 +168,7 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 		} else {
 			node= InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN);
 		}
-		IEclipsePreferences defaultNode= new DefaultScope().getNode(JavaUI.ID_PLUGIN);
+		IEclipsePreferences defaultNode= DefaultScope.INSTANCE.getNode(JavaUI.ID_PLUGIN);
 
 		String key= getPreferenceKey();
 		return node.getBoolean(key, defaultNode.getBoolean(key, false));

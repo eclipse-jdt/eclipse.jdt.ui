@@ -166,7 +166,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 				IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
 				if (extraAttributes.length == 0) {
 					// Revert to default
-					String defaultValue = new DefaultScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID).get(preferenceKey, ""); //$NON-NLS-1$
+					String defaultValue= DefaultScope.INSTANCE.getNode(JUnitCorePlugin.CORE_PLUGIN_ID).get(preferenceKey, ""); //$NON-NLS-1$
 					if (!defaultValue.equals(preferences.get(preferenceKey, defaultValue))) {
 						preferences.put(preferenceKey, defaultValue);
 					}

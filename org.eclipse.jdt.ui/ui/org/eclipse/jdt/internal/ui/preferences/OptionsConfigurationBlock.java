@@ -720,12 +720,12 @@ public abstract class OptionsConfigurationBlock {
 			fLookupOrder= new IScopeContext[] {
 				new ProjectScope(fProject),
 				InstanceScope.INSTANCE,
-				new DefaultScope()
+				DefaultScope.INSTANCE
 			};
 		} else {
 			fLookupOrder= new IScopeContext[] {
 				InstanceScope.INSTANCE,
-				new DefaultScope()
+				DefaultScope.INSTANCE
 			};
 		}
 		testIfOptionsComplete(allKeys);
@@ -786,12 +786,12 @@ public abstract class OptionsConfigurationBlock {
 	}
 
 	private int getRebuildCount() {
-		return fManager.getWorkingCopy(new DefaultScope().getNode(JavaUI.ID_PLUGIN)).getInt(REBUILD_COUNT_KEY, 0);
+		return fManager.getWorkingCopy(DefaultScope.INSTANCE.getNode(JavaUI.ID_PLUGIN)).getInt(REBUILD_COUNT_KEY, 0);
 	}
 
 	private void incrementRebuildCount() {
 		fRebuildCount++;
-		fManager.getWorkingCopy(new DefaultScope().getNode(JavaUI.ID_PLUGIN)).putInt(REBUILD_COUNT_KEY, fRebuildCount);
+		fManager.getWorkingCopy(DefaultScope.INSTANCE.getNode(JavaUI.ID_PLUGIN)).putInt(REBUILD_COUNT_KEY, fRebuildCount);
 	}
 
 

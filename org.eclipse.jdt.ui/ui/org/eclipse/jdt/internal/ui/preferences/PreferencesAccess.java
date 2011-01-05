@@ -42,7 +42,7 @@ public class PreferencesAccess {
 	}
 
 	public IScopeContext getDefaultScope() {
-		return new DefaultScope();
+		return DefaultScope.INSTANCE;
 	}
 
 	public IScopeContext getInstanceScope() {

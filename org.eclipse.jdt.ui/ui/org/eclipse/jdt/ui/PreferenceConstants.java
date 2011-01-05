@@ -4061,7 +4061,7 @@ public class PreferenceConstants {
 		if (val != null) {
 			return val;
 		}
-		return new DefaultScope().getNode(JavaUI.ID_PLUGIN).get(key, null);
+		return DefaultScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).get(key, null);
 	}
 
 	/**

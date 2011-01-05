@@ -28,7 +28,7 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 
 	/** {@inheritDoc} */
 	public void initializeDefaultPreferences() {
-		IEclipsePreferences prefs= new DefaultScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID);
+		IEclipsePreferences prefs= DefaultScope.INSTANCE.getNode(JUnitCorePlugin.CORE_PLUGIN_ID);
 
 		prefs.putBoolean(JUnitPreferencesConstants.DO_FILTER_STACK, true);
 
