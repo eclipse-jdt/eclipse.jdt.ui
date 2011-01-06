@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEscapes;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
@@ -176,8 +177,8 @@ public class PropertyFileDocumentModel {
             if (!SimpleLineReader.isCommentOrWhiteSpace(line)) {
                 int idx = getIndexOfSeparationCharacter(line);
                 if (idx != -1) {
-                	String key= line.substring(0, idx);
-                	String value= line.substring(idx + 1);
+					String key= line.substring(0, idx).trim();
+					String value= Strings.trimLeadingTabsAndSpaces(line.substring(idx + 1));
                     fKeyValuePairs.add(new KeyValuePairModell(key, value, offset, leadingWhiteSpaces));
                     leadingWhiteSpaces = 0;
                 }
@@ -210,10 +211,8 @@ public class PropertyFileDocumentModel {
             minIndex = Math.max(indexOfEven, indexOfColumn);
         }
 
-        if ((minIndex != -1) && (indexOfBlank != -1)) {
-            minIndex = Math.min(minIndex, indexOfBlank);
-        } else {
-            minIndex = Math.max(minIndex, indexOfBlank);
+		if ((minIndex == -1) && (indexOfBlank != -1)) {
+			minIndex= indexOfBlank;
         }
 
         return minIndex;
