@@ -21,6 +21,7 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -36,6 +37,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -77,6 +79,7 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.FocusDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
 
 /**
@@ -180,6 +183,18 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 				return declaringType;
 			}
 			return res.getDeclaringType();
+		}
+
+		/*
+		 * @see ILabelProvider#getImage
+		 */
+		public Image getImage(Object element) {
+			if (element.equals(fInitiallySelectedType) || (element instanceof IMember && ((IMember)element).getDeclaringType() == null)) {
+				ImageDescriptor desc= fImageLabelProvider.getJavaImageDescriptor((IJavaElement)element, (evaluateImageFlags(element)));
+				Image image= JavaPlugin.getImageDescriptorRegistry().get(new FocusDescriptor(desc));
+				return decorateImage(image, element);
+			}
+			return super.getImage(element);
 		}
 	}
 

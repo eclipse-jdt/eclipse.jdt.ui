@@ -16,12 +16,9 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.preference.JFacePreferences;
-import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -39,6 +36,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.FocusDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
@@ -46,36 +44,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  * input scope are rendered differently.
   */
 public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
-
-	private static class FocusDescriptor extends CompositeImageDescriptor {
-		private ImageDescriptor fBase;
-		public FocusDescriptor(ImageDescriptor base) {
-			fBase= base;
-		}
-		protected void drawCompositeImage(int width, int height) {
-			drawImage(getImageData(fBase), 0, 0);
-			drawImage(getImageData(JavaPluginImages.DESC_OVR_FOCUS), 0, 0);
-		}
-
-		private ImageData getImageData(ImageDescriptor descriptor) {
-			ImageData data= descriptor.getImageData(); // see bug 51965: getImageData can return null
-			if (data == null) {
-				data= DEFAULT_IMAGE_DATA;
-				JavaPlugin.logErrorMessage("Image data not available: " + descriptor.toString()); //$NON-NLS-1$
-			}
-			return data;
-		}
-
-		protected Point getSize() {
-			return JavaElementImageProvider.BIG_SIZE;
-		}
-		public int hashCode() {
-			return fBase.hashCode();
-		}
-		public boolean equals(Object object) {
-			return object != null && FocusDescriptor.class.equals(object.getClass()) && ((FocusDescriptor)object).fBase.equals(fBase);
-		}
-	}
 
 	private Color fSpecialColor;
 

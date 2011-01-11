@@ -579,7 +579,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 	protected void inputChanged(Object newInput, Object newSelection) {
 		fFilterText.setText(""); //$NON-NLS-1$
-		fTreeViewer.setInput(newInput);
 		fInitiallySelectedType= null;
 		if (newSelection instanceof IJavaElement) {
 			IJavaElement javaElement= ((IJavaElement)newSelection);
@@ -588,6 +587,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			else
 				fInitiallySelectedType= (IType)javaElement.getAncestor(IJavaElement.TYPE);
 		}
+		fTreeViewer.setInput(newInput);
 		if (newSelection != null)
 			fTreeViewer.setSelection(new StructuredSelection(newSelection));
 	}
