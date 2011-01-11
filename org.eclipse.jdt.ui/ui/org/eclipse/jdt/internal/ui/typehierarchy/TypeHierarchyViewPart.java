@@ -997,7 +997,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		// see http://bugs.eclipse.org/bugs/show_bug.cgi?id=33657
 		IJavaElement[] input= null; //determineInputElement();
 		if (fMemento != null) {
-			restoreState(fMemento, input);
+			restoreState(fMemento);
 		//} else if (input != null) {
 		//	setInputElement(input);
 		} else {
@@ -1663,7 +1663,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	/*
 	 * Restores the type hierarchy settings from a memento.
 	 */
-	private void restoreState(final IMemento memento, IJavaElement[] defaultInput) {
+	private void restoreState(final IMemento memento) {
 		IJavaElement input= null;
 		List inputList= new ArrayList();
 		String elementId= memento.getString(TAG_INPUT);
