@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,9 +22,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -100,20 +98,7 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 	 * @see org.eclipse.jface.text.hyperlink.IHyperlink#open()
 	 */
 	public void open() {
-		String typeSignature= null;
-		if (fElement instanceof ILocalVariable) {
-			ILocalVariable localVariable= (ILocalVariable)fElement;
-			typeSignature= localVariable.getTypeSignature();
-		} else if (fElement instanceof IField) {
-			IField field= (IField)fElement;
-			try {
-				typeSignature= field.getTypeSignature();
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-				return;
-			}
-		}
-
+		String typeSignature= JavaElementHyperlinkDeclaredTypeDetector.getTypeSignature(fElement);
 		int kind= Signature.getTypeSignatureKind(typeSignature);
 		if (kind == Signature.ARRAY_TYPE_SIGNATURE) {
 			typeSignature= Signature.getElementType(typeSignature);

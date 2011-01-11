@@ -56,6 +56,18 @@ public class JavaElementHyperlinkDeclaredTypeDetector extends JavaElementHyperli
 	 *             accessing its corresponding resource.
 	 */
 	private boolean isPrimitive(IJavaElement element) throws JavaModelException {
+		String typeSignature= getTypeSignature(element);
+		return typeSignature != null ? Signature.getTypeSignatureKind(Signature.getElementType(typeSignature)) == Signature.BASE_TYPE_SIGNATURE : true;
+	}
+
+	/**
+	 * Returns the type signature of the element.
+	 * 
+	 * @param element a field or local variable
+	 * @return the type signature of the element
+	 * @since 3.7
+	 */
+	static String getTypeSignature(IJavaElement element) {
 		String typeSignature= null;
 		if (element instanceof ILocalVariable) {
 			typeSignature= ((ILocalVariable)element).getTypeSignature();
@@ -64,9 +76,8 @@ public class JavaElementHyperlinkDeclaredTypeDetector extends JavaElementHyperli
 				typeSignature= ((IField)element).getTypeSignature();
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
-				return false;
 			}
 		}
-		return Signature.getTypeSignatureKind(Signature.getElementType(typeSignature)) == Signature.BASE_TYPE_SIGNATURE;
+		return typeSignature;
 	}
 }
