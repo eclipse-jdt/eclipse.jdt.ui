@@ -451,7 +451,7 @@ public final class JavaModelUtil {
 	}
 
 	/**
-	 * Checks whether a type is a primitive type.
+	 * Checks whether the given type signature is from a primitive type.
 	 * 
 	 * @param typeSignature the type signature string to check
 	 * @return <code>true</code> if the type is a primitive type, <code> false</code> otherwise
