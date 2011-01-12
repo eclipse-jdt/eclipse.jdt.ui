@@ -994,15 +994,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		getSite().setSelectionProvider(fSelectionProviderMediator);
 		getSite().getPage().addPartListener(fPartListener);
 
-		// see http://bugs.eclipse.org/bugs/show_bug.cgi?id=33657
-		IJavaElement[] input= null; //determineInputElement();
-		if (fMemento != null) {
+		if (fMemento != null)
 			restoreState(fMemento);
-		//} else if (input != null) {
-		//	setInputElement(input);
-		} else {
+		else
 			setViewerVisibility(false);
-		}
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(fPagebook, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 
