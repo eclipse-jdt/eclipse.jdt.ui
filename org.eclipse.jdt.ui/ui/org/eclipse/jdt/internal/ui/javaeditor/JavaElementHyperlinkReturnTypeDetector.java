@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,8 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -36,26 +37,12 @@ public class JavaElementHyperlinkReturnTypeDetector extends JavaElementHyperlink
 	 */
 	protected IHyperlink createHyperlink(IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
 		try {
-			if (element.getElementType() == IJavaElement.METHOD && !isPrimitive((IMethod)element) && SelectionConverter.canOperateOn(editor)) {
+			if (element.getElementType() == IJavaElement.METHOD && !JavaModelUtil.isPrimitive(((IMethod)element).getReturnType()) && SelectionConverter.canOperateOn(editor)) {
 				return new JavaElementReturnTypeHyperlink(wordRegion, openAction, (IMethod)element, qualify);
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
 		return null;
-	}
-
-	/**
-	 * Checks whether the return type is a primitive type.
-	 * 
-	 * @param method the method to check
-	 * @return <code>true</code> if the return type is a primitive type, <code> false</code>
-	 *         otherwise
-	 * @throws JavaModelException if this element does not exist or if an exception occurs while
-	 *             accessing its corresponding resource.
-	 */
-	private boolean isPrimitive(IMethod method) throws JavaModelException {
-		String returnType= method.getReturnType();
-		return Signature.getTypeSignatureKind(Signature.getElementType(returnType)) == Signature.BASE_TYPE_SIGNATURE;
 	}
 }

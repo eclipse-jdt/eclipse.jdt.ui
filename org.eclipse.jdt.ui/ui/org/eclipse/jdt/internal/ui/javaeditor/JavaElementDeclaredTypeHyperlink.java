@@ -98,7 +98,13 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 	 * @see org.eclipse.jface.text.hyperlink.IHyperlink#open()
 	 */
 	public void open() {
-		String typeSignature= JavaElementHyperlinkDeclaredTypeDetector.getTypeSignature(fElement);
+		String typeSignature;
+		try {
+			typeSignature= JavaElementHyperlinkDeclaredTypeDetector.getTypeSignature(fElement);
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			return;
+		}
 		int kind= Signature.getTypeSignatureKind(typeSignature);
 		if (kind == Signature.ARRAY_TYPE_SIGNATURE) {
 			typeSignature= Signature.getElementType(typeSignature);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -448,6 +448,19 @@ public final class JavaModelUtil {
 	 */
 	public static boolean isPrimary(ICompilationUnit cu) {
 		return cu.getOwner() == null;
+	}
+
+	/**
+	 * Checks whether a type is a primitive type.
+	 * 
+	 * @param typeSignature the type signature string to check
+	 * @return <code>true</code> if the type is a primitive type, <code> false</code> otherwise
+	 * @throws JavaModelException if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource.
+	 * @since 3.7
+	 */
+	public static boolean isPrimitive(String typeSignature) throws JavaModelException {
+		return Signature.getTypeSignatureKind(Signature.getElementType(typeSignature)) == Signature.BASE_TYPE_SIGNATURE;
 	}
 
 	/*

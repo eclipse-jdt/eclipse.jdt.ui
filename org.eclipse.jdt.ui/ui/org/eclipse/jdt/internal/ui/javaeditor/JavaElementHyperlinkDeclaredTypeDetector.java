@@ -17,7 +17,8 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -37,7 +38,8 @@ public class JavaElementHyperlinkDeclaredTypeDetector extends JavaElementHyperli
 	 */
 	protected IHyperlink createHyperlink(IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
 		try {
-			if ((element.getElementType() == IJavaElement.FIELD || element.getElementType() == IJavaElement.LOCAL_VARIABLE) && !isPrimitive(element) && SelectionConverter.canOperateOn(editor)) {
+			if ((element.getElementType() == IJavaElement.FIELD || element.getElementType() == IJavaElement.LOCAL_VARIABLE) && !JavaModelUtil.isPrimitive(getTypeSignature(element))
+					&& SelectionConverter.canOperateOn(editor)) {
 				return new JavaElementDeclaredTypeHyperlink(wordRegion, openAction, element, qualify);
 			}
 		} catch (JavaModelException e) {
@@ -47,36 +49,19 @@ public class JavaElementHyperlinkDeclaredTypeDetector extends JavaElementHyperli
 	}
 
 	/**
-	 * Checks whether the declared type is a primitive type.
-	 * 
-	 * @param element the java element
-	 * @return <code>true</code> if the declared type is a primitive type, <code> false</code>
-	 *         otherwise
-	 * @throws JavaModelException if this element does not exist or if an exception occurs while
-	 *             accessing its corresponding resource.
-	 */
-	private boolean isPrimitive(IJavaElement element) throws JavaModelException {
-		String typeSignature= getTypeSignature(element);
-		return typeSignature != null ? Signature.getTypeSignatureKind(Signature.getElementType(typeSignature)) == Signature.BASE_TYPE_SIGNATURE : true;
-	}
-
-	/**
 	 * Returns the type signature of the element.
 	 * 
 	 * @param element a field or local variable
 	 * @return the type signature of the element
-	 * @since 3.7
+	 * @throws JavaModelException if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource.
 	 */
-	static String getTypeSignature(IJavaElement element) {
+	static String getTypeSignature(IJavaElement element) throws JavaModelException {
 		String typeSignature= null;
 		if (element instanceof ILocalVariable) {
 			typeSignature= ((ILocalVariable)element).getTypeSignature();
 		} else if (element instanceof IField) {
-			try {
-				typeSignature= ((IField)element).getTypeSignature();
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-			}
+			typeSignature= ((IField)element).getTypeSignature();
 		}
 		return typeSignature;
 	}
