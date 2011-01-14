@@ -51,18 +51,17 @@ public class JavaElementHyperlinkDeclaredTypeDetector extends JavaElementHyperli
 	/**
 	 * Returns the type signature of the element.
 	 * 
-	 * @param element a field or local variable
+	 * @param element an instance of <code>ILocalVariable</code> or <code>IField</code>
 	 * @return the type signature of the element
 	 * @throws JavaModelException if this element does not exist or if an exception occurs while
 	 *             accessing its corresponding resource.
 	 */
 	static String getTypeSignature(IJavaElement element) throws JavaModelException {
-		String typeSignature= null;
 		if (element instanceof ILocalVariable) {
-			typeSignature= ((ILocalVariable)element).getTypeSignature();
+			return ((ILocalVariable)element).getTypeSignature();
 		} else if (element instanceof IField) {
-			typeSignature= ((IField)element).getTypeSignature();
+			return ((IField)element).getTypeSignature();
 		}
-		return typeSignature;
+		throw new IllegalArgumentException();
 	}
 }
