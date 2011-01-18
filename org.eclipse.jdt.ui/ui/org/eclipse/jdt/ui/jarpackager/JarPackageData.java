@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.widgets.Shell;
@@ -310,14 +311,21 @@ public class JarPackageData {
 	 * @since 3.0
 	 */
 	public IPath getAbsoluteJarLocation() {
-		// The workspace root is always local to the file system. 
-		// So getLocation is OK here.
-		IPath workspaceLocation= ResourcesPlugin.getWorkspace().getRoot().getLocation();
-		if (!fJarLocation.isAbsolute() && workspaceLocation != null)
-			// prepend workspace path
-			return workspaceLocation.append(fJarLocation);
-		else
-			return fJarLocation;
+		if (!fJarLocation.isAbsolute()) {
+			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+			if (fJarLocation.segmentCount() >= 2 && !"..".equals(fJarLocation.segment(0))) { //$NON-NLS-1$
+				// reverse of AbstractJarDestinationWizardPage#handleDestinationBrowseButtonPressed()
+				IFile file= root.getFile(fJarLocation);
+				IPath absolutePath= file.getLocation();
+				if (absolutePath != null) {
+					return absolutePath;
+				}
+			}
+			// The path does not exist in the workspace (e.g. because there's no such project).
+			// Fallback is to just append the path to the workspace root.
+			return root.getLocation().append(fJarLocation);
+		}
+		return fJarLocation;
 	}
 
 	/**
