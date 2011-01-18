@@ -25,6 +25,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.core.filesystem.URIUtil;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -127,7 +129,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 		}
 		String selectedFileName= dialog.open();
 		if (selectedFileName != null) {
-			IContainer[] findContainersForLocation= ResourcesPlugin.getWorkspace().getRoot().findContainersForLocation(new Path(selectedFileName));
+			IContainer[] findContainersForLocation= ResourcesPlugin.getWorkspace().getRoot().findContainersForLocationURI(URIUtil.toURI(new Path(selectedFileName).makeAbsolute()));
 			if (findContainersForLocation.length > 0) {
 				selectedFileName= findContainersForLocation[0].getFullPath().makeRelative().toString();
 			}
