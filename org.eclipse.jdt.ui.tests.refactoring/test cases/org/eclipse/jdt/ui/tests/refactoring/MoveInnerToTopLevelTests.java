@@ -566,6 +566,10 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	public void test_nonstatic_48() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, null, false, true, false, false);
 	}
+	
+	public void test_nonstatic_49() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, "a", false, true, true, true);
+	}
 
 	public void testFail_nonstatic_0() throws Exception{
 		validateFailingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", RefactoringStatus.ERROR);

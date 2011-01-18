@@ -223,12 +223,13 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		}
 
 		private boolean isAccessToOuter(ITypeBinding binding) {
-			if (Bindings.isSuperType(binding, fCurrentType)) {
+			binding= binding.getTypeDeclaration();
+			if (Bindings.isSuperType(binding, fCurrentType, false)) {
 				return false;
 			}
 			ITypeBinding outer= fCurrentType.getDeclaringClass();
 			while (outer != null) {
-				if (Bindings.isSuperType(binding, outer)) {
+				if (Bindings.isSuperType(binding, outer, false)) {
 					return true;
 				}
 				outer= outer.getDeclaringClass();

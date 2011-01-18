@@ -845,15 +845,31 @@ public class Bindings {
 	 * 		a super type of <code>type</code> or is equal to it
 	 */
 	public static boolean isSuperType(ITypeBinding possibleSuperType, ITypeBinding type) {
+		return isSuperType(possibleSuperType, type, true);
+	}
+	
+	/**
+	 * Returns <code>true</code> if the given type is a super type of a candidate.
+	 * <code>true</code> is returned if the two type bindings are identical (TODO)
+	 * @param possibleSuperType the type to inspect
+	 * @param type the type whose super types are looked at
+	 * @param considerTypeArguments if <code>true</code>, consider type arguments of <code>type</code>
+	 * @return <code>true</code> iff <code>possibleSuperType</code> is
+	 * 		a super type of <code>type</code> or is equal to it
+	 */
+	public static boolean isSuperType(ITypeBinding possibleSuperType, ITypeBinding type, boolean considerTypeArguments) {
 		if (type.isArray() || type.isPrimitive()) {
 			return false;
+		}
+		if (! considerTypeArguments) {
+			type= type.getTypeDeclaration();
 		}
 		if (Bindings.equals(type, possibleSuperType)) {
 			return true;
 		}
 		ITypeBinding superClass= type.getSuperclass();
 		if (superClass != null) {
-			if (isSuperType(possibleSuperType, superClass)) {
+			if (isSuperType(possibleSuperType, superClass, considerTypeArguments)) {
 				return true;
 			}
 		}
@@ -861,7 +877,7 @@ public class Bindings {
 		if (possibleSuperType.isInterface()) {
 			ITypeBinding[] superInterfaces= type.getInterfaces();
 			for (int i= 0; i < superInterfaces.length; i++) {
-				if (isSuperType(possibleSuperType, superInterfaces[i])) {
+				if (isSuperType(possibleSuperType, superInterfaces[i], considerTypeArguments)) {
 					return true;
 				}
 			}
