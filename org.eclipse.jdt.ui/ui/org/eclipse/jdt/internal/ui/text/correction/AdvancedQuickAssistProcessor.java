@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1194,6 +1194,17 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				rightExpression= combineOperands(rewrite, rightExpression, extendedOperand, false, operator);
 			}
 		}
+
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=332019
+		if (operator == InfixExpression.Operator.EQUALS || operator == InfixExpression.Operator.NOT_EQUALS) {
+			if (leftExpression instanceof InfixExpression && !(leftExpression instanceof ParenthesizedExpression)) {
+				leftExpression= getParenthesizedExpression(ast, leftExpression);
+			}
+			if (rightExpression instanceof InfixExpression && !(rightExpression instanceof ParenthesizedExpression)) {
+				rightExpression= getParenthesizedExpression(ast, rightExpression);
+			}
+		}
+
 		if (operator == InfixExpression.Operator.LESS) {
 			operator= InfixExpression.Operator.GREATER;
 		} else if (operator == InfixExpression.Operator.LESS_EQUALS) {
