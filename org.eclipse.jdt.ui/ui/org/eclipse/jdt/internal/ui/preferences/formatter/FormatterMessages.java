@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *     istvan@benedek-home.de - 103706 [formatter] indent empty lines
  *     Aaron Luchko, aluchko@redhat.com - 105926 [Formatter] Exporting Unnamed profile fails silently
  *     Brock Janiczak <brockj@tpg.com.au> - [formatter] Add  option: "add new line after label" - https://bugs.eclipse.org/bugs/show_bug.cgi?id=150741
+ *     Ray V. (voidstar@gmail.com) - Contribution for bug 282988
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
@@ -356,6 +357,7 @@ final class FormatterMessages extends NLS {
 	public static String commentsTabPage_enable_javadoc_comment_formatting;
 	public static String CommentsTabPage_enable_line_comment_formatting;
 	public static String CommentsTabPage_enable_block_comment_formatting;
+	public static String CommentsTabPage_preserve_white_space_before_line_comment;
 	public static String CommentsTabPage_format_header;
 	public static String CommentsTabPage_format_html;
 	public static String CommentsTabPage_format_code_snippets;

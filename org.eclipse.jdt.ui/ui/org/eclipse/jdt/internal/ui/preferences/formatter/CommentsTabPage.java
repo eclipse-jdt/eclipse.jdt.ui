@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Ray V. (voidstar@gmail.com) - Contribution for bug 282988
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
@@ -119,6 +120,12 @@ public class CommentsTabPage extends FormatterTabPage {
 		" * @return The result of the foo operation, usually within 0 and 1000.\n" + //$NON-NLS-1$
 		" */" + //$NON-NLS-1$
 		" int foo(int a, int b);\n" + //$NON-NLS-1$
+		"}\n" +//$NON-NLS-1$
+		"class Test {\n" +//$NON-NLS-1$
+		"\t\tvoid trailingCommented() {\n" +  //$NON-NLS-1$
+		"\t\t\t\tSystem.out.println(\"indented\");\t\t// comment\n" +  //$NON-NLS-1$
+		"\t\t\t\tSystem.out.println(\"indent\");\t\t// comment\n" +  //$NON-NLS-1$
+		"\t\t}\n" +  //$NON-NLS-1$
 		"}"; //$NON-NLS-1$
 
 	private CompilationUnitPreview fPreview;
@@ -141,8 +148,9 @@ public class CommentsTabPage extends FormatterTabPage {
 		GridData spacerData= new GridData(0, 0);
 		spacerData.horizontalSpan= numColumns;
 		new Composite(globalGroup, SWT.NONE).setLayoutData(spacerData);
-		createPrefFalseTrue(globalGroup, numColumns, FormatterMessages.CommentsTabPage_never_indent_block_comments_on_first_column, DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_BLOCK_COMMENTS_ON_FIRST_COLUMN, false);
+		createPrefFalseTrue(globalGroup, numColumns, FormatterMessages.CommentsTabPage_preserve_white_space_before_line_comment, DefaultCodeFormatterConstants.FORMATTER_COMMENT_PRESERVE_WHITE_SPACE_BETWEEN_CODE_AND_LINE_COMMENT, false);
 		createPrefFalseTrue(globalGroup, numColumns, FormatterMessages.CommentsTabPage_never_indent_line_comments_on_first_column, DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, false);
+		createPrefFalseTrue(globalGroup, numColumns, FormatterMessages.CommentsTabPage_never_indent_block_comments_on_first_column, DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_BLOCK_COMMENTS_ON_FIRST_COLUMN, false);
 		createPrefFalseTrue(globalGroup, numColumns, FormatterMessages.CommentsTabPage_do_not_join_lines, DefaultCodeFormatterConstants.FORMATTER_JOIN_LINES_IN_COMMENTS, true);
 
 		// javadoc comment formatting settings
