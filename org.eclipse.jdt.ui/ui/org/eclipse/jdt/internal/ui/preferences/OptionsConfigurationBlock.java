@@ -874,7 +874,7 @@ public abstract class OptionsConfigurationBlock {
 		return checkBox;
 	}
 
-	protected Button addCheckBoxWithLink(Composite parent, final String label, Key key, String[] values, int indent, int widthHint, SelectionListener listener) {
+	protected Button addCheckBoxWithLink(Composite parent, final String label, Key key, String[] values, int indent, int widthHint, final SelectionListener listener) {
 		LinkControlData data= new LinkControlData(key, values);
 
 		GridData gd= new GridData(GridData.FILL, GridData.FILL, true, false);
@@ -907,9 +907,6 @@ public abstract class OptionsConfigurationBlock {
 		Link link= new Link(composite, SWT.NONE);
 		link.setText(label);
 		link.setLayoutData(gd);
-		if (listener != null) {
-			link.addSelectionListener(listener);
-		}
 		data.setLink(link);
 		
 		// toggle checkbox when user clicks unlinked text in link:
@@ -917,6 +914,9 @@ public abstract class OptionsConfigurationBlock {
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				linkSelected[0]= true;
+				if (listener != null) {
+					listener.widgetSelected(e);
+				}
 			}
 		});
 		link.addMouseListener(new MouseAdapter() {
