@@ -2655,6 +2655,39 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	}
 
+	public void testInverseCondition1() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=334876
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a, Object b) {\n");
+		buf.append("        if (a == null ^ b == null) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("a ==");
+		int length= "a == null ^ b == null".length();
+		AssistContext context= getCorrectionContext(cu, offset, length);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a, Object b) {\n");
+		buf.append("        if (!(a == null ^ b == null)) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
 
 	public void testPushNegationDown1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

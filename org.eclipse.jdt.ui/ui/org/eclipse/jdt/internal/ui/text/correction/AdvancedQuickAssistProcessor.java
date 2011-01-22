@@ -501,6 +501,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			if (operator == InfixExpression.Operator.OR) {
 				return getInversedAndOrExpression(rewrite, infixExpression, InfixExpression.Operator.AND, provider);
 			}
+			if (operator == InfixExpression.Operator.XOR) {
+				return getInversedNotExpression(rewrite, expression, ast);
+			}
 		}
 		if (expression instanceof PrefixExpression) {
 			PrefixExpression prefixExpression= (PrefixExpression) expression;
@@ -509,12 +512,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		if (expression instanceof InstanceofExpression) {
-			PrefixExpression prefixExpression= ast.newPrefixExpression();
-			prefixExpression.setOperator(PrefixExpression.Operator.NOT);
-			ParenthesizedExpression parenthesizedExpression= ast.newParenthesizedExpression();
-			parenthesizedExpression.setExpression((Expression) rewrite.createCopyTarget(expression));
-			prefixExpression.setOperand(parenthesizedExpression);
-			return prefixExpression;
+			return getInversedNotExpression(rewrite, expression, ast);
 		}
 		if (expression instanceof ParenthesizedExpression) {
 			ParenthesizedExpression parenthesizedExpression= (ParenthesizedExpression) expression;
@@ -525,14 +523,21 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			if (innerExpression instanceof InstanceofExpression) {
 				return getInversedExpression(rewrite, innerExpression, provider);
 			}
-			parenthesizedExpression= ast.newParenthesizedExpression();
-			parenthesizedExpression.setExpression(getInversedExpression(rewrite, innerExpression, provider));
+			parenthesizedExpression= getParenthesizedExpression(ast, getInversedExpression(rewrite, innerExpression, provider));
 			return parenthesizedExpression;
 		}
 		//
 		PrefixExpression prefixExpression= ast.newPrefixExpression();
 		prefixExpression.setOperator(PrefixExpression.Operator.NOT);
 		prefixExpression.setOperand(getRenamedNameCopy(provider, rewrite, expression));
+		return prefixExpression;
+	}
+
+	private static Expression getInversedNotExpression(ASTRewrite rewrite, Expression expression, AST ast) {
+		PrefixExpression prefixExpression= ast.newPrefixExpression();
+		prefixExpression.setOperator(PrefixExpression.Operator.NOT);
+		ParenthesizedExpression parenthesizedExpression= getParenthesizedExpression(ast, (Expression)rewrite.createCopyTarget(expression));
+		prefixExpression.setOperand(parenthesizedExpression);
 		return prefixExpression;
 	}
 
@@ -765,7 +770,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return expression;
 	}
 
-	private static Expression getParenthesizedExpression(AST ast, Expression expression) {
+	private static ParenthesizedExpression getParenthesizedExpression(AST ast, Expression expression) {
 		ParenthesizedExpression parenthesizedExpression= ast.newParenthesizedExpression();
 		parenthesizedExpression.setExpression(expression);
 		return parenthesizedExpression;
