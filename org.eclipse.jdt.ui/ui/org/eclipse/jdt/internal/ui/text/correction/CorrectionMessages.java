@@ -29,6 +29,7 @@ public final class CorrectionMessages extends NLS {
 	public static String JavadocTagsSubProcessor_document_parameter_description;
 	public static String LocalCorrectionsSubProcessor_renaming_duplicate_method;
 	public static String LocalCorrectionsSubProcessor_replacefieldaccesswithmethod_description;
+	public static String ModifierCorrectionSubProcessor_addstatic_description;
 	public static String ModifierCorrectionSubProcessor_addstatictoparenttype_description;
 	public static String ModifierCorrectionSubProcessor_addsynchronized_description;
 	public static String ModifierCorrectionSubProcessor_changefieldmodifiertononstatic_description;

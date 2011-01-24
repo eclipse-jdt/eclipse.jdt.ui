@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -113,6 +113,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_PB_MISSING_HASHCODE_METHOD= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_HASHCODE_METHOD);
 	private static final Key PREF_PB_DEAD_CODE= getJDTCoreKey(JavaCore.COMPILER_PB_DEAD_CODE);
 	private static final Key PREF_PB_UNUSED_OBJECT_ALLOCATION= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_OBJECT_ALLOCATION);
+	private static final Key PREF_PB_MISSING_STATIC_ON_METHOD= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_STATIC_ON_METHOD);
+	private static final Key PREF_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD= getJDTCoreKey(JavaCore.COMPILER_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD);
 
 	// values
 	private static final String ERROR= JavaCore.ERROR;
@@ -165,7 +167,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_PB_SUPPRESS_WARNINGS, PREF_PB_SUPPRESS_OPTIONAL_ERRORS,
 				PREF_PB_UNHANDLED_WARNING_TOKEN,
 				PREF_PB_COMPARING_IDENTICAL, PREF_PB_MISSING_SYNCHRONIZED_ON_INHERITED_METHOD, PREF_PB_MISSING_HASHCODE_METHOD,
-				PREF_PB_DEAD_CODE, PREF_PB_UNUSED_OBJECT_ALLOCATION
+				PREF_PB_DEAD_CODE, PREF_PB_UNUSED_OBJECT_ALLOCATION,
+				PREF_PB_MISSING_STATIC_ON_METHOD, PREF_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD
 			};
 	}
 
@@ -323,6 +326,12 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_object_allocation_label;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_OBJECT_ALLOCATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
 
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_missing_static_on_method_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_MISSING_STATIC_ON_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_potentially_missing_static_on_method_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		
 		// --- name_shadowing
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_name_shadowing;

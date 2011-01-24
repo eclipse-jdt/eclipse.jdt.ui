@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -62,7 +63,6 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 
@@ -70,12 +70,12 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix.MakeTypeAbstractOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -772,6 +772,14 @@ public class ModifierCorrectionSubProcessor {
 
 
 	public static void addSynchronizedMethodProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		addAddMethodModifierProposal(context, problem, proposals, Modifier.SYNCHRONIZED, CorrectionMessages.ModifierCorrectionSubProcessor_addsynchronized_description);
+	}
+
+	public static void addStaticMethodProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		addAddMethodModifierProposal(context, problem, proposals, Modifier.STATIC, CorrectionMessages.ModifierCorrectionSubProcessor_addstatic_description);
+	}
+	
+	private static void addAddMethodModifierProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int modifier, String label) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -783,8 +791,7 @@ public class ModifierCorrectionSubProcessor {
 		if (binding instanceof IMethodBinding) {
 			binding= ((IMethodBinding) binding).getMethodDeclaration();
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_addsynchronized_description, BasicElementLabels.getJavaElementName(binding.getName()));
-			proposals.add(new ModifierChangeCorrectionProposal(label, cu, binding, selectedNode, Modifier.SYNCHRONIZED, 0, 5, image));
+			proposals.add(new ModifierChangeCorrectionProposal(label, cu, binding, selectedNode, modifier, 0, 5, image));
 		}
 	}
 
