@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,7 +76,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
@@ -676,17 +675,26 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		verifyInput(getEditorInput());
 
-		final ITypeRoot inputElement= getInputJavaElement();
-
 		JavaPlugin.getDefault().getASTProvider().activeJavaEditorChanged(this);
 
+		if (fSemanticManager != null)
+			installSemanticHighlighting();
+
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#installSemanticHighlighting()
+	 * @since 3.7
+	 */
+	protected void installSemanticHighlighting() {
+		super.installSemanticHighlighting();
 		Job job= new Job(JavaEditorMessages.OverrideIndicatorManager_intallJob) {
 			/*
 			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 			 * @since 3.0
 			 */
 			protected IStatus run(IProgressMonitor monitor) {
-				CompilationUnit ast= SharedASTProvider.getAST(inputElement, SharedASTProvider.WAIT_YES, null);
+				CompilationUnit ast= SharedASTProvider.getAST(getInputJavaElement(), SharedASTProvider.WAIT_YES, null);
 				if (fOverrideIndicatorManager != null)
 					fOverrideIndicatorManager.reconciled(ast, true, monitor);
 				if (fSemanticManager != null) {
@@ -702,7 +710,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		job.setPriority(Job.DECORATE);
 		job.setSystem(true);
 		job.schedule();
-
 	}
 
 	/*

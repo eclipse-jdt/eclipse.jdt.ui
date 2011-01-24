@@ -3498,7 +3498,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 *
 	 * @since 3.0
 	 */
-	private void installSemanticHighlighting() {
+	protected void installSemanticHighlighting() {
 		if (fSemanticManager == null) {
 			fSemanticManager= new SemanticHighlightingManager();
 			fSemanticManager.install(this, (JavaSourceViewer) getSourceViewer(), JavaPlugin.getDefault().getJavaTextTools().getColorManager(), getPreferenceStore());
