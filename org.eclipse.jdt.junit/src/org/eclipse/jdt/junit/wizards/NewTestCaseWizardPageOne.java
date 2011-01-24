@@ -913,7 +913,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	 * @throws CoreException if the element could not be created
 	 * @since 3.7
 	 */
-	private void createTestMethod(IType type, ImportsManager imports, IMethod method, List/*<IMethod>*/overloadedMethods, List/*<String>*/names) throws CoreException {
+	private void createTestMethod(IType type, ImportsManager imports, IMethod method, List<IMethod> overloadedMethods, List<String> names) throws CoreException {
 		StringBuffer buffer= new StringBuffer();
 		StringBuffer name;
 		if (method != null) {
