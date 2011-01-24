@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -737,7 +737,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			createTearDown(type, imports);
 		}
 
-		if (fClassUnderTest != null) {
+		if (fClassUnderTest != null || isJUnit4()) {
 			createTestMethodStubs(type, imports);
 		}
 
@@ -879,8 +879,13 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	private void createTestMethodStubs(IType type, ImportsManager imports) throws CoreException {
 		IMethod[] methods= fPage2.getCheckedMethods();
-		if (methods.length == 0)
+		if (methods.length == 0) {
+			if (isJUnit4()) {
+				List<String> names= new ArrayList<String>();
+				createTestMethod(type, imports, null, null, names);
+			}
 			return;
+		}
 		/* find overloaded methods */
 		IMethod[] allMethodsArray= fPage2.getAllMethods();
 		List<IMethod> allMethods= new ArrayList<IMethod>();
@@ -893,49 +898,68 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		 */
 		List<String> names= new ArrayList<String>();
 		for (IMethod method : methods) {
-			String elementName= method.getElementName();
-			StringBuffer name= new StringBuffer(PREFIX).append(Character.toUpperCase(elementName.charAt(0))).append(elementName.substring(1));
-			StringBuffer buffer= new StringBuffer();
+			createTestMethod(type, imports, method, overloadedMethods, names);
+		}
+	}
 
+	/**
+	 * Creates a test method.
+	 * 
+	 * @param type the type to create the method
+	 * @param imports the imports manager
+	 * @param method the method or <code>null</code>
+	 * @param overloadedMethods the list of overloaded methods or <code>null</code>
+	 * @param names the list of method names
+	 * @throws CoreException if the element could not be created
+	 * @since 3.7
+	 */
+	private void createTestMethod(IType type, ImportsManager imports, IMethod method, List/*<IMethod>*/overloadedMethods, List/*<String>*/names) throws CoreException {
+		StringBuffer buffer= new StringBuffer();
+		StringBuffer name;
+		if (method != null) {
+			String elementName= method.getElementName();
+			name= new StringBuffer(PREFIX).append(Character.toUpperCase(elementName.charAt(0))).append(elementName.substring(1));
 			final boolean contains= overloadedMethods.contains(method);
 			if (contains)
 				appendParameterNamesToMethodName(name, method.getParameterTypes());
-
-			replaceIllegalCharacters(name);
-			/* void foo(java.lang.StringBuffer sb) {}
-			 *  void foo(mypackage1.StringBuffer sb) {}
-			 *  void foo(mypackage2.StringBuffer sb) {}
-			 * ->
-			 *  testFooStringBuffer()
-			 *  testFooStringBuffer1()
-			 *  testFooStringBuffer2()
-			 */
-			String testName= name.toString();
-			if (names.contains(testName)) {
-				int suffix= 1;
-				while (names.contains(testName + Integer.toString(suffix)))
-					suffix++;
-				name.append(Integer.toString(suffix));
-			}
-			testName= name.toString();
-			names.add(testName);
-
-			if (isAddComments()) {
-				appendMethodComment(buffer, method);
-			}
-			if (isJUnit4()) {
-				buffer.append('@').append(imports.addImport(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME)).append(getLineDelimiter());
-			}
-
-			buffer.append("public ");//$NON-NLS-1$
-			if (fPage2.getCreateFinalMethodStubsButtonSelection())
-				buffer.append("final "); //$NON-NLS-1$
-			buffer.append("void ");//$NON-NLS-1$
-			buffer.append(testName);
-			buffer.append("()");//$NON-NLS-1$
-			appendTestMethodBody(buffer, type.getCompilationUnit());
-			type.createMethod(buffer.toString(), null, false, null);
+		} else {
+			name= new StringBuffer(PREFIX);
 		}
+
+		replaceIllegalCharacters(name);
+		/* void foo(java.lang.StringBuffer sb) {}
+		 *  void foo(mypackage1.StringBuffer sb) {}
+		 *  void foo(mypackage2.StringBuffer sb) {}
+		 * ->
+		 *  testFooStringBuffer()
+		 *  testFooStringBuffer1()
+		 *  testFooStringBuffer2()
+		 */
+		String testName= name.toString();
+		if (names.contains(testName)) {
+			int suffix= 1;
+			while (names.contains(testName + Integer.toString(suffix)))
+				suffix++;
+			name.append(Integer.toString(suffix));
+		}
+		testName= name.toString();
+		names.add(testName);
+
+		if (isAddComments() && method != null) {
+			appendMethodComment(buffer, method);
+		}
+		if (isJUnit4()) {
+			buffer.append('@').append(imports.addImport(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME)).append(getLineDelimiter());
+		}
+
+		buffer.append("public ");//$NON-NLS-1$
+		if (fPage2.getCreateFinalMethodStubsButtonSelection())
+			buffer.append("final "); //$NON-NLS-1$
+		buffer.append("void ");//$NON-NLS-1$
+		buffer.append(testName);
+		buffer.append("()");//$NON-NLS-1$
+		appendTestMethodBody(buffer, type.getCompilationUnit());
+		type.createMethod(buffer.toString(), null, false, null);
 	}
 
 	private void replaceIllegalCharacters(StringBuffer buffer) {
