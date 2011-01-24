@@ -17,6 +17,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -614,7 +615,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		if (isEmpty) {
 			setContentDescription(""); //$NON-NLS-1$
 			setTitleToolTip(getPartName());
-			getViewSite().getActionBars().getStatusLineManager().setMessage(""); //$NON-NLS-1$			
+			getViewSite().getActionBars().getStatusLineManager().setMessage(""); //$NON-NLS-1$
+			getViewer().clearViewer();
 		}
 		fPagebook.showPage(control);
 		if (fRefreshViewAction != null)
@@ -1099,7 +1101,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		if (fInputElements != null) {
 			showPage(PAGE_VIEWER);
 
-			int includeMask= fShowSearchInDialogAction.getSearchInDialog().getIncludeMask();
+			int includeMask= getIncludeMask();
 			CallHierarchy.getDefault().setSearchScope(getSearchScope(includeMask));
 
 			// set input to null so that setComparator does not cause a refresh on the old contents:
@@ -1116,9 +1118,31 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 				fCallHierarchyViewer.setComparator(null);
 				fCallHierarchyViewer.setMethodWrappers(getCalleeRoots());
 			}
-			setContentDescription(computeContentDescription(includeMask));
+			setContentDescription(includeMask);
 		}
     }
+
+	/**
+	 * Sets the content description.
+	 * 
+	 * @param includeMask the include mask
+	 * @since 3.7
+	 */
+	private void setContentDescription(int includeMask) {
+		setContentDescription(computeContentDescription(includeMask));
+	}
+
+
+
+	/**
+	 * Gets the include mask.
+	 * 
+	 * @return the include mask
+	 * @since 3.7
+	 */
+	private int getIncludeMask() {
+		return fShowSearchInDialogAction.getSearchInDialog().getIncludeMask();
+	}
 
 	/**
 	 * Computes the content description for the call hierarchy computation.
@@ -1301,5 +1325,49 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		if (siteService != null)
 			service= (IWorkbenchSiteProgressService)siteService;
 		return service;
+	}
+
+	/**
+	 * Adds the new input elements to the current list.
+	 * 
+	 * @param newElements the new input elements to add
+	 * @since 3.7
+	 */
+	void addInputElements(IMember[] newElements) {
+		if (fInputElements == null || fInputElements.length == 0) {
+			fInputElements= newElements;
+			return;
+		}
+		List/*<IMember>*/ elem= new ArrayList/*<IMember>*/();
+		elem.addAll(Arrays.asList(fInputElements));
+		elem.addAll(Arrays.asList(newElements));
+
+		fInputElements= (IMember[])elem.toArray(new IMember[elem.size()]);
+		addHistoryEntry(fInputElements);
+		updateViewWithAddedElements(newElements);
+	}
+
+	/**
+	 * Updates the view with the newly added input elements.
+	 * 
+	 * @param newElements the newly added elements
+	 * @since 3.7
+	 */
+	private void updateViewWithAddedElements(IMember[] newElements) {
+		setCalleeRoots(null);
+		setCallerRoots(null);
+		setContentDescription(getIncludeMask());
+		MethodWrapper[] roots;
+		if (getCallMode() == CALL_MODE_CALLERS)
+			roots= CallHierarchy.getDefault().getCallerRoots(newElements);
+		else
+			roots= CallHierarchy.getDefault().getCalleeRoots(newElements);
+		CallHierarchyViewer hierarchyViewer= getViewer();		
+		TreeRoot treeRoot= hierarchyViewer.getTreeRoot(roots, true);
+		hierarchyViewer.add(treeRoot, roots);
+		for (int i= 0; i < roots.length; i++) {
+			hierarchyViewer.setExpandedState(roots[i], true);
+		}
+		hierarchyViewer.setSelection(new StructuredSelection(roots), true);
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ class CallHierarchyViewer extends TreeViewer {
 
 	private CallerMethodWrapper fConstructorToExpand;
 
+	private TreeRoot fDummyRoot;
 
     /**
      * @param parent the parent composite
@@ -97,10 +98,27 @@ class CallHierarchyViewer extends TreeViewer {
      * @return A new TreeRoot which is a dummy root above the specified root.
      */
     private TreeRoot getTreeRoot(MethodWrapper[] roots) {
-        TreeRoot dummyRoot = new TreeRoot(roots);
+		return getTreeRoot(roots, false);
+	}
 
-        return dummyRoot;
-    }
+
+	/**
+	 * Wraps the roots of a MethodWrapper tree in a dummy root in order to show it in the tree.
+	 * 
+	 * @param roots The visible roots of the MethodWrapper tree.
+	 * @param addRoots <code>true</code> if the roots need to be added to the existing roots,
+	 *            <code>false</code> otherwise
+	 * @return a new TreeRoot which is a dummy root above the specified root
+	 * @since 3.7
+	 */
+	TreeRoot getTreeRoot(MethodWrapper[] roots, boolean addRoots) {
+		if (fDummyRoot == null || !addRoots)
+			fDummyRoot= new TreeRoot(roots);
+		else
+			fDummyRoot.addRoots(roots);
+
+		return fDummyRoot;
+	}
 
     /**
      * Attaches a context menu listener to the tree
@@ -119,6 +137,7 @@ class CallHierarchyViewer extends TreeViewer {
 
     void clearViewer() {
         setInput(TreeRoot.EMPTY_ROOT);
+		fDummyRoot= null;
     }
 
     void cancelJobs() {
