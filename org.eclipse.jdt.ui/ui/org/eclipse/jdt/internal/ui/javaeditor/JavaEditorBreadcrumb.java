@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -212,7 +212,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 		private ILabelProvider createDropDownLabelProvider() {
 			final AppearanceAwareLabelProvider result= new AppearanceAwareLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_APP_TYPE_SIGNATURE
-					| JavaElementLabels.ALL_CATEGORY, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
+					| JavaElementLabels.ALL_CATEGORY | JavaElementLabels.P_COMPRESSED, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 
 			return new DecoratingJavaLabelProvider(result);
 		}
@@ -694,7 +694,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	private static ILabelProvider createLabelProvider() {
 		final AppearanceAwareLabelProvider result= new AppearanceAwareLabelProvider(JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.M_PARAMETER_TYPES
 				| JavaElementLabels.M_APP_TYPE_PARAMETERS | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.F_APP_TYPE_SIGNATURE
-				| JavaElementLabels.ALL_CATEGORY, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
+				| JavaElementLabels.ALL_CATEGORY | JavaElementLabels.P_COMPRESSED, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 
 		return new DecoratingJavaLabelProvider(result) {
 
