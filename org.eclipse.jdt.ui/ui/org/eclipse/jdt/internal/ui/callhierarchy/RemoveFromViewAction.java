@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 IBM Corporation and others.
+ * Copyright (c) 2009, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.swt.widgets.TreeItem;
 
@@ -18,6 +21,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
@@ -67,9 +72,42 @@ class RemoveFromViewAction extends Action{
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	public void run() {
+		IMember[] inputElements= fPart.getInputElements();
+		List inputList= new ArrayList(Arrays.asList(inputElements));
+		IMember[] selection= getSelectedElements();
+		for (int i= 0; i < selection.length; i++) {
+			if (inputList.contains(selection[i]))
+				inputList.remove(selection[i]);
+		}
+		if (inputList.size() > 0) {
+			fPart.updateInputHistoryAndDescription(inputElements, (IMember[])inputList.toArray(new IMember[inputList.size()]));
+		}
 		TreeItem[] items= fCallHierarchyViewer.getTree().getSelection();
 		for (int i= 0; i < items.length; i++)
 			items[i].dispose();
+	}
+
+	/**
+	 * Gets the elements selected in the call hierarchy view part.
+	 * 
+	 * @return the elements
+	 * @since 3.7
+	 */
+	private IMember[] getSelectedElements() {
+		ISelection selection= getSelection();
+		if (selection instanceof IStructuredSelection) {
+			List members= new ArrayList();
+			List elements= ((IStructuredSelection)selection).toList();
+			for (Iterator iter= elements.iterator(); iter.hasNext();) {
+				Object obj= iter.next();
+				if (obj instanceof MethodWrapper) {
+					MethodWrapper wrapper= (MethodWrapper)obj;
+					members.add((wrapper).getMember());
+				}
+			}
+			return (IMember[])members.toArray(new IMember[members.size()]);
+		}
+		return null;
 	}
 
 	/**

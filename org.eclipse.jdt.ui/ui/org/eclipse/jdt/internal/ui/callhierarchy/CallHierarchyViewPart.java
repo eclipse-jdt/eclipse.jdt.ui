@@ -942,8 +942,32 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @param entry the entry to add
      */
     private void addHistoryEntry(IMember[] entry) {
-    	for (Iterator iter= getMethodHistory().iterator(); iter.hasNext(); ) {
-			if (Arrays.equals(entry, (IMember[]) iter.next())) {
+		updateHistoryEntries(entry, entry);
+    }
+
+	/**
+	 * Updates the input, history and description for the new input.
+	 * 
+	 * @param currentInput the current input
+	 * @param entry the new input elements
+	 * @since 3.7
+	 */
+	void updateInputHistoryAndDescription(IMember[] currentInput, IMember[] entry) {
+		updateHistoryEntries(currentInput, entry);
+		fInputElements= entry;
+		setContentDescription(getIncludeMask());
+	}
+
+	/**
+	 * Updates the history with the latest input.
+	 * 
+	 * @param currentInput the current input
+	 * @param entry the new input elements
+	 * @since 3.7
+	 */
+	private void updateHistoryEntries(IMember[] currentInput, IMember[] entry) {
+		for (Iterator iter= getMethodHistory().iterator(); iter.hasNext();) {
+			if (Arrays.equals(currentInput, (IMember[]) iter.next())) {
 				iter.remove();
 			}
 		}
@@ -1339,11 +1363,12 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			return;
 		}
 		List/*<IMember>*/ elem= new ArrayList/*<IMember>*/();
-		elem.addAll(Arrays.asList(fInputElements));
+		boolean lastElementRemoved= fInputElements.length == 1 && fCallHierarchyViewer.getTree().getItemCount() == 0;
+		if (!lastElementRemoved)
+			elem.addAll(Arrays.asList(fInputElements));
 		elem.addAll(Arrays.asList(newElements));
-
-		fInputElements= (IMember[])elem.toArray(new IMember[elem.size()]);
-		addHistoryEntry(fInputElements);
+		IMember[] members= (IMember[])elem.toArray(new IMember[elem.size()]);
+		updateInputHistoryAndDescription(fInputElements, members);
 		updateViewWithAddedElements(newElements);
 	}
 
@@ -1356,7 +1381,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	private void updateViewWithAddedElements(IMember[] newElements) {
 		setCalleeRoots(null);
 		setCallerRoots(null);
-		setContentDescription(getIncludeMask());
 		MethodWrapper[] roots;
 		if (getCallMode() == CALL_MODE_CALLERS)
 			roots= CallHierarchy.getDefault().getCallerRoots(newElements);
