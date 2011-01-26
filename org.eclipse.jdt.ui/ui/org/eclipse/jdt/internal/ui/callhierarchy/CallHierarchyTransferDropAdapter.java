@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.dnd.DND;
@@ -44,22 +42,15 @@ class CallHierarchyTransferDropAdapter extends ViewerInputDropAdapter {
 	 */
 	protected void doInputView(Object inputElements) {
 		IMember[] newElements= (IMember[])inputElements;
-		IMember[] members= fCallHierarchyViewPart.getInputElements();
-		boolean noInput= members != null && members.length > 0;
+		IMember[] oldInput= fCallHierarchyViewPart.getInputElements();
+		boolean noInput= oldInput != null && oldInput.length > 0;
 		if (getCurrentOperation() == DND.DROP_LINK || !noInput) {
 			fCallHierarchyViewPart.setInputElements(newElements);
 			return;
-		} 
-		List/*<IMember>*/oldElements= Arrays.asList(members);
-		List/*<IMember>*/elements= new ArrayList/*<IMember>*/();
-		for (int i= 0; i < newElements.length; i++) {
-			if (!oldElements.contains(newElements[i]))
-				elements.add(newElements[i]);
 		}
-		if (elements.size() == 0)
-			return;
-		newElements= (IMember[])elements.toArray(new IMember[elements.size()]);
-		fCallHierarchyViewPart.addInputElements(newElements);
+		if (newElements != null && newElements.length > 0) {
+			fCallHierarchyViewPart.addInputElements(newElements);
+		}
 	}
 
 	/* (non-Javadoc)

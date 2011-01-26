@@ -38,6 +38,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -972,12 +973,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			}
 		}
 
-		if (entry.length == 0) {
-			CallHierarchyUI.getDefault().clearHistory();
-		} else {
-			getMethodHistory().add(0, entry);
-			fHistoryDropDownAction.setEnabled(true);
-		}
+        getMethodHistory().add(0, entry);
+        fHistoryDropDownAction.setEnabled(true);
     }
 
     private void createLocationViewer(Composite parent) {
@@ -1362,16 +1359,33 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	 * @since 3.7
 	 */
 	void addInputElements(IMember[] newElements) {
-		if (fInputElements == null || fInputElements.length == 0) {
-			fInputElements= newElements;
-			return;
+		// Caveat: RemoveFromViewAction#run() disposes TreeItems. When we add a previously removed element,
+		// we have to consider the real Tree state, not only fInputElements.
+		
+		List/*<IMember>*/ inputElements= Arrays.asList(fInputElements);
+		List/*<IMember>*/ treeElements= new ArrayList/*<IMember>*/();
+		TreeItem[] treeItems= fCallHierarchyViewer.getTree().getItems();
+		for (int i= 0; i < treeItems.length; i++) {
+			Object data= treeItems[i].getData();
+			if (data instanceof MethodWrapper)
+				treeElements.add(((MethodWrapper) data).getMember());
 		}
-		List/*<IMember>*/ elem= new ArrayList/*<IMember>*/();
-		elem.addAll(Arrays.asList(fInputElements));
-		elem.addAll(Arrays.asList(newElements));
-		IMember[] members= (IMember[])elem.toArray(new IMember[elem.size()]);
-		updateInputHistoryAndDescription(fInputElements, members);
-		updateViewWithAddedElements(newElements);
+		
+		List/*<IMember>*/ newInput= new ArrayList/*<IMember>*/();
+		newInput.addAll(inputElements);
+		List/*<IMember>*/ addedElements= new ArrayList/*<IMember>*/();
+		
+		for (int i= 0; i < newElements.length; i++) {
+			IMember newElement= newElements[i];
+			if (! inputElements.contains(newElement))
+				newInput.add(newElement);
+			if (! treeElements.contains(newElement))
+				addedElements.add(newElement);
+		}
+		if (newInput.size() > fInputElements.length)
+			updateInputHistoryAndDescription(fInputElements, (IMember[])newInput.toArray(new IMember[newInput.size()]));
+		if (addedElements.size() > 0)
+			updateViewWithAddedElements((IMember[]) addedElements.toArray(new IMember[addedElements.size()]));
 	}
 
 	/**
