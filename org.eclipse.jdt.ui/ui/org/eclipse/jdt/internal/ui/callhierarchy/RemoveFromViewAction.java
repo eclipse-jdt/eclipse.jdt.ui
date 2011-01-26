@@ -79,9 +79,7 @@ class RemoveFromViewAction extends Action{
 			if (inputList.contains(selection[i]))
 				inputList.remove(selection[i]);
 		}
-		if (inputList.size() > 0) {
-			fPart.updateInputHistoryAndDescription(inputElements, (IMember[])inputList.toArray(new IMember[inputList.size()]));
-		}
+		fPart.updateInputHistoryAndDescription(inputElements, (IMember[])inputList.toArray(new IMember[inputList.size()]));
 		TreeItem[] items= fCallHierarchyViewer.getTree().getSelection();
 		for (int i= 0; i < items.length; i++)
 			items[i].dispose();

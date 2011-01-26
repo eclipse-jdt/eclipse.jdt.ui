@@ -972,8 +972,12 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			}
 		}
 
-        getMethodHistory().add(0, entry);
-        fHistoryDropDownAction.setEnabled(true);
+		if (entry.length == 0) {
+			CallHierarchyUI.getDefault().clearHistory();
+		} else {
+			getMethodHistory().add(0, entry);
+			fHistoryDropDownAction.setEnabled(true);
+		}
     }
 
     private void createLocationViewer(Composite parent) {
@@ -1363,9 +1367,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			return;
 		}
 		List/*<IMember>*/ elem= new ArrayList/*<IMember>*/();
-		boolean lastElementRemoved= fInputElements.length == 1 && fCallHierarchyViewer.getTree().getItemCount() == 0;
-		if (!lastElementRemoved)
-			elem.addAll(Arrays.asList(fInputElements));
+		elem.addAll(Arrays.asList(fInputElements));
 		elem.addAll(Arrays.asList(newElements));
 		IMember[] members= (IMember[])elem.toArray(new IMember[elem.size()]);
 		updateInputHistoryAndDescription(fInputElements, members);
