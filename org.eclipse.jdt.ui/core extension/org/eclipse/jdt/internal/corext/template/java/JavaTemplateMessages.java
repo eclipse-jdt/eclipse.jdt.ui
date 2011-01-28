@@ -31,6 +31,7 @@ final class JavaTemplateMessages extends NLS {
 	public static String CompilationUnitContextType_variable_description_enclosing_package;
 	public static String CompilationUnitContextType_variable_description_enclosing_project;
 	public static String CompilationUnitContextType_variable_description_enclosing_method_arguments;
+	public static String CompilationUnitContextType_variable_description_line_selection;
 	public static String CompilationUnitContextType_variable_description_return_type;
 	public static String JavaContextType_variable_description_array;
 	public static String JavaContextType_variable_description_array_type;
@@ -45,6 +46,7 @@ final class JavaTemplateMessages extends NLS {
 	public static String JavaContext_error_title;
 	public static String JavaContext_error_message;
 	public static String JavaContext_unexpected_error_message;
+	public static String JavaDocContextType_variable_description_word_selection;
 	public static String CodeTemplateContextType_variable_description_todo;
 	public static String CodeTemplateContextType_variable_description_packdeclaration;
 	public static String CodeTemplateContextType_variable_description_typedeclaration;
