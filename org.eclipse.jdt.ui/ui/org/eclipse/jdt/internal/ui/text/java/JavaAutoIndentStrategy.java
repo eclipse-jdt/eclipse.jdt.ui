@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -715,7 +715,6 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 							}
 							return;
 						}
-						removeJavaStuff(temp);
 					} else {
 						changed= insertLength != 0;
 					}
@@ -729,6 +728,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 			}
 
+			removeJavaStuff(temp);
 			temp.stopRewriteSession(session);
 			newText= temp.get(prefix.length(), temp.getLength() - prefix.length());
 

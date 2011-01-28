@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,6 +59,7 @@ public final class JavaHeuristicScanner implements Symbols {
 	private static final char EQUAL= '=';
 	private static final char LANGLE= '<';
 	private static final char RANGLE= '>';
+	private static final char PLUS= '+';
 
 	/**
 	 * Specifies the stop condition, upon which the <code>scanXXX</code> methods will decide whether
@@ -333,6 +334,8 @@ public final class JavaHeuristicScanner implements Symbols {
 				return TokenLESSTHAN;
 			case RANGLE:
 				return TokenGREATERTHAN;
+			case PLUS:
+				return TokenPLUS;
 		}
 
 		// else
@@ -405,6 +408,8 @@ public final class JavaHeuristicScanner implements Symbols {
 				return TokenLESSTHAN;
 			case RANGLE:
 				return TokenGREATERTHAN;
+			case PLUS:
+				return TokenPLUS;
 		}
 
 		// else
@@ -485,6 +490,8 @@ public final class JavaHeuristicScanner implements Symbols {
 					return TokenSTATIC;
 				if ("switch".equals(s)) //$NON-NLS-1$
 					return TokenSWITCH;
+				if ("throws".equals(s)) //$NON-NLS-1$
+					return TokenTHROWS;
 				break;
 			case 7:
 				if ("default".equals(s)) //$NON-NLS-1$
@@ -672,13 +679,34 @@ public final class JavaHeuristicScanner implements Symbols {
 	}
 
 	/**
-	 * Finds the lowest position <code>p</code> in <code>fDocument</code> such that <code>start</code> &lt;= p &lt;
-	 * <code>bound</code> and <code>condition.stop(fDocument.getChar(p), p)</code> evaluates to <code>true</code>.
-	 *
+	 * Finds the highest position in <code>fDocument</code> such that the position is &lt;=
+	 * <code>position</code> and &gt; <code>bound</code> and
+	 * <code>Character.isWhitespace(fDocument.getChar(pos))</code> evaluates to <code>false</code>
+	 * and the position can be in any partition.
+	 * 
+	 * @param position the first character position in <code>fDocument</code> to be considered
+	 * @param bound the first position in <code>fDocument</code> to not consider any more, with
+	 *            <code>bound</code> &lt; <code>position</code>, or <code>UNBOUND</code>
+	 * @return the highest position of a non-whitespace character in (<code>bound</code>,
+	 *         <code>position</code>] that resides in a Java partition, or <code>NOT_FOUND</code> if
+	 *         none can be found
+	 * @since 3.7
+	 */
+	public int findNonWhitespaceBackwardInAnyPartition(int position, int bound) {
+		return scanBackward(position, bound, fNonWS);
+	}
+
+	/**
+	 * Finds the lowest position <code>p</code> in <code>fDocument</code> such that
+	 * <code>start</code> &lt;= p &lt; <code>bound</code> and
+	 * <code>condition.stop(fDocument.getChar(p), p)</code> evaluates to <code>true</code>.
+	 * 
 	 * @param start the first character position in <code>fDocument</code> to be considered
-	 * @param bound the first position in <code>fDocument</code> to not consider any more, with <code>bound</code> &gt; <code>start</code>, or <code>UNBOUND</code>
+	 * @param bound the first position in <code>fDocument</code> to not consider any more, with
+	 *            <code>bound</code> &gt; <code>start</code>, or <code>UNBOUND</code>
 	 * @param condition the <code>StopCondition</code> to check
-	 * @return the lowest position in [<code>start</code>, <code>bound</code>) for which <code>condition</code> holds, or <code>NOT_FOUND</code> if none can be found
+	 * @return the lowest position in [<code>start</code>, <code>bound</code>) for which
+	 *         <code>condition</code> holds, or <code>NOT_FOUND</code> if none can be found
 	 */
 	public int scanForward(int start, int bound, StopCondition condition) {
 		Assert.isLegal(start >= 0);
