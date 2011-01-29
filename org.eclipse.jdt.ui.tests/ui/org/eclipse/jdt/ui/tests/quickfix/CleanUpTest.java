@@ -5530,7 +5530,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
-	public void testAddParenthesis01() throws Exception {
+	public void testAddParentheses01() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5579,7 +5579,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
-	public void testAddParenthesis02() throws Exception {
+	public void testAddParentheses02() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=331845
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5611,7 +5611,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
-	public void testRemoveParenthesis01() throws Exception {
+	public void testRemoveParentheses01() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5660,7 +5660,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
-	public void testRemoveParenthesisBug134739() throws Exception {
+	public void testRemoveParenthesesBug134739() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5699,7 +5699,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
-	public void testRemoveParenthesisBug134741_1() throws Exception {
+	public void testRemoveParenthesesBug134741_1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5730,7 +5730,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
-	public void testRemoveParenthesisBug134741_2() throws Exception {
+	public void testRemoveParenthesesBug134741_2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5749,7 +5749,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 
-	public void testRemoveParenthesisBug134741_3() throws Exception {
+	public void testRemoveParenthesesBug134741_3() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5767,7 +5767,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 
-	public void testRemoveParenthesisBug134985_1() throws Exception {
+	public void testRemoveParenthesesBug134985_1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5793,7 +5793,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
 	}
 
-	public void testRemoveParenthesisBug134985_2() throws Exception {
+	public void testRemoveParenthesesBug134985_2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5819,7 +5819,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
 	}
 
-	public void testRemoveParenthesisBug188207() throws Exception {
+	public void testRemoveParenthesesBug188207() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5847,7 +5847,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
 	}
 
-	public void testRemoveParenthesisBug208752() throws Exception {
+	public void testRemoveParenthesesBug208752() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5877,7 +5877,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
 	}
 
-	public void testRemoveParenthesisBug190188() throws Exception {
+	public void testRemoveParenthesesBug190188() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5903,7 +5903,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
 	}
 
-	public void testRemoveParenthesisBug212856() throws Exception {
+	public void testRemoveParenthesesBug212856() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

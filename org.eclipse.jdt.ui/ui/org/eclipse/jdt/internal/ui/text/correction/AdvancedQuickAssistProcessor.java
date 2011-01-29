@@ -122,9 +122,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					|| getInverseIfContinueIntoIfThenInLoopsProposals(context, coveringNode, null)
 					|| getInverseIfIntoContinueInLoopsProposals(context, coveringNode, null)
 					|| getInverseConditionProposals(context, coveringNode, coveredNodes, null)
-					|| getRemoveExtraParenthesisProposals(context, coveringNode, coveredNodes, null)
-					|| getAddParanoidalParenthesisProposals(context, coveredNodes, null)
-					|| getAddParenthesisForExpressionProposals(context, coveringNode, null)
+					|| getRemoveExtraParenthesesProposals(context, coveringNode, coveredNodes, null)
+					|| getAddParanoidalParenthesesProposals(context, coveredNodes, null)
+					|| getAddParenthesesForExpressionProposals(context, coveringNode, null)
 					|| getJoinAndIfStatementsProposals(context, coveringNode, null)
 					|| getSplitAndConditionProposals(context, coveringNode, null)
 					|| getJoinOrIfStatementsProposals(context, coveringNode, coveredNodes, null)
@@ -160,9 +160,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getInverseIfContinueIntoIfThenInLoopsProposals(context, coveringNode, resultingCollections);
 				getInverseIfIntoContinueInLoopsProposals(context, coveringNode, resultingCollections);
 				getInverseConditionProposals(context, coveringNode, coveredNodes, resultingCollections);
-				getRemoveExtraParenthesisProposals(context, coveringNode, coveredNodes, resultingCollections);
-				getAddParanoidalParenthesisProposals(context, coveredNodes, resultingCollections);
-				getAddParenthesisForExpressionProposals(context, coveringNode, resultingCollections);
+				getRemoveExtraParenthesesProposals(context, coveringNode, coveredNodes, resultingCollections);
+				getAddParanoidalParenthesesProposals(context, coveredNodes, resultingCollections);
+				getAddParenthesesForExpressionProposals(context, coveringNode, resultingCollections);
 				getJoinAndIfStatementsProposals(context, coveringNode, resultingCollections);
 				getSplitAndConditionProposals(context, coveringNode, resultingCollections);
 				getJoinOrIfStatementsProposals(context, coveringNode, coveredNodes, resultingCollections);
@@ -598,7 +598,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return newExpression;
 	}
 
-	private static boolean getRemoveExtraParenthesisProposals(IInvocationContext context, ASTNode covering, ArrayList coveredNodes, Collection resultingCollections) {
+	private static boolean getRemoveExtraParenthesesProposals(IInvocationContext context, ASTNode covering, ArrayList coveredNodes, Collection resultingCollections) {
 		ArrayList nodes;
 		if (context.getSelectionLength() == 0 && covering instanceof ParenthesizedExpression) {
 			nodes= new ArrayList();
@@ -625,7 +625,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getAddParanoidalParenthesisProposals(IInvocationContext context, ArrayList coveredNodes, Collection resultingCollections) {
+	private static boolean getAddParanoidalParenthesesProposals(IInvocationContext context, ArrayList coveredNodes, Collection resultingCollections) {
 
 		IProposableFix fix= ExpressionsFix.createAddParanoidalParenthesisFix(context.getASTRoot(), (ASTNode[]) coveredNodes.toArray(new ASTNode[coveredNodes.size()]));
 		if (fix == null)
@@ -644,7 +644,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getAddParenthesisForExpressionProposals(IInvocationContext context, ASTNode coveringNode, Collection resultingCollections) {
+	private static boolean getAddParenthesesForExpressionProposals(IInvocationContext context, ASTNode coveringNode, Collection resultingCollections) {
 		ASTNode node= coveringNode;
 		while (node != null && !(node instanceof CastExpression) && !(node instanceof InfixExpression) && !(node instanceof InstanceofExpression) && !(node instanceof ConditionalExpression)) {
 			node= node.getParent();
@@ -744,7 +744,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				//
 				AST ast= node.getAST();
 				ASTRewrite rewrite= ASTRewrite.create(ast);
-				// prepare condition parts, add parenthesis if needed
+				// prepare condition parts, add parentheses if needed
 				Expression outerCondition= getParenthesizedForAndIfNeeded(ast, rewrite, outerIf.getExpression());
 				Expression innerCondition= getParenthesizedForAndIfNeeded(ast, rewrite, ifStatement.getExpression());
 				// create compound condition
@@ -783,7 +783,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				//
 				AST ast= node.getAST();
 				ASTRewrite rewrite= ASTRewrite.create(ast);
-				// prepare condition parts, add parenthesis if needed
+				// prepare condition parts, add parentheses if needed
 				Expression outerCondition= getParenthesizedForAndIfNeeded(ast, rewrite, ifStatement.getExpression());
 				Expression innerCondition= getParenthesizedForAndIfNeeded(ast, rewrite, innerIf.getExpression());
 				// create compound condition
@@ -1291,15 +1291,15 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	 * Breaks an infix operation with possible extended operators at the given operator and returns the new left and right operands.
 	 * a & b & c   ->  [[a' & b' ] & c' ]   (c' == copy of c)
 	 */
-	private static void breakInfixOperationAtOperation(ASTRewrite rewrite, Expression expression, Operator operator, int operatorOffset, boolean removeParenthesis, Expression[] res) {
+	private static void breakInfixOperationAtOperation(ASTRewrite rewrite, Expression expression, Operator operator, int operatorOffset, boolean removeParentheses, Expression[] res) {
 		if (expression.getStartPosition() + expression.getLength() <= operatorOffset) {
 			// add to the left
-			res[0]= combineOperands(rewrite, res[0], expression, removeParenthesis, operator);
+			res[0]= combineOperands(rewrite, res[0], expression, removeParentheses, operator);
 			return;
 		}
 		if (operatorOffset <= expression.getStartPosition()) {
 			// add to the right
-			res[1]= combineOperands(rewrite, res[1], expression, removeParenthesis, operator);
+			res[1]= combineOperands(rewrite, res[1], expression, removeParentheses, operator);
 			return;
 		}
 		if (!(expression instanceof InfixExpression)) {
@@ -1309,17 +1309,17 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (infixExpression.getOperator() != operator) {
 			throw new IllegalArgumentException("Incompatible operator"); //$NON-NLS-1$
 		}
-		breakInfixOperationAtOperation(rewrite, infixExpression.getLeftOperand(), operator, operatorOffset, removeParenthesis, res);
-		breakInfixOperationAtOperation(rewrite, infixExpression.getRightOperand(), operator, operatorOffset, removeParenthesis, res);
+		breakInfixOperationAtOperation(rewrite, infixExpression.getLeftOperand(), operator, operatorOffset, removeParentheses, res);
+		breakInfixOperationAtOperation(rewrite, infixExpression.getRightOperand(), operator, operatorOffset, removeParentheses, res);
 
 		List extended= infixExpression.extendedOperands();
 		for (int i= 0; i < extended.size(); i++) {
-			breakInfixOperationAtOperation(rewrite, (Expression) extended.get(i), operator, operatorOffset, removeParenthesis, res);
+			breakInfixOperationAtOperation(rewrite, (Expression)extended.get(i), operator, operatorOffset, removeParentheses, res);
 		}
 	}
 
-	private static Expression combineOperands(ASTRewrite rewrite, Expression existing, Expression nodeToAdd, boolean removeParenthesis, Operator operator) {
-		if (existing == null && removeParenthesis) {
+	private static Expression combineOperands(ASTRewrite rewrite, Expression existing, Expression nodeToAdd, boolean removeParentheses, Operator operator) {
+		if (existing == null && removeParentheses) {
 			while (nodeToAdd instanceof ParenthesizedExpression) {
 				nodeToAdd= ((ParenthesizedExpression) nodeToAdd).getExpression();
 			}
