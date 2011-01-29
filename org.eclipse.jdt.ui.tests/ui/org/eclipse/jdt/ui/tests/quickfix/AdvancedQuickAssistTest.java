@@ -230,7 +230,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
 		ArrayList previews= new ArrayList();
@@ -286,6 +286,19 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    public void foo(boolean a, int b) {\n");
 		buf.append("        boolean c = a && (b == 0);\n");
 		buf.append("        if (c) {\n");
+		buf.append("            b= 9;\n");
+		buf.append("        } else {\n");
+		buf.append("            b= 2;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		addPreviewAndExpected(proposals, buf, expecteds, previews);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean a, int b) {\n");
+		buf.append("        if ((a && (b == 0))) {\n");
 		buf.append("            b= 9;\n");
 		buf.append("        } else {\n");
 		buf.append("            b= 2;\n");
@@ -606,7 +619,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	}
 
-	public void testRemoveExtraParenthesis1() throws Exception {
+	public void testRemoveExtraParentheses1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -641,7 +654,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	}
 
-	public void testRemoveExtraParenthesis2() throws Exception {
+	public void testRemoveExtraParentheses2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -670,7 +683,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 
-	public void testAddParanoidalParenthesis1() throws Exception {
+	public void testAddParanoidalParentheses1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -694,7 +707,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(boolean a, int b, int c, Object o) {\n");
-		buf.append("        if (a && (b == 0) && (b + c > 3) && (o instanceof Integer)) {\n");
+		buf.append("        if (a && (b == 0) && ((b + c) > 3) && (o instanceof Integer)) {\n");
 		buf.append("            b= 9;\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
@@ -702,6 +715,199 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		String expected1= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
+
+	}
+
+	public void testAddParenthesesForExpression1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object obj) {\n");
+		buf.append("        if (obj instanceof String) {\n");
+		buf.append("            String string = (String) obj;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("(String) obj"), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object obj) {\n");
+		buf.append("        if (obj instanceof String) {\n");
+		buf.append("            String string = ((String) obj);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
+	public void testAddParenthesesForExpression2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object obj) {\n");
+		buf.append("        if (obj instanceof String) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("instanceof"), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object obj) {\n");
+		buf.append("        if ((obj instanceof String)) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
+	public void testAddParenthesesForExpression3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a, int b, int c) {\n");
+		buf.append("        if (a + b == 0 && b + c > 3) {\n");
+		buf.append("            b= 9;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("=="), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a, int b, int c) {\n");
+		buf.append("        if ((a + b == 0) && b + c > 3) {\n");
+		buf.append("            b= 9;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
+	public void testAddParenthesesForExpression4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a, int b, int c) {\n");
+		buf.append("        if (a + b == 0 && b + c > 3) {\n");
+		buf.append("            b= 9;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("+"), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a, int b, int c) {\n");
+		buf.append("        if ((a + b) == 0 && b + c > 3) {\n");
+		buf.append("            b= 9;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
+	public void testAddParenthesesForExpression5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a, int b, int c) {\n");
+		buf.append("        int d = a > 10 ? b : c;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("?"), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a, int b, int c) {\n");
+		buf.append("        int d = (a > 10 ? b : c);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
+	public void testAddParenthesesForExpression6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a, int b, int c) {\n");
+		buf.append("        if (a > 3 && b > 5) {\n");
+		buf.append("            a= 3;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("a > 3"), "a > 3".length());
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 7);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a, int b, int c) {\n");
+		buf.append("        if ((a > 3) && b > 5) {\n");
+		buf.append("            a= 3;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 
 	}
 

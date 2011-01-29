@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -5577,6 +5577,38 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected1= buf.toString();
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+
+	public void testAddParenthesis02() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=331845
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(int i, int j) {\n");
+		buf.append("        if (i + 10 != j - 5)\n");
+		buf.append("            System.out.println(i - j + 10 - i * j);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(int i, int j) {\n");
+		buf.append("        if ((i + 10) != (j - 5)) {\n");
+		buf.append("            System.out.println(((i - j) + 10) - (i * j));\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
 	public void testRemoveParenthesis01() throws Exception {

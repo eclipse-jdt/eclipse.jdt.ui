@@ -117,18 +117,31 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null) {
 			ArrayList coveredNodes= getFullyCoveredNodes(context, coveringNode);
-			return getInverseIfProposals(context, coveringNode, null) || getIfReturnIntoIfElseAtEndOfVoidMethodProposals(context, coveringNode, null)
-					|| getInverseIfContinueIntoIfThenInLoopsProposals(context, coveringNode, null) || getInverseIfIntoContinueInLoopsProposals(context, coveringNode, null)
-					|| getInverseConditionProposals(context, coveringNode, coveredNodes, null) || getRemoveExtraParenthesisProposals(context, coveringNode, coveredNodes, null)
-					|| getAddParanoidalParenthesisProposals(context, coveredNodes, null) || getJoinAndIfStatementsProposals(context, coveringNode, null)
-					|| getSplitAndConditionProposals(context, coveringNode, null) || getJoinOrIfStatementsProposals(context, coveringNode, coveredNodes, null)
-					|| getSplitOrConditionProposals(context, coveringNode, null) || getInverseConditionalExpressionProposals(context, coveringNode, null)
-					|| getExchangeInnerAndOuterIfConditionsProposals(context, coveringNode, null) || getExchangeOperandsProposals(context, coveringNode, null)
-					|| getCastAndAssignIfStatementProposals(context, coveringNode, null) || getPickOutStringProposals(context, coveringNode, null)
-					|| getReplaceIfElseWithConditionalProposals(context, coveringNode, null) || getReplaceConditionalWithIfElseProposals(context, coveringNode, null)
-					|| getInverseLocalVariableProposals(context, coveringNode, null) || getPushNegationDownProposals(context, coveringNode, null)
-					|| getPullNegationUpProposals(context, coveredNodes, null) || getJoinIfListInIfElseIfProposals(context, coveringNode, coveredNodes, null)
-					|| getConvertSwitchToIfProposals(context, coveringNode, null) || GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, null, null);
+			return getInverseIfProposals(context, coveringNode, null)
+					|| getIfReturnIntoIfElseAtEndOfVoidMethodProposals(context, coveringNode, null)
+					|| getInverseIfContinueIntoIfThenInLoopsProposals(context, coveringNode, null)
+					|| getInverseIfIntoContinueInLoopsProposals(context, coveringNode, null)
+					|| getInverseConditionProposals(context, coveringNode, coveredNodes, null)
+					|| getRemoveExtraParenthesisProposals(context, coveringNode, coveredNodes, null)
+					|| getAddParanoidalParenthesisProposals(context, coveredNodes, null)
+					|| getAddParenthesisForExpressionProposals(context, coveringNode, null)
+					|| getJoinAndIfStatementsProposals(context, coveringNode, null)
+					|| getSplitAndConditionProposals(context, coveringNode, null)
+					|| getJoinOrIfStatementsProposals(context, coveringNode, coveredNodes, null)
+					|| getSplitOrConditionProposals(context, coveringNode, null)
+					|| getInverseConditionalExpressionProposals(context, coveringNode, null)
+					|| getExchangeInnerAndOuterIfConditionsProposals(context, coveringNode, null)
+					|| getExchangeOperandsProposals(context, coveringNode, null)
+					|| getCastAndAssignIfStatementProposals(context, coveringNode, null)
+					|| getPickOutStringProposals(context, coveringNode, null)
+					|| getReplaceIfElseWithConditionalProposals(context, coveringNode, null)
+					|| getReplaceConditionalWithIfElseProposals(context, coveringNode, null)
+					|| getInverseLocalVariableProposals(context, coveringNode, null)
+					|| getPushNegationDownProposals(context, coveringNode, null)
+					|| getPullNegationUpProposals(context, coveredNodes, null)
+					|| getJoinIfListInIfElseIfProposals(context, coveringNode, coveredNodes, null)
+					|| getConvertSwitchToIfProposals(context, coveringNode, null)
+					|| GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, null, null);
 		}
 		return false;
 	}
@@ -149,6 +162,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getInverseConditionProposals(context, coveringNode, coveredNodes, resultingCollections);
 				getRemoveExtraParenthesisProposals(context, coveringNode, coveredNodes, resultingCollections);
 				getAddParanoidalParenthesisProposals(context, coveredNodes, resultingCollections);
+				getAddParenthesisForExpressionProposals(context, coveringNode, resultingCollections);
 				getJoinAndIfStatementsProposals(context, coveringNode, resultingCollections);
 				getSplitAndConditionProposals(context, coveringNode, resultingCollections);
 				getJoinOrIfStatementsProposals(context, coveringNode, coveredNodes, resultingCollections);
@@ -625,7 +639,46 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Map options= new Hashtable();
 		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.TRUE);
-		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(options), 1, image, context);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(options), -9, image, context);
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private static boolean getAddParenthesisForExpressionProposals(IInvocationContext context, ASTNode coveringNode, Collection resultingCollections) {
+		ASTNode node= coveringNode;
+		while (node != null && !(node instanceof CastExpression) && !(node instanceof InfixExpression) && !(node instanceof InstanceofExpression) && !(node instanceof ConditionalExpression)) {
+			node= node.getParent();
+		}
+
+		String label= null;
+		if (node instanceof CastExpression) {
+			label= CorrectionMessages.UnresolvedElementsSubProcessor_missingcastbrackets_description;
+		} else if (node instanceof InstanceofExpression) {
+			label= CorrectionMessages.LocalCorrectionsSubProcessor_setparenteses_instanceof_description;
+		} else if (node instanceof InfixExpression) {
+			InfixExpression infixExpression= (InfixExpression)node;
+			label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_setparenteses_description, infixExpression.getOperator().toString());
+		} else if (node instanceof ConditionalExpression) {
+			label= CorrectionMessages.AdvancedQuickAssistProcessor_putConditionalExpressionInParentheses;
+		} else {
+			return false;
+		}
+
+		if (node.getParent() instanceof ParenthesizedExpression)
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		AST ast= node.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+
+		ParenthesizedExpression parenthesizedExpression= ast.newParenthesizedExpression();
+		parenthesizedExpression.setExpression((Expression)rewrite.createCopyTarget(node));
+		rewrite.replace(node, parenthesizedExpression, null);
+
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, -10, image);
 		resultingCollections.add(proposal);
 		return true;
 	}

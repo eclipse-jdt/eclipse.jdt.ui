@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,9 +26,9 @@ import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
@@ -54,11 +54,9 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		private boolean needsParentesis(ASTNode node) {
-			// check that parent is && or ||
 			if (!(node.getParent() instanceof InfixExpression))
 				return false;
 
-			// we want to add parenthesis around arithmetic operators and instanceof
 			if (node instanceof InstanceofExpression)
 				return true;
 
@@ -72,16 +70,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				if (parentOperator == operator)
 					return false;
 
-
-				return (operator == InfixExpression.Operator.LESS)
-						|| (operator == InfixExpression.Operator.GREATER)
-						|| (operator == InfixExpression.Operator.LESS_EQUALS)
-						|| (operator == InfixExpression.Operator.GREATER_EQUALS)
-						|| (operator == InfixExpression.Operator.EQUALS)
-						|| (operator == InfixExpression.Operator.NOT_EQUALS)
-
-						|| (operator == InfixExpression.Operator.CONDITIONAL_AND)
-						|| (operator == InfixExpression.Operator.CONDITIONAL_OR);
+				return true;
 			}
 
 			return false;
@@ -274,7 +263,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		 * {@inheritDoc}
 		 */
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
-			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_addParanoiacParenthesis_description, cuRewrite);
+			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_addParanoiacParentheses_description, cuRewrite);
 
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
@@ -302,7 +291,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		 * {@inheritDoc}
 		 */
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
-			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_removeUnnecessaryParenthesis_description, cuRewrite);
+			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_removeUnnecessaryParentheses_description, cuRewrite);
 
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			rewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
@@ -342,12 +331,12 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			if (covered instanceof InfixExpression)
 				covered.accept(new MissingParenthesisVisitor(changedNodes));
 		}
-		if (changedNodes.isEmpty())
+		if (changedNodes.isEmpty() || (changedNodes.size() == 1 && changedNodes.get(0).equals(coveredNodes[0])))
 			return null;
 
 
 		CompilationUnitRewriteOperation op= new AddParenthesisOperation((Expression[])changedNodes.toArray(new Expression[changedNodes.size()]));
-		return new ExpressionsFix(FixMessages.ExpressionsFix_addParanoiacParenthesis_description, compilationUnit, new CompilationUnitRewriteOperation[] {op});
+		return new ExpressionsFix(FixMessages.ExpressionsFix_addParanoiacParentheses_description, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 	}
 
 	public static ExpressionsFix createRemoveUnnecessaryParenthesisFix(CompilationUnit compilationUnit, ASTNode[] nodes) {
@@ -363,7 +352,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 		HashSet expressions= new HashSet(changedNodes);
 		RemoveParenthesisOperation op= new RemoveParenthesisOperation(expressions);
-		return new ExpressionsFix(FixMessages.ExpressionsFix_removeUnnecessaryParenthesis_description, compilationUnit, new CompilationUnitRewriteOperation[] {op});
+		return new ExpressionsFix(FixMessages.ExpressionsFix_removeUnnecessaryParentheses_description, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 	}
 
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
@@ -378,7 +367,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				return null;
 
 			CompilationUnitRewriteOperation op= new AddParenthesisOperation((Expression[])changedNodes.toArray(new Expression[changedNodes.size()]));
-			return new ExpressionsFix(FixMessages.ExpressionsFix_add_parenthesis_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});
+			return new ExpressionsFix(FixMessages.ExpressionsFix_add_parentheses_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 		} else if (removeUnnecessaryParenthesis) {
 			final ArrayList changedNodes = new ArrayList();
 			compilationUnit.accept(new UnnecessaryParenthesisVisitor(changedNodes));
@@ -388,7 +377,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 			HashSet expressions= new HashSet(changedNodes);
 			CompilationUnitRewriteOperation op= new RemoveParenthesisOperation(expressions);
-			return new ExpressionsFix(FixMessages.ExpressionsFix_remove_parenthesis_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});
+			return new ExpressionsFix(FixMessages.ExpressionsFix_remove_parentheses_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 		}
 		return null;
 	}
