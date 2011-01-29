@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,11 +18,11 @@ import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 
 public class OperatorPrecedence {
 
@@ -34,7 +34,7 @@ public class OperatorPrecedence {
 	private static final int BITWISE_EXCLUSIVE_OR=	5;
 	private static final int BITWISE_AND=			6;
 	private static final int EQUALITY=				7;
-	private static final int RATIONAL=				8;
+	private static final int RELATIONAL= 			8;
 	private static final int SHIFT=					9;
 	private static final int ADDITIVE=				10;
 	private static final int MULTIPLICATIVE=		11;
@@ -71,7 +71,7 @@ public class OperatorPrecedence {
 		} else if (expression instanceof ConditionalExpression) {
 			return CONDITIONAL;
 		} else if (expression instanceof InstanceofExpression) {
-			return RATIONAL;
+			return RELATIONAL;
 		} else if (expression instanceof CastExpression) {
 			return TYPEGENERATION;
 		} else if (expression instanceof ClassInstanceCreation) {
@@ -124,7 +124,7 @@ public class OperatorPrecedence {
 		} else if (operator == Operator.EQUALS || operator == Operator.NOT_EQUALS) {
 			return EQUALITY;
 		} else if (operator == Operator.LESS || operator == Operator.LESS_EQUALS || operator == Operator.GREATER || operator == Operator.GREATER_EQUALS) {
-			return RATIONAL;
+			return RELATIONAL;
 		} else if (operator == Operator.LEFT_SHIFT || operator == Operator.RIGHT_SHIFT_SIGNED || operator == Operator.RIGHT_SHIFT_UNSIGNED) {
 			return SHIFT;
 		} else if (operator == Operator.PLUS || operator == Operator.MINUS) {
