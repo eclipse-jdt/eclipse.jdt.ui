@@ -75,6 +75,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -1039,7 +1040,8 @@ public class LocalCorrectionsSubProcessor {
 
 				String label= CorrectionMessages.LocalCorrectionsSubProcessor_throw_allocated_description;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
+				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
+				proposal.setEndPosition(rewrite.track(throwStatement));
 				proposals.add(proposal);
 			}
 			
@@ -1056,7 +1058,18 @@ public class LocalCorrectionsSubProcessor {
 
 				String label= CorrectionMessages.LocalCorrectionsSubProcessor_return_allocated_description;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 7, image);
+				int relevance;
+				ITypeBinding returnTypeBinding= method.getReturnType2().resolveBinding();
+				if (returnTypeBinding != null && exprType != null && exprType.isAssignmentCompatible(returnTypeBinding)) {
+					relevance= 7;
+				} else if (method.getReturnType2() instanceof PrimitiveType
+						&& ((PrimitiveType)method.getReturnType2()).getPrimitiveTypeCode() == PrimitiveType.VOID) {
+					relevance= 1;
+				} else {
+					relevance= 2;
+				}
+				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, relevance, image);
+				proposal.setEndPosition(rewrite.track(returnStatement));
 				proposals.add(proposal);
 			}
 			
@@ -1066,11 +1079,13 @@ public class LocalCorrectionsSubProcessor {
 				
 				String label= CorrectionMessages.LocalCorrectionsSubProcessor_remove_allocated_description;
 				Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 2, image);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 				proposals.add(proposal);
 			}
 			
 		}
+		
+		QuickAssistProcessor.getAssignToVariableProposals(context, selectedNode, null, proposals);
 	}
 
 	public static void getAssignmentHasNoEffectProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -184,7 +184,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return getCatchClauseToThrowsProposals(context, coveringNode, null)
 				|| getRenameLocalProposals(context, coveringNode, null, false, null)
 				|| getRenameRefactoringProposal(context, coveringNode, null, false, null)
-				|| getAssignToVariableProposals(context, coveringNode, null)
+				|| getAssignToVariableProposals(context, coveringNode, null, null)
 				|| getUnWrapProposals(context, coveringNode, null)
 				|| getAssignParamToFieldProposals(context, coveringNode, null)
 				|| getJoinVariableProposals(context, coveringNode, null)
@@ -219,7 +219,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			// quick assists that show up also if there is an error/warning
 			getRenameLocalProposals(context, coveringNode, locations, noErrorsAtLocation, resultingCollections);
 			getRenameRefactoringProposal(context, coveringNode, locations, noErrorsAtLocation, resultingCollections);
-			getAssignToVariableProposals(context, coveringNode, resultingCollections);
+			getAssignToVariableProposals(context, coveringNode, locations, resultingCollections);
 			getAssignParamToFieldProposals(context, coveringNode, resultingCollections);
 
 			if (noErrorsAtLocation) {
@@ -983,7 +983,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return proposal;
 	}
 
-	private static boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	public static boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection resultingCollections) {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (!(statement instanceof ExpressionStatement)) {
 			return false;
@@ -1004,6 +1004,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 
+		// don't add if already added as quick fix
+		if (containsMatchingProblem(locations, IProblem.UnusedObjectAllocation))
+			return false;
+		
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		AssignToVariableAssistProposal localProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.LOCAL, expressionStatement, typeBinding, 2);
@@ -1016,8 +1020,21 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			fieldProposal.setCommandId(ASSIGN_TO_FIELD_ID);
 			resultingCollections.add(fieldProposal);
 		}
-		return false;
+		return true;
 
+	}
+
+	private static boolean containsMatchingProblem(IProblemLocation[] locations, int problemId) {
+		if (locations != null) {
+			for (int i= 0; i < locations.length; i++) {
+				IProblemLocation location= locations[i];
+				if (IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(location.getMarkerType())
+						&& location.getProblemId() == problemId) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private static boolean getAssignParamToFieldProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
@@ -1293,14 +1310,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	private static boolean containsQuickFixableRenameLocal(IProblemLocation[] locations) {
 		if (locations != null) {
 			for (int i= 0; i < locations.length; i++) {
-				switch (locations[i].getProblemId()) {
-					case IProblem.LocalVariableHidingLocalVariable:
-					case IProblem.LocalVariableHidingField:
-					case IProblem.FieldHidingLocalVariable:
-					case IProblem.FieldHidingField:
-					case IProblem.ArgumentHidingLocalVariable:
-					case IProblem.ArgumentHidingField:
-						return true;
+				IProblemLocation location= locations[i];
+				if (IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(location.getMarkerType())) {
+					switch (location.getProblemId()) {
+						case IProblem.LocalVariableHidingLocalVariable:
+						case IProblem.LocalVariableHidingField:
+						case IProblem.FieldHidingLocalVariable:
+						case IProblem.FieldHidingField:
+						case IProblem.ArgumentHidingLocalVariable:
+						case IProblem.ArgumentHidingField:
+							return true;
+					}
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,10 +62,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public static Test suite() {
-		if (true) {
-			return allTests();
-		}
-		return setUpTest(new LocalCorrectionsQuickFixTest("testTypePrametersToRawTypeReference04"));
+		return allTests();
+//		return setUpTest(new LocalCorrectionsQuickFixTest("testTypePrametersToRawTypeReference04"));
 	}
 
 
@@ -6648,7 +6646,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public Object foo() {\n");
 		buf.append("        if (Boolean.TRUE) {\n");
-//		buf.append("            /*a*/new Exception()/*b*/;/*c*/\n");
 		buf.append("            /*a*/new Object()/*b*/;/*c*/\n");
 		buf.append("        }\n");
 		buf.append("        return null;\n");
@@ -6660,9 +6657,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 5);
 		
-		String[] expected= new String[3];
+		String[] expected= new String[5];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -6702,6 +6699,34 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[2]= buf.toString();
 		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public Object foo() {\n");
+		buf.append("        if (Boolean.TRUE) {\n");
+		buf.append("            /*a*/Object object = new Object()/*b*/;/*c*/\n");
+		buf.append("        }\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    private Object object;\n");
+		buf.append("\n");
+		buf.append("    public Object foo() {\n");
+		buf.append("        if (Boolean.TRUE) {\n");
+		buf.append("            /*a*/object = new Object()/*b*/;/*c*/\n");
+		buf.append("        }\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[4]= buf.toString();
+		
 		assertExpectedExistInProposals(proposals, expected);
 	}
 	
@@ -6725,9 +6750,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 6);
 		
-		String[] expected= new String[4];
+		String[] expected= new String[6];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -6767,6 +6792,28 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[3]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        /*a*/Exception exception = new Exception()/*b*/;/*c*/\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[4]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    private Exception exception;\n");
+		buf.append("\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        /*a*/exception = new Exception()/*b*/;/*c*/\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[5]= buf.toString();
 		
 		assertExpectedExistInProposals(proposals, expected);
 	}
