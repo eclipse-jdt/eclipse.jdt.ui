@@ -19,11 +19,9 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.text.tests.Accessor;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.rules.FastPartitioner;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
@@ -119,15 +117,6 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 
 		Accessor accessor= new Accessor(javaAutoIndentStrategy, JavaAutoIndentStrategy.class);
 		accessor.invoke("smartPaste", new Class[] { IDocument.class, DocumentCommand.class }, new Object[] { fDocument, documentCommand });
-		System.out.println(documentCommand.text);
-		try {
-			IRegion lineDetails= fDocument.getLineInformation(0);
-			//System.out.println(fDocument.get(lineDetails.getOffset(), lineDetails.getLength()));
-		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 	}
 
 	/*
