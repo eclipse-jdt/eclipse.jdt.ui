@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,8 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -41,6 +43,7 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.ITextSelection;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -314,7 +317,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 				scope= factory.createWorkspaceScope(includeMask);
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE:
-				IJavaElement[] javaElements= factory.getJavaElements(getContainer().getSelection());
+				IJavaElement[] javaElements= new IJavaElement[0];
+				if (getContainer().getActiveEditorInput() != null) {
+					IFile file= (IFile)getContainer().getActiveEditorInput().getAdapter(IFile.class);
+					if (file != null && file.exists())
+						javaElements= new IJavaElement[] { JavaCore.create(file) };
+				} else
+					javaElements= factory.getJavaElements(getContainer().getSelection());
 				scope= factory.createJavaSearchScope(javaElements, includeMask);
 				scopeDescription= factory.getSelectionScopeDescription(javaElements, includeMask);
 				break;
@@ -486,6 +495,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			fPattern.setFocus();
 		}
 		updateOKStatus();
+
+		IEditorInput editorInput= getContainer().getActiveEditorInput();
+		getContainer().setActiveEditorCanProvideScopeSelection(editorInput != null && editorInput.getAdapter(IFile.class) != null);
+
 		super.setVisible(visible);
 	}
 
