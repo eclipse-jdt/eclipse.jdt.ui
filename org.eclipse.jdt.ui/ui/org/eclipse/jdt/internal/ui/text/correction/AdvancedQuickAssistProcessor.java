@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
@@ -2029,12 +2030,14 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (expression.getParent() instanceof InfixExpression) {
 			return expression;
 		}
-		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY || locationInParent == IfStatement.EXPRESSION_PROPERTY || locationInParent == WhileStatement.EXPRESSION_PROPERTY
-				|| locationInParent == DoStatement.EXPRESSION_PROPERTY || locationInParent == ReturnStatement.EXPRESSION_PROPERTY || locationInParent == ForStatement.EXPRESSION_PROPERTY
-				|| locationInParent == MethodInvocation.ARGUMENTS_PROPERTY || locationInParent == ConstructorInvocation.ARGUMENTS_PROPERTY
-				|| locationInParent == SuperMethodInvocation.ARGUMENTS_PROPERTY || locationInParent == EnumConstantDeclaration.ARGUMENTS_PROPERTY
-				|| locationInParent == SuperConstructorInvocation.ARGUMENTS_PROPERTY || locationInParent == ClassInstanceCreation.ARGUMENTS_PROPERTY
-				|| locationInParent == ConditionalExpression.EXPRESSION_PROPERTY || locationInParent == PrefixExpression.OPERAND_PROPERTY) {
+		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY || locationInParent == IfStatement.EXPRESSION_PROPERTY
+				|| locationInParent == WhileStatement.EXPRESSION_PROPERTY || locationInParent == DoStatement.EXPRESSION_PROPERTY
+				|| locationInParent == ReturnStatement.EXPRESSION_PROPERTY || locationInParent == ForStatement.EXPRESSION_PROPERTY
+				|| locationInParent == AssertStatement.EXPRESSION_PROPERTY || locationInParent == MethodInvocation.ARGUMENTS_PROPERTY
+				|| locationInParent == ConstructorInvocation.ARGUMENTS_PROPERTY || locationInParent == SuperMethodInvocation.ARGUMENTS_PROPERTY
+				|| locationInParent == EnumConstantDeclaration.ARGUMENTS_PROPERTY || locationInParent == SuperConstructorInvocation.ARGUMENTS_PROPERTY
+				|| locationInParent == ClassInstanceCreation.ARGUMENTS_PROPERTY || locationInParent == ConditionalExpression.EXPRESSION_PROPERTY
+				|| locationInParent == PrefixExpression.OPERAND_PROPERTY) {
 			return expression;
 		}
 		return null;
