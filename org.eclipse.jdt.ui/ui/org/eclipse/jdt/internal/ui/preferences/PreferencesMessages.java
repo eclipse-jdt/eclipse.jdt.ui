@@ -232,6 +232,8 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocConfigurationPropertyPage_IsPackageFragmentRoot_description;
 	public static String JavadocConfigurationPropertyPage_IsIncorrectElement_description;
 	public static String JavadocConfigurationPropertyPage_IsJavaProject_description;
+	public static String JavadocConfigurationPropertyPage_location_path;
+	public static String JavadocConfigurationPropertyPage_locationPath_none;
 	public static String JavadocConfigurationBlock_browse_folder_button;
 	public static String JavadocConfigurationBlock_error_notafolder;
 	public static String JavadocConfigurationBlock_javadocFolderDialog_label;
@@ -267,10 +269,14 @@ public final class PreferencesMessages extends NLS {
 	public static String SourceAttachmentPropertyPage_error_title;
 	public static String SourceAttachmentPropertyPage_error_message;
 	public static String SourceAttachmentPropertyPage_invalid_container;
+	public static String SourceAttachmentPropertyPage_location_path;
+	public static String SourceAttachmentPropertyPage_locationPath_none;
 	public static String SourceAttachmentPropertyPage_noarchive_message;
 	public static String NativeLibrariesPropertyPage_invalidElementSelection_desription;
 	public static String NativeLibrariesPropertyPage_errorAttaching_title;
 	public static String NativeLibrariesPropertyPage_errorAttaching_message;
+	public static String NativeLibrariesPropertyPage_location_path;
+	public static String NativeLibrariesPropertyPage_locationPath_none;
 	public static String AppearancePreferencePage_description;
 	public static String AppearancePreferencePage_methodreturntype_label;
 	public static String AppearancePreferencePage_showCategory_label;

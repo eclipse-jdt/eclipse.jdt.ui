@@ -14,9 +14,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -45,6 +49,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -69,6 +74,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 
 	private JavadocConfigurationBlock fJavadocConfigurationBlock;
 	private boolean fIsValidElement;
+	private boolean fIsReadOnly;
 
 	private IPath fContainerPath;
 	private IClasspathEntry fEntry;
@@ -131,11 +137,12 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 			setDescription(Messages.format(PreferencesMessages.JavadocConfigurationPropertyPage_not_supported, containerName));
 			return null;
 		}
+		IClasspathEntry entry= JavaModelUtil.findEntryInContainer(container, jarPath);
 		if (status.getCode() == ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY) {
 			setDescription(Messages.format(PreferencesMessages.JavadocConfigurationPropertyPage_read_only, containerName));
-			return null;
+			fIsReadOnly= true;
+			return entry;
 		}
-		IClasspathEntry entry= JavaModelUtil.findEntryInContainer(container, jarPath);
 		Assert.isNotNull(entry);
 		setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsPackageFragmentRoot_description);
 		return entry;
@@ -145,8 +152,32 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		if (!fIsValidElement) {
-			return new Composite(parent, SWT.NONE);
+		if (!fIsValidElement || fIsReadOnly) {
+			Composite inner= new Composite(parent, SWT.NONE);
+			
+			if (fIsReadOnly) {
+				GridLayout layout= new GridLayout();
+				layout.marginWidth= 0;
+				inner.setLayout(layout);
+
+				Label label= new Label(inner, SWT.WRAP);
+				label.setText(PreferencesMessages.JavadocConfigurationPropertyPage_location_path);
+				
+				Text location= new Text(inner, SWT.READ_ONLY | SWT.WRAP);
+				GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+				gd.widthHint= convertWidthInCharsToPixels(80);
+				location.setLayoutData(gd);
+				String locationPath= PreferencesMessages.JavadocConfigurationPropertyPage_locationPath_none;
+				if (fEntry != null) {
+					URL javadocUrl= JavaDocLocations.getLibraryJavadocLocation(fEntry);
+					if (javadocUrl != null) {
+						locationPath= javadocUrl.toExternalForm();
+					}
+				}
+				location.setText(locationPath);
+				Dialog.applyDialogFont(inner);
+			}
+			return inner;
 		}
 
 		IJavaElement elem= getJavaElement();
