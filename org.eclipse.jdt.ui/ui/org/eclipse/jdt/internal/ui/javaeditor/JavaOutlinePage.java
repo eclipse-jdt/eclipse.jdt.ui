@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -132,7 +132,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
-import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.CategoryFilterActionGroup;
 import org.eclipse.jdt.internal.ui.actions.CollapseAllAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
@@ -613,7 +612,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		 */
 		public void run(IStructuredSelection selection) {
 			ICompilationUnit compilationUnit= (ICompilationUnit)((IJavaElement)selection.getFirstElement()).getAncestor(IJavaElement.COMPILATION_UNIT);
-			if (ElementValidator.check(compilationUnit, getShell(), ActionMessages.FormatElementAction_label, fEditor != null)) {
+			if (ElementValidator.check(compilationUnit, getShell(), JavaEditorMessages.JavaEditor_FormatElementDialog_label, fEditor != null)) {
 				JavaSourceViewer javaSourceViewer= (JavaSourceViewer)fEditor.getViewer();
 				javaSourceViewer.rememberSelection();
 				javaSourceViewer.setRedraw(false);
