@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -37,6 +41,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.DisjunctiveType;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -93,6 +98,7 @@ import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.TryStatementWithResources;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
@@ -947,7 +953,20 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	public void endVisit(VariableDeclarationFragment node) {
 		endVisit((VariableDeclaration)node);
 	}
+	public boolean visit(DisjunctiveType node) {
+		return visit((Type)node);
+	}
 
+	public void endVisit(DisjunctiveType node) {
+		endVisit((Type)node);
+	}
+	public boolean visit(TryStatementWithResources node) {
+		return visit((Statement)node);
+	}
+
+	public void endVisit(TryStatementWithResources node) {
+		endVisit((Statement)node);
+	}
 //---- End VariableDeclaration Hierarchy -----------------------------
 //---- End ASTNode Hierarchy -----------------------------------------
 }
