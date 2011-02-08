@@ -670,7 +670,7 @@ public class JavaHeuristicScannerTest extends TestCase {
 
 		// this is bogus, since this is really just an unfinished call argument list - how could we know
 		String indent= fScanner.computeIndentation(fDocument.getLength() - 2).toString();
-		Assert.assertEquals("		", indent);
+		Assert.assertEquals("			", indent);
 	}
 
 	public void testExceptionIndentation1() {
@@ -894,6 +894,13 @@ public class JavaHeuristicScannerTest extends TestCase {
 		String indent= fScanner.computeIndentation(23).toString();
 		Assert.assertEquals("\t\t", indent);
 		indent= fScanner.computeIndentation(24).toString();
+		Assert.assertEquals("\t\t", indent);
+	}
+
+	public void testContinuationIndentationOfParentheses() throws Exception {
+		fDocument.set("\tint foo() {\n\treturn \"\".length(\n\t\t);\n\t}");
+
+		String indent= fScanner.computeIndentation(34).toString();
 		Assert.assertEquals("\t\t", indent);
 	}
 

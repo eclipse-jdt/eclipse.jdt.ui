@@ -932,9 +932,10 @@ public final class JavaIndenter {
 
 		// align parenthesis'
 		if (matchParen) {
-			if (skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN))
+			if (skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN)) {
+				fIndent= fPrefs.prefContinuationIndent;
 				return fPosition;
-			else {
+			} else {
 				// if we can't find the matching paren, the heuristic is to unindent
 				// by one against the normal position
 				int pos= findReferencePosition(offset, danglingElse, matchBrace, false, matchCase, throwsClause);
