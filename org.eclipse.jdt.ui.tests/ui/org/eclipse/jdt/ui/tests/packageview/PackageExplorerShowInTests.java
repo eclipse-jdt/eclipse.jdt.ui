@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.ui.tests.packageview;
 
+import java.io.ByteArrayInputStream;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -19,11 +21,14 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.IAdaptable;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 
@@ -32,10 +37,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 
 public class PackageExplorerShowInTests extends TestCase {
@@ -46,14 +53,7 @@ public class PackageExplorerShowInTests extends TestCase {
 	}
 
 	public static Test suite() {
-		if (true) {
-			return new ProjectTestSetup(new TestSuite(clazz));
-		} else {
-			System.err.println("*** Running only parts of " + clazz.getName() + "!");
-			TestSuite suite= new TestSuite();
-			suite.addTest(new PackageExplorerShowInTests("testXXX"));
-			return new ProjectTestSetup(suite);
-		}
+		return new ProjectTestSetup(new TestSuite(clazz));
 	}
 
 	public static Test setUpTest(Test someTest) {
@@ -129,6 +129,30 @@ public class PackageExplorerShowInTests extends TestCase {
 
 		assertEquals(1, selection.size());
 		assertEquals(cu, selection.getFirstElement());
+	}
+
+	public void testCUNotOnClasspath() throws Exception {
+		IFolder folder= fJProject.getProject().getFolder("folder");
+		folder.create(true, true, null);
+		IFile file= folder.getFile("A.java");
+		file.create(new ByteArrayInputStream("package p;\nclass A {\n\n}".getBytes()), true, null);
+		
+		IStructuredSelection selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(file));
+		assertEquals(1, selection.size());
+		assertEquals(file, selection.getFirstElement());
+		
+		IEditorPart editor= EditorUtility.openInEditor(file);
+		try {
+			selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(file));
+			assertEquals(1, selection.size());
+			assertEquals(file, selection.getFirstElement());
+			
+			selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(JavaCore.create(file)));
+			assertEquals(1, selection.size());
+			assertEquals(file, selection.getFirstElement());
+		} finally {
+			editor.getSite().getPage().closeEditor(editor, false);
+		}
 	}
 
 
