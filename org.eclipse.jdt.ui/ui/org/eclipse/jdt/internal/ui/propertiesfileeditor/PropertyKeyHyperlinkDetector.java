@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.text.StringCharacterIterator;
 import java.util.Properties;
 
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.IDocument;
@@ -31,6 +33,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
 
+import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 
@@ -45,26 +48,28 @@ import org.eclipse.ui.texteditor.ITextEditor;
  */
 public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 
+	private ITextEditor fTextEditor;
+
 	/*
 	 * @see org.eclipse.jface.text.hyperlink.IHyperlinkDetector#detectHyperlinks(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion, boolean)
 	 */
 	public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
-		ITextEditor textEditor= (ITextEditor)getAdapter(ITextEditor.class);
-		if (region == null || textEditor == null)
+		fTextEditor= (ITextEditor)getAdapter(ITextEditor.class);
+		if (region == null || fTextEditor == null)
 			return null;
 
-		IEditorSite site= textEditor.getEditorSite();
+		IEditorSite site= fTextEditor.getEditorSite();
 		if (site == null)
 			return null;
 
 		int offset= region.getOffset();
-		if (!checkEnabled(textEditor, offset))
+		if (!checkEnabled(fTextEditor, offset))
 			return null;
 
 		ITypedRegion partition= null;
 		try {
-			IStorageEditorInput storageEditorInput= (IStorageEditorInput)textEditor.getEditorInput();
-			IDocument document= textEditor.getDocumentProvider().getDocument(storageEditorInput);
+			IStorageEditorInput storageEditorInput= (IStorageEditorInput)fTextEditor.getEditorInput();
+			IDocument document= fTextEditor.getDocumentProvider().getDocument(storageEditorInput);
 			if (document instanceof IDocumentExtension3)
 				partition= ((IDocumentExtension3)document).getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset, false);
 
@@ -92,13 +97,16 @@ public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 				return null;
 			}
 
-			return new PropertyKeyHyperlink[] {new PropertyKeyHyperlink(new Region(partition.getOffset() + delta, realKey.length()), realKey, textEditor)};
+			return new PropertyKeyHyperlink[] {new PropertyKeyHyperlink(new Region(partition.getOffset() + delta, realKey.length()), realKey, fTextEditor)};
 
 		} catch (BadLocationException ex) {
 			return null;
 		} catch (BadPartitioningException ex) {
 			return null;
 		} catch (IOException ex) {
+			return null;
+		} catch (IllegalArgumentException ex) {
+			showErrorInStatusLine(ex.getLocalizedMessage());
 			return null;
 		}
 	}
@@ -132,5 +140,21 @@ public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 
 		 // XXX: Must be changed to IStorageEditorInput once support for JARs is available (see class Javadoc for details)
 		return textEditor.getEditorInput() instanceof IFileEditorInput;
+	}
+
+	private void showErrorInStatusLine(final String message) {
+		Display display= fTextEditor.getEditorSite().getShell().getDisplay();
+		display.beep();
+		final IEditorStatusLine statusLine= (IEditorStatusLine)fTextEditor.getAdapter(IEditorStatusLine.class);
+		if (statusLine != null) {
+			display.asyncExec(new Runnable() {
+				/*
+				 * @see java.lang.Runnable#run()
+				 */
+				public void run() {
+					statusLine.setMessage(true, message, null);
+				}
+			});
+		}
 	}
 }
