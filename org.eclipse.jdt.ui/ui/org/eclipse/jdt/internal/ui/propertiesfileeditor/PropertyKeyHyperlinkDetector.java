@@ -48,28 +48,26 @@ import org.eclipse.ui.texteditor.ITextEditor;
  */
 public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 
-	private ITextEditor fTextEditor;
-
 	/*
 	 * @see org.eclipse.jface.text.hyperlink.IHyperlinkDetector#detectHyperlinks(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion, boolean)
 	 */
 	public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
-		fTextEditor= (ITextEditor)getAdapter(ITextEditor.class);
-		if (region == null || fTextEditor == null)
+		ITextEditor textEditor= (ITextEditor)getAdapter(ITextEditor.class);
+		if (region == null || textEditor == null)
 			return null;
 
-		IEditorSite site= fTextEditor.getEditorSite();
+		IEditorSite site= textEditor.getEditorSite();
 		if (site == null)
 			return null;
 
 		int offset= region.getOffset();
-		if (!checkEnabled(fTextEditor, offset))
+		if (!checkEnabled(textEditor, offset))
 			return null;
 
 		ITypedRegion partition= null;
 		try {
-			IStorageEditorInput storageEditorInput= (IStorageEditorInput)fTextEditor.getEditorInput();
-			IDocument document= fTextEditor.getDocumentProvider().getDocument(storageEditorInput);
+			IStorageEditorInput storageEditorInput= (IStorageEditorInput)textEditor.getEditorInput();
+			IDocument document= textEditor.getDocumentProvider().getDocument(storageEditorInput);
 			if (document instanceof IDocumentExtension3)
 				partition= ((IDocumentExtension3)document).getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset, false);
 
@@ -97,7 +95,7 @@ public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 				return null;
 			}
 
-			return new PropertyKeyHyperlink[] {new PropertyKeyHyperlink(new Region(partition.getOffset() + delta, realKey.length()), realKey, fTextEditor)};
+			return new PropertyKeyHyperlink[] { new PropertyKeyHyperlink(new Region(partition.getOffset() + delta, realKey.length()), realKey, textEditor) };
 
 		} catch (BadLocationException ex) {
 			return null;
@@ -106,7 +104,7 @@ public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 		} catch (IOException ex) {
 			return null;
 		} catch (IllegalArgumentException ex) {
-			showErrorInStatusLine(ex.getLocalizedMessage());
+			showErrorInStatusLine(ex.getLocalizedMessage(), textEditor);
 			return null;
 		}
 	}
@@ -142,10 +140,10 @@ public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 		return textEditor.getEditorInput() instanceof IFileEditorInput;
 	}
 
-	private void showErrorInStatusLine(final String message) {
-		Display display= fTextEditor.getEditorSite().getShell().getDisplay();
+	private void showErrorInStatusLine(final String message, ITextEditor textEditor) {
+		Display display= textEditor.getEditorSite().getShell().getDisplay();
 		display.beep();
-		final IEditorStatusLine statusLine= (IEditorStatusLine)fTextEditor.getAdapter(IEditorStatusLine.class);
+		final IEditorStatusLine statusLine= (IEditorStatusLine)textEditor.getAdapter(IEditorStatusLine.class);
 		if (statusLine != null) {
 			display.asyncExec(new Runnable() {
 				/*
