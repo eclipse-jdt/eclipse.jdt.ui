@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,8 +57,8 @@ public abstract class MoveLineTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to move a line within a large file.
-	 *
-	 * @throws Exception
+	 * 
+	 * @throws Exception if something goes wrong while moving a line
 	 */
 	public void test() throws Exception {
 		measureMoveLine(getNullPerformanceMeter(), getWarmUpRuns());
@@ -88,16 +88,16 @@ public abstract class MoveLineTest extends TextPerformanceTestCase {
 
 			fEditor.selectAndReveal(offset, 0);
 			performanceMeter.start();
-			SWTEventHelper.keyCodeDown(display, SWT.MOD3, true);
+			SWTEventHelper.keyCodeDown(display, SWT.MOD3, false);
 			for (int j= 0; j < DISTANCE; j++) {
 				event.type= SWT.KeyDown;
 				display.post(event);
-				EditorTestHelper.runEventQueue();
+				
 				event.type= SWT.KeyUp;
 				display.post(event);
-				EditorTestHelper.runEventQueue();
 			}
-			SWTEventHelper.keyCodeUp(display, SWT.MOD3, true);
+			SWTEventHelper.keyCodeUp(display, SWT.MOD3, false);
+			EditorTestHelper.runEventQueue();
 			performanceMeter.stop();
 
 			/*
@@ -114,6 +114,5 @@ public abstract class MoveLineTest extends TextPerformanceTestCase {
 
 	private void runAction(IAction action) {
 		action.run();
-		EditorTestHelper.runEventQueue();
 	}
 }
