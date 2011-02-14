@@ -2073,6 +2073,95 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
 	}
 
+	public void testJoinDeclaration4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        // 1;\n");
+		buf.append("        \n");
+		buf.append("        String message;\n");
+		buf.append("        \n");
+		buf.append("        // 2;\n");
+		buf.append("        \n");
+		buf.append("        message = \"\";\n");
+		buf.append("        \n");
+		buf.append("        // 3;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "message;";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        // 1;\n");
+		buf.append("        \n");
+		buf.append("        String message = \"\";\n");
+		buf.append("        \n");
+		buf.append("        // 2;\n");
+		buf.append("\n");
+		buf.append("        \n");
+		buf.append("        // 3;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+	
+	public void testJoinDeclaration5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        // 1;\n");
+		buf.append("        \n");
+		buf.append("        String message;\n");
+		buf.append("        \n");
+		buf.append("        // 2;\n");
+		buf.append("        \n");
+		buf.append("        message = \"\";\n");
+		buf.append("        \n");
+		buf.append("        // 3;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "message =";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        // 1;\n");
+		buf.append("        \n");
+		buf.append("        \n");
+		buf.append("        \n");
+		buf.append("        // 2;\n");
+		buf.append("        \n");
+		buf.append("        String message = \"\";\n");
+		buf.append("        \n");
+		buf.append("        // 3;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+	
 	private static final Class[] FILTER_EQ= { LinkedNamesAssistProposal.class, RenameRefactoringProposal.class, AssignToVariableAssistProposal.class };
 
     public void testInvertEquals() throws Exception {
