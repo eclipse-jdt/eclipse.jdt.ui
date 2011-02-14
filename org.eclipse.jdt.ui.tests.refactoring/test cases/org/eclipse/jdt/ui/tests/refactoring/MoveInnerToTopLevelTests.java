@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -564,7 +564,17 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	}
 
 	public void test_nonstatic_48() throws Exception {
-		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, null, false, true, false, false);
+		String fileCommentTemplate= "/** Copy right or wrong. */";
+		StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, fileCommentTemplate, null);
+		String newFileTemplate= "${filecomment}\n${package_declaration}\n\n${typecomment}\n${type_declaration}";
+		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID, newFileTemplate, null);
+		
+		try {
+			validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, null, false, true, false, false);
+		} finally {
+			fileCommentTemplate= "/**\n * \n */";
+			StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, fileCommentTemplate, null);
+		}
 	}
 	
 	public void test_nonstatic_49() throws Exception {

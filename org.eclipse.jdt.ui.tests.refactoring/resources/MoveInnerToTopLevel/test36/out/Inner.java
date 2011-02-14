@@ -1,5 +1,4 @@
 package p;
-
 // move to top
 class Inner {
 	

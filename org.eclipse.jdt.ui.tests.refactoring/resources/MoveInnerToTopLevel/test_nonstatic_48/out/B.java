@@ -1,3 +1,4 @@
+/** Copy right or wrong. */
 package p;
 
 // comment move to B 
