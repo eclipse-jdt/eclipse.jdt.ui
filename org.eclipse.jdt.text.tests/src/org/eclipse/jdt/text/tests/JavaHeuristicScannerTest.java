@@ -904,6 +904,16 @@ public class JavaHeuristicScannerTest extends TestCase {
 		Assert.assertEquals("\t\t", indent);
 	}
 
+	public void testContinuationIndentationOfAnnotation() throws Exception {
+		fDocument.set("\t@MyAnnotation(\n\t\tvalue=\"hello\")\n\t\tpublic class ArrayAnnotationBug {\n\t\t}");
+		String indent= fScanner.computeIndentation(33).toString();
+		Assert.assertEquals("\t", indent);
+
+		fDocument.set("\t@org.eclipse.jdt.MyAnnotation(\n\t\tvalue=\"hello\")\n\t\tpublic class ArrayAnnotationBug {\n\t\t}");
+		indent= fScanner.computeIndentation(49).toString();
+		Assert.assertEquals("\t", indent);
+	}
+
 	public void testContinuationIndentationOfBrackets() throws Exception {
 		fDocument.set("\tprivate void helper2(boolean[] booleans) {\n\t}");
 

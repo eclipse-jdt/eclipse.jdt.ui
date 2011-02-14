@@ -1038,6 +1038,10 @@ public final class JavaIndenter {
 					if (looksLikeAnonymousTypeDecl()) {
 						return skipToStatementStart(danglingElse, false);
 					}
+					fPosition= scope;
+					if (looksLikeAnnotation()) {
+						return skipToStatementStart(danglingElse, false);
+					}
 				}
 				// restore
 				fPosition= offset;
@@ -1724,6 +1728,29 @@ public final class JavaIndenter {
 	}
 
 	/**
+	 * Returns <code>true</code> if the current tokens look like an annotation (i.e. an annotation
+	 * name (potentially qualified) preceded by an at-sign).
+	 * 
+	 * @return <code>true</code> if the current position looks like an annotation.
+	 * @since 3.7
+	 */
+
+	private boolean looksLikeAnnotation() {
+		nextToken();
+		if (fToken == Symbols.TokenIDENT) { // Annotation name
+			nextToken();
+			while (fToken == Symbols.TokenOTHER) { // dot of qualification
+				nextToken();
+				if (fToken != Symbols.TokenIDENT) // qualifying name
+					return false;
+				nextToken();
+			}
+			return fToken == Symbols.TokenAT;
+		}
+		return false;
+	}
+	
+	/**
 	 * Returns <code>true</code> if the current tokens look like an anonymous type declaration
 	 * header (i.e. a type name (potentially qualified) and a new keyword). The heuristic calls
 	 * <code>nextToken</code> and expects a possibly qualified identifier (type name) and a new
@@ -1739,7 +1766,7 @@ public final class JavaIndenter {
 			nextToken();
 			while (fToken == Symbols.TokenOTHER) { // dot of qualification
 				nextToken();
-				if (fToken != Symbols.TokenIDENT) // qualificating name
+				if (fToken != Symbols.TokenIDENT) // qualifying name
 					return false;
 				nextToken();
 			}
