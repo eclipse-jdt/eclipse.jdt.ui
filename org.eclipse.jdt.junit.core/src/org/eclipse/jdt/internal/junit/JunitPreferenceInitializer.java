@@ -47,18 +47,21 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 		prefs.put(JUnitPreferencesConstants.JUNIT4_JAVADOC, "http://www.junit.org/junit/javadoc/4.5"); //$NON-NLS-1$
 		
 		// migrate old instance scope prefs
-		IEclipsePreferences oldInstancePrefs= InstanceScope.INSTANCE.getNode(JUnitCorePlugin.PLUGIN_ID);
-		IEclipsePreferences newInstancePrefs= InstanceScope.INSTANCE.getNode(JUnitCorePlugin.CORE_PLUGIN_ID);
-		String[] oldKeys;
 		try {
-			oldKeys= oldInstancePrefs.keys();
-			for (int i= 0; i < oldKeys.length; i++ ) {
-				String key= oldKeys[i];
-				newInstancePrefs.put(key, oldInstancePrefs.get(key, null));
-				oldInstancePrefs.remove(key);
+			IEclipsePreferences newInstancePrefs= InstanceScope.INSTANCE.getNode(JUnitCorePlugin.CORE_PLUGIN_ID);
+			
+			if (newInstancePrefs.keys().length == 0) {
+				IEclipsePreferences oldInstancePrefs= InstanceScope.INSTANCE.getNode(JUnitCorePlugin.PLUGIN_ID);
+				
+				String[] oldKeys= oldInstancePrefs.keys();
+				for (int i= 0; i < oldKeys.length; i++ ) {
+					String key= oldKeys[i];
+					newInstancePrefs.put(key, oldInstancePrefs.get(key, null));
+					oldInstancePrefs.remove(key);
+				}
+				newInstancePrefs.flush();
+				oldInstancePrefs.flush();
 			}
-			newInstancePrefs.flush();
-			oldInstancePrefs.flush();
 		} catch (BackingStoreException e) {
 			JUnitCorePlugin.log(e);
 		}

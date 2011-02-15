@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
+import org.osgi.service.prefs.BackingStoreException;
+
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 /**
@@ -34,6 +37,12 @@ public class JUnitUIPreferencesConstants {
 	}
 
 	public static void setShowInAllViews(boolean show) {
-		InstanceScope.INSTANCE.getNode(JUnitPlugin.PLUGIN_ID).putBoolean(SHOW_IN_ALL_VIEWS, show);
+		IEclipsePreferences preferences= InstanceScope.INSTANCE.getNode(JUnitPlugin.PLUGIN_ID);
+		preferences.putBoolean(SHOW_IN_ALL_VIEWS, show);
+		try {
+			preferences.flush();
+		} catch (BackingStoreException e) {
+			JUnitPlugin.log(e);
+		}
 	}
 }
