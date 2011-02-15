@@ -50,6 +50,10 @@ public class JUnitCorePlugin extends Plugin {
 
 	public static final String CORE_PLUGIN_ID= "org.eclipse.jdt.junit.core"; //$NON-NLS-1$
 	
+	/**
+	 * Plug-in ID of the <b>UI</b> plug-in ("org.eclipse.jdt.junit").
+	 * @see #CORE_PLUGIN_ID
+	 */
 	public static final String PLUGIN_ID= "org.eclipse.jdt.junit"; //$NON-NLS-1$
 	public static final String ID_EXTENSION_POINT_TESTRUN_LISTENERS= PLUGIN_ID + "." + "testRunListeners"; //$NON-NLS-1$ //$NON-NLS-2$
 	public static final String ID_EXTENSION_POINT_TEST_KINDS= PLUGIN_ID + "." + "internal_testKinds"; //$NON-NLS-1$ //$NON-NLS-2$
