@@ -158,28 +158,6 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		if (ref == null)
 			return null;
 
-		IStorage propertiesFile;
-		try {
-			propertiesFile= NLSHintHelper.getResourceBundle(je.getJavaProject(), ref);
-			if (propertiesFile == null)
-				return new NLSHoverControlInput(toHtml(JavaHoverMessages.NLSStringHover_NLSStringHover_PropertiesFileNotDetectedWarning, "", null, false), (IStorage)null, "", getEditor()); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (JavaModelException ex) {
-			return null;
-		}
-
-		final String propertiesFileName= propertiesFile.getName();
-		Properties properties= null;
-		try {
-			properties= NLSHintHelper.getProperties(propertiesFile);
-		} catch (IllegalArgumentException e) {
-			return new NLSHoverControlInput(toHtml(propertiesFileName, JavaHoverMessages.NLSStringHover_NLSStringHover_PropertiesFileCouldNotBeReadWarning, e.getLocalizedMessage(), false),
-					propertiesFile, "", getEditor()); //$NON-NLS-1$
-		}
-		if (properties == null)
-			return null;
-		if (properties.isEmpty())
-			return new NLSHoverControlInput(toHtml(propertiesFileName, JavaHoverMessages.NLSStringHover_NLSStringHover_missingKeyWarning, null, false), propertiesFile, "", getEditor()); //$NON-NLS-1$
-
 		String identifier= null;
 		if (node instanceof StringLiteral) {
 			identifier= ((StringLiteral)node).getLiteralValue();
@@ -204,6 +182,28 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		}
 		if (identifier == null)
 			return null;
+
+		IStorage propertiesFile;
+		try {
+			propertiesFile= NLSHintHelper.getResourceBundle(je.getJavaProject(), ref);
+			if (propertiesFile == null)
+				return new NLSHoverControlInput(toHtml(JavaHoverMessages.NLSStringHover_NLSStringHover_PropertiesFileNotDetectedWarning, "", null, false), (IStorage)null, "", getEditor()); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (JavaModelException ex) {
+			return null;
+		}
+
+		final String propertiesFileName= propertiesFile.getName();
+		Properties properties= null;
+		try {
+			properties= NLSHintHelper.getProperties(propertiesFile);
+		} catch (IllegalArgumentException e) {
+			return new NLSHoverControlInput(toHtml(propertiesFileName, JavaHoverMessages.NLSStringHover_NLSStringHover_PropertiesFileCouldNotBeReadWarning, e.getLocalizedMessage(), false),
+					propertiesFile, identifier, getEditor());
+		}
+		if (properties == null)
+			return null;
+		if (properties.isEmpty())
+			return new NLSHoverControlInput(toHtml(propertiesFileName, JavaHoverMessages.NLSStringHover_NLSStringHover_missingKeyWarning, null, false), propertiesFile, "", getEditor()); //$NON-NLS-1$
 
 		String value= properties.getProperty(identifier, null);
 		String buffer= toHtml(propertiesFileName, value, null, true);
