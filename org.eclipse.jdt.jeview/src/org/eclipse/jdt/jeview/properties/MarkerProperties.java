@@ -45,7 +45,6 @@ public class MarkerProperties implements IPropertySource {
 		Map<String, Object> attributes= null;
 		boolean isJavaMarker= false;
 		try {
-			@SuppressWarnings("unchecked")
 			Map<String, Object> uncheckedAttributes= fMarker.getAttributes();
 			attributes= uncheckedAttributes;
 			isJavaMarker= IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(fMarker.getType());
