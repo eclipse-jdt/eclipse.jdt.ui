@@ -1229,6 +1229,14 @@ public final class JavaIndenter {
 					else
 						return pos;
 
+				case Symbols.TokenCATCH:
+				case Symbols.TokenFINALLY:
+					pos= fPosition;
+					if (skipNextTRY())
+						break;
+					else
+						return pos;
+
 				case Symbols.TokenDO:
 					// align the WHILE position with its do
 					return fPosition;
@@ -1629,6 +1637,44 @@ public final class JavaIndenter {
 		}
 	}
 
+
+	/**
+	 * Skips over the next <code>try</code> keyword. The current token when calling this method must
+	 * be a <code>catch</code> or <code>finally</code> keyword. Returns <code>true</code> if a
+	 * matching <code>try</code> could be found, <code>false</code> otherwise. The cursor (
+	 * <code>fPosition</code>) is set to the offset of the <code>try</code> token.
+	 * 
+	 * @return <code>true</code> if a matching <code>try</code> token was found, <code>false</code>
+	 *         otherwise
+	 * @since 3.7
+	 */
+	private boolean skipNextTRY() {
+		Assert.isTrue(fToken == Symbols.TokenCATCH || fToken == Symbols.TokenFINALLY);
+	
+		while (true) {
+			nextToken();
+			switch (fToken) {
+			// scopes: skip them
+				case Symbols.TokenRPAREN:
+				case Symbols.TokenRBRACKET:
+				case Symbols.TokenRBRACE:
+				case Symbols.TokenGREATERTHAN:
+					skipScope();
+					break;
+	
+				case Symbols.TokenTRY:
+					// found it
+					return true;
+	
+					// shortcut scope starts
+				case Symbols.TokenLPAREN:
+				case Symbols.TokenLBRACE:
+				case Symbols.TokenLBRACKET:
+				case Symbols.TokenEOF:
+					return false;
+			}
+		}
+	}
 
 	/**
 	 * while(condition); is ambiguous when parsed backwardly, as it is a valid

@@ -914,6 +914,34 @@ public class JavaHeuristicScannerTest extends TestCase {
 		Assert.assertEquals("\t", indent);
 	}
 
+	public void testIndentationAfterIfTryCatch() throws Exception {
+		fDocument.set("\tpublic class Bug237081 {\n" +
+				"\t\tpublic void foo() {\n" +
+				"\t\t\tif (true)\n" +
+				"\t\t\t\ttry {\n" +
+				"\t\t\t\t} catch (RuntimeException ex) {\n" +
+				"\t\t\t\t}\n" +
+				"\t\t\t\tfoo();\n" +
+				"\t\t}\n" +
+				"\t}");
+		String indent= fScanner.computeIndentation(117).toString();
+		Assert.assertEquals("\t\t\t", indent);
+
+		fDocument.set("\tpublic class Bug237081 {\n" +
+				"\t\tpublic void foo() {\n" +
+				"\t\t\tif (true)\n" +
+				"\t\t\t\ttry {\n" +
+				"\t\t\t\t} catch (RuntimeException ex) {\n" +
+				"\t\t\t\t} catch (RuntimeException ex) {\n" +
+				"\t\t\t\t} finally {\n" +
+				"\t\t\t\t}\n" +
+				"\t\tfoo();\n" +
+				"\t\t}\n" +
+				"\t}");
+		indent= fScanner.computeIndentation(167).toString();
+		Assert.assertEquals("\t\t\t", indent);
+	}
+
 	public void testContinuationIndentationOfBrackets() throws Exception {
 		fDocument.set("\tprivate void helper2(boolean[] booleans) {\n\t}");
 
