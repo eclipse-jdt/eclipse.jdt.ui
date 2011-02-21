@@ -870,7 +870,7 @@ public class PackageExplorerPart extends ViewPart
 			if (je != null && je.exists()) {
 				IJavaProject javaProject= je.getJavaProject();
 				if (javaProject != null && javaProject.exists()) {
-					if (javaProject.isOnClasspath(je)) {
+					if (javaProject.equals(je) || javaProject.isOnClasspath(je)) {
 						return je;
 					} else {
 						// a working copy of a .java file that is not on classpath

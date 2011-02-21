@@ -86,10 +86,26 @@ public class PackageExplorerShowInTests extends TestCase {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 		IPackageFragment pack= sourceFolder.createPackageFragment("p", true, null);
 		ICompilationUnit cu= pack.createCompilationUnit("A.java", "package p;\nclass A {\n\n}", true, null);
+		
 		IStructuredSelection selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(cu));
-
 		assertEquals(1, selection.size());
 		assertEquals(cu, selection.getFirstElement());
+		
+		selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(pack));
+		assertEquals(1, selection.size());
+		assertEquals(pack, selection.getFirstElement());
+		
+		selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(sourceFolder));
+		assertEquals(1, selection.size());
+		assertEquals(sourceFolder, selection.getFirstElement());
+		
+		selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(fJProject));
+		assertEquals(1, selection.size());
+		assertEquals(fJProject, selection.getFirstElement());
+		
+		selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(fJProject.getProject()));
+		assertEquals(1, selection.size());
+		assertEquals(fJProject, selection.getFirstElement());
 	}
 
 	public void testCUAdaptedCU() throws Exception {
