@@ -3,6 +3,9 @@
 	
 	<target name="build" description="Cleans, builds and refreshes the impacted resources" depends="clean, jar-in-jar-loader_zip" />
 	
+	<!-- Empty target for "After a Clean" task (we don't want to rebuild the Jar here, e.g. on checkout). -->
+	<target name="dummy_clean"/>
+	
 	<target name="init" depends="properties">
 		<property name="temp.folder" value="${basedir}/temp.folder" />
 		<property name="build.result.folder" value="${basedir}" />
