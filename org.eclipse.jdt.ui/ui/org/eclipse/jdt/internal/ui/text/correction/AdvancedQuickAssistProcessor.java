@@ -2262,7 +2262,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		InfixExpression condition= ast.newInfixExpression();
 		condition.setOperator(InfixExpression.Operator.EQUALS);
 		//
-		Expression leftExpression= (Expression) rewrite.createCopyTarget(switchStatement.getExpression());
+		Expression leftExpression= getParenthesizedExpressionIfNeeded(ast, rewrite, switchStatement.getExpression(), condition, InfixExpression.LEFT_OPERAND_PROPERTY);
 		condition.setLeftOperand(leftExpression);
 		//
 		Expression rightExpression= null;

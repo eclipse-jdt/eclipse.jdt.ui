@@ -3493,6 +3493,104 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 
+	public void testConvertSwitchToIfBug252104_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foobar() {\n");
+		buf.append("        switch (getFoo() ? getBar() : getBar()) {\n");
+		buf.append("        case 1:\n");
+		buf.append("            System.out.println();\n");
+		buf.append("            break;\n");
+		buf.append("        case 2:\n");
+		buf.append("            System.out.println();\n");
+		buf.append("            break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private int getBar() {\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");
+		buf.append("    private boolean getFoo() {\n");
+		buf.append("        return false;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("switch");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foobar() {\n");
+		buf.append("        if ((getFoo() ? getBar() : getBar()) == 1) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        } else if ((getFoo() ? getBar() : getBar()) == 2) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private int getBar() {\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");
+		buf.append("    private boolean getFoo() {\n");
+		buf.append("        return false;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
+	public void testConvertSwitchToIfBug252104_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x, int y) {\n");
+		buf.append("        switch (x + y) {\n");
+		buf.append("        case 1:\n");
+		buf.append("            System.out.println();\n");
+		buf.append("            break;\n");
+		buf.append("        case 2:\n");
+		buf.append("            System.out.println();\n");
+		buf.append("            break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("switch");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x, int y) {\n");
+		buf.append("        if (x + y == 1) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        } else if (x + y == 2) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
 	public void testSurroundWithTemplate01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
