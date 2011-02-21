@@ -103,6 +103,19 @@ public class PackageExplorerShowInTests extends TestCase {
 		assertEquals(1, selection.size());
 		assertEquals(fJProject, selection.getFirstElement());
 		
+		// check corresponding resources:
+		selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(cu.getResource()));
+		assertEquals(1, selection.size());
+		assertEquals(cu, selection.getFirstElement());
+		
+		selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(pack.getResource()));
+		assertEquals(1, selection.size());
+		assertEquals(pack, selection.getFirstElement());
+		
+		selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(sourceFolder.getResource()));
+		assertEquals(1, selection.size());
+		assertEquals(sourceFolder, selection.getFirstElement());
+		
 		selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(fJProject.getProject()));
 		assertEquals(1, selection.size());
 		assertEquals(fJProject, selection.getFirstElement());
@@ -166,6 +179,10 @@ public class PackageExplorerShowInTests extends TestCase {
 			selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(JavaCore.create(file)));
 			assertEquals(1, selection.size());
 			assertEquals(file, selection.getFirstElement());
+			
+			selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(folder));
+			assertEquals(1, selection.size());
+			assertEquals(folder, selection.getFirstElement());
 		} finally {
 			editor.getSite().getPage().closeEditor(editor, false);
 		}
