@@ -547,10 +547,22 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			parenthesizedExpression= getParenthesizedExpression(ast, getInversedExpression(rewrite, innerExpression, provider));
 			return parenthesizedExpression;
 		}
-		//
+		if (expression instanceof ConditionalExpression) {
+			ConditionalExpression conditionalExpression= (ConditionalExpression)expression;
+			ConditionalExpression newExpression= ast.newConditionalExpression();
+			newExpression.setExpression((Expression)rewrite.createCopyTarget(conditionalExpression.getExpression()));
+			newExpression.setThenExpression(getInversedExpression(rewrite, conditionalExpression.getThenExpression()));
+			newExpression.setElseExpression(getInversedExpression(rewrite, conditionalExpression.getElseExpression()));
+			return newExpression;
+		}
+
 		PrefixExpression prefixExpression= ast.newPrefixExpression();
 		prefixExpression.setOperator(PrefixExpression.Operator.NOT);
-		prefixExpression.setOperand(getRenamedNameCopy(provider, rewrite, expression));
+		Expression renamedNameCopy= getRenamedNameCopy(provider, rewrite, expression);
+		if (NecessaryParenthesesChecker.needsParentheses(renamedNameCopy, prefixExpression, PrefixExpression.OPERAND_PROPERTY)) {
+			renamedNameCopy= getParenthesizedExpression(ast, renamedNameCopy);
+		}
+		prefixExpression.setOperand(renamedNameCopy);
 		return prefixExpression;
 	}
 
