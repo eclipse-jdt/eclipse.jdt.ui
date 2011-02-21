@@ -3,9 +3,6 @@
 	
 	<target name="build" description="Cleans, builds and refreshes the impacted resources" depends="clean, jar-in-jar-loader_zip" />
 	
-	<!-- Dummy clean target, workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=196811 and https://bugs.eclipse.org/bugs/show_bug.cgi?id=160895 -->
-	<target name="dummy_clean"/>
-	
 	<target name="init" depends="properties">
 		<property name="temp.folder" value="${basedir}/temp.folder" />
 		<property name="build.result.folder" value="${basedir}" />
