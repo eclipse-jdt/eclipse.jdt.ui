@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -150,6 +150,26 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	}
 
 	public void testSimple_ConstantExpression2() throws Exception {
+		performOK();
+	}
+
+	public void testSimple_Expression1() throws Exception {
+		performOK();
+	}
+
+	public void testSimple_Expression2() throws Exception {
+		performOK();
+	}
+
+	public void testSimple_Expression3() throws Exception {
+		performOK();
+	}
+
+	public void testSimple_Expression4() throws Exception {
+		performOK();
+	}
+
+	public void testSimple_Expression5() throws Exception {
 		performOK();
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -277,7 +277,7 @@ public class InlineTempTests extends RefactoringTest {
 	
 	public void test36() throws Exception{
 		// parenthesize complex cast expression
-		helper1(8, 21, 8, 24);
+		helper1(6, 21, 6, 24);
 	}
 	
 	public void test37() throws Exception{
@@ -300,6 +300,21 @@ public class InlineTempTests extends RefactoringTest {
 		helper1(5, 43, 5, 46);
 	}
 	
+	public void test41() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
+		helper1(5, 13, 5, 14);
+	}
+
+	public void test42() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
+		helper1(5, 13, 5, 14);
+	}
+
+	public void test43() throws Exception {
+		// parenthesize complex cast expression https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
+		helper1(6, 21, 6, 24);
+	}
+
 	//------
 
 	public void testFail0() throws Exception{

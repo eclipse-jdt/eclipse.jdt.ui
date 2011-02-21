@@ -877,6 +877,91 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	public void testUnusedCodeBug335173_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+
+		buf.append("package test1;\n");
+		buf.append("import java.util.Comparator;\n");
+		buf.append("\n");
+		buf.append("class IntComp implements Comparator<Integer> {\n");
+		buf.append("    public int compare(Integer o1, Integer o2) {\n");
+		buf.append("        return ((Integer) o1).intValue() - ((Integer) o2).intValue();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("IntComp.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Comparator;\n");
+		buf.append("\n");
+		buf.append("class IntComp implements Comparator<Integer> {\n");
+		buf.append("    public int compare(Integer o1, Integer o2) {\n");
+		buf.append("        return o1.intValue() - o2.intValue();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testUnusedCodeBug335173_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(Integer n) {\n");
+		buf.append("        int i = (((Integer) n)).intValue();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(Integer n) {\n");
+		buf.append("        int i = (n).intValue();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testUnusedCodeBug335173_3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(Integer n) {\n");
+		buf.append("        int i = ((Integer) (n)).intValue();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(Integer n) {\n");
+		buf.append("        int i = (n).intValue();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
 	public void testJava5001() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5868,7 +5953,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        double d = 2.0 * 0.5 / 4.0;\n");
+		buf.append("        double d = 2.0 * (0.5 / 4.0);\n");
 		buf.append("        int spaceCount = 3;\n");
 		buf.append("        spaceCount = 2 * (spaceCount / 2);\n");
 		buf.append("    }\n");
@@ -5935,6 +6020,624 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+	}
+
+	public void testRemoveParenthesesBug335173_1() throws Exception {
+		//while loop's expression
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean a) {\n");
+		buf.append("        while (((a))) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void bar(int x) {\n");
+		buf.append("        while ((x > 2)) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean a) {\n");
+		buf.append("        while (a) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void bar(int x) {\n");
+		buf.append("        while (x > 2) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_2() throws Exception {
+		//do while loop's expression
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        do {\n");
+		buf.append("        } while ((x > 2));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        do {\n");
+		buf.append("        } while (x > 2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_3() throws Exception {
+		//for loop's expression
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        for (int x = 0; (x > 2); x++) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        for (int x = 0; x > 2; x++) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_4() throws Exception {
+		//switch statement expression
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        switch ((x - 2)) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        switch (x - 2) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_5() throws Exception {
+		//switch case expression
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        switch (x) {\n");
+		buf.append("        case (1 + 2):\n");
+		buf.append("            break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        switch (x) {\n");
+		buf.append("        case 1 + 2:\n");
+		buf.append("            break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_6() throws Exception {
+		//throw statement expression
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int type) throws Exception {\n");
+		buf.append("        throw (type == 1 ? new IllegalArgumentException() : new Exception());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int type) throws Exception {\n");
+		buf.append("        throw type == 1 ? new IllegalArgumentException() : new Exception();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_7() throws Exception {
+		//synchronized statement expression
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static final Object OBJECT = new Object();\n");
+		buf.append("    private static final String STRING = new String();\n");
+		buf.append("    \n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        synchronized ((x == 1 ? STRING : OBJECT)) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static final Object OBJECT = new Object();\n");
+		buf.append("    private static final String STRING = new String();\n");
+		buf.append("    \n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        synchronized (x == 1 ? STRING : OBJECT) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_8() throws Exception {
+		//assert statement expression
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        assert (x > 2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        assert x > 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_9() throws Exception {
+		//assert statement message expression
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        assert x > 2 : (x - 2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        assert x > 2 : x - 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_10() throws Exception {
+		//array access index expression
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a[], int x) {\n");
+		buf.append("        int i = a[(x + 2)];\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a[], int x) {\n");
+		buf.append("        int i = a[x + 2];\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_11() throws Exception {
+		//conditional expression's then expression
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        int i = x > 10 ? (x > 5 ? x - 1 : x - 2): x;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        int i = x > 10 ? x > 5 ? x - 1 : x - 2: x;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_12() throws Exception {
+		//conditional expression's else expression
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        int i = x > 10 ? x: (x > 5 ? x - 1 : x - 2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        int i = x > 10 ? x: x > 5 ? x - 1 : x - 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_13() throws Exception {
+		//conditional expression's then expression
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        int i = x > 10 ? (x = x - 2): x;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        int i = x > 10 ? (x = x - 2): x;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_14() throws Exception {
+		//conditional expression's else expression
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        int i = x > 10 ? x: (x = x - 2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        int i = x > 10 ? x: (x = x - 2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_15() throws Exception {
+		//shift operators
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        int m= (x >> 2) >> 1;\n");
+		buf.append("        m= x >> (2 >> 1);\n");
+		buf.append("        int n= (x << 2) << 1;\n");
+		buf.append("        n= x << (2 << 1);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        int m= x >> 2 >> 1;\n");
+		buf.append("        m= x >> (2 >> 1);\n");
+		buf.append("        int n= x << 2 << 1;\n");
+		buf.append("        n= x << (2 << 1);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_16() throws Exception {
+		//integer multiplication
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x, long y) {\n");
+		buf.append("        int m= (4 * x) * 2;\n");
+		buf.append("        int n= 4 * (x * 2);\n");
+		buf.append("        int p= 4 * (x % 3);\n");
+		buf.append("        int q= 4 * (x / 3);\n");
+		buf.append("        int r= 4 * (x * y);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x, long y) {\n");
+		buf.append("        int m= 4 * x * 2;\n");
+		buf.append("        int n= 4 * x * 2;\n");
+		buf.append("        int p= 4 * (x % 3);\n");
+		buf.append("        int q= 4 * (x / 3);\n");
+		buf.append("        int r= 4 * (x * y);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_17() throws Exception {
+		//floating point multiplication
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(double x) {\n");
+		buf.append("        int m= (4.0 * x) * 0.5;\n");
+		buf.append("        int n= 4.0 * (x * 0.5);\n");
+		buf.append("        int p= 4.0 * (x / 100);\n");
+		buf.append("        int q= 4.0 * (x % 3);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(double x) {\n");
+		buf.append("        int m= 4.0 * x * 0.5;\n");
+		buf.append("        int n= 4.0 * (x * 0.5);\n");
+		buf.append("        int p= 4.0 * (x / 100);\n");
+		buf.append("        int q= 4.0 * (x % 3);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_18() throws Exception {
+		//integer addition
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x, long y) {\n");
+		buf.append("        int m= (4 + x) + 2;\n");
+		buf.append("        int n= 4 + (x + 2);\n");
+		buf.append("        int p= 4 + (x + y);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x, long y) {\n");
+		buf.append("        int m= 4 + x + 2;\n");
+		buf.append("        int n= 4 + x + 2;\n");
+		buf.append("        int p= 4 + (x + y);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_19() throws Exception {
+		//floating point addition
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(double x) {\n");
+		buf.append("        int m= (4.0 + x) + 100.0;\n");
+		buf.append("        int n= 4.0 + (x + 100.0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(double x) {\n");
+		buf.append("        int m= 4.0 + x + 100.0;\n");
+		buf.append("        int n= 4.0 + (x + 100.0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug335173_20() throws Exception {
+		//string concatenation
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String s, String t, String u) {\n");
+		buf.append("        String a= (s + t) + u;\n");
+		buf.append("        String b= s + (t + u);\n");
+		buf.append("        String c= (1 + 2) + s;\n");
+		buf.append("        String d= 1 + (2 + s);\n");
+		buf.append("        String e= s + (1 + 2);\n");
+		buf.append("        String f= (s + 1) + 2;\n");
+		buf.append("        String g= (1 + s) + 2;\n");
+		buf.append("        String h= 1 + (s + 2);\n");
+		buf.append("        String i= s + (1 + t);\n");
+		buf.append("        String j= s + (t + 1);\n");
+		buf.append("        String k= s + (1 - 2);\n");
+		buf.append("        String l= s + (1 * 2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String s, String t, String u) {\n");
+		buf.append("        String a= s + t + u;\n");
+		buf.append("        String b= s + t + u;\n");
+		buf.append("        String c= 1 + 2 + s;\n");
+		buf.append("        String d= 1 + (2 + s);\n");
+		buf.append("        String e= s + (1 + 2);\n");
+		buf.append("        String f= s + 1 + 2;\n");
+		buf.append("        String g= 1 + s + 2;\n");
+		buf.append("        String h= 1 + s + 2;\n");
+		buf.append("        String i= s + 1 + t;\n");
+		buf.append("        String j= s + t + 1;\n");
+		buf.append("        String k= s + (1 - 2);\n");
+		buf.append("        String l= s + 1 * 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
 	public void testRemoveQualifier01() throws Exception {

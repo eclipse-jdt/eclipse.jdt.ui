@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.corext.SourceRangeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 
@@ -138,7 +139,6 @@ class AccessAnalyzer extends ASTVisitor {
 				arguments.add(fRewriter.createCopyTarget(node.getRightHandSide()));
 			} else {
 				// This is the compound assignment case: field+= 10;
-				boolean needsParentheses= ASTNodes.needsParentheses(node.getRightHandSide());
 				InfixExpression exp= ast.newInfixExpression();
 				exp.setOperator(ASTNodes.convertToInfixOperator(node.getOperator()));
 				MethodInvocation getter= ast.newMethodInvocation();
@@ -148,7 +148,8 @@ class AccessAnalyzer extends ASTVisitor {
 					getter.setExpression((Expression)fRewriter.createCopyTarget(receiver));
 				exp.setLeftOperand(getter);
 				Expression rhs= (Expression)fRewriter.createCopyTarget(node.getRightHandSide());
-				if (needsParentheses) {
+				if (NecessaryParenthesesChecker.needsParentheses(node.getRightHandSide(), exp, InfixExpression.RIGHT_OPERAND_PROPERTY)) {
+					//TODO: this introduces extra parentheses as the new 'exp' node doesn't have bindings
 					ParenthesizedExpression p= ast.newParenthesizedExpression();
 					p.setExpression(rhs);
 					rhs= p;

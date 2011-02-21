@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,8 +83,8 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.InlineConstantDescriptor;
@@ -100,6 +100,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollecto
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
+import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -501,7 +502,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			if (explicitCast != null) {
 				CastExpression cast= ast.newCastExpression();
 				Expression modifiedInitializerExpr= (Expression) fCuRewrite.getASTRewrite().createStringPlaceholder(modifiedInitializer, reference.getNodeType());
-				if (ASTNodes.substituteMustBeParenthesized(fInitializer, cast)) {
+				if (NecessaryParenthesesChecker.needsParentheses(fInitializer, cast, CastExpression.EXPRESSION_PROPERTY)) {
 					ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
 					parenthesized.setExpression(modifiedInitializerExpr);
 					modifiedInitializerExpr= parenthesized;
@@ -531,7 +532,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				isStringPlaceholder= true;
 			}
 
-			if (ASTNodes.substituteMustBeParenthesized((isStringPlaceholder ? fInitializer : newReference), reference)) {
+			if (NecessaryParenthesesChecker.needsParentheses((isStringPlaceholder ? fInitializer : newReference), reference.getParent(), reference.getLocationInParent())) {
 				ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
 				parenthesized.setExpression(newReference);
 				newReference= parenthesized;

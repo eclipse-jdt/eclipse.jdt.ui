@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -646,7 +646,7 @@ public class CallInliner {
 					node= castExpression;
 				}
 
-				if (needsParenthesis()) {
+				if (fSourceProvider.needsReturnedExpressionParenthesis(fTargetNode.getParent(), fTargetNode.getLocationInParent())) {
 					ParenthesizedExpression pExp= fTargetNode.getAST().newParenthesizedExpression();
 					pExp.setExpression((Expression)node);
 					node= pExp;
@@ -719,19 +719,6 @@ public class CallInliner {
 			}
 		}
 		return false;
-	}
-
-	private boolean needsParenthesis() {
-		if (!fSourceProvider.needsReturnedExpressionParenthesis())
-			return false;
-		ASTNode parent= fTargetNode.getParent();
-		int type= parent.getNodeType();
-		return
-			type == ASTNode.METHOD_INVOCATION ||
-			(parent instanceof Expression && type != ASTNode.ASSIGNMENT) ||
-			(fSourceProvider.returnsConditionalExpression() &&
-				type == ASTNode.VARIABLE_DECLARATION_FRAGMENT &&
-				((VariableDeclarationFragment)parent).getInitializer() == fTargetNode);
 	}
 
 	private VariableDeclarationStatement createLocalDeclaration(ITypeBinding type, String name, Expression initializer) {

@@ -382,6 +382,40 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	}
 
+	public void testJoinAndIfStatementsBug335173() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a, int x) {\n");
+		buf.append("        if (a instanceof String) {\n");
+		buf.append("            if (x > 2) {\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if (a");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a, int x) {\n");
+		buf.append("        if (a instanceof String && x > 2) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
 	public void testJoinOrIfStatements1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -422,6 +456,49 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		String expected1= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
+
+	}
+
+	public void testJoinOrIfStatementsBug335173() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a, int x) {\n");
+		buf.append("        if (a instanceof String)\n");
+		buf.append("            return;\n");
+		buf.append("        if (x > 2)\n");
+		buf.append("            return;\n");
+		buf.append("        x= 9;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset1= buf.toString().indexOf("if (a");
+		int offset2= buf.toString().lastIndexOf("x= 9;");
+		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
+		List proposals= collectAssists(context, false);
+
+		for (Iterator I= proposals.iterator(); I.hasNext();) {
+			Object o= I.next();
+			if (!(o instanceof CUCorrectionProposal))
+				I.remove();
+		}
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a, int x) {\n");
+		buf.append("        if (a instanceof String || x > 2)\n");
+		buf.append("            return;\n");
+		buf.append("        x= 9;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 
 	}
 
@@ -1639,7 +1716,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public boolean foo(int a, int b) {\n");
-		buf.append("        return (a == b) != (b > 0);\n");
+		buf.append("        return (a == b) != b > 0;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -1671,6 +1748,37 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public boolean foo(int a, int b) {\n");
 		buf.append("        return false == (b == 0 == true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
+	public void testExchangeOperandsBug332019_4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public boolean foo(int a, int b) {\n");
+		buf.append("        return b + 1 != a - 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("!=");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public boolean foo(int a, int b) {\n");
+		buf.append("        return a - 1 != b + 1;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -2887,6 +2995,169 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    public void foo(Object a, Object b) {\n");
 		buf.append("        if (!(a == null ^ b == null)) {\n");
 		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
+	public void testInverseCondition2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a) {\n");
+		buf.append("        if (!(a instanceof String)) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("!");
+		int length= "!(a instanceof String)".length();
+		AssistContext context= getCorrectionContext(cu, offset, length);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a) {\n");
+		buf.append("        if (a instanceof String) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
+	public void testInverseCondition3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a) {\n");
+		buf.append("        while (!(a instanceof String)) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("!");
+		int length= "!(a instanceof String)".length();
+		AssistContext context= getCorrectionContext(cu, offset, length);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a) {\n");
+		buf.append("        while (a instanceof String) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
+	public void testInverseCondition4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a) {\n");
+		buf.append("        for (int i = 0; !(a instanceof String); i++) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("!");
+		int length= "!(a instanceof String)".length();
+		AssistContext context= getCorrectionContext(cu, offset, length);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a) {\n");
+		buf.append("        for (int i = 0; a instanceof String; i++) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
+	public void testInverseCondition5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a) {\n");
+		buf.append("        do {\n");
+		buf.append("        } while (!(a instanceof String));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("!");
+		int length= "!(a instanceof String)".length();
+		AssistContext context= getCorrectionContext(cu, offset, length);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a) {\n");
+		buf.append("        do {\n");
+		buf.append("        } while (a instanceof String);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
+	public void testInverseCondition6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a) {\n");
+		buf.append("        assert !(a instanceof String);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("!");
+		int length= "!(a instanceof String)".length();
+		AssistContext context= getCorrectionContext(cu, offset, length);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object a) {\n");
+		buf.append("        assert a instanceof String;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -836,6 +836,14 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performCastTest();
 	}
 
+	public void testInfixExpression1() throws Exception {
+		performCastTest();
+	}
+
+	public void testInfixExpression2() throws Exception {
+		performCastTest();
+	}
+
 	/* *********************** Enum Tests ******************************* */
 
 	private void performEnumTest() throws Exception {
@@ -948,11 +956,19 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performOperatorTest();
 	}
 
+	public void testPlusPlus_1() throws Exception {
+		performOperatorTest();
+	}
+
 	public void testPlusDiff() throws Exception {
 		performOperatorTest();
 	}
 
 	public void testDiffDiff() throws Exception {
+		performOperatorTest();
+	}
+
+	public void testDiffPlus() throws Exception {
 		performOperatorTest();
 	}
 

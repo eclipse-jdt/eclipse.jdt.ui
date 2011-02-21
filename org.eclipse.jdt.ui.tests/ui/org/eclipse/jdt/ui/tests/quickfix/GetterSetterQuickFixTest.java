@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -161,6 +161,238 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testInvisibleFieldToGetterSetterBug335173_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    private int test;\n");
+		buf.append("\n");
+		buf.append("    public int getTest() {\n");
+		buf.append("        return this.test;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void setTest(int test) {\n");
+		buf.append("        this.test = test;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class D {\n");
+		buf.append("    public void foo(int x){\n");
+		buf.append("        C c=new C();\n");
+		buf.append("        c.test+= x;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    private int test;\n");
+		buf.append("\n");
+		buf.append("    public int getTest() {\n");
+		buf.append("        return this.test;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void setTest(int test) {\n");
+		buf.append("        this.test = test;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class D {\n");
+		buf.append("    public void foo(int x){\n");
+		buf.append("        C c=new C();\n");
+		buf.append("        c.setTest(c.getTest() + x);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testInvisibleFieldToGetterSetterBug335173_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    private int test;\n");
+		buf.append("\n");
+		buf.append("    public int getTest() {\n");
+		buf.append("        return this.test;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void setTest(int test) {\n");
+		buf.append("        this.test = test;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class D {\n");
+		buf.append("    public void foo(){\n");
+		buf.append("        C c=new C();\n");
+		buf.append("        c.test+= 1 + 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    private int test;\n");
+		buf.append("\n");
+		buf.append("    public int getTest() {\n");
+		buf.append("        return this.test;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void setTest(int test) {\n");
+		buf.append("        this.test = test;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class D {\n");
+		buf.append("    public void foo(){\n");
+		buf.append("        C c=new C();\n");
+		buf.append("        c.setTest(c.getTest() + (1 + 2));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testInvisibleFieldToGetterSetterBug335173_3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    private int test;\n");
+		buf.append("\n");
+		buf.append("    public int getTest() {\n");
+		buf.append("        return this.test;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void setTest(int test) {\n");
+		buf.append("        this.test = test;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class D {\n");
+		buf.append("    public void foo(){\n");
+		buf.append("        C c=new C();\n");
+		buf.append("        c.test-= 1 + 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    private int test;\n");
+		buf.append("\n");
+		buf.append("    public int getTest() {\n");
+		buf.append("        return this.test;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void setTest(int test) {\n");
+		buf.append("        this.test = test;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class D {\n");
+		buf.append("    public void foo(){\n");
+		buf.append("        C c=new C();\n");
+		buf.append("        c.setTest(c.getTest() - (1 + 2));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testInvisibleFieldToGetterSetterBug335173_4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    private int test;\n");
+		buf.append("\n");
+		buf.append("    public int getTest() {\n");
+		buf.append("        return this.test;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void setTest(int test) {\n");
+		buf.append("        this.test = test;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class D {\n");
+		buf.append("    public void foo(){\n");
+		buf.append("        C c=new C();\n");
+		buf.append("        c.test*= 1 + 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    private int test;\n");
+		buf.append("\n");
+		buf.append("    public int getTest() {\n");
+		buf.append("        return this.test;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void setTest(int test) {\n");
+		buf.append("        this.test = test;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class D {\n");
+		buf.append("    public void foo(){\n");
+		buf.append("        C c=new C();\n");
+		buf.append("        c.setTest(c.getTest() * (1 + 2));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}

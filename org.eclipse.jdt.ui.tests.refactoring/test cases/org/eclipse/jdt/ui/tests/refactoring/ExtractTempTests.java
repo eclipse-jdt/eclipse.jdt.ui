@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -654,6 +654,31 @@ public class ExtractTempTests extends RefactoringTest {
 	public void test104() throws Exception {
 		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=307758
 		helper1(6, 17, 6, 24, true, false, "temp", "i");
+	}
+
+	public void test105() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
+		helper1(5, 21, 5, 26, true, false, "temp", "i");
+	}
+
+	public void test106() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
+		helper1(5, 20, 5, 27, true, false, "temp", "i");
+	}
+
+	public void test107() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
+		helper1(5, 22, 5, 27, true, false, "temp", "i");
+	}
+
+	public void test108() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
+		helper1(5, 21, 5, 28, true, false, "temp", "i");
+	}
+
+	public void test109() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
+		helper1(5, 20, 5, 29, true, false, "temp", "i");
 	}
 
 	public void testZeroLengthSelection0() throws Exception {

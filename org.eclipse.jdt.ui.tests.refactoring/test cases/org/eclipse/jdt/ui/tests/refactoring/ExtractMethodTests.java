@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1442,6 +1442,26 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 
 	public void test624() throws Exception {
+		expressionTest();
+	}
+
+	public void test625() throws Exception {
+		expressionTest();
+	}
+
+	public void test626() throws Exception {
+		expressionTest();
+	}
+
+	public void test627() throws Exception {
+		expressionTest();
+	}
+
+	public void test628() throws Exception {
+		expressionTest();
+	}
+
+	public void test629() throws Exception {
 		expressionTest();
 	}
 

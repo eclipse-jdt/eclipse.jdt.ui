@@ -7,6 +7,6 @@ public class TestArray {
 	}
 	
 	public void main() {
-		int i= (new int[] {1})[0];
+		int i= new int[] {1}[0];
 	}
 }
