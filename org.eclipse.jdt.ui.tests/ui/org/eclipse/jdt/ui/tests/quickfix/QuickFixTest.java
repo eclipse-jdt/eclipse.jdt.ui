@@ -152,11 +152,11 @@ public class QuickFixTest extends TestCase {
 	}
 
 
-	public static void assertCommandIdDoesNotExists(List actualProposals, String commandId) {
+	public static void assertCommandIdDoesNotExist(List actualProposals, String commandId) {
 		assertTrue(findProposalByCommandId(commandId, actualProposals) == null);
 	}
 
-	public static void assertProposalDoesNotExists(List actualProposals, String proposalName) {
+	public static void assertProposalDoesNotExist(List actualProposals, String proposalName) {
 		assertTrue(findProposalByName(proposalName, actualProposals) == null);
 	}
 

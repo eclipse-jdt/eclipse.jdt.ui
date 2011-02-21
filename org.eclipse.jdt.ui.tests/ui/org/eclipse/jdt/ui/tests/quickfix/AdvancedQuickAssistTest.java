@@ -3250,7 +3250,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		assertProposalDoesNotExists(proposals, "Push negation down");
+		assertProposalDoesNotExist(proposals, "Push negation down");
 	}
 
 	public void testPushNegationDownBug335778_2() throws Exception {
@@ -3272,7 +3272,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		assertProposalDoesNotExists(proposals, "Push negation down");
+		assertProposalDoesNotExist(proposals, "Push negation down");
 	}
 
 	public void testPullNegationUp() throws Exception {
@@ -3328,7 +3328,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		assertProposalDoesNotExists(proposals, "Pull negation up");
+		assertProposalDoesNotExist(proposals, "Pull negation up");
 	}
 
 	public void testPullNegationUpBug335778_2() throws Exception {
@@ -3351,7 +3351,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		assertProposalDoesNotExists(proposals, "Pull negation up");
+		assertProposalDoesNotExist(proposals, "Pull negation up");
 	}
 
 	public void testJoinIfListInIfElseIf() throws Exception {

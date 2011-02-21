@@ -5261,7 +5261,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
 		List proposals= collectAssists(context, false);
 
-		assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
+		assertCommandIdDoesNotExist(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
 	}
 
 	public void testConvertToStringBufferNoFixWithoutString2() throws Exception {
@@ -5279,7 +5279,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
 		List proposals= collectAssists(context, false);
 
-		assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
+		assertCommandIdDoesNotExist(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
 	}
 
 	public void testConvertToStringBufferNoFixOutsideMethod() throws Exception {
@@ -5296,7 +5296,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
 		List proposals= collectAssists(context, false);
 
-		assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
+		assertCommandIdDoesNotExist(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
 	}
 
 	public void testConvertToStringBufferDupVarName() throws Exception {
@@ -5565,7 +5565,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_MESSAGE_FORMAT_ID);
+		assertCommandIdDoesNotExist(proposals, QuickAssistProcessor.CONVERT_TO_MESSAGE_FORMAT_ID);
 	}
 
 	public void testConvertToMessageFormatStringBoxing14() throws Exception {
