@@ -1960,8 +1960,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			negationExpression= (PrefixExpression) covering.getParent();
 			parenthesizedExpression= (ParenthesizedExpression) covering;
 		}
-		//
-		if (negationExpression == null) {
+		if (negationExpression == null || (!(parenthesizedExpression.getExpression() instanceof InfixExpression) && !(parenthesizedExpression.getExpression() instanceof ConditionalExpression))) {
 			return false;
 		}
 		//  we could produce quick assist
@@ -2039,7 +2038,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		ASTNode fullyCoveredNode= (ASTNode) coveredNodes.get(0);
 
 		Expression expression= getBooleanExpression(fullyCoveredNode);
-		if (expression == null) {
+		if (expression == null || (!(expression instanceof InfixExpression) && !(expression instanceof ConditionalExpression))) {
 			return false;
 		}
 		//  we could produce quick assist

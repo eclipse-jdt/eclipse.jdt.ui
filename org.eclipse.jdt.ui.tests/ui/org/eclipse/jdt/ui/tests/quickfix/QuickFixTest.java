@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -154,6 +154,10 @@ public class QuickFixTest extends TestCase {
 
 	public static void assertCommandIdDoesNotExists(List actualProposals, String commandId) {
 		assertTrue(findProposalByCommandId(commandId, actualProposals) == null);
+	}
+
+	public static void assertProposalDoesNotExists(List actualProposals, String proposalName) {
+		assertTrue(findProposalByName(proposalName, actualProposals) == null);
 	}
 
 	public static TypeDeclaration findTypeDeclaration(CompilationUnit astRoot, String simpleTypeName) {
@@ -428,6 +432,15 @@ public class QuickFixTest extends TestCase {
 					return (ICommandAccess) curr;
 				}
 			}
+		}
+		return null;
+	}
+
+	protected static ICompletionProposal findProposalByName(String name, List proposals) {
+		for (int i= 0; i < proposals.size(); i++) {
+			Object curr= proposals.get(i);
+			if (curr instanceof ICompletionProposal && name.equals(((ICompletionProposal)curr).getDisplayString()))
+				return (ICompletionProposal)curr;
 		}
 		return null;
 	}
