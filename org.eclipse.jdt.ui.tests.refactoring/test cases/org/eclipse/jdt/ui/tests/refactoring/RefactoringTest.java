@@ -122,7 +122,8 @@ public abstract class RefactoringTest extends TestCase {
 		refreshFromLocal();
 		performDummySearch();
 
-		if (getPackageP().exists()){
+		final boolean pExists= getPackageP().exists();
+		if (pExists) {
 			tryDeletingAllJavaChildren(getPackageP());
 			tryDeletingAllNonJavaChildResources(getPackageP());
 		}
@@ -137,6 +138,9 @@ public abstract class RefactoringTest extends TestCase {
 					else
 						JavaProjectHelper.delete(pack.getResource()); // also delete packages with subpackages
 			}
+			// Restore package 'p'
+			if (!pExists)
+				getRoot().createPackageFragment("p", true, null);
 		}
 
 		restoreTestProject();
