@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -129,19 +129,17 @@ public class MethodOverrideTester {
 		IType superClass= fHierarchy.getSuperclass(type);
 		if (superClass != null) {
 			IMethod res= findOverriddenMethodInHierarchy(superClass, overriding);
-			if (res != null && !Flags.isPrivate(res.getFlags())) {
+			if (res != null) {
 				if (!testVisibility || JavaModelUtil.isVisibleInHierarchy(res, type.getPackageFragment())) {
 					return res;
 				}
 			}
 		}
-		if (!overriding.isConstructor()) {
-			IType[] interfaces= fHierarchy.getSuperInterfaces(type);
-			for (int i= 0; i < interfaces.length; i++) {
-				IMethod res= findOverriddenMethodInHierarchy(interfaces[i], overriding);
-				if (res != null) {
-					return res; // methods from interfaces are always public and therefore visible
-				}
+		IType[] interfaces= fHierarchy.getSuperInterfaces(type);
+		for (int i= 0; i < interfaces.length; i++) {
+			IMethod res= findOverriddenMethodInHierarchy(interfaces[i], overriding);
+			if (res != null) {
+				return res; // methods from interfaces are always public and therefore visible
 			}
 		}
 		return null;
@@ -167,13 +165,11 @@ public class MethodOverrideTester {
 				return res;
 			}
 		}
-		if (!overriding.isConstructor()) {
-			IType[] superInterfaces= fHierarchy.getSuperInterfaces(type);
-			for (int i= 0; i < superInterfaces.length; i++) {
-				IMethod res= findOverriddenMethodInHierarchy(superInterfaces[i], overriding);
-				if (res != null) {
-					return res;
-				}
+		IType[] superInterfaces= fHierarchy.getSuperInterfaces(type);
+		for (int i= 0; i < superInterfaces.length; i++) {
+			IMethod res= findOverriddenMethodInHierarchy(superInterfaces[i], overriding);
+			if (res != null) {
+				return res;
 			}
 		}
 		return method;
@@ -188,10 +184,17 @@ public class MethodOverrideTester {
 	 * @throws JavaModelException
 	 */
 	public IMethod findOverriddenMethodInType(IType overriddenType, IMethod overriding) throws JavaModelException {
+		int flags= overriding.getFlags();
+		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || overriding.isConstructor())
+			return null;
 		IMethod[] overriddenMethods= overriddenType.getMethods();
 		for (int i= 0; i < overriddenMethods.length; i++) {
-			if (isSubsignature(overriding, overriddenMethods[i])) {
-				return overriddenMethods[i];
+			IMethod overridden= overriddenMethods[i];
+			flags= overridden.getFlags();
+			if (Flags.isPrivate(flags) || Flags.isStatic(flags) || overridden.isConstructor())
+				continue;
+			if (isSubsignature(overriding, overridden)) {
+				return overridden;
 			}
 		}
 		return null;
@@ -205,10 +208,17 @@ public class MethodOverrideTester {
 	 * @throws JavaModelException
 	 */
 	public IMethod findOverridingMethodInType(IType overridingType, IMethod overridden) throws JavaModelException {
+		int flags= overridden.getFlags();
+		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || overridden.isConstructor())
+			return null;
 		IMethod[] overridingMethods= overridingType.getMethods();
 		for (int i= 0; i < overridingMethods.length; i++) {
-			if (isSubsignature(overridingMethods[i], overridden)) {
-				return overridingMethods[i];
+			IMethod overriding= overridingMethods[i];
+			flags= overriding.getFlags();
+			if (Flags.isPrivate(flags) || Flags.isStatic(flags) || overriding.isConstructor())
+				continue;
+			if (isSubsignature(overriding, overridden)) {
+				return overriding;
 			}
 		}
 		return null;
