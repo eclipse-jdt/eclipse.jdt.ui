@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
@@ -319,18 +320,25 @@ public class JavaProjectHelper {
 
 
 	public static void performDummySearch() throws JavaModelException {
+		performDummySearch(SearchEngine.createWorkspaceScope());
+	}
+
+	public static void performDummySearch(IJavaElement element) throws JavaModelException {
+		performDummySearch(SearchEngine.createJavaSearchScope(new IJavaElement[] { element }));
+	}
+
+	private static void performDummySearch(IJavaSearchScope searchScope) throws JavaModelException {
 		new SearchEngine().searchAllTypeNames(
 				null,
 				SearchPattern.R_EXACT_MATCH,
 				"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent
 				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
 				IJavaSearchConstants.CLASS,
-				SearchEngine.createJavaSearchScope(new IJavaElement[0]),
+				searchScope,
 				new Requestor(),
 				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 				null);
 	}
-
 
 	/**
 	 * Adds a source container to a IJavaProject.

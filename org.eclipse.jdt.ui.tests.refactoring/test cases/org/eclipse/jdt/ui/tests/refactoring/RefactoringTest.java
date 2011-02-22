@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,10 +61,6 @@ import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchPattern;
-import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -113,7 +109,7 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	protected void performDummySearch() throws Exception {
-		performDummySearch(getPackageP());
+		JavaProjectHelper.performDummySearch(getPackageP());
 	}
 
 	/**
@@ -474,19 +470,6 @@ public abstract class RefactoringTest extends TestCase {
 		return fileName.substring(0, fileName.lastIndexOf('.'));
 	}
 
-	public static void performDummySearch(IJavaElement element) throws Exception{
-		new SearchEngine().searchAllTypeNames(
-			null,
-			SearchPattern.R_EXACT_MATCH,
-			"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent
-			SearchPattern.R_EXACT_MATCH,
-			IJavaSearchConstants.CLASS,
-			SearchEngine.createJavaSearchScope(new IJavaElement[]{element}),
-			new Requestor(),
-			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
-			null);
-	}
-
 	public static IMember[] merge(IMember[] a1, IMember[] a2, IMember[] a3){
 		return JavaElementUtil.merge(JavaElementUtil.merge(a1, a2), a3);
 	}
@@ -620,6 +603,4 @@ public abstract class RefactoringTest extends TestCase {
 		assertEquals(message, expected2, actual2);
 	}
 
-	private static class Requestor extends TypeNameRequestor {
-	}
 }
