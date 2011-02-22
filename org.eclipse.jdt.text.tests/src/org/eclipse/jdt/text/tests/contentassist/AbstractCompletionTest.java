@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -144,8 +144,16 @@ public class AbstractCompletionTest extends TestCase {
 		store.setToDefault(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
 		store.setToDefault(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION);
 		store.setToDefault(PreferenceConstants.CODEASSIST_AUTOINSERT);
-		fCU= null;
-		fEditor= null;
+
+		if (fEditor != null) {
+			EditorTestHelper.closeEditor(fEditor);
+			fEditor= null;
+		}
+
+		if (fCU != null) {
+			JavaProjectHelper.delete(fCU);
+			fCU= null;
+		}
 
 		JavaProjectHelper.emptyDisplayLoop();
 	}
@@ -321,6 +329,7 @@ public class AbstractCompletionTest extends TestCase {
 			postSelection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
 		} finally {
 			EditorTestHelper.closeEditor(fEditor);
+			fEditor= null;
 		}
 
 		assertEquals(result.toString(), doc.get());
@@ -339,6 +348,7 @@ public class AbstractCompletionTest extends TestCase {
 			postSelection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
 		} finally {
 			EditorTestHelper.closeEditor(fEditor);
+			fEditor= null;
 		}
 
 		assertEquals(result.toString(), doc.get());
@@ -353,6 +363,7 @@ public class AbstractCompletionTest extends TestCase {
 			assertNull(findNamedProposal(selector, preSelection));
 		} finally {
 			EditorTestHelper.closeEditor(fEditor);
+			fEditor= null;
 		}
 	}
 
