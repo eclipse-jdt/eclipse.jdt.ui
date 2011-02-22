@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -443,11 +443,12 @@ public class RenamePackageTests extends RefactoringTest {
 
 	/**
 	 * Custom project and source folder structure.
+	 * 
 	 * @param roots source folders
 	 * @param packageNames package names per root
 	 * @param newPackageName the new package name for packageNames[0][0]
 	 * @param cuNames cu names per package
-	 * @throws Exception
+	 * @throws Exception if one of the resources cannot be created
 	 */
 	private void helperMultiProjects(IPackageFragmentRoot[] roots, String[][] packageNames, String newPackageName, String[][][] cuNames) throws Exception{
 		ICompilationUnit[][][] cus=new ICompilationUnit[roots.length][][];
@@ -501,12 +502,13 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 
 	/**
-	 * 2 Projects with a root each:
-	 * Project RenamePack2 (root: srcTest) requires project RenamePack1 (root: srcPrg).
+	 * 2 Projects with a root each: Project RenamePack2 (root: srcTest) requires project RenamePack1
+	 * (root: srcPrg).
+	 * 
 	 * @param packageNames package names per root
 	 * @param newPackageName the new package name for packageNames[0][0]
 	 * @param cuNames cu names per package
-	 * @throws Exception
+	 * @throws Exception if one of the resources cannot be created
 	 */
 	private void helperProjectsPrgTest(String[][] packageNames, String newPackageName, String[][][] cuNames) throws Exception{
 		IJavaProject projectPrg= null;
