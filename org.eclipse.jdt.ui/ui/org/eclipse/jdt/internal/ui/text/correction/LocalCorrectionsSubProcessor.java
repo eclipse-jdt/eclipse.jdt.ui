@@ -49,6 +49,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -76,8 +77,10 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -1215,6 +1218,64 @@ public class LocalCorrectionsSubProcessor {
 			}
 		};
 		proposals.add(proposal);
+		
+		addTypeArgumentsFromContext(context, problem, proposals);
+	}
+	
+	private static void addTypeArgumentsFromContext(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		// similar to UnresolvedElementsSubProcessor.getTypeProposals(context, problem, proposals);
+		
+		ICompilationUnit cu= context.getCompilationUnit();
+
+		CompilationUnit root= context.getASTRoot();
+		ASTNode selectedNode= problem.getCoveringNode(root);
+		if (selectedNode == null) {
+			return;
+		}
+
+		while (selectedNode.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
+			selectedNode= selectedNode.getParent();
+		}
+
+		Name node= null;
+		if (selectedNode instanceof SimpleType) {
+			node= ((SimpleType) selectedNode).getName();
+		} else if (selectedNode instanceof ArrayType) {
+			Type elementType= ((ArrayType) selectedNode).getElementType();
+			if (elementType.isSimpleType()) {
+				node= ((SimpleType) elementType).getName();
+			} else {
+				return;
+			}
+		} else if (selectedNode instanceof Name) {
+			node= (Name) selectedNode;
+		} else {
+			return;
+		}
+
+		// try to resolve type in context
+		ITypeBinding binding= ASTResolving.guessBindingForTypeReference(node);
+		if (binding != null) {
+			ITypeBinding simpleBinding= binding;
+			if (simpleBinding.isArray()) {
+				simpleBinding= simpleBinding.getElementType();
+			}
+			simpleBinding= simpleBinding.getTypeDeclaration();
+		
+			if (!simpleBinding.isRecovered()) {
+				if (binding.isParameterizedType() && node.getParent() instanceof SimpleType && !(node.getParent().getParent() instanceof Type)) {
+					proposals.add(UnresolvedElementsSubProcessor.createTypeRefChangeFullProposal(cu, binding, node, 3 + 2));
+				}
+			}
+		} else {
+			ASTNode normalizedNode= ASTNodes.getNormalizedNode(node);
+			if (!(normalizedNode.getParent() instanceof Type) && node.getParent() != normalizedNode) {
+				ITypeBinding normBinding= ASTResolving.guessBindingForTypeReference(normalizedNode);
+				if (normBinding != null && !normBinding.isRecovered()) {
+					proposals.add(UnresolvedElementsSubProcessor.createTypeRefChangeFullProposal(cu, normBinding, normalizedNode, 3 + 2));
+				}
+			}
+		}
 	}
 
 	public static void addFallThroughProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {

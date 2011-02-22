@@ -7784,9 +7784,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot, 1);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
-		String[] expected= new String[2];
+		String[] expected= new String[3];
 
 		buf= new StringBuffer();
 		buf.append("package pack;\n");
@@ -7807,6 +7807,15 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[1]= buf.toString();
 
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    private ArrayList<String> l= new ArrayList<String>();\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+		
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
