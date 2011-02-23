@@ -8306,6 +8306,52 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	public void testCollectionsFieldMethodReplacement2() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_TYPE_PARAMETER_HIDING, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import java.util.Collections;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("public class CollectionsTest {\n");
+		buf.append("    public void foo(Map<Object, Integer> map) { };\n");
+		buf.append("    {\n");
+		buf.append("        foo(Collections.EMPTY_MAP);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("CollectionsTest.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import java.util.Collections;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("public class CollectionsTest {\n");
+		buf.append("    public void foo(Map<Object, Integer> map) { };\n");
+		buf.append("    {\n");
+		buf.append("        foo(Collections.<Object, Integer> emptyMap());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
 	public void testMissingEnumConstantsInCase1() throws Exception {
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.WARNING);

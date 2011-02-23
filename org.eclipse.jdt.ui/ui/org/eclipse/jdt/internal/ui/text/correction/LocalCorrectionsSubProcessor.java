@@ -107,6 +107,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
@@ -114,6 +115,7 @@ import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 import org.eclipse.jdt.internal.corext.fix.StringFix;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
+import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
@@ -1327,6 +1329,29 @@ public class LocalCorrectionsSubProcessor {
 						String qfn= importRewrite.addImport(methodName[0]);
 						method.setExpression(ast.newName(qfn));
 						method.setName(ast.newSimpleName(methodName[1]));
+						ASTNode parent= selectedNode.getParent();
+						// add explicit type arguments if necessary:
+						if (Invocations.isInvocationWithArguments(parent)) {
+							IMethodBinding methodBinding= Invocations.resolveBinding(parent);
+							if (methodBinding != null) {
+								ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+								int i= Invocations.getArguments(parent).indexOf(selectedNode);
+								if (parameterTypes.length >= i && parameterTypes[i].isParameterizedType()) {
+									ITypeBinding[] typeArguments= parameterTypes[i].getTypeArguments();
+									for (int j= 0; j < typeArguments.length; j++) {
+										ITypeBinding typeArgument= typeArguments[j];
+										if (! TypeRules.isJavaLangObject(typeArgument)) {
+											List typeArgumentsList= method.typeArguments();
+											for (int k= 0; k < typeArguments.length; k++) {
+												typeArgument= typeArguments[k];
+												typeArgumentsList.add(importRewrite.addImport(typeArgument, ast));
+											}
+										}
+									}
+								}
+							}
+						}
+						
 						astRewrite.replace(selectedNode, method, null);
 
 						String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_replacefieldaccesswithmethod_description, BasicElementLabels.getJavaElementName(ASTNodes.asString(method)));
