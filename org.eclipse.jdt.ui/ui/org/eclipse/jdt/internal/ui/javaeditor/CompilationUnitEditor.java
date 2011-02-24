@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,10 +73,10 @@ import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
-import org.eclipse.jface.text.link.LinkedPosition;
-import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
+import org.eclipse.jface.text.link.LinkedPosition;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
@@ -395,6 +395,11 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			fCloseAngularBrackets= enabled;
 		}
 
+		private boolean isTypeArgumentStart(String identifier) {
+			return identifier.length() > 0
+					&& Character.isUpperCase(identifier.charAt(0));
+		}
+		
 		private boolean isAngularIntroducer(String identifier) {
 			return identifier.length() > 0
 					&& (Character.isUpperCase(identifier.charAt(0))
@@ -463,6 +468,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					case '<':
 						if (!(fCloseAngularBrackets && fCloseBrackets)
 								|| nextToken == Symbols.TokenLESSTHAN
+								|| nextToken == Symbols.TokenQUESTIONMARK
+								|| nextToken == Symbols.TokenIDENT && isTypeArgumentStart(next)
 								|| 		   prevToken != Symbols.TokenLBRACE
 										&& prevToken != Symbols.TokenRBRACE
 										&& prevToken != Symbols.TokenSEMICOLON

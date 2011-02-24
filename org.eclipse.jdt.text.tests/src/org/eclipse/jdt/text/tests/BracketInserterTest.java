@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -409,6 +409,36 @@ public class BracketInserterTest extends TestCase {
 		assertSingleLinkedPosition(FOO_VOID_OFFSET + 1);
 	}
 
+	public void testAngleBracketsBeforeTypeArgument15() throws Exception {
+		use15();
+		
+		String PRE= "new ArrayList";
+		String POST= "String>();";
+		
+		fDocument.replace(BODY_OFFSET, 0, PRE + POST);
+		setCaret(BODY_OFFSET + PRE.length());
+		
+		type('<');
+		
+		assertEquals(PRE + '<' + POST, fDocument.get(BODY_OFFSET, PRE.length() + 1 + POST.length()));
+		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
+	}
+	
+	public void testAngleBracketsBeforeWildcard15() throws Exception {
+		use15();
+		
+		String PRE= "new ArrayList";
+		String POST= "? extends Number>();";
+		
+		fDocument.replace(BODY_OFFSET, 0, PRE + POST);
+		setCaret(BODY_OFFSET + PRE.length());
+		
+		type('<');
+		
+		assertEquals(PRE + '<' + POST, fDocument.get(BODY_OFFSET, PRE.length() + 1 + POST.length()));
+		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
+	}
+	
 	/* utilities */
 
 	private void assertSingleLinkedPosition(int offset) {
