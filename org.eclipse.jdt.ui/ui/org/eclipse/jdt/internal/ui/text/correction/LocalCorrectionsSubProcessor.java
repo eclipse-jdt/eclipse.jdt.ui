@@ -124,6 +124,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.actions.GenerateHashCodeEqualsAction;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.InferTypeArgumentsAction;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
@@ -1195,31 +1196,44 @@ public class LocalCorrectionsSubProcessor {
 		}
 
 		//Infer Generic Type Arguments... proposal
-		final ICompilationUnit cu= context.getCompilationUnit();
-		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.LocalCorrectionsSubProcessor_InferGenericTypeArguments, null, 5, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
-			public void apply(IDocument document) {
-				IEditorInput input= new FileEditorInput((IFile) cu.getResource());
-				IWorkbenchPage p= JavaPlugin.getActivePage();
-				if (p == null)
-					return;
-
-				IEditorPart part= p.findEditor(input);
-				if (!(part instanceof JavaEditor))
-					return;
-
-				IEditorSite site= ((JavaEditor)part).getEditorSite();
-				InferTypeArgumentsAction action= new InferTypeArgumentsAction(site);
-				action.run(new StructuredSelection(cu));
+		boolean hasInferTypeArgumentsProposal= false;
+		for (Iterator iterator= proposals.iterator(); iterator.hasNext();) {
+			Object completionProposal= iterator.next();
+			if (completionProposal instanceof ChangeCorrectionProposal) {
+				if (IJavaEditorActionDefinitionIds.INFER_TYPE_ARGUMENTS_ACTION.equals(((ChangeCorrectionProposal)completionProposal).getCommandId())) {
+					hasInferTypeArgumentsProposal= true;
+					break;
+				}
 			}
-
-			/**
-			 * {@inheritDoc}
-			 */
-			public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-				return CorrectionMessages.LocalCorrectionsSubProcessor_InferGenericTypeArguments_description;
-			}
-		};
-		proposals.add(proposal);
+		}
+		if (! hasInferTypeArgumentsProposal) {
+			final ICompilationUnit cu= context.getCompilationUnit();
+			ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.LocalCorrectionsSubProcessor_InferGenericTypeArguments, null, 5, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+				public void apply(IDocument document) {
+					IEditorInput input= new FileEditorInput((IFile) cu.getResource());
+					IWorkbenchPage p= JavaPlugin.getActivePage();
+					if (p == null)
+						return;
+	
+					IEditorPart part= p.findEditor(input);
+					if (!(part instanceof JavaEditor))
+						return;
+	
+					IEditorSite site= ((JavaEditor)part).getEditorSite();
+					InferTypeArgumentsAction action= new InferTypeArgumentsAction(site);
+					action.run(new StructuredSelection(cu));
+				}
+	
+				/**
+				 * {@inheritDoc}
+				 */
+				public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+					return CorrectionMessages.LocalCorrectionsSubProcessor_InferGenericTypeArguments_description;
+				}
+			};
+			proposal.setCommandId(IJavaEditorActionDefinitionIds.INFER_TYPE_ARGUMENTS_ACTION);
+			proposals.add(proposal);
+		}
 		
 		addTypeArgumentsFromContext(context, problem, proposals);
 	}
