@@ -1346,6 +1346,7 @@ public class LocalCorrectionsSubProcessor {
 												typeArgument= typeArguments[k];
 												typeArgumentsList.add(importRewrite.addImport(typeArgument, ast));
 											}
+											break;
 										}
 									}
 								}
