@@ -858,6 +858,17 @@ public class JavaHeuristicScannerTest extends TestCase {
 		Assert.assertEquals("\t", indent);
 	}
 
+	public void testContinuationIndentationOfForEachStatement() throws Exception {
+		// Bug 331028 and Bug 331734
+		fDocument.set("\tfor (int value : values) {\n" +
+				"\t\tsum += value;\n" +
+				"\t\t\t\tSystem.out.println(sum);\n" +
+				"\t}");
+
+		String indent= fScanner.computeIndentation(44).toString();
+		Assert.assertEquals("\t\t", indent);
+	}
+
 	public void testContinuationIndentationOfBooleanExpression() throws Exception {
 		fDocument.set("\tboolean a = true || false;\n" +
 				"\tboolean b = a || false;\n");
