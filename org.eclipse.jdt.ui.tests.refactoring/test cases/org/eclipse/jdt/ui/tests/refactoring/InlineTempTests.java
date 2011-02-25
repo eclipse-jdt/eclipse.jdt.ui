@@ -315,6 +315,11 @@ public class InlineTempTests extends RefactoringTest {
 		helper1(6, 21, 6, 24);
 	}
 
+	public void test44() throws Exception {
+		// don't add unnecessary cast to wildcard-parameterized type https://bugs.eclipse.org/bugs/show_bug.cgi?id=338271
+		helper1(7, 35, 7, 41);
+	}
+	
 	//------
 
 	public void testFail0() throws Exception{

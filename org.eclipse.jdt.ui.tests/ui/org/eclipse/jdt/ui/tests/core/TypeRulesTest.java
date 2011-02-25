@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -243,17 +243,6 @@ public class TypeRulesTest extends CoreTests {
 				assertNotNull(b1);
 				ITypeBinding b2= f2.resolveBinding().getType();
 				assertNotNull(b2);
-
-				//old implementation does not support generics:
-				if (b1.isParameterizedType() || b1.isWildcardType() || b1.isTypeVariable())
-					continue;
-				if (b2.isParameterizedType() || b2.isWildcardType() || b2.isTypeVariable())
-					continue;
-				if (b1.isRawType() != b2.isRawType())
-					continue;
-				//old implementation does not support autoboxing:
-				if (b1.isPrimitive() != b2.isPrimitive())
-					continue;
 
 				boolean res2= TypeRules.canAssign(b1, b2);
 				if (res2 != (problems.length == 0)) {

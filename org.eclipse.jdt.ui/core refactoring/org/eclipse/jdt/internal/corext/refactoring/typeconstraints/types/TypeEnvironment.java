@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,13 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 
 
+/**
+ * A type environment comprises a set of {@link TType}s that stand for Java {@link ITypeBinding}s.
+ * In contrast to type bindings, TTypes of the same type environment also work across project boundaries and
+ * across compiler environments, i.e. a type environment can handle bindings from multiple {@link ASTParser} sessions.
+ * 
+ * @see TType
+ */
 public class TypeEnvironment {
 
 	private static class ProjectKeyPair {
@@ -118,6 +125,11 @@ public class TypeEnvironment {
 	 * information was not requested in the constructor.
 	 */
 	private Map/*<TType, List<TType>>*/ fSubTypes;
+	/**
+	 * If <code>true</code>, replace all capture types by their wildcard type.
+	 * @since 3.7
+	 */
+	private final boolean fRemoveCapures;
 
 	public static ITypeBinding[] createTypeBindings(TType[] types, IJavaProject project) {
 		final Map mapping= new HashMap();
@@ -154,9 +166,14 @@ public class TypeEnvironment {
 	}
 
 	public TypeEnvironment(boolean rememberSubtypes) {
+		this(rememberSubtypes, false);
+	}
+	
+	public TypeEnvironment(boolean rememberSubtypes, boolean removeCapures) {
 		if (rememberSubtypes) {
 			fSubTypes= new HashMap();
 		}
+		fRemoveCapures= removeCapures;
 	}
 
 	Map/*<TypeTuple, Boolean>*/ getSubTypeCache() {
@@ -185,7 +202,11 @@ public class TypeEnvironment {
 				return createSuperWildCardType(binding);
 			}
 		} else if (binding.isCapture()) {
-			return createCaptureType(binding);
+			if (fRemoveCapures) {
+				return create(binding.getWildcard());
+			} else {
+				return createCaptureType(binding);
+			}
 		}
 		if ("null".equals(binding.getName())) //$NON-NLS-1$
 			return NULL;

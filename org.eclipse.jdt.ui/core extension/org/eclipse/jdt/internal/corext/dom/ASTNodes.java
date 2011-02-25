@@ -439,16 +439,22 @@ public class ASTNodes {
 		if (initializerType == null || referenceType == null)
 			return null;
 		
-		if (initializerType.isPrimitive() && referenceType.isPrimitive() && ! referenceType.isEqualTo(initializerType))
+		if (initializerType.isPrimitive() && referenceType.isPrimitive() && ! referenceType.isEqualTo(initializerType)) {
 			return referenceType;
-		else if (initializerType.isPrimitive() && ! referenceType.isPrimitive()) { // initializer is autoboxed
+			
+		} else if (initializerType.isPrimitive() && ! referenceType.isPrimitive()) { // initializer is autoboxed
 			ITypeBinding unboxedReferenceType= Bindings.getUnboxedTypeBinding(referenceType, reference.getAST());
 			if (!unboxedReferenceType.isEqualTo(initializerType))
 				return unboxedReferenceType;
 			else if (needsExplicitBoxing(reference))
 				return referenceType;
-		} else if (! TypeRules.canAssign(initializerType, referenceType))
+			
+		} else if (initializerType.isRawType() && referenceType.isParameterizedType()) {
+			return referenceType; // don't lose the unchecked conversion
+			
+		} else if (! TypeRules.canAssign(initializerType, referenceType)) {
 			return referenceType;
+		}
 		
 		return null;
 	}
