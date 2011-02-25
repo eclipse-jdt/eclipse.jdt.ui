@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -838,7 +838,14 @@ public class Bindings {
 
 	/**
 	 * Returns <code>true</code> if the given type is a super type of a candidate.
-	 * <code>true</code> is returned if the two type bindings are identical (TODO)
+	 * <code>true</code> is returned if the two type bindings are identical.
+	 * 
+	 * <p><b>Warning:</b> With the addition of generics, this method is valid in less
+	 * cases than before. Consider using {@link TypeRules#canAssign(ITypeBinding, ITypeBinding)}
+	 * if you're dealing with types of variables. The classical notion of supertypes
+	 * only makes sense if you really need to walk the type hierarchy but don't need to play
+	 * the assignment rules.</p>
+	 * 
 	 * @param possibleSuperType the type to inspect
 	 * @param type the type whose super types are looked at
 	 * @return <code>true</code> iff <code>possibleSuperType</code> is
