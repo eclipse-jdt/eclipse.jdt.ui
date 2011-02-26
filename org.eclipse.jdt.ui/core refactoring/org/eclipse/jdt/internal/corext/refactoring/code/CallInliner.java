@@ -91,6 +91,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
+import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -637,16 +638,27 @@ public class CallInliner {
 				node= fRewrite.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION);
 
 				// fixes bug #24941
-				if(needsExplicitCast(status)) {
+				if (needsExplicitCast(status)) {
 					AST ast= node.getAST();
 					CastExpression castExpression= ast.newCastExpression();
 					Type returnType= fImportRewrite.addImport(fSourceProvider.getReturnType(), ast);
 					castExpression.setType(returnType);
+
+					if (NecessaryParenthesesChecker.needsParentheses((Expression)fSourceProvider.getReturnExpressions().get(0), castExpression, CastExpression.EXPRESSION_PROPERTY)) {
+						ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
+						parenthesized.setExpression((Expression)node);
+						node= parenthesized;
+					}
+
 					castExpression.setExpression((Expression)node);
 					node= castExpression;
-				}
 
-				if (fSourceProvider.needsReturnedExpressionParenthesis(fTargetNode.getParent(), fTargetNode.getLocationInParent())) {
+					if (NecessaryParenthesesChecker.needsParentheses(castExpression, fTargetNode.getParent(), fTargetNode.getLocationInParent())) {
+						ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
+						parenthesized.setExpression((Expression)node);
+						node= parenthesized;
+					}
+				} else if (fSourceProvider.needsReturnedExpressionParenthesis(fTargetNode.getParent(), fTargetNode.getLocationInParent())) {
 					ParenthesizedExpression pExp= fTargetNode.getAST().newParenthesizedExpression();
 					pExp.setExpression((Expression)node);
 					node= pExp;
@@ -679,10 +691,16 @@ public class CallInliner {
 		// returned expression then we don't need an explicit cast.
 		if (fSourceProvider.returnTypeMatchesReturnExpressions())
 				return false;
-		ASTNode parent= fTargetNode.getParent();
-		int nodeType= parent.getNodeType();
-		if (nodeType == ASTNode.METHOD_INVOCATION) {
-			MethodInvocation methodInvocation= (MethodInvocation)parent;
+
+		List returnExprs= fSourceProvider.getReturnExpressions();
+		// it is inferred that only methods consisting of a single
+		// return statement can be inlined as parameters in other
+		// method invocations
+		if (returnExprs.size() != 1)
+			return false;
+
+		if (fTargetNode.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+			MethodInvocation methodInvocation= (MethodInvocation)fTargetNode.getParent();
 			if(methodInvocation.getExpression() == fTargetNode)
 				return false;
 			IMethodBinding method= methodInvocation.resolveMethodBinding();
@@ -693,12 +711,7 @@ public class CallInliner {
 			}
 			ITypeBinding[] parameters= method.getParameterTypes();
 			int argumentIndex= methodInvocation.arguments().indexOf(fInvocation);
-			List returnExprs= fSourceProvider.getReturnExpressions();
-			// it is inferred that only methods consisting of a single
-			// return statement can be inlined as parameters in other
-			// method invocations
-			if (returnExprs.size() != 1)
-				return false;
+
 			parameters[argumentIndex]= ((Expression)returnExprs.get(0)).resolveTypeBinding();
 
 			ITypeBinding type= ASTNodes.getReceiverTypeBinding(methodInvocation);
@@ -706,19 +719,18 @@ public class CallInliner {
 				fTypeEnvironment, method, fTypeEnvironment.create(parameters));
 			if(!visitor.visit(type)) {
 				return true;
-			}
-			else if(type.isInterface()) {
+			} else if (type.isInterface()) {
 				return !Bindings.visitInterfaces(type, visitor);
-			}
-			else if(Modifier.isAbstract(type.getModifiers())) {
+			} else if (Modifier.isAbstract(type.getModifiers())) {
 				return !Bindings.visitHierarchy(type, visitor);
-			}
-			else {
+			} else {
 				// it is not needed to visit interfaces if receiver is a concrete class
 				return !Bindings.visitSuperclasses(type, visitor);
 			}
+		} else {
+			ITypeBinding explicitCast= ASTNodes.getExplicitCast((Expression)returnExprs.get(0), (Expression)fTargetNode);
+			return explicitCast != null;
 		}
-		return false;
 	}
 
 	private VariableDeclarationStatement createLocalDeclaration(ITypeBinding type, String name, Expression initializer) {

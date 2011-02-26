@@ -844,6 +844,26 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performCastTest();
 	}
 
+	public void testReturnValue1() throws Exception {
+		performCastTest();
+	}
+
+	public void testReturnValue2() throws Exception {
+		performCastTest();
+	}
+
+	public void testReturnValue3() throws Exception {
+		performCastTest();
+	}
+
+	public void testReturnValue4() throws Exception {
+		performCastTest();
+	}
+
+	public void testReturnValue5() throws Exception {
+		performCastTest();
+	}
+
 	/* *********************** Enum Tests ******************************* */
 
 	private void performEnumTest() throws Exception {
@@ -908,6 +928,17 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performGenericTest();
 	}
 
+	public void testParameterizedType4() throws Exception {
+		performGenericTest();
+	}
+
+	public void testParameterizedType5() throws Exception {
+		performGenericTest();
+	}
+
+	public void testParameterizedType6() throws Exception {
+		performGenericTest();
+	}
 	/* *********************** Binary Tests ******************************* */
 
 	public void testBinaryInlineSingle() throws Exception { // uses classes.Target#
