@@ -563,7 +563,7 @@ public class LocalCorrectionsSubProcessor {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map options= new Hashtable();
 			options.put(CleanUpConstants.REMOVE_UNNECESSARY_CASTS, CleanUpOptions.TRUE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new UnnecessaryCodeCleanUp(options), 5, image, context);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new UnnecessaryCodeCleanUp(options), 10, image, context);
 			proposals.add(proposal);
 		}
 	}
@@ -592,7 +592,7 @@ public class LocalCorrectionsSubProcessor {
 
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_unnecessaryinstanceof_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
 			proposals.add(proposal);
 		}
 
