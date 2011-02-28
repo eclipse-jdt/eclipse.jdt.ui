@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,12 @@ public class WorkingSetModel {
 	public static final IElementComparer COMPARER= new WorkingSetComparar();
 
 	private static final String TAG_LOCAL_WORKING_SET_MANAGER= "localWorkingSetManager"; //$NON-NLS-1$
+
+	/**
+	 * Key associated with the state of all working sets.
+	 * @since 3.7
+	 */
+	private static final String TAG_ALL_WORKING_SETS= "allWorkingSets";  //$NON-NLS-1$
 	private static final String TAG_ACTIVE_WORKING_SET= "activeWorkingSet"; //$NON-NLS-1$
 	private static final String TAG_WORKING_SET_NAME= "workingSetName"; //$NON-NLS-1$
 	private static final String TAG_CONFIGURED= "configured"; //$NON-NLS-1$
@@ -74,6 +80,12 @@ public class WorkingSetModel {
 	 * @since 3.5
 	 */
 	private boolean fIsSortingEnabled;
+
+	/**
+	 * List of all working sets. 
+	 * @since 3.7
+	 */
+	private List fAllWorkingSets;
 
 	private static class WorkingSetComparar implements IElementComparer {
 		public boolean equals(Object o1, Object o2) {
@@ -236,13 +248,15 @@ public class WorkingSetModel {
 	public WorkingSetModel(IMemento memento) {
 		fLocalWorkingSetManager= PlatformUI.getWorkbench().createLocalWorkingSetManager();
 		addListenersToWorkingSetManagers();
-		fActiveWorkingSets= new ArrayList(2);
+		fActiveWorkingSets= new ArrayList();
+		fAllWorkingSets= new ArrayList();
 
 		if (memento == null || ! restoreState(memento)) {
 			IWorkingSet others= fLocalWorkingSetManager.createWorkingSet(WorkingSetMessages.WorkingSetModel_others_name, new IAdaptable[0]);
 			others.setId(IWorkingSetIDs.OTHERS);
 			fLocalWorkingSetManager.addWorkingSet(others);
 			fActiveWorkingSets.add(others);
+			fAllWorkingSets.add(others);
 		}
 		Assert.isNotNull(fOthersWorkingSetUpdater);
 
@@ -342,23 +356,75 @@ public class WorkingSetModel {
 		return (IWorkingSet[])fActiveWorkingSets.toArray(new IWorkingSet[fActiveWorkingSets.size()]);
 	}
 
+	/**
+	 * Returns the array of all working sets.
+	 * 
+	 * @return the array of all working sets
+	 * @since 3.7
+	 */
 	public IWorkingSet[] getAllWorkingSets() {
+		if (fAllWorkingSets.size() == 1 && IWorkingSetIDs.OTHERS.equals(((IWorkingSet)fAllWorkingSets.get(0)).getId()))
+			fAllWorkingSets= getActiveAndAllWorkingSetsFromManagers();
+		return (IWorkingSet[])fAllWorkingSets.toArray(new IWorkingSet[fAllWorkingSets.size()]);
+	}
+
+	/**
+	 * Returns the list containing active and all working sets from the working set managers.
+	 * 
+	 * @return the list of all the working sets
+	 * @since 3.7
+	 */
+	private List getActiveAndAllWorkingSetsFromManagers() {
 		List result= new ArrayList();
 		result.addAll(fActiveWorkingSets);
 		IWorkingSet[] locals= fLocalWorkingSetManager.getWorkingSets();
 		for (int i= 0; i < locals.length; i++) {
-			if (!result.contains(locals[i]))
+			if (!result.contains(locals[i]) && isSupportedAsTopLevelElement(locals[i]))
 				result.add(locals[i]);
 		}
 		IWorkingSet[] globals= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets();
 		for (int i= 0; i < globals.length; i++) {
-			if (!result.contains(globals[i]))
+			if (!result.contains(globals[i]) && isSupportedAsTopLevelElement(globals[i]))
 				result.add(globals[i]);
 		}
-		return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
+
+		if (fIsSortingEnabled)
+			Collections.sort(result, new WorkingSetComparator(true));
+		return result;
+	}
+
+	/**
+	 * Adds newly created working sets to the list of all working sets.
+	 * 
+	 * @param result the list of all working sets from the working set managers
+	 * @since 3.7
+	 */
+	private void addNewlyCreatedWorkingSets(List result) {
+		for (Iterator iter= result.iterator(); iter.hasNext();) {
+			IWorkingSet set= (IWorkingSet)iter.next();
+			if (!fAllWorkingSets.contains(set))
+				fAllWorkingSets.add(set);
+		}
+	}
+
+	/**
+	 * Sets the working sets lists.
+	 * 
+	 * @param workingSets the array of all working sets
+	 * @param isSortingEnabled <code>true</code> if sorting is enabled, <code>false</code> otherwise
+	 * @param activeWorkingSets the array of active working sets
+	 * @since 3.7
+	 */
+	public void setWorkingSets(IWorkingSet[] workingSets, boolean isSortingEnabled, IWorkingSet[] activeWorkingSets) {
+		Assert.isLegal(fAllWorkingSets.containsAll(Arrays.asList(activeWorkingSets)));
+		if (isSortingEnabled)
+			Arrays.sort(workingSets, new WorkingSetComparator(true));
+		fAllWorkingSets= new ArrayList(Arrays.asList(workingSets));
+		setActiveWorkingSets(activeWorkingSets, isSortingEnabled);
 	}
 
 	public void setActiveWorkingSets(IWorkingSet[] workingSets) {
+		Assert.isLegal(fAllWorkingSets.containsAll(Arrays.asList(workingSets)));
 		if (fIsSortingEnabled) {
 			Arrays.sort(workingSets, new WorkingSetComparator(true));
 		}
@@ -388,6 +454,12 @@ public class WorkingSetModel {
 			IMemento active= memento.createChild(TAG_ACTIVE_WORKING_SET);
 			IWorkingSet workingSet= (IWorkingSet)iter.next();
 			active.putString(TAG_WORKING_SET_NAME, workingSet.getName());
+		}
+		for (Iterator iter= Arrays.asList(getAllWorkingSets()).iterator(); iter.hasNext();) {
+			IMemento allWorkingSet= memento.createChild(TAG_ALL_WORKING_SETS);
+			IWorkingSet workingSet= (IWorkingSet)iter.next();
+			if (isSupportedAsTopLevelElement(workingSet))
+				allWorkingSet.putString(TAG_WORKING_SET_NAME, workingSet.getName());
 		}
 	}
 
@@ -440,6 +512,23 @@ public class WorkingSetModel {
 				}
 			}
 		}
+		IMemento[] allWorkingSets= memento.getChildren(TAG_ALL_WORKING_SETS);
+		for (int i= 0; i < allWorkingSets.length; i++) {
+			String name= allWorkingSets[i].getString(TAG_WORKING_SET_NAME);
+			if (name != null) {
+				IWorkingSet ws= fLocalWorkingSetManager.getWorkingSet(name);
+				if (ws == null) {
+					ws= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(name);
+				}
+				if (ws != null) {
+					fAllWorkingSets.add(ws);
+				}
+			}
+		}
+
+		List result= getActiveAndAllWorkingSetsFromManagers();
+		if (fAllWorkingSets.size() > 0 && (!fAllWorkingSets.containsAll(result)))
+			addNewlyCreatedWorkingSets(result);
 		return true;
 	}
 	private void workingSetManagerChanged(PropertyChangeEvent event) {
@@ -453,16 +542,20 @@ public class WorkingSetModel {
 			return;
 		}
 
-		// Add new working set to the list of active working sets
+		// Add new working set to the list of active working sets and all working sets
 		if (IWorkingSetManager.CHANGE_WORKING_SET_ADD.equals(property)) {
 			IWorkingSet workingSet= (IWorkingSet)event.getNewValue();
 			if (isSupportedAsTopLevelElement(workingSet)) {
 				IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 				List allWorkingSets= new ArrayList(Arrays.asList(manager.getAllWorkingSets()));
-				if (workingSet.isVisible() && allWorkingSets.contains(workingSet) && !fActiveWorkingSets.contains(workingSet)) {
+				if (allWorkingSets.contains(workingSet)) {
 					List elements= new ArrayList(fActiveWorkingSets);
-					elements.add(workingSet);
-					setActiveWorkingSets((IWorkingSet[])elements.toArray(new IWorkingSet[elements.size()]));
+					if (workingSet.isVisible() && !fActiveWorkingSets.contains(workingSet))
+						elements.add(workingSet);
+					List allElements= new ArrayList(Arrays.asList(getAllWorkingSets()));
+					if (!allElements.contains(workingSet))
+						allElements.add(workingSet);
+					setWorkingSets((IWorkingSet[])allElements.toArray(new IWorkingSet[elements.size()]), fIsSortingEnabled, (IWorkingSet[])elements.toArray(new IWorkingSet[elements.size()]));
 				}
 			}
 		}
@@ -481,12 +574,13 @@ public class WorkingSetModel {
 			IWorkingSet workingSet= (IWorkingSet)event.getOldValue();
 			List elements= new ArrayList(fActiveWorkingSets);
 			elements.remove(workingSet);
-			setActiveWorkingSets((IWorkingSet[])elements.toArray(new IWorkingSet[elements.size()]));
+			List allElements= new ArrayList(Arrays.asList(getAllWorkingSets()));
+			allElements.remove(workingSet);
+			setWorkingSets((IWorkingSet[])allElements.toArray(new IWorkingSet[elements.size()]), fIsSortingEnabled, (IWorkingSet[])elements.toArray(new IWorkingSet[elements.size()]));
 		} else if (IWorkingSetManager.CHANGE_WORKING_SET_LABEL_CHANGE.equals(property)) {
 			IWorkingSet workingSet= (IWorkingSet)event.getNewValue();
-			if (isSortingEnabled() && fActiveWorkingSets.contains(workingSet)) {
-				// re-sort the active working sets in PE after label update
-				setActiveWorkingSets((IWorkingSet[])fActiveWorkingSets.toArray(new IWorkingSet[fActiveWorkingSets.size()]));
+			if (isSortingEnabled() && Arrays.asList(getAllWorkingSets()).contains(workingSet)) {
+				setWorkingSets(getAllWorkingSets(), isSortingEnabled(), (IWorkingSet[])fActiveWorkingSets.toArray(new IWorkingSet[fActiveWorkingSets.size()]));
 			} else {
 				fireEvent(event);
 			}

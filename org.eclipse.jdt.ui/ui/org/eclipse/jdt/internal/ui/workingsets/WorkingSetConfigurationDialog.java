@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,7 +52,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 
@@ -101,14 +100,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		}
 	}
 
-
-	private class Filter extends ViewerFilter {
-
-		public boolean select(Viewer viewer, Object parentElement, Object element) {
-			return WorkingSetModel.isSupportedAsTopLevelElement((IWorkingSet)element);
-		}
-	}
-
 	private List fAllWorkingSets;
 	private CheckboxTableViewer fTableViewer;
 
@@ -154,10 +145,8 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		setTitle(WorkingSetMessages.WorkingSetConfigurationDialog_title);
 		setMessage(WorkingSetMessages.WorkingSetConfigurationDialog_message);
 		fAllWorkingSets= new ArrayList(allWorkingSets.length);
-		Filter filter= new Filter();
 		for (int i= 0; i < allWorkingSets.length; i++) {
-			if (filter.select(null, null, allWorkingSets[i]))
-				fAllWorkingSets.add(allWorkingSets[i]);
+			fAllWorkingSets.add(allWorkingSets[i]);
 		}
 		fIsSortingEnabled= isSortingEnabled;
 	}
@@ -245,7 +234,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		data.widthHint= convertWidthInCharsToPixels(50);
 		fTableViewer.getTable().setLayoutData(data);
 
-		fTableViewer.addFilter(new Filter());
 		fTableViewer.setLabelProvider(new WorkingSetLabelProvider());
 		fTableViewer.setContentProvider(new IStructuredContentProvider() {
 			public Object[] getElements(Object element) {
@@ -418,8 +406,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		dialog.create();
 		if (dialog.open() == Window.OK) {
 			IWorkingSet workingSet= wizard.getSelection();
-			Filter filter= new Filter();
-			if (filter.select(null, null, workingSet)) {
+			if (WorkingSetModel.isSupportedAsTopLevelElement(workingSet)) {
 				fAllWorkingSets.add(workingSet);
 				fTableViewer.add(workingSet);
 				fTableViewer.setSelection(new StructuredSelection(workingSet), true);
@@ -701,5 +688,15 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 			fComparator= new WorkingSetComparator(true);
 		}
 		return fComparator;
+	}
+
+	/**
+	 * Returns all the working sets.
+	 * 
+	 * @return all the working sets
+	 * @since 3.7
+	 */
+	public IWorkingSet[] getAllWorkingSets() {
+		return (IWorkingSet[])fAllWorkingSets.toArray(new IWorkingSet[fAllWorkingSets.size()]);
 	}
 }

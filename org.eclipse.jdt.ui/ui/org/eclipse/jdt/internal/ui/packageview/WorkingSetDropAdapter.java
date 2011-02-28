@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -222,25 +222,32 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 
 	private void performWorkingSetReordering() {
 		WorkingSetModel model= fPackageExplorer.getWorkingSetModel();
-		List activeWorkingSets= new ArrayList(Arrays.asList(model.getActiveWorkingSets()));
-		int index= activeWorkingSets.indexOf(fWorkingSet);
+		List allWorkingSets= new ArrayList(Arrays.asList(model.getAllWorkingSets()));
+		int index= allWorkingSets.indexOf(fWorkingSet);
 		if (index != -1) {
 			if (getCurrentLocation() == LOCATION_AFTER)
 				index++;
-			List result= new ArrayList(activeWorkingSets.size());
+			List result= new ArrayList(allWorkingSets.size());
 			List selected= new ArrayList(Arrays.asList(fElementsToAdds));
-			for (int i= 0; i < activeWorkingSets.size(); i++) {
+			List activeWorkingSets= new ArrayList(Arrays.asList(model.getActiveWorkingSets()));
+			List active= new ArrayList(activeWorkingSets.size());
+			for (int i= 0; i < allWorkingSets.size(); i++) {
 				if (i == index) {
 					result.addAll(selected);
+					active.addAll(selected);
 				}
-				Object element= activeWorkingSets.get(i);
+				Object element= allWorkingSets.get(i);
 				if (!selected.contains(element)) {
 					result.add(element);
+					if (activeWorkingSets.contains(element))
+						active.add(element);
 				}
 			}
-			if (index == activeWorkingSets.size())
+			if (index == allWorkingSets.size()) {
 				result.addAll(selected);
-			model.setActiveWorkingSets((IWorkingSet[])result.toArray(new IWorkingSet[result.size()]));
+				active.addAll(selected);
+			}
+			model.setWorkingSets((IWorkingSet[])result.toArray(new IWorkingSet[result.size()]), model.isSortingEnabled(), (IWorkingSet[])active.toArray(new IWorkingSet[active.size()]));
 		}
 	}
 
