@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -23,10 +24,15 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
@@ -37,13 +43,17 @@ import org.eclipse.ui.texteditor.IEditorStatusLine;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -52,6 +62,9 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkDetector;
+import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
+import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
@@ -135,6 +148,16 @@ public class OpenAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(ITextSelection selection) {
+		IJavaElement input= EditorUtility.getEditorInputJavaElement(fEditor, false);
+		if (input == null)
+			return;
+		IRegion region= new Region(selection.getOffset(), selection.getLength());
+		ASTNode labelNode= JavaElementHyperlinkDetector.getBreakOrContinueLabelNode(input, region);
+		ISourceViewer viewer= fEditor.getViewer();
+		if (labelNode != null && viewer != null) {
+			jumpToLabel(viewer, labelNode, (ITypeRoot)input);
+			return;
+		}
 		try {
 			IJavaElement[] elements= SelectionConverter.codeResolveForked(fEditor, false);
 			elements= selectOpenableElements(elements);
@@ -161,6 +184,33 @@ public class OpenAction extends SelectionDispatchAction {
 		} catch (InterruptedException e) {
 			// ignore
 		}
+	}
+
+	/**
+	 * Jumps to the label of the break/continue statement.
+	 * 
+	 * @param viewer the text viewer
+	 * @param labelNode the label node
+	 * @param input the editor input
+	 * @since 3.7
+	 */
+	private void jumpToLabel(ITextViewer viewer, ASTNode labelNode, ITypeRoot input) {
+		Assert.isNotNull(input);
+		CompilationUnit ast= SharedASTProvider.getAST(input, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
+		if (ast == null)
+			return;
+		BreakContinueTargetFinder finder= new BreakContinueTargetFinder();
+		if (finder.initialize(ast, labelNode) == null) {
+			OccurrenceLocation[] locations= finder.getOccurrences();
+			if (locations != null) {
+				OccurrenceLocation location= locations[0]; // the first location is the labeled statement target location
+				viewer.setSelectedRange(location.getOffset(), location.getLength());
+				return;
+			}
+		}
+		MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+				ActionMessages.OpenAction_error_text,
+				Messages.format(ActionMessages.OpenAction_error_no_label_found_message, labelNode.toString()));
 	}
 
 	/**

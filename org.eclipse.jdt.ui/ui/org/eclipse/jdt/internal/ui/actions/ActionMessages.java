@@ -68,6 +68,8 @@ public final class ActionMessages extends NLS {
 	public static String OpenAction_multistatus_message;
 	public static String OpenViewActionGroup_showInAction_label;
 	public static String OpenWithMenu_label;
+	public static String OpenAction_error_text;
+	public static String OpenAction_error_no_label_found_message;
 
 	public static String RefactorMenu_label;
 	public static String SourceMenu_label;

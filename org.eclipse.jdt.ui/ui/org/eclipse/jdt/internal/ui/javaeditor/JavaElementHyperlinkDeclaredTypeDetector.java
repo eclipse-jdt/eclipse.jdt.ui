@@ -38,7 +38,7 @@ public class JavaElementHyperlinkDeclaredTypeDetector extends JavaElementHyperli
 	 */
 	protected IHyperlink createHyperlink(IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
 		try {
-			if ((element.getElementType() == IJavaElement.FIELD || element.getElementType() == IJavaElement.LOCAL_VARIABLE) && !JavaModelUtil.isPrimitive(getTypeSignature(element))
+			if (element != null && (element.getElementType() == IJavaElement.FIELD || element.getElementType() == IJavaElement.LOCAL_VARIABLE) && !JavaModelUtil.isPrimitive(getTypeSignature(element))
 					&& SelectionConverter.canOperateOn(editor)) {
 				return new JavaElementDeclaredTypeHyperlink(wordRegion, openAction, element, qualify);
 			}

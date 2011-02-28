@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -43,14 +44,13 @@ public class JavaElementHyperlink implements IHyperlink {
 	 * 
 	 * @param region the region of the link
 	 * @param openAction the action to use to open the java elements
-	 * @param element the java element to open
+	 * @param element the java element to open or <code>null</code> if the element is a label
 	 * @param qualify <code>true</code> if the hyperlink text should show a qualified name for
 	 *            element.
 	 */
 	public JavaElementHyperlink(IRegion region, SelectionDispatchAction openAction, IJavaElement element, boolean qualify) {
 		Assert.isNotNull(openAction);
 		Assert.isNotNull(region);
-		Assert.isNotNull(element);
 
 		fRegion= region;
 		fOpenAction= openAction;
@@ -71,7 +71,10 @@ public class JavaElementHyperlink implements IHyperlink {
 	 * @since 3.1
 	 */
 	public void open() {
-		fOpenAction.run(new StructuredSelection(fElement));
+		if (fElement != null)
+			fOpenAction.run(new StructuredSelection(fElement));
+		else
+			fOpenAction.run(new TextSelection(fRegion.getOffset(), fRegion.getLength()));
 	}
 
 	/*
@@ -87,7 +90,7 @@ public class JavaElementHyperlink implements IHyperlink {
 	 * @since 3.1
 	 */
 	public String getHyperlinkText() {
-		if (fQualify) {
+		if (fQualify && fElement != null) {
 			String elementLabel= JavaElementLabels.getElementLabel(fElement, JavaElementLabels.ALL_POST_QUALIFIED);
 			return Messages.format(JavaEditorMessages.JavaElementHyperlink_hyperlinkText_qualified, new Object[] { elementLabel });
 		} else {
