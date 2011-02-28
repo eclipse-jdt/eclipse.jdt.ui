@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.jface.action.IAction;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
@@ -63,6 +64,9 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 			if (wordRegion == null || wordRegion.getLength() == 0)
 				return null;
 
+			if (isInheritDoc(document, wordRegion) && getClass() != JavaElementHyperlinkDetector.class)
+				return null;
+			
 			IJavaElement[] elements= null;
 			elements= ((ICodeAssist) input).codeSelect(wordRegion.getOffset(), wordRegion.getLength());
 			elements= selectOpenableElements(elements);
@@ -88,6 +92,23 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 
 		} catch (JavaModelException e) {
 			return null;
+		}
+	}
+
+	/**
+	 * Returns whether the word is "inheritDoc".
+	 * 
+	 * @param document the document
+	 * @param wordRegion the word region
+	 * @return <code>true</code> iff the word is "inheritDoc"
+	 * @since 3.7
+	 */
+	private static boolean isInheritDoc(IDocument document, IRegion wordRegion) {
+		try {
+			String word= document.get(wordRegion.getOffset(), wordRegion.getLength());
+			return "inheritDoc".equals(word); //$NON-NLS-1$
+		} catch (BadLocationException e) {
+			return false;
 		}
 	}
 
