@@ -64,13 +64,13 @@ public class WorkingSetModel {
 	 */
 	private static final String TAG_SORT_WORKING_SETS= "sortWorkingSets"; //$NON-NLS-1$
 
-	private ILocalWorkingSetManager fLocalWorkingSetManager;
+	private final ILocalWorkingSetManager fLocalWorkingSetManager;
 	private List<IWorkingSet> fActiveWorkingSets;
 	private ListenerList fListeners;
 	private IPropertyChangeListener fWorkingSetManagerListener;
 	private OthersWorkingSetUpdater fOthersWorkingSetUpdater;
 
-	private ElementMapper fElementMapper= new ElementMapper();
+	private final ElementMapper fElementMapper= new ElementMapper();
 
 	private boolean fConfigured;
 
@@ -103,11 +103,11 @@ public class WorkingSetModel {
 	}
 
 	private static class ElementMapper {
-		private Map<IAdaptable, Object> fElementToWorkingSet= new HashMap<IAdaptable, Object>();
-		private Map<IWorkingSet, IAdaptable[]> fWorkingSetToElement= new IdentityHashMap<IWorkingSet, IAdaptable[]>();
+		private final Map<IAdaptable, Object> fElementToWorkingSet= new HashMap<IAdaptable, Object>();
+		private final Map<IWorkingSet, IAdaptable[]> fWorkingSetToElement= new IdentityHashMap<IWorkingSet, IAdaptable[]>();
 
-		private Map<IAdaptable, Object> fResourceToWorkingSet= new HashMap<IAdaptable, Object>();
-		private List<IAdaptable> fNonProjectTopLevelElements= new ArrayList<IAdaptable>();
+		private final Map<IAdaptable, Object> fResourceToWorkingSet= new HashMap<IAdaptable, Object>();
+		private final List<IAdaptable> fNonProjectTopLevelElements= new ArrayList<IAdaptable>();
 
 		public void clear() {
 			fElementToWorkingSet.clear();
@@ -393,7 +393,7 @@ public class WorkingSetModel {
 		}
 		IWorkingSet[] globals= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets();
 		for (int i= 0; i < globals.length; i++) {
-			if (!result.contains(globals[i]) && isSupportedAsTopLevelElement(locals[i]))
+			if (!result.contains(globals[i]) && isSupportedAsTopLevelElement(globals[i]))
 				result.add(globals[i]);
 		}
 
