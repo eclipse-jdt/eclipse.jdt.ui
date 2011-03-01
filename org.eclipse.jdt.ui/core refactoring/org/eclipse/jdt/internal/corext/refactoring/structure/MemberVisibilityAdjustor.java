@@ -243,6 +243,7 @@ public final class MemberVisibilityAdjustor {
 		/*
 		 * @see org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IVisibilityAdjustment#rewriteVisibility(org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor, org.eclipse.core.runtime.IProgressMonitor)
 		 */
+		@Override
 		public void rewriteVisibility(final MemberVisibilityAdjustor adjustor, final IProgressMonitor monitor) throws JavaModelException {
 			Assert.isNotNull(adjustor);
 			Assert.isNotNull(monitor);
@@ -391,11 +392,11 @@ public final class MemberVisibilityAdjustor {
 	 * @param adjustments the map of members to visibility adjustments
 	 * @return <code>true</code> if the member needs further adjustment, <code>false</code> otherwise
 	 */
-	public static boolean needsVisibilityAdjustments(final IMember member, final int threshold, final Map adjustments) {
+	public static boolean needsVisibilityAdjustments(final IMember member, final int threshold, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments) {
 		Assert.isNotNull(member);
 		Assert.isTrue(isVisibilityModifier(threshold));
 		Assert.isNotNull(adjustments);
-		final IncomingMemberVisibilityAdjustment adjustment= (IncomingMemberVisibilityAdjustment) adjustments.get(member);
+		final IncomingMemberVisibilityAdjustment adjustment= adjustments.get(member);
 		if (adjustment != null) {
 			final ModifierKeyword keyword= adjustment.getKeyword();
 			return hasLowerVisibility(keyword == null ? Modifier.NONE : keyword.toFlagValue(), threshold);
@@ -411,17 +412,17 @@ public final class MemberVisibilityAdjustor {
 	 * @param adjustments the map of members to visibility adjustments
 	 * @return <code>true</code> if the member needs further adjustment, <code>false</code> otherwise
 	 */
-	public static boolean needsVisibilityAdjustments(final IMember member, final ModifierKeyword threshold, final Map adjustments) {
+	public static boolean needsVisibilityAdjustments(final IMember member, final ModifierKeyword threshold, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments) {
 		Assert.isNotNull(member);
 		Assert.isNotNull(adjustments);
-		final IncomingMemberVisibilityAdjustment adjustment= (IncomingMemberVisibilityAdjustment) adjustments.get(member);
+		final IncomingMemberVisibilityAdjustment adjustment= adjustments.get(member);
 		if (adjustment != null)
 			return hasLowerVisibility(adjustment.getKeyword(), threshold);
 		return true;
 	}
 
 	/** The map of members to visibility adjustments */
-	private Map fAdjustments= new LinkedHashMap(); // LinkedHashMap to preserve order of generated warnings
+	private Map<IMember, IncomingMemberVisibilityAdjustment> fAdjustments= new LinkedHashMap<IMember, IncomingMemberVisibilityAdjustment>(); // LinkedHashMap to preserve order of generated warnings
 
 	/** Should incoming references be adjusted? */
 	private boolean fIncoming= true;
@@ -439,7 +440,7 @@ public final class MemberVisibilityAdjustor {
 	private ASTRewrite fRewrite= null;
 
 	/** The map of compilation units to compilation unit rewrites */
-	private Map fRewrites= new HashMap(3);
+	private Map<ICompilationUnit, CompilationUnitRewrite> fRewrites= new HashMap<ICompilationUnit, CompilationUnitRewrite>(3);
 
 	/** The root node of the AST rewrite for reference visibility adjustments, or <code>null</code> to use a compilation unit rewrite */
 	private CompilationUnit fRoot= null;
@@ -451,7 +452,7 @@ public final class MemberVisibilityAdjustor {
 	private RefactoringStatus fStatus= new RefactoringStatus();
 
 	/** The type hierarchy cache */
-	private final Map fTypeHierarchies= new LRUMap(10);
+	private final Map<IType, ITypeHierarchy> fTypeHierarchies= new LRUMap<IType, ITypeHierarchy>(10);
 
 	/** The visibility message severity */
 	private int fVisibilitySeverity= RefactoringStatus.WARNING;
@@ -977,7 +978,7 @@ public final class MemberVisibilityAdjustor {
 	 *
 	 * @return the visibility adjustments
 	 */
-	public final Map getAdjustments() {
+	public final Map<IMember, IncomingMemberVisibilityAdjustment> getAdjustments() {
 		return fAdjustments;
 	}
 
@@ -988,7 +989,7 @@ public final class MemberVisibilityAdjustor {
 	 * @return the rewrite for the compilation unit
 	 */
 	private CompilationUnitRewrite getCompilationUnitRewrite(final ICompilationUnit unit) {
-		CompilationUnitRewrite rewrite= (CompilationUnitRewrite) fRewrites.get(unit);
+		CompilationUnitRewrite rewrite= fRewrites.get(unit);
 		if (rewrite == null) {
 			if (fOwner == null)
 				rewrite= new CompilationUnitRewrite(unit);
@@ -1012,7 +1013,7 @@ public final class MemberVisibilityAdjustor {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
 			try {
-				hierarchy= (ITypeHierarchy) fTypeHierarchies.get(type);
+				hierarchy= fTypeHierarchies.get(type);
 				if (hierarchy == null) {
 					if (fOwner == null) {
 						hierarchy= type.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
@@ -1024,8 +1025,7 @@ public final class MemberVisibilityAdjustor {
 			} finally {
 				monitor.done();
 			}
-		} finally {
-			monitor.done();
+		} finally {			monitor.done();
 		}
 		return hierarchy;
 	}
@@ -1055,10 +1055,10 @@ public final class MemberVisibilityAdjustor {
 			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_adjusting);
 			IMember member= null;
 			IVisibilityAdjustment adjustment= null;
-			for (final Iterator iterator= fAdjustments.keySet().iterator(); iterator.hasNext();) {
-				member= (IMember) iterator.next();
+			for (final Iterator<IMember> iterator= fAdjustments.keySet().iterator(); iterator.hasNext();) {
+				member= iterator.next();
 				if (unit.equals(member.getCompilationUnit())) {
-					adjustment= (IVisibilityAdjustment) fAdjustments.get(member);
+					adjustment= fAdjustments.get(member);
 					if (adjustment != null)
 						adjustment.rewriteVisibility(this, new SubProgressMonitor(monitor, 1));
 				}
@@ -1081,9 +1081,9 @@ public final class MemberVisibilityAdjustor {
 			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_adjusting);
 			IMember member= null;
 			IVisibilityAdjustment adjustment= null;
-			for (final Iterator iterator= fAdjustments.keySet().iterator(); iterator.hasNext();) {
-				member= (IMember) iterator.next();
-				adjustment= (IVisibilityAdjustment) fAdjustments.get(member);
+			for (final Iterator<IMember> iterator= fAdjustments.keySet().iterator(); iterator.hasNext();) {
+				member= iterator.next();
+				adjustment= fAdjustments.get(member);
 				if (adjustment != null)
 					adjustment.rewriteVisibility(this, new SubProgressMonitor(monitor, 1));
 				if (monitor.isCanceled())
@@ -1102,7 +1102,7 @@ public final class MemberVisibilityAdjustor {
 	 *
 	 * @param adjustments the existing adjustments to set
 	 */
-	public final void setAdjustments(final Map adjustments) {
+	public final void setAdjustments(final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments) {
 		Assert.isNotNull(adjustments);
 		fAdjustments= adjustments;
 	}
@@ -1161,7 +1161,7 @@ public final class MemberVisibilityAdjustor {
 	 *
 	 * @param rewrites the map of compilation units to compilation unit rewrites to set
 	 */
-	public final void setRewrites(final Map rewrites) {
+	public final void setRewrites(final Map<ICompilationUnit, CompilationUnitRewrite> rewrites) {
 		Assert.isNotNull(rewrites);
 		fRewrites= rewrites;
 	}

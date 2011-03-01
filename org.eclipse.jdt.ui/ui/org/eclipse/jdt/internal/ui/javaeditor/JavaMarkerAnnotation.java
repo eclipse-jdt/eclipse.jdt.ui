@@ -150,7 +150,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	/*
 	 * @see IJavaAnnotation#getOverlaidIterator()
 	 */
-	public Iterator getOverlaidIterator() {
+	public Iterator<IJavaAnnotation> getOverlaidIterator() {
 		// not supported
 		return null;
 	}

@@ -102,6 +102,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	/*
 	 * @see org.eclipse.jface.preference.PreferencePage#createContents(Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		fPixelConverter= new PixelConverter(parent);
 		setShell(parent.getShell());
@@ -257,6 +258,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */
+	@Override
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		if (!areSettingsEnabled()) {
 			return;
@@ -318,6 +320,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	}
 
 
+	@Override
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		String title= PreferencesMessages.JavadocProblemsConfigurationBlock_needsbuild_title;
 		String message;

@@ -39,6 +39,7 @@ public class DelegateUIHelper {
 		updating.setDeprecateDelegates(button.getSelection());
 		button.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				updating.setDeprecateDelegates(button.getSelection());
 			}
@@ -54,6 +55,7 @@ public class DelegateUIHelper {
 		updating.setDelegateUpdating(button.getSelection());
 		button.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				updating.setDelegateUpdating(button.getSelection());
 			}

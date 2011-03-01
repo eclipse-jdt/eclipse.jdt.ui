@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.IEditorPart;
@@ -113,6 +114,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		boolean enabled= false;
 		enabled= getSelectedCompilationUnit(selection) != null;
@@ -122,6 +124,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		Shell shell= getShell();
 		try {
@@ -174,12 +177,14 @@ public class SortMembersAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		Shell shell= getShell();
 		IJavaElement input= SelectionConverter.getInput(fEditor);
@@ -204,9 +209,9 @@ public class SortMembersAction extends SelectionDispatchAction {
 
 	private boolean containsRelevantMarkers(IEditorPart editor) {
 		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(editor.getEditorInput());
-		Iterator iterator= model.getAnnotationIterator();
+		Iterator<Annotation> iterator= model.getAnnotationIterator();
 		while (iterator.hasNext()) {
-			Object element= iterator.next();
+			Annotation element= iterator.next();
 			if (element instanceof IJavaAnnotation) {
 				IJavaAnnotation annot= (IJavaAnnotation) element;
 				if (!annot.isMarkedDeleted() && annot.isPersistent() && !annot.isProblem())

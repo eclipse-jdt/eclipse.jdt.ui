@@ -71,7 +71,7 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 			res= fPreComputedProposals;
 		} else {
 			try {
-				List proposals= new ArrayList();
+				List<ICompletionProposal> proposals= new ArrayList<ICompletionProposal>();
 				ICompletionProposal[] spellingProposals= fSpellingCorrectionProcessor.computeQuickAssistProposals(quickAssistContext);
 				if (spellingProposals.length > 1) {
 					for (int i= 0; i < spellingProposals.length; i++) {
@@ -84,7 +84,7 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 						proposals.add(assists[i]);
 					}
 				}
-				res= (ICompletionProposal[])proposals.toArray(new ICompletionProposal[proposals.size()]);
+				res= proposals.toArray(new ICompletionProposal[proposals.size()]);
 			} catch (BadLocationException e) {
 				fErrorMessage= CorrectionMessages.JavaCorrectionProcessor_error_quickassist_message;
 				JavaPlugin.log(e);

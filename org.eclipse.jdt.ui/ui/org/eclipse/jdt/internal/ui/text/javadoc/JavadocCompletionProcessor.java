@@ -44,6 +44,7 @@ public class JavadocCompletionProcessor extends JavaCompletionProcessor {
 	 *
 	 * @param restrict <code>true</code> if proposals should be restricted
 	 */
+	@Override
 	public void restrictProposalsToMatchingCases(boolean restrict) {
 		fSubProcessorFlags= restrict ? IJavadocCompletionProcessor.RESTRICT_TO_MATCHING_CASE : 0;
 	}
@@ -51,6 +52,7 @@ public class JavadocCompletionProcessor extends JavaCompletionProcessor {
 	/**
 	 * @see IContentAssistProcessor#getContextInformationValidator()
 	 */
+	@Override
 	public IContextInformationValidator getContextInformationValidator() {
 		return null;
 	}
@@ -58,6 +60,7 @@ public class JavadocCompletionProcessor extends JavaCompletionProcessor {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor#createContext(org.eclipse.jface.text.ITextViewer, int)
 	 */
+	@Override
 	protected ContentAssistInvocationContext createContext(ITextViewer viewer, int offset) {
 		return new JavadocContentAssistInvocationContext(viewer, offset, fEditor, fSubProcessorFlags);
 	}

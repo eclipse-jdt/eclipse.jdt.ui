@@ -109,6 +109,7 @@ public class NLSElement {
 	 * Method declared in Object.
 	 * only for debugging
 	 */
+	@Override
 	public String toString() {
 		return fPosition + ": " + fValue + "    Tag position: " + //$NON-NLS-2$ //$NON-NLS-1$
 				(hasTag() ? fTagPosition.toString() : "no tag found"); //$NON-NLS-1$

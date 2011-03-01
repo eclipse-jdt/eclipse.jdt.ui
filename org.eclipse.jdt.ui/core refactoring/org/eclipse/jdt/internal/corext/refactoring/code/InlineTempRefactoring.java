@@ -186,6 +186,7 @@ public class InlineTempRefactoring extends Refactoring {
 	/*
 	 * @see IRefactoring#getName()
 	 */
+	@Override
 	public String getName() {
 		return RefactoringCoreMessages.InlineTempRefactoring_name;
 	}
@@ -193,6 +194,7 @@ public class InlineTempRefactoring extends Refactoring {
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 1); //$NON-NLS-1$
@@ -259,6 +261,7 @@ public class InlineTempRefactoring extends Refactoring {
 	/*
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 1); //$NON-NLS-1$
@@ -270,10 +273,11 @@ public class InlineTempRefactoring extends Refactoring {
 
 	//----- changes
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.InlineTempRefactoring_preview, 2);
-			final Map arguments= new HashMap();
+			final Map<String, String> arguments= new HashMap<String, String>();
 			String project= null;
 			IJavaProject javaProject= fCu.getJavaProject();
 			if (javaProject != null)

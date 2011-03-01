@@ -54,6 +54,7 @@ public final class ParameterTypeVariable2 extends ConstraintVariable2 implements
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return getParameterIndex() ^ getKey().hashCode();
 	}
@@ -61,6 +62,7 @@ public final class ParameterTypeVariable2 extends ConstraintVariable2 implements
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object other) {
 		if (this == other)
 			return true;
@@ -72,6 +74,7 @@ public final class ParameterTypeVariable2 extends ConstraintVariable2 implements
 				&& getKey().equals(other2.getKey());
 	}
 
+	@Override
 	public String toString() {
 		String toString= (String) getData(TO_STRING);
 		return toString == null ? "[Parameter(" + fParameterIndex + "," + fKey + ")]" : toString; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$

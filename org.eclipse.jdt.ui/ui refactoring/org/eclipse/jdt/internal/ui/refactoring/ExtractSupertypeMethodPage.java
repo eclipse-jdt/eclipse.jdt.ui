@@ -49,6 +49,7 @@ public class ExtractSupertypeMethodPage extends PullUpMethodPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_SUPERTYPE_WIZARD_PAGE);
@@ -57,6 +58,7 @@ public class ExtractSupertypeMethodPage extends PullUpMethodPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setVisible(final boolean visible) {
 		if (visible) {
 			final ExtractSupertypeProcessor processor= getProcessor();

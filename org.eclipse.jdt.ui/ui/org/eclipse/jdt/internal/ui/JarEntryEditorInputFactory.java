@@ -144,7 +144,7 @@ public class JarEntryEditorInputFactory implements IElementFactory {
 	 * @see IPersistableElement#saveState(IMemento)
 	 */
 	public static void saveState(IMemento memento, IJarEntryResource jarEntryResource) {
-		ArrayList reversePath= new ArrayList();
+		ArrayList<String> reversePath= new ArrayList<String>();
 		reversePath.add(jarEntryResource.getName());
 
 		Object parent= jarEntryResource.getParent();
@@ -155,9 +155,9 @@ public class JarEntryEditorInputFactory implements IElementFactory {
 		}
 		if (parent instanceof IPackageFragmentRoot || parent instanceof IPackageFragment) {
 			memento.putString(KEY_ELEMENT, ((IJavaElement) parent).getHandleIdentifier());
-			IPath path= new Path((String) reversePath.get(reversePath.size() - 1));
+			IPath path= new Path(reversePath.get(reversePath.size() - 1));
 			for (int i= reversePath.size() - 2; i >= 0; i--) {
-				path= path.append((String) reversePath.get(i));
+				path= path.append(reversePath.get(i));
 			}
 			memento.putString(KEY_PATH, path.toString());
 		}

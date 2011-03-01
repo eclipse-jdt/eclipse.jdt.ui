@@ -21,6 +21,7 @@ public class InnerClassFilesFilter extends ViewerFilter {
 	public InnerClassFilesFilter() {
 	}
 
+	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if (element instanceof IClassFile) {
 			IClassFile classFile= (IClassFile) element;

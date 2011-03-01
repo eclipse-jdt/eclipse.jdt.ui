@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,7 @@ public final class CleanUpRequirements {
 
 	private final boolean fRequiresAST;
 
-	private final Map fCompilerOptions;
+	private final Map<String, String> fCompilerOptions;
 
 	private final boolean fRequiresFreshAST;
 
@@ -41,7 +41,7 @@ public final class CleanUpRequirements {
 	 * @param requiresChangedRegions <code>true</code> if changed regions are required
 	 * @param compilerOptions map of compiler options or <code>null</code> if no requirements
 	 */
-	public CleanUpRequirements(boolean requiresAST, boolean requiresFreshAST, boolean requiresChangedRegions, Map compilerOptions) {
+	public CleanUpRequirements(boolean requiresAST, boolean requiresFreshAST, boolean requiresChangedRegions, Map<String, String> compilerOptions) {
 		Assert.isLegal(!requiresFreshAST || requiresAST, "Must not request fresh AST if no AST is required"); //$NON-NLS-1$
 		Assert.isLegal(compilerOptions == null || requiresAST, "Must not provide options if no AST is required"); //$NON-NLS-1$
 		fRequiresAST= requiresAST;
@@ -79,7 +79,7 @@ public final class CleanUpRequirements {
 	 * @return the compiler options map or <code>null</code> if none
 	 * @see JavaCore
 	 */
-	public Map getCompilerOptions() {
+	public Map<String, String> getCompilerOptions() {
 		return fCompilerOptions;
 	}
 

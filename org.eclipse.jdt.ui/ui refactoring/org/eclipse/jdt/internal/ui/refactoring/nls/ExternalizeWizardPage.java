@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -382,6 +382,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			return res;
 		}
 
+		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
 
@@ -544,6 +545,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 
 		SelectionListener listener= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (e.widget instanceof Button) {
 					doConfigureButtonPressed();
@@ -612,8 +614,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				fNLSRefactoring.getResourceBundleName(),
 				fNLSRefactoring.getResourceBundlePackage());
 
-		ArrayList currChoices= new ArrayList();
-		ArrayList currLabels= new ArrayList();
+		ArrayList<AccessorDescription> currChoices= new ArrayList<AccessorDescription>();
+		ArrayList<String> currLabels= new ArrayList<String>();
 
 		currChoices.add(configured);
 		currLabels.add(configured.getLabel());
@@ -631,8 +633,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			}
 		}
 
-		String[] labels= (String[]) currLabels.toArray(new String[currLabels.size()]);
-		fAccessorChoices= (AccessorDescription[]) currChoices.toArray(new AccessorDescription[currChoices.size()]);
+		String[] labels= currLabels.toArray(new String[currLabels.size()]);
+		fAccessorChoices= currChoices.toArray(new AccessorDescription[currChoices.size()]);
 
 		fAccessorClassField.setItems(labels);
 		fAccessorClassField.select(0);
@@ -644,7 +646,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		if (section == null) {
 			return new AccessorDescription[0];
 		}
-		ArrayList res= new ArrayList();
+		ArrayList<AccessorDescription> res= new ArrayList<AccessorDescription>();
 		for (int i= 0; i < SETTINGS_MAX_ENTRIES; i++) {
 			IDialogSettings serializedDesc= section.getSection(String.valueOf(i));
 			if (serializedDesc != null) {
@@ -654,7 +656,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				}
 			}
 		}
-		return (AccessorDescription[]) res.toArray(new AccessorDescription[res.size()]);
+		return res.toArray(new AccessorDescription[res.size()]);
 	}
 
 
@@ -712,15 +714,17 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		 * behavior.
 		 */
 		fTableViewer= new TableViewer(fTable) {
+			@Override
 			protected void hookControl(Control control) {
 				super.hookControl(control);
 				((Table) control).addMouseListener(new MouseAdapter() {
+					@Override
 					public void mouseDoubleClick(MouseEvent e) {
 						if (getTable().getSelection().length == 0)
 							return;
 						TableItem item= getTable().getSelection()[0];
 						if (item.getBounds(STATE_PROP).contains(e.x, e.y)) {
-							List widgetSel= getSelectionFromWidget();
+							List<?> widgetSel= getSelectionFromWidget();
 							if (widgetSel == null || widgetSel.size() != 1)
 								return;
 							NLSSubstitution substitution= (NLSSubstitution) widgetSel.get(0);
@@ -750,6 +754,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			}
 		});
 		fTableViewer.addFilter(new ViewerFilter() {
+			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				if (!fFilterCheckBox.getSelection()) {
 					return true;
@@ -860,6 +865,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fIsEclipseNLS.setSelection(fNLSRefactoring.isEclipseNLS());
 			fIsEclipseNLS.setEnabled(willCreateAccessorClass());
 			fIsEclipseNLS.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					super.widgetDefaultSelected(e);
 					boolean isEclipseNLS= fIsEclipseNLS.getSelection();
@@ -1064,6 +1070,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		buttonComp.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 
 		SelectionAdapter adapter= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleButtonPressed(e.widget);
 			}
@@ -1106,7 +1113,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	 */
 	private void openRenameDialog() {
 		IStructuredSelection sel= (IStructuredSelection) fTableViewer.getSelection();
-		List elementsToRename= getExternalizedElements(sel);
+		List<NLSSubstitution> elementsToRename= getExternalizedElements(sel);
 		RenameKeysDialog dialog= new RenameKeysDialog(getShell(), elementsToRename);
 		if (dialog.open() == Window.OK) {
 			fTableViewer.refresh();
@@ -1115,8 +1122,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 
 	private void revertStateOfSelection() {
-		List selection= getSelectedTableEntries();
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		List<?> selection= getSelectedTableEntries();
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			NLSSubstitution substitution= (NLSSubstitution) iter.next();
 			substitution.revert();
 		}
@@ -1157,7 +1164,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		}
 	}
 
-	private List getSelectedTableEntries() {
+	private List<?> getSelectedTableEntries() {
 		ISelection sel= fTableViewer.getSelection();
 		if (sel instanceof IStructuredSelection)
 			return((IStructuredSelection) sel).toList();
@@ -1167,9 +1174,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private void setSelectedTasks(int state) {
 		Assert.isTrue(state == NLSSubstitution.EXTERNALIZED || state == NLSSubstitution.IGNORED || state == NLSSubstitution.INTERNALIZED);
-		List selected= getSelectedTableEntries();
+		List<?> selected= getSelectedTableEntries();
 		String[] props= new String[]{PROPERTIES[STATE_PROP]};
-		for (Iterator iter= selected.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selected.iterator(); iter.hasNext();) {
 			NLSSubstitution substitution= (NLSSubstitution) iter.next();
 			substitution.setState(state);
 			if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasStateChanged()) {
@@ -1223,7 +1230,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 
 	private boolean containsElementsWithChange(IStructuredSelection selection) {
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			NLSSubstitution substitution= (NLSSubstitution) iter.next();
 			if (substitution.hasPropertyFileChange() || substitution.hasSourceChange()) {
 				return true;
@@ -1232,9 +1239,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		return false;
 	}
 
-	private List getExternalizedElements(IStructuredSelection selection) {
-		ArrayList res= new ArrayList();
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+	private List<NLSSubstitution> getExternalizedElements(IStructuredSelection selection) {
+		ArrayList<NLSSubstitution> res= new ArrayList<NLSSubstitution>();
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			NLSSubstitution substitution= (NLSSubstitution) iter.next();
 			if (substitution.getState() == NLSSubstitution.EXTERNALIZED && !substitution.hasStateChanged()) {
 				res.add(substitution);
@@ -1244,7 +1251,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 
 	private boolean containsOnlyElementsOfSameState(int state, IStructuredSelection selection) {
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			NLSSubstitution substitution= (NLSSubstitution) iter.next();
 			if (substitution.getState() != state) {
 				return false;
@@ -1253,14 +1260,17 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		return true;
 	}
 
+	@Override
 	public boolean performFinish() {
 		return super.performFinish();
 	}
 
+	@Override
 	public IWizardPage getNextPage() {
 		return super.getNextPage();
 	}
 
+	@Override
 	public void dispose() {
 		storeAccessorDescriptions();
 		//widgets will be disposed. only need to null'em

@@ -32,18 +32,22 @@ public final class TypeVariable extends AbstractTypeVariable {
 		super.initialize(binding);
 	}
 
+	@Override
 	public int getKind() {
 		return TYPE_VARIABLE;
 	}
 
+	@Override
 	public boolean doEquals(TType type) {
 		return fJavaTypeParameter.equals(((TypeVariable)type).fJavaTypeParameter);
 	}
 
+	@Override
 	public int hashCode() {
 		return fJavaTypeParameter.hashCode();
 	}
 
+	@Override
 	protected boolean doCanAssignTo(TType lhs) {
 		switch (lhs.getKind()) {
 			case NULL_TYPE:
@@ -81,10 +85,12 @@ public final class TypeVariable extends AbstractTypeVariable {
 		return false;
 	}
 
+	@Override
 	public String getName() {
 		return fJavaTypeParameter.getElementName();
 	}
 
+	@Override
 	public String getPrettySignature() {
 		if (fBounds.length == 1 && fBounds[0].isJavaLangObject())
 			return fJavaTypeParameter.getElementName(); // don't print the trivial bound
@@ -101,6 +107,7 @@ public final class TypeVariable extends AbstractTypeVariable {
 		return result.toString();
 	}
 
+	@Override
 	protected String getPlainPrettySignature() {
 		return fJavaTypeParameter.getElementName();
 	}

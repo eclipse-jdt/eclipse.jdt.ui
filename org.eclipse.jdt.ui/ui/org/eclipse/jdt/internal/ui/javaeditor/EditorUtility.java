@@ -299,6 +299,7 @@ public class EditorUtility {
 			final IEditorInput input= editor.getEditorInput();
 			if (input instanceof IFileEditorInput) {
 				WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
+					@Override
 					protected void execute(IProgressMonitor monitor) throws CoreException {
 						IMarker marker= null;
 						try {
@@ -589,8 +590,8 @@ public class EditorUtility {
 	 * @since 3.4
 	 */
 	public static IEditorPart[] getDirtyEditors(boolean skipNonResourceEditors) {
-		Set inputs= new HashSet();
-		List result= new ArrayList(0);
+		Set<IEditorInput> inputs= new HashSet<IEditorInput>();
+		List<IEditorPart> result= new ArrayList<IEditorPart>(0);
 		IWorkbench workbench= PlatformUI.getWorkbench();
 		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
 		for (int i= 0; i < windows.length; i++) {
@@ -608,7 +609,7 @@ public class EditorUtility {
 				}
 			}
 		}
-		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
+		return result.toArray(new IEditorPart[result.size()]);
 	}
 
 	private static boolean isResourceEditorInput(IEditorInput input) {
@@ -635,8 +636,8 @@ public class EditorUtility {
 	 * @since 3.3
 	 */
 	public static IEditorPart[] getDirtyEditorsToSave(boolean saveUnknownEditors) {
-		Set inputs= new HashSet();
-		List result= new ArrayList(0);
+		Set<IEditorInput> inputs= new HashSet<IEditorInput>();
+		List<IEditorPart> result= new ArrayList<IEditorPart>(0);
 		IWorkbench workbench= PlatformUI.getWorkbench();
 		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
 		for (int i= 0; i < windows.length; i++) {
@@ -654,7 +655,7 @@ public class EditorUtility {
 				}
 			}
 		}
-		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
+		return result.toArray(new IEditorPart[result.size()]);
 	}
 
 	/*
@@ -770,7 +771,7 @@ public class EditorUtility {
 					//2. Successive changed lines are merged into on RangeDifference
 					//     forAll r1,r2 element differences: r1.rightStart()<r2.rightStart() -> r1.rightEnd()<r2.rightStart
 
-					ArrayList regions= new ArrayList();
+					ArrayList<IRegion> regions= new ArrayList<IRegion>();
 					for (int i= 0; i < differences.length; i++) {
 						RangeDifference curr= differences[i];
 						if (curr.kind() == RangeDifference.CHANGE && curr.rightLength() > 0) {
@@ -789,7 +790,7 @@ public class EditorUtility {
 						}
 					}
 
-					return (IRegion[]) regions.toArray(new IRegion[regions.size()]);
+					return regions.toArray(new IRegion[regions.size()]);
 				}
 			});
 		} finally {

@@ -52,6 +52,7 @@ public class OpenNewSourceFolderWizardAction extends AbstractOpenWizardAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#createWizard()
 	 */
+	@Override
 	protected final INewWizard createWizard() throws CoreException {
 		return new NewSourceFolderCreationWizard();
 	}

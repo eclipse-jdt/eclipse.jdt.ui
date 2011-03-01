@@ -118,7 +118,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	public boolean hasAssists(IInvocationContext context) throws CoreException {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null) {
-			ArrayList coveredNodes= getFullyCoveredNodes(context, coveringNode);
+			ArrayList<ASTNode> coveredNodes= getFullyCoveredNodes(context, coveringNode);
 			return getInverseIfProposals(context, coveringNode, null)
 					|| getIfReturnIntoIfElseAtEndOfVoidMethodProposals(context, coveringNode, null)
 					|| getInverseIfContinueIntoIfThenInLoopsProposals(context, coveringNode, null)
@@ -154,8 +154,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	public IJavaCompletionProposal[] getAssists(IInvocationContext context, IProblemLocation[] locations) throws CoreException {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null) {
-			ArrayList coveredNodes= getFullyCoveredNodes(context, coveringNode);
-			ArrayList resultingCollections= new ArrayList();
+			ArrayList<ASTNode> coveredNodes= getFullyCoveredNodes(context, coveringNode);
+			ArrayList<ICommandAccess> resultingCollections= new ArrayList<ICommandAccess>();
 			if (QuickAssistProcessor.noErrorsAtLocation(locations)) {
 				getInverseIfProposals(context, coveringNode, resultingCollections);
 				getIfReturnIntoIfElseAtEndOfVoidMethodProposals(context, coveringNode, resultingCollections);
@@ -184,12 +184,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, locations, resultingCollections);
 			}
 
-			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
+			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
 		return null;
 	}
 
-	private static boolean getIfReturnIntoIfElseAtEndOfVoidMethodProposals(IInvocationContext context, ASTNode covering, Collection resultingCollections) {
+	private static boolean getIfReturnIntoIfElseAtEndOfVoidMethodProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		if (!(covering instanceof IfStatement)) {
 			return false;
 		}
@@ -203,7 +203,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		Block thenBlock= (Block) thenStatement;
-		List thenStatements= thenBlock.statements();
+		List<Statement> thenStatements= thenBlock.statements();
 		if (thenStatements.isEmpty() || !(thenStatements.get(thenStatements.size() - 1) instanceof ReturnStatement)) {
 			return false;
 		}
@@ -216,7 +216,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (!(returnType instanceof PrimitiveType) || ((PrimitiveType) returnType).getPrimitiveTypeCode() != PrimitiveType.VOID)
 			return false;
 		//
-		List statements= coveringMetod.getBody().statements();
+		List<Statement> statements= coveringMetod.getBody().statements();
 		int ifIndex= statements.indexOf(ifStatement);
 		if (ifIndex == -1) {
 			return false;
@@ -230,14 +230,14 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		// remove last 'return' in 'then' block
 		ListRewrite listRewriter= rewrite.getListRewrite(thenBlock, (ChildListPropertyDescriptor) ifStatement.getLocationInParent());
-		listRewriter.remove((ASTNode) thenStatements.get(thenStatements.size() - 1), null);
+		listRewriter.remove(thenStatements.get(thenStatements.size() - 1), null);
 		// prepare original nodes
 		Expression conditionPlaceholder= (Expression) rewrite.createMoveTarget(ifStatement.getExpression());
 		Statement thenPlaceholder= (Statement) rewrite.createMoveTarget(ifStatement.getThenStatement());
 		// prepare 'else' block
 		Block elseBlock= ast.newBlock();
 		for (int i= ifIndex + 1; i < statements.size(); i++) {
-			Statement statement= (Statement) statements.get(i);
+			Statement statement= statements.get(i);
 			elseBlock.statements().add(rewrite.createMoveTarget(statement));
 		}
 		// prepare new 'if' statement
@@ -254,7 +254,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getInverseIfProposals(IInvocationContext context, ASTNode covering, Collection resultingCollections) {
+	private static boolean getInverseIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		if (!(covering instanceof IfStatement)) {
 			return false;
 		}
@@ -295,7 +295,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getInverseIfContinueIntoIfThenInLoopsProposals(IInvocationContext context, ASTNode covering, Collection resultingCollections) {
+	private static boolean getInverseIfContinueIntoIfThenInLoopsProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		if (!(covering instanceof IfStatement)) {
 			return false;
 		}
@@ -344,7 +344,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getInverseIfIntoContinueInLoopsProposals(IInvocationContext context, ASTNode covering, Collection resultingCollections) {
+	private static boolean getInverseIfIntoContinueInLoopsProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		if (!(covering instanceof IfStatement)) {
 			return false;
 		}
@@ -384,8 +384,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			// if there is no block, create it
 			ifParentBlock= ast.newBlock();
 			ifParentBlock.statements().add(newIf);
-			for (Iterator iter= getUnwrappedStatements(ifStatement.getThenStatement()).iterator(); iter.hasNext();) {
-				Statement statement= (Statement) iter.next();
+			for (Iterator<Statement> iter= getUnwrappedStatements(ifStatement.getThenStatement()).iterator(); iter.hasNext();) {
+				Statement statement= iter.next();
 				ifParentBlock.statements().add(rewrite.createMoveTarget(statement));
 			}
 			// replace 'if' statement as body with new block
@@ -399,8 +399,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			ListRewrite listRewriter= rewrite.getListRewrite(ifParentBlock, (ChildListPropertyDescriptor) ifStatement.getLocationInParent());
 			listRewriter.replace(ifStatement, newIf, null);
 			// add statements from 'then' to the end of block
-			for (Iterator iter= getUnwrappedStatements(ifStatement.getThenStatement()).iterator(); iter.hasNext();) {
-				Statement statement= (Statement) iter.next();
+			for (Iterator<Statement> iter= getUnwrappedStatements(ifStatement.getThenStatement()).iterator(); iter.hasNext();) {
+				Statement statement= iter.next();
 				listRewriter.insertLast(rewrite.createMoveTarget(statement), null);
 			}
 		}
@@ -412,11 +412,11 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static ArrayList getUnwrappedStatements(Statement body) {
-		ArrayList statements= new ArrayList();
+	private static ArrayList<Statement> getUnwrappedStatements(Statement body) {
+		ArrayList<Statement> statements= new ArrayList<Statement>();
 		if (body instanceof Block) {
-			for (Iterator iter= ((Block) body).statements().iterator(); iter.hasNext();) {
-				Statement statement= (Statement) iter.next();
+			for (Iterator<Statement> iter= ((Block) body).statements().iterator(); iter.hasNext();) {
+				Statement statement= iter.next();
 				statements.add(statement);
 			}
 		} else {
@@ -425,7 +425,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return statements;
 	}
 
-	private static boolean getInverseConditionProposals(IInvocationContext context, ASTNode covering, ArrayList coveredNodes, Collection resultingCollections) {
+	private static boolean getInverseConditionProposals(IInvocationContext context, ASTNode covering, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
 		if (coveredNodes.isEmpty()) {
 			return false;
 		}
@@ -434,8 +434,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
 		// check sub-expressions in fully covered nodes
 		boolean hasChanges= false;
-		for (Iterator iter= coveredNodes.iterator(); iter.hasNext();) {
-			ASTNode covered= (ASTNode) iter.next();
+		for (Iterator<ASTNode> iter= coveredNodes.iterator(); iter.hasNext();) {
+			ASTNode covered= iter.next();
 			Expression coveredExpression= getBooleanExpression(covered);
 			if (coveredExpression != null) {
 				Expression inversedExpression= getInversedExpression(rewrite, coveredExpression);
@@ -608,19 +608,19 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Expression rightOperand= getInversedExpression(rewrite, infixExpression.getRightOperand(), provider);
 		newExpression.setRightOperand(parenthesizeIfRequired(rightOperand, newOperatorPrecedence));
 
-		List extraOperands= infixExpression.extendedOperands();
-		List newExtraOperands= newExpression.extendedOperands();
+		List<Expression> extraOperands= infixExpression.extendedOperands();
+		List<Expression> newExtraOperands= newExpression.extendedOperands();
 		for (int i= 0; i < extraOperands.size(); i++) {
-			Expression extraOperand= getInversedExpression(rewrite, (Expression) extraOperands.get(i), provider);
+			Expression extraOperand= getInversedExpression(rewrite, extraOperands.get(i), provider);
 			newExtraOperands.add(parenthesizeIfRequired(extraOperand, newOperatorPrecedence));
 		}
 		return newExpression;
 	}
 
-	private static boolean getRemoveExtraParenthesesProposals(IInvocationContext context, ASTNode covering, ArrayList coveredNodes, Collection resultingCollections) {
-		ArrayList nodes;
+	private static boolean getRemoveExtraParenthesesProposals(IInvocationContext context, ASTNode covering, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
+		ArrayList<ASTNode> nodes;
 		if (context.getSelectionLength() == 0 && covering instanceof ParenthesizedExpression) {
-			nodes= new ArrayList();
+			nodes= new ArrayList<ASTNode>();
 			nodes.add(covering);
 		} else {
 			nodes= coveredNodes;
@@ -628,7 +628,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (nodes.isEmpty())
 			return false;
 
-		IProposableFix fix= ExpressionsFix.createRemoveUnnecessaryParenthesisFix(context.getASTRoot(), (ASTNode[]) nodes.toArray(new ASTNode[nodes.size()]));
+		IProposableFix fix= ExpressionsFix.createRemoveUnnecessaryParenthesisFix(context.getASTRoot(), nodes.toArray(new ASTNode[nodes.size()]));
 		if (fix == null)
 			return false;
 
@@ -636,7 +636,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
-		Map options= new Hashtable();
+		Map<String, String> options= new Hashtable<String, String>();
 		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpOptions.TRUE);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(options), 1, image, context);
@@ -644,9 +644,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getAddParanoidalParenthesesProposals(IInvocationContext context, ArrayList coveredNodes, Collection resultingCollections) {
+	private static boolean getAddParanoidalParenthesesProposals(IInvocationContext context, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
 
-		IProposableFix fix= ExpressionsFix.createAddParanoidalParenthesisFix(context.getASTRoot(), (ASTNode[]) coveredNodes.toArray(new ASTNode[coveredNodes.size()]));
+		IProposableFix fix= ExpressionsFix.createAddParanoidalParenthesisFix(context.getASTRoot(), coveredNodes.toArray(new ASTNode[coveredNodes.size()]));
 		if (fix == null)
 			return false;
 
@@ -655,7 +655,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 		// add correction proposal
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
-		Map options= new Hashtable();
+		Map<String, String> options= new Hashtable<String, String>();
 		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.TRUE);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(options), -9, image, context);
@@ -663,7 +663,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getAddParenthesesForExpressionProposals(IInvocationContext context, ASTNode coveringNode, Collection resultingCollections) {
+	private static boolean getAddParenthesesForExpressionProposals(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
 		ASTNode node= coveringNode;
 		while (node != null && !(node instanceof CastExpression) && !(node instanceof InfixExpression) && !(node instanceof InstanceofExpression) && !(node instanceof ConditionalExpression)) {
 			node= node.getParent();
@@ -702,11 +702,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static ArrayList getFullyCoveredNodes(IInvocationContext context, ASTNode coveringNode) {
-		final ArrayList coveredNodes= new ArrayList();
+	private static ArrayList<ASTNode> getFullyCoveredNodes(IInvocationContext context, ASTNode coveringNode) {
+		final ArrayList<ASTNode> coveredNodes= new ArrayList<ASTNode>();
 		final int selectionBegin= context.getSelectionOffset();
 		final int selectionEnd= selectionBegin + context.getSelectionLength();
 		coveringNode.accept(new GenericVisitor() {
+			@Override
 			protected boolean visitNode(ASTNode node) {
 				int nodeStart= node.getStartPosition();
 				int nodeEnd= nodeStart + node.getLength();
@@ -735,7 +736,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return coveredNodes;
 	}
 
-	private static boolean getJoinAndIfStatementsProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getJoinAndIfStatementsProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 
 		//
 		if (!(node instanceof IfStatement)) {
@@ -841,7 +842,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return parenthesizedExpression;
 	}
 
-	public static boolean getSplitAndConditionProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	public static boolean getSplitAndConditionProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		Operator andOperator= InfixExpression.Operator.CONDITIONAL_AND;
 		// check that user invokes quick assist on infix expression
 		if (!(node instanceof InfixExpression)) {
@@ -934,10 +935,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (isSelectingOperator(left, right, offset, length)) {
 			return ASTNodes.getExclusiveEnd(left);
 		}
-		List extended= infixExpression.extendedOperands();
+		List<Expression> extended= infixExpression.extendedOperands();
 		for (int i= 0; i < extended.size(); i++) {
 			left= right;
-			right= (ASTNode) extended.get(i);
+			right= extended.get(i);
 			if (isSelectingOperator(left, right, offset, length)) {
 				return ASTNodes.getExclusiveEnd(left);
 			}
@@ -945,14 +946,14 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return -1;
 	}
 
-	private static boolean getJoinOrIfStatementsProposals(IInvocationContext context, ASTNode covering, ArrayList coveredNodes, Collection resultingCollections) {
+	private static boolean getJoinOrIfStatementsProposals(IInvocationContext context, ASTNode covering, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
 		Operator orOperator= InfixExpression.Operator.CONDITIONAL_OR;
 		if (coveredNodes.size() < 2)
 			return false;
 		// check that all covered nodes are IfStatement's with same 'then' statement and without 'else'
 		String commonThenSource= null;
-		for (Iterator iter= coveredNodes.iterator(); iter.hasNext();) {
-			ASTNode node= (ASTNode) iter.next();
+		for (Iterator<ASTNode> iter= coveredNodes.iterator(); iter.hasNext();) {
+			ASTNode node= iter.next();
 			if (!(node instanceof IfStatement))
 				return false;
 			//
@@ -983,7 +984,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		InfixExpression condition= null;
 		boolean hasRightOperand= false;
 		Statement thenStatement= null;
-		for (Iterator iter= coveredNodes.iterator(); iter.hasNext();) {
+		for (Iterator<ASTNode> iter= coveredNodes.iterator(); iter.hasNext();) {
 			IfStatement ifStatement= (IfStatement) iter.next();
 			if (thenStatement == null)
 				thenStatement= (Statement) rewrite.createCopyTarget(ifStatement.getThenStatement());
@@ -1008,7 +1009,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		newIf.setThenStatement(thenStatement);
 		//
 		ListRewrite listRewriter= null;
-		for (Iterator iter= coveredNodes.iterator(); iter.hasNext();) {
+		for (Iterator<ASTNode> iter= coveredNodes.iterator(); iter.hasNext();) {
 			IfStatement ifStatement= (IfStatement) iter.next();
 			if (listRewriter == null) {
 				Block sourceBlock= (Block) ifStatement.getParent();
@@ -1030,7 +1031,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	public static boolean getSplitOrConditionProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	public static boolean getSplitOrConditionProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		Operator orOperator= InfixExpression.Operator.CONDITIONAL_OR;
 		// check that user invokes quick assist on infix expression
 		if (!(node instanceof InfixExpression)) {
@@ -1096,7 +1097,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getInverseConditionalExpressionProposals(IInvocationContext context, ASTNode covering, Collection resultingCollections) {
+	private static boolean getInverseConditionalExpressionProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		// try to find conditional expression as parent
 		while (covering instanceof Expression) {
 			if (covering instanceof ConditionalExpression)
@@ -1129,7 +1130,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getExchangeInnerAndOuterIfConditionsProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getExchangeInnerAndOuterIfConditionsProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		boolean result= false;
 		//
 		if (!(node instanceof IfStatement)) {
@@ -1206,7 +1207,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return result;
 	}
 
-	private static boolean getExchangeOperandsProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getExchangeOperandsProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		// check that user invokes quick assist on infix expression
 		if (!(node instanceof InfixExpression)) {
 			return false;
@@ -1244,8 +1245,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		} else {
 			rightExpression= combineOperands(rewrite, rightExpression, infixExpression.getRightOperand(), false, operator);
 		}
-		for (Iterator iter= currentExpression.extendedOperands().iterator(); iter.hasNext();) {
-			Expression extendedOperand= (Expression)iter.next();
+		for (Iterator<Expression> iter= currentExpression.extendedOperands().iterator(); iter.hasNext();) {
+			Expression extendedOperand= iter.next();
 			if (extendedOperand.getStartPosition() <= context.getSelectionOffset()) {
 				leftExpression= combineOperands(rewrite, leftExpression, extendedOperand, false, operator);
 			} else {
@@ -1309,9 +1310,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		breakInfixOperationAtOperation(rewrite, infixExpression.getLeftOperand(), operator, operatorOffset, removeParentheses, res);
 		breakInfixOperationAtOperation(rewrite, infixExpression.getRightOperand(), operator, operatorOffset, removeParentheses, res);
 
-		List extended= infixExpression.extendedOperands();
+		List<Expression> extended= infixExpression.extendedOperands();
 		for (int i= 0; i < extended.size(); i++) {
-			breakInfixOperationAtOperation(rewrite, (Expression)extended.get(i), operator, operatorOffset, removeParentheses, res);
+			breakInfixOperationAtOperation(rewrite, extended.get(i), operator, operatorOffset, removeParentheses, res);
 		}
 	}
 
@@ -1337,15 +1338,15 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return infix;
 	}
 
-	private static boolean getCastAndAssignIfStatementProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getCastAndAssignIfStatementProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		if (node instanceof IfStatement) {
 			node= ((IfStatement)node).getExpression();
 		} else if (node instanceof WhileStatement) {
 			node= ((WhileStatement)node).getExpression();
 		} else if (node instanceof Block) {
-			List statements= ((Block)node).statements();
+			List<Statement> statements= ((Block)node).statements();
 			if (statements.size() > 0) {
-				if (context.getSelectionOffset() > ((Statement)statements.get(0)).getStartPosition()) {
+				if (context.getSelectionOffset() > statements.get(0).getStartPosition()) {
 					return false;
 				}
 			}
@@ -1362,8 +1363,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			if (expression instanceof InstanceofExpression) {
 				node= expression;
 			} else {
-				final ArrayList nodes= new ArrayList();
+				final ArrayList<InstanceofExpression> nodes= new ArrayList<InstanceofExpression>();
 				expression.accept(new ASTVisitor() {
+					@Override
 					public boolean visit(InstanceofExpression instanceofExpression) {
 						nodes.add(instanceofExpression);
 						return false;
@@ -1373,7 +1375,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				if (nodes.size() != 1) {
 					return false;
 				}
-				node= (ASTNode)nodes.get(0);
+				node= nodes.get(0);
 			}
 		} else {
 			while (node != null && !(node instanceof InstanceofExpression) && !(node instanceof Statement)) {
@@ -1438,7 +1440,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 7, image);
 		// prepare possible variable names
-		List excludedNames= Arrays.asList(ASTResolving.getUsedVariableNames(body));
+		List<String> excludedNames= Arrays.asList(ASTResolving.getUsedVariableNames(body));
 		String[] varNames= suggestLocalVariableNames(cu, originalType.resolveBinding(), excludedNames);
 		for (int i= 0; i < varNames.length; i++) {
 			proposal.addLinkedPositionProposal(KEY_NAME, varNames[i], null);
@@ -1464,9 +1466,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				listRewriter.insertAt(vds, 0, null);
 			} else {
 				Block newBlock= ast.newBlock();
-				List statements= newBlock.statements();
+				List<Statement> statements= newBlock.statements();
 				statements.add(vds);
-				statements.add(rewrite.createMoveTarget(body));
+				statements.add((Statement) rewrite.createMoveTarget(body));
 				rewrite.replace(body, newBlock, null);
 			}
 		}
@@ -1496,11 +1498,11 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static String[] suggestLocalVariableNames(ICompilationUnit cu, ITypeBinding binding, List excluded) {
+	private static String[] suggestLocalVariableNames(ICompilationUnit cu, ITypeBinding binding, List<String> excluded) {
 		return StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, cu.getJavaProject(), binding, null, excluded);
 	}
 
-	private static boolean getPickOutStringProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getPickOutStringProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		// we work with String's
 		if (!(node instanceof StringLiteral)) {
 			return false;
@@ -1580,16 +1582,16 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static Statement getSingleStatement(Statement statement) {
 		if (statement instanceof Block) {
-			List blockStatements= ((Block) statement).statements();
+			List<Statement> blockStatements= ((Block) statement).statements();
 			if (blockStatements.size() != 1) {
 				return null;
 			}
-			return (Statement) blockStatements.get(0);
+			return blockStatements.get(0);
 		}
 		return statement;
 	}
 
-	private static boolean getReplaceIfElseWithConditionalProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getReplaceIfElseWithConditionalProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		if (!(node instanceof IfStatement)) {
 			return false;
 		}
@@ -1712,7 +1714,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return statement;
 	}
 
-	private static boolean getReplaceConditionalWithIfElseProposals(IInvocationContext context, ASTNode covering, Collection resultingCollections) {
+	private static boolean getReplaceConditionalWithIfElseProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		ASTNode node= covering;
 		while (!(node instanceof ConditionalExpression) && node instanceof Expression) {
 			node= node.getParent();
@@ -1810,7 +1812,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getInverseLocalVariableProposals(IInvocationContext context, ASTNode covering, Collection resultingCollections) {
+	private static boolean getInverseLocalVariableProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		final AST ast= covering.getAST();
 		// cursor should be placed on variable name
 		if (!(covering instanceof SimpleName)) {
@@ -1865,7 +1867,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		proposal.addLinkedPositionProposal(KEY_NAME, newIdentifier, null);
 		proposal.addLinkedPositionProposal(KEY_NAME, oldIdentifier, null);
 		// iterate over linked nodes and replace variable references with negated reference
-		final HashSet renamedNames= new HashSet();
+		final HashSet<SimpleName> renamedNames= new HashSet<SimpleName>();
 		for (int i= 0; i < linkedNodes.length; i++) {
 			SimpleName name= linkedNodes[i];
 			if (renamedNames.contains(name)) {
@@ -1885,7 +1887,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				int exStart= expression.getStartPosition();
 				int exEnd= exStart + expression.getLength();
 				// collect all names that are used in assignments
-				HashSet overlapNames= new HashSet();
+				HashSet<SimpleName> overlapNames= new HashSet<SimpleName>();
 				for (int j= 0; j < linkedNodes.length; j++) {
 					SimpleName name2= linkedNodes[j];
 					if (name2 == null) {
@@ -1908,7 +1910,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				};
 				Expression inversedExpression= getInversedExpression(rewrite, expression, provider);
 				// if any name was not renamed during expression inverting, we can not already rename it, so fail to create assist
-				for (Iterator iter= overlapNames.iterator(); iter.hasNext();) {
+				for (Iterator<SimpleName> iter= overlapNames.iterator(); iter.hasNext();) {
 					Object o= iter.next();
 					if (!renamedNames.contains(o)) {
 						return false;
@@ -1956,7 +1958,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getPushNegationDownProposals(IInvocationContext context, ASTNode covering, Collection resultingCollections) {
+	private static boolean getPushNegationDownProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		PrefixExpression negationExpression= null;
 		ParenthesizedExpression parenthesizedExpression= null;
 		// check for case when cursor is on '!' before parentheses
@@ -2042,12 +2044,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return null;
 	}
 
-	private static boolean getPullNegationUpProposals(IInvocationContext context, ArrayList coveredNodes, Collection resultingCollections) {
+	private static boolean getPullNegationUpProposals(IInvocationContext context, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
 		if (coveredNodes.size() != 1) {
 			return false;
 		}
 		//
-		ASTNode fullyCoveredNode= (ASTNode) coveredNodes.get(0);
+		ASTNode fullyCoveredNode= coveredNodes.get(0);
 
 		Expression expression= getBooleanExpression(fullyCoveredNode);
 		if (expression == null || (!(expression instanceof InfixExpression) && !(expression instanceof ConditionalExpression))) {
@@ -2079,7 +2081,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getJoinIfListInIfElseIfProposals(IInvocationContext context, ASTNode covering, ArrayList coveredNodes, Collection resultingCollections) {
+	private static boolean getJoinIfListInIfElseIfProposals(IInvocationContext context, ASTNode covering, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
 		if (coveredNodes.isEmpty()) {
 			return false;
 		}
@@ -2088,8 +2090,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		// check that all selected nodes are 'if' statements with only 'then' statement
-		for (Iterator iter= coveredNodes.iterator(); iter.hasNext();) {
-			ASTNode node= (ASTNode) iter.next();
+		for (Iterator<ASTNode> iter= coveredNodes.iterator(); iter.hasNext();) {
+			ASTNode node= iter.next();
 			if (!(node instanceof IfStatement)) {
 				return false;
 			}
@@ -2110,7 +2112,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		IfStatement firstNewIfStatement= null;
 		//
 		IfStatement prevIfStatement= null;
-		for (Iterator iter= coveredNodes.iterator(); iter.hasNext();) {
+		for (Iterator<ASTNode> iter= coveredNodes.iterator(); iter.hasNext();) {
 			IfStatement ifStatement= (IfStatement) iter.next();
 			// prepare new 'if' statement
 			IfStatement newIfStatement= ast.newIfStatement();
@@ -2144,7 +2146,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection resultingCollections) {
+	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		if (!(covering instanceof SwitchStatement)) {
 			return false;
 		}
@@ -2166,10 +2168,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		InfixExpression currentCondition= null;
 		boolean defaultFound= false;
 
-		ArrayList allBlocks= new ArrayList();
+		ArrayList<Block> allBlocks= new ArrayList<Block>();
 		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(covering), importRewrite);
-		for (Iterator iter= switchStatement.statements().iterator(); iter.hasNext();) {
-			Statement statement= (Statement) iter.next();
+		for (Iterator<Statement> iter= switchStatement.statements().iterator(); iter.hasNext();) {
+			Statement statement= iter.next();
 			if (statement instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) statement;
 				// special case: pass through
@@ -2248,8 +2250,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		// remove unnecessary blocks in blocks
 		for (int i= 0; i < allBlocks.size(); i++) {
-			Block block= (Block) allBlocks.get(i);
-			List statements= block.statements();
+			Block block= allBlocks.get(i);
+			List<Statement> statements= block.statements();
 			if (statements.size() == 1 && statements.get(0) instanceof Block) {
 				Block innerBlock= (Block) statements.remove(0);
 				block.getParent().setStructuralProperty(block.getLocationInParent(), innerBlock);
@@ -2310,8 +2312,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (source instanceof Block) {
 			Block block= (Block) source;
 			Block newBlock= ast.newBlock();
-			for (Iterator iter= block.statements().iterator(); iter.hasNext();) {
-				Statement statement= (Statement) iter.next();
+			for (Iterator<Statement> iter= block.statements().iterator(); iter.hasNext();) {
+				Statement statement= iter.next();
 				if (statement instanceof BreakStatement) {
 					continue;
 				}

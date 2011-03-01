@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 public class TreeRoot {
@@ -35,11 +36,11 @@ public class TreeRoot {
 	 * @since 3.7
 	 */
     void addRoots(MethodWrapper[] roots){
-		List/*<MethodWrapper>*/newRoots= new ArrayList/*<MethodWrapper>*/();
+		List<MethodWrapper>newRoots= new ArrayList<MethodWrapper>();
 		newRoots.addAll(Arrays.asList(fRoots));
 		newRoots.addAll(Arrays.asList(roots));
 
-		fRoots= (MethodWrapper[])newRoots.toArray(new MethodWrapper[newRoots.size()]);
+		fRoots= newRoots.toArray(new MethodWrapper[newRoots.size()]);
     }
 
 

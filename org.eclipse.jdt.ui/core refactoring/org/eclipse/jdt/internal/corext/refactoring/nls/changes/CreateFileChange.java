@@ -87,6 +87,7 @@ public class CreateFileChange extends ResourceChange {
 		fExplicitEncoding= explicit;
 	}
 
+	@Override
 	public String getName() {
 		if (fChangeName == null)
 			return Messages.format(NLSChangesMessages.createFile_Create_file, BasicElementLabels.getPathLabel(fPath, false));
@@ -114,10 +115,12 @@ public class CreateFileChange extends ResourceChange {
 		return fPath;
 	}
 
+	@Override
 	protected IResource getModifiedResource() {
 		return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
 	}
 
+	@Override
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
@@ -140,6 +143,7 @@ public class CreateFileChange extends ResourceChange {
 		return result;
 	}
 
+	@Override
 	public Change perform(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 
 		InputStream is= null;

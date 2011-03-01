@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectio
  */
 public class BasicJavaEditorActionContributor extends BasicTextEditorActionContributor {
 
-	private List fPartListeners= new ArrayList();
+	private List<RetargetAction> fPartListeners= new ArrayList<RetargetAction>();
 
 	private TogglePresentationAction fTogglePresentation;
 	private ToggleMarkOccurrencesAction fToggleMarkOccurrencesAction;
@@ -118,11 +118,12 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	/*
 	 * @see IEditorActionBarContributor#init(IActionBars, IWorkbenchPage)
 	 */
+	@Override
 	public void init(IActionBars bars, IWorkbenchPage page) {
 		fToggleBreadcrumbAction= new ToggleBreadcrumbAction(page);
-		Iterator e= fPartListeners.iterator();
+		Iterator<RetargetAction> e= fPartListeners.iterator();
 		while (e.hasNext())
-			page.addPartListener((RetargetAction) e.next());
+			page.addPartListener(e.next());
 
 		super.init(bars, page);
 
@@ -134,6 +135,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	/*
 	 * @see org.eclipse.ui.part.EditorActionBarContributor#contributeToMenu(org.eclipse.jface.action.IMenuManager)
 	 */
+	@Override
 	public void contributeToMenu(IMenuManager menu) {
 
 		super.contributeToMenu(menu);
@@ -169,6 +171,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	/*
 	 * @see EditorActionBarContributor#setActiveEditor(IEditorPart)
 	 */
+	@Override
 	public void setActiveEditor(IEditorPart part) {
 
 		super.setActiveEditor(part);
@@ -226,11 +229,12 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	/*
 	 * @see IEditorActionBarContributor#dispose()
 	 */
+	@Override
 	public void dispose() {
 
-		Iterator e= fPartListeners.iterator();
+		Iterator<RetargetAction> e= fPartListeners.iterator();
 		while (e.hasNext())
-			getPage().removePartListener((RetargetAction) e.next());
+			getPage().removePartListener(e.next());
 		fPartListeners.clear();
 
 		setActiveEditor(null);

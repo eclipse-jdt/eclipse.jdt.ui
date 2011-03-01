@@ -31,6 +31,7 @@ public class IntroduceFactoryWizard extends RefactoringWizard {
 	/**
 	 * @see RefactoringWizard#addUserInputPages
 	 */
+	@Override
 	protected void addUserInputPages() {
 		String message= RefactoringMessages.IntroduceFactoryInputPage_name_factory;
 

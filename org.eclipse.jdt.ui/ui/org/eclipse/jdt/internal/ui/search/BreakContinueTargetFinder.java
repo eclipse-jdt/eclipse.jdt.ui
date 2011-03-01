@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,9 +58,9 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 	private String fDescription;
 	private CompilationUnit fASTRoot;
 
-	private static final Class[] STOPPERS=        {MethodDeclaration.class, Initializer.class};
-	private static final Class[] BREAKTARGETS=    {ForStatement.class, EnhancedForStatement.class, WhileStatement.class, DoStatement.class, SwitchStatement.class};
-	private static final Class[] CONTINUETARGETS= {ForStatement.class, EnhancedForStatement.class, WhileStatement.class, DoStatement.class};
+	private static final Class<?>[] STOPPERS=        {MethodDeclaration.class, Initializer.class};
+	private static final Class<?>[] BREAKTARGETS=    {ForStatement.class, EnhancedForStatement.class, WhileStatement.class, DoStatement.class, SwitchStatement.class};
+	private static final Class<?>[] CONTINUETARGETS= {ForStatement.class, EnhancedForStatement.class, WhileStatement.class, DoStatement.class};
 	private static final int BRACE_LENGTH= 1;
 
 	/*
@@ -129,7 +129,7 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 		if (!isEnclosingStatement(targetNode))
 			return null;
 
-		List list= new ArrayList();
+		List<OccurrenceLocation> list= new ArrayList<OccurrenceLocation>();
 		OccurrenceLocation location= getLocationForFirstToken(targetNode);
 		if (location != null) {
 			list.add(location);
@@ -141,7 +141,7 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 			}
 		}
 		if (!list.isEmpty()) {
-			return (OccurrenceLocation[]) list.toArray(new OccurrenceLocation[list.size()]);
+			return list.toArray(new OccurrenceLocation[list.size()]);
 		}
 		return null;
 	}
@@ -194,7 +194,7 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 		return labelSelected.getIdentifier().equals(labelToMatch.getIdentifier());
 	}
 
-	private static boolean isAnyInstanceOf(Class[] continueTargets, ASTNode node) {
+	private static boolean isAnyInstanceOf(Class<?>[] continueTargets, ASTNode node) {
 		for (int i= 0; i < continueTargets.length; i++) {
 			if (continueTargets[i].isInstance(node))
 				return true;

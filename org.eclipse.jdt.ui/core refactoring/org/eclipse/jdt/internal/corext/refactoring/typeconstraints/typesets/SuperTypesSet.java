@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isUniverse()
 	 */
+	@Override
 	public boolean isUniverse() {
 		return fLowerBounds.isUniverse();
 	}
@@ -39,6 +40,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
 	 */
+	@Override
 	public TypeSet makeClone() {
 		return this; //new SuperTypesSet(fLowerBounds.makeClone(), getTypeSetEnvironment());
 	}
@@ -46,6 +48,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#upperBound()
 	 */
+	@Override
 	public TypeSet upperBound() {
 		return new SingletonTypeSet(getTypeSetEnvironment().getJavaLangObject(), getTypeSetEnvironment());
 	}
@@ -53,6 +56,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#lowerBound()
 	 */
+	@Override
 	public TypeSet lowerBound() {
 		// Ask the operand for its lower-bound, in case it's something like an
 		// EnumeratedTypeSet, which may have things in it other than the lower
@@ -63,6 +67,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#intersectedWith(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.EnumeratedTypeSet)
 	 */
+	@Override
 	protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
 		if (fLowerBounds.equals(s2))
 			return s2; // xsect(superTypes(A),A) = A
@@ -123,6 +128,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#superTypes()
 	 */
+	@Override
 	public TypeSet superTypes() {
 		return this; // makeClone();
 	}
@@ -130,6 +136,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isEmpty()
 	 */
+	@Override
 	public boolean isEmpty() {
 		return fLowerBounds.isEmpty();
 	}
@@ -137,6 +144,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(TType)
 	 */
+	@Override
 	public boolean contains(TType t) {
 		if (fEnumCache != null) return fEnumCache.contains(t);
 
@@ -147,8 +155,8 @@ public class SuperTypesSet extends TypeSet {
 
 		// Find the "lower frontier", i.e. the lower bound, and see whether
 		// the given type is a supertype of any of those.
-		for(Iterator lbIter= fLowerBounds /*.lowerBound() */.iterator(); lbIter.hasNext(); ) {
-			TType lb= (TType) lbIter.next();
+		for(Iterator<TType> lbIter= fLowerBounds /*.lowerBound() */.iterator(); lbIter.hasNext(); ) {
+			TType lb= lbIter.next();
 
 			if (TTypes.canAssignTo(lb, t))
 				return true;
@@ -159,6 +167,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#containsAll(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.EnumeratedTypeSet)
 	 */
+	@Override
 	public boolean containsAll(TypeSet s) {
 		if (fEnumCache != null) return fEnumCache.containsAll(s);
 
@@ -170,14 +179,14 @@ public class SuperTypesSet extends TypeSet {
 			return true;
 
 		// Make sure all elements of s are contained in this set
-		for(Iterator sIter= s.iterator(); sIter.hasNext(); ) {
-			TType t= (TType) sIter.next();
+		for(Iterator<TType> sIter= s.iterator(); sIter.hasNext(); ) {
+			TType t= sIter.next();
 			boolean found= false;
 
 			// Scan the "lower frontier", i.e. the lower bound set, and see whether
 			// 't' is a supertype of any of those.
-			for(Iterator lbIter= fLowerBounds /*.lowerBound()*/.iterator(); lbIter.hasNext(); ) {
-				TType lb= (TType) lbIter.next();
+			for(Iterator<TType> lbIter= fLowerBounds /*.lowerBound()*/.iterator(); lbIter.hasNext(); ) {
+				TType lb= lbIter.next();
 
 				if (TTypes.canAssignTo(lb, t)) {
 					found= true;
@@ -192,6 +201,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isSingleton()
 	 */
+	@Override
 	public boolean isSingleton() {
 		if (fEnumCache != null) return fEnumCache.isSingleton();
 
@@ -201,6 +211,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#anyMember()
 	 */
+	@Override
 	public TType anyMember() {
 		return fLowerBounds.anyMember();
 	}
@@ -208,6 +219,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object o) {
 		if (o instanceof SuperTypesSet) {
 			SuperTypesSet other= (SuperTypesSet) o;
@@ -221,6 +233,7 @@ public class SuperTypesSet extends TypeSet {
 			return false;
 	}
 
+	@Override
 	public int hashCode() {
 		return fLowerBounds.hashCode();
 	}
@@ -228,10 +241,12 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#iterator()
 	 */
-	public Iterator iterator() {
+	@Override
+	public Iterator<TType> iterator() {
 		return enumerate().iterator();
 	}
 
+	@Override
 	public String toString() {
 		return "<" + fID + ": superTypes(" + fLowerBounds + ")>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
@@ -239,6 +254,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueLowerBound()
 	 */
+	@Override
 	public boolean hasUniqueLowerBound() {
 		return fLowerBounds.isSingleton();
 	}
@@ -246,6 +262,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueUpperBound()
 	 */
+	@Override
 	public boolean hasUniqueUpperBound() {
 		return false;
 	}
@@ -253,6 +270,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueLowerBound()
 	 */
+	@Override
 	public TType uniqueLowerBound() {
 		return fLowerBounds.isSingleton() ? fLowerBounds.anyMember() : null;
 	}
@@ -260,6 +278,7 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueUpperBound()
 	 */
+	@Override
 	public TType uniqueUpperBound() {
 		return null;
 	}
@@ -269,22 +288,23 @@ public class SuperTypesSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#enumerate()
 	 */
+	@Override
 	public EnumeratedTypeSet enumerate() {
 		if (fEnumCache == null) {
 			fEnumCache= new EnumeratedTypeSet(getTypeSetEnvironment());
 			boolean anyLBIsIntfOrArray= false;
 
-			for(Iterator iter= fLowerBounds.iterator(); iter.hasNext(); ) {
-				TType lb= (TType) iter.next();
+			for(Iterator<TType> iter= fLowerBounds.iterator(); iter.hasNext(); ) {
+				TType lb= iter.next();
 
 				if (lb instanceof ArrayType) {
 					ArrayType at= (ArrayType) lb;
 					int numDims= at.getDimensions();
-					for(Iterator elemSuperIter=TTypes.getAllSuperTypesIterator(at.getElementType()); elemSuperIter.hasNext(); )
-						fEnumCache.add(TTypes.createArrayType((TType) elemSuperIter.next(), numDims));
+					for(Iterator<TType> elemSuperIter=TTypes.getAllSuperTypesIterator(at.getElementType()); elemSuperIter.hasNext(); )
+						fEnumCache.add(TTypes.createArrayType(elemSuperIter.next(), numDims));
 					anyLBIsIntfOrArray= true;
 				} else {
-					for (Iterator iterator= TTypes.getAllSuperTypesIterator(lb); iterator.hasNext(); )
+					for (Iterator<TType> iterator= TTypes.getAllSuperTypesIterator(lb); iterator.hasNext(); )
 					fEnumCache.fMembers.add(iterator.next());
 				}
 				fEnumCache.add(lb);

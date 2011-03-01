@@ -49,26 +49,26 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
      * @see org.eclipse.jdt.internal.ui.preferences.cleanup.IProfileVersioner#updateAndComplete(org.eclipse.jdt.internal.ui.preferences.cleanup.ProfileManager.CustomProfile)
      */
 	public void update(CustomProfile profile) {
-		final Map oldSettings= profile.getSettings();
-		Map newSettings= updateAndComplete(oldSettings, profile.getVersion());
+		final Map<String, String> oldSettings= profile.getSettings();
+		Map<String, String> newSettings= updateAndComplete(oldSettings, profile.getVersion());
 		profile.setVersion(CURRENT_VERSION);
 		profile.setSettings(newSettings);
 	}
 
-	private Map updateAndComplete(Map oldSettings, int version) {
-		final Map newSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getMap();
+	private Map<String, String> updateAndComplete(Map<String, String> oldSettings, int version) {
+		final Map<String, String> newSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getMap();
 
 		switch (version) {
 			case VERSION_1:
 				updateFrom1To2(oldSettings);
 				//$FALL-THROUGH$
 			default:
-				for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext();) {
-					final String key= (String) iter.next();
+				for (final Iterator<String> iter= oldSettings.keySet().iterator(); iter.hasNext();) {
+					final String key= iter.next();
 					if (!newSettings.containsKey(key))
 						continue;
 
-					final String value= (String) oldSettings.get(key);
+					final String value= oldSettings.get(key);
 					if (value != null) {
 						newSettings.put(key, value);
 					}
@@ -85,7 +85,7 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
 	    return PROFILE_KIND;
     }
 
-	private static void updateFrom1To2(Map settings) {
+	private static void updateFrom1To2(Map<String, String> settings) {
 		CleanUpOptions defaultSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
 		settings.put(CleanUpConstants.ORGANIZE_IMPORTS, defaultSettings.getValue(CleanUpConstants.ORGANIZE_IMPORTS));
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
@@ -71,14 +72,15 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
     /**
      * @return a map from handle identifier ({@link String}) to {@link MethodCall}
      */
-    public Map getCallees() {
+    public Map<String, MethodCall> getCallees() {
         return fSearchResults.getCallers();
     }
 
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ClassInstanceCreation)
      */
-    public boolean visit(ClassInstanceCreation node) {
+    @Override
+	public boolean visit(ClassInstanceCreation node) {
         progressMonitorWorked(1);
         if (!isFurtherTraversalNecessary(node)) {
             return false;
@@ -98,7 +100,8 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
      *
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ConstructorInvocation)
      */
-    public boolean visit(ConstructorInvocation node) {
+    @Override
+	public boolean visit(ConstructorInvocation node) {
         progressMonitorWorked(1);
         if (!isFurtherTraversalNecessary(node)) {
             return false;
@@ -114,16 +117,17 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
     /**
      * @see HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.AbstractTypeDeclaration)
      */
-    public boolean visit(AbstractTypeDeclaration node) {
+    @Override
+	public boolean visit(AbstractTypeDeclaration node) {
     	progressMonitorWorked(1);
     	if (!isFurtherTraversalNecessary(node)) {
     		return false;
     	}
 
     	if (isNodeWithinMethod(node)) {
-    		List bodyDeclarations= node.bodyDeclarations();
-    		for (Iterator iter= bodyDeclarations.iterator(); iter.hasNext(); ) {
-				BodyDeclaration bodyDeclaration= (BodyDeclaration) iter.next();
+    		List<BodyDeclaration> bodyDeclarations= node.bodyDeclarations();
+    		for (Iterator<BodyDeclaration> iter= bodyDeclarations.iterator(); iter.hasNext(); ) {
+				BodyDeclaration bodyDeclaration= iter.next();
 				if (bodyDeclaration instanceof MethodDeclaration) {
 					MethodDeclaration child= (MethodDeclaration) bodyDeclaration;
 					if (child.isConstructor()) {
@@ -140,7 +144,8 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
     /**
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodDeclaration)
      */
-    public boolean visit(MethodDeclaration node) {
+    @Override
+	public boolean visit(MethodDeclaration node) {
         progressMonitorWorked(1);
         return isFurtherTraversalNecessary(node);
     }
@@ -152,7 +157,8 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
      *
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodInvocation)
      */
-    public boolean visit(MethodInvocation node) {
+    @Override
+	public boolean visit(MethodInvocation node) {
         progressMonitorWorked(1);
         if (!isFurtherTraversalNecessary(node)) {
             return false;
@@ -173,7 +179,8 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
      *
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SuperConstructorInvocation)
      */
-    public boolean visit(SuperConstructorInvocation node) {
+    @Override
+	public boolean visit(SuperConstructorInvocation node) {
         progressMonitorWorked(1);
         if (!isFurtherTraversalNecessary(node)) {
             return false;
@@ -195,7 +202,8 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
      *
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodInvocation)
      */
-    public boolean visit(SuperMethodInvocation node) {
+    @Override
+	public boolean visit(SuperMethodInvocation node) {
         progressMonitorWorked(1);
         if (!isFurtherTraversalNecessary(node)) {
             return false;
@@ -214,7 +222,8 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
      *
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.AnonymousClassDeclaration)
      */
-    public boolean visit(AnonymousClassDeclaration node) {
+    @Override
+	public boolean visit(AnonymousClassDeclaration node) {
         return isNodeEnclosingMethod(node);
     }
 
@@ -325,7 +334,7 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
     }
 
     private IMethod findImplementingMethods(IMethod calledMethod) {
-        Collection implementingMethods = CallHierarchy.getDefault()
+        Collection<IJavaElement> implementingMethods = CallHierarchy.getDefault()
                                                         .getImplementingMethods(calledMethod);
 
         if ((implementingMethods.size() == 0) || (implementingMethods.size() > 1)) {

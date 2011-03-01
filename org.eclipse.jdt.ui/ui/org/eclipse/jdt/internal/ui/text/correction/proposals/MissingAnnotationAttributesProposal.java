@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,8 +32,8 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 
@@ -56,6 +56,7 @@ public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposa
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
+	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		AST ast= fAnnotation.getAST();
 
@@ -78,11 +79,11 @@ public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposa
 	}
 
 	private void addMissingAtributes(ITypeBinding binding, ListRewrite listRewriter) {
-		Set implementedAttribs= new HashSet();
+		Set<String> implementedAttribs= new HashSet<String>();
 		if (fAnnotation instanceof NormalAnnotation) {
-			List list= ((NormalAnnotation) fAnnotation).values();
+			List<MemberValuePair> list= ((NormalAnnotation) fAnnotation).values();
 			for (int i= 0; i < list.size(); i++) {
-				MemberValuePair curr= (MemberValuePair) list.get(i);
+				MemberValuePair curr= list.get(i);
 				implementedAttribs.add(curr.getName().getIdentifier());
 			}
 		} else if (fAnnotation instanceof SingleMemberAnnotation){

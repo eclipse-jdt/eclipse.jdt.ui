@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ public abstract class AbstractTypeVariable extends TType {
 		super(environment);
 	}
 
+	@Override
 	protected void initialize(ITypeBinding binding) {
 		super.initialize(binding);
 		ITypeBinding[] bounds= binding.getTypeBounds();
@@ -37,6 +38,7 @@ public abstract class AbstractTypeVariable extends TType {
 		}
 	}
 
+	@Override
 	public TType getErasure() {
 		if (fBounds.length == 0)
 			return getEnvironment().getJavaLangObject();
@@ -50,9 +52,10 @@ public abstract class AbstractTypeVariable extends TType {
 	}
 
 	public final TType[] getBounds() {
-		return (TType[]) fBounds.clone();
+		return fBounds.clone();
 	}
 
+	@Override
 	public final TType[] getSubTypes() {
 		return EMPTY_TYPE_ARRAY;
 	}

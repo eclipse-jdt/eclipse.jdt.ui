@@ -30,10 +30,12 @@ public final class MissingCodeTabPage extends AbstractCleanUpTabPage {
 		super();
 	}
 
-	protected AbstractCleanUp[] createPreviewCleanUps(Map values) {
+	@Override
+	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] { new Java50CleanUp(values), new PotentialProgrammingProblemsCleanUp(values), new UnimplementedCodeCleanUp(values) };
 	}
 
+	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 
     	Group annotationsGroup= createGroup(numColumns, composite, CleanUpMessages.MissingCodeTabPage_GroupName_Annotations);

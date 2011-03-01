@@ -48,6 +48,7 @@ public final class ExtractSupertypeWizard extends RefactoringWizard {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void addUserInputPages() {
 		final ExtractSupertypeMethodPage page= new ExtractSupertypeMethodPage(fProcessor);
 		addPage(new ExtractSupertypeMemberPage(PAGE_NAME, page, fProcessor));

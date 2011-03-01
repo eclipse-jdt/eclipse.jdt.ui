@@ -73,7 +73,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	private boolean fApply= true;
 
 	/** The method binding keys for which a method was generated */
-	private final List fCreated= new ArrayList();
+	private final List<IMethodBinding> fCreated= new ArrayList<IMethodBinding>();
 
 	/** The resulting text edit */
 	private TextEdit fResultingEdit= null;

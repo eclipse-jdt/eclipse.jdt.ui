@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,13 +35,13 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
 
-	private List fElements;
+	private List<?> fElements;
 	private JavaMoveProcessor fMoveProcessor;
 	private int fCanMoveElements;
 	private JavaCopyProcessor fCopyProcessor;
@@ -91,6 +91,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void dragEnter(DropTargetEvent event) {
 		clear();
 		super.dragEnter(event);
@@ -99,6 +100,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void dragLeave(DropTargetEvent event) {
 		clear();
 		super.dragLeave(event);
@@ -117,6 +119,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean validateDrop(Object target, int operation, TransferData transferType) {
 		return determineOperation(target, operation, transferType, DND.DROP_MOVE | DND.DROP_LINK | DND.DROP_COPY) != DND.DROP_NONE;
 	}
@@ -124,6 +127,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected int determineOperation(Object target, int operation, TransferData transferType, int operations) {
 		int result= internalDetermineOperation(target, operation, operations);
 
@@ -208,6 +212,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean performDrop(Object data) {
 		try{
 			switch(getCurrentOperation()) {
@@ -326,6 +331,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected int getCurrentLocation() {
 		if (getFeedbackEnabled()) {
 			return super.getCurrentLocation();

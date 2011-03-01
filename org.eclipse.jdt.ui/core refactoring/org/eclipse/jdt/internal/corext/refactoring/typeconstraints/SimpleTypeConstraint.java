@@ -42,6 +42,7 @@ public final class SimpleTypeConstraint implements ITypeConstraint {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public  String toString(){
 		return getLeft().toString() + " " + fOperator.toString() + " " + getRight().toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,7 +69,7 @@ public abstract class RefactoringModifications {
 		if (source.getKind() == IPackageFragmentRoot.K_BINARY) {
 			childOfInterest = IJavaElement.CLASS_FILE;
 		}
-		ArrayList result = new ArrayList(children.length);
+		ArrayList<IResource> result = new ArrayList<IResource>(children.length);
 		for (int i = 0; i < children.length; i++) {
 			IJavaElement child = children[i];
 			if (child.getElementType() == childOfInterest && child.getResource() != null) {
@@ -81,10 +81,10 @@ public abstract class RefactoringModifications {
 		for (int i= 0; i < nonJavaResources.length; i++) {
 			Object element= nonJavaResources[i];
 			if (element instanceof IResource) {
-				result.add(element);
+				result.add((IResource) element);
 			}
 		}
-		return (IResource[]) result.toArray(new IResource[result.size()]);
+		return result.toArray(new IResource[result.size()]);
 	}
 
 	protected IFile getClasspathFile(IResource resource) {

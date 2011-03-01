@@ -26,6 +26,7 @@ public class TextBoxDialogField extends StringDialogField {
 	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField#createTextControl(org.eclipse.swt.widgets.Composite)
 	 * @since 3.6
 	 */
+	@Override
 	protected Text createTextControl(Composite parent) {
 		Text text= new Text(parent, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		text.addTraverseListener(new TraverseListener() {

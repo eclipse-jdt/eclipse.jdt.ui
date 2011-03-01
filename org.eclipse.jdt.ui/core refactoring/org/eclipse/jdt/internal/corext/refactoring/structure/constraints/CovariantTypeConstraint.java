@@ -42,6 +42,7 @@ public final class CovariantTypeConstraint implements ITypeConstraint2 {
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public final boolean equals(final Object object) {
 		if (object.getClass() != CovariantTypeConstraint.class)
 			return false;
@@ -66,6 +67,7 @@ public final class CovariantTypeConstraint implements ITypeConstraint2 {
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public final int hashCode() {
 		return fDescendant.hashCode() ^ 35 * fAncestor.hashCode();
 	}
@@ -73,6 +75,7 @@ public final class CovariantTypeConstraint implements ITypeConstraint2 {
 	/*
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public final String toString() {
 		return fDescendant.toString() + " <<= " + fAncestor.toString(); //$NON-NLS-1$
 	}

@@ -55,9 +55,9 @@ public final class LoggedCreateTargetQueries implements ICreateTargetQueries {
 			final IFolder folder= project.getProject().getFolder(root.getElementName());
 			if (!folder.exists())
 				CoreUtility.createFolder(folder, true, true, new NullProgressMonitor());
-			final List list= Arrays.asList(project.getRawClasspath());
+			final List<IClasspathEntry> list= Arrays.asList(project.getRawClasspath());
 			list.add(JavaCore.newSourceEntry(folder.getFullPath()));
-			project.setRawClasspath((IClasspathEntry[]) list.toArray(new IClasspathEntry[list.size()]), new NullProgressMonitor());
+			project.setRawClasspath(list.toArray(new IClasspathEntry[list.size()]), new NullProgressMonitor());
 		}
 
 		/**

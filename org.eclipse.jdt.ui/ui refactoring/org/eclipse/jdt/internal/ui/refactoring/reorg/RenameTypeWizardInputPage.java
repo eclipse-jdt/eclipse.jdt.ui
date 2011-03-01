@@ -54,6 +54,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 		super(description, contextHelpId, isLastUserPage, initialValue);
 	}
 
+	@Override
 	protected void addAdditionalOptions(Composite composite, RowLayouter layouter) {
 
 		if (getSimilarElementUpdating() == null || !getSimilarElementUpdating().canEnableSimilarDeclarationUpdating())
@@ -82,6 +83,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 		fUpdateSimilarElements.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fUpdateSimilarElements.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				getSimilarElementUpdating().setUpdateSimilarDeclarations(fUpdateSimilarElements.getSelection());
 				fUpdateSimilarElementsButton.setEnabled(fUpdateSimilarElements.getSelection());
@@ -96,6 +98,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 		fUpdateSimilarElementsButton.setEnabled(updateSimilarElements);
 		fUpdateSimilarElementsButton.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				RenameTypeWizardSimilarElementsOptionsDialog dialog= new RenameTypeWizardSimilarElementsOptionsDialog(getShell(), fSelectedStrategy);
 				if (dialog.open() == Window.OK) {
@@ -117,6 +120,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 		layouter.perform(separator);
 	}
 
+	@Override
 	public void dispose() {
 		if (saveSettings())
 			if (fUpdateSimilarElements != null && !fUpdateSimilarElements.isDisposed() && fUpdateSimilarElements.isEnabled()) {
@@ -132,6 +136,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 	 * trigger change creation if similar elements page is skipped, which is not
 	 * indicated by fIsLastUserInputPage in parent).
 	 */
+	@Override
 	public boolean canFlipToNextPage() {
 		return isPageComplete();
 	}
@@ -140,6 +145,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 		return (ISimilarDeclarationUpdating) getRefactoring().getAdapter(ISimilarDeclarationUpdating.class);
 	}
 
+	@Override
 	protected boolean performFinish() {
 		boolean returner= super.performFinish();
 		// check if we got deferred to the error page
@@ -151,6 +157,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ltk.ui.refactoring.UserInputWizardPage#getNextPage()
 	 */
+	@Override
 	public IWizardPage getNextPage() {
 		RenameTypeWizard wizard= (RenameTypeWizard) getWizard();
 		IWizardPage nextPage;

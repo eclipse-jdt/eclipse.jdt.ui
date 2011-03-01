@@ -28,6 +28,7 @@ public class JdtViewerDragAdapter extends DelegatingDragAdapter {
 		fViewer= viewer;
 	}
 
+	@Override
 	public void dragStart(DragSourceEvent event) {
 		IStructuredSelection selection= (IStructuredSelection)fViewer.getSelection();
 		if (selection.isEmpty()) {

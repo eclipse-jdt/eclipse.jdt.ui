@@ -53,10 +53,10 @@ public class SearchUtil {
 
 	private static void saveState() {
 		IWorkingSet[] workingSets;
-		Iterator iter= SearchUtil.fgLRUWorkingSets.iterator();
+		Iterator<IWorkingSet[]> iter= SearchUtil.fgLRUWorkingSets.iterator();
 		int i= 0;
 		while (iter.hasNext()) {
-			workingSets= (IWorkingSet[])iter.next();
+			workingSets= iter.next();
 			String[] names= new String[workingSets.length];
 			for (int j= 0; j < workingSets.length; j++)
 				names[j]= workingSets[j].getName();
@@ -82,7 +82,7 @@ public class SearchUtil {
 		for (int i= SearchUtil.LRU_WORKINGSET_LIST_SIZE - 1; i >= 0; i--) {
 			String[] lruWorkingSetNames= SearchUtil.fgSettingsStore.getArray(SearchUtil.STORE_LRU_WORKING_SET_NAMES + i);
 			if (lruWorkingSetNames != null) {
-				Set workingSets= new HashSet(2);
+				Set<IWorkingSet> workingSets= new HashSet<IWorkingSet>(2);
 				for (int j= 0; j < lruWorkingSetNames.length; j++) {
 					IWorkingSet workingSet= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(lruWorkingSetNames[j]);
 					if (workingSet != null) {
@@ -91,7 +91,7 @@ public class SearchUtil {
 				}
 				foundLRU= true;
 				if (!workingSets.isEmpty())
-					SearchUtil.fgLRUWorkingSets.add((IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()]));
+					SearchUtil.fgLRUWorkingSets.add(workingSets.toArray(new IWorkingSet[workingSets.size()]));
 			}
 		}
 		if (!foundLRU)

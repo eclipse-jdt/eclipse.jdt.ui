@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.ui.text.spelling.engine;
  *
  * @since 3.0
  */
-public class RankedWordProposal implements Comparable {
+public class RankedWordProposal implements Comparable<RankedWordProposal> {
 
 	/** The word rank */
 	private int fRank;
@@ -40,9 +40,8 @@ public class RankedWordProposal implements Comparable {
 	/*
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
-	public final int compareTo(Object object) {
+	public final int compareTo(RankedWordProposal word) {
 
-		final RankedWordProposal word= (RankedWordProposal)object;
 		final int rank= word.getRank();
 
 		if (fRank < rank)
@@ -57,6 +56,7 @@ public class RankedWordProposal implements Comparable {
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public final boolean equals(Object object) {
 
 		if (object instanceof RankedWordProposal)
@@ -86,6 +86,7 @@ public class RankedWordProposal implements Comparable {
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public final int hashCode() {
 		return fText.hashCode();
 	}

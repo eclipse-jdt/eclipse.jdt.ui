@@ -50,6 +50,7 @@ public class JavaStringStatusContext extends RefactoringStatusContext {
 	/* (non-Javadoc)
 	 * @see RefactoringStatusContext#getCorrespondingElement()
 	 */
+	@Override
 	public Object getCorrespondingElement() {
 		return null;
 	}

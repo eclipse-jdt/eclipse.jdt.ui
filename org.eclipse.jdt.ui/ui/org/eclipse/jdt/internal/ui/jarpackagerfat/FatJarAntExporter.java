@@ -114,7 +114,7 @@ public abstract class FatJarAntExporter {
 		IRuntimeClasspathEntry[] entries= JavaRuntime.computeUnresolvedRuntimeClasspath(configuration);
 		entries= JavaRuntime.resolveRuntimeClasspath(entries, configuration);
 
-		ArrayList userEntries= new ArrayList(entries.length);
+		ArrayList<IPath> userEntries= new ArrayList<IPath>(entries.length);
 		for (int i= 0; i < entries.length; i++) {
 			if (entries[i].getClasspathProperty() == IRuntimeClasspathEntry.USER_CLASSES) {
 
@@ -127,7 +127,7 @@ public abstract class FatJarAntExporter {
 				}
 			}
 		}
-		return (IPath[]) userEntries.toArray(new IPath[userEntries.size()]);
+		return userEntries.toArray(new IPath[userEntries.size()]);
 	}
 
 	private static String getMainClass(ILaunchConfiguration launchConfig, MultiStatus status) {

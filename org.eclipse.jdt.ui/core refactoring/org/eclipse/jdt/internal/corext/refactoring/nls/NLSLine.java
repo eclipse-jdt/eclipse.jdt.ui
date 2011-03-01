@@ -20,12 +20,12 @@ import org.eclipse.core.runtime.Assert;
 public class NLSLine {
 
 	private int fLineNumber;
-	private List fElements;
+	private List<NLSElement> fElements;
 
 	public NLSLine(int lineNumber) {
 		fLineNumber= lineNumber;
 		Assert.isTrue(fLineNumber >= 0);
-		fElements= new ArrayList();
+		fElements= new ArrayList<NLSElement>();
 	}
 
 	public int getLineNumber() {
@@ -43,11 +43,11 @@ public class NLSLine {
 	}
 
 	public NLSElement[] getElements() {
-		return (NLSElement[]) fElements.toArray(new NLSElement[fElements.size()]);
+		return fElements.toArray(new NLSElement[fElements.size()]);
 	}
 
 	public NLSElement get(int index) {
-		return (NLSElement)fElements.get(index);
+		return fElements.get(index);
 	}
 
 	public boolean exists(int index) {
@@ -62,10 +62,11 @@ public class NLSLine {
 	 * only for debugging
 	 * @see Object#toString()
 	 */
+	@Override
 	public String toString() {
 		StringBuffer result= new StringBuffer();
 		result.append("Line: " + fLineNumber + "\n"); //$NON-NLS-2$ //$NON-NLS-1$
-		for (Iterator iter= fElements.iterator(); iter.hasNext(); ) {
+		for (Iterator<NLSElement> iter= fElements.iterator(); iter.hasNext(); ) {
 			result.append("\t"); //$NON-NLS-1$
 			result.append(iter.next().toString());
 			result.append("\n"); //$NON-NLS-1$

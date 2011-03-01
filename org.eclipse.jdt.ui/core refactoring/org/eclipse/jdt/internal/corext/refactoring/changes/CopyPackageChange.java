@@ -31,11 +31,13 @@ public class CopyPackageChange extends PackageReorgChange {
 		super(pack, dest, nameQuery);
 	}
 
+	@Override
 	protected Change doPerformReorg(IProgressMonitor pm) throws JavaModelException, OperationCanceledException {
 		getPackage().copy(getDestination(), null, getNewName(), true, pm);
 		return null;
 	}
 
+	@Override
 	public String getName() {
 		String packageName= JavaElementLabels.getElementLabel(getPackage(), JavaElementLabels.ALL_DEFAULT);
 		String destinationName= JavaElementLabels.getElementLabel(getDestination(), JavaElementLabels.ALL_DEFAULT);

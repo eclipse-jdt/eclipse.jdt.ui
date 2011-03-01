@@ -169,6 +169,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	 * @see StructuredViewer#setContentProvider
 	 * Content provider must be of type TypeHierarchyContentProvider
 	 */
+	@Override
 	public void setContentProvider(IContentProvider cp) {
 		Assert.isTrue(cp instanceof TypeHierarchyContentProvider);
 		super.setContentProvider(cp);

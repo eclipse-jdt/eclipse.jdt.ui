@@ -113,14 +113,16 @@ public class CPListElementAttribute {
 		getParent().attributeChanged(fKey);
 	}
 
-    public boolean equals(Object obj) {
+    @Override
+	public boolean equals(Object obj) {
         if (!(obj instanceof CPListElementAttribute))
             return false;
         CPListElementAttribute attrib= (CPListElementAttribute)obj;
         return attrib.fKey== this.fKey && attrib.getParent().getPath().equals(fParent.getPath());
     }
     
-    public int hashCode() {
+    @Override
+	public int hashCode() {
     	return fKey.hashCode() * 89 + fParent.getPath().hashCode();
     }
 
@@ -136,12 +138,15 @@ public class CPListElementAttribute {
     public ClasspathAttributeAccess getClasspathAttributeAccess() {
     	if (fCachedAccess == null) {
 	    	fCachedAccess= new ClasspathAttributeAccess() {
-	    		public IClasspathAttribute getClasspathAttribute() {
+	    		@Override
+				public IClasspathAttribute getClasspathAttribute() {
 	 				return CPListElementAttribute.this.getClasspathAttribute();
 				}
+				@Override
 				public IJavaProject getJavaProject() {
 					return getParent().getJavaProject();
 				}
+				@Override
 				public IClasspathEntry getParentClasspassEntry() {
 					return getParent().getClasspathEntry();
 				}

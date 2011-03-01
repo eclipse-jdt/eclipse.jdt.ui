@@ -42,7 +42,8 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
 			setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_FILTER);
         }
 
-        public void run() {
+        @Override
+		public void run() {
             openFiltersDialog();
         }
     }
@@ -52,7 +53,8 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
     		setText(CallHierarchyMessages.ShowExpandWithConstructorsDialogAction_text);
     	}
     	
-    	public void run() {
+    	@Override
+		public void run() {
     		openExpandWithConstructorsDialog();
     	}
     }
@@ -74,7 +76,8 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
     /* (non-Javadoc)
      * Method declared on ActionGroup.
      */
-    public void fillActionBars(IActionBars actionBars) {
+    @Override
+	public void fillActionBars(IActionBars actionBars) {
         fillViewMenu(actionBars.getMenuManager());
     }
 
@@ -87,7 +90,8 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
     /* (non-Javadoc)
      * Method declared on ActionGroup.
      */
-    public void dispose() {
+    @Override
+	public void dispose() {
         super.dispose();
     }
 

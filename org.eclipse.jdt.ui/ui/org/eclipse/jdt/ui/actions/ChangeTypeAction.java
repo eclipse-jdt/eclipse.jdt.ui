@@ -87,6 +87,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 
 	//---- structured selection ---------------------------------------------
 
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isGeneralizeTypeAvailable(selection));
@@ -97,6 +98,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 		}
 	}
 
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			IMember member= getMember(selection);
@@ -134,6 +136,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
@@ -144,6 +147,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isGeneralizeTypeAvailable(selection));
@@ -155,6 +159,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;

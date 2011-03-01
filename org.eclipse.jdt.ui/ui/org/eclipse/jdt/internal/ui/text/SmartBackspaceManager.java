@@ -167,7 +167,7 @@ public class SmartBackspaceManager {
 
 	private ITextViewer fViewer;
 	private BackspaceListener fBackspaceListener;
-	private Map fSpecs;
+	private Map<Integer, UndoSpec> fSpecs;
 	private TypingRunDetector fRunDetector;
 	private ITypingRunListener fRunListener;
 
@@ -192,7 +192,7 @@ public class SmartBackspaceManager {
 
 	private UndoSpec removeEdit(int offset) {
 		Integer i= new Integer(offset);
-		UndoSpec spec= (UndoSpec) fSpecs.remove(i);
+		UndoSpec spec= fSpecs.remove(i);
 		return spec;
 	}
 
@@ -231,7 +231,7 @@ public class SmartBackspaceManager {
 		Assert.isLegal(viewer != null);
 
 		fViewer= viewer;
-		fSpecs= new HashMap();
+		fSpecs= new HashMap<Integer, UndoSpec>();
 		fRunDetector= new TypingRunDetector();
 		fRunDetector.install(viewer);
 		fRunListener= new ITypingRunListener() {
@@ -256,8 +256,8 @@ public class SmartBackspaceManager {
 	}
 
 	private void prune() {
-		for (Iterator it= fSpecs.values().iterator(); it.hasNext();) {
-			UndoSpec spec= (UndoSpec) it.next();
+		for (Iterator<UndoSpec> it= fSpecs.values().iterator(); it.hasNext();) {
+			UndoSpec spec= it.next();
 			if (--spec.lives < 0)
 				it.remove();
 		}

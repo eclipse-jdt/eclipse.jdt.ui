@@ -43,6 +43,7 @@ public abstract class JavaViewerFilter extends ViewerFilter {
 	/*
  	 * Overrides method from ViewerFilter
  	 */
+	@Override
 	public Object[] filter(Viewer viewer, Object parent, Object[] elements) {
 		try {
 			filteringStart();

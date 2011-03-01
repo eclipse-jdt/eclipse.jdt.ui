@@ -100,12 +100,14 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		return fCachedHierarchy;
 	}
 
+	@Override
 	public boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isRenameVirtualMethodAvailable(getMethod());
 	}
 
 	//------------ preconditions -------------
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor monitor) throws CoreException {
 		RefactoringStatus result= super.checkInitialConditions(monitor);
 		if (result.hasFatalError())
@@ -135,6 +137,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		return result;
 	}
 
+	@Override
 	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext checkContext) throws CoreException {
 		try{
 			pm.beginTask("", 9); //$NON-NLS-1$
@@ -191,15 +194,15 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 
 	private IMethod[] relatedTypeDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws CoreException {
 		try{
-			Set result= new HashSet();
-			Set types= getRelatedTypes();
+			Set<IMethod> result= new HashSet<IMethod>();
+			Set<IType> types= getRelatedTypes();
 			pm.beginTask("", types.size()); //$NON-NLS-1$
-			for (Iterator iter= types.iterator(); iter.hasNext(); ) {
-				final IMethod found= Checks.findMethod(method, (IType)iter.next());
+			for (Iterator<IType> iter= types.iterator(); iter.hasNext(); ) {
+				final IMethod found= Checks.findMethod(method, iter.next());
 				final IType declaring= found.getDeclaringType();
 				result.addAll(Arrays.asList(hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), declaring.newTypeHierarchy(new SubProgressMonitor(pm, 1)), found, newName)));
 			}
-			return (IMethod[]) result.toArray(new IMethod[result.size()]);
+			return result.toArray(new IMethod[result.size()]);
 		} finally {
 			pm.done();
 		}
@@ -229,11 +232,11 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		return false;
 	}
 
-	private Set getRelatedTypes() {
-		Set methods= getMethodsToRename();
-		Set result= new HashSet(methods.size());
-		for (Iterator iter= methods.iterator(); iter.hasNext(); ){
-			result.add(((IMethod)iter.next()).getDeclaringType());
+	private Set<IType> getRelatedTypes() {
+		Set<IMethod> methods= getMethodsToRename();
+		Set<IType> result= new HashSet<IType>(methods.size());
+		for (Iterator<IMethod> iter= methods.iterator(); iter.hasNext(); ){
+			result.add(iter.next().getDeclaringType());
 		}
 		return result;
 	}

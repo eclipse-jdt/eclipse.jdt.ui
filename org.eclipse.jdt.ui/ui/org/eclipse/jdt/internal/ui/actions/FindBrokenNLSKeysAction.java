@@ -112,6 +112,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		ISelectionProvider selectionProvider= fEditor.getSelectionProvider();
 		if (selectionProvider == null)
@@ -123,6 +124,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		if (selection.size() == 1) {
 			Object firstElement= selection.getFirstElement();
@@ -155,8 +157,8 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	}
 
 	private void run(SearchPatternData[] data, String scope) {
-		List wrappers= new ArrayList();
-		List properties= new ArrayList();
+		List<IType> wrappers= new ArrayList<IType>();
+		List<IFile> properties= new ArrayList<IFile>();
 		for (int i= 0; i < data.length; i++) {
 			SearchPatternData current= data[i];
 			if (current.getWrapperClass() != null || current.getPropertyFile() != null) {
@@ -164,14 +166,15 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 				properties.add(current.getPropertyFile());
 			}
 		}
-		IType[] accessorClasses= (IType[])wrappers.toArray(new IType[wrappers.size()]);
-		IFile[] propertieFiles= (IFile[])properties.toArray(new IFile[properties.size()]);
+		IType[] accessorClasses= wrappers.toArray(new IType[wrappers.size()]);
+		IFile[] propertieFiles= properties.toArray(new IFile[properties.size()]);
 		SearchBrokenNLSKeysUtil.search(scope, accessorClasses, propertieFiles);
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		ISelectionProvider selectionProvider= fEditor.getSelectionProvider();
 		if (selectionProvider == null) {
@@ -184,19 +187,20 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canEnable(selection));
 	}
 
 	private SearchPatternData[] getNLSFiles(IStructuredSelection selection) {
 		Object[] selectedElements= selection.toArray();
-		HashMap result= new HashMap();
+		HashMap<IType, SearchPatternData> result= new HashMap<IType, SearchPatternData>();
 
 		collectNLSFilesFromResources(selectedElements, result);
 		collectNLSFilesFromJavaElements(selectedElements, result);
 
-		Collection values= result.values();
-		return (SearchPatternData[])values.toArray(new SearchPatternData[values.size()]);
+		Collection<SearchPatternData> values= result.values();
+		return values.toArray(new SearchPatternData[values.size()]);
 	}
 
 	private boolean canEnable(IStructuredSelection selection) {
@@ -243,7 +247,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 		return false;
 	}
 
-	private void collectNLSFilesFromResources(Object[] objects, HashMap result) {
+	private void collectNLSFilesFromResources(Object[] objects, HashMap<IType, SearchPatternData> result) {
 		try {
 			for (int i= 0; i < objects.length; i++) {
 				Object object= objects[i];
@@ -279,7 +283,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 		}
 	}
 
-	private void collectNLSFilesFromJavaElements(Object[] objects, HashMap result) {
+	private void collectNLSFilesFromJavaElements(Object[] objects, HashMap<IType, SearchPatternData> result) {
 		try {
 			for (int i= 0; i < objects.length; i++) {
 				if (objects[i] instanceof IJavaElement) {

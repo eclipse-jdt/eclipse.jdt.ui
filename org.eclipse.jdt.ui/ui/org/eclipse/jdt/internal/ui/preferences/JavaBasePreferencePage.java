@@ -58,18 +58,18 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	private static final String DOUBLE_CLICK_GOES_INTO= PreferenceConstants.DOUBLE_CLICK_GOES_INTO;
 	private static final String DOUBLE_CLICK_EXPANDS= PreferenceConstants.DOUBLE_CLICK_EXPANDS;
 
-	private ArrayList fCheckBoxes;
-	private ArrayList fRadioButtons;
-	private ArrayList fTextControls;
+	private ArrayList<Button> fCheckBoxes;
+	private ArrayList<Button> fRadioButtons;
+	private ArrayList<Text> fTextControls;
 
 	public JavaBasePreferencePage() {
 		super();
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setDescription(PreferencesMessages.JavaBasePreferencePage_description);
 
-		fRadioButtons= new ArrayList();
-		fCheckBoxes= new ArrayList();
-		fTextControls= new ArrayList();
+		fRadioButtons= new ArrayList<Button>();
+		fCheckBoxes= new ArrayList<Button>();
+		fTextControls= new ArrayList<Text>();
 	}
 
 	/*
@@ -81,6 +81,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	/*
 	 * @see PreferencePage#createControl(Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.JAVA_BASE_PREFERENCE_PAGE);
@@ -114,6 +115,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		return button;
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -211,20 +213,21 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
+	@Override
 	protected void performDefaults() {
 		IPreferenceStore store= getPreferenceStore();
 		for (int i= 0; i < fCheckBoxes.size(); i++) {
-			Button button= (Button) fCheckBoxes.get(i);
+			Button button= fCheckBoxes.get(i);
 			String key= (String) button.getData();
 			button.setSelection(store.getDefaultBoolean(key));
 		}
 		for (int i= 0; i < fRadioButtons.size(); i++) {
-			Button button= (Button) fRadioButtons.get(i);
+			Button button= fRadioButtons.get(i);
 			String[] info= (String[]) button.getData();
 			button.setSelection(info[1].equals(store.getDefaultString(info[0])));
 		}
 		for (int i= 0; i < fTextControls.size(); i++) {
-			Text text= (Text) fTextControls.get(i);
+			Text text= fTextControls.get(i);
 			String key= (String) text.getData();
 			text.setText(store.getDefaultString(key));
 		}
@@ -234,22 +237,23 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	/*
 	 * @see IPreferencePage#performOk()
 	 */
+	@Override
 	public boolean performOk() {
 		IPreferenceStore store= getPreferenceStore();
 		for (int i= 0; i < fCheckBoxes.size(); i++) {
-			Button button= (Button) fCheckBoxes.get(i);
+			Button button= fCheckBoxes.get(i);
 			String key= (String) button.getData();
 			store.setValue(key, button.getSelection());
 		}
 		for (int i= 0; i < fRadioButtons.size(); i++) {
-			Button button= (Button) fRadioButtons.get(i);
+			Button button= fRadioButtons.get(i);
 			if (button.getSelection()) {
 				String[] info= (String[]) button.getData();
 				store.setValue(info[0], info[1]);
 			}
 		}
 		for (int i= 0; i < fTextControls.size(); i++) {
-			Text text= (Text) fTextControls.get(i);
+			Text text= fTextControls.get(i);
 			String key= (String) text.getData();
 			store.setValue(key, text.getText());
 		}

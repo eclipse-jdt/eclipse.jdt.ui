@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,7 +69,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	// A dummy which can't be selected in the UI
 	private static final IJavaElement RETURN_WITHOUT_BEEP= JavaCore.create(JavaPlugin.getWorkspace().getRoot());
 
-	private Class[] fValidTypes;
+	private Class<?>[] fValidTypes;
 	private JavaEditor fEditor;
 
 
@@ -96,7 +96,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	 * To be overridden by implementors of this action.
 	 * @return the valid input types of the action
 	 */
-	abstract Class[] getValidTypes();
+	abstract Class<?>[] getValidTypes();
 
 	private boolean canOperateOn(IStructuredSelection sel) {
 		return sel != null && !sel.isEmpty() && canOperateOn(getJavaElement(sel, true));
@@ -199,6 +199,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	/*
 	 * Method declared on SelectionChangedAction.
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		IJavaElement element= getJavaElement(selection, false);
 		if (element == null || !element.exists()) {
@@ -214,6 +215,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	/*
 	 * Method declared on SelectionChangedAction.
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(fEditor))
 			return;
@@ -243,6 +245,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	/*
 	 * Method declared on SelectionChangedAction.
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canOperateOn(selection));
 	}
@@ -250,6 +253,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	/*
 	 * Method declared on SelectionChangedAction.
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 

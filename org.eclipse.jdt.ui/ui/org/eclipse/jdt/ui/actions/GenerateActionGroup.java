@@ -125,7 +125,7 @@ public class GenerateActionGroup extends ActionGroup {
 	private CompilationUnitEditor fEditor;
 	private IWorkbenchSite fSite;
 	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
-	private List fRegisteredSelectionListeners;
+	private List<ISelectionChangedListener> fRegisteredSelectionListeners;
 
 	private AddImportOnSelectionAction fAddImport;
 	private OverrideMethodsAction fOverrideMethods;
@@ -372,6 +372,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fHandlerService= (IHandlerService)fSite.getService(IHandlerService.class);
 		if (fHandlerService != null) {
 			IHandler handler= new JDTQuickMenuCreator(fEditor) {
+				@Override
 				protected void fillMenu(IMenuManager menu) {
 					fillQuickMenu(menu);
 				}
@@ -382,7 +383,7 @@ public class GenerateActionGroup extends ActionGroup {
 
 	private void registerSelectionListener(ISelectionProvider provider, ISelectionChangedListener listener) {
 		if (fRegisteredSelectionListeners == null)
-			fRegisteredSelectionListeners= new ArrayList(20);
+			fRegisteredSelectionListeners= new ArrayList<ISelectionChangedListener>(20);
 		provider.addSelectionChangedListener(listener);
 		fRegisteredSelectionListeners.add(listener);
 	}
@@ -405,6 +406,7 @@ public class GenerateActionGroup extends ActionGroup {
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
+	@Override
 	public void fillActionBars(IActionBars actionBar) {
 		super.fillActionBars(actionBar);
 		setGlobalActionHandlers(actionBar);
@@ -413,6 +415,7 @@ public class GenerateActionGroup extends ActionGroup {
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 		MenuManager subMenu= new MenuManager(ActionMessages.SourceMenu_label, MENU_ID);
@@ -495,11 +498,12 @@ public class GenerateActionGroup extends ActionGroup {
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
+	@Override
 	public void dispose() {
 		if (fRegisteredSelectionListeners != null) {
 			ISelectionProvider provider= fSelectionProvider;
-			for (Iterator iter= fRegisteredSelectionListeners.iterator(); iter.hasNext();) {
-				ISelectionChangedListener listener= (ISelectionChangedListener) iter.next();
+			for (Iterator<ISelectionChangedListener> iter= fRegisteredSelectionListeners.iterator(); iter.hasNext();) {
+				ISelectionChangedListener listener= iter.next();
 				provider.removeSelectionChangedListener(listener);
 			}
 		}

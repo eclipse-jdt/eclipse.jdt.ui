@@ -44,6 +44,7 @@ public class UnpackFatJarAntExporter extends FatJarAntExporter {
 		super(antScriptLocation, jarLocation, launchConfiguration);
 	}
 
+	@Override
 	protected void buildANTScript(IPath antScriptLocation, String projectName, IPath absJarfile, String mainClass, SourceInfo[] sourceInfos) throws IOException {
 		OutputStream outputStream= new FileOutputStream(antScriptLocation.toFile());
 		String absJarname= absJarfile.toString();

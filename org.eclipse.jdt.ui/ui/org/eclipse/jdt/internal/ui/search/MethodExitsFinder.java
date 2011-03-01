@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,8 +57,8 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 	public static final String ID= "MethodExitsFinder"; //$NON-NLS-1$
 
 	private MethodDeclaration fMethodDeclaration;
-	private List fResult;
-	private List fCatchedExceptions;
+	private List<OccurrenceLocation> fResult;
+	private List<ITypeBinding> fCatchedExceptions;
 	private String fExitDescription;
 	private CompilationUnit fASTRoot;
 
@@ -103,7 +103,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 	}
 
 	private void performSearch() {
-		fResult= new ArrayList();
+		fResult= new ArrayList<OccurrenceLocation>();
 		markReferences();
 		if (!fResult.isEmpty()) {
 			Type returnType= fMethodDeclaration.getReturnType2();
@@ -119,12 +119,12 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		if (fResult.isEmpty())
 			return null;
 
-		return (OccurrenceLocation[]) fResult.toArray(new OccurrenceLocation[fResult.size()]);
+		return fResult.toArray(new OccurrenceLocation[fResult.size()]);
 	}
 
 
 	private void markReferences() {
-		fCatchedExceptions= new ArrayList();
+		fCatchedExceptions= new ArrayList<ITypeBinding>();
 		boolean isVoid= true;
 		Type returnType= fMethodDeclaration.getReturnType2();
 		if (returnType != null) {
@@ -134,9 +134,9 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		fMethodDeclaration.accept(this);
 		Block block= fMethodDeclaration.getBody();
 		if (block != null) {
-			List statements= block.statements();
+			List<Statement> statements= block.statements();
 			if (statements.size() > 0) {
-				Statement last= (Statement)statements.get(statements.size() - 1);
+				Statement last= statements.get(statements.size() - 1);
 				int maxVariableId= LocalVariableIndex.perform(fMethodDeclaration);
 				FlowContext flowContext= new FlowContext(0, maxVariableId + 1);
 				flowContext.setConsiderAccessMode(false);
@@ -153,36 +153,42 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 	}
 
+	@Override
 	public boolean visit(TypeDeclaration node) {
 		// Don't dive into a local type.
 		return false;
 	}
 
+	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
 		// Don't dive into a local type.
 		return false;
 	}
 
+	@Override
 	public boolean visit(AnnotationTypeDeclaration node) {
 		// Don't dive into a local type.
 		return false;
 	}
 
+	@Override
 	public boolean visit(EnumDeclaration node) {
 		// Don't dive into a local type.
 		return false;
 	}
 
+	@Override
 	public boolean visit(ReturnStatement node) {
 		fResult.add(new OccurrenceLocation(node.getStartPosition(), node.getLength(), 0, fExitDescription));
 		return super.visit(node);
 	}
 
+	@Override
 	public boolean visit(TryStatement node) {
 		int currentSize= fCatchedExceptions.size();
-		List catchClauses= node.catchClauses();
-		for (Iterator iter= catchClauses.iterator(); iter.hasNext();) {
-			IVariableBinding variable= ((CatchClause)iter.next()).getException().resolveBinding();
+		List<CatchClause> catchClauses= node.catchClauses();
+		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext();) {
+			IVariableBinding variable= iter.next().getException().resolveBinding();
 			if (variable != null && variable.getType() != null) {
 				fCatchedExceptions.add(variable.getType());
 			}
@@ -194,8 +200,8 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 
 		// visit catch and finally
-		for (Iterator iter= catchClauses.iterator(); iter.hasNext(); ) {
-			((CatchClause)iter.next()).accept(this);
+		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext(); ) {
+			iter.next().accept(this);
 		}
 		if (node.getFinally() != null)
 			node.getFinally().accept(this);
@@ -204,6 +210,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		return false;
 	}
 
+	@Override
 	public boolean visit(ThrowStatement node) {
 		ITypeBinding exception= node.getExpression().resolveTypeBinding();
 		if (isExitPoint(exception)) {
@@ -213,6 +220,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		return true;
 	}
 
+	@Override
 	public boolean visit(MethodInvocation node) {
 		if (isExitPoint(node.resolveMethodBinding())) {
 			SimpleName name= node.getName();
@@ -221,6 +229,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		return true;
 	}
 
+	@Override
 	public boolean visit(SuperMethodInvocation node) {
 		if (isExitPoint(node.resolveMethodBinding())) {
 			SimpleName name= node.getName();
@@ -229,6 +238,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		return true;
 	}
 
+	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		if (isExitPoint(node.resolveConstructorBinding())) {
 			Type name= node.getType();
@@ -237,6 +247,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		return true;
 	}
 
+	@Override
 	public boolean visit(ConstructorInvocation node) {
 		if (isExitPoint(node.resolveConstructorBinding())) {
 			// mark 'this'
@@ -245,6 +256,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		return true;
 	}
 
+	@Override
 	public boolean visit(SuperConstructorInvocation node) {
 		if (isExitPoint(node.resolveConstructorBinding())) {
 			// mark 'super'
@@ -271,8 +283,8 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 	}
 
 	private boolean isCatched(ITypeBinding binding) {
-		for (Iterator iter= fCatchedExceptions.iterator(); iter.hasNext();) {
-			ITypeBinding catchException= (ITypeBinding)iter.next();
+		for (Iterator<ITypeBinding> iter= fCatchedExceptions.iterator(); iter.hasNext();) {
+			ITypeBinding catchException= iter.next();
 			if (catches(catchException, binding))
 				return true;
 		}

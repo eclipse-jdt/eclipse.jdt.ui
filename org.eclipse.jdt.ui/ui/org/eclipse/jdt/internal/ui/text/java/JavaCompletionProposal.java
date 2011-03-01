@@ -106,6 +106,7 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
 	 */
+	@Override
 	protected boolean isValidPrefix(String prefix) {
 		String word= TextProcessor.deprocess(getDisplayString());
 		if (isInJavadoc()) {
@@ -127,6 +128,7 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementText()
 	 */
+	@Override
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		String string= getReplacementString();
 		int pos= string.indexOf('(');

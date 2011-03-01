@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,12 +56,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 
-	private List fElements;
+	private List<?> fElements;
 	private JavaMoveProcessor fMoveProcessor;
 	private int fCanMoveElements;
 	private JavaCopyProcessor fCopyProcessor;
 	private int fCanCopyElements;
 
+	@Override
 	public IStatus handleDrop(CommonDropAdapter dropAdapter, DropTargetEvent dropTargetEvent, Object target) {
 		int currentOperation= dropAdapter.getCurrentOperation();
 		if (LocalSelectionTransfer.getInstance().isSupportedType(dropAdapter.getCurrentTransfer())) {
@@ -104,6 +105,7 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 		return Status.CANCEL_STATUS;
 	}
 
+	@Override
 	public IStatus validateDrop(Object target, int operation, TransferData transferType) {
 		IStatus result = Status.OK_STATUS;
 		if (LocalSelectionTransfer.getInstance().isSupportedType(transferType)) {
@@ -163,6 +165,7 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 		return result;
 	}
 
+	@Override
 	public boolean isSupportedType(TransferData transferType) {
 		return super.isSupportedType(transferType) || FileTransfer.getInstance().isSupportedType(transferType);
 	}

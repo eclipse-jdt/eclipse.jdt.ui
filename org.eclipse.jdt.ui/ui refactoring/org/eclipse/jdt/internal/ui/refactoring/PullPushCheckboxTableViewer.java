@@ -28,6 +28,7 @@ class PullPushCheckboxTableViewer extends CheckboxTableViewer{
 	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#doUpdateItem(org.eclipse.swt.widgets.Widget, java.lang.Object, boolean)
 	 */
+	@Override
 	protected void doUpdateItem(Widget widget, Object element, boolean fullMap) {
 		super.doUpdateItem(widget, element, fullMap);
 		if (! (widget instanceof TableItem))
@@ -41,6 +42,7 @@ class PullPushCheckboxTableViewer extends CheckboxTableViewer{
 	/*
 	 * @see org.eclipse.jface.viewers.Viewer#inputChanged(java.lang.Object, java.lang.Object)
 	 */
+	@Override
 	protected void inputChanged(Object input, Object oldInput) {
 		super.inputChanged(input, oldInput);
 		// XXX workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=9390
@@ -63,6 +65,7 @@ class PullPushCheckboxTableViewer extends CheckboxTableViewer{
 	/*
 	 * @see org.eclipse.jface.viewers.Viewer#refresh()
 	 */
+	@Override
 	public void refresh() {
 		int topIndex = getTable().getTopIndex();
 		super.refresh();

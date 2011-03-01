@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -97,7 +98,7 @@ class ConstructorReferenceFinder {
 
 	//XXX this method is a workaround for jdt core bug 27236
 	private SearchResultGroup[] removeUnrealReferences(SearchResultGroup[] groups) {
-		List result= new ArrayList(groups.length);
+		List<SearchResultGroup> result= new ArrayList<SearchResultGroup>(groups.length);
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
 			ICompilationUnit cu= group.getCompilationUnit();
@@ -105,16 +106,16 @@ class ConstructorReferenceFinder {
 				continue;
 			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(cu, false);
 			SearchMatch[] allSearchResults= group.getSearchResults();
-			List realConstructorReferences= new ArrayList(Arrays.asList(allSearchResults));
+			List<SearchMatch> realConstructorReferences= new ArrayList<SearchMatch>(Arrays.asList(allSearchResults));
 			for (int j= 0; j < allSearchResults.length; j++) {
 				SearchMatch searchResult= allSearchResults[j];
 				if (! isRealConstructorReferenceNode(ASTNodeSearchUtil.getAstNode(searchResult, cuNode)))
 					realConstructorReferences.remove(searchResult);
 			}
 			if (! realConstructorReferences.isEmpty())
-				result.add(new SearchResultGroup(group.getResource(), (SearchMatch[]) realConstructorReferences.toArray(new SearchMatch[realConstructorReferences.size()])));
+				result.add(new SearchResultGroup(group.getResource(), realConstructorReferences.toArray(new SearchMatch[realConstructorReferences.size()])));
 		}
-		return (SearchResultGroup[]) result.toArray(new SearchResultGroup[result.size()]);
+		return result.toArray(new SearchResultGroup[result.size()]);
 	}
 
 	//XXX this method is a workaround for jdt core bug 27236
@@ -168,20 +169,20 @@ class ConstructorReferenceFinder {
 
 	private SearchResultGroup[] getImplicitConstructorReferences(IProgressMonitor pm, WorkingCopyOwner owner, RefactoringStatus status) throws JavaModelException {
 		pm.beginTask("", 2); //$NON-NLS-1$
-		List searchMatches= new ArrayList();
+		List<SearchMatch> searchMatches= new ArrayList<SearchMatch>();
 		searchMatches.addAll(getImplicitConstructorReferencesFromHierarchy(owner, new SubProgressMonitor(pm, 1)));
 		searchMatches.addAll(getImplicitConstructorReferencesInClassCreations(owner, new SubProgressMonitor(pm, 1), status));
 		pm.done();
-		return RefactoringSearchEngine.groupByCu((SearchMatch[]) searchMatches.toArray(new SearchMatch[searchMatches.size()]), status);
+		return RefactoringSearchEngine.groupByCu(searchMatches.toArray(new SearchMatch[searchMatches.size()]), status);
 	}
 
 	//List of SearchResults
-	private List getImplicitConstructorReferencesInClassCreations(WorkingCopyOwner owner, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
+	private List<SearchMatch> getImplicitConstructorReferencesInClassCreations(WorkingCopyOwner owner, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		//XXX workaround for jdt core bug 23112
 		SearchPattern pattern= SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
 		SearchResultGroup[] refs= RefactoringSearchEngine.search(pattern, owner, scope, pm, status);
-		List result= new ArrayList();
+		List<SearchMatch> result= new ArrayList<SearchMatch>();
 		for (int i= 0; i < refs.length; i++) {
 			SearchResultGroup group= refs[i];
 			ICompilationUnit cu= group.getCompilationUnit();
@@ -216,9 +217,9 @@ class ConstructorReferenceFinder {
 	}
 
 	//List of SearchResults
-	private List getImplicitConstructorReferencesFromHierarchy(WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException{
+	private List<SearchMatch> getImplicitConstructorReferencesFromHierarchy(WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException{
 		IType[] subTypes= getNonBinarySubtypes(owner, fType, pm);
-		List result= new ArrayList(subTypes.length);
+		List<SearchMatch> result= new ArrayList<SearchMatch>(subTypes.length);
 		for (int i= 0; i < subTypes.length; i++) {
 			result.addAll(getAllSuperConstructorInvocations(subTypes[i]));
 		}
@@ -232,20 +233,20 @@ class ConstructorReferenceFinder {
 		else
 			hierarchy= type.newSupertypeHierarchy(owner, monitor);
 		IType[] subTypes= hierarchy.getAllSubtypes(type);
-		List result= new ArrayList(subTypes.length);
+		List<IType> result= new ArrayList<IType>(subTypes.length);
 		for (int i= 0; i < subTypes.length; i++) {
 			if (! subTypes[i].isBinary()) {
 				result.add(subTypes[i]);
 			}
 		}
-		return (IType[]) result.toArray(new IType[result.size()]);
+		return result.toArray(new IType[result.size()]);
 	}
 
 	//Collection of SearchResults
-	private static Collection getAllSuperConstructorInvocations(IType type) throws JavaModelException {
+	private static Collection<SearchMatch> getAllSuperConstructorInvocations(IType type) throws JavaModelException {
 		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
 		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(type.getCompilationUnit(), false);
-		List result= new ArrayList(constructors.length);
+		List<SearchMatch> result= new ArrayList<SearchMatch>(constructors.length);
 		for (int i= 0; i < constructors.length; i++) {
 			ASTNode superCall= getSuperConstructorCallNode(constructors[i], cuNode);
 			if (superCall != null)
@@ -268,7 +269,7 @@ class ConstructorReferenceFinder {
 		Assert.isTrue(constructorNode.isConstructor());
 		Block body= constructorNode.getBody();
 		Assert.isNotNull(body);
-		List statements= body.statements();
+		List<Statement> statements= body.statements();
 		if (! statements.isEmpty() && statements.get(0) instanceof SuperConstructorInvocation)
 			return (SuperConstructorInvocation)statements.get(0);
 		return null;

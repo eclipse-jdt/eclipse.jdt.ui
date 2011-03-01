@@ -54,14 +54,15 @@ public class RefreshElementAction extends Action {
 	/**
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
+	@Override
 	public void run() {
 		IStructuredSelection selection= (IStructuredSelection)getSelection();
 		if (selection.isEmpty()) {
 			fViewer.getPart().refresh();
 			return;
 		}
-		List toExpand= new ArrayList();
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		List<MethodWrapper> toExpand= new ArrayList<MethodWrapper>();
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			MethodWrapper element= (MethodWrapper)iter.next();
 			boolean isExpanded= fViewer.getExpandedState(element);
 			element.removeFromCache();
@@ -71,8 +72,8 @@ public class RefreshElementAction extends Action {
 			}
 			fViewer.refresh(element);
 		}
-		for (Iterator iter= toExpand.iterator(); iter.hasNext();) {
-			MethodWrapper elem= (MethodWrapper)iter.next();
+		for (Iterator<MethodWrapper> iter= toExpand.iterator(); iter.hasNext();) {
+			MethodWrapper elem= iter.next();
 			fViewer.setExpandedState(elem, true);
 		}
 	}

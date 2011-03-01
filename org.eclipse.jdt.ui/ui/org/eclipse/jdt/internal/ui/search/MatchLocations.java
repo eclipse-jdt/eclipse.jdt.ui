@@ -38,20 +38,21 @@ public class MatchLocations {
 
 	public static class MatchLocationSelectionDialog extends TrayDialog {
 
-		private final ArrayList fButtons;
+		private final ArrayList<Button> fButtons;
 		private final int fSearchFor;
 		private int fCurrentSelection;
 
 		public MatchLocationSelectionDialog(Shell parent, int initialSelection, int searchFor) {
 			super(parent);
 			fSearchFor= searchFor;
-			fButtons= new ArrayList();
+			fButtons= new ArrayList<Button>();
 			fCurrentSelection= initialSelection;
 		}
 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
 		 */
+		@Override
 		protected void configureShell(Shell shell) {
 			super.configureShell(shell);
 			shell.setText(SearchMessages.MatchLocations_dialog_title);
@@ -60,6 +61,7 @@ public class MatchLocations {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 		 */
+		@Override
 		protected boolean isResizable() {
 			return true;
 		}
@@ -67,6 +69,7 @@ public class MatchLocations {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 		 */
+		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite contents= (Composite) super.createDialogArea(parent);
 			GridLayout layout= (GridLayout) contents.getLayout();
@@ -94,9 +97,11 @@ public class MatchLocations {
 			selectAllButton.setLayoutData(new GridData());
 			selectAllButton.setText(SearchMessages.MatchLocations_select_all_button_label);
 			selectAllButton.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					performSelectAction(true);
 				}
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					performSelectAction(true);
 				}
@@ -108,9 +113,11 @@ public class MatchLocations {
 			deselectAllButton.setLayoutData(new GridData());
 			deselectAllButton.setText(SearchMessages.MatchLocations_deselect_all_button_label);
 			deselectAllButton.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					performSelectAction(false);
 				}
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					performSelectAction(false);
 				}
@@ -185,7 +192,7 @@ public class MatchLocations {
 
 		protected final void performSelectAction(boolean selectAll) {
 			for (int i= 0; i < fButtons.size(); i++) {
-				Button button= (Button) fButtons.get(i);
+				Button button= fButtons.get(i);
 				button.setSelection(selectAll);
 			}
 			validateSettings();
@@ -208,9 +215,11 @@ public class MatchLocations {
 			button.setLayoutData(new GridData());
 			button.setSelection(isSelected);
 			button.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					performOptionChanged();
 				}
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					widgetDefaultSelected(e);
 				}
@@ -237,7 +246,7 @@ public class MatchLocations {
 		private void validateSettings() {
 			int selected= 0;
 			for (int i= 0; i < fButtons.size(); i++) {
-				Button button= (Button) fButtons.get(i);
+				Button button= fButtons.get(i);
 				if (button.getSelection()) {
 					selected |= getIntValue(button);
 				}
@@ -257,7 +266,7 @@ public class MatchLocations {
 		if (nOptions > entryLimit) {
 			return SearchMessages.MatchLocations_match_locations_description;
 		}
-		ArrayList args= new ArrayList(3);
+		ArrayList<String> args= new ArrayList<String>(3);
 		if (isSet(locations, IJavaSearchConstants.IMPORT_DECLARATION_TYPE_REFERENCE)) {
 			args.add(SearchMessages.MatchLocations_imports_description);
 		}
@@ -316,14 +325,14 @@ public class MatchLocations {
 			args.add(SearchMessages.MatchLocations_implicit_this_description);
 		}
 		if (args.size() == 1) {
-			return (String) args.get(0);
+			return args.get(0);
 		}
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < args.size(); i++) {
 			if (i > 0) {
 				buf.append(JavaElementLabels.COMMA_STRING);
 			}
-			buf.append((String) args.get(i));
+			buf.append(args.get(i));
 		}
 		return buf.toString();
 	}

@@ -68,6 +68,7 @@ public abstract class AbstractOpenWizardAction extends Action {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
+	@Override
 	public void run() {
 		Shell shell= getShell();
 		if (!doCreateProjectFirstOnEmptyWorkspace(shell)) {

@@ -111,11 +111,13 @@ class BreadcrumbItemDetails {
 		addElementListener(fElementText);
 
 		fTextComposite.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			@Override
 			public void getName(AccessibleEvent e) {
 				e.result= fElementText.getText();
 			}
 		});
 		fImageComposite.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			@Override
 			public void getName(AccessibleEvent e) {
 				e.result= fElementText.getText();
 			}

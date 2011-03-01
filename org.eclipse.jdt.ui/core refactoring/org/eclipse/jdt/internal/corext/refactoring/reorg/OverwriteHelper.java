@@ -106,7 +106,7 @@ class OverwriteHelper {
 	}
 
 	private void confirmPackageFragmentRootOverwritting(IConfirmQuery skipQuery, IConfirmQuery overwriteQuery) {
-		List toNotOverwrite= new ArrayList(1);
+		List<IPackageFragmentRoot> toNotOverwrite= new ArrayList<IPackageFragmentRoot>(1);
 		for (int i= 0; i < fRoots.length; i++) {
 			IPackageFragmentRoot root= fRoots[i];
 			if (canOverwrite(root)) {
@@ -119,34 +119,34 @@ class OverwriteHelper {
 				}
 			}
 		}
-		IPackageFragmentRoot[] roots= (IPackageFragmentRoot[]) toNotOverwrite.toArray(new IPackageFragmentRoot[toNotOverwrite.size()]);
+		IPackageFragmentRoot[] roots= toNotOverwrite.toArray(new IPackageFragmentRoot[toNotOverwrite.size()]);
 		fRoots= ArrayTypeConverter.toPackageFragmentRootArray(ReorgUtils.setMinus(fRoots, roots));
 	}
 
 	private void confirmCuOverwritting(IConfirmQuery overwriteQuery) {
-		List cusToNotOverwrite= new ArrayList(1);
+		List<ICompilationUnit> cusToNotOverwrite= new ArrayList<ICompilationUnit>(1);
 		for (int i= 0; i < fCus.length; i++) {
 			ICompilationUnit cu= fCus[i];
 			if (canOverwrite(cu) && ! overwrite(cu, overwriteQuery))
 				cusToNotOverwrite.add(cu);
 		}
-		ICompilationUnit[] cus= (ICompilationUnit[]) cusToNotOverwrite.toArray(new ICompilationUnit[cusToNotOverwrite.size()]);
+		ICompilationUnit[] cus= cusToNotOverwrite.toArray(new ICompilationUnit[cusToNotOverwrite.size()]);
 		fCus= ArrayTypeConverter.toCuArray(ReorgUtils.setMinus(fCus, cus));
 	}
 
 	private void confirmFolderOverwritting(IConfirmQuery overwriteQuery) {
-		List foldersToNotOverwrite= new ArrayList(1);
+		List<IFolder> foldersToNotOverwrite= new ArrayList<IFolder>(1);
 		for (int i= 0; i < fFolders.length; i++) {
 			IFolder folder= fFolders[i];
 			if (willOverwrite(folder) && ! skip(BasicElementLabels.getResourceName(folder), overwriteQuery))
 				foldersToNotOverwrite.add(folder);
 		}
-		IFolder[] folders= (IFolder[]) foldersToNotOverwrite.toArray(new IFolder[foldersToNotOverwrite.size()]);
+		IFolder[] folders= foldersToNotOverwrite.toArray(new IFolder[foldersToNotOverwrite.size()]);
 		fFolders= ArrayTypeConverter.toFolderArray(ReorgUtils.setMinus(fFolders, folders));
 	}
 
 	private void confirmFileOverwritting(IConfirmQuery overwriteQuery, IConfirmQuery skipQuery) {
-		List filesToNotOverwrite= new ArrayList(1);
+		List<IFile> filesToNotOverwrite= new ArrayList<IFile>(1);
 		for (int i= 0; i < fFiles.length; i++) {
 			IFile file= fFiles[i];
 			if (willOverwrite(file)) {
@@ -160,18 +160,18 @@ class OverwriteHelper {
 				}
 			}
 		}
-		IFile[] files= (IFile[]) filesToNotOverwrite.toArray(new IFile[filesToNotOverwrite.size()]);
+		IFile[] files= filesToNotOverwrite.toArray(new IFile[filesToNotOverwrite.size()]);
 		fFiles= ArrayTypeConverter.toFileArray(ReorgUtils.setMinus(fFiles, files));
 	}
 
 	private void confirmPackageOverwritting(IConfirmQuery overwriteQuery){
-		List toNotOverwrite= new ArrayList(1);
+		List<IPackageFragment> toNotOverwrite= new ArrayList<IPackageFragment>(1);
 		for (int i= 0; i < fPackageFragments.length; i++) {
 			IPackageFragment pack= fPackageFragments[i];
 			if (canOverwrite(pack) && ! overwrite(pack, overwriteQuery))
 				toNotOverwrite.add(pack);
 		}
-		IPackageFragment[] packages= (IPackageFragment[]) toNotOverwrite.toArray(new IPackageFragment[toNotOverwrite.size()]);
+		IPackageFragment[] packages= toNotOverwrite.toArray(new IPackageFragment[toNotOverwrite.size()]);
 		fPackageFragments= ArrayTypeConverter.toPackageArray(ReorgUtils.setMinus(fPackageFragments, packages));
 	}
 

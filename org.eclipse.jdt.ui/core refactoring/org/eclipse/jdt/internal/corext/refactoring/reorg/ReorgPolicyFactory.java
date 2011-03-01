@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -92,6 +93,7 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SwitchStatement;
@@ -161,7 +163,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		public IJavaElement[] getActualJavaElementsToReorg() throws JavaModelException {
-			List result= new ArrayList();
+			List<IJavaElement> result= new ArrayList<IJavaElement>();
 			for (int i= 0; i < fJavaElements.length; i++) {
 				IJavaElement element= fJavaElements[i];
 				if (element == null)
@@ -177,12 +179,12 @@ public final class ReorgPolicyFactory {
 					result.add(element);
 				}
 			}
-			return (IJavaElement[]) result.toArray(new IJavaElement[result.size()]);
+			return result.toArray(new IJavaElement[result.size()]);
 		}
 
 		public IResource[] getActualResourcesToReorg() {
-			Set javaElementSet= new HashSet(Arrays.asList(fJavaElements));
-			List result= new ArrayList();
+			Set<IJavaElement> javaElementSet= new HashSet<IJavaElement>(Arrays.asList(fJavaElements));
+			List<IResource> result= new ArrayList<IResource>();
 			for (int i= 0; i < fResources.length; i++) {
 				if (fResources[i] == null)
 					continue;
@@ -191,7 +193,7 @@ public final class ReorgPolicyFactory {
 					if (!result.contains(fResources[i]))
 						result.add(fResources[i]);
 			}
-			return (IResource[]) result.toArray(new IResource[result.size()]);
+			return result.toArray(new IResource[result.size()]);
 
 		}
 	}
@@ -290,12 +292,14 @@ public final class ReorgPolicyFactory {
 			return createCopyResourceChange(resource, nameProposer, copyQueries, dest);
 		}
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
+		@Override
+		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map<String, String> arguments, String description, String project, int flags) {
 			ReorgExecutionLog log= getReorgExecutionLog();
 			storeReorgExecutionLog(project, arguments, log);
 			return RefactoringSignatureDescriptorFactory.createCopyDescriptor(project, description, comment.asString(), arguments, flags);
 		}
 
+		@Override
 		protected String getDescriptionPlural() {
 			final int kind= getContentKind();
 			switch (kind) {
@@ -309,6 +313,7 @@ public final class ReorgPolicyFactory {
 			return RefactoringCoreMessages.ReorgPolicyFactory_copy_description_plural;
 		}
 
+		@Override
 		protected String getDescriptionSingular() {
 			final int kind= getContentKind();
 			switch (kind) {
@@ -329,14 +334,17 @@ public final class ReorgPolicyFactory {
 			return getDestinationAsContainer();
 		}
 
+		@Override
 		protected String getHeaderPatternSingular() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_copy_header_singular;
 		}
 
+		@Override
 		protected String getHeaderPatternPlural() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_copy_header_plural;
 		}
 
+		@Override
 		protected RefactoringModifications getModifications() throws CoreException {
 			if (fModifications != null)
 				return fModifications;
@@ -359,10 +367,12 @@ public final class ReorgPolicyFactory {
 			return POLICY_COPY_RESOURCE;
 		}
 
+		@Override
 		protected String getProcessorId() {
 			return IJavaRefactorings.COPY;
 		}
 
+		@Override
 		protected String getRefactoringId() {
 			return IJavaRefactorings.COPY;
 		}
@@ -430,28 +440,34 @@ public final class ReorgPolicyFactory {
 			return composite;
 		}
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
+		@Override
+		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map<String, String> arguments, String description, String project, int flags) {
 			ReorgExecutionLog log= getReorgExecutionLog();
 			storeReorgExecutionLog(project, arguments, log);
 			return RefactoringSignatureDescriptorFactory.createCopyDescriptor(project, description, comment.asString(), arguments, flags);
 		}
 
+		@Override
 		protected String getDescriptionPlural() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_copy_roots_plural;
 		}
 
+		@Override
 		protected String getDescriptionSingular() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_copy_roots_singular;
 		}
 
+		@Override
 		protected String getHeaderPatternSingular() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_copy_roots_header_singular;
 		}
 
+		@Override
 		protected String getHeaderPatternPlural() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_copy_roots_header_plural;
 		}
 
+		@Override
 		protected RefactoringModifications getModifications() throws CoreException {
 			if (fModifications != null)
 				return fModifications;
@@ -479,10 +495,12 @@ public final class ReorgPolicyFactory {
 			return POLICY_COPY_ROOTS;
 		}
 
+		@Override
 		protected String getProcessorId() {
 			return IJavaRefactorings.COPY;
 		}
 
+		@Override
 		protected String getRefactoringId() {
 			return IJavaRefactorings.COPY;
 		}
@@ -555,28 +573,34 @@ public final class ReorgPolicyFactory {
 			return composite;
 		}
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
+		@Override
+		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map<String, String> arguments, String description, String project, int flags) {
 			ReorgExecutionLog log= getReorgExecutionLog();
 			storeReorgExecutionLog(project, arguments, log);
 			return RefactoringSignatureDescriptorFactory.createCopyDescriptor(project, description, comment.asString(), arguments, flags);
 		}
 
+		@Override
 		protected String getDescriptionPlural() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_copy_packages_plural;
 		}
 
+		@Override
 		protected String getDescriptionSingular() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_copy_package_singular;
 		}
 
+		@Override
 		protected String getHeaderPatternSingular() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_copy_packages_header_singular;
 		}
 
+		@Override
 		protected String getHeaderPatternPlural() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_copy_packages_header_plural;
 		}
 
+		@Override
 		protected RefactoringModifications getModifications() throws CoreException {
 			if (fModifications != null)
 				return fModifications;
@@ -604,10 +628,12 @@ public final class ReorgPolicyFactory {
 			return POLICY_COPY_PACKAGES;
 		}
 
+		@Override
 		protected String getProcessorId() {
 			return IJavaRefactorings.COPY;
 		}
 
+		@Override
 		protected String getRefactoringId() {
 			return IJavaRefactorings.COPY;
 		}
@@ -629,6 +655,7 @@ public final class ReorgPolicyFactory {
 			super(javaElements);
 		}
 
+		@Override
 		public boolean canEnable() throws JavaModelException {
 			return super.canEnable() && (getSourceCu() != null || getSourceClassFile() != null);
 		}
@@ -650,7 +677,8 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
+		@Override
+		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map<String, String> arguments, String description, String project, int flags) {
 			ReorgExecutionLog log= getReorgExecutionLog();
 			storeReorgExecutionLog(project, arguments, log);
 			return RefactoringSignatureDescriptorFactory.createCopyDescriptor(project, description, comment.asString(), arguments, flags);
@@ -669,10 +697,12 @@ public final class ReorgPolicyFactory {
 			return (CompilationUnit) parser.createAST(null);
 		}
 
+		@Override
 		public IFile[] getAllModifiedFiles() {
 			return ReorgUtils.getFiles(new IResource[] { ReorgUtils.getResource(getEnclosingCompilationUnit(getJavaElementDestination()))});
 		}
 
+		@Override
 		protected String getDescriptionPlural() {
 			if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.TYPE)) {
 				return RefactoringCoreMessages.ReorgPolicyFactory_copy_types;
@@ -693,6 +723,7 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
+		@Override
 		protected String getDescriptionSingular() {
 			if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.TYPE)) {
 				return RefactoringCoreMessages.ReorgPolicyFactory_copy_type;
@@ -713,14 +744,17 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
+		@Override
 		protected String getHeaderPatternSingular() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_copy_elements_header_singular;
 		}
 
+		@Override
 		protected String getHeaderPatternPlural() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_copy_elements_header_plural;
 		}
 
+		@Override
 		protected RefactoringModifications getModifications() throws CoreException {
 			if (fModifications != null)
 				return fModifications;
@@ -739,10 +773,12 @@ public final class ReorgPolicyFactory {
 			return POLICY_COPY_MEMBERS;
 		}
 
+		@Override
 		protected String getProcessorId() {
 			return IJavaRefactorings.COPY;
 		}
 
+		@Override
 		protected String getRefactoringId() {
 			return IJavaRefactorings.COPY;
 		}
@@ -786,6 +822,7 @@ public final class ReorgPolicyFactory {
 			fCus= cus;
 		}
 
+		@Override
 		public boolean canChildrenBeDestinations(IJavaElement javaElement) {
 			switch (javaElement.getElementType()) {
 				case IJavaElement.JAVA_MODEL:
@@ -799,10 +836,12 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
+		@Override
 		public boolean canChildrenBeDestinations(IResource resource) {
 			return resource instanceof IContainer;
 		}
 
+		@Override
 		public boolean canElementBeDestination(IJavaElement javaElement) {
 			switch (javaElement.getElementType()) {
 				case IJavaElement.PACKAGE_FRAGMENT:
@@ -812,10 +851,12 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
+		@Override
 		public boolean canElementBeDestination(IResource resource) {
 			return resource instanceof IProject || resource instanceof IFolder;
 		}
 
+		@Override
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
 			confirmOverwriting(reorgQueries);
 			RefactoringStatus status= super.checkFinalConditions(pm, context, reorgQueries);
@@ -844,7 +885,7 @@ public final class ReorgPolicyFactory {
 			return ReorgUtils.containsLinkedResources(fFiles) || ReorgUtils.containsLinkedResources(fFolders) || ReorgUtils.containsLinkedResources(fCus);
 		}
 
-		protected abstract JavaRefactoringDescriptor createRefactoringDescriptor(final JDTRefactoringDescriptorComment comment, final Map arguments, final String description, final String project, int flags);
+		protected abstract JavaRefactoringDescriptor createRefactoringDescriptor(final JDTRefactoringDescriptorComment comment, final Map<String, String> arguments, final String description, final String project, int flags);
 
 		protected final int getContentKind() {
 			final int length= fCus.length + fFiles.length + fFolders.length;
@@ -874,7 +915,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		public final ChangeDescriptor getDescriptor() {
-			final Map arguments= new HashMap();
+			final Map<String, String> arguments= new HashMap<String, String>();
 			final int length= fFiles.length + fFolders.length + fCus.length;
 			final String description= length == 1 ? getDescriptionSingular() : getDescriptionPlural();
 			final IProject resource= getSingleProject();
@@ -991,6 +1032,7 @@ public final class ReorgPolicyFactory {
 			return result;
 		}
 
+		@Override
 		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
 			RefactoringStatus status= new RefactoringStatus();
 			int fileCount= 0;
@@ -1024,7 +1066,7 @@ public final class ReorgPolicyFactory {
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_UNITS));
 			String handle= null;
-			List elements= new ArrayList();
+			List<IAdaptable> elements= new ArrayList<IAdaptable>();
 			for (int index= 0; index < fileCount; index++) {
 				final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
 				handle= arguments.getAttribute(attribute);
@@ -1037,8 +1079,8 @@ public final class ReorgPolicyFactory {
 				} else
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
 			}
-			fFiles= (IFile[]) elements.toArray(new IFile[elements.size()]);
-			elements= new ArrayList();
+			fFiles= elements.toArray(new IFile[elements.size()]);
+			elements= new ArrayList<IAdaptable>();
 			for (int index= 0; index < folderCount; index++) {
 				final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (fileCount + index + 1);
 				handle= arguments.getAttribute(attribute);
@@ -1051,8 +1093,8 @@ public final class ReorgPolicyFactory {
 				} else
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
 			}
-			fFolders= (IFolder[]) elements.toArray(new IFolder[elements.size()]);
-			elements= new ArrayList();
+			fFolders= elements.toArray(new IFolder[elements.size()]);
+			elements= new ArrayList<IAdaptable>();
 			for (int index= 0; index < unitCount; index++) {
 				final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (folderCount + fileCount + index + 1);
 				handle= arguments.getAttribute(attribute);
@@ -1065,7 +1107,7 @@ public final class ReorgPolicyFactory {
 				} else
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
 			}
-			fCus= (ICompilationUnit[]) elements.toArray(new ICompilationUnit[elements.size()]);
+			fCus= elements.toArray(new ICompilationUnit[elements.size()]);
 			status.merge(super.initialize(arguments));
 			return status;
 		}
@@ -1079,6 +1121,7 @@ public final class ReorgPolicyFactory {
 			return false;
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
 			if (!fCheckDestination)
@@ -1121,6 +1164,7 @@ public final class ReorgPolicyFactory {
 			return new RefactoringStatus();
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 			Assert.isNotNull(resource);
 			if (!resource.exists() || resource.isPhantom())
@@ -1230,6 +1274,7 @@ public final class ReorgPolicyFactory {
 			return JavaElementUtil.isDefaultPackage(commonParent);
 		}
 
+		@Override
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
 			try {
 				pm.beginTask("", fUpdateQualifiedNames ? 7 : 3); //$NON-NLS-1$
@@ -1252,6 +1297,7 @@ public final class ReorgPolicyFactory {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		protected IPackageFragment getDestinationAsPackageFragment() {
 			IJavaElement destination= getJavaElementDestination();
 			if (destination instanceof IPackageFragmentRoot && getCus().length > 0) {
@@ -1333,7 +1379,8 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
+		@Override
+		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map<String, String> arguments, String description, String project, int flags) {
 			CreateTargetExecutionLog log= getCreateTargetExecutionLog();
 			storeCreateTargetExecutionLog(project, arguments, log);
 			return RefactoringSignatureDescriptorFactory.createMoveDescriptor(project, description, comment.asString(), arguments, flags);
@@ -1396,13 +1443,14 @@ public final class ReorgPolicyFactory {
 			return result;
 		}
 
+		@Override
 		public IFile[] getAllModifiedFiles() {
-			Set result= new HashSet();
+			Set<IFile> result= new HashSet<IFile>();
 			result.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
 			result.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
 			if (!(getJavaElementDestination() instanceof IPackageFragmentRoot) && getDestinationAsPackageFragment() != null && getUpdateReferences())
 				result.addAll(Arrays.asList(ResourceUtil.getFiles(getCus())));
-			return (IFile[]) result.toArray(new IFile[result.size()]);
+			return result.toArray(new IFile[result.size()]);
 		}
 
 		private Object getCommonParent() {
@@ -1417,6 +1465,7 @@ public final class ReorgPolicyFactory {
 			return createQueries.createNewPackageQuery();
 		}
 
+		@Override
 		protected String getDescriptionPlural() {
 			final int kind= getContentKind();
 			switch (kind) {
@@ -1430,6 +1479,7 @@ public final class ReorgPolicyFactory {
 			return RefactoringCoreMessages.ReorgPolicyFactory_move_description_plural;
 		}
 
+		@Override
 		protected String getDescriptionSingular() {
 			final int kind= getContentKind();
 			switch (kind) {
@@ -1447,14 +1497,17 @@ public final class ReorgPolicyFactory {
 			return fFilePatterns;
 		}
 
+		@Override
 		protected String getHeaderPatternSingular() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_move_header_singular;
 		}
 
+		@Override
 		protected String getHeaderPatternPlural() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_move_header_plural;
 		}
 
+		@Override
 		protected RefactoringModifications getModifications() throws CoreException {
 			if (fModifications != null)
 				return fModifications;
@@ -1492,12 +1545,14 @@ public final class ReorgPolicyFactory {
 			return POLICY_MOVE_RESOURCES;
 		}
 
+		@Override
 		protected String getProcessorId() {
 			return IJavaRefactorings.MOVE;
 		}
 
-		protected Map getRefactoringArguments(String project) {
-			final Map arguments= new HashMap();
+		@Override
+		protected Map<String, String> getRefactoringArguments(String project) {
+			final Map<String, String> arguments= new HashMap<String, String>();
 			arguments.putAll(super.getRefactoringArguments(project));
 			if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
@@ -1506,6 +1561,7 @@ public final class ReorgPolicyFactory {
 			return arguments;
 		}
 
+		@Override
 		protected String getRefactoringId() {
 			return IJavaRefactorings.MOVE;
 		}
@@ -1532,6 +1588,7 @@ public final class ReorgPolicyFactory {
 			return true;
 		}
 
+		@Override
 		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
 			final String patterns= arguments.getAttribute(ATTRIBUTE_PATTERNS);
 			if (patterns != null && !"".equals(patterns)) //$NON-NLS-1$
@@ -1580,6 +1637,7 @@ public final class ReorgPolicyFactory {
 			fUpdateReferences= update;
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
 			RefactoringStatus superStatus= super.verifyDestination(destination);
 			if (superStatus.hasFatalError())
@@ -1601,6 +1659,7 @@ public final class ReorgPolicyFactory {
 			return superStatus;
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(IResource destination) throws JavaModelException {
 			RefactoringStatus superStatus= super.verifyDestination(destination);
 			if (superStatus.hasFatalError())
@@ -1645,6 +1704,7 @@ public final class ReorgPolicyFactory {
 			super(roots);
 		}
 
+		@Override
 		public boolean canEnable() throws JavaModelException {
 			if (!super.canEnable())
 				return false;
@@ -1660,6 +1720,7 @@ public final class ReorgPolicyFactory {
 			return roots.length > 0;
 		}
 
+		@Override
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
 			try {
 				RefactoringStatus status= super.checkFinalConditions(pm, context, reorgQueries);
@@ -1700,7 +1761,8 @@ public final class ReorgPolicyFactory {
 			return composite;
 		}
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
+		@Override
+		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map<String, String> arguments, String description, String project, int flags) {
 			CreateTargetExecutionLog log= getCreateTargetExecutionLog();
 			storeCreateTargetExecutionLog(project, arguments, log);
 			return RefactoringSignatureDescriptorFactory.createMoveDescriptor(project, description, comment.asString(), arguments, flags);
@@ -1714,22 +1776,27 @@ public final class ReorgPolicyFactory {
 			return null;
 		}
 
+		@Override
 		protected String getDescriptionPlural() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_move_roots_plural;
 		}
 
+		@Override
 		protected String getDescriptionSingular() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_move_roots_singular;
 		}
 
+		@Override
 		protected String getHeaderPatternSingular() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_move_roots_header_singular;
 		}
 
+		@Override
 		protected String getHeaderPatternPlural() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_move_roots_header_plural;
 		}
 
+		@Override
 		protected RefactoringModifications getModifications() throws CoreException {
 			if (fModifications != null)
 				return fModifications;
@@ -1755,10 +1822,12 @@ public final class ReorgPolicyFactory {
 			return POLICY_MOVE_ROOTS;
 		}
 
+		@Override
 		protected String getProcessorId() {
 			return IJavaRefactorings.MOVE;
 		}
 
+		@Override
 		protected String getRefactoringId() {
 			return IJavaRefactorings.MOVE;
 		}
@@ -1778,6 +1847,7 @@ public final class ReorgPolicyFactory {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			RefactoringStatus superStatus= super.verifyDestination(javaElement);
 			if (superStatus.hasFatalError())
@@ -1791,6 +1861,7 @@ public final class ReorgPolicyFactory {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		protected RefactoringStatus verifyDestination(IResource destination) {
 			RefactoringStatus superStatus= super.verifyDestination(destination);
 			if (superStatus.hasFatalError())
@@ -1895,6 +1966,7 @@ public final class ReorgPolicyFactory {
 			super(packageFragments);
 		}
 
+		@Override
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
 			try {
 				RefactoringStatus status= super.checkFinalConditions(pm, context, reorgQueries);
@@ -1941,7 +2013,8 @@ public final class ReorgPolicyFactory {
 		}
 
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
+		@Override
+		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map<String, String> arguments, String description, String project, int flags) {
 			CreateTargetExecutionLog log= getCreateTargetExecutionLog();
 			storeCreateTargetExecutionLog(project, arguments, log);
 			return RefactoringSignatureDescriptorFactory.createMoveDescriptor(project, description, comment.asString(), arguments, flags);
@@ -1955,22 +2028,27 @@ public final class ReorgPolicyFactory {
 			return null;
 		}
 
+		@Override
 		protected String getDescriptionPlural() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_move_packages_plural;
 		}
 
+		@Override
 		protected String getDescriptionSingular() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_move_packages_singular;
 		}
 
+		@Override
 		protected String getHeaderPatternSingular() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_move_packages_header_singular;
 		}
 
+		@Override
 		protected String getHeaderPatternPlural() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_move_packages_header_plural;
 		}
 
+		@Override
 		protected RefactoringModifications getModifications() throws CoreException {
 			if (fModifications != null)
 				return fModifications;
@@ -1993,10 +2071,12 @@ public final class ReorgPolicyFactory {
 			return POLICY_MOVE_PACKAGES;
 		}
 
+		@Override
 		protected String getProcessorId() {
 			return IJavaRefactorings.MOVE;
 		}
 
+		@Override
 		protected String getRefactoringId() {
 			return IJavaRefactorings.MOVE;
 		}
@@ -2013,6 +2093,7 @@ public final class ReorgPolicyFactory {
 			fCheckDestination= check;
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			RefactoringStatus superStatus= super.verifyDestination(javaElement);
 			if (superStatus.hasFatalError())
@@ -2027,6 +2108,7 @@ public final class ReorgPolicyFactory {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		protected RefactoringStatus verifyDestination(IResource destination) {
 			RefactoringStatus superStatus= super.verifyDestination(destination);
 			if (superStatus.hasFatalError())
@@ -2118,6 +2200,7 @@ public final class ReorgPolicyFactory {
 			super(javaElements);
 		}
 
+		@Override
 		public boolean canEnable() throws JavaModelException {
 			return super.canEnable() && getSourceCu() != null;
 		}
@@ -2150,7 +2233,7 @@ public final class ReorgPolicyFactory {
 					result.markAsSynthetic();
 					result.add(targetCuChange);
 					if (Arrays.asList(getJavaElements()).containsAll(Arrays.asList(sourceCu.getTypes()))) {
-						result.add(DeleteChangeCreator.createDeleteChange(null, new IResource[0], new ICompilationUnit[] {sourceCu}, RefactoringCoreMessages.ReorgPolicy_move, Collections.EMPTY_LIST));
+						result.add(DeleteChangeCreator.createDeleteChange(null, new IResource[0], new ICompilationUnit[] {sourceCu}, RefactoringCoreMessages.ReorgPolicy_move, Collections.<IResource>emptyList()));
 					} else {
 						result.add(createCompilationUnitChange(sourceRewriter));
 					}
@@ -2165,12 +2248,14 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
+		@Override
+		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map<String, String> arguments, String description, String project, int flags) {
 			CreateTargetExecutionLog log= getCreateTargetExecutionLog();
 			storeCreateTargetExecutionLog(project, arguments, log);
 			return RefactoringSignatureDescriptorFactory.createMoveDescriptor(project, description, comment.asString(), arguments, flags);
 		}
 
+		@Override
 		public IFile[] getAllModifiedFiles() {
 			return ReorgUtils.getFiles(new IResource[] { ReorgUtils.getResource(getSourceCu()), ReorgUtils.getResource(getEnclosingCompilationUnit(getJavaElementDestination()))});
 		}
@@ -2183,6 +2268,7 @@ public final class ReorgPolicyFactory {
 			return null;
 		}
 
+		@Override
 		protected String getDescriptionPlural() {
 			if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.TYPE)) {
 				return RefactoringCoreMessages.ReorgPolicyFactory_move_types;
@@ -2203,6 +2289,7 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
+		@Override
 		protected String getDescriptionSingular() {
 			if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.TYPE)) {
 				return RefactoringCoreMessages.ReorgPolicyFactory_move_type;
@@ -2223,18 +2310,22 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
+		@Override
 		protected String getHeaderPatternSingular() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_move_elements_header_singular;
 		}
 
+		@Override
 		protected String getHeaderPatternPlural() {
 			return RefactoringCoreMessages.ReorgPolicyFactory_move_elements_header_plural;
 		}
 
+		@Override
 		protected String getProcessorId() {
 			return IJavaRefactorings.MOVE;
 		}
 
+		@Override
 		protected String getRefactoringId() {
 			return IJavaRefactorings.MOVE;
 		}
@@ -2251,6 +2342,7 @@ public final class ReorgPolicyFactory {
 			fCheckDestination= check;
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(IJavaElement destination, int location) throws JavaModelException {
 			IJavaElement[] elements= getJavaElements();
 			for (int i= 0; i < elements.length; i++) {
@@ -2283,7 +2375,7 @@ public final class ReorgPolicyFactory {
 				if (!allInSameParent(elements, parent))
 					return superStatus;
 
-				ArrayList sortedChildren= getSortedChildren((IType) parent);
+				ArrayList<IJavaElement> sortedChildren= getSortedChildren((IType) parent);
 
 				int destinationIndex= sortedChildren.indexOf(destination);
 
@@ -2300,11 +2392,11 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
-		private ArrayList getSortedChildren(IType parent) throws JavaModelException {
+		private ArrayList<IJavaElement> getSortedChildren(IType parent) throws JavaModelException {
 			IJavaElement[] children= parent.getChildren();
-			ArrayList sortedChildren= new ArrayList(Arrays.asList(children));
-			Collections.sort(sortedChildren, new Comparator() {
-				public int compare(Object e1, Object e2) {
+			ArrayList<IJavaElement> sortedChildren= new ArrayList<IJavaElement>(Arrays.asList(children));
+			Collections.sort(sortedChildren, new Comparator<IJavaElement>() {
+				public int compare(IJavaElement e1, IJavaElement e2) {
 					if (!(e1 instanceof ISourceReference))
 						return 0;
 					if (!(e2 instanceof ISourceReference))
@@ -2461,7 +2553,7 @@ public final class ReorgPolicyFactory {
 			return !root.getPackageFragment(newName).exists();
 		}
 
-		private final Set fAutoGeneratedNewNames= new HashSet(2);
+		private final Set<String> fAutoGeneratedNewNames= new HashSet<String>(2);
 
 		public String createNewName(ICompilationUnit cu, IPackageFragment destination) {
 			if (isNewNameOk(destination, cu.getElementName()))
@@ -2526,6 +2618,7 @@ public final class ReorgPolicyFactory {
 
 	private static final class NoCopyPolicy extends ReorgPolicy implements ICopyPolicy {
 
+		@Override
 		public boolean canEnable() throws JavaModelException {
 			return false;
 		}
@@ -2534,10 +2627,12 @@ public final class ReorgPolicyFactory {
 			return new NullChange();
 		}
 
+		@Override
 		protected String getDescriptionPlural() {
 			return UNUSED_STRING;
 		}
 
+		@Override
 		protected String getDescriptionSingular() {
 			return UNUSED_STRING;
 		}
@@ -2546,10 +2641,12 @@ public final class ReorgPolicyFactory {
 			return null;
 		}
 
+		@Override
 		protected String getHeaderPatternSingular() {
 			return UNUSED_STRING;
 		}
 
+		@Override
 		protected String getHeaderPatternPlural() {
 			return UNUSED_STRING;
 		}
@@ -2562,10 +2659,12 @@ public final class ReorgPolicyFactory {
 			return NO_POLICY;
 		}
 
+		@Override
 		protected String getProcessorId() {
 			return NO_ID;
 		}
 
+		@Override
 		protected String getRefactoringId() {
 			return NO_ID;
 		}
@@ -2578,14 +2677,17 @@ public final class ReorgPolicyFactory {
 			return new IResource[0];
 		}
 
+		@Override
 		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
 			return new RefactoringStatus();
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_noCopying);
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_noCopying);
 		}
@@ -2593,6 +2695,7 @@ public final class ReorgPolicyFactory {
 
 	private static final class NoMovePolicy extends ReorgPolicy implements IMovePolicy {
 
+		@Override
 		public boolean canEnable() throws JavaModelException {
 			return false;
 		}
@@ -2609,10 +2712,12 @@ public final class ReorgPolicyFactory {
 			return null;
 		}
 
+		@Override
 		protected String getDescriptionPlural() {
 			return UNUSED_STRING;
 		}
 
+		@Override
 		protected String getDescriptionSingular() {
 			return UNUSED_STRING;
 		}
@@ -2621,10 +2726,12 @@ public final class ReorgPolicyFactory {
 			return null;
 		}
 
+		@Override
 		protected String getHeaderPatternSingular() {
 			return UNUSED_STRING;
 		}
 
+		@Override
 		protected String getHeaderPatternPlural() {
 			return UNUSED_STRING;
 		}
@@ -2637,10 +2744,12 @@ public final class ReorgPolicyFactory {
 			return NO_POLICY;
 		}
 
+		@Override
 		protected String getProcessorId() {
 			return NO_ID;
 		}
 
+		@Override
 		protected String getRefactoringId() {
 			return NO_ID;
 		}
@@ -2649,6 +2758,7 @@ public final class ReorgPolicyFactory {
 			return new IResource[0];
 		}
 
+		@Override
 		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
 			return new RefactoringStatus();
 		}
@@ -2665,10 +2775,12 @@ public final class ReorgPolicyFactory {
 			fCheckDestination= check;
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_noMoving);
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_noMoving);
 		}
@@ -2749,6 +2861,7 @@ public final class ReorgPolicyFactory {
 			fPackageFragmentRoots= roots;
 		}
 
+		@Override
 		public boolean canChildrenBeDestinations(IJavaElement javaElement) {
 			switch (javaElement.getElementType()) {
 				case IJavaElement.JAVA_MODEL:
@@ -2759,18 +2872,22 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
+		@Override
 		public boolean canChildrenBeDestinations(IResource resource) {
 			return resource instanceof IContainer;
 		}
 
+		@Override
 		public boolean canElementBeDestination(IJavaElement javaElement) {
 			return javaElement.getElementType() == IJavaElement.JAVA_PROJECT;
 		}
 
+		@Override
 		public boolean canElementBeDestination(IResource resource) {
 			return resource instanceof IContainer;
 		}
 
+		@Override
 		public boolean canEnable() throws JavaModelException {
 			if (!super.canEnable() || fPackageFragmentRoots.length == 0)
 				return false;
@@ -2784,6 +2901,7 @@ public final class ReorgPolicyFactory {
 			return true;
 		}
 
+		@Override
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
 			confirmOverwriting(reorgQueries);
 			RefactoringStatus status= super.checkFinalConditions(pm, context, reorgQueries);
@@ -2802,10 +2920,10 @@ public final class ReorgPolicyFactory {
 			fPackageFragmentRoots= oh.getPackageFragmentRootsWithoutUnconfirmedOnes();
 		}
 
-		protected abstract JavaRefactoringDescriptor createRefactoringDescriptor(final JDTRefactoringDescriptorComment comment, final Map arguments, final String description, final String project, int flags);
+		protected abstract JavaRefactoringDescriptor createRefactoringDescriptor(final JDTRefactoringDescriptorComment comment, final Map<String, String> arguments, final String description, final String project, int flags);
 
 		public final ChangeDescriptor getDescriptor() {
-			final Map arguments= new HashMap();
+			final Map<String, String> arguments= new HashMap<String, String>();
 			final int length= fPackageFragmentRoots.length;
 			final String description= length == 1 ? getDescriptionSingular() : getDescriptionPlural();
 			final IProject resource= getSingleProject();
@@ -2861,6 +2979,7 @@ public final class ReorgPolicyFactory {
 			return result;
 		}
 
+		@Override
 		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
 			final RefactoringStatus status= new RefactoringStatus();
 			int rootCount= 0;
@@ -2874,7 +2993,7 @@ public final class ReorgPolicyFactory {
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ROOTS));
 			String handle= null;
-			List elements= new ArrayList();
+			List<IJavaElement> elements= new ArrayList<IJavaElement>();
 			for (int index= 0; index < rootCount; index++) {
 				final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
 				handle= arguments.getAttribute(attribute);
@@ -2887,11 +3006,12 @@ public final class ReorgPolicyFactory {
 				} else
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
 			}
-			fPackageFragmentRoots= (IPackageFragmentRoot[]) elements.toArray(new IPackageFragmentRoot[elements.size()]);
+			fPackageFragmentRoots= elements.toArray(new IPackageFragmentRoot[elements.size()]);
 			status.merge(super.initialize(arguments));
 			return status;
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
 			if (!fCheckDestination)
@@ -2909,6 +3029,7 @@ public final class ReorgPolicyFactory {
 			return new RefactoringStatus();
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(IResource resource) {
 			Assert.isNotNull(resource);
 			if (!resource.exists() || resource.isPhantom())
@@ -2957,6 +3078,7 @@ public final class ReorgPolicyFactory {
 			fPackageFragments= packageFragments;
 		}
 
+		@Override
 		public boolean canChildrenBeDestinations(IJavaElement javaElement) {
 			switch (javaElement.getElementType()) {
 				case IJavaElement.JAVA_MODEL:
@@ -2971,10 +3093,12 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
+		@Override
 		public boolean canChildrenBeDestinations(IResource resource) {
 			return resource instanceof IContainer;
 		}
 
+		@Override
 		public boolean canElementBeDestination(IJavaElement javaElement) {
 			switch (javaElement.getElementType()) {
 				case IJavaElement.JAVA_PROJECT:
@@ -2985,10 +3109,12 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
+		@Override
 		public boolean canElementBeDestination(IResource resource) {
 			return resource instanceof IContainer;
 		}
 
+		@Override
 		public boolean canEnable() throws JavaModelException {
 			if (fPackageFragments.length == 0)
 				return false;
@@ -3001,6 +3127,7 @@ public final class ReorgPolicyFactory {
 			return true;
 		}
 
+		@Override
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
 			confirmOverwriting(reorgQueries);
 			RefactoringStatus refactoringStatus= super.checkFinalConditions(pm, context, reorgQueries);
@@ -3019,10 +3146,10 @@ public final class ReorgPolicyFactory {
 			fPackageFragments= helper.getPackagesWithoutUnconfirmedOnes();
 		}
 
-		protected abstract JavaRefactoringDescriptor createRefactoringDescriptor(final JDTRefactoringDescriptorComment comment, final Map arguments, final String description, final String project, int flags);
+		protected abstract JavaRefactoringDescriptor createRefactoringDescriptor(final JDTRefactoringDescriptorComment comment, final Map<String, String> arguments, final String description, final String project, int flags);
 
 		public final ChangeDescriptor getDescriptor() {
-			final Map arguments= new HashMap();
+			final Map<String, String> arguments= new HashMap<String, String>();
 			final int length= fPackageFragments.length;
 			final String description= length == 1 ? getDescriptionSingular() : getDescriptionPlural();
 			final IProject resource= getSingleProject();
@@ -3086,6 +3213,7 @@ public final class ReorgPolicyFactory {
 			return result;
 		}
 
+		@Override
 		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
 			final RefactoringStatus status= new RefactoringStatus();
 			int fragmentCount= 0;
@@ -3099,7 +3227,7 @@ public final class ReorgPolicyFactory {
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FRAGMENTS));
 			String handle= null;
-			List elements= new ArrayList();
+			List<IJavaElement> elements= new ArrayList<IJavaElement>();
 			for (int index= 0; index < fragmentCount; index++) {
 				final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
 				handle= arguments.getAttribute(attribute);
@@ -3112,11 +3240,12 @@ public final class ReorgPolicyFactory {
 				} else
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
 			}
-			fPackageFragments= (IPackageFragment[]) elements.toArray(new IPackageFragment[elements.size()]);
+			fPackageFragments= elements.toArray(new IPackageFragment[elements.size()]);
 			status.merge(super.initialize(arguments));
 			return status;
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
 			if (!fCheckDestination)
@@ -3131,6 +3260,7 @@ public final class ReorgPolicyFactory {
 			return new RefactoringStatus();
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(IResource resource) {
 			Assert.isNotNull(resource);
 			if (!resource.exists() || resource.isPhantom())
@@ -3339,8 +3469,8 @@ public final class ReorgPolicyFactory {
 
 		protected abstract String getProcessorId();
 
-		protected Map getRefactoringArguments(String project) {
-			final Map arguments= new HashMap();
+		protected Map<String, String> getRefactoringArguments(String project) {
+			final Map<String, String> arguments= new HashMap<String, String>();
 			final IJavaElement element= getJavaElementDestination();
 			if (element != null)
 				arguments.put(ATTRIBUTE_DESTINATION, JavaRefactoringDescriptorUtil.elementToHandle(project, element));
@@ -3515,6 +3645,7 @@ public final class ReorgPolicyFactory {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public boolean canChildrenBeDestinations(IResource resource) {
 			return false;
 		}
@@ -3522,10 +3653,12 @@ public final class ReorgPolicyFactory {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public boolean canElementBeDestination(IJavaElement javaElement) {
 			return true;
 		}
 
+		@Override
 		public boolean canEnable() throws JavaModelException {
 			if (!super.canEnable() || fJavaElements.length == 0)
 				return false;
@@ -3545,6 +3678,7 @@ public final class ReorgPolicyFactory {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public int getSaveMode() {
 			return RefactoringSaveHelper.SAVE_REFACTORING;
 		}
@@ -3626,7 +3760,7 @@ public final class ReorgPolicyFactory {
 				BodyDeclaration decl= ASTNodeSearchUtil.getBodyDeclarationNode(member, sourceCuNode);
 				if (decl != null) {
 					ImportRewriteContext context= new ContextSensitiveImportRewriteContext(destinationContainer, targetRewriter.getImportRewrite());
-					ImportRewriteUtil.addImports(targetRewriter, context, decl, new HashMap(), new HashMap(), false);
+					ImportRewriteUtil.addImports(targetRewriter, context, decl, new HashMap<Name, String>(), new HashMap<Name, String>(), false);
 				}
 			}
 		}
@@ -3661,7 +3795,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		private void insertRelative(ASTNode newNode, ASTNode relativeNode, ListRewrite listRewrite) {
-			final List list= listRewrite.getOriginalList();
+			final List<?> list= listRewrite.getOriginalList();
 			final int index= list.indexOf(relativeNode);
 
 			if (getLocation() == IReorgDestination.LOCATION_BEFORE) {
@@ -3768,10 +3902,10 @@ public final class ReorgPolicyFactory {
 			return newDeclaration;
 		}
 
-		protected abstract JavaRefactoringDescriptor createRefactoringDescriptor(final JDTRefactoringDescriptorComment comment, final Map arguments, final String description, final String project, int flags);
+		protected abstract JavaRefactoringDescriptor createRefactoringDescriptor(final JDTRefactoringDescriptorComment comment, final Map<String, String> arguments, final String description, final String project, int flags);
 
 		public final ChangeDescriptor getDescriptor() {
-			final Map arguments= new HashMap();
+			final Map<String, String> arguments= new HashMap<String, String>();
 			final int length= fJavaElements.length;
 			final String description= length == 1 ? getDescriptionSingular() : getDescriptionPlural();
 			final IProject resource= getSingleProject();
@@ -3815,6 +3949,7 @@ public final class ReorgPolicyFactory {
 			return getEnclosingCompilationUnit(fJavaElements[0]);
 		}
 
+		@Override
 		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
 			final RefactoringStatus status= new RefactoringStatus();
 			int memberCount= 0;
@@ -3828,7 +3963,7 @@ public final class ReorgPolicyFactory {
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MEMBERS));
 			String handle= null;
-			List elements= new ArrayList();
+			List<IJavaElement> elements= new ArrayList<IJavaElement>();
 			for (int index= 0; index < memberCount; index++) {
 				final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
 				handle= arguments.getAttribute(attribute);
@@ -3841,7 +3976,7 @@ public final class ReorgPolicyFactory {
 				} else
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
 			}
-			fJavaElements= (IJavaElement[]) elements.toArray(new IJavaElement[elements.size()]);
+			fJavaElements= elements.toArray(new IJavaElement[elements.size()]);
 			status.merge(super.initialize(arguments));
 			return status;
 		}
@@ -3942,6 +4077,7 @@ public final class ReorgPolicyFactory {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public RefactoringStatus verifyDestination(IReorgDestination destination) throws JavaModelException {
 			if (!(destination instanceof JavaElementDestination))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_invalidDestinationKind);
@@ -4107,8 +4243,8 @@ public final class ReorgPolicyFactory {
 			if (copy) {
 				return new CopySubCuElementsPolicy(javaElements);
 			} else {
-				List members= Arrays.asList(javaElements);
-				return new MoveMembersPolicy((IMember[]) members.toArray(new IMember[members.size()]));
+				List<IJavaElement> members= Arrays.asList(javaElements);
+				return new MoveMembersPolicy(members.toArray(new IMember[members.size()]));
 			}
 		}
 
@@ -4116,8 +4252,8 @@ public final class ReorgPolicyFactory {
 			if (copy) {
 				return new CopySubCuElementsPolicy(javaElements);
 			} else {
-				List declarations= ReorgUtils.getElementsOfType(javaElements, IJavaElement.IMPORT_DECLARATION);
-				return new MoveImportDeclarationsPolicy((IImportDeclaration[]) declarations.toArray(new IImportDeclaration[declarations.size()]));
+				List<IImportDeclaration> declarations= (List<IImportDeclaration>) ReorgUtils.getElementsOfType(javaElements, IJavaElement.IMPORT_DECLARATION);
+				return new MoveImportDeclarationsPolicy(declarations.toArray(new IImportDeclaration[declarations.size()]));
 			}
 		}
 
@@ -4245,7 +4381,7 @@ public final class ReorgPolicyFactory {
 		}
 	}
 
-	public static void storeCreateTargetExecutionLog(String project, Map arguments, CreateTargetExecutionLog log) {
+	public static void storeCreateTargetExecutionLog(String project, Map<String, String> arguments, CreateTargetExecutionLog log) {
 		if (log != null) {
 			final StringBuffer buffer= new StringBuffer(64);
 			final Object[] selections= log.getSelectedElements();
@@ -4281,13 +4417,13 @@ public final class ReorgPolicyFactory {
 		return false;
 	}
 
-	public static void storeReorgExecutionLog(String project, Map arguments, ReorgExecutionLog log) {
+	public static void storeReorgExecutionLog(String project, Map<String, String> arguments, ReorgExecutionLog log) {
 		if (log != null) {
-			final Set set= new HashSet();
+			final Set<Object> set= new HashSet<Object>();
 			set.addAll(Arrays.asList(log.getProcessedElements()));
 			set.addAll(Arrays.asList(log.getRenamedElements()));
 			final StringBuffer buffer= new StringBuffer(64);
-			for (final Iterator iterator= set.iterator(); iterator.hasNext();) {
+			for (final Iterator<Object> iterator= set.iterator(); iterator.hasNext();) {
 				final Object object= iterator.next();
 				if (storeLogElement(buffer, project, object)) {
 					buffer.append(DELIMITER_ELEMENT);

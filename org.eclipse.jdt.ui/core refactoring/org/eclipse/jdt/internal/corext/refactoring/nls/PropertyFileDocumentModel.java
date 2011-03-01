@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class PropertyFileDocumentModel {
 
-	private List fKeyValuePairs;
+	private List<KeyValuePairModell> fKeyValuePairs;
     private String fLineDelimiter;
 
     public PropertyFileDocumentModel(IDocument document) {
@@ -61,7 +61,7 @@ public class PropertyFileDocumentModel {
 	 */
     public KeyValuePair getKeyValuePair(String key) {
     	for (int i= 0; i < fKeyValuePairs.size(); i++) {
-            KeyValuePairModell keyValuePair = (KeyValuePairModell) fKeyValuePairs.get(i);
+            KeyValuePairModell keyValuePair = fKeyValuePairs.get(i);
             if (keyValuePair.getKey().equals(key)) {
             	return keyValuePair;
             }
@@ -72,7 +72,7 @@ public class PropertyFileDocumentModel {
     private InsertEdit insert(KeyValuePair keyValuePair) {
         KeyValuePairModell keyValuePairModell = new KeyValuePairModell(keyValuePair);
         int index = findInsertPosition(keyValuePairModell);
-        KeyValuePairModell insertHere = (KeyValuePairModell) fKeyValuePairs.get(index);
+        KeyValuePairModell insertHere = fKeyValuePairs.get(index);
         int offset = insertHere.fOffset;
 
         String extra= ""; //$NON-NLS-1$
@@ -81,7 +81,7 @@ public class PropertyFileDocumentModel {
         	((LastKeyValuePair)insertHere).resetNeedsNewLine();
         	offset-= insertHere.fLeadingWhiteSpaces;
         } else if (index > 0) {
-        	String beforeKey= ((KeyValuePair) fKeyValuePairs.get(index - 1)).fKey;
+        	String beforeKey= fKeyValuePairs.get(index - 1).fKey;
 			String afterKey= insertHere.fKey;
 			String key= keyValuePair.fKey;
 			int distBefore= NLSUtil.invertDistance(key, beforeKey);
@@ -111,17 +111,15 @@ public class PropertyFileDocumentModel {
      */
     public void insert(KeyValuePair[] keyValuePairs, TextChange change) {
 
-        ArrayList sorted= new ArrayList(Arrays.asList(keyValuePairs));
-        Collections.sort(sorted, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				KeyValuePair p1= (KeyValuePair) o1;
-				KeyValuePair p2= (KeyValuePair) o2;
+        ArrayList<KeyValuePair> sorted= new ArrayList<KeyValuePair>(Arrays.asList(keyValuePairs));
+        Collections.sort(sorted, new Comparator<KeyValuePair>() {
+			public int compare(KeyValuePair p1, KeyValuePair p2) {
 				return Collator.getInstance().compare(p1.fKey, p2.fKey);
 			}
         });
 
         for (int i = 0; i < sorted.size(); i++) {
-            KeyValuePair curr= (KeyValuePair) sorted.get(i);
+            KeyValuePair curr= sorted.get(i);
 			InsertEdit insertEdit= insert(curr);
 
             String message= Messages.format(NLSMessages.NLSPropertyFileModifier_add_entry, BasicElementLabels.getJavaElementName(curr.getKey()));
@@ -130,8 +128,8 @@ public class PropertyFileDocumentModel {
     }
 
     public DeleteEdit remove(String key) {
-    	for (Iterator iter = fKeyValuePairs.iterator(); iter.hasNext();) {
-            KeyValuePairModell keyValuePair = (KeyValuePairModell) iter.next();
+    	for (Iterator<KeyValuePairModell> iter = fKeyValuePairs.iterator(); iter.hasNext();) {
+            KeyValuePairModell keyValuePair = iter.next();
             if (keyValuePair.fKey.equals(key)) {
             	return new DeleteEdit(keyValuePair.fOffset, keyValuePair.getLength());
             }
@@ -140,8 +138,8 @@ public class PropertyFileDocumentModel {
     }
 
     public ReplaceEdit replace(KeyValuePair toReplace, KeyValuePair replaceWith) {
-        for (Iterator iter = fKeyValuePairs.iterator(); iter.hasNext();) {
-            KeyValuePairModell keyValuePair = (KeyValuePairModell) iter.next();
+        for (Iterator<KeyValuePairModell> iter = fKeyValuePairs.iterator(); iter.hasNext();) {
+            KeyValuePairModell keyValuePair = iter.next();
             if (keyValuePair.fKey.equals(toReplace.getKey())) {
                 String newText= new KeyValuePairModell(replaceWith).getKeyValueText();
                 return new ReplaceEdit(keyValuePair.fOffset, keyValuePair.getLength(), newText);
@@ -151,9 +149,9 @@ public class PropertyFileDocumentModel {
     }
 
     private int findInsertPosition(KeyValuePairModell keyValuePair) {
-    	ArrayList keys= new ArrayList();
+    	ArrayList<String> keys= new ArrayList<String>();
         for (int i= 0; i < fKeyValuePairs.size(); i++) {
-            KeyValuePairModell element = (KeyValuePairModell) fKeyValuePairs.get(i);
+            KeyValuePairModell element = fKeyValuePairs.get(i);
             if (! (element instanceof LastKeyValuePair))
             	keys.add(element.getKey());
         }
@@ -167,7 +165,7 @@ public class PropertyFileDocumentModel {
     }
 
     private void parsePropertyDocument(IDocument document) {
-        fKeyValuePairs = new ArrayList();
+        fKeyValuePairs = new ArrayList<KeyValuePairModell>();
 
         SimpleLineReader reader = new SimpleLineReader(document);
         int offset = 0;

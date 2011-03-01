@@ -39,17 +39,18 @@ public final class CompatibilityTemplateStore extends ContributionTemplateStore 
 		fLegacySet= legacySet;
 	}
 
+	@Override
 	public void load() throws IOException {
 		super.load();
 
 		if (fLegacySet != null) {
 
-			List legacyTemplates= new ArrayList(Arrays.asList(fLegacySet.getTemplates()));
+			List<Template> legacyTemplates= new ArrayList<Template>(Arrays.asList(fLegacySet.getTemplates()));
 			fLegacySet.clear();
 
 			TemplatePersistenceData[] datas= getTemplateData(true);
-			for (Iterator it= legacyTemplates.listIterator(); it.hasNext();) {
-				Template t= (Template) it.next();
+			for (Iterator<Template> it= legacyTemplates.listIterator(); it.hasNext();) {
+				Template t= it.next();
 				TemplatePersistenceData orig= findSimilarTemplate(datas, t, isCodeTemplates());
 				if (orig == null) { // no contributed match for the old template found
 					if (!isCodeTemplates())

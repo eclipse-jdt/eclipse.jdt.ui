@@ -414,7 +414,7 @@ public abstract class DelegateCreator {
 		int firstParam= msg.indexOf("{0}"); //$NON-NLS-1$
 		Assert.isTrue(firstParam != -1);
 
-		List fragments= new ArrayList();
+		List<ASTNode> fragments= new ArrayList<ASTNode>();
 		TextElement text= getAst().newTextElement();
 		text.setText(msg.substring(0, firstParam).trim());
 		fragments.add(text);

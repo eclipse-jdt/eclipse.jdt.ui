@@ -119,7 +119,7 @@ public class UnresolvedElementsSubProcessor {
 
 	private static final String ADD_IMPORT_ID= "org.eclipse.jdt.ui.correction.addImport"; //$NON-NLS-1$
 
-	public static void getVariableProposals(IInvocationContext context, IProblemLocation problem, IVariableBinding resolvedField, Collection proposals) throws CoreException {
+	public static void getVariableProposals(IInvocationContext context, IProblemLocation problem, IVariableBinding resolvedField, Collection<ICommandAccess> proposals) throws CoreException {
 
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -263,7 +263,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	private static void addNewVariableProposals(ICompilationUnit cu, Name node, SimpleName simpleName, Collection proposals) {
+	private static void addNewVariableProposals(ICompilationUnit cu, Name node, SimpleName simpleName, Collection<ICommandAccess> proposals) {
 		String name= simpleName.getIdentifier();
 		BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(node, true);
 		int type= bodyDeclaration.getNodeType();
@@ -298,7 +298,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	private static void addNewFieldProposals(ICompilationUnit cu, CompilationUnit astRoot, ITypeBinding binding, ITypeBinding declaringTypeBinding, SimpleName simpleName, boolean isWriteAccess, Collection proposals) throws JavaModelException {
+	private static void addNewFieldProposals(ICompilationUnit cu, CompilationUnit astRoot, ITypeBinding binding, ITypeBinding declaringTypeBinding, SimpleName simpleName, boolean isWriteAccess, Collection<ICommandAccess> proposals) throws JavaModelException {
 		// new variables
 		ICompilationUnit targetCU;
 		ITypeBinding senderDeclBinding;
@@ -329,7 +329,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	private static void addNewFieldForType(ICompilationUnit targetCU, ITypeBinding binding, ITypeBinding senderDeclBinding, SimpleName simpleName, boolean isWriteAccess, boolean mustBeConst, Collection proposals) {
+	private static void addNewFieldForType(ICompilationUnit targetCU, ITypeBinding binding, ITypeBinding senderDeclBinding, SimpleName simpleName, boolean isWriteAccess, boolean mustBeConst, Collection<ICommandAccess> proposals) {
 		String name= simpleName.getIdentifier();
 		String nameLabel= BasicElementLabels.getJavaElementName(name);
 		String label;
@@ -365,7 +365,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	private static void addSimilarVariableProposals(ICompilationUnit cu, CompilationUnit astRoot, ITypeBinding binding, SimpleName node, boolean isWriteAccess, Collection proposals) {
+	private static void addSimilarVariableProposals(ICompilationUnit cu, CompilationUnit astRoot, ITypeBinding binding, SimpleName node, boolean isWriteAccess, Collection<ICommandAccess> proposals) {
 		int kind= ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY;
 		if (!isWriteAccess) {
 			kind |= ScopeAnalyzer.METHODS; // also try to find similar methods
@@ -414,7 +414,7 @@ public class UnresolvedElementsSubProcessor {
 			ITypeBinding objectBinding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			String identifier= node.getIdentifier();
 			boolean isInStaticContext= ASTResolving.isInStaticContext(node);
-			ArrayList newProposals= new ArrayList(51);
+			ArrayList<CUCorrectionProposal> newProposals= new ArrayList<CUCorrectionProposal>(51);
 
 			loop: for (int i= 0; i < varsAndMethodsInScope.length && newProposals.size() <= 50; i++) {
 				IBinding varOrMeth= varsAndMethodsInScope[i];
@@ -532,7 +532,7 @@ public class UnresolvedElementsSubProcessor {
 	}
 
 
-	public static void getTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void getTypeProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -580,7 +580,7 @@ public class UnresolvedElementsSubProcessor {
 		ReorgCorrectionsSubProcessor.addProjectSetupFixProposal(context, problem, node.getFullyQualifiedName(), proposals);
 	}
 
-	private static void addSimilarTypeProposals(int kind, ICompilationUnit cu, Name node, int relevance, Collection proposals) throws CoreException {
+	private static void addSimilarTypeProposals(int kind, ICompilationUnit cu, Name node, int relevance, Collection<ICommandAccess> proposals) throws CoreException {
 		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, node, kind);
 
 		// try to resolve type in context -> highest severity
@@ -704,7 +704,7 @@ public class UnresolvedElementsSubProcessor {
 		return name.length() == 1 && Character.isUpperCase(name.charAt(0));
 	}
 
-	public static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, Collection proposals) throws JavaModelException {
+	public static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, Collection<ICommandAccess> proposals) throws JavaModelException {
 		Name node= refNode;
 		do {
 			String typeName= ASTNodes.getSimpleNameIdentifier(node);
@@ -795,7 +795,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	public static void getMethodProposals(IInvocationContext context, IProblemLocation problem, boolean isOnlyParameterMismatch, Collection proposals) throws CoreException {
+	public static void getMethodProposals(IInvocationContext context, IProblemLocation problem, boolean isOnlyParameterMismatch, Collection<ICommandAccess> proposals) throws CoreException {
 
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -807,7 +807,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 		SimpleName nameNode= (SimpleName) selectedNode;
 
-		List arguments;
+		List<Expression> arguments;
 		Expression sender;
 		boolean isSuperInvocation;
 
@@ -832,7 +832,7 @@ public class UnresolvedElementsSubProcessor {
 		// corrections
 		IBinding[] bindings= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(nameNode, ScopeAnalyzer.METHODS);
 
-		HashSet suggestedRenames= new HashSet();
+		HashSet<String> suggestedRenames= new HashSet<String>();
 		for (int i= 0; i < bindings.length; i++) {
 			IMethodBinding binding= (IMethodBinding) bindings[i];
 			String curr= binding.getName();
@@ -844,7 +844,7 @@ public class UnresolvedElementsSubProcessor {
 		suggestedRenames= null;
 
 		if (isOnlyParameterMismatch) {
-			ArrayList parameterMismatchs= new ArrayList();
+			ArrayList<IMethodBinding> parameterMismatchs= new ArrayList<IMethodBinding>();
 			for (int i= 0; i < bindings.length; i++) {
 				IMethodBinding binding= (IMethodBinding) bindings[i];
 				if (binding.getName().equals(methodName)) {
@@ -871,7 +871,7 @@ public class UnresolvedElementsSubProcessor {
 
 	}
 
-	private static void addNewMethodProposals(ICompilationUnit cu, CompilationUnit astRoot, Expression sender, List arguments, boolean isSuperInvocation, ASTNode invocationNode, String methodName, Collection proposals) throws JavaModelException {
+	private static void addNewMethodProposals(ICompilationUnit cu, CompilationUnit astRoot, Expression sender, List<Expression> arguments, boolean isSuperInvocation, ASTNode invocationNode, String methodName, Collection<ICommandAccess> proposals) throws JavaModelException {
 		ITypeBinding nodeParentType= Bindings.getBindingOfParentType(invocationNode);
 		ITypeBinding binding= null;
 		if (sender != null) {
@@ -920,7 +920,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	private static void addMissingCastParentsProposal(ICompilationUnit cu, MethodInvocation invocationNode, Collection proposals) {
+	private static void addMissingCastParentsProposal(ICompilationUnit cu, MethodInvocation invocationNode, Collection<ICommandAccess> proposals) {
 		Expression sender= invocationNode.getExpression();
 		if (sender instanceof ThisExpression) {
 			return;
@@ -978,7 +978,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	private static boolean useExistingParentCastProposal(ICompilationUnit cu, CastExpression expression, Expression accessExpression, SimpleName accessSelector, ITypeBinding[] paramTypes, Collection proposals) {
+	private static boolean useExistingParentCastProposal(ICompilationUnit cu, CastExpression expression, Expression accessExpression, SimpleName accessSelector, ITypeBinding[] paramTypes, Collection<ICommandAccess> proposals) {
 		ITypeBinding castType= expression.getType().resolveBinding();
 		if (castType == null) {
 			return false;
@@ -1018,7 +1018,7 @@ public class UnresolvedElementsSubProcessor {
 		return false;
 	}
 
-	private static void addParameterMissmatchProposals(IInvocationContext context, IProblemLocation problem, List similarElements, ASTNode invocationNode, List arguments, Collection proposals) throws CoreException {
+	private static void addParameterMissmatchProposals(IInvocationContext context, IProblemLocation problem, List<IMethodBinding> similarElements, ASTNode invocationNode, List<Expression> arguments, Collection<ICommandAccess> proposals) throws CoreException {
 		int nSimilarElements= similarElements.size();
 		ITypeBinding[] argTypes= getArgumentTypes(arguments);
 		if (argTypes == null || nSimilarElements == 0)  {
@@ -1026,7 +1026,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 
 		for (int i= 0; i < nSimilarElements; i++) {
-			IMethodBinding elem = (IMethodBinding) similarElements.get(i);
+			IMethodBinding elem = similarElements.get(i);
 			int diff= elem.getParameterTypes().length - argTypes.length;
 			if (diff == 0) {
 				int nProposals= proposals.size();
@@ -1042,7 +1042,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	private static void doMoreParameters(IInvocationContext context, ASTNode invocationNode, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection proposals) throws CoreException {
+	private static void doMoreParameters(IInvocationContext context, ASTNode invocationNode, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection<ICommandAccess> proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int k= 0, nSkipped= 0;
 		int diff= paramTypes.length - argTypes.length;
@@ -1125,10 +1125,10 @@ public class UnresolvedElementsSubProcessor {
 		return BasicElementLabels.getJavaElementName(buf.toString());
 	}
 
-	private static String getArgumentName(List arguments, int index) {
+	private static String getArgumentName(List<Expression> arguments, int index) {
 		String def= String.valueOf(index + 1);
 
-		ASTNode expr= (ASTNode) arguments.get(index);
+		ASTNode expr= arguments.get(index);
 		if (expr.getLength() > 18) {
 			return def;
 		}
@@ -1141,7 +1141,7 @@ public class UnresolvedElementsSubProcessor {
 		return '\'' + BasicElementLabels.getJavaElementName(ASTNodes.asString(expr)) + '\'';
 	}
 
-	private static void doMoreArguments(IInvocationContext context, ASTNode invocationNode, List arguments, ITypeBinding[] argTypes, IMethodBinding methodRef, Collection proposals) throws CoreException {
+	private static void doMoreArguments(IInvocationContext context, ASTNode invocationNode, List<Expression> arguments, ITypeBinding[] argTypes, IMethodBinding methodRef, Collection<ICommandAccess> proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodRef.getParameterTypes();
 		int k= 0, nSkipped= 0;
 		int diff= argTypes.length - paramTypes.length;
@@ -1165,7 +1165,7 @@ public class UnresolvedElementsSubProcessor {
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 
 			for (int i= diff - 1; i >= 0; i--) {
-				rewrite.remove((Expression) arguments.get(indexSkipped[i]), null);
+				rewrite.remove(arguments.get(indexSkipped[i]), null);
 			}
 			String[] arg= new String[] { ASTResolving.getMethodSignature(methodRef) };
 			String label;
@@ -1197,7 +1197,7 @@ public class UnresolvedElementsSubProcessor {
 			ITypeBinding[] changeTypes= new ITypeBinding[diff];
 			for (int i= diff - 1; i >= 0; i--) {
 				int idx= indexSkipped[i];
-				Expression arg= (Expression) arguments.get(idx);
+				Expression arg= arguments.get(idx);
 				String name= getExpressionBaseName(arg);
 				ITypeBinding newType= Bindings.normalizeTypeBinding(argTypes[idx]);
 				if (newType == null) {
@@ -1237,10 +1237,10 @@ public class UnresolvedElementsSubProcessor {
 		return meth.isDefaultConstructor();
 	}
 
-	private static ITypeBinding[] getParameterTypes(List args) {
+	private static ITypeBinding[] getParameterTypes(List<Expression> args) {
 		ITypeBinding[] params= new ITypeBinding[args.size()];
 		for (int i= 0; i < args.size(); i++) {
-			Expression expr= (Expression) args.get(i);
+			Expression expr= args.get(i);
 			ITypeBinding curr= Bindings.normalizeTypeBinding(expr.resolveTypeBinding());
 			if (curr != null && curr.isWildcardType()) {
 				curr= ASTResolving.normalizeWildcardType(curr, true, expr.getAST());
@@ -1253,7 +1253,7 @@ public class UnresolvedElementsSubProcessor {
 		return params;
 	}
 
-	private static void doEqualNumberOfParameters(IInvocationContext context, ASTNode invocationNode, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection proposals) throws CoreException {
+	private static void doEqualNumberOfParameters(IInvocationContext context, ASTNode invocationNode, IProblemLocation problem, List<Expression> arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection<ICommandAccess> proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int[] indexOfDiff= new int[paramTypes.length];
 		int nDiffs= 0;
@@ -1284,7 +1284,7 @@ public class UnresolvedElementsSubProcessor {
 
 		if (nDiffs == 1) { // one argument mismatching: try to fix
 			int idx= indexOfDiff[0];
-			Expression nodeToCast= (Expression) arguments.get(idx);
+			Expression nodeToCast= arguments.get(idx);
 			ITypeBinding castType= paramTypes[idx];
 			castType= Bindings.normalizeTypeBinding(castType);
 			if (castType.isWildcardType()) {
@@ -1318,8 +1318,8 @@ public class UnresolvedElementsSubProcessor {
 			int idx2= indexOfDiff[1];
 			boolean canSwap= canAssign(argTypes[idx1], paramTypes[idx2]) && canAssign(argTypes[idx2], paramTypes[idx1]);
 			if (canSwap) {
-				Expression arg1= (Expression) arguments.get(idx1);
-				Expression arg2= (Expression) arguments.get(idx2);
+				Expression arg1= arguments.get(idx1);
+				Expression arg2= arguments.get(idx2);
 
 				ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 				rewrite.replace(arg1, rewrite.createCopyTarget(arg2), null);
@@ -1388,11 +1388,11 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	private static ChangeDescription[] createSignatureChangeDescription(int[] indexOfDiff, int nDiffs, ITypeBinding[] paramTypes, List arguments, ITypeBinding[] argTypes) {
+	private static ChangeDescription[] createSignatureChangeDescription(int[] indexOfDiff, int nDiffs, ITypeBinding[] paramTypes, List<Expression> arguments, ITypeBinding[] argTypes) {
 		ChangeDescription[] changeDesc= new ChangeDescription[paramTypes.length];
 		for (int i= 0; i < nDiffs; i++) {
 			int diffIndex= indexOfDiff[i];
-			Expression arg= (Expression) arguments.get(diffIndex);
+			Expression arg= arguments.get(diffIndex);
 			String name= getExpressionBaseName(arg);
 			ITypeBinding argType= argTypes[diffIndex];
 			if (argType.isWildcardType()) {
@@ -1423,10 +1423,10 @@ public class UnresolvedElementsSubProcessor {
 		return null;
 	}
 
-	private static ITypeBinding[] getArgumentTypes(List arguments) {
+	private static ITypeBinding[] getArgumentTypes(List<Expression> arguments) {
 		ITypeBinding[] res= new ITypeBinding[arguments.size()];
 		for (int i= 0; i < res.length; i++) {
-			Expression expression= (Expression) arguments.get(i);
+			Expression expression= arguments.get(i);
 			ITypeBinding curr= expression.resolveTypeBinding();
 			if (curr == null) {
 				return null;
@@ -1442,7 +1442,7 @@ public class UnresolvedElementsSubProcessor {
 		return res;
 	}
 
-	private static void addQualifierToOuterProposal(IInvocationContext context, MethodInvocation invocationNode, IMethodBinding binding, Collection proposals) {
+	private static void addQualifierToOuterProposal(IInvocationContext context, MethodInvocation invocationNode, IMethodBinding binding, Collection<ICommandAccess> proposals) {
 		ITypeBinding declaringType= binding.getDeclaringClass();
 		ITypeBinding parentType= Bindings.getBindingOfParentType(invocationNode);
 		ITypeBinding currType= parentType;
@@ -1487,7 +1487,7 @@ public class UnresolvedElementsSubProcessor {
 	}
 
 
-	public static void getConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void getConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
@@ -1497,7 +1497,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 
 		ITypeBinding targetBinding= null;
-		List arguments= null;
+		List<Expression> arguments= null;
 		IMethodBinding recursiveConstructor= null;
 
 		int type= selectedNode.getNodeType();
@@ -1527,7 +1527,7 @@ public class UnresolvedElementsSubProcessor {
 			return;
 		}
 		IMethodBinding[] methods= targetBinding.getDeclaredMethods();
-		ArrayList similarElements= new ArrayList();
+		ArrayList<IMethodBinding> similarElements= new ArrayList<IMethodBinding>();
 		for (int i= 0; i < methods.length; i++) {
 			IMethodBinding curr= methods[i];
 			if (curr.isConstructor() && recursiveConstructor != curr) {
@@ -1550,7 +1550,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	public static void getAmbiguosTypeReferenceProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void getAmbiguosTypeReferenceProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		final ICompilationUnit cu= context.getCompilationUnit();
 		int offset= problem.getOffset();
 		int len= problem.getLength();
@@ -1575,7 +1575,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	public static void getArrayAccessProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void getArrayAccessProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 
 		CompilationUnit root= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(root);
@@ -1603,7 +1603,7 @@ public class UnresolvedElementsSubProcessor {
 		proposals.add(new RenameNodeCorrectionProposal(label, context.getCompilationUnit(), offset, length, lengthId, 7));
 	}
 
-	public static void getAnnotationMemberProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void getAnnotationMemberProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		CompilationUnit astRoot= context.getASTRoot();
 		ICompilationUnit cu= context.getCompilationUnit();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);

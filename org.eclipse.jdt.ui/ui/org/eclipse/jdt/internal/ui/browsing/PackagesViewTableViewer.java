@@ -30,6 +30,7 @@ class PackagesViewTableViewer extends ProblemTableViewer implements IPackagesVie
 		super(parent, style);
 	}
 
+	@Override
 	public void mapElement(Object element, Widget item) {
 		if (element instanceof LogicalPackage && item instanceof Item) {
 			LogicalPackage cp= (LogicalPackage) element;
@@ -42,6 +43,7 @@ class PackagesViewTableViewer extends ProblemTableViewer implements IPackagesVie
 		super.mapElement(element, item);
 	}
 
+	@Override
 	public void unmapElement(Object element, Widget item) {
 		if (element instanceof LogicalPackage && item instanceof Item) {
 			LogicalPackage cp= (LogicalPackage) element;
@@ -58,10 +60,11 @@ class PackagesViewTableViewer extends ProblemTableViewer implements IPackagesVie
 	 * @see org.eclipse.jface.viewers.StructuredViewer#getFilteredChildren(java.
 	 * lang.Object)
 	 */
+	@Override
 	protected Object[] getFilteredChildren(Object parent) {
 
 		Object[] result= getRawChildren(parent);
-		List list= new ArrayList();
+		List<Object> list= new ArrayList<Object>();
 		if (result != null) {
 			Object[] toBeFiltered= new Object[1];
 			for (int i= 0; i < result.length; i++) {
@@ -85,26 +88,32 @@ class PackagesViewTableViewer extends ProblemTableViewer implements IPackagesVie
 
 	// --------- see IPackagesViewViewer ----------
 
+	@Override
 	public Widget doFindItem(Object element){
 		return super.doFindItem(element);
 	}
 
+	@Override
 	public Widget doFindInputItem(Object element){
 		return super.doFindInputItem(element);
 	}
 
+	@Override
 	public List getSelectionFromWidget(){
 		return super.getSelectionFromWidget();
 	}
 
+	@Override
 	public void doUpdateItem(Widget item, Object element, boolean fullMap){
 		super.doUpdateItem(item, element, fullMap);
 	}
 
+	@Override
 	public void internalRefresh(Object element){
 		super.internalRefresh(element);
 	}
 
+	@Override
 	public void setSelectionToWidget(List l, boolean reveal){
 		super.setSelectionToWidget(l, reveal);
 	}

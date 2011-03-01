@@ -57,6 +57,7 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled((fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null));
 	}
@@ -67,6 +68,7 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 	 * @param selection the Java text selection
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		setEnabled(RefactoringAvailabilityTester.isIntroduceParameterAvailable(selection));
 	}
@@ -74,6 +76,7 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;

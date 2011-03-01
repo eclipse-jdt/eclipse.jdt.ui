@@ -91,6 +91,7 @@ public class MultiActionGroup extends ActionGroup {
 
 			viewMenu.add(new ContributionItem() {
 
+				@Override
 				public void fill(Menu menu, int index) {
 
 					int style= SWT.CHECK;
@@ -105,6 +106,7 @@ public class MultiActionGroup extends ActionGroup {
 					mi.setSelection(fCurrentSelection == j);
 					mi.addSelectionListener(new SelectionAdapter() {
 
+						@Override
 						public void widgetSelected(SelectionEvent e) {
 							if (fCurrentSelection == j) {
 								fItems[fCurrentSelection].setSelection(true);
@@ -120,6 +122,7 @@ public class MultiActionGroup extends ActionGroup {
 
 					});
 				}
+				@Override
 				public boolean isDynamic() {
 					return false;
 				}

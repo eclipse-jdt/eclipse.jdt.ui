@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,9 +70,9 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 					String varName= doc.get(offset, subject.getLength());
 					TemplateContextType contextType= fProcessor.getContextType();
 					if (contextType != null) {
-						Iterator iter= contextType.resolvers();
+						Iterator<TemplateVariableResolver> iter= contextType.resolvers();
 						while (iter.hasNext()) {
-							TemplateVariableResolver var= (TemplateVariableResolver) iter.next();
+							TemplateVariableResolver var= iter.next();
 							if (varName.equals(var.getType())) {
 								return var.getDescription();
 							}
@@ -106,6 +106,7 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 	/*
 	 * @see SourceViewerConfiguration#getContentAssistant(ISourceViewer)
 	 */
+	@Override
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -153,6 +154,7 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String, int)
 	 * @since 2.1
 	 */
+	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
 		return new TemplateVariableTextHover(fProcessor);
 	}

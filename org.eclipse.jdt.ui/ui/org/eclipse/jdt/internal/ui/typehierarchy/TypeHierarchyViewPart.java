@@ -174,7 +174,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private IJavaElement[] fInputElements;
 
 	// history of input elements. No duplicates
-	private ArrayList fInputHistory;
+	private ArrayList<IJavaElement[]> fInputHistory;
 
 	private IMemento fMemento;
 	private IDialogSettings fDialogSettings;
@@ -283,7 +283,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 		fIsEnableMemberFilter= false;
 
-		fInputHistory= new ArrayList();
+		fInputHistory= new ArrayList<IJavaElement[]>();
 		fAllViewers= null;
 
 		fViewActions= new ToggleViewAction[] {
@@ -374,8 +374,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * @param entry The new entry
 	 */
 	private void addHistoryEntry(IJavaElement[] entry) {
-		for (Iterator iter= fInputHistory.iterator(); iter.hasNext();) {
-			IJavaElement[] elem= (IJavaElement[])iter.next();
+		for (Iterator<IJavaElement[]> iter= fInputHistory.iterator(); iter.hasNext();) {
+			IJavaElement[] elem= iter.next();
 			if (Arrays.equals(elem, entry)) {
 				fInputHistory.remove(elem);
 				break;
@@ -387,7 +387,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	private void updateHistoryEntries() {
 		for (int i= fInputHistory.size() - 1; i >= 0; i--) {
-			IJavaElement[] entries= (IJavaElement[])fInputHistory.get(i);
+			IJavaElement[] entries= fInputHistory.get(i);
 			for (int j= 0; j < entries.length; j++) {
 				IJavaElement elem= entries[j];
 				if (elem != null && !elem.exists()) {
@@ -414,7 +414,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * Gets all history entries.
 	 * @return All history entries
 	 */
-	public List getHistoryEntries() {
+	public List<IJavaElement[]> getHistoryEntries() {
 		if (fInputHistory.size() > 0) {
 			updateHistoryEntries();
 		}
@@ -427,7 +427,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * @param elems the history elements to set
 	 */
 	public void setHistoryEntries(IJavaElement[] elems) {
-		List list= new ArrayList(1);
+		List<IJavaElement[]> list= new ArrayList<IJavaElement[]>(1);
 		list.add(elems);
 		setHistoryEntries(list);
 	}
@@ -438,10 +438,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * @param elems the history elements to set
 	 * @since 3.7
 	 */
-	public void setHistoryEntries(List elems) {
+	public void setHistoryEntries(List<IJavaElement[]> elems) {
 		fInputHistory.clear();
-		for (Iterator iterator= elems.iterator(); iterator.hasNext();) {
-			IJavaElement[] elements= (IJavaElement[])iterator.next();
+		for (Iterator<IJavaElement[]> iterator= elems.iterator(); iterator.hasNext();) {
+			IJavaElement[] elements= iterator.next();
 			if (elements != null && elements.length != 0)
 				fInputHistory.add(elements);
 		}
@@ -672,6 +672,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	/*
 	 * @see IWorbenchPart#setFocus
 	 */
+	@Override
 	public void setFocus() {
 		fPagebook.setFocus();
 	}
@@ -679,6 +680,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	/*
 	 * @see IWorkbenchPart#dispose
 	 */
+	@Override
 	public void dispose() {
 		if (fHierarchyLifeCycle != null) {
 			fHierarchyLifeCycle.freeHierarchy();
@@ -710,6 +712,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
+	@Override
 	public Object getAdapter(Class key) {
 		if (key == IShowInSource.class) {
 			return getShowInSource();
@@ -773,6 +776,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	private KeyListener createKeyListener() {
 		return new KeyAdapter() {
+			@Override
 			public void keyReleased(KeyEvent event) {
 				if (event.stateMask == 0) {
 					if (event.keyCode == SWT.F5) {
@@ -813,6 +817,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fMethodsViewer.addPostSelectionChangedListener(fSelectionChangedListener);
 
 		new OpenAndLinkWithEditorHelper(fMethodsViewer) {
+			@Override
 			protected void activate(ISelection selection) {
 				try {
 					final Object selectedElement= SelectionUtil.getSingleElement(selection);
@@ -823,10 +828,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				}
 			}
 
+			@Override
 			protected void linkToEditor(ISelection selection) {
 				// do nothing: this is handled in more detail by the part itself
 			}
 
+			@Override
 			protected void open(ISelection selection, boolean activate) {
 				if (selection instanceof IStructuredSelection)
 					fOpenAction.run((IStructuredSelection)selection);
@@ -890,6 +897,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * Returns the inner component in a workbench part.
 	 * @see IWorkbenchPart#createPartControl(Composite)
 	 */
+	@Override
 	public void createPartControl(Composite container) {
 		fParent= container;
     	addResizeListener(container);
@@ -1274,7 +1282,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	private void methodSelectionChanged(ISelection sel) {
 		if (sel instanceof IStructuredSelection) {
-			List selected= ((IStructuredSelection)sel).toList();
+			List<?> selected= ((IStructuredSelection)sel).toList();
 			int nSelected= selected.size();
 			if (fIsEnableMemberFilter) {
 				IMember[] memberFilter= null;
@@ -1295,10 +1303,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	private void typeSelectionChanged(ISelection sel) {
 		if (sel instanceof IStructuredSelection) {
-			List selected= ((IStructuredSelection)sel).toList();
+			List<?> selected= ((IStructuredSelection)sel).toList();
 			int nSelected= selected.size();
 			if (nSelected != 0) {
-				List types= new ArrayList(nSelected);
+				List<Object> types= new ArrayList<Object>(nSelected);
 				for (int i= nSelected-1; i >= 0; i--) {
 					Object elem= selected.get(i);
 					if (elem instanceof IType && !types.contains(elem)) {
@@ -1445,6 +1453,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (fTypeOpenAndLinkWithEditorHelper != null)
 				fTypeOpenAndLinkWithEditorHelper.dispose();
 			fTypeOpenAndLinkWithEditorHelper= new OpenAndLinkWithEditorHelper(getCurrentViewer()) {
+				@Override
 				protected void activate(ISelection selection) {
 					try {
 						final Object selectedElement= SelectionUtil.getSingleElement(selection);
@@ -1455,10 +1464,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					}
 				}
 
+				@Override
 				protected void linkToEditor(ISelection selection) {
 					// do nothing: this is handled in more detailed by the part itself
 				}
 
+				@Override
 				protected void open(ISelection selection, boolean activate) {
 					if (selection instanceof IStructuredSelection)
 						fOpenAction.run((IStructuredSelection)selection);
@@ -1609,6 +1620,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	/*
 	 * @see IViewPart#init
 	 */
+	@Override
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 		fMemento= memento;
@@ -1617,6 +1629,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	/*
 	 * @see ViewPart#saveState(IMemento)
 	 */
+	@Override
 	public void saveState(IMemento memento) {
 		if (fPagebook == null) {
 			// part has not been created
@@ -1660,7 +1673,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */
 	private void restoreState(final IMemento memento) {
 		IJavaElement input= null;
-		List inputList= new ArrayList();
+		List<IJavaElement> inputList= new ArrayList<IJavaElement>();
 		String elementId= memento.getString(TAG_INPUT);
 		int i= 0;
 		while (elementId != null) {
@@ -1675,13 +1688,14 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (inputList == null || inputList.size() == 0) {
 			doRestoreState(memento, input);
 		} else {
-			final IJavaElement[] hierarchyInput= (IJavaElement[])inputList.toArray(new IJavaElement[inputList.size()]);
+			final IJavaElement[] hierarchyInput= inputList.toArray(new IJavaElement[inputList.size()]);
 
 			synchronized (this) {
 				String label= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_restoreinput, HistoryAction.getElementLabel(hierarchyInput));
 				fNoHierarchyShownLabel.setText(label);
 
 				fRestoreStateJob= new Job(label) {
+					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						try {
 							doRestoreInBackground(memento, hierarchyInput, monitor);

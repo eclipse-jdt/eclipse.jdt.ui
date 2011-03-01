@@ -39,6 +39,7 @@ public class DelegateFieldCreator extends DelegateCreator {
 
 	private VariableDeclarationFragment fOldFieldFragment;
 
+	@Override
 	protected void initialize() {
 
 		Assert.isTrue(getDeclaration() instanceof FieldDeclaration);
@@ -51,12 +52,14 @@ public class DelegateFieldCreator extends DelegateCreator {
 		setInsertBefore(false); // delegate must be inserted after the original field that is referenced in the initializer
 	}
 
+	@Override
 	protected ASTNode createBody(BodyDeclaration fd) throws JavaModelException {
 		FieldDeclaration result= (FieldDeclaration) fd;
 		Expression initializer= createDelegateFieldInitializer(result);
 		return initializer;
 	}
 
+	@Override
 	protected ASTNode createDocReference(BodyDeclaration declaration) {
 		MemberRef ref= getAst().newMemberRef();
 		ref.setName(getAst().newSimpleName(getNewElementName()));
@@ -66,22 +69,27 @@ public class DelegateFieldCreator extends DelegateCreator {
 		return ref;
 	}
 
+	@Override
 	protected ASTNode getBodyHead(BodyDeclaration result) {
 		return fOldFieldFragment;
 	}
 
+	@Override
 	protected ChildPropertyDescriptor getJavaDocProperty() {
 		return FieldDeclaration.JAVADOC_PROPERTY;
 	}
 
+	@Override
 	protected ChildPropertyDescriptor getBodyProperty() {
 		return VariableDeclarationFragment.INITIALIZER_PROPERTY;
 	}
 
+	@Override
 	protected IBinding getDeclarationBinding() {
 		return fOldFieldFragment.resolveBinding();
 	}
 
+	@Override
 	protected String getTextEditGroupLabel() {
 		return RefactoringCoreMessages.DelegateFieldCreator_text_edit_group_label;
 	}

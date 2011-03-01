@@ -34,11 +34,13 @@ public class MovePackageFragmentRootChange extends PackageFragmentRootReorgChang
 		super(root, destination, null, updateClasspathQuery);
 	}
 
+	@Override
 	protected Change doPerformReorg(IPath destinationPath, IProgressMonitor pm) throws JavaModelException {
 		getRoot().move(destinationPath, getResourceUpdateFlags(), getUpdateModelFlags(false), null, pm);
 		return null;
 	}
 
+	@Override
 	public String getName() {
 		String rootName= JavaElementLabels.getElementLabel(getRoot(), JavaElementLabels.ALL_DEFAULT);
 		String destinationName= BasicElementLabels.getResourceName(getDestination());

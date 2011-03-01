@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -563,7 +563,7 @@ public class Checks {
 	 * @throws JavaModelException
 	 */
 	public static SearchResultGroup[] excludeCompilationUnits(SearchResultGroup[] grouped, RefactoringStatus status) throws JavaModelException{
-		List result= new ArrayList();
+		List<SearchResultGroup> result= new ArrayList<SearchResultGroup>();
 		boolean wasEmpty= grouped.length == 0;
 		for (int i= 0; i < grouped.length; i++){
 			IResource resource= grouped[i].getResource();
@@ -582,7 +582,7 @@ public class Checks {
 		if ((!wasEmpty) && result.isEmpty())
 			status.addFatalError(RefactoringCoreMessages.Checks_all_excluded);
 
-		return (SearchResultGroup[])result.toArray(new SearchResultGroup[result.size()]);
+		return result.toArray(new SearchResultGroup[result.size()]);
 	}
 
 	public static RefactoringStatus checkCompileErrorsInAffectedFiles(SearchResultGroup[] grouped) throws JavaModelException {
@@ -864,7 +864,7 @@ public class Checks {
 		return guessingRequired ? IS_RVALUE_GUESSED : IS_RVALUE;
 	}
 
-	public static boolean isDeclaredIn(VariableDeclaration tempDeclaration, Class astNodeClass) {
+	public static boolean isDeclaredIn(VariableDeclaration tempDeclaration, Class<? extends ASTNode> astNodeClass) {
 		ASTNode initializer= ASTNodes.getParent(tempDeclaration, astNodeClass);
 		if (initializer == null)
 			return false;

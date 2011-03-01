@@ -59,11 +59,13 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 			selectionProvider.addSelectionChangedListener(fAssignWorkingSetAction);
 		}
 
+		@Override
 		public void dispose() {
 			super.dispose();
 			fSelectionProvider.removeSelectionChangedListener(fAssignWorkingSetAction);
 		}
 
+		@Override
 		public void fillContextMenu(IMenuManager menu) {
 			if (fAssignWorkingSetAction.isEnabled())
 				menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fAssignWorkingSetAction);
@@ -85,6 +87,7 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 			/*
 			 * @see org.eclipse.jface.action.Action#run()
 			 */
+			@Override
 			public void run() {
 				fJavaEditor.getViewer().getTextWidget().setFocus();
 			}
@@ -103,6 +106,7 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 		/*
 		 * @see org.eclipse.ui.actions.ActionGroup#fillActionBars(org.eclipse.ui.IActionBars)
 		 */
+		@Override
 		public void fillActionBars(IActionBars actionBars) {
 			super.fillActionBars(actionBars);
 			actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB, fGoToEditor);
@@ -111,6 +115,7 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 		/*
 		 * @see org.eclipse.ui.actions.ActionGroup#fillContextMenu(org.eclipse.jface.action.IMenuManager)
 		 */
+		@Override
 		public void fillContextMenu(IMenuManager menu) {
 			super.fillContextMenu(menu);
 			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGoToEditor);
@@ -138,6 +143,7 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.actions.CompositeActionGroup#fillContextMenu(org.eclipse.jface.action.IMenuManager)
 	 */
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
 

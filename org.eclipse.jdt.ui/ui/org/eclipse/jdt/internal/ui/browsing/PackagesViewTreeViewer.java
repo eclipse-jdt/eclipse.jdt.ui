@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,7 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#mapElement(java.lang.Object, org.eclipse.swt.widgets.Widget)
 	 */
+	@Override
 	public void mapElement(Object element, Widget item) {
 		if (element instanceof LogicalPackage && item instanceof Item) {
 			LogicalPackage cp= (LogicalPackage) element;
@@ -51,6 +52,7 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#unmapElement(java.lang.Object, org.eclipse.swt.widgets.Widget)
 	 */
+	@Override
 	public void unmapElement(Object element, Widget item) {
 
 		if (element instanceof LogicalPackage && item instanceof Item) {
@@ -67,6 +69,7 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer#isFiltered(java.lang.Object, java.lang.Object, org.eclipse.jface.viewers.ViewerFilter[])
 	 */
+	@Override
 	protected boolean isFiltered(Object object, Object parent, ViewerFilter[] filters) {
 		boolean res= super.isFiltered(object, parent, filters);
 		if (res && isEssential(object)) {
@@ -96,26 +99,32 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 
 	// --------- see IPackagesViewViewer ----------
 
+	@Override
 	public Widget doFindItem(Object element) {
 		return super.doFindItem(element);
 	}
 
+	@Override
 	public Widget doFindInputItem(Object element) {
 		return super.doFindInputItem(element);
 	}
 
-	public List getSelectionFromWidget() {
+	@Override
+	public List<?> getSelectionFromWidget() {
 		return super.getSelectionFromWidget();
 	}
 
+	@Override
 	public void doUpdateItem(Widget item, Object element, boolean fullMap){
 		super.doUpdateItem(item, element, fullMap);
 	}
 
+	@Override
 	public void internalRefresh(Object element){
 		super.internalRefresh(element);
 	}
 
+	@Override
 	public void setSelectionToWidget(List l, boolean reveal){
 		super.setSelectionToWidget(l, reveal);
 	}

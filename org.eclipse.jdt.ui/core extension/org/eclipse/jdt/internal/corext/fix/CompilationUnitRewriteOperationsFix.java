@@ -81,6 +81,7 @@ public class CompilationUnitRewriteOperationsFix extends AbstractFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public LinkedProposalModel getLinkedPositions() {
 		if (!fLinkedProposalModel.hasLinkedPositions())
 			return null;
@@ -110,6 +111,7 @@ public class CompilationUnitRewriteOperationsFix extends AbstractFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getAdditionalProposalInfo(){
 		StringBuffer sb= new StringBuffer();
 		for (int i= 0; i < fOperations.length; i++) {

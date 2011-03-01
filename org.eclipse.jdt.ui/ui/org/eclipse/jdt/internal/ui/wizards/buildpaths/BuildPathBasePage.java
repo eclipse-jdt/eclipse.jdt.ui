@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,8 +79,8 @@ public abstract class BuildPathBasePage {
 	}
 
 
-	public abstract List getSelection();
-	public abstract void setSelection(List selection, boolean expand);
+	public abstract List<?> getSelection();
+	public abstract void setSelection(List<?> selection, boolean expand);
 
 
 	/**
@@ -94,8 +94,8 @@ public abstract class BuildPathBasePage {
 
 	public abstract boolean isEntryKind(int kind);
 
-	protected void filterAndSetSelection(List list) {
-		ArrayList res= new ArrayList(list.size());
+	protected void filterAndSetSelection(List<?> list) {
+		ArrayList<Object> res= new ArrayList<Object>(list.size());
 		for (int i= list.size()-1; i >= 0; i--) {
 			Object curr= list.get(i);
 			if (curr instanceof CPListElement) {
@@ -108,13 +108,13 @@ public abstract class BuildPathBasePage {
 		setSelection(res, false);
 	}
 
-	public static void fixNestingConflicts(CPListElement[] newEntries, CPListElement[] existing, Set modifiedSourceEntries) {
+	public static void fixNestingConflicts(CPListElement[] newEntries, CPListElement[] existing, Set<CPListElement> modifiedSourceEntries) {
 		for (int i= 0; i < newEntries.length; i++) {
 			addExclusionPatterns(newEntries[i], existing, modifiedSourceEntries);
 		}
 	}
 
-	private static void addExclusionPatterns(CPListElement newEntry, CPListElement[] existing, Set modifiedEntries) {
+	private static void addExclusionPatterns(CPListElement newEntry, CPListElement[] existing, Set<CPListElement> modifiedEntries) {
 		IPath entryPath= newEntry.getPath();
 		for (int i= 0; i < existing.length; i++) {
 			CPListElement curr= existing[i];
@@ -148,7 +148,7 @@ public abstract class BuildPathBasePage {
 		return false;
 	}
 
-	protected boolean containsOnlyTopLevelEntries(List selElements) {
+	protected boolean containsOnlyTopLevelEntries(List<?> selElements) {
 		if (selElements.size() == 0) {
 			return true;
 		}

@@ -192,6 +192,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		fLinkedProposalModel= linkedProposalModel;
 	}
 
+	@Override
 	public String getName() {
 		return RefactoringCoreMessages.ExtractConstantRefactoring_name;
 	}
@@ -260,8 +261,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 		if (fExcludedVariableNames == null) {
 			try {
 				IExpressionFragment expr= getSelectedExpression();
-				Collection takenNames= new ScopeAnalyzer(fCuRewrite.getRoot()).getUsedVariableNames(expr.getStartPosition(), expr.getLength());
-				fExcludedVariableNames= (String[]) takenNames.toArray(new String[takenNames.size()]);
+				Collection<String> takenNames= new ScopeAnalyzer(fCuRewrite.getRoot()).getUsedVariableNames(expr.getStartPosition(), expr.getLength());
+				fExcludedVariableNames= takenNames.toArray(new String[takenNames.size()]);
 			} catch (JavaModelException e) {
 				fExcludedVariableNames= new String[0];
 			}
@@ -269,6 +270,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return fExcludedVariableNames;
 	}
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 7); //$NON-NLS-1$
@@ -448,6 +450,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.ExtractConstantRefactoring_checking_preconditions, 2);
 
@@ -566,6 +569,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return fConstantTypeCache;
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		ExtractConstantDescriptor descriptor= createRefactoringDescriptor();
 		fChange.setDescriptor(new RefactoringChangeDescriptor(descriptor));
@@ -573,7 +577,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private ExtractConstantDescriptor createRefactoringDescriptor() {
-		final Map arguments= new HashMap();
+		final Map<String, String> arguments= new HashMap<String, String>();
 		String project= null;
 		IJavaProject javaProject= fCu.getJavaProject();
 		if (javaProject != null)
@@ -646,10 +650,10 @@ public class ExtractConstantRefactoring extends Refactoring {
 			return;
 
 		BodyDeclaration lastStaticDependency= null;
-		Iterator decls= getContainingTypeDeclarationNode().bodyDeclarations().iterator();
+		Iterator<BodyDeclaration> decls= getContainingTypeDeclarationNode().bodyDeclarations().iterator();
 
 		while (decls.hasNext()) {
-			BodyDeclaration decl= (BodyDeclaration) decls.next();
+			BodyDeclaration decl= decls.next();
 
 			int modifiers;
 			if (decl instanceof FieldDeclaration)
@@ -689,8 +693,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 		if(bd instanceof FieldDeclaration) {
 			FieldDeclaration fieldDecl = (FieldDeclaration) bd;
-			for(Iterator fragments = fieldDecl.fragments().iterator(); fragments.hasNext();) {
-				VariableDeclarationFragment fragment = (VariableDeclarationFragment) fragments.next();
+			for(Iterator<VariableDeclarationFragment> fragments = fieldDecl.fragments().iterator(); fragments.hasNext();) {
+				VariableDeclarationFragment fragment = fragments.next();
 				SimpleName staticFieldName = fragment.getName();
 				if(selected.getSubFragmentsMatching(ASTFragmentFactory.createFragmentForFullSubtree(staticFieldName)).length != 0)
 					return true;
@@ -742,10 +746,10 @@ public class ExtractConstantRefactoring extends Refactoring {
 	/*
 	 * Elements returned by next() are BodyDeclaration or Annotation instances.
 	 */
-	private Iterator getReplacementScope() throws JavaModelException {
+	private Iterator<ASTNode> getReplacementScope() throws JavaModelException {
 		boolean declPredecessorReached= false;
 
-		Collection scope= new ArrayList();
+		Collection<ASTNode> scope= new ArrayList<ASTNode>();
 
 		AbstractTypeDeclaration containingType= getContainingTypeDeclarationNode();
 		if (containingType instanceof EnumDeclaration) {
@@ -754,15 +758,15 @@ public class ExtractConstantRefactoring extends Refactoring {
 			scope.addAll(enumDeclaration.enumConstants());
 		}
 		
-		for (Iterator iter= containingType.modifiers().iterator(); iter.hasNext();) {
-			IExtendedModifier modifier= (IExtendedModifier)iter.next();
+		for (Iterator<IExtendedModifier> iter= containingType.modifiers().iterator(); iter.hasNext();) {
+			IExtendedModifier modifier= iter.next();
 			if (modifier instanceof Annotation) {
-				scope.add(modifier);
+				scope.add((ASTNode) modifier);
 			}
 		}
 
-		for (Iterator bodyDeclarations = containingType.bodyDeclarations().iterator(); bodyDeclarations.hasNext();) {
-		    BodyDeclaration bodyDeclaration= (BodyDeclaration) bodyDeclarations.next();
+		for (Iterator<BodyDeclaration> bodyDeclarations = containingType.bodyDeclarations().iterator(); bodyDeclarations.hasNext();) {
+		    BodyDeclaration bodyDeclaration= bodyDeclarations.next();
 
 		    if(bodyDeclaration == getNodeToInsertConstantDeclarationAfter())
 		    	declPredecessorReached= true;
@@ -774,11 +778,11 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private IASTFragment[] getFragmentsToReplace() throws JavaModelException {
-		List toReplace = new ArrayList();
+		List<IASTFragment> toReplace = new ArrayList<IASTFragment>();
 		if (fReplaceAllOccurrences) {
-			Iterator replacementScope = getReplacementScope();
+			Iterator<ASTNode> replacementScope = getReplacementScope();
 			while(replacementScope.hasNext()) {
-				ASTNode scope= (ASTNode) replacementScope.next();
+				ASTNode scope= replacementScope.next();
 				IASTFragment[] allMatches= ASTFragmentFactory.createFragmentForFullSubtree(scope).getSubFragmentsMatching(getSelectedExpression());
 				IASTFragment[] replaceableMatches = retainOnlyReplacableMatches(allMatches);
 				for(int i = 0; i < replaceableMatches.length; i++)
@@ -786,17 +790,17 @@ public class ExtractConstantRefactoring extends Refactoring {
 			}
 		} else if (canReplace(getSelectedExpression()))
 			toReplace.add(getSelectedExpression());
-		return (IASTFragment[]) toReplace.toArray(new IASTFragment[toReplace.size()]);
+		return toReplace.toArray(new IASTFragment[toReplace.size()]);
 	}
 
 	// !! - like one in ExtractTempRefactoring
 	private static IASTFragment[] retainOnlyReplacableMatches(IASTFragment[] allMatches) {
-		List result= new ArrayList(allMatches.length);
+		List<IASTFragment> result= new ArrayList<IASTFragment>(allMatches.length);
 		for (int i= 0; i < allMatches.length; i++) {
 			if (canReplace(allMatches[i]))
 				result.add(allMatches[i]);
 		}
-		return (IASTFragment[]) result.toArray(new IASTFragment[result.size()]);
+		return result.toArray(new IASTFragment[result.size()]);
 	}
 
 	// !! - like one in ExtractTempRefactoring

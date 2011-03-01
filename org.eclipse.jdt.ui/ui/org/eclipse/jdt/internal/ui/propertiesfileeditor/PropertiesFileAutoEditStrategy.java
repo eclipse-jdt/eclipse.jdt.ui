@@ -105,6 +105,7 @@ public class PropertiesFileAutoEditStrategy implements IAutoEditStrategy {
 	private void showProposal(final ICompletionProposal proposal, final IDocument document) {
 		if (proposal != null && fSourceViewer instanceof ISourceViewerExtension3) {
 			final WorkbenchJob job= new WorkbenchJob(PropertiesFileEditorMessages.PropertiesFileAutoEditStrategy_showQuickAssist) {
+				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
 					IQuickAssistAssistant assistant= ((ISourceViewerExtension3)fSourceViewer).getQuickAssistAssistant();
 					IQuickAssistProcessor processor= assistant.getQuickAssistProcessor();

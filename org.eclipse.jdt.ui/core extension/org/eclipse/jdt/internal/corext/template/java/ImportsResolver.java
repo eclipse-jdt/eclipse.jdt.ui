@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,16 +38,17 @@ public class ImportsResolver extends TemplateVariableResolver {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
 	 */
+	@Override
 	public void resolve(TemplateVariable variable, TemplateContext context) {
 		variable.setUnambiguous(true);
 		variable.setValue(""); //$NON-NLS-1$
 
 		if (context instanceof JavaContext) {
 			JavaContext jc= (JavaContext) context;
-			List params= variable.getVariableType().getParams();
+			List<String> params= variable.getVariableType().getParams();
 			if (params.size() > 0) {
-				for (Iterator iterator= params.iterator(); iterator.hasNext();) {
-					String typeName= (String) iterator.next();
+				for (Iterator<String> iterator= params.iterator(); iterator.hasNext();) {
+					String typeName= iterator.next();
 					jc.addImport(typeName);
 				}
 			}
@@ -59,6 +60,7 @@ public class ImportsResolver extends TemplateVariableResolver {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolveAll(org.eclipse.jface.text.templates.TemplateContext)
 	 */
+	@Override
 	protected String[] resolveAll(TemplateContext context) {
 		return new String[0];
 	}

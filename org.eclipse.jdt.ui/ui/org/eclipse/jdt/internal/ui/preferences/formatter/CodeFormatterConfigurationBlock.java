@@ -86,18 +86,22 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
 		super(project, access, DIALOGSTORE_LASTSAVELOADPATH);
 	}
 
+	@Override
 	protected IProfileVersioner createProfileVersioner() {
 	    return new ProfileVersioner();
     }
 
+	@Override
 	protected ProfileStore createProfileStore(IProfileVersioner versioner) {
 	    return new FormatterProfileStore(versioner);
     }
 
-	protected ProfileManager createProfileManager(List profiles, IScopeContext context, PreferencesAccess access, IProfileVersioner profileVersioner) {
+	@Override
+	protected ProfileManager createProfileManager(List<Profile> profiles, IScopeContext context, PreferencesAccess access, IProfileVersioner profileVersioner) {
 	    return new FormatterProfileManager(profiles, context, access, profileVersioner);
     }
 
+	@Override
 	protected void configurePreview(Composite composite, int numColumns, ProfileManager profileManager) {
 		createLabel(composite, FormatterMessages.CodingStyleConfigurationBlock_preview_label_text, numColumns);
 		CompilationUnitPreview result= new CompilationUnitPreview(profileManager.getSelected().getSettings(), composite);
@@ -115,7 +119,8 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
 	}
 
 
-    protected ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile) {
+    @Override
+	protected ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile) {
         return new FormatterModifyDialog(shell, profile, profileManager, profileStore, newProfile, FORMATTER_DIALOG_PREFERENCE_KEY, DIALOGSTORE_LASTSAVELOADPATH);
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -103,14 +103,17 @@ public class LinkedProposalPositionGroup {
 			fIsFirst= isFirst;
 		}
 
+		@Override
 		public int getOffset() {
 			return fPos.getStartPosition();
 		}
 
+		@Override
 		public int getLength() {
 			return fPos.getLength();
 		}
 
+		@Override
 		public int getSequenceRank() {
 			return fIsFirst ? 0 : 1;
 		}
@@ -133,6 +136,7 @@ public class LinkedProposalPositionGroup {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.fix.PositionGroup.Proposal#computeEdits(int, org.eclipse.jface.text.link.LinkedPosition, char, int, org.eclipse.jface.text.link.LinkedModeModel)
 		 */
+		@Override
 		public TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model) throws CoreException {
 			ImportRewrite impRewrite= StubUtility.createImportRewrite(fCompilationUnit, true);
 			String replaceString= impRewrite.addImport(fTypeProposal);
@@ -146,14 +150,14 @@ public class LinkedProposalPositionGroup {
 
 
 	private final String fGroupId;
-	private final List/*<Position>*/ fPositions;
-	private final List/*<Proposal>*/ fProposals;
+	private final List<PositionInformation> fPositions;
+	private final List<Proposal> fProposals;
 
 
 	public LinkedProposalPositionGroup(String groupID) {
 		fGroupId= groupID;
-		fPositions= new ArrayList();
-		fProposals= new ArrayList();
+		fPositions= new ArrayList<PositionInformation>();
+		fProposals= new ArrayList<Proposal>();
 	}
 
 	public void addPosition(PositionInformation position) {
@@ -182,11 +186,11 @@ public class LinkedProposalPositionGroup {
 	}
 
 	public PositionInformation[] getPositions() {
-		return (PositionInformation[])fPositions.toArray(new PositionInformation[fPositions.size()]);
+		return fPositions.toArray(new PositionInformation[fPositions.size()]);
 	}
 
 	public Proposal[] getProposals() {
-		return (Proposal[])fProposals.toArray(new Proposal[fProposals.size()]);
+		return fProposals.toArray(new Proposal[fProposals.size()]);
 	}
 
 }

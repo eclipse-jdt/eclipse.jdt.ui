@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,22 +59,25 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 
 	private static class SideEffectFinder extends ASTVisitor {
 
-		private ArrayList fSideEffectNodes;
+		private ArrayList<Expression> fSideEffectNodes;
 
-		public SideEffectFinder(ArrayList res) {
+		public SideEffectFinder(ArrayList<Expression> res) {
 			fSideEffectNodes= res;
 		}
 
+		@Override
 		public boolean visit(Assignment node) {
 			fSideEffectNodes.add(node);
 			return false;
 		}
 
+		@Override
 		public boolean visit(PostfixExpression node) {
 			fSideEffectNodes.add(node);
 			return false;
 		}
 
+		@Override
 		public boolean visit(PrefixExpression node) {
 			Object operator= node.getOperator();
 			if (operator == PrefixExpression.Operator.INCREMENT || operator == PrefixExpression.Operator.DECREMENT) {
@@ -83,16 +86,19 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			return false;
 		}
 
+		@Override
 		public boolean visit(MethodInvocation node) {
 			fSideEffectNodes.add(node);
 			return false;
 		}
 
+		@Override
 		public boolean visit(ClassInstanceCreation node) {
 			fSideEffectNodes.add(node);
 			return false;
 		}
 
+		@Override
 		public boolean visit(SuperMethodInvocation node) {
 			fSideEffectNodes.add(node);
 			return false;
@@ -107,6 +113,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		fName= name;
 	}
 
+	@Override
 	public String getName() {
 		IBinding binding= fName.resolveBinding();
 		String name= BasicElementLabels.getJavaElementName(fName.getIdentifier());
@@ -133,6 +140,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
+	@Override
 	protected ASTRewrite getRewrite() {
 		IBinding binding= fName.resolveBinding();
 		CompilationUnit root= (CompilationUnit) fName.getRoot();
@@ -212,7 +220,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		} else if (nameParentType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) parent;
 			ASTNode varDecl= frag.getParent();
-			List fragments;
+			List<VariableDeclarationFragment> fragments;
 			if (varDecl instanceof VariableDeclarationExpression) {
 				fragments= ((VariableDeclarationExpression) varDecl).fragments();
 			} else if (varDecl instanceof FieldDeclaration) {
@@ -229,7 +237,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 	}
 
 	private void removeVariableWithInitializer(ASTRewrite rewrite, ASTNode initializerNode, ASTNode statementNode) {
-		ArrayList sideEffectNodes= new ArrayList();
+		ArrayList<Expression> sideEffectNodes= new ArrayList<Expression>();
 		initializerNode.accept(new SideEffectFinder(sideEffectNodes));
 		int nSideEffects= sideEffectNodes.size();
 		if (nSideEffects == 0) {

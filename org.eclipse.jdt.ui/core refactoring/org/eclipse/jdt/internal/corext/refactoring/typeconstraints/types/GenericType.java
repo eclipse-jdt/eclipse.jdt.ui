@@ -24,6 +24,7 @@ public final class GenericType extends HierarchyType {
 		super(environment);
 	}
 
+	@Override
 	protected void initialize(ITypeBinding binding, IType javaElementType) {
 		Assert.isTrue(binding.isGenericType());
 		super.initialize(binding, javaElementType);
@@ -35,26 +36,31 @@ public final class GenericType extends HierarchyType {
 		}
 	}
 
+	@Override
 	public int getKind() {
 		return GENERIC_TYPE;
 	}
 
 	public TypeVariable[] getTypeParameters() {
-		return (TypeVariable[]) fTypeParameters.clone();
+		return fTypeParameters.clone();
 	}
 
+	@Override
 	public boolean doEquals(TType type) {
 		return getJavaElementType().equals(((GenericType)type).getJavaElementType());
 	}
 
+	@Override
 	public int hashCode() {
 		return getJavaElementType().hashCode();
 	}
 
+	@Override
 	protected boolean doCanAssignTo(TType type) {
 		return false;
 	}
 
+	@Override
 	protected boolean isTypeEquivalentTo(TType other) {
 		int otherElementType= other.getKind();
 		if (otherElementType == RAW_TYPE || otherElementType == PARAMETERIZED_TYPE)
@@ -62,10 +68,12 @@ public final class GenericType extends HierarchyType {
 		return super.isTypeEquivalentTo(other);
 	}
 
+	@Override
 	public String getName() {
 		return getJavaElementType().getElementName();
 	}
 
+	@Override
 	protected String getPlainPrettySignature() {
 		StringBuffer result= new StringBuffer(getJavaElementType().getFullyQualifiedName('.'));
 		result.append("<"); //$NON-NLS-1$

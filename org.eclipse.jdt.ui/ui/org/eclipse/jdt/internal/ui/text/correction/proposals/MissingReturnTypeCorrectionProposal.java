@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -48,6 +49,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 		fExistingReturn= existingReturn;
 	}
 
+	@Override
 	public String getName() {
 		if (fExistingReturn != null) {
 			return CorrectionMessages.MissingReturnTypeCorrectionProposal_changereturnstatement_description;
@@ -59,6 +61,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
+	@Override
 	protected ASTRewrite getRewrite() {
 		AST ast= fMethodDecl.getAST();
 
@@ -79,11 +82,11 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 
 			Block block= fMethodDecl.getBody();
 
-			List statements= block.statements();
+			List<Statement> statements= block.statements();
 			int nStatements= statements.size();
 			ASTNode lastStatement= null;
 			if (nStatements > 0) {
-				lastStatement= (ASTNode) statements.get(nStatements - 1);
+				lastStatement= statements.get(nStatements - 1);
 			}
 
 			if (returnBinding != null && lastStatement instanceof ExpressionStatement && lastStatement.getNodeType() != ASTNode.ASSIGNMENT) {

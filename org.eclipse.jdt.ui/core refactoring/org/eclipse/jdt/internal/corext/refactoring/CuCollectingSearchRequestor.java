@@ -60,6 +60,7 @@ public class CuCollectingSearchRequestor extends CollectingSearchRequestor {
 	 * @throws CoreException
 	 * @deprecated
 	 */
+	@Override
 	public final void acceptSearchMatch(SearchMatch match) throws CoreException {
 		if (filterMatch(match))
 			return;
@@ -83,6 +84,7 @@ public class CuCollectingSearchRequestor extends CollectingSearchRequestor {
 		collectMatch(match);
 	}
 
+	@Override
 	public void endReporting() {
 		fProjectCache= null;
 		fScannerCache= null;

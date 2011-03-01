@@ -100,6 +100,7 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 		}
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof ClassPathContainer) {
 			ClassPathContainer other = (ClassPathContainer)obj;
@@ -112,16 +113,19 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		return getJavaProject().hashCode()*17+fClassPathEntry.hashCode();
 	}
 
+	@Override
 	public IPackageFragmentRoot[] getPackageFragmentRoots() {
 		return getJavaProject().findPackageFragmentRoots(fClassPathEntry);
 	}
 
+	@Override
 	public IAdaptable[] getChildren() {
-		List list= new ArrayList();
+		List<IAdaptable> list= new ArrayList<IAdaptable>();
 		IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
 			list.add(roots[i]);
@@ -143,13 +147,15 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 				}
 			}
 		}
-		return (IAdaptable[]) list.toArray(new IAdaptable[list.size()]);
+		return list.toArray(new IAdaptable[list.size()]);
 	}
 
+	@Override
 	public ImageDescriptor getImageDescriptor() {
 		return JavaPluginImages.DESC_OBJS_LIBRARY;
 	}
 
+	@Override
 	public String getLabel() {
 		if (fContainer != null)
 			return fContainer.getDescription();

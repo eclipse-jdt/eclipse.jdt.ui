@@ -90,12 +90,14 @@ public class OpenAttachedJavadocAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canEnableFor(selection));
 	}
@@ -115,6 +117,7 @@ public class OpenAttachedJavadocAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		IJavaElement element= SelectionConverter.getInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), element))
@@ -141,6 +144,7 @@ public class OpenAttachedJavadocAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		if (!canEnableFor(selection))
 			return;
@@ -239,6 +243,7 @@ public class OpenAttachedJavadocAction extends SelectionDispatchAction {
 	 * 
 	 * @return the site's shell
 	 */
+	@Override
 	public Shell getShell() {
 		if (fShell != null)
 			return fShell;

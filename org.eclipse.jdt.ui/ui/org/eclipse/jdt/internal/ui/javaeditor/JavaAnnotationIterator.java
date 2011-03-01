@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,9 +24,9 @@ import org.eclipse.ui.texteditor.MarkerAnnotation;
 /**
  * Filters problems based on their types.
  */
-public class JavaAnnotationIterator implements Iterator {
+public class JavaAnnotationIterator implements Iterator<Annotation> {
 
-	private Iterator fIterator;
+	private Iterator<Annotation> fIterator;
 	private Annotation fNext;
 	private boolean fReturnAllAnnotations;
 
@@ -36,7 +36,7 @@ public class JavaAnnotationIterator implements Iterator {
 	 * @param parent the parent iterator to iterate over annotations
 	 * @param returnAllAnnotations whether to return all annotations or just problem annotations
 	 */
-	public JavaAnnotationIterator(Iterator parent, boolean returnAllAnnotations) {
+	public JavaAnnotationIterator(Iterator<Annotation> parent, boolean returnAllAnnotations) {
 		fReturnAllAnnotations= returnAllAnnotations;
 		fIterator= parent;
 		skip();
@@ -44,7 +44,7 @@ public class JavaAnnotationIterator implements Iterator {
 
 	private void skip() {
 		while (fIterator.hasNext()) {
-			Annotation next= (Annotation) fIterator.next();
+			Annotation next= fIterator.next();
 
 			if (next.isMarkedDeleted())
 				continue;
@@ -77,7 +77,7 @@ public class JavaAnnotationIterator implements Iterator {
 	/*
 	 * @see Iterator#next()
 	 */
-	public Object next() {
+	public Annotation next() {
 		try {
 			return fNext;
 		} finally {

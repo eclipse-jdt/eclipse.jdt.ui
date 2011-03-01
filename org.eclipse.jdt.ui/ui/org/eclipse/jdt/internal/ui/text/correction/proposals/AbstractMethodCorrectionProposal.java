@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,16 +24,21 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -72,6 +77,7 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 		return fSenderBinding;
 	}
 
+	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
 		ASTNode typeDecl= astRoot.findDeclaringNode(fSenderBinding);
@@ -93,7 +99,7 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 			MethodDeclaration newStub= getStub(rewrite, newTypeDecl);
 
 			ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
-			List members= (List) newTypeDecl.getStructuralProperty(property);
+			List<BodyDeclaration> members= (List<BodyDeclaration>) newTypeDecl.getStructuralProperty(property);
 
 			int insertIndex;
 			if (isConstructor()) {
@@ -121,7 +127,7 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 
 		addNewModifiers(rewrite, targetTypeDecl, decl.modifiers());
 
-		ArrayList takenNames= new ArrayList();
+		ArrayList<String> takenNames= new ArrayList<String>();
 		addNewTypeParameters(rewrite, takenNames, decl.typeParameters());
 
 		decl.setName(newNameNode);
@@ -152,7 +158,7 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 			body= ast.newBlock();
 			String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), fSenderBinding.getName(), newNameNode.getIdentifier(), isConstructor(), bodyStatement, String.valueOf('\n'));
 			if (placeHolder != null) {
-				ASTNode todoNode= rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
+				ReturnStatement todoNode= (ReturnStatement)rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
 				body.statements().add(todoNode);
 			}
 		}
@@ -169,10 +175,10 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 		return decl;
 	}
 
-	private int findMethodInsertIndex(List decls, int currPos) {
+	private int findMethodInsertIndex(List<BodyDeclaration> decls, int currPos) {
 		int nDecls= decls.size();
 		for (int i= 0; i < nDecls; i++) {
-			ASTNode curr= (ASTNode) decls.get(i);
+			BodyDeclaration curr= decls.get(i);
 			if (curr instanceof MethodDeclaration && currPos < curr.getStartPosition() + curr.getLength()) {
 				return i + 1;
 			}
@@ -180,11 +186,11 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 		return nDecls;
 	}
 
-	private int findConstructorInsertIndex(List decls) {
+	private int findConstructorInsertIndex(List<BodyDeclaration> decls) {
 		int nDecls= decls.size();
 		int lastMethod= 0;
 		for (int i= nDecls - 1; i >= 0; i--) {
-			ASTNode curr= (ASTNode) decls.get(i);
+			BodyDeclaration curr= decls.get(i);
 			if (curr instanceof MethodDeclaration) {
 				if (((MethodDeclaration) curr).isConstructor()) {
 					return i + 1;
@@ -197,10 +203,10 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 
 	protected abstract boolean isConstructor();
 
-	protected abstract void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List exceptions);
-	protected abstract void addNewTypeParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException;
-	protected abstract void addNewParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException;
-	protected abstract void addNewExceptions(ASTRewrite rewrite, List exceptions) throws CoreException;
+	protected abstract void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> exceptions);
+	protected abstract void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params) throws CoreException;
+	protected abstract void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params) throws CoreException;
+	protected abstract void addNewExceptions(ASTRewrite rewrite, List<Name> exceptions) throws CoreException;
 
 	protected abstract SimpleName getNewName(ASTRewrite rewrite);
 	protected abstract Type getNewMethodType(ASTRewrite rewrite) throws CoreException;

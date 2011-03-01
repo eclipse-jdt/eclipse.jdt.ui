@@ -136,14 +136,17 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 		delegeteLabelProvider.removeListener(listener);
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		return delegeteLabelProvider.equals(obj);
 	}
 
+	@Override
 	public int hashCode() {
 		return delegeteLabelProvider.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return delegeteLabelProvider.toString();
 	}

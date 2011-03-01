@@ -73,6 +73,7 @@ public class CPListLabelProvider extends LabelProvider {
 		fAttributeDescriptors= JavaPlugin.getDefault().getClasspathAttributeConfigurationDescriptors();
 	}
 
+	@Override
 	public String getText(Object element) {
 		if (element instanceof CPListElement) {
 			return getCPListElementText((CPListElement) element);
@@ -389,6 +390,7 @@ public class CPListLabelProvider extends LabelProvider {
 		}
 	}
 
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof CPListElement) {
 			CPListElement cpentry= (CPListElement) element;

@@ -29,7 +29,6 @@ import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.rules.FastPartitioner;
 import org.eclipse.jface.text.source.LineRange;
@@ -74,7 +73,7 @@ public class JavaFormatter {
 		private static final String CATEGORY= "__template_variables"; //$NON-NLS-1$
 		private Document fDocument;
 		private final TemplateBuffer fBuffer;
-		private List fPositions;
+		private List<TypedPosition> fPositions;
 
 		/**
 		 * Creates a new tracker.
@@ -149,11 +148,11 @@ public class JavaFormatter {
 			return fBuffer;
 		}
 
-		private List createRangeMarkers(TemplateVariable[] variables, IDocument document) throws MalformedTreeException, BadLocationException {
-			Map markerToOriginal= new HashMap();
+		private List<TypedPosition> createRangeMarkers(TemplateVariable[] variables, IDocument document) throws MalformedTreeException, BadLocationException {
+			Map<ReplaceEdit, String> markerToOriginal= new HashMap<ReplaceEdit, String>();
 
 			MultiTextEdit root= new MultiTextEdit(0, document.getLength());
-			List edits= new ArrayList();
+			List<TextEdit> edits= new ArrayList<TextEdit>();
 			boolean hasModifications= false;
 			for (int i= 0; i != variables.length; i++) {
 				final TemplateVariable variable= variables[i];
@@ -184,12 +183,12 @@ public class JavaFormatter {
 				root.apply(document, TextEdit.UPDATE_REGIONS);
 			}
 
-			List positions= new ArrayList();
-			for (Iterator it= edits.iterator(); it.hasNext();) {
-				TextEdit edit= (TextEdit) it.next();
+			List<TypedPosition> positions= new ArrayList<TypedPosition>();
+			for (Iterator<TextEdit> it= edits.iterator(); it.hasNext();) {
+				TextEdit edit= it.next();
 				try {
 					// abuse TypedPosition to piggy back the original contents of the position
-					final TypedPosition pos= new TypedPosition(edit.getOffset(), edit.getLength(), (String) markerToOriginal.get(edit));
+					final TypedPosition pos= new TypedPosition(edit.getOffset(), edit.getLength(), markerToOriginal.get(edit));
 					document.addPosition(CATEGORY, pos);
 					positions.add(pos);
 				} catch (BadPositionCategoryException x) {
@@ -205,11 +204,11 @@ public class JavaFormatter {
 			return length == 0 || Character.isWhitespace(value.charAt(0)) || Character.isWhitespace(value.charAt(length - 1));
 		}
 
-		private void removeRangeMarkers(List positions, IDocument document, TemplateVariable[] variables) throws MalformedTreeException, BadLocationException, BadPositionCategoryException {
+		private void removeRangeMarkers(List<TypedPosition> positions, IDocument document, TemplateVariable[] variables) throws MalformedTreeException, BadLocationException, BadPositionCategoryException {
 
 			// revert previous changes
-			for (Iterator it= positions.iterator(); it.hasNext();) {
-				TypedPosition position= (TypedPosition) it.next();
+			for (Iterator<TypedPosition> it= positions.iterator(); it.hasNext();) {
+				TypedPosition position= it.next();
 				// remove and re-add in order to not confuse ExclusivePositionUpdater
 				document.removePosition(CATEGORY, position);
 				final String original= position.getType();
@@ -220,13 +219,13 @@ public class JavaFormatter {
 				document.addPosition(position);
 			}
 
-			Iterator it= positions.iterator();
+			Iterator<TypedPosition> it= positions.iterator();
 			for (int i= 0; i != variables.length; i++) {
 				TemplateVariable variable= variables[i];
 
 				int[] offsets= new int[variable.getOffsets().length];
 				for (int j= 0; j != offsets.length; j++)
-					offsets[j]= ((Position) it.next()).getOffset();
+					offsets[j]= it.next().getOffset();
 
 				variable.setOffsets(offsets);
 			}
@@ -335,7 +334,7 @@ public class JavaFormatter {
 	}
 
 	private void format(IDocument doc, CompilationUnitContext context) throws BadLocationException {
-		Map options;
+		Map<String, String> options;
 		IJavaProject project= context.getJavaProject();
 		if (project != null)
 			options= project.getOptions(true);

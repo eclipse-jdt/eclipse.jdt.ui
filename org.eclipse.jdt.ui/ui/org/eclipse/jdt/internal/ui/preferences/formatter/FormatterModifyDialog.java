@@ -24,7 +24,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 		super(parentShell, profile, profileManager, profileStore, newProfile, dialogPreferencesKey, lastSavePathKey);
 	}
 
-	protected void addPages(Map values) {
+	@Override
+	protected void addPages(Map<String, String> values) {
 		addTabPage(FormatterMessages.ModifyDialog_tabpage_indentation_title, new IndentationTabPage(this, values));
 		addTabPage(FormatterMessages.ModifyDialog_tabpage_braces_title, new BracesTabPage(this, values));
 		addTabPage(FormatterMessages.ModifyDialog_tabpage_whitespace_title, new WhiteSpaceTabPage(this, values));
@@ -41,6 +42,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 	 * 
 	 * @since 3.5
 	 */
+	@Override
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.CODEFORMATTER_PREFERENCE_PAGE;
 	}

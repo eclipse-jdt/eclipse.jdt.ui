@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -78,7 +79,7 @@ public class ClasspathModifier {
 		if (!allowInvalidCP && cpProject.getDefaultOutputLocation().segmentCount() == 1 && !projectPath.equals(elementToChange.getPath())) {
 			String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
 			cpProject.setDefaultOutputLocation(cpProject.getDefaultOutputLocation().append(outputFolderName));
-			List existingEntries= cpProject.getCPListElements();
+			List<CPListElement> existingEntries= cpProject.getCPListElements();
 			CPListElement elem= ClasspathModifier.getListElement(javaProject.getPath(), existingEntries);
             if (elem != null) {
             	existingEntries.remove(elem);
@@ -87,7 +88,7 @@ public class ClasspathModifier {
 		}
 
 		if (outputPath != null)
-			exclude(outputPath, cpProject.getCPListElements(), new ArrayList(), cpProject.getJavaProject(), null);
+			exclude(outputPath, cpProject.getCPListElements(), new ArrayList<CPListElement>(), cpProject.getJavaProject(), null);
 
 		IPath oldOutputLocation= (IPath)elementToChange.getAttribute(CPListElement.OUTPUT);
         if (oldOutputLocation != null && oldOutputLocation.segmentCount() > 1 && !oldOutputLocation.equals(cpProject.getDefaultOutputLocation())) {
@@ -97,7 +98,7 @@ public class ClasspathModifier {
 		elementToChange.setAttribute(CPListElement.OUTPUT, outputPath);
 
 		result.setDefaultOutputLocation(cpProject.getDefaultOutputLocation());
-		result.setNewEntries((CPListElement[])cpProject.getCPListElements().toArray(new CPListElement[cpProject.getCPListElements().size()]));
+		result.setNewEntries(cpProject.getCPListElements().toArray(new CPListElement[cpProject.getCPListElements().size()]));
 		if (outputPath != null && outputPath.segmentCount() > 1) {
 			result.addCreatedResource(workspace.getRoot().getFolder(outputPath));
 		}
@@ -140,7 +141,7 @@ public class ClasspathModifier {
 			result= new StatusInfo(IStatus.INFO, Messages.format(NewWizardMessages.OutputLocationDialog_removeProjectFromBP, BasicElementLabels.getPathLabel(cpProject.getDefaultOutputLocation(), false)));
 		}
 
-		exclude(outputPath, cpProject.getCPListElements(), new ArrayList(), cpProject.getJavaProject(), null);
+		exclude(outputPath, cpProject.getCPListElements(), new ArrayList<CPListElement>(), cpProject.getJavaProject(), null);
 
 		IPath oldOutputLocation= (IPath)elementToChange.getAttribute(CPListElement.OUTPUT);
         if (oldOutputLocation != null && oldOutputLocation.segmentCount() > 1 && !oldOutputLocation.equals(cpProject.getDefaultOutputLocation())) {
@@ -193,9 +194,9 @@ public class ClasspathModifier {
 
     	IJavaProject javaProject= cpProject.getJavaProject();
 
-    	List newEntries= new ArrayList();
-    	List duplicateEntries= new ArrayList();
-    	List existingEntries= cpProject.getCPListElements();
+    	List<CPListElement> newEntries= new ArrayList<CPListElement>();
+    	List<CPListElement> duplicateEntries= new ArrayList<CPListElement>();
+    	List<CPListElement> existingEntries= cpProject.getCPListElements();
     	for (int i= 0; i < absolutePaths.length; i++) {
 	        CPListElement newEntry= new CPListElement(javaProject, IClasspathEntry.CPE_LIBRARY, absolutePaths[i], null);
 	        if (existingEntries.contains(newEntry)) {
@@ -209,13 +210,13 @@ public class ClasspathModifier {
 			String message;
 			if (duplicateEntries.size() > 1) {
 				StringBuffer buf= new StringBuffer();
-				for (Iterator iterator= duplicateEntries.iterator(); iterator.hasNext();) {
-	                CPListElement dup= (CPListElement)iterator.next();
+				for (Iterator<CPListElement> iterator= duplicateEntries.iterator(); iterator.hasNext();) {
+	                CPListElement dup= iterator.next();
 	                buf.append('\n').append(BasicElementLabels.getResourceName(dup.getPath().lastSegment()));
                 }
 				message= Messages.format(NewWizardMessages.AddArchiveToBuildpathAction_DuplicateArchivesInfo_message, buf.toString());
 			} else {
-				message= Messages.format(NewWizardMessages.AddArchiveToBuildpathAction_DuplicateArchiveInfo_message, BasicElementLabels.getResourceName(((CPListElement)duplicateEntries.get(0)).getPath().lastSegment()));
+				message= Messages.format(NewWizardMessages.AddArchiveToBuildpathAction_DuplicateArchiveInfo_message, BasicElementLabels.getResourceName(duplicateEntries.get(0).getPath().lastSegment()));
 			}
 			result= new StatusInfo(IStatus.INFO, message);
 		}
@@ -226,8 +227,8 @@ public class ClasspathModifier {
 		cpProject= cpProject.createWorkingCopy();
 		existingEntries= cpProject.getCPListElements();
 
-		for (Iterator iterator= newEntries.iterator(); iterator.hasNext();) {
-            CPListElement newEntry= (CPListElement)iterator.next();
+		for (Iterator<CPListElement> iterator= newEntries.iterator(); iterator.hasNext();) {
+            CPListElement newEntry= iterator.next();
             insertAtEndOfCategory(newEntry, existingEntries);
         }
 
@@ -243,7 +244,7 @@ public class ClasspathModifier {
 
     	IJavaProject javaProject= cpProject.getJavaProject();
 
-    	List existingEntries= cpProject.getCPListElements();
+    	List<CPListElement> existingEntries= cpProject.getCPListElements();
     	for (int i= 0; i < absolutePaths.length; i++) {
 	        CPListElement newEntry= new CPListElement(javaProject, IClasspathEntry.CPE_LIBRARY, absolutePaths[i], null);
 	        if (!existingEntries.contains(newEntry)) {
@@ -252,7 +253,7 @@ public class ClasspathModifier {
 	        }
         }
 
-		result.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
+		result.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));
 		result.setDefaultOutputLocation(cpProject.getDefaultOutputLocation());
 		return result;
     }
@@ -263,7 +264,7 @@ public class ClasspathModifier {
 		IPath projectPath= javaProject.getPath();
         IWorkspaceRoot workspaceRoot= javaProject.getProject().getWorkspace().getRoot();
 
-    	List existingEntries= cpProject.getCPListElements();
+    	List<CPListElement> existingEntries= cpProject.getCPListElements();
 		BuildpathDelta result= new BuildpathDelta(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip);
 
 		for (int i= 0; i < toRemove.length; i++) {
@@ -283,15 +284,15 @@ public class ClasspathModifier {
         }
 
 		result.setDefaultOutputLocation(cpProject.getDefaultOutputLocation());
-    	result.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
+    	result.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));
 
 	    return result;
     }
 
     private static boolean containsSourceFolders(CPJavaProject cpProject) {
-    	List elements= cpProject.getCPListElements();
-    	for (Iterator iterator= elements.iterator(); iterator.hasNext();) {
-	        CPListElement element= (CPListElement)iterator.next();
+    	List<CPListElement> elements= cpProject.getCPListElements();
+    	for (Iterator<CPListElement> iterator= elements.iterator(); iterator.hasNext();) {
+	        CPListElement element= iterator.next();
 	        if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE)
 	        	return true;
         }
@@ -299,9 +300,9 @@ public class ClasspathModifier {
     }
 
 	private static void include(CPJavaProject cpProject, IPath path) {
-	    List elements= cpProject.getCPListElements();
-	    for (Iterator iterator= elements.iterator(); iterator.hasNext();) {
-	        CPListElement element= (CPListElement)iterator.next();
+	    List<CPListElement> elements= cpProject.getCPListElements();
+	    for (Iterator<CPListElement> iterator= elements.iterator(); iterator.hasNext();) {
+	        CPListElement element= iterator.next();
 	        element.removeFromExclusions(path);
 	    }
     }
@@ -315,9 +316,9 @@ public class ClasspathModifier {
 	 * build path entries of the project
 	 * @throws JavaModelException
 	 */
-	public static List getExistingEntries(IJavaProject project) throws JavaModelException {
+	public static List<CPListElement> getExistingEntries(IJavaProject project) throws JavaModelException {
 		IClasspathEntry[] classpathEntries= project.getRawClasspath();
-		ArrayList newClassPath= new ArrayList();
+		ArrayList<CPListElement> newClassPath= new ArrayList<CPListElement>();
 		for (int i= 0; i < classpathEntries.length; i++) {
 			IClasspathEntry curr= classpathEntries[i];
 			newClassPath.add(CPListElement.createFromExisting(curr, project));
@@ -338,12 +339,12 @@ public class ClasspathModifier {
 	 * the roots own <code>IClasspathEntry</code> converted to a <code>CPListElement</code>.
 	 * @throws JavaModelException
 	 */
-	public static CPListElement getClasspathEntry(List elements, IPackageFragmentRoot root) throws JavaModelException {
+	public static CPListElement getClasspathEntry(List<CPListElement> elements, IPackageFragmentRoot root) throws JavaModelException {
 		IClasspathEntry entry= root.getRawClasspathEntry();
 		for (int i= 0; i < elements.size(); i++) {
-			CPListElement element= (CPListElement) elements.get(i);
+			CPListElement element= elements.get(i);
 			if (element.getPath().equals(root.getPath()) && element.getEntryKind() == entry.getEntryKind())
-				return (CPListElement) elements.get(i);
+				return elements.get(i);
 		}
 		CPListElement newElement= CPListElement.createFromExisting(entry, root.getJavaProject());
 		elements.add(newElement);
@@ -516,7 +517,7 @@ public class ClasspathModifier {
 	}
 
 	/**
-	 * Check wheter the output location of the <code>IPackageFragmentRoot</code>
+	 * Check whether the output location of the <code>IPackageFragmentRoot</code>
 	 * is <code>null</code>. If this holds, then the root
 	 * does use the default output folder.
 	 *
@@ -641,7 +642,7 @@ public class ClasspathModifier {
 	}
 
 	/**
-	 * Check whether the input paramenter of type <code>
+	 * Check whether the input parameter of type <code>
 	 * IPackageFragmentRoot</code> has either it's inclusion or
 	 * exclusion filter or both set (that means they are
 	 * not empty).
@@ -676,7 +677,7 @@ public class ClasspathModifier {
 	 * @throws CoreException
 	 * @throws OperationCanceledException
 	 */
-	public static CPListElement addToClasspath(IResource resource, List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+	public static CPListElement addToClasspath(IResource resource, List<CPListElement> existingEntries, List<CPListElement> newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -718,7 +719,7 @@ public class ClasspathModifier {
 	 * @throws CoreException
 	 * @throws OperationCanceledException
 	 */
-	public static CPListElement addToClasspath(IJavaElement javaElement, List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+	public static CPListElement addToClasspath(IJavaElement javaElement, List<CPListElement> existingEntries, List<CPListElement> newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -739,7 +740,7 @@ public class ClasspathModifier {
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @return returns the Java project
 	 */
-	public static IJavaProject removeFromClasspath(IJavaProject project, List existingEntries, IProgressMonitor monitor) {
+	public static IJavaProject removeFromClasspath(IJavaProject project, List<CPListElement> existingEntries, IProgressMonitor monitor) {
 		CPListElement elem= getListElement(project.getPath(), existingEntries);
 		if (elem != null) {
 			existingEntries.remove(elem);
@@ -756,22 +757,22 @@ public class ClasspathModifier {
 	 * entries of the project.
 	 * @return returns a <code>List</code> of <code>CPListElement</code> of modified elements, not null.
 	 */
-	public static List removeFilters(IPath path, IJavaProject project, List existingEntries) {
+	public static List<CPListElement> removeFilters(IPath path, IJavaProject project, List<CPListElement> existingEntries) {
 		if (path == null)
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 
 		IPath projPath= project.getPath();
 		if (projPath.isPrefixOf(path)) {
 			path= path.removeFirstSegments(projPath.segmentCount()).addTrailingSeparator();
 		}
 
-		List result= new ArrayList();
-		for (Iterator iter= existingEntries.iterator(); iter.hasNext();) {
-			CPListElement element= (CPListElement)iter.next();
+		List<CPListElement> result= new ArrayList<CPListElement>();
+		for (Iterator<CPListElement> iter= existingEntries.iterator(); iter.hasNext();) {
+			CPListElement element= iter.next();
 			boolean hasChange= false;
 			IPath[] exlusions= (IPath[])element.getAttribute(CPListElement.EXCLUSION);
 			if (exlusions != null) {
-				List exlusionList= new ArrayList(exlusions.length);
+				List<IPath> exlusionList= new ArrayList<IPath>(exlusions.length);
 				for (int i= 0; i < exlusions.length; i++) {
 					if (!exlusions[i].equals(path)) {
 						exlusionList.add(exlusions[i]);
@@ -784,7 +785,7 @@ public class ClasspathModifier {
 
 			IPath[] inclusion= (IPath[])element.getAttribute(CPListElement.INCLUSION);
 			if (inclusion != null) {
-				List inclusionList= new ArrayList(inclusion.length);
+				List<IPath> inclusionList= new ArrayList<IPath>(inclusion.length);
 				for (int i= 0; i < inclusion.length; i++) {
 					if (!inclusion[i].equals(path)) {
 						inclusionList.add(inclusion[i]);
@@ -856,7 +857,7 @@ public class ClasspathModifier {
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @throws JavaModelException
 	 */
-	public static void exclude(IPath path, List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	public static void exclude(IPath path, List<CPListElement> existingEntries, List<CPListElement> newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -957,7 +958,7 @@ public class ClasspathModifier {
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ResetFilters, 3);
 
-			List exclusionList= getFoldersOnCP(element.getPath(), project, new SubProgressMonitor(monitor, 2));
+			List<Path> exclusionList= getFoldersOnCP(element.getPath(), project, new SubProgressMonitor(monitor, 2));
 			IPath outputLocation= (IPath) entry.getAttribute(CPListElement.OUTPUT);
 			if (outputLocation != null) {
 				IPath[] exclusionPatterns= (IPath[]) entry.getAttribute(CPListElement.EXCLUSION);
@@ -965,7 +966,7 @@ public class ClasspathModifier {
 					exclusionList.add(new Path(completeName(outputLocation.lastSegment())));
 				}
 			}
-			IPath[] exclusions= (IPath[]) exclusionList.toArray(new IPath[exclusionList.size()]);
+			IPath[] exclusions= exclusionList.toArray(new IPath[exclusionList.size()]);
 
 			entry.setAttribute(CPListElement.INCLUSION, new IPath[0]);
 			entry.setAttribute(CPListElement.EXCLUSION, exclusions);
@@ -999,10 +1000,10 @@ public class ClasspathModifier {
 	 * @return the <code>CPListElement</code> found in the list (matching by using the path) or
 	 * the second <code>CPListElement</code> parameter itself if there is no match.
 	 */
-	public static CPListElement getClasspathEntry(List elements, CPListElement cpElement) {
+	public static CPListElement getClasspathEntry(List<CPListElement> elements, CPListElement cpElement) {
 		for (int i= 0; i < elements.size(); i++) {
-			if (((CPListElement) elements.get(i)).getPath().equals(cpElement.getPath()))
-				return (CPListElement) elements.get(i);
+			if (elements.get(i).getPath().equals(cpElement.getPath()))
+				return elements.get(i);
 		}
 		elements.add(cpElement);
 		return cpElement;
@@ -1013,12 +1014,12 @@ public class ClasspathModifier {
 	 *
 	 * @param path the path to found an entry for
 	 * @param elements a list of <code>CPListElement</code>s
-	 * @return the mathed <code>CPListElement</code> or <code>null</code> if
+	 * @return the matched <code>CPListElement</code> or <code>null</code> if
 	 * no match could be found
 	 */
-	public static CPListElement getListElement(IPath path, List elements) {
+	public static CPListElement getListElement(IPath path, List<CPListElement> elements) {
 		for (int i= 0; i < elements.size(); i++) {
-			CPListElement element= (CPListElement) elements.get(i);
+			CPListElement element= elements.get(i);
 			if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE && element.getPath().equals(path)) {
 				return element;
 			}
@@ -1026,7 +1027,7 @@ public class ClasspathModifier {
 		return null;
 	}
 
-	public static void commitClassPath(List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	public static void commitClassPath(List<CPListElement> newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 
@@ -1054,7 +1055,7 @@ public class ClasspathModifier {
 		monitor.beginTask("", 2); //$NON-NLS-1$
 
 		try {
-			List cpListElements= cpProject.getCPListElements();
+			List<CPListElement> cpListElements= cpProject.getCPListElements();
 			IClasspathEntry[] entries= convert(cpListElements);
 			IPath outputLocation= cpProject.getDefaultOutputLocation();
 
@@ -1082,8 +1083,8 @@ public class ClasspathModifier {
 	 * @param project the Java project
 	 * @return a list of elements corresponding to the passed entries.
 	 */
-	public static List getCorrespondingElements(List entries, IJavaProject project) {
-		List result= new ArrayList();
+	public static List<?> getCorrespondingElements(List<?> entries, IJavaProject project) {
+		List<IAdaptable> result= new ArrayList<IAdaptable>();
 		for (int i= 0; i < entries.size(); i++) {
 			Object element= entries.get(i);
 			IPath path;
@@ -1185,14 +1186,14 @@ public class ClasspathModifier {
 			if (!contains(path, paths, new SubProgressMonitor(monitor, 5)))
 				return paths;
 
-			ArrayList newPaths= new ArrayList();
+			ArrayList<IPath> newPaths= new ArrayList<IPath>();
 			for (int i= 0; i < paths.length; i++) {
 				monitor.worked(1);
 				if (!paths[i].equals(path))
 					newPaths.add(paths[i]);
 			}
 
-			return (IPath[]) newPaths.toArray(new IPath[newPaths.size()]);
+			return newPaths.toArray(new IPath[newPaths.size()]);
 		} finally {
 			monitor.done();
 		}
@@ -1217,10 +1218,10 @@ public class ClasspathModifier {
 	 * of <code>path</code> and which are on the build path
 	 * @throws JavaModelException
 	 */
-	private static List getFoldersOnCP(IPath path, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	private static List<Path> getFoldersOnCP(IPath path, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
-		List srcFolders= new ArrayList();
+		List<Path> srcFolders= new ArrayList<Path>();
 		IClasspathEntry[] cpEntries= project.getRawClasspath();
 		for (int i= 0; i < cpEntries.length; i++) {
 			IPath cpPath= cpEntries[i].getPath();
@@ -1246,7 +1247,7 @@ public class ClasspathModifier {
 	}
 
 	/**
-	 * Sets and validates the new entries. Note that the elments of
+	 * Sets and validates the new entries. Note that the elements of
 	 * the list containing the new entries will be added to the list of
 	 * existing entries (therefore, there is no return list for this method).
 	 *
@@ -1256,11 +1257,11 @@ public class ClasspathModifier {
 	 * @param monitor a progress monitor, can be <code>null</code>
 	 * @throws CoreException in case that validation on one of the new entries fails
 	 */
-	public static void setNewEntry(List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws CoreException {
+	public static void setNewEntry(List<CPListElement> existingEntries, List<CPListElement> newEntries, IJavaProject project, IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_SetNewEntry, existingEntries.size());
 			for (int i= 0; i < newEntries.size(); i++) {
-				CPListElement entry= (CPListElement) newEntries.get(i);
+				CPListElement entry= newEntries.get(i);
 				validateAndAddEntry(entry, existingEntries, project);
 				monitor.worked(1);
 			}
@@ -1277,10 +1278,10 @@ public class ClasspathModifier {
 	 * @return an array containing build path entries
 	 * corresponding to the list
 	 */
-	private static IClasspathEntry[] convert(List list) {
+	private static IClasspathEntry[] convert(List<CPListElement> list) {
 		IClasspathEntry[] entries= new IClasspathEntry[list.size()];
 		for (int i= 0; i < list.size(); i++) {
-			CPListElement element= (CPListElement) list.get(i);
+			CPListElement element= list.get(i);
 			entries[i]= element.getClasspathEntry();
 		}
 		return entries;
@@ -1290,14 +1291,14 @@ public class ClasspathModifier {
 	 * Validate the new entry in the context of the existing entries. Furthermore,
 	 * check if exclusion filters need to be applied and do so if necessary.
 	 *
-	 * If validation was successfull, add the new entry to the list of existing entries.
+	 * If validation was successful, add the new entry to the list of existing entries.
 	 *
 	 * @param entry the entry to be validated and added to the list of existing entries.
 	 * @param existingEntries a list of existing entries representing the build path
 	 * @param project the Java project
 	 * @throws CoreException in case that validation fails
 	 */
-	private static void validateAndAddEntry(CPListElement entry, List existingEntries, IJavaProject project) throws CoreException {
+	private static void validateAndAddEntry(CPListElement entry, List<CPListElement> existingEntries, IJavaProject project) throws CoreException {
 		IPath path= entry.getPath();
 		IPath projPath= project.getProject().getFullPath();
 		IWorkspaceRoot workspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
@@ -1329,7 +1330,7 @@ public class ClasspathModifier {
 			}
 
 			for (int i= 0; i < existingEntries.size(); i++) {
-				CPListElement curr= (CPListElement) existingEntries.get(i);
+				CPListElement curr= existingEntries.get(i);
 				if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 					if (path.equals(curr.getPath()) && !project.getPath().equals(path)) {
 						rootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExisting);
@@ -1339,7 +1340,7 @@ public class ClasspathModifier {
 			}
 
 			if (!isExternal && !entry.getPath().equals(project.getPath()))
-				exclude(entry.getPath(), existingEntries, new ArrayList(), project, null);
+				exclude(entry.getPath(), existingEntries, new ArrayList<CPListElement>(), project, null);
 
 			IPath outputLocation= project.getOutputLocation();
 			insertAtEndOfCategory(entry, existingEntries);
@@ -1373,9 +1374,9 @@ public class ClasspathModifier {
 		}
 	}
 
-	private static void insertAtEndOfCategory(CPListElement entry, List existingEntries) {
+	private static void insertAtEndOfCategory(CPListElement entry, List<CPListElement> existingEntries) {
 		int length= existingEntries.size();
-		CPListElement[] elements= (CPListElement[])existingEntries.toArray(new CPListElement[length]);
+		CPListElement[] elements= existingEntries.toArray(new CPListElement[length]);
 		int i= 0;
 		while (i < length && elements[i].getClasspathEntry().getEntryKind() != entry.getClasspathEntry().getEntryKind()) {
 			i++;
@@ -1432,9 +1433,10 @@ public class ClasspathModifier {
 		return entry.getEntryKind() == kind;
 	}
 
-	public static OutputFolderValidator getValidator(final List newElements, final IJavaProject project) throws JavaModelException {
+	public static OutputFolderValidator getValidator(final List<?> newElements, final IJavaProject project) throws JavaModelException {
 		return new OutputFolderValidator(newElements, project) {
 
+			@Override
 			public boolean validate(IPath outputLocation) {
 				for (int i= 0; i < newElements.size(); i++) {
 					if (isInvalid(newElements.get(i), outputLocation))

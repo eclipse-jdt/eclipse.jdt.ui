@@ -53,6 +53,7 @@ public class ClasspathContainerPreferencePage extends WizardPropertyPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setElement(IAdaptable element) {
 		super.setElement(element);
 
@@ -66,6 +67,7 @@ public class ClasspathContainerPreferencePage extends WizardPropertyPage {
 		fEntry= container.getClasspathEntry();
 	}
 
+	@Override
 	protected IWizard createWizard() {
 		try {
 			IJavaProject project= fJavaProject;
@@ -83,6 +85,7 @@ public class ClasspathContainerPreferencePage extends WizardPropertyPage {
 	/**
 	 * Apply the changes to the classpath
 	 */
+	@Override
 	protected void applyChanges() {
 		IClasspathEntry[] created= ((ClasspathContainerWizard) getWizard()).getNewEntries();
 		if (created == null || created.length != 1)

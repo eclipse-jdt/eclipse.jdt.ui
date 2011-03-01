@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,19 +68,19 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 	private static final String DS_KEY_PREFERRED_Y= ".preferred_y"; //$NON-NLS-1$
 	private static final String DS_KEY_LAST_FOCUS= ".last_focus"; //$NON-NLS-1$
 
-	private final Map fWorkingValues;
-	private final List fTabPages;
+	private final Map<String, String> fWorkingValues;
+	private final List<IModifyDialogTabPage> fTabPages;
 	private final IDialogSettings fDialogSettings;
 	private TabFolder fTabFolder;
 	private CleanUpTabPage[] fPages;
 	private Label fCountLabel;
 
-	public CleanUpSelectionDialog(Shell parent, Map settings, String title) {
+	public CleanUpSelectionDialog(Shell parent, Map<String, String> settings, String title) {
 		super(parent);
 		setTitle(title);
 		fWorkingValues= settings;
 		setStatusLineAboveButtons(false);
-		fTabPages= new ArrayList();
+		fTabPages= new ArrayList<IModifyDialogTabPage>();
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 	}
 
@@ -88,11 +88,12 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
 
-	protected abstract NamedCleanUpTabPage[] createTabPages(Map workingValues);
+	protected abstract NamedCleanUpTabPage[] createTabPages(Map<String, String> workingValues);
 
 	protected abstract String getPreferenceKeyPrefix();
 
@@ -100,10 +101,11 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 
 	protected abstract String getEmptySelectionMessage();
 
-	protected Map getWorkingValues() {
+	protected Map<String, String> getWorkingValues() {
 		return fWorkingValues;
 	}
 
+	@Override
 	public boolean close() {
 		final Rectangle shell= getShell().getBounds();
 
@@ -115,6 +117,7 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 		return super.close();
 	}
 
+	@Override
 	public void create() {
 		super.create();
 		int lastFocusNr= 0;
@@ -132,6 +135,7 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 		((IModifyDialogTabPage) fTabFolder.getSelection()[0].getData()).setInitialFocus();
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		final Composite composite= (Composite) super.createDialogArea(parent);
 
@@ -171,6 +175,7 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 		return composite;
 	}
 
+	@Override
 	public void updateStatus(IStatus status) {
 		int count= 0;
 		for (int i= 0; i < fPages.length; i++) {
@@ -187,6 +192,7 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 		}
 	}
 
+	@Override
 	protected Point getInitialSize() {
 		Point initialSize= super.getInitialSize();
 		try {
@@ -202,6 +208,7 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 		return initialSize;
 	}
 
+	@Override
 	protected Point getInitialLocation(Point initialSize) {
 		try {
 			return new Point(fDialogSettings.getInt(getPreferenceKeyPositionX()), fDialogSettings.getInt(getPreferenceKeyPositionY()));

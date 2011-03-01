@@ -42,6 +42,7 @@ public class JavaDocContextType extends CompilationUnitContextType {
 		public SurroundWithWordSelection() {
 			super(org.eclipse.jface.text.templates.GlobalTemplateVariables.WordSelection.NAME, JavaTemplateMessages.JavaDocContextType_variable_description_word_selection);
 		}
+		@Override
 		protected String resolve(TemplateContext context) {
 			String selection= context.getVariable(org.eclipse.jface.text.templates.GlobalTemplateVariables.SELECTION);
 			if (selection == null)
@@ -84,6 +85,7 @@ public class JavaDocContextType extends CompilationUnitContextType {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, int, int, org.eclipse.jdt.core.ICompilationUnit)
 	 */
+	@Override
 	public CompilationUnitContext createContext(IDocument document, int offset, int length, ICompilationUnit compilationUnit) {
 		return new JavaDocContext(this, document, offset, length, compilationUnit);
 	}
@@ -91,6 +93,7 @@ public class JavaDocContextType extends CompilationUnitContextType {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.Position, org.eclipse.jdt.core.ICompilationUnit)
 	 */
+	@Override
 	public CompilationUnitContext createContext(IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
 		return new JavaDocContext(this, document, completionPosition, compilationUnit);
 	}

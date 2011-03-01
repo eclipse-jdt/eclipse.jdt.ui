@@ -29,10 +29,11 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 		for (int i= 0; i < statements.length; i++) {
 			statements[i].accept(analyzer);
 		}
-		List exceptions= analyzer.getCurrentExceptions();
-		return (ITypeBinding[]) exceptions.toArray(new ITypeBinding[exceptions.size()]);
+		List<ITypeBinding> exceptions= analyzer.getCurrentExceptions();
+		return exceptions.toArray(new ITypeBinding[exceptions.size()]);
 	}
 
+	@Override
 	public boolean visit(ThrowStatement node) {
 		ITypeBinding exception= node.getExpression().resolveTypeBinding();
 		if (exception == null)		// Safety net for null bindings when compiling fails.
@@ -42,14 +43,17 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 		return true;
 	}
 
+	@Override
 	public boolean visit(MethodInvocation node) {
 		return handleExceptions((IMethodBinding)node.getName().resolveBinding());
 	}
 
+	@Override
 	public boolean visit(SuperMethodInvocation node) {
 		return handleExceptions((IMethodBinding)node.getName().resolveBinding());
 	}
 
+	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		return handleExceptions(node.resolveConstructorBinding());
 	}

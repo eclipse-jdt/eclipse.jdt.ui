@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,7 +68,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	 *
 	 * @since 3.3
 	 */
-	private static Set fgLocalesWithInstalledDictionaries;
+	private static Set<Locale> fgLocalesWithInstalledDictionaries;
 
 	/**
 	 * Returns the locales for which this
@@ -77,22 +77,22 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	 * @param location dictionaries location
 	 * @return The available locales for this engine
 	 */
-	private static Set getLocalesWithInstalledDictionaries(URL location) {
+	private static Set<Locale> getLocalesWithInstalledDictionaries(URL location) {
 		String[] fileNames;
 		try {
 			URL url= FileLocator.toFileURL(location);
 			File file= new File(url.getFile());
 			if (!file.isDirectory())
-				return Collections.EMPTY_SET;
+				return Collections.emptySet();
 			fileNames= file.list();
 			if (fileNames == null)
-				return Collections.EMPTY_SET;
+				return Collections.emptySet();
 		} catch (IOException ex) {
 			JavaPlugin.log(ex);
-			return Collections.EMPTY_SET;
+			return Collections.emptySet();
 		}
 
-		Set localesWithInstalledDictionaries= new HashSet();
+		Set<Locale> localesWithInstalledDictionaries= new HashSet<Locale>();
 		int fileNameCount= fileNames.length;
 		for (int i= 0; i < fileNameCount; i++) {
 			String fileName= fileNames[i];
@@ -119,25 +119,25 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	 *
 	 * @return The available locales for this engine
 	 */
-	public static Set getLocalesWithInstalledDictionaries() {
+	public static Set<Locale> getLocalesWithInstalledDictionaries() {
 		if (fgLocalesWithInstalledDictionaries != null)
 			return fgLocalesWithInstalledDictionaries;
 
-		Enumeration locations;
+		Enumeration<URL> locations;
 		try {
 			locations= getDictionaryLocations();
 			if (locations == null)
-				return fgLocalesWithInstalledDictionaries= Collections.EMPTY_SET;
+				return fgLocalesWithInstalledDictionaries= Collections.emptySet();
 		} catch (IOException ex) {
 			JavaPlugin.log(ex);
-			return fgLocalesWithInstalledDictionaries= Collections.EMPTY_SET;
+			return fgLocalesWithInstalledDictionaries= Collections.emptySet();
 		}
 
-		fgLocalesWithInstalledDictionaries= new HashSet();
+		fgLocalesWithInstalledDictionaries= new HashSet<Locale>();
 
 		while (locations.hasMoreElements()) {
-			URL location= (URL) locations.nextElement();
-			Set locales= getLocalesWithInstalledDictionaries(location);
+			URL location= locations.nextElement();
+			Set<Locale> locales= getLocalesWithInstalledDictionaries(location);
 			fgLocalesWithInstalledDictionaries.addAll(locales);
 		}
 
@@ -161,18 +161,18 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	 * @since 3.3
 	 */
 	public ISpellDictionary findDictionary(Locale locale) {
-		ISpellDictionary dictionary= (ISpellDictionary)fLocaleDictionaries.get(locale);
+		ISpellDictionary dictionary= fLocaleDictionaries.get(locale);
 		if (dictionary != null)
 			return dictionary;
 
 		// Try same language
 		String language= locale.getLanguage();
-		Iterator iter= fLocaleDictionaries.entrySet().iterator();
+		Iterator<Entry<Locale, ISpellDictionary>> iter= fLocaleDictionaries.entrySet().iterator();
 		while (iter.hasNext()) {
-			Entry entry= (Entry)iter.next();
-			Locale dictLocale= (Locale)entry.getKey();
+			Entry<Locale, ISpellDictionary> entry= iter.next();
+			Locale dictLocale= entry.getKey();
 			if (dictLocale.getLanguage().equals(language))
-				return (ISpellDictionary)entry.getValue();
+				return entry.getValue();
 		}
 
 		return null;
@@ -191,9 +191,9 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 
 		// Try same language
 		String language= locale.getLanguage();
-		Iterator iter= getLocalesWithInstalledDictionaries().iterator();
+		Iterator<Locale> iter= getLocalesWithInstalledDictionaries().iterator();
 		while (iter.hasNext()) {
-			Locale dictLocale= (Locale)iter.next();
+			Locale dictLocale= iter.next();
 			if (dictLocale.getLanguage().equals(language))
 				return dictLocale;
 		}
@@ -217,7 +217,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	 * @throws IOException if there is an I/O error
 	 * @return The dictionary locations, or <code>null</code> iff the locations are not known
 	 */
-	public static Enumeration getDictionaryLocations() throws IOException {
+	public static Enumeration<URL> getDictionaryLocations() throws IOException {
 		final JavaPlugin plugin= JavaPlugin.getDefault();
 		if (plugin != null)
 			return plugin.getBundle().getResources("/" + DICTIONARY_LOCATION); //$NON-NLS-1$
@@ -248,13 +248,13 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	}
 
 	/** The registered locale insensitive dictionaries */
-	private Set fGlobalDictionaries= new HashSet();
+	private Set<ISpellDictionary> fGlobalDictionaries= new HashSet<ISpellDictionary>();
 
 	/** The spell checker for fLocale */
 	private ISpellChecker fChecker= null;
 
 	/** The registered locale sensitive dictionaries */
-	private Map fLocaleDictionaries= new HashMap();
+	private Map<Locale, ISpellDictionary> fLocaleDictionaries= new HashMap<Locale, ISpellDictionary>();
 
 	/** The user dictionary */
 	private ISpellDictionary fUserDictionary= null;
@@ -271,14 +271,14 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		try {
 
 			Locale locale= null;
-			final Enumeration locations= getDictionaryLocations();
+			final Enumeration<URL> locations= getDictionaryLocations();
 
 			while (locations != null && locations.hasMoreElements()) {
-				URL location= (URL)locations.nextElement();
+				URL location= locations.nextElement();
 
-				for (final Iterator iterator= getLocalesWithInstalledDictionaries(location).iterator(); iterator.hasNext();) {
+				for (final Iterator<Locale> iterator= getLocalesWithInstalledDictionaries(location).iterator(); iterator.hasNext();) {
 
-					locale= (Locale)iterator.next();
+					locale= iterator.next();
 					fLocaleDictionaries.put(locale, new LocaleSensitiveSpellDictionary(locale, location));
 				}
 			}
@@ -311,8 +311,8 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		fChecker= new DefaultSpellChecker(store, locale);
 		resetUserDictionary();
 
-		for (Iterator iterator= fGlobalDictionaries.iterator(); iterator.hasNext();) {
-			ISpellDictionary dictionary= (ISpellDictionary)iterator.next();
+		for (Iterator<ISpellDictionary> iterator= fGlobalDictionaries.iterator(); iterator.hasNext();) {
+			ISpellDictionary dictionary= iterator.next();
 			fChecker.addDictionary(dictionary);
 		}
 
@@ -465,14 +465,14 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		EditorsUI.getPreferenceStore().removePropertyChangeListener(this);
 
 		ISpellDictionary dictionary= null;
-		for (final Iterator iterator= fGlobalDictionaries.iterator(); iterator.hasNext();) {
-			dictionary= (ISpellDictionary)iterator.next();
+		for (final Iterator<ISpellDictionary> iterator= fGlobalDictionaries.iterator(); iterator.hasNext();) {
+			dictionary= iterator.next();
 			dictionary.unload();
 		}
 		fGlobalDictionaries= null;
 
-		for (final Iterator iterator= fLocaleDictionaries.values().iterator(); iterator.hasNext();) {
-			dictionary= (ISpellDictionary)iterator.next();
+		for (final Iterator<ISpellDictionary> iterator= fLocaleDictionaries.values().iterator(); iterator.hasNext();) {
+			dictionary= iterator.next();
 			dictionary.unload();
 		}
 		fLocaleDictionaries= null;
@@ -483,7 +483,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 
 	private synchronized void resetSpellChecker() {
 		if (fChecker != null) {
-			ISpellDictionary dictionary= (ISpellDictionary)fLocaleDictionaries.get(fChecker.getLocale());
+			ISpellDictionary dictionary= fLocaleDictionaries.get(fChecker.getLocale());
 			if (dictionary != null)
 				dictionary.unload();
 		}

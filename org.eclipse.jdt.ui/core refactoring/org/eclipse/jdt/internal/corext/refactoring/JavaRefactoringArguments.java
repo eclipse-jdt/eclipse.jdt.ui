@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 public final class JavaRefactoringArguments {
 
 	/** The attribute map (element type: <code>&lt;String, String&gt;</code>) */
-	private final Map fAttributes;
+	private final Map<String, String> fAttributes;
 
 	/** The name of the project, or <code>null</code> for the workspace */
 	private String fProject;
@@ -34,7 +34,7 @@ public final class JavaRefactoringArguments {
 	 * @param arguments
 	 *            the arguments
 	 */
-	public JavaRefactoringArguments(String project, Map arguments) {
+	public JavaRefactoringArguments(String project, Map<String, String> arguments) {
 		fProject= project;
 		fAttributes= arguments;
 	}
@@ -47,7 +47,7 @@ public final class JavaRefactoringArguments {
 	 * @return the attribute value, or <code>null</code>
 	 */
 	public String getAttribute(final String name) {
-		return (String) fAttributes.get(name);
+		return fAttributes.get(name);
 	}
 
 	/**
@@ -62,6 +62,7 @@ public final class JavaRefactoringArguments {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String toString() {
 		return getClass().getName() + fAttributes.toString();
 	}

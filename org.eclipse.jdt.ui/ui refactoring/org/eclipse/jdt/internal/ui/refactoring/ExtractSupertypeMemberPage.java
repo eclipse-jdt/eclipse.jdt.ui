@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -100,6 +100,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void create() {
 			super.create();
 			getShell().setText(RefactoringMessages.ExtractSupertypeMemberPage_choose_type_caption);
@@ -108,6 +109,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		protected Control createDialogArea(final Composite composite) {
 			Assert.isNotNull(composite);
 			setMessage(RefactoringMessages.ExtractSupertypeMemberPage_choose_type_message);
@@ -193,6 +195,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public int compare(final Viewer viewer, final Object first, final Object second) {
 			final IType predecessor= (IType) first;
 			final IType successor= (IType) second;
@@ -216,7 +219,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	private TableViewer fTableViewer;
 
 	/** The types to extract */
-	private final Set fTypesToExtract= new HashSet(2);
+	private final Set<IType> fTypesToExtract= new HashSet<IType>(2);
 
 	/**
 	 * Creates a new extract supertype member page.
@@ -239,6 +242,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void checkPageCompletionStatus(final boolean display) {
 		final RefactoringStatus status= getProcessor().checkExtractedCompilationUnit();
 		setMessage(null);
@@ -299,17 +303,18 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		SWTUtil.setButtonDimensionHint(addButton);
 		addButton.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(final SelectionEvent event) {
 				try {
 					computeCandidateTypes();
 				} catch (InterruptedException exception) {
 					return;
 				}
-				final LinkedList list= new LinkedList(Arrays.asList(fCandidateTypes));
-				for (final Iterator outer= list.iterator(); outer.hasNext();) {
-					final IType first= (IType) outer.next();
-					for (final Iterator inner= fTypesToExtract.iterator(); inner.hasNext();) {
-						final IType second= (IType) inner.next();
+				final LinkedList<IType> list= new LinkedList<IType>(Arrays.asList(fCandidateTypes));
+				for (final Iterator<IType> outer= list.iterator(); outer.hasNext();) {
+					final IType first= outer.next();
+					for (final Iterator<IType> inner= fTypesToExtract.iterator(); inner.hasNext();) {
+						final IType second= inner.next();
 						if (second.getFullyQualifiedName().equals(first.getFullyQualifiedName()))
 							outer.remove();
 					}
@@ -322,7 +327,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 					final Object[] objects= dialog.getResult();
 					if (objects != null && objects.length > 0) {
 						for (int index= 0; index < objects.length; index++) {
-							fTypesToExtract.add(objects[index]);
+							fTypesToExtract.add((IType) objects[index]);
 						}
 						fTableViewer.setInput(fTypesToExtract.toArray());
 						handleTypesChanged();
@@ -338,11 +343,12 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		SWTUtil.setButtonDimensionHint(removeButton);
 		removeButton.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(final SelectionEvent event) {
 				final IStructuredSelection selection= (IStructuredSelection) fTableViewer.getSelection();
 				if (!selection.isEmpty()) {
 					final IType declaring= getDeclaringType();
-					for (final Iterator iterator= selection.iterator(); iterator.hasNext();) {
+					for (final Iterator<?> iterator= selection.iterator(); iterator.hasNext();) {
 						final Object element= iterator.next();
 						if (!declaring.equals(element))
 							fTypesToExtract.remove(element);
@@ -374,6 +380,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void createControl(final Composite parent) {
 		final Composite composite= new Composite(parent, SWT.NONE);
 		final GridLayout layout= new GridLayout();
@@ -400,6 +407,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void createSuperTypeControl(final Composite parent) {
 		try {
 			createSuperTypeList(parent);
@@ -472,6 +480,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected String getCreateStubsButtonLabel() {
 		return RefactoringMessages.ExtractSupertypeMemberPage_create_stubs_label;
 	}
@@ -479,6 +488,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected String getDeclareAbstractActionLabel() {
 		return RefactoringMessages.ExtractSupertypeMemberPage_declare_abstract;
 	}
@@ -495,6 +505,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IType getDestinationType() {
 		return getProcessor().computeExtractedType(fNameField.getText());
 	}
@@ -502,6 +513,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected String getInstanceofButtonLabel() {
 		return RefactoringMessages.ExtractSupertypeMemberPage_use_supertype_label;
 	}
@@ -509,6 +521,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected String getNoMembersMessage() {
 		return RefactoringMessages.ExtractSupertypeMemberPage_no_members_selected;
 	}
@@ -525,6 +538,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected String getPullUpActionLabel() {
 		return RefactoringMessages.ExtractSupertypeMemberPage_extract;
 	}
@@ -532,6 +546,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected String getReplaceButtonLabel() {
 		return RefactoringMessages.ExtractSupertypeMemberPage_use_instanceof_label;
 	}
@@ -539,6 +554,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected int getTableRowCount() {
 		return 6;
 	}
@@ -559,12 +575,13 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 * Handles the types changed event.
 	 */
 	protected void handleTypesChanged() {
-		getProcessor().setTypesToExtract((IType[]) fTypesToExtract.toArray(new IType[fTypesToExtract.size()]));
+		getProcessor().setTypesToExtract(fTypesToExtract.toArray(new IType[fTypesToExtract.size()]));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setVisible(final boolean visible) {
 		super.setVisible(visible);
 		if (visible) {

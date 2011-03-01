@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 import org.eclipse.jdt.internal.corext.callhierarchy.RealCallers;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -53,6 +54,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	/*
 	 * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
 	 */
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof MethodWrapper) {
 			MethodWrapper methodWrapper;
@@ -78,6 +80,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	/*
 	 * @see ILabelProvider#getText(Object)
 	 */
+	@Override
 	public String getText(Object element) {
 		if (isNormalMethodWrapper(element)) {
 			MethodWrapper wrapper= (MethodWrapper)element;
@@ -94,6 +97,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
+	@Override
 	public StyledString getStyledText(Object element) {
 		if (isNormalMethodWrapper(element)) {
 			MethodWrapper wrapper= (MethodWrapper)element;
@@ -154,7 +158,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	private String getElementLabel(MethodWrapper methodWrapper) {
 		String label= super.getText(methodWrapper.getMember());
 
-		Collection callLocations= methodWrapper.getMethodCall().getCallLocations();
+		Collection<CallLocation> callLocations= methodWrapper.getMethodCall().getCallLocations();
 
 		if ((callLocations != null) && (callLocations.size() > 1)) {
 			return Messages.format(CallHierarchyMessages.CallHierarchyLabelProvider_matches, new String[] { label, String.valueOf(callLocations.size()) });

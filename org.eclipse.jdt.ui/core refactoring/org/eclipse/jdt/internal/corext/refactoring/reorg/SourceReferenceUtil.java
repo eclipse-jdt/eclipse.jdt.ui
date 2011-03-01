@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,10 +13,8 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -50,7 +48,7 @@ public class SourceReferenceUtil {
 		return null;
 	}
 
-	private static boolean hasParentInSet(IJavaElement elem, Set set){
+	private static boolean hasParentInSet(IJavaElement elem, Set<ISourceReference> set){
 		IJavaElement parent= elem.getParent();
 		while (parent != null) {
 			if (set.contains(parent))
@@ -61,8 +59,8 @@ public class SourceReferenceUtil {
 	}
 
 	public static ISourceReference[] removeAllWithParentsSelected(ISourceReference[] elems){
-		Set set= new HashSet(Arrays.asList(elems));
-		List result= new ArrayList(elems.length);
+		Set<ISourceReference> set= new HashSet<ISourceReference>(Arrays.asList(elems));
+		List<ISourceReference> result= new ArrayList<ISourceReference>(elems.length);
 		for (int i= 0; i < elems.length; i++) {
 			ISourceReference elem= elems[i];
 			if (! (elem instanceof IJavaElement))
@@ -72,30 +70,14 @@ public class SourceReferenceUtil {
 					result.add(elem);
 			}
 		}
-		return (ISourceReference[]) result.toArray(new ISourceReference[result.size()]);
-	}
-
-	/**
-	 * @param elems the references
-	 * @return IFile -> List of ISourceReference (elements from that file)
-	 */
-	public static Map groupByFile(ISourceReference[] elems) {
-		Map map= new HashMap();
-		for (int i= 0; i < elems.length; i++) {
-			ISourceReference elem= elems[i];
-			IFile file= SourceReferenceUtil.getFile(elem);
-			if (! map.containsKey(file))
-				map.put(file, new ArrayList());
-			((List)map.get(file)).add(elem);
-		}
-		return map;
+		return result.toArray(new ISourceReference[result.size()]);
 	}
 
 	public static ISourceReference[] sortByOffset(ISourceReference[] methods){
-		Arrays.sort(methods, new Comparator(){
-			public int compare(Object o1, Object o2){
+		Arrays.sort(methods, new Comparator<ISourceReference>(){
+			public int compare(ISourceReference o1, ISourceReference o2){
 				try{
-					return ((ISourceReference)o2).getSourceRange().getOffset() - ((ISourceReference)o1).getSourceRange().getOffset();
+					return o2.getSourceRange().getOffset() - o1.getSourceRange().getOffset();
 				} catch (JavaModelException e){
 					return o2.hashCode() - o1.hashCode();
 				}

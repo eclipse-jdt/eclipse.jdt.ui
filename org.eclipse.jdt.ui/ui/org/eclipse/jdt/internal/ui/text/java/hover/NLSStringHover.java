@@ -72,6 +72,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractJavaEditorTextHover#getHoverRegion(org.eclipse.jface.text.ITextViewer, int)
 	 */
+	@Override
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
 		if (!(getEditor() instanceof JavaEditor))
 			return null;
@@ -108,6 +109,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 	/*
 	 * @see org.eclipse.jface.text.ITextHoverExtension2#getHoverInfo2(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 */
+	@Override
 	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
 		return internalGetHoverInfo(textViewer, hoverRegion);
 	}
@@ -325,6 +327,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
+		@Override
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			ToolBarManager tbm= new ToolBarManager(SWT.FLAT);
 			NLSHoverControl iControl= new NLSHoverControl(parent, tbm);
@@ -359,11 +362,13 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
+		@Override
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			return new NLSHoverControl(parent, EditorsUI.getTooltipAffordanceString()) {
 				/*
 				 * @see org.eclipse.jface.text.IInformationControlExtension5#getInformationPresenterControlCreator()
 				 */
+				@Override
 				public IInformationControlCreator getInformationPresenterControlCreator() {
 					return fPresenterControlCreator;
 				}
@@ -389,6 +394,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 	 * @see ITextHoverExtension#getHoverControlCreator()
 	 * @since 3.5
 	 */
+	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		if (fHoverControlCreator == null)
 			fHoverControlCreator= new HoverControlCreator(getInformationPresenterControlCreator());
@@ -399,6 +405,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 * @since 3.5
 	 */
+	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		if (fPresenterControlCreator == null)
 			fPresenterControlCreator= new PresenterControlCreator();
@@ -432,6 +439,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
+		@Override
 		public void run() {
 			NLSHoverControlInput input= fControl.getInput();
 			NLSKeyHyperlink.openKeyInPropertiesFile(input.fKeyName, input.fpropertiesFile, input.fActiveEditor);

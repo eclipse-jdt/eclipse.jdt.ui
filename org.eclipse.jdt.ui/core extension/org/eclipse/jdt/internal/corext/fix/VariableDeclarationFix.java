@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,15 +60,16 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 
 	private static class WrittenNamesFinder extends GenericVisitor {
 
-		private final HashMap fResult;
+		private final HashMap<IBinding, List<SimpleName>> fResult;
 
-		public WrittenNamesFinder(HashMap result) {
+		public WrittenNamesFinder(HashMap<IBinding, List<SimpleName>> result) {
 			fResult= result;
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public boolean visit(SimpleName node) {
 			if (node.getParent() instanceof VariableDeclarationFragment)
 				return super.visit(node);
@@ -81,11 +82,11 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 
 			binding= ((IVariableBinding)binding).getVariableDeclaration();
 			if (ASTResolving.isWriteAccess(node)) {
-				List list;
+				List<SimpleName> list;
 				if (fResult.containsKey(binding)) {
-					list= (List)fResult.get(binding);
+					list= fResult.get(binding);
 				} else {
-					list= new ArrayList();
+					list= new ArrayList<SimpleName>();
 				}
 				list.add(node);
 				fResult.put(binding, list);
@@ -97,6 +98,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 
 	private static class ReturnFinder extends ASTVisitor {
 		boolean foundOne;
+		@Override
 		public boolean visit(ReturnStatement node) {
 			foundOne= true;
 			return super.visit(node);
@@ -105,8 +107,8 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 
 	private static class VariableDeclarationFinder extends GenericVisitor {
 
-		private final List fResult;
-		private final HashMap fWrittenVariables;
+		private final List<ModifierChangeOperation> fResult;
+		private final HashMap<IBinding, List<SimpleName>> fWrittenVariables;
 		private final boolean fAddFinalFields;
 		private final boolean fAddFinalParameters;
 		private final boolean fAddFinalLocals;
@@ -114,7 +116,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 		public VariableDeclarationFinder(boolean addFinalFields,
 				boolean addFinalParameters,
 				boolean addFinalLocals,
-				final List result, final HashMap writtenNames) {
+				final List<ModifierChangeOperation> result, final HashMap<IBinding, List<SimpleName>> writtenNames) {
 
 			super();
 			fAddFinalFields= addFinalFields;
@@ -127,13 +129,14 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public boolean visit(FieldDeclaration node) {
 			if (fAddFinalFields)
 				handleFragments(node.fragments(), node);
 
-			List fragments= node.fragments();
-			for (Iterator iterator= fragments.iterator(); iterator.hasNext();) {
-				VariableDeclarationFragment fragment= (VariableDeclarationFragment) iterator.next();
+			List<VariableDeclarationFragment> fragments= node.fragments();
+			for (Iterator<VariableDeclarationFragment> iterator= fragments.iterator(); iterator.hasNext();) {
+				VariableDeclarationFragment fragment= iterator.next();
 				Expression initializer= fragment.getInitializer();
 				if (initializer != null) {
 					initializer.accept(this);
@@ -146,13 +149,14 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public boolean visit(VariableDeclarationStatement node) {
 			if (fAddFinalLocals)
 				handleFragments(node.fragments(), node);
 
-			List fragments= node.fragments();
-			for (Iterator iterator= fragments.iterator(); iterator.hasNext();) {
-				VariableDeclarationFragment fragment= (VariableDeclarationFragment) iterator.next();
+			List<VariableDeclarationFragment> fragments= node.fragments();
+			for (Iterator<VariableDeclarationFragment> iterator= fragments.iterator(); iterator.hasNext();) {
+				VariableDeclarationFragment fragment= iterator.next();
 				Expression initializer= fragment.getInitializer();
 				if (initializer != null) {
 					initializer.accept(this);
@@ -165,6 +169,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public boolean visit(VariableDeclarationExpression node) {
 			if (fAddFinalLocals && node.fragments().size() == 1) {
 				SimpleName name= ((VariableDeclarationFragment)node.fragments().get(0)).getName();
@@ -186,11 +191,11 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 			return false;
 		}
 
-		private boolean handleFragments(List list, ASTNode declaration) {
-			List toChange= new ArrayList();
+		private boolean handleFragments(List<VariableDeclarationFragment> list, ASTNode declaration) {
+			List<VariableDeclarationFragment> toChange= new ArrayList<VariableDeclarationFragment>();
 
-			for (Iterator iter= list.iterator(); iter.hasNext();) {
-				VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
+			for (Iterator<VariableDeclarationFragment> iter= list.iterator(); iter.hasNext();) {
+				VariableDeclarationFragment fragment= iter.next();
 				SimpleName name= fragment.getName();
 				IBinding resolveBinding= name.resolveBinding();
 				if (canAddFinal(resolveBinding, declaration)) {
@@ -233,14 +238,14 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 			if (declaringClass == null)
 				return false;
 
-			ArrayList writes= (ArrayList)fWrittenVariables.get(binding);
+			List<SimpleName> writes= fWrittenVariables.get(binding);
 			if (!isWrittenInTypeConstructors(writes, declaringClass))
 				return false;
 
-			HashSet writingConstructorBindings= new HashSet();
-			ArrayList writingConstructors= new ArrayList();
+			HashSet<IMethodBinding> writingConstructorBindings= new HashSet<IMethodBinding>();
+			ArrayList<MethodDeclaration> writingConstructors= new ArrayList<MethodDeclaration>();
 			for (int i= 0; i < writes.size(); i++) {
-	            SimpleName name= (SimpleName)writes.get(i);
+	            SimpleName name= writes.get(i);
 	            MethodDeclaration constructor= getWritingConstructor(name);
 	            if (writingConstructors.contains(constructor))//variable is written twice or more in constructor
 	            	return false;
@@ -257,12 +262,12 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
             }
 
 			for (int i= 0; i < writingConstructors.size(); i++) {
-	            MethodDeclaration constructor= (MethodDeclaration)writingConstructors.get(i);
+	            MethodDeclaration constructor= writingConstructors.get(i);
 	            if (callsWritingConstructor(constructor, writingConstructorBindings))//writing constructor calls other writing constructor
 	            	return false;
             }
 
-			MethodDeclaration constructor= (MethodDeclaration)writingConstructors.get(0);
+			MethodDeclaration constructor= writingConstructors.get(0);
 			TypeDeclaration typeDecl= (TypeDeclaration)ASTNodes.getParent(constructor, TypeDeclaration.class);
 			if (typeDecl == null)
 				return false;
@@ -290,22 +295,22 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 			return retFinder.foundOne;
 		}
 
-		private boolean callsWritingConstructor(MethodDeclaration methodDeclaration, HashSet writingConstructorBindings) {
-			HashSet visitedMethodDeclarations= new HashSet();
+		private boolean callsWritingConstructor(MethodDeclaration methodDeclaration, HashSet<IMethodBinding> writingConstructorBindings) {
+			HashSet<MethodDeclaration> visitedMethodDeclarations= new HashSet<MethodDeclaration>();
 			visitedMethodDeclarations.add(methodDeclaration);
 			return callsWritingConstructor(methodDeclaration, writingConstructorBindings, visitedMethodDeclarations);
 		}
 
-		private boolean callsWritingConstructor(MethodDeclaration methodDeclaration, HashSet writingConstructorBindings, Set visitedMethodDeclarations) {
+		private boolean callsWritingConstructor(MethodDeclaration methodDeclaration, HashSet<IMethodBinding> writingConstructorBindings, Set<MethodDeclaration> visitedMethodDeclarations) {
 			Block body= methodDeclaration.getBody();
 			if (body == null)
 				return false;
 
-			List statements= body.statements();
+			List<Statement> statements= body.statements();
 			if (statements.size() == 0)
 				return false;
 
-			Statement statement= (Statement)statements.get(0);
+			Statement statement= statements.get(0);
 			if (!(statement instanceof ConstructorInvocation))
 				return false;
 
@@ -329,10 +334,10 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 			}
 		}
 
-		private boolean isWrittenInTypeConstructors(ArrayList writes, ITypeBinding declaringClass) {
+		private boolean isWrittenInTypeConstructors(List<SimpleName> writes, ITypeBinding declaringClass) {
 
 			for (int i= 0; i < writes.size(); i++) {
-	            SimpleName name= (SimpleName)writes.get(i);
+	            SimpleName name= writes.get(i);
 
 	            MethodDeclaration methodDeclaration= getWritingConstructor(name);
 	            if (methodDeclaration == null)
@@ -376,6 +381,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public boolean visit(VariableDeclarationFragment node) {
 			SimpleName name= node.getName();
 
@@ -397,6 +403,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public boolean visit(SingleVariableDeclaration node) {
 			SimpleName name= node.getName();
 
@@ -444,11 +451,11 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 	private static class ModifierChangeOperation extends CompilationUnitRewriteOperation {
 
 		private final ASTNode fDeclaration;
-		private final List fToChange;
+		private final List<VariableDeclarationFragment> fToChange;
 		private final int fIncludedModifiers;
 		private final int fExcludedModifiers;
 
-		public ModifierChangeOperation(ASTNode declaration, List toChange, int includedModifiers, int excludedModifiers) {
+		public ModifierChangeOperation(ASTNode declaration, List<VariableDeclarationFragment> toChange, int includedModifiers, int excludedModifiers) {
 			fDeclaration= declaration;
 			fToChange= toChange;
 			fIncludedModifiers= includedModifiers;
@@ -458,16 +465,17 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
 			TextEditGroup group= createTextEditGroup(FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description, cuRewrite);
 
 			if (fDeclaration instanceof VariableDeclarationStatement) {
-				VariableDeclarationFragment[] toChange= (VariableDeclarationFragment[])fToChange.toArray(new VariableDeclarationFragment[fToChange.size()]);
+				VariableDeclarationFragment[] toChange= fToChange.toArray(new VariableDeclarationFragment[fToChange.size()]);
 				VariableDeclarationRewrite.rewriteModifiers((VariableDeclarationStatement)fDeclaration, toChange, fIncludedModifiers, fExcludedModifiers, rewrite, group);
 			} else if (fDeclaration instanceof FieldDeclaration) {
-				VariableDeclarationFragment[] toChange= (VariableDeclarationFragment[])fToChange.toArray(new VariableDeclarationFragment[fToChange.size()]);
+				VariableDeclarationFragment[] toChange= fToChange.toArray(new VariableDeclarationFragment[fToChange.size()]);
 				VariableDeclarationRewrite.rewriteModifiers((FieldDeclaration)fDeclaration, toChange, fIncludedModifiers, fExcludedModifiers, rewrite, group);
 			} else if (fDeclaration instanceof SingleVariableDeclaration) {
 				VariableDeclarationRewrite.rewriteModifiers((SingleVariableDeclaration)fDeclaration, fIncludedModifiers, fExcludedModifiers, rewrite, group);
@@ -478,10 +486,10 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 	}
 
 	public static VariableDeclarationFix createChangeModifierToFinalFix(final CompilationUnit compilationUnit, ASTNode[] selectedNodes) {
-		HashMap writtenNames= new HashMap();
+		HashMap<IBinding, List<SimpleName>> writtenNames= new HashMap<IBinding, List<SimpleName>>();
 		WrittenNamesFinder finder= new WrittenNamesFinder(writtenNames);
 		compilationUnit.accept(finder);
-		List ops= new ArrayList();
+		List<ModifierChangeOperation> ops= new ArrayList<ModifierChangeOperation>();
 		VariableDeclarationFinder visitor= new VariableDeclarationFinder(true, true, true, ops, writtenNames);
 		if (selectedNodes.length == 1) {
 			if (selectedNodes[0] instanceof SimpleName) {
@@ -497,7 +505,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 		if (ops.size() == 0)
 			return null;
 
-		CompilationUnitRewriteOperation[] result= (CompilationUnitRewriteOperation[])ops.toArray(new CompilationUnitRewriteOperation[ops.size()]);
+		CompilationUnitRewriteOperation[] result= ops.toArray(new CompilationUnitRewriteOperation[ops.size()]);
 		String label;
 		if (result.length == 1) {
 			label= FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
@@ -513,18 +521,18 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 		if (!addFinalFields && !addFinalParameters && !addFinalLocals)
 			return null;
 
-		HashMap writtenNames= new HashMap();
+		HashMap<IBinding, List<SimpleName>> writtenNames= new HashMap<IBinding, List<SimpleName>>();
 		WrittenNamesFinder finder= new WrittenNamesFinder(writtenNames);
 		compilationUnit.accept(finder);
 
-		List operations= new ArrayList();
+		List<ModifierChangeOperation> operations= new ArrayList<ModifierChangeOperation>();
 		VariableDeclarationFinder visitor= new VariableDeclarationFinder(addFinalFields, addFinalParameters, addFinalLocals, operations, writtenNames);
 		compilationUnit.accept(visitor);
 
 		if (operations.isEmpty())
 			return null;
 
-		return new VariableDeclarationFix(FixMessages.VariableDeclarationFix_add_final_change_name, compilationUnit, (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
+		return new VariableDeclarationFix(FixMessages.VariableDeclarationFix_add_final_change_name, compilationUnit, operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
 	}
 
 	private static ModifierChangeOperation createAddFinalOperation(SimpleName name, ASTNode decl) {
@@ -536,18 +544,18 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 			return null;
 
 		if (decl instanceof SingleVariableDeclaration) {
-			return new ModifierChangeOperation(decl, new ArrayList(), Modifier.FINAL, Modifier.NONE);
+			return new ModifierChangeOperation(decl, new ArrayList<VariableDeclarationFragment>(), Modifier.FINAL, Modifier.NONE);
 		} else if (decl instanceof VariableDeclarationExpression) {
-			return new ModifierChangeOperation(decl, new ArrayList(), Modifier.FINAL, Modifier.NONE);
+			return new ModifierChangeOperation(decl, new ArrayList<VariableDeclarationFragment>(), Modifier.FINAL, Modifier.NONE);
 		} else if (decl instanceof VariableDeclarationFragment){
 			VariableDeclarationFragment frag= (VariableDeclarationFragment)decl;
 			decl= decl.getParent();
 			if (decl instanceof FieldDeclaration || decl instanceof VariableDeclarationStatement) {
-				List list= new ArrayList();
+				List<VariableDeclarationFragment> list= new ArrayList<VariableDeclarationFragment>();
 				list.add(frag);
 				return new ModifierChangeOperation(decl, list, Modifier.FINAL, Modifier.NONE);
 			} else if (decl instanceof VariableDeclarationExpression) {
-				return new ModifierChangeOperation(decl, new ArrayList(), Modifier.FINAL, Modifier.NONE);
+				return new ModifierChangeOperation(decl, new ArrayList<VariableDeclarationFragment>(), Modifier.FINAL, Modifier.NONE);
 			}
 		}
 

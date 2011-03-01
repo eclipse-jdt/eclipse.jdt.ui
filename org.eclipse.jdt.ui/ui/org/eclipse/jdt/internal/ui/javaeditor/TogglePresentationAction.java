@@ -57,6 +57,7 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 	/*
 	 * @see IAction#actionPerformed
 	 */
+	@Override
 	public void run() {
 
 		ITextEditor editor= getTextEditor();
@@ -81,6 +82,7 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 	/*
 	 * @see TextEditorAction#update
 	 */
+	@Override
 	public void update() {
 		ITextEditor editor= getTextEditor();
 		boolean checked= (editor != null && editor.showsHighlightRangeOnly());
@@ -103,6 +105,7 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 	/*
 	 * @see TextEditorAction#setEditor(ITextEditor)
 	 */
+	@Override
 	public void setEditor(ITextEditor editor) {
 
 		super.setEditor(editor);

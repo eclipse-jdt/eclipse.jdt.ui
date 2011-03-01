@@ -44,6 +44,7 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 		fValidator= validator;
 	}
 
+	@Override
 	public boolean hasChildren(Object element) {
 		IReorgDestination destination= ReorgDestinationFactory.createDestination(element);
 		if (!fValidator.canChildrenBeDestinations(destination))
@@ -61,13 +62,14 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 		return super.hasChildren(element);
 	}
 
+	@Override
 	public Object[] getChildren(Object element) {
 		try {
 			if (element instanceof IJavaModel) {
 				return concatenate(getJavaProjects((IJavaModel)element), getOpenNonJavaProjects((IJavaModel)element));
 			} else {
 				Object[] children= doGetChildren(element);
-				ArrayList result= new ArrayList(children.length);
+				ArrayList<Object> result= new ArrayList<Object>(children.length);
 				for (int i= 0; i < children.length; i++) {
 					IReorgDestination destination= ReorgDestinationFactory.createDestination(children[i]);
 					if (fValidator.canElementBeDestination(destination) || fValidator.canChildrenBeDestinations(destination))
@@ -97,7 +99,7 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 			if (javaProject == null || !javaProject.exists())
 				return members;
 			boolean isFolderOnClasspath = javaProject.isOnClasspath(container);
-			List nonJavaResources= new ArrayList();
+			List<IResource> nonJavaResources= new ArrayList<IResource>();
 			// Can be on classpath but as a member of non-java resource folder
 			for (int i= 0; i < members.length; i++) {
 				IResource member= members[i];
@@ -121,7 +123,7 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 
 	private static Object[] getOpenNonJavaProjects(IJavaModel model) throws JavaModelException {
 		Object[] nonJavaProjects= model.getNonJavaResources();
-		ArrayList result= new ArrayList(nonJavaProjects.length);
+		ArrayList<IProject> result= new ArrayList<IProject>(nonJavaProjects.length);
 		for (int i= 0; i < nonJavaProjects.length; i++) {
 			IProject project = (IProject) nonJavaProjects[i];
 			if (project.isOpen())

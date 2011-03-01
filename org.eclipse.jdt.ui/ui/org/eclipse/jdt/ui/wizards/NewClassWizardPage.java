@@ -127,6 +127,7 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 	/*
 	 * @see NewContainerWizardPage#handleFieldChanged
 	 */
+	@Override
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 
@@ -179,6 +180,7 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 	/*
 	 * @see WizardPage#becomesVisible
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
@@ -257,6 +259,7 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 	/*
 	 * @see NewTypeWizardPage#createTypeMembers
 	 */
+	@Override
 	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		boolean doMain= isCreateMain();
 		boolean doConstr= isCreateConstructors();

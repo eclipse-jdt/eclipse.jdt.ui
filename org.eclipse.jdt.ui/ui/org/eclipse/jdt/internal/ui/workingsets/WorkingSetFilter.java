@@ -176,6 +176,7 @@ public class WorkingSetFilter extends JavaViewerFilter {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.filters.JavaViewerFilter#initFilter()
 	 */
+	@Override
 	protected void initFilter() {
 		notifyWorkingSetContentChange();
 	}
@@ -198,6 +199,7 @@ public class WorkingSetFilter extends JavaViewerFilter {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.filters.JavaViewerFilter#freeFilter()
 	 */
+	@Override
 	protected void freeFilter() {
 		fCachedCompareEntries= null;
 	}
@@ -205,6 +207,7 @@ public class WorkingSetFilter extends JavaViewerFilter {
 	/*
 	 * Overrides method from ViewerFilter.
 	 */
+	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if (fWorkingSet == null || (fWorkingSet.isAggregateWorkingSet() && fWorkingSet.isEmpty()))
 			return true;

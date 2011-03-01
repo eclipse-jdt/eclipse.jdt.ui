@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -195,8 +195,8 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	private final LinkFields fLinkFields;
 
 	private final CPListElement fNewElement;
-	private final List/*<CPListElement>*/ fExistingEntries;
-	private final Hashtable/*<CPListElement, IPath[]>*/ fOrginalExlusionFilters, fOrginalInclusionFilters, fOrginalExlusionFiltersCopy, fOrginalInclusionFiltersCopy;
+	private final List<CPListElement> fExistingEntries;
+	private final Hashtable<CPListElement, IPath[]> fOrginalExlusionFilters, fOrginalInclusionFilters, fOrginalExlusionFiltersCopy, fOrginalInclusionFiltersCopy;
 	private final IPath fOrginalPath;
 	private final boolean fLinkedMode;
 
@@ -204,8 +204,8 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	private IPath fNewOutputLocation;
 	private CPListElement fOldProjectSourceFolder;
 
-	private List fModifiedElements;
-	private List fRemovedElements;
+	private List<CPListElement> fModifiedElements;
+	private List<CPListElement> fRemovedElements;
 
 	private final boolean fAllowConflict;
 	private final boolean fAllowRemoveProjectFolder;
@@ -213,7 +213,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	private final boolean fCanCommitConflictingBuildpath;
 	private final IContainer fParent;
 
-	public AddSourceFolderWizardPage(CPListElement newElement, List/*<CPListElement>*/ existingEntries, IPath outputLocation,
+	public AddSourceFolderWizardPage(CPListElement newElement, List<CPListElement> existingEntries, IPath outputLocation,
 			boolean linkedMode, boolean canCommitConflictingBuildpath,
 			boolean allowIgnoreConflicts, boolean allowRemoveProjectFolder, boolean allowAddExclusionPatterns, IContainer parent) {
 
@@ -226,12 +226,12 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		fAllowAddExclusionPatterns= allowAddExclusionPatterns;
 		fParent= parent;
 
-		fOrginalExlusionFilters= new Hashtable();
-		fOrginalInclusionFilters= new Hashtable();
-		fOrginalExlusionFiltersCopy= new Hashtable();
-		fOrginalInclusionFiltersCopy= new Hashtable();
-		for (Iterator iter= existingEntries.iterator(); iter.hasNext();) {
-			CPListElement element= (CPListElement)iter.next();
+		fOrginalExlusionFilters= new Hashtable<CPListElement, IPath[]>();
+		fOrginalInclusionFilters= new Hashtable<CPListElement, IPath[]>();
+		fOrginalExlusionFiltersCopy= new Hashtable<CPListElement, IPath[]>();
+		fOrginalInclusionFiltersCopy= new Hashtable<CPListElement, IPath[]>();
+		for (Iterator<CPListElement> iter= existingEntries.iterator(); iter.hasNext();) {
+			CPListElement element= iter.next();
 			IPath[] exlusions= (IPath[])element.getAttribute(CPListElement.EXCLUSION);
 			if (exlusions != null) {
 				IPath[] save= new IPath[exlusions.length];
@@ -266,8 +266,8 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 		fNewElement= newElement;
 		fExistingEntries= existingEntries;
-		fModifiedElements= new ArrayList();
-		fRemovedElements= new ArrayList();
+		fModifiedElements= new ArrayList<CPListElement>();
+		fRemovedElements= new ArrayList<CPListElement>();
 		fOutputLocation= outputLocation;
 
 		RootFieldAdapter adapter= new RootFieldAdapter();
@@ -355,6 +355,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
@@ -430,7 +431,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 		IFolder folder= fParent.getFolder(new Path(fRootDialogField.getText()));
 		for (int i= 0; i < fExistingEntries.size(); i++) {
-			IClasspathEntry curr= ((CPListElement)fExistingEntries.get(i)).getClasspathEntry();
+			IClasspathEntry curr= fExistingEntries.get(i).getClasspathEntry();
 			if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				if (path.equals(curr.getPath()) && fExistingEntries.get(i) != fNewElement) {
 					if (folder.exists()) {
@@ -459,7 +460,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			fNewElement.setLinkTarget(fLinkFields.getLinkTarget());
 		}
 		fRemovedElements.clear();
-		Set modified= new HashSet();
+		Set<CPListElement> modified= new HashSet<CPListElement>();
 		boolean isProjectSourceFolderReplaced= false;
 		if (fAddExclusionPatterns.isSelected()) {
 			if (fOrginalPath == null) {
@@ -471,7 +472,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		} else {
 			if (isProjectASourceFolder) {
 				if (fRemoveProjectFolder.isSelected()) {
-					fOldProjectSourceFolder= (CPListElement)fExistingEntries.get(projectEntryIndex);
+					fOldProjectSourceFolder= fExistingEntries.get(projectEntryIndex);
 					fRemovedElements.add(fOldProjectSourceFolder);
 					fExistingEntries.set(projectEntryIndex, fNewElement);
 					isProjectSourceFolderReplaced= true;
@@ -534,8 +535,8 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	}
 
 	public void restore() {
-		for (Iterator iter= fExistingEntries.iterator(); iter.hasNext();) {
-			CPListElement element= (CPListElement)iter.next();
+		for (Iterator<CPListElement> iter= fExistingEntries.iterator(); iter.hasNext();) {
+			CPListElement element= iter.next();
 			if (fOrginalExlusionFilters.containsKey(element)) {
 				element.setAttribute(CPListElement.EXCLUSION, fOrginalExlusionFiltersCopy.get(element));
 			}
@@ -548,8 +549,8 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 	private void restoreCPElements() {
 		if (fNewElement.getPath() != null) {
-			for (Iterator iter= fExistingEntries.iterator(); iter.hasNext();) {
-				CPListElement element= (CPListElement)iter.next();
+			for (Iterator<CPListElement> iter= fExistingEntries.iterator(); iter.hasNext();) {
+				CPListElement element= iter.next();
 				if (fOrginalExlusionFilters.containsKey(element)) {
 					element.setAttribute(CPListElement.EXCLUSION, fOrginalExlusionFilters.get(element));
 				}
@@ -579,8 +580,8 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			newPath= newPath.removeFirstSegments(projPath.segmentCount()).addTrailingSeparator();
 		}
 
-		for (Iterator iter= fExistingEntries.iterator(); iter.hasNext();) {
-			CPListElement element= (CPListElement)iter.next();
+		for (Iterator<CPListElement> iter= fExistingEntries.iterator(); iter.hasNext();) {
+			CPListElement element= iter.next();
 			IPath elementPath= element.getPath();
 			if (projPath.isPrefixOf(elementPath)) {
 				elementPath= elementPath.removeFirstSegments(projPath.segmentCount());
@@ -700,10 +701,10 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		return result;
 	}
 
-	private void addExclusionPatterns(CPListElement newEntry, List existing, Set modifiedEntries) {
+	private void addExclusionPatterns(CPListElement newEntry, List<CPListElement> existing, Set<CPListElement> modifiedEntries) {
 		IPath entryPath= newEntry.getPath();
 		for (int i= 0; i < existing.size(); i++) {
-			CPListElement curr= (CPListElement) existing.get(i);
+			CPListElement curr= existing.get(i);
 			IPath currPath= curr.getPath();
 			if (curr != newEntry && curr.getEntryKind() == IClasspathEntry.CPE_SOURCE && currPath.isPrefixOf(entryPath)) {
 				boolean added= curr.addToExclusions(entryPath);
@@ -729,7 +730,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	// ------------- choose dialogs
 
 	private IFolder chooseFolder(String title, String message, IPath initialPath) {
-		Class[] acceptedClasses= new Class[] { IFolder.class };
+		Class<?>[] acceptedClasses= new Class[] { IFolder.class };
 		ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, null);
 
@@ -739,6 +740,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		IProject currProject= fNewElement.getJavaProject().getProject();
 
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp) {
+			@Override
 			protected Control createDialogArea(Composite parent) {
 				Control result= super.createDialogArea(parent);
 				PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.BP_CHOOSE_EXISTING_FOLDER_TO_MAKE_SOURCE_FOLDER);
@@ -762,14 +764,14 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		return null;
 	}
 
-	public List getModifiedElements() {
+	public List<CPListElement> getModifiedElements() {
 		if (fOrginalPath != null && !fModifiedElements.contains(fNewElement))
 			fModifiedElements.add(fNewElement);
 
 		return fModifiedElements;
 	}
 
-	public List getRemovedElements() {
+	public List<CPListElement> getRemovedElements() {
 		return fRemovedElements;
 	}
 

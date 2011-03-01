@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,7 +83,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 			return NO_RESOLUTION;
 		}
 
-		ArrayList resolutions= new ArrayList();
+		ArrayList<IMarkerResolution2> resolutions= new ArrayList<IMarkerResolution2>();
 
 		final IJavaProject project= getJavaProject(marker);
 
@@ -123,7 +123,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 			resolutions.add(new OpenBuildPathMarkerResolution(project));
 		}
 
-		return (IMarkerResolution[]) resolutions.toArray(new IMarkerResolution[resolutions.size()]);
+		return resolutions.toArray(new IMarkerResolution[resolutions.size()]);
 	}
 
 	protected void changeToExistingLibrary(Shell shell, IPath path, boolean isNew, final IJavaProject project) {
@@ -190,7 +190,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 	protected void createUserLibrary(final Shell shell, IPath unboundPath) {
 		String name= unboundPath.segment(1);
 		String id= UserLibraryPreferencePage.ID;
-		HashMap data= new HashMap(3);
+		HashMap<String, Object> data= new HashMap<String, Object>(3);
 		data.put(UserLibraryPreferencePage.DATA_LIBRARY_TO_SELECT, name);
 		data.put(UserLibraryPreferencePage.DATA_DO_CREATE, Boolean.TRUE);
 		PreferencesUtil.createPreferenceDialogOn(shell, id, new String[] { id }, data).open();

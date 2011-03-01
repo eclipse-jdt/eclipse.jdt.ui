@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,24 +108,29 @@ public class JavaElementLabelComposer {
 			fStringBuffer= stringBuffer;
 		}
 
+		@Override
 		public FlexibleBuffer append(char ch) {
 			fStringBuffer.append(ch);
 			return this;
 		}
 
+		@Override
 		public FlexibleBuffer append(String string) {
 			fStringBuffer.append(string);
 			return this;
 		}
 
+		@Override
 		public int length() {
 			return fStringBuffer.length();
 		}
 
+		@Override
 		public void setStyle(int offset, int length, Styler styler) {
 			// no style
 		}
 
+		@Override
 		public String toString() {
 			return fStringBuffer.toString();
 		}
@@ -138,24 +143,29 @@ public class JavaElementLabelComposer {
 			fStyledString= stringBuffer;
 		}
 
+		@Override
 		public FlexibleBuffer append(char ch) {
 			fStyledString.append(ch);
 			return this;
 		}
 
+		@Override
 		public FlexibleBuffer append(String string) {
 			fStyledString.append(string);
 			return this;
 		}
 
+		@Override
 		public int length() {
 			return fStyledString.length();
 		}
 
+		@Override
 		public void setStyle(int offset, int length, Styler styler) {
 			fStyledString.setStyle(offset, length, styler);
 		}
 
+		@Override
 		public String toString() {
 			return fStyledString.toString();
 		}
@@ -1348,7 +1358,7 @@ public class JavaElementLabelComposer {
 	public static PackageNameAbbreviation[] parseAbbreviationPattern(String pattern) {
 		String[] parts= pattern.split("\\s*(?:\r\n?|\n)\\s*"); //$NON-NLS-1$
 
-		ArrayList result= new ArrayList();
+		ArrayList<PackageNameAbbreviation> result= new ArrayList<PackageNameAbbreviation>();
 
 		for (int i= 0; i < parts.length; i++) {
 			String part= parts[i].trim();
@@ -1372,16 +1382,13 @@ public class JavaElementLabelComposer {
 			result.add(pkgAbbr);
 		}
 
-		Collections.sort(result, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				PackageNameAbbreviation a1= (PackageNameAbbreviation)o1;
-				PackageNameAbbreviation a2= (PackageNameAbbreviation)o2;
-
+		Collections.sort(result, new Comparator<PackageNameAbbreviation>() {
+			public int compare(PackageNameAbbreviation a1, PackageNameAbbreviation a2) {
 				return a2.getPackagePrefix().length() - a1.getPackagePrefix().length();
 			}
 		});
 
-		return (PackageNameAbbreviation[])result.toArray(new PackageNameAbbreviation[0]);
+		return result.toArray(new PackageNameAbbreviation[0]);
 	}
 	
 	private boolean isPackageNameCompressionEnabled() {

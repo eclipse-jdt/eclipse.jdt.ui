@@ -21,6 +21,7 @@ public class TypeTuple {
 		fSecond= second;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -30,6 +31,7 @@ public class TypeTuple {
 		return fFirst.equals(other.fFirst) && fSecond.equals(other.fSecond);
 	}
 
+	@Override
 	public int hashCode() {
 		return fFirst.hashCode() << 16 + fSecond.hashCode();
 	}

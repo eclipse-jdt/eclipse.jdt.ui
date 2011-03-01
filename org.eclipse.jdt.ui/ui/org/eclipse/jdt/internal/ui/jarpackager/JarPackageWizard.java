@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -99,7 +99,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		}
 	}
 
-	private void addJavaElement(List selectedElements, IJavaElement je) {
+	private void addJavaElement(List<Object> selectedElements, IJavaElement je) {
 		if (je.getElementType() == IJavaElement.COMPILATION_UNIT)
 			selectedElements.add(je);
 		else if (je.getElementType() == IJavaElement.CLASS_FILE)
@@ -129,6 +129,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void addPages() {
 		super.addPages();
 		fJarPackageWizardPage= new JarPackageWizardPage(fJarPackage, fSelection);
@@ -138,7 +139,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		addPage(new JarManifestWizardPage(fJarPackage));
 	}
 
-	private void addProject(List selectedElements, IProject project) {
+	private void addProject(List<Object> selectedElements, IProject project) {
 		try {
 			if (project.hasNature(JavaCore.NATURE_ID))
 				selectedElements.add(JavaCore.create(project));
@@ -147,7 +148,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		}
 	}
 
-	private void addResource(List selectedElements, IResource resource) {
+	private void addResource(List<Object> selectedElements, IResource resource) {
 		IJavaElement je= JavaCore.create(resource);
 		if (je != null && je.exists() && je.getElementType() == IJavaElement.COMPILATION_UNIT)
 			selectedElements.add(je);
@@ -180,12 +181,14 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		return true;
 	}
 
+	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
 		if (page == fJarPackageWizardPage && !fJarPackage.isRefactoringAware())
 			return fJarOptionsWizardPage;
 		return super.getNextPage(page);
 	}
 
+	@Override
 	public IWizardPage getPreviousPage(IWizardPage page) {
 		if (page == fJarOptionsWizardPage && !fJarPackage.isRefactoringAware())
 			return fJarPackageWizardPage;
@@ -205,8 +208,8 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		ISelection currentSelection= JavaPlugin.getActiveWorkbenchWindow().getSelectionService().getSelection();
 		if (currentSelection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) currentSelection;
-			List selectedElements= new ArrayList(structuredSelection.size());
-			Iterator iter= structuredSelection.iterator();
+			List<Object> selectedElements= new ArrayList<Object>(structuredSelection.size());
+			Iterator<?> iter= structuredSelection.iterator();
 			while (iter.hasNext()) {
 				Object selectedElement= iter.next();
 				if (selectedElement instanceof IProject)
@@ -260,6 +263,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean performFinish() {
 		fJarPackage.setElements(fJarPackageWizardPage.getSelectedElementsWithoutContainedChildren());
 

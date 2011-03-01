@@ -83,6 +83,7 @@ public class FormatAllAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		// do nothing
 	}
@@ -90,6 +91,7 @@ public class FormatAllAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		fCleanUpDelegate.selectionChanged(selection);
 		setEnabled(fCleanUpDelegate.isEnabled());
@@ -98,12 +100,14 @@ public class FormatAllAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		fCleanUpDelegate.run(selection);
 	}

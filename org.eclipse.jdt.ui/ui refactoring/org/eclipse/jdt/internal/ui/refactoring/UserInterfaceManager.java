@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,18 +21,18 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class UserInterfaceManager {
 
-	private Map fMap= new HashMap();
+	private Map<Class<? extends RefactoringProcessor>, Tuple> fMap= new HashMap<Class<? extends RefactoringProcessor>, Tuple>();
 
 	private static class Tuple {
-		private Class starter;
-		private Class wizard;
-		public Tuple(Class s, Class w) {
+		private Class<? extends UserInterfaceStarter> starter;
+		private Class<? extends RefactoringWizard> wizard;
+		public Tuple(Class<? extends UserInterfaceStarter> s, Class<? extends RefactoringWizard> w) {
 			starter= s;
 			wizard= w;
 		}
 	}
 
-	protected void put(Class processor, Class starter, Class wizard) {
+	protected void put(Class<? extends RefactoringProcessor> processor, Class<? extends UserInterfaceStarter> starter, Class<? extends RefactoringWizard> wizard) {
 		fMap.put(processor, new Tuple(starter, wizard));
 	}
 
@@ -41,14 +41,14 @@ public class UserInterfaceManager {
 		RefactoringProcessor processor= (RefactoringProcessor)refactoring.getAdapter(RefactoringProcessor.class);
 		if (processor == null)
 			return null;
-		Tuple tuple= (Tuple)fMap.get(processor.getClass());
+		Tuple tuple= fMap.get(processor.getClass());
 		if (tuple == null)
 			return null;
 		try {
-			UserInterfaceStarter starter= (UserInterfaceStarter)tuple.starter.newInstance();
-			Class wizardClass= tuple.wizard;
-			Constructor constructor= wizardClass.getConstructor(new Class[] {Refactoring.class});
-			RefactoringWizard wizard= (RefactoringWizard)constructor.newInstance(new Object[] {refactoring});
+			UserInterfaceStarter starter= tuple.starter.newInstance();
+			Class<? extends RefactoringWizard> wizardClass= tuple.wizard;
+			Constructor<? extends RefactoringWizard> constructor= wizardClass.getConstructor(new Class[] {Refactoring.class});
+			RefactoringWizard wizard= constructor.newInstance(new Object[] {refactoring});
 			starter.initialize(wizard);
 			return starter;
 		} catch (NoSuchMethodException e) {

@@ -23,6 +23,7 @@ public class ReplaceInvocationsWizard extends RefactoringWizard {
 		setDefaultPageTitle(RefactoringMessages.ReplaceInvocationsWizard_title);
 	}
 
+	@Override
 	protected void addUserInputPages(){
 		addPage(new ReplaceInvocationsInputPage());
 	}

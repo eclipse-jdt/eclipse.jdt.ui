@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,6 +74,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 			setCompareConfiguration(cc);
 		}
 
+		@Override
 		public void run() {
 			boolean b= !JavaCompareUtilities.getBoolean(fCompareConfiguration, fPropertyKey, false);
 			setChecked(b);
@@ -81,6 +82,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 				fCompareConfiguration.setProperty(fPropertyKey, new Boolean(b));
 		}
 
+		@Override
 		public void setChecked(boolean state) {
 			super.setChecked(state);
 			JavaCompareUtilities.initToggleAction(this, fBundle, fPrefix, state);
@@ -108,6 +110,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 	/**
 	 * Overridden to find and expand the first class.
 	 */
+	@Override
 	protected void initialSelection() {
 		Object firstClass= null;
 		Object o= getRoot();
@@ -142,6 +145,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 			expandToLevel(2);
 	}
 
+	@Override
 	protected void compareInputChanged(ICompareInput input) {
 
 		fThreeWay= input != null ? input.getAncestor() != null
@@ -149,7 +153,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 		setSmartButtonVisible(fThreeWay);
 
 		if (input != null) {
-			Map compilerOptions= getCompilerOptions(input.getAncestor());
+			Map<String, String> compilerOptions= getCompilerOptions(input.getAncestor());
 			if (compilerOptions == null)
 				compilerOptions= getCompilerOptions(input.getLeft());
 			if (compilerOptions == null)
@@ -161,7 +165,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 		super.compareInputChanged(input);
 	}
 
-	private Map getCompilerOptions(ITypedElement input) {
+	private Map<String, String> getCompilerOptions(ITypedElement input) {
 		IJavaElement element= findJavaElement(input);
 		if (element != null) {
 			IJavaProject javaProject= element.getJavaProject();
@@ -175,6 +179,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 	 * @see org.eclipse.compare.structuremergeviewer.StructureDiffViewer#handleDispose(org.eclipse.swt.events.DisposeEvent)
 	 * @since 3.5
 	 */
+	@Override
 	protected void handleDispose(DisposeEvent event) {
 		JavaCore.removeElementChangedListener(this);
 		super.handleDispose(event);
@@ -198,6 +203,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 	 *
 	 * @param toolBarManager the toolbar manager for which to add the buttons
 	 */
+	@Override
 	protected void createToolItems(ToolBarManager toolBarManager) {
 
 		super.createToolItems(toolBarManager);
@@ -208,6 +214,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 		toolBarManager.appendToGroup("modes", fSmartActionItem); //$NON-NLS-1$
 	}
 
+	@Override
 	protected void postDiffHook(Differencer differencer, IDiffContainer root, IProgressMonitor monitor) {
 		if (fStructureCreator.canRewriteTree()) {
 			boolean smart= JavaCompareUtilities.getBoolean(getCompareConfiguration(), SMART, false);
@@ -222,6 +229,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 	 * 
 	 * @param event the property change event
 	 */
+	@Override
 	protected void propertyChange(PropertyChangeEvent event) {
 		if (event.getProperty().equals(SMART))
 			diff();
@@ -272,14 +280,14 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 		if (!(input instanceof ICompareInput))
 			return new ITypedElement[0];
 
-		Set affectedElements= new HashSet();
+		Set<ITypedElement> affectedElements= new HashSet<ITypedElement>();
 		ICompareInput ci= (ICompareInput)input;
 		IJavaElementDelta delta= event.getDelta();
 		addAffectedElement(ci.getAncestor(), delta, affectedElements);
 		addAffectedElement(ci.getLeft(), delta, affectedElements);
 		addAffectedElement(ci.getRight(), delta, affectedElements);
 
-		return (ITypedElement[])affectedElements.toArray(new ITypedElement[affectedElements.size()]);
+		return affectedElements.toArray(new ITypedElement[affectedElements.size()]);
 	}
 
 	/**
@@ -290,7 +298,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 	 * @param affectedElements the set of affected elements
 	 * @since 3.5
 	 */
-	private void addAffectedElement(ITypedElement element, IJavaElementDelta delta, Set affectedElements) {
+	private void addAffectedElement(ITypedElement element, IJavaElementDelta delta, Set<ITypedElement> affectedElements) {
 		IJavaElement javaElement= findJavaElement(element);
 		if (isEditable(javaElement) && findJavaElementDelta(javaElement, delta) != null)
 			affectedElements.add(element);

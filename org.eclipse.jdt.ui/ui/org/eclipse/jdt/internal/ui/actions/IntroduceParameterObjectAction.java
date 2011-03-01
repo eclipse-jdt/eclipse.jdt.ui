@@ -65,6 +65,7 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isIntroduceParameterObjectAvailable(selection));
@@ -77,6 +78,7 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(ITextSelection)
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
@@ -84,6 +86,7 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection)
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isIntroduceParameterObjectAvailable(selection));
@@ -97,6 +100,7 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			IMethod singleSelectedMethod= getSingleSelectedMethod(selection);
@@ -111,6 +115,7 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		try {
 			if (!ActionUtil.isEditable(fEditor))
@@ -121,6 +126,7 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 		}
 	}
 
+	@Override
 	public void run(JavaTextSelection selection) {
 		try {
 			IJavaElement[] elements= selection.resolveElementAtOffset();

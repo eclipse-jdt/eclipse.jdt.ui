@@ -81,6 +81,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedRange;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
+import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore.OverlayKey;
 import org.eclipse.jdt.internal.ui.text.JavaColorManager;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
@@ -217,6 +218,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		/*
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
 		 */
+		@Override
 		public String getText(Object element) {
 			if (element instanceof String)
 				return (String) element;
@@ -343,7 +345,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * Highlighting color list
 	 * @since  3.0
 	 */
-	private final java.util.List fListModel= new ArrayList();
+	private final java.util.List<HighlightingColorListItem> fListModel= new ArrayList<HighlightingColorListItem>();
 	/**
 	 * Highlighting color tree viewer
 	 * @since  3.0
@@ -396,10 +398,10 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 
-		ArrayList overlayKeys= new ArrayList();
+		ArrayList<OverlayKey> overlayKeys= new ArrayList<OverlayKey>();
 
 		for (int i= 0, n= fListModel.size(); i < n; i++) {
-			HighlightingColorListItem item= (HighlightingColorListItem) fListModel.get(i);
+			HighlightingColorListItem item= fListModel.get(i);
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, item.getColorKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getBoldKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getItalicKey()));
@@ -475,6 +477,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
         return Dialog.convertHeightInCharsToPixels(fFontMetrics, chars);
     }
 
+	@Override
 	public void initialize() {
 		super.initialize();
 
@@ -482,6 +485,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		fTreeViewer.setSelection(new StructuredSelection(fJavaCategory));
 	}
 
+	@Override
 	public void performDefaults() {
 		super.performDefaults();
 
@@ -496,6 +500,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#dispose()
 	 */
+	@Override
 	public void dispose() {
 		uninstallSemanticHighlighting();
 		fColorManager.dispose();
@@ -554,6 +559,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		Link link= new Link(colorComposite, SWT.NONE);
 		link.setText(PreferencesMessages.JavaEditorColoringConfigurationBlock_link);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if ("org.eclipse.ui.preferencePages.GeneralTextEditor".equals(e.text)) //$NON-NLS-1$
 					PreferencesUtil.createPreferenceDialogOn(parent.getShell(), e.text, null, null);
@@ -587,6 +593,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		fTreeViewer.setLabelProvider(new ColorListLabelProvider());
 		fTreeViewer.setContentProvider(new ColorListContentProvider());
 		fTreeViewer.setComparator(new ViewerComparator() {
+			@Override
 			public int category(Object element) {
 				// don't sort the top level categories
 				if (fJavaCategory.equals(element))
@@ -604,8 +611,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, true);
 		gd.heightHint= convertHeightInCharsToPixels(9);
 		int maxWidth= 0;
-		for (Iterator it= fListModel.iterator(); it.hasNext();) {
-			HighlightingColorListItem item= (HighlightingColorListItem) it.next();
+		for (Iterator<HighlightingColorListItem> it= fListModel.iterator(); it.hasNext();) {
+			HighlightingColorListItem item= it.next();
 			maxWidth= Math.max(maxWidth, convertWidthInCharsToPixels(item.getDisplayName().length()));
 		}
 		ScrollBar vBar= ((Scrollable) fTreeViewer.getControl()).getVerticalBar();

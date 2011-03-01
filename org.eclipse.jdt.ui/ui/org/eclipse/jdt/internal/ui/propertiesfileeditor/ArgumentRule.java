@@ -57,6 +57,7 @@ public final class ArgumentRule extends WordPatternRule {
 	/*
 	 * @see org.eclipse.jface.text.rules.WordPatternRule#endSequenceDetected(org.eclipse.jface.text.rules.ICharacterScanner)
 	 */
+	@Override
 	protected boolean endSequenceDetected(ICharacterScanner scanner) {
 		fCount++;
 
@@ -70,6 +71,7 @@ public final class ArgumentRule extends WordPatternRule {
 	/*
 	 * @see org.eclipse.jface.text.rules.PatternRule#sequenceDetected(org.eclipse.jface.text.rules.ICharacterScanner, char[], boolean)
 	 */
+	@Override
 	protected boolean sequenceDetected(ICharacterScanner scanner, char[] sequence, boolean eofAllowed) {
 		fCount= 0;
 		return super.sequenceDetected(scanner, sequence, eofAllowed);

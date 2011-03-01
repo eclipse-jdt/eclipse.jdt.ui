@@ -54,6 +54,7 @@ public class FocusOnSelectionAction extends Action {
 	/*
 	 * @see Action#run
 	 */
+	@Override
 	public void run() {
 		Object element= SelectionUtil.getSingleElement(getSelection());
 		if (element instanceof IType) {

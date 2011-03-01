@@ -31,6 +31,7 @@ public class SurroundWithTryCatchAnalyzer extends SurroundWithAnalyzer {
 		return fExceptions;
 	}
 
+	@Override
 	public void endVisit(CompilationUnit node) {
 		BodyDeclaration enclosingNode= null;
 		if (!getStatus().hasFatalError() && hasSelectedNodes())

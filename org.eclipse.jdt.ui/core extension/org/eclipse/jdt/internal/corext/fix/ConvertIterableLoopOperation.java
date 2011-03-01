@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -121,7 +121,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	private IVariableBinding fIterator= null;
 
 	/** The nodes of the element variable occurrences */
-	private final List fOccurrences= new ArrayList(2);
+	private final List<Expression> fOccurrences= new ArrayList<Expression>(2);
 
 	private EnhancedForStatement fEnhancedForLoop;
 
@@ -136,6 +136,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		fMakeFinal= makeFinal;
 	}
 
+	@Override
 	public String getIntroducedVariableName() {
 		if (fElement != null) {
 			return fElement.getName();
@@ -210,6 +211,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel positionGroups) throws CoreException {
 		final TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, cuRewrite);
 
@@ -228,6 +230,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		astRewrite.replace(getForStatement(), statement, group);
 	}
 
+	@Override
 	protected Statement convert(CompilationUnitRewrite cuRewrite, final TextEditGroup group, final LinkedProposalModel positionGroups) throws CoreException {
 		final AST ast= cuRewrite.getAST();
 		final ASTRewrite astRewrite= cuRewrite.getASTRewrite();
@@ -255,8 +258,8 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			final ListRewrite list;
 			if (body instanceof Block) {
 				list= astRewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY);
-				for (final Iterator iterator= fOccurrences.iterator(); iterator.hasNext();) {
-					final Statement parent= (Statement)ASTNodes.getParent((ASTNode)iterator.next(), Statement.class);
+				for (final Iterator<Expression> iterator= fOccurrences.iterator(); iterator.hasNext();) {
+					final Statement parent= (Statement)ASTNodes.getParent(iterator.next(), Statement.class);
 					if (parent != null && list.getRewrittenList().contains(parent)) {
 						list.remove(parent, null);
 						remover.registerRemovedNode(parent);
@@ -276,6 +279,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 					return false;
 				}
 
+				@Override
 				public final boolean visit(final MethodInvocation node) {
 					final IMethodBinding binding= node.resolveMethodBinding();
 					if (binding != null && (binding.getName().equals("next") || binding.getName().equals("nextElement"))) { //$NON-NLS-1$ //$NON-NLS-2$
@@ -293,6 +297,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 					return super.visit(node);
 				}
 
+				@Override
 				public final boolean visit(final SimpleName node) {
 					if (fElement != null) {
 						final IBinding binding= node.resolveBinding();
@@ -321,8 +326,8 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		fEnhancedForLoop.setParameter(declaration);
 		fEnhancedForLoop.setExpression(getExpression(astRewrite));
 
-		for (Iterator iterator= getForStatement().initializers().iterator(); iterator.hasNext();) {
-			ASTNode node= (ASTNode)iterator.next();
+		for (Iterator<Expression> iterator= getForStatement().initializers().iterator(); iterator.hasNext();) {
+			ASTNode node= iterator.next();
 			if (node instanceof VariableDeclarationExpression) {
 				VariableDeclarationExpression variableDeclarationExpression= (VariableDeclarationExpression) node;
 				remover.registerRemovedNode(variableDeclarationExpression.getType());
@@ -331,8 +336,8 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			}
 		}
 
-		for (Iterator iterator= getForStatement().updaters().iterator(); iterator.hasNext();) {
-			ASTNode node= (ASTNode)iterator.next();
+		for (Iterator<Expression> iterator= getForStatement().updaters().iterator(); iterator.hasNext();) {
+			ASTNode node= iterator.next();
 			remover.registerRemovedNode(node);
 		}
 
@@ -345,6 +350,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	 * @return A status with severity <code>IStatus.Error</code> if not
 	 *         applicable
 	 */
+	@Override
 	public final IStatus satisfiesPreconditions() {
 		IStatus resultStatus= StatusInfo.OK_STATUS;
 		if (JavaModelUtil.is50OrHigher(getJavaProject())) {
@@ -352,24 +358,25 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			if (resultStatus.getSeverity() == IStatus.ERROR)
 				return resultStatus;
 
-			List updateExpressions= (List)getForStatement().getStructuralProperty(ForStatement.UPDATERS_PROPERTY);
+			List<Expression> updateExpressions= (List<Expression>) getForStatement().getStructuralProperty(ForStatement.UPDATERS_PROPERTY);
 			if (updateExpressions.size() == 1) {
-				resultStatus= new StatusInfo(IStatus.WARNING, Messages.format(FixMessages.ConvertIterableLoopOperation_RemoveUpdateExpression_Warning, BasicElementLabels.getJavaCodeString(((Expression)updateExpressions.get(0)).toString())));
+				resultStatus= new StatusInfo(IStatus.WARNING, Messages.format(FixMessages.ConvertIterableLoopOperation_RemoveUpdateExpression_Warning, BasicElementLabels.getJavaCodeString(updateExpressions.get(0).toString())));
 			} else if (updateExpressions.size() > 1) {
 				resultStatus= new StatusInfo(IStatus.WARNING, FixMessages.ConvertIterableLoopOperation_RemoveUpdateExpressions_Warning);
 			}
 
-			for (final Iterator outer= getForStatement().initializers().iterator(); outer.hasNext();) {
-				final Expression initializer= (Expression)outer.next();
+			for (final Iterator<Expression> outer= getForStatement().initializers().iterator(); outer.hasNext();) {
+				final Expression initializer= outer.next();
 				if (initializer instanceof VariableDeclarationExpression) {
 					final VariableDeclarationExpression declaration= (VariableDeclarationExpression)initializer;
-					List fragments= declaration.fragments();
+					List<VariableDeclarationFragment> fragments= declaration.fragments();
 					if (fragments.size() != 1) {
 						return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 					} else {
-						final VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(0);
+						final VariableDeclarationFragment fragment= fragments.get(0);
 						fragment.accept(new ASTVisitor() {
 
+							@Override
 							public final boolean visit(final MethodInvocation node) {
 								final IMethodBinding binding= node.resolveMethodBinding();
 								if (binding != null) {
@@ -413,6 +420,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 								return true;
 							}
 
+							@Override
 							public final boolean visit(final VariableDeclarationFragment node) {
 								final IVariableBinding binding= node.resolveBinding();
 								if (binding != null) {
@@ -441,6 +449,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 				final ITypeBinding iterable= getIterableType(fIterator.getType());
 				statement.accept(new ASTVisitor() {
 
+					@Override
 					public final boolean visit(final Assignment node) {
 						return visit(node.getLeftHandSide(), node.getRightHandSide());
 					}
@@ -508,6 +517,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 					/**
 					 * {@inheritDoc}
 					 */
+					@Override
 					public boolean visit(MethodInvocation invocation) {
 						final IMethodBinding binding= invocation.resolveMethodBinding();
 						if (binding != null) {
@@ -537,6 +547,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 						return true;
 					}
 
+					@Override
 					public final boolean visit(final VariableDeclarationFragment node) {
 						return visit(node.getName(), node.getInitializer());
 					}
@@ -549,6 +560,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
 				if (fElement != null) {
 					statement.accept(new ASTVisitor() {
+						@Override
 						public final boolean visit(final VariableDeclarationFragment node) {
 							if (node.getInitializer() instanceof NullLiteral) {
 								SimpleName name= node.getName();
@@ -566,10 +578,12 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			if (root != null) {
 				root.accept(new ASTVisitor() {
 
+					@Override
 					public final boolean visit(final ForStatement node) {
 						return false;
 					}
 
+					@Override
 					public final boolean visit(final SimpleName node) {
 						final IBinding binding= node.resolveBinding();
 						if (binding != null && binding.equals(fElement))
@@ -618,24 +632,22 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
 	private IStatus checkIteratorCondition() {
 
-		List initializers= getForStatement().initializers();
+		List<Expression> initializers= getForStatement().initializers();
 		if (initializers.size() != 1)
 			return SEMANTIC_CHANGE_WARNING_STATUS;
 
-		Expression expression= (Expression)initializers.get(0);
+		Expression expression= initializers.get(0);
 		if (!(expression instanceof VariableDeclarationExpression))
 			return SEMANTIC_CHANGE_WARNING_STATUS;
 
 		VariableDeclarationExpression declaration= (VariableDeclarationExpression)expression;
-		List variableDeclarationFragments= declaration.fragments();
+		List<VariableDeclarationFragment> variableDeclarationFragments= declaration.fragments();
 		if (variableDeclarationFragments.size() != 1)
 			return SEMANTIC_CHANGE_WARNING_STATUS;
 
-		Object declarationFragment= variableDeclarationFragments.get(0);
-		if (!(declarationFragment instanceof VariableDeclarationFragment))
-			return SEMANTIC_CHANGE_WARNING_STATUS;
+		VariableDeclarationFragment declarationFragment= variableDeclarationFragments.get(0);
 
-		Expression initializer= ((VariableDeclarationFragment)declarationFragment).getInitializer();
+		Expression initializer= declarationFragment.getInitializer();
 		if (!(initializer instanceof MethodInvocation))
 			return SEMANTIC_CHANGE_WARNING_STATUS;
 

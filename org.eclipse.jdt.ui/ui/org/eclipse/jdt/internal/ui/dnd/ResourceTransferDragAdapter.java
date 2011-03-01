@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,7 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 
 	private ISelectionProvider fProvider;
 
-	private static final List EMPTY_LIST= new ArrayList(0);
+	private static final List<IResource> EMPTY_LIST= new ArrayList<IResource>(0);
 
 	/**
 	 * Creates a new ResourceTransferDragAdapter for the given selection
@@ -72,15 +72,18 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 		return ResourceTransfer.getInstance();
 	}
 
+	@Override
 	public void dragStart(DragSourceEvent event) {
 		event.doit= convertSelection().size() > 0;
 	}
 
+	@Override
 	public void dragSetData(DragSourceEvent event) {
-		List resources= convertSelection();
+		List<IResource> resources= convertSelection();
 		event.data= resources.toArray(new IResource[resources.size()]);
 	}
 
+	@Override
 	public void dragFinished(DragSourceEvent event) {
 		if (!event.doit)
 			return;
@@ -90,13 +93,13 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 		}
 	}
 
-	private List convertSelection() {
+	private List<IResource> convertSelection() {
 		ISelection s= fProvider.getSelection();
 		if (!(s instanceof IStructuredSelection))
 			return EMPTY_LIST;
 		IStructuredSelection selection= (IStructuredSelection)s;
-		List result= new ArrayList(selection.size());
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		List<IResource> result= new ArrayList<IResource>(selection.size());
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			IResource resource= null;
 			if (element instanceof IJavaElement) {
@@ -117,9 +120,9 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 			IJavaStatusConstants.INTERNAL_ERROR,
 			JavaUIMessages.ResourceTransferDragAdapter_cannot_delete_resource,
 			null);
-		List resources= convertSelection();
-		for (Iterator iter= resources.iterator(); iter.hasNext();) {
-			IResource resource= (IResource) iter.next();
+		List<IResource> resources= convertSelection();
+		for (Iterator<IResource> iter= resources.iterator(); iter.hasNext();) {
+			IResource resource= iter.next();
 			try {
 				resource.delete(true, null);
 			} catch (CoreException e) {

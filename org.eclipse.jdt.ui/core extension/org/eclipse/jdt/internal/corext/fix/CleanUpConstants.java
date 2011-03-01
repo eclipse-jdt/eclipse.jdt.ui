@@ -1264,8 +1264,8 @@ public class CleanUpConstants {
 
 	public static void initDefaults(IPreferenceStore store) {
 		CleanUpOptions settings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
-		for (Iterator iterator= settings.getKeys().iterator(); iterator.hasNext();) {
-			String key= (String)iterator.next();
+		for (Iterator<String> iterator= settings.getKeys().iterator(); iterator.hasNext();) {
+			String key= iterator.next();
 			store.setDefault(key, settings.getValue(key));
 		}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
  *
  * @since 3.2
  */
-public abstract class AbstractProposalSorter implements Comparator {
+public abstract class AbstractProposalSorter implements Comparator<ICompletionProposal> {
 
 	/**
 	 * Creates a new sorter. Note that subclasses must provide a zero-argument constructor to be
@@ -51,18 +51,14 @@ public abstract class AbstractProposalSorter implements Comparator {
 	}
 
 	/**
-	 * Implements the same contract as {@link Comparator#compare(Object, Object)} but with
-	 * completion proposals as parameters. This method will implement the {@link Comparator}
-	 * interface if this class is ever converted to extend
-	 * <code>Comparator&lt;ICompletionProposal&gt;</code>.
-	 * <p>
 	 * The orderings imposed by an implementation need not be consistent with equals.
-	 * </p>
 	 *
 	 * @param p1 the first proposal to be compared
 	 * @param p2 the second proposal to be compared
 	 * @return a negative integer, zero, or a positive integer as the first argument is less than,
 	 *         equal to, or greater than the second.
+	 * 
+	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
 	public abstract int compare(ICompletionProposal p1, ICompletionProposal p2);
 
@@ -73,19 +69,5 @@ public abstract class AbstractProposalSorter implements Comparator {
 	 * </p>
 	 */
 	public void endSorting() {
-	}
-
-	/**
-	 * This method delegates to {@link #compare(ICompletionProposal, ICompletionProposal)} and may
-	 * be removed if the class is ever converted to extend
-	 * <code>Comparator&lt;ICompletionProposal&gt;</code>.
-	 *
-	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-	 */
-	public final int compare(Object o1, Object o2) {
-		ICompletionProposal p1= (ICompletionProposal) o1;
-		ICompletionProposal p2= (ICompletionProposal) o2;
-
-		return compare(p1, p2);
 	}
 }

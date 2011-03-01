@@ -45,6 +45,7 @@ class LayoutActionGroup extends ActionGroup {
 	/* (non-Javadoc)
 	 * @see ActionGroup#fillActionBars(IActionBars)
 	 */
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		contributeToViewMenu(actionBars.getMenuManager());
@@ -89,6 +90,7 @@ class LayoutAction extends Action {
 	/*
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
+	@Override
 	public void run() {
 		if (fPackageExplorer.isFlatLayout() != fIsFlatLayout)
 			fPackageExplorer.setFlatLayout(fIsFlatLayout);
@@ -108,6 +110,7 @@ class ShowLibrariesNodeAction extends Action {
 	/*
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
+	@Override
 	public void run() {
 		fPackageExplorer.setShowLibrariesNode(isChecked());
 	}

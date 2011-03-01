@@ -185,6 +185,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fSelectAllAction= new SelectAllAction(fPart.getTreeViewer());
 	}
 
+	@Override
 	public void dispose() {
 		super.dispose();
 	}
@@ -204,6 +205,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	//---- Action Bars ----------------------------------------------------------------------------
 
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		setGlobalActionHandlers(actionBars);
@@ -272,6 +274,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	//---- Context menu -------------------------------------------------------------------------
 
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		IStructuredSelection selection= (IStructuredSelection)getContext().getSelection();
 		int size= selection.size();

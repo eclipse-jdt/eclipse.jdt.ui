@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.IMember;
 
 public class MethodCall {
     private IMember fMember;
-    private List fCallLocations;
+    private List<CallLocation> fCallLocations;
 
     /**
      * @param enclosingElement
@@ -31,13 +31,13 @@ public class MethodCall {
     /**
      *
      */
-    public Collection getCallLocations() {
+    public Collection<CallLocation> getCallLocations() {
         return fCallLocations;
     }
 
     public CallLocation getFirstCallLocation() {
         if ((fCallLocations != null) && !fCallLocations.isEmpty()) {
-            return (CallLocation) fCallLocations.get(0);
+            return fCallLocations.get(0);
         } else {
             return null;
         }
@@ -50,7 +50,7 @@ public class MethodCall {
     /**
      * @return Object
      */
-    public Object getKey() {
+    public String getKey() {
         return getMember().getHandleIdentifier();
     }
 
@@ -66,7 +66,7 @@ public class MethodCall {
      */
     public void addCallLocation(CallLocation location) {
         if (fCallLocations == null) {
-            fCallLocations = new ArrayList();
+            fCallLocations = new ArrayList<CallLocation>();
         }
 
         fCallLocations.add(location);

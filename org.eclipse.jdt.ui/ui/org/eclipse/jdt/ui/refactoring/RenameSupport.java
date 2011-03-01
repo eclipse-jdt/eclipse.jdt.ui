@@ -149,6 +149,7 @@ public class RenameSupport {
 		} else {
 			starter= new RenameUserInterfaceStarter();
 			RenameRefactoringWizard wizard= new RenameRefactoringWizard(fRefactoring, fRefactoring.getName(), null, null, null) {
+				@Override
 				protected void addUserInputPages() {
 					// nothing to add
 				}

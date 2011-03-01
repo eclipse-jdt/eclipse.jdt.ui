@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,7 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 public class ControlStatementsCleanUp extends AbstractCleanUp {
 
-	public ControlStatementsCleanUp(Map options) {
+	public ControlStatementsCleanUp(Map<String, String> options) {
 		super(options);
     }
 
@@ -38,6 +38,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(requireAST(), false, false, null);
 	}
@@ -56,6 +57,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
@@ -74,8 +76,9 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String[] getStepDescriptions() {
-		List result= new ArrayList();
+		List<String> result= new ArrayList<String>();
 		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS))
 			result.add(MultiFixMessages.CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description);
 		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER))
@@ -83,12 +86,13 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW))
 			result.add(MultiFixMessages.ControlStatementsCleanUp_RemoveUnnecessaryBlocksWithReturnOrThrow_description);
 
-		return (String[])result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 

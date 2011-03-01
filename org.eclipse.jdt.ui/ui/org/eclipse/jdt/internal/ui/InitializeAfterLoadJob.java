@@ -29,6 +29,7 @@ public class InitializeAfterLoadJob extends UIJob {
 		public RealJob(String name) {
 			super(name);
 		}
+		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			monitor.beginTask("", 10); //$NON-NLS-1$
 			try {
@@ -40,6 +41,7 @@ public class InitializeAfterLoadJob extends UIJob {
 			}
 			return Status.OK_STATUS;
 		}
+		@Override
 		public boolean belongsTo(Object family) {
 			return JavaUI.ID_PLUGIN.equals(family);
 		}
@@ -49,6 +51,7 @@ public class InitializeAfterLoadJob extends UIJob {
 		super(JavaUIMessages.InitializeAfterLoadJob_starter_job_name);
 		setSystem(true);
 	}
+	@Override
 	public IStatus runInUIThread(IProgressMonitor monitor) {
 		Job job = new RealJob(JavaUIMessages.JavaPlugin_initializing_ui);
 		job.setPriority(Job.SHORT);

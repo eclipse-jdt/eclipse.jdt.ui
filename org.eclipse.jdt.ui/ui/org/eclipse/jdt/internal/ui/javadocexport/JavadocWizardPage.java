@@ -133,6 +133,7 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 			fDisable= disable;
 		}
 
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 			for (int i= 0; i < fEnable.length; i++) {
 				fEnable[i].setEnabled(true);
@@ -155,6 +156,7 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 			this.controls= controls;
 		}
 
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 
 			for (int i= 0; i < controls.length; i++) {

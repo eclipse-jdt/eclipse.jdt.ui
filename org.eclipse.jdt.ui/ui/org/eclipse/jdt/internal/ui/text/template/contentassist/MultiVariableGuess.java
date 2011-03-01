@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -183,15 +183,15 @@ public class MultiVariableGuess {
 		}
 	}
 
-	private final Map fDependencies= new HashMap();
-	private final Map fBackwardDeps= new HashMap();
-	private final Map fPositions= new HashMap();
+	private final Map<MultiVariable, Set<MultiVariable>> fDependencies= new HashMap<MultiVariable, Set<MultiVariable>>();
+	private final Map<MultiVariable, MultiVariable> fBackwardDeps= new HashMap<MultiVariable, MultiVariable>();
+	private final Map<MultiVariable, VariablePosition> fPositions= new HashMap<MultiVariable, VariablePosition>();
 
 	public MultiVariableGuess() {
 	}
 
 	public ICompletionProposal[] getProposals(final MultiVariable variable, int offset, int length) {
-		MultiVariable master= (MultiVariable) fBackwardDeps.get(variable);
+		MultiVariable master= fBackwardDeps.get(variable);
 		Object[] choices;
 		if (master == null)
 			choices= variable.getChoices();
@@ -206,6 +206,7 @@ public class MultiVariableGuess {
 			for (int i= 0; i < ret.length; i++) {
 				final Object choice= choices[i];
 				ret[i]= new Proposal(variable.toString(choice), offset, length, offset + length) {
+					@Override
 					public void apply(IDocument document) {
 						super.apply(document);
 						Object oldChoice= variable.getCurrentChoice();
@@ -232,10 +233,10 @@ public class MultiVariableGuess {
 	private void updateSlaves(MultiVariable variable, IDocument document, Object oldChoice) {
 		Object choice= variable.getCurrentChoice();
 		if (!oldChoice.equals(choice)) {
-			Set slaves= (Set) fDependencies.get(variable);
-			for (Iterator it= slaves.iterator(); it.hasNext();) {
-				MultiVariable slave= (MultiVariable) it.next();
-				VariablePosition pos= (VariablePosition) fPositions.get(slave);
+			Set<MultiVariable> slaves= fDependencies.get(variable);
+			for (Iterator<MultiVariable> it= slaves.iterator(); it.hasNext();) {
+				MultiVariable slave= it.next();
+				VariablePosition pos= fPositions.get(slave);
 
 				Object slavesOldChoice= slave.getCurrentChoice();
 				slave.setKey(choice); // resets the current choice
@@ -274,9 +275,9 @@ public class MultiVariableGuess {
 				throw new IllegalArgumentException("cycle detected"); //$NON-NLS-1$
 		}
 
-		Set slaves= (Set) fDependencies.get(master);
+		Set<MultiVariable> slaves= fDependencies.get(master);
 		if (slaves == null) {
-			slaves= new HashSet();
+			slaves= new HashSet<MultiVariable>();
 			fDependencies.put(master, slaves);
 		}
 		fBackwardDeps.put(slave, master);

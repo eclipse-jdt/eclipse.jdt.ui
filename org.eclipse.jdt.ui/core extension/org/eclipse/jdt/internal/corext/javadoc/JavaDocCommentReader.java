@@ -42,6 +42,7 @@ public class JavaDocCommentReader extends SingleCharReader {
 	/**
 	 * @see java.io.Reader#read()
 	 */
+	@Override
 	public int read() {
 		if (fCurrPos < fEndPos) {
 			char ch;
@@ -71,6 +72,7 @@ public class JavaDocCommentReader extends SingleCharReader {
 	/**
 	 * @see java.io.Reader#close()
 	 */
+	@Override
 	public void close() {
 		fBuffer= null;
 	}
@@ -78,6 +80,7 @@ public class JavaDocCommentReader extends SingleCharReader {
 	/**
 	 * @see java.io.Reader#reset()
 	 */
+	@Override
 	public void reset() {
 		fCurrPos= fStartPos;
 		fWasNewLine= true;

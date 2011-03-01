@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,6 +86,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getDetailedDescription() {
 		if (!isEnabled())
 			return null;
@@ -111,6 +112,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void run() {
 		try {
 
@@ -126,8 +128,8 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 				project= container.getJavaProject();
 			}
 
-			final List elementsToRemove= new ArrayList();
-			final List foldersToDelete= new ArrayList();
+			final List<Object> elementsToRemove= new ArrayList<Object>();
+			final List<IFolder> foldersToDelete= new ArrayList<IFolder>();
 			queryToRemoveLinkedFolders(elementsToRemove, foldersToDelete);
 
 			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
@@ -138,7 +140,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 						CPJavaProject cpProject= CPJavaProject.createFromExisting(project);
 						CPListElement[] toRemove= new CPListElement[elementsToRemove.size()];
 						int i= 0;
-						for (Iterator iterator= elementsToRemove.iterator(); iterator.hasNext();) {
+						for (Iterator<Object> iterator= elementsToRemove.iterator(); iterator.hasNext();) {
 							Object element= iterator.next();
 							if (element instanceof IJavaProject) {
 								toRemove[i]= ClasspathModifier.getListElement(((IJavaProject)element).getPath(), cpProject.getCPListElements());
@@ -160,7 +162,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 						if (delta.getDeletedResources().length == foldersToDelete.size()) {
 							selectAndReveal(new StructuredSelection(project));
 						} else {
-							List result= new ArrayList(Arrays.asList(delta.getDeletedResources()));
+							List<IResource> result= new ArrayList<IResource>(Arrays.asList(delta.getDeletedResources()));
 							result.removeAll(foldersToDelete);
 							selectAndReveal(new StructuredSelection(result));
 						}
@@ -185,12 +187,12 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 		}
 	}
 
-	private void deleteFolders(List folders, IProgressMonitor monitor) throws CoreException {
+	private void deleteFolders(List<IFolder> folders, IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemoveFromBuildpath, folders.size());
 
-			for (Iterator iter= folders.iterator(); iter.hasNext();) {
-				IFolder folder= (IFolder)iter.next();
+			for (Iterator<IFolder> iter= folders.iterator(); iter.hasNext();) {
+				IFolder folder= iter.next();
 				folder.delete(true, true, new SubProgressMonitor(monitor, 1));
 			}
 		} finally {
@@ -198,9 +200,9 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 		}
 	}
 
-	private void queryToRemoveLinkedFolders(final List elementsToRemove, final List foldersToDelete) throws JavaModelException {
+	private void queryToRemoveLinkedFolders(final List<Object> elementsToRemove, final List<IFolder> foldersToDelete) throws JavaModelException {
 		final Shell shell= getShell();
-		for (Iterator iter= getSelectedElements().iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= getSelectedElements().iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IPackageFragmentRoot) {
 				IFolder folder= getLinkedSourceFolder((IPackageFragmentRoot)element);
@@ -241,12 +243,13 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 		return folder;
 	}
 
+	@Override
 	protected boolean canHandle(IStructuredSelection elements) {
 		if (elements.size() == 0)
 			return false;
 
 		try {
-			for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 				Object element= iter.next();
 
 				if (element instanceof IJavaProject) {

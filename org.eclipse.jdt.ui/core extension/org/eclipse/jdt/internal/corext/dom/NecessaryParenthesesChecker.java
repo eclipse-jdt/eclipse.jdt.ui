@@ -108,8 +108,8 @@ public class NecessaryParenthesesChecker {
 		if (binding != current)
 			return false;
 	
-		for (Iterator iterator= expression.extendedOperands().iterator(); iterator.hasNext();) {
-			Expression operand= (Expression) iterator.next();
+		for (Iterator<Expression> iterator= expression.extendedOperands().iterator(); iterator.hasNext();) {
+			Expression operand= iterator.next();
 			current= operand.resolveTypeBinding();
 			if (binding != current)
 				return false;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,7 +83,7 @@ public class SuppressWarningsSubProcessor {
 	}
 
 
-	public static void addSuppressWarningsProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addSuppressWarningsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		if (problem.isError() && ! JavaCore.ENABLED.equals(context.getCompilationUnit().getJavaProject().getOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, true))) {
 			return;
 		}
@@ -95,7 +95,7 @@ public class SuppressWarningsSubProcessor {
 		if (warningToken == null) {
 			return;
 		}
-		for (Iterator iter= proposals.iterator(); iter.hasNext();) {
+		for (Iterator<ICommandAccess> iter= proposals.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof SuppressWarningsProposal && warningToken.equals(((SuppressWarningsProposal) element).getWarningToken())) {
 				return; // only one at a time
@@ -125,9 +125,9 @@ public class SuppressWarningsSubProcessor {
 		}
 	}
 
-	private static String getFirstFragmentName(List fragments) {
+	private static String getFirstFragmentName(List<VariableDeclarationFragment> fragments) {
 		if (fragments.size() > 0) {
-			return ((VariableDeclarationFragment) fragments.get(0)).getName().getIdentifier();
+			return fragments.get(0).getName().getIdentifier();
 		}
 		return new String();
 	}
@@ -157,6 +157,7 @@ public class SuppressWarningsSubProcessor {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 		 */
+		@Override
 		protected ASTRewrite getRewrite() throws CoreException {
 			AST ast= fNode.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
@@ -164,7 +165,7 @@ public class SuppressWarningsSubProcessor {
 			StringLiteral newStringLiteral= ast.newStringLiteral();
 			newStringLiteral.setLiteralValue(fWarningToken);
 
-			Annotation existing= findExistingAnnotation((List) fNode.getStructuralProperty(fProperty));
+			Annotation existing= findExistingAnnotation((List<? extends ASTNode>) fNode.getStructuralProperty(fProperty));
 			if (existing == null) {
 				ListRewrite listRewrite= rewrite.getListRewrite(fNode, fProperty);
 
@@ -210,9 +211,9 @@ public class SuppressWarningsSubProcessor {
 			return true;
 		}
 
-		private static Expression findValue(List keyValues) {
+		private static Expression findValue(List<MemberValuePair> keyValues) {
 			for (int i= 0, len= keyValues.size(); i < len; i++) {
-				MemberValuePair curr= (MemberValuePair) keyValues.get(i);
+				MemberValuePair curr= keyValues.get(i);
 				if ("value".equals(curr.getName().getIdentifier())) { //$NON-NLS-1$
 					return curr.getValue();
 				}
@@ -220,7 +221,7 @@ public class SuppressWarningsSubProcessor {
 			return null;
 		}
 
-		private static Annotation findExistingAnnotation(List modifiers) {
+		private static Annotation findExistingAnnotation(List<? extends ASTNode> modifiers) {
 			for (int i= 0, len= modifiers.size(); i < len; i++) {
 				Object curr= modifiers.get(i);
 				if (curr instanceof NormalAnnotation || curr instanceof SingleMemberAnnotation) {
@@ -254,7 +255,7 @@ public class SuppressWarningsSubProcessor {
 	 * 
 	 * @since 3.6
 	 */
-	private static int addSuppressWarningsProposalIfPossible(ICompilationUnit cu, ASTNode node, String warningToken, int relevance, Collection proposals) {
+	private static int addSuppressWarningsProposalIfPossible(ICompilationUnit cu, ASTNode node, String warningToken, int relevance, Collection<ICommandAccess> proposals) {
 
 		ChildListPropertyDescriptor property;
 		String name;
@@ -321,7 +322,7 @@ public class SuppressWarningsSubProcessor {
 	 * @param problem the problem
 	 * @param proposals the resulting proposals
 	 */
-	public static void addUnknownSuppressWarningProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addUnknownSuppressWarningProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 
 		ASTNode coveringNode= context.getCoveringNode();
 		if (!(coveringNode instanceof StringLiteral))
@@ -349,7 +350,7 @@ public class SuppressWarningsSubProcessor {
 	}
 
 
-	public static void addRemoveUnusedSuppressWarningProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addRemoveUnusedSuppressWarningProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
 		if (!(coveringNode instanceof StringLiteral))
 			return;

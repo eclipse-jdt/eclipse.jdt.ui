@@ -118,6 +118,7 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
 	}
 
 
+	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		AST ast= fNodeToCast.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);

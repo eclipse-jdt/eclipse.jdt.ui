@@ -22,11 +22,11 @@ public interface IImplementorFinder {
     /**
      * Find implementors of the specified IType instance.
      */
-    public abstract Collection findImplementingTypes(IType type,
+    public abstract Collection<IType> findImplementingTypes(IType type,
         IProgressMonitor progressMonitor);
 
     /**
      * Find interfaces which are implemented by the specified IType instance.
      */
-    public abstract Collection findInterfaces(IType type, IProgressMonitor progressMonitor);
+    public abstract Collection<IType> findInterfaces(IType type, IProgressMonitor progressMonitor);
 }

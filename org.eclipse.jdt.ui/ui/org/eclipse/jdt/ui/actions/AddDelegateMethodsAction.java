@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,9 +62,9 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation.DelegateEntry;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
-import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation.DelegateEntry;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -127,7 +127,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			int duplicateCount= 0;
 			if (selection != null && selection.length > 0) {
 
-				HashSet signatures= new HashSet(selection.length);
+				HashSet<String> signatures= new HashSet<String>(selection.length);
 				for (int index= 0; index < selection.length; index++) {
 					if (selection[index] instanceof DelegateEntry) {
 						DelegateEntry delegateEntry= (DelegateEntry) selection[index];
@@ -168,7 +168,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			if (binding != null) {
 				fDelegateEntries= StubUtility2.getDelegatableMethods(binding);
 
-				List expanded= new ArrayList();
+				List<IVariableBinding> expanded= new ArrayList<IVariableBinding>();
 				for (int index= 0; index < fields.length; index++) {
 					VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(fields[index], astRoot);
 					if (fragment != null) {
@@ -177,7 +177,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 							expanded.add(variableBinding);
 					}
 				}
-				fExpanded= (IVariableBinding[]) expanded.toArray(new IVariableBinding[expanded.size()]);
+				fExpanded= expanded.toArray(new IVariableBinding[expanded.size()]);
 			}
 		}
 
@@ -186,7 +186,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 		public Object[] getChildren(Object element) {
 			if (element instanceof IVariableBinding) {
-				List result= new ArrayList();
+				List<DelegateEntry> result= new ArrayList<DelegateEntry>();
 				for (int i= 0; i < fDelegateEntries.length; i++) {
 					if (element == fDelegateEntries[i].field) {
 						result.add(fDelegateEntries[i]);
@@ -202,7 +202,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 
 		public Object[] getElements(Object inputElement) {
-			HashSet result= new HashSet();
+			HashSet<IVariableBinding> result= new HashSet<IVariableBinding>();
 			for (int i= 0; i < fDelegateEntries.length; i++) {
 				DelegateEntry curr= fDelegateEntries[i];
 				result.add(curr.field);
@@ -238,6 +238,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			super(parent, labelProvider, contentProvider, editor, type, isConstructor);
 		}
 
+		@Override
 		protected void configureShell(Shell shell) {
 			super.configureShell(shell);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.ADD_DELEGATE_METHODS_SELECTION_DIALOG);
@@ -246,10 +247,12 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
 		 */
+		@Override
 		protected Control createLinkControl(Composite composite) {
 			Link link= new Link(composite, SWT.WRAP);
 			link.setText(ActionMessages.AddDelegateMethodsAction_template_link_message);
 			link.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					openCodeTempatePage(CodeTemplateContextType.OVERRIDECOMMENT_ID);
 				}
@@ -265,6 +268,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 	private static class AddDelegateMethodsLabelProvider extends BindingLabelProvider {
 
+		@Override
 		public Image getImage(Object element) {
 			if (element instanceof DelegateEntry) {
 				DelegateEntry delegateEntry= (DelegateEntry) element;
@@ -275,6 +279,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			return null;
 		}
 
+		@Override
 		public String getText(Object element) {
 			if (element instanceof DelegateEntry) {
 				DelegateEntry delegateEntry= (DelegateEntry) element;
@@ -288,12 +293,14 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 	private static class AddDelegateMethodsViewerComparator extends ViewerComparator {
 
+		@Override
 		public int category(Object element) {
 			if (element instanceof DelegateEntry)
 				return 0;
 			return 1;
 		}
 
+		@Override
 		public int compare(Viewer viewer, Object o1, Object o2) {
 			if (o1 instanceof DelegateEntry && o2 instanceof DelegateEntry) {
 				String bindingLabel1= BindingLabelProvider.getBindingLabel(((DelegateEntry) o1).delegateMethod, BindingLabelProvider.DEFAULT_TEXTFLAGS);
@@ -393,7 +400,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	}
 
 	private IField[] getSelectedFields(IStructuredSelection selection) {
-		List elements= selection.toList();
+		List<?> elements= selection.toList();
 		if (elements.size() > 0) {
 			IField[] result= new IField[elements.size()];
 			ICompilationUnit unit= null;
@@ -434,6 +441,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			IField[] selectedFields= getSelectedFields(selection);
@@ -457,6 +465,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		try {
 			if (!ActionUtil.isProcessable(fEditor))
@@ -503,6 +512,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(canEnable(selection));
@@ -519,6 +529,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
@@ -555,10 +566,10 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					notifyResult(false);
 					return;
 				}
-				List tuples= new ArrayList(object.length);
+				List<DelegateEntry> tuples= new ArrayList<DelegateEntry>(object.length);
 				for (int index= 0; index < object.length; index++) {
 					if (object[index] instanceof DelegateEntry)
-						tuples.add(object[index]);
+						tuples.add((DelegateEntry) object[index]);
 				}
 				IEditorPart part= JavaUI.openInEditor(type);
 				IRewriteTarget target= (IRewriteTarget) part.getAdapter(IRewriteTarget.class);
@@ -568,7 +579,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 					settings.createComments= dialog.getGenerateComment();
 
-					DelegateEntry[] methodToDelegate= (DelegateEntry[]) tuples.toArray(new DelegateEntry[tuples.size()]);
+					DelegateEntry[] methodToDelegate= tuples.toArray(new DelegateEntry[tuples.size()]);
 
 					AddDelegateMethodsOperation operation= new AddDelegateMethodsOperation(astRoot, methodToDelegate, dialog.getElementPosition(), settings, true, false);
 					IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();

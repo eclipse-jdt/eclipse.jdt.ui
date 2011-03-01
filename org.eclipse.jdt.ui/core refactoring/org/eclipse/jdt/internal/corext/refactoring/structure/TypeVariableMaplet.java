@@ -54,6 +54,7 @@ public final class TypeVariableMaplet {
 		fTargetIndex= offset;
 	}
 
+	@Override
 	public final boolean equals(final Object object) {
 		if (object instanceof TypeVariableMaplet) {
 			final TypeVariableMaplet mapping= (TypeVariableMaplet) object;
@@ -98,6 +99,7 @@ public final class TypeVariableMaplet {
 		return fTargetName;
 	}
 
+	@Override
 	public final int hashCode() {
 		return fSourceIndex | fTargetIndex | fSourceName.hashCode() | fTargetName.hashCode();
 	}

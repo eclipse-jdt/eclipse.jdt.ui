@@ -62,6 +62,7 @@ public class MemberFilter extends ViewerFilter {
 	/*
 	 * @see ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
+	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		try {
 			if (element instanceof IMember) {

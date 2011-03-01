@@ -75,6 +75,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore.OverlayKey;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
@@ -244,6 +245,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		/*
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
 		 */
+		@Override
 		public String getText(Object element) {
 			return ((HighlightingColorListItem)element).getDisplayName();
 		}
@@ -272,7 +274,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 		 */
 		public Object[] getElements(Object inputElement) {
-			return ((java.util.List)inputElement).toArray();
+			return ((java.util.List<?>)inputElement).toArray();
 		}
 
 		/*
@@ -347,7 +349,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	/**
 	 * Highlighting color list
 	 */
-	private final List fHighlightingColorList= new ArrayList();
+	private final List<HighlightingColorListItem> fHighlightingColorList= new ArrayList<HighlightingColorListItem>();
 	/**
 	 * Highlighting color list viewer
 	 */
@@ -371,7 +373,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 
-		ArrayList overlayKeys= new ArrayList();
+		ArrayList<OverlayKey> overlayKeys= new ArrayList<OverlayKey>();
 
 		for (int i= 0; i < fSyntaxColorListModel.length; i++) {
 			String colorKey= fSyntaxColorListModel[i][1];
@@ -396,6 +398,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	/*
 	 * @see PreferencePage#createControl(Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.PROPERTIES_FILE_EDITOR_PREFERENCE_PAGE);
@@ -509,6 +512,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		});
 
 		foregroundColorButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				PreferenceConverter.setValue(fOverlayStore, item.getColorKey(), fSyntaxForegroundColorEditor.getColorValue());
@@ -516,6 +520,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		});
 
 		fBoldCheckBox.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				fOverlayStore.setValue(item.getBoldKey(), fBoldCheckBox.getSelection());
@@ -523,6 +528,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		});
 
 		fItalicCheckBox.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				fOverlayStore.setValue(item.getItalicKey(), fItalicCheckBox.getSelection());
@@ -530,6 +536,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		});
 
 		fStrikethroughCheckBox.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				fOverlayStore.setValue(item.getStrikethroughKey(), fStrikethroughCheckBox.getSelection());
@@ -537,6 +544,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		});
 
 		fUnderlineCheckBox.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				fOverlayStore.setValue(item.getUnderlineKey(), fUnderlineCheckBox.getSelection());
@@ -571,6 +579,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	/*
 	 * @see PreferencePage#createContents(Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		fOverlayStore.load();
 		fOverlayStore.start();
@@ -597,6 +606,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		Link link= new Link(contents, SWT.NONE);
 		link.setText(text);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if ("org.eclipse.ui.preferencePages.GeneralTextEditor".equals(e.text)) //$NON-NLS-1$
 					PreferencesUtil.createPreferenceDialogOn(getShell(), e.text, null, null);
@@ -648,6 +658,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	/*
 	 * @see PreferencePage#performOk()
 	 */
+	@Override
 	public boolean performOk() {
 		fOverlayStore.propagate();
 		JavaPlugin.flushInstanceScope();
@@ -657,6 +668,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
+	@Override
 	protected void performDefaults() {
 
 		fOverlayStore.loadDefaults();
@@ -673,6 +685,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	/*
 	 * @see DialogPage#dispose()
 	 */
+	@Override
 	public void dispose() {
 
 		if (fOverlayStore != null) {

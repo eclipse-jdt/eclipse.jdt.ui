@@ -55,6 +55,7 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerComparator {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ViewerSorter#category(java.lang.Object)
 	 */
+	@Override
 	public int category(Object element) {
 		if (element instanceof IType) {
 			IType type= (IType) element;
@@ -78,6 +79,7 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerComparator {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ViewerSorter#compare(null, null, null)
 	 */
+	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		if (!isSortAlphabetically() && !isSortByDefiningType()) {
 			return fSourcePositonSorter.compare(viewer, e1, e2);

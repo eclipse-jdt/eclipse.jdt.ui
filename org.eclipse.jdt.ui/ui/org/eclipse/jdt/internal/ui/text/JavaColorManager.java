@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,8 +27,8 @@ import org.eclipse.jdt.ui.text.IColorManagerExtension;
  */
 public class JavaColorManager implements IColorManager, IColorManagerExtension {
 
-	protected Map fKeyTable= new HashMap(10);
-	protected Map fDisplayTable= new HashMap(2);
+	protected Map<String, RGB> fKeyTable= new HashMap<String, RGB>(10);
+	protected Map<Display, Map<RGB, Color>> fDisplayTable= new HashMap<Display, Map<RGB, Color>>(2);
 
 	/**
 	 * Flag which tells if the colors are automatically disposed when
@@ -60,11 +60,11 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 	}
 
 	public void dispose(Display display) {
-		Map colorTable= (Map) fDisplayTable.get(display);
+		Map<RGB, Color> colorTable= fDisplayTable.get(display);
 		if (colorTable != null) {
-			Iterator e= colorTable.values().iterator();
+			Iterator<Color> e= colorTable.values().iterator();
 			while (e.hasNext()) {
-				Color color= (Color)e.next();
+				Color color= e.next();
 				if (color != null && !color.isDisposed())
 					color.dispose();
 			}
@@ -80,9 +80,9 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 			return null;
 
 		final Display display= Display.getCurrent();
-		Map colorTable= (Map) fDisplayTable.get(display);
+		Map<RGB, Color> colorTable= fDisplayTable.get(display);
 		if (colorTable == null) {
-			colorTable= new HashMap(10);
+			colorTable= new HashMap<RGB, Color>(10);
 			fDisplayTable.put(display, colorTable);
 			if (fAutoDisposeOnDisplayDispose) {
 				display.disposeExec(new Runnable() {
@@ -93,7 +93,7 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 			}
 		}
 
-		Color color= (Color) colorTable.get(rgb);
+		Color color= colorTable.get(rgb);
 		if (color == null) {
 			color= new Color(Display.getCurrent(), rgb);
 			colorTable.put(rgb, color);
@@ -118,7 +118,7 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 		if (key == null)
 			return null;
 
-		RGB rgb= (RGB) fKeyTable.get(key);
+		RGB rgb= fKeyTable.get(key);
 		return getColor(rgb);
 	}
 

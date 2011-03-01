@@ -61,6 +61,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 
 	//---- Structured selection ------------------------------------------------
 
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			if (selection.size() == 1) {
@@ -93,6 +94,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		return (IJavaElement)first;
 	}
 
+	@Override
 	public void run(IStructuredSelection selection) {
 		IJavaElement element= getJavaElement(selection);
 		if (element == null)
@@ -108,6 +110,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 
 	//---- text selection ------------------------------------------------------------
 
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		if (selection instanceof JavaTextSelection) {
 			try {
@@ -127,6 +130,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		}
 	}
 
+	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;

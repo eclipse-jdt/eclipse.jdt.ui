@@ -109,6 +109,7 @@ class SearchInDialog extends TrayDialog {
 	/* (non-Javadoc)
 	 * Method declared on Window.
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setText(CallHierarchyMessages.SearchInDialog_title);
@@ -118,6 +119,7 @@ class SearchInDialog extends TrayDialog {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
@@ -125,6 +127,7 @@ class SearchInDialog extends TrayDialog {
 	/* (non-Javadoc)
 	 * Method declared on Dialog.
 	 */
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
 
@@ -152,6 +155,7 @@ class SearchInDialog extends TrayDialog {
 		};
 
 		SelectionAdapter listener= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				updateOKStatus();
 			}
@@ -221,6 +225,7 @@ class SearchInDialog extends TrayDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
 	 */
+	@Override
 	protected void okPressed() {
 		int mask= getIncludeMask();
 		if (mask != fIncludeMask) {

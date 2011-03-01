@@ -72,10 +72,12 @@ public class FindReferencesAction extends FindAction {
 		super(editor);
 	}
 
-	Class[] getValidTypes() {
+	@Override
+	Class<?>[] getValidTypes() {
 		return new Class[] { ICompilationUnit.class, IType.class, IMethod.class, IField.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class, ILocalVariable.class, ITypeParameter.class };
 	}
 
+	@Override
 	void init() {
 		setText(SearchMessages.Search_FindReferencesAction_label);
 		setToolTipText(SearchMessages.Search_FindReferencesAction_tooltip);
@@ -83,10 +85,12 @@ public class FindReferencesAction extends FindAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_WORKSPACE_ACTION);
 	}
 
+	@Override
 	int getLimitTo() {
 		return IJavaSearchConstants.REFERENCES;
 	}
 
+	@Override
 	QuerySpecification createQuery(IJavaElement element) throws JavaModelException, InterruptedException {
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 		boolean isInsideJRE= factory.isInsideJRE(element);
@@ -96,6 +100,7 @@ public class FindReferencesAction extends FindAction {
 		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
 	}
 
+	@Override
 	public void run(IJavaElement element) {
 		SearchUtil.warnIfBinaryConstant(element, getShell());
 		super.run(element);

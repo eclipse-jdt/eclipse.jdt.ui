@@ -58,7 +58,7 @@ public class JarWriter {
 	private JarOutputStream fJarOutputStream;
 	private JarPackageData fJarPackage;
 
-	private Set fDirectories= new HashSet();
+	private Set<String> fDirectories= new HashSet<String>();
 
 	/**
 	 * Creates an instance which is used to create a JAR based
@@ -213,7 +213,7 @@ public class JarWriter {
 	private void addDirectories(IPath destinationPath, File correspondingFile) throws IOException {
 		String path= destinationPath.toString().replace(File.separatorChar, '/');
 		int lastSlash= path.lastIndexOf('/');
-		List directories= new ArrayList(2);
+		List<JarEntry> directories= new ArrayList<JarEntry>(2);
 		while(lastSlash != -1) {
 			path= path.substring(0, lastSlash + 1);
 			if (!fDirectories.add(path))
@@ -236,7 +236,7 @@ public class JarWriter {
 		}
 
 		for(int i= directories.size() - 1; i >= 0; --i) {
-			fJarOutputStream.putNextEntry((JarEntry)directories.get(i));
+			fJarOutputStream.putNextEntry(directories.get(i));
 		}
 	}
 

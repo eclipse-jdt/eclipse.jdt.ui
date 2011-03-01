@@ -105,6 +105,7 @@ public class JavaElementLinks {
 			fElement= member;
 		}
 
+		@Override
 		public String getElementName(IJavaElement element) {
 			String elementName= element.getElementName();
 			if (element.equals(fElement)) { // linking to the member itself would be a no-op
@@ -122,14 +123,17 @@ public class JavaElementLinks {
 			}
 		}
 
+		@Override
 		protected String getGT() {
 			return "&gt;"; //$NON-NLS-1$
 		}
 
+		@Override
 		protected String getLT() {
 			return "&lt;"; //$NON-NLS-1$
 		}
 
+		@Override
 		protected String getSimpleTypeName(IJavaElement enclosingElement, String typeSig) {
 			String typeName= super.getSimpleTypeName(enclosingElement, typeSig);
 			try {
@@ -173,6 +177,7 @@ public class JavaElementLinks {
 	 */
 	public static LocationListener createLocationListener(final ILinkHandler handler) {
 		return new LocationAdapter() {
+			@Override
 			public void changing(LocationEvent event) {
 				String loc= event.location;
 

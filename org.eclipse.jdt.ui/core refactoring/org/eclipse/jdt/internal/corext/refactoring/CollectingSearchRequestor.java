@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContex
  * inside a binary element are not collected (but added to the context if they are accurate).
  */
 public class CollectingSearchRequestor extends SearchRequestor {
-	private final ArrayList/*<SearchMatch>*/ fFound;
+	private final ArrayList<SearchMatch> fFound;
 	private final ReferencesInBinaryContext fBinaryRefs;
 
 	public CollectingSearchRequestor() {
@@ -40,7 +40,7 @@ public class CollectingSearchRequestor extends SearchRequestor {
 	}
 
 	public CollectingSearchRequestor(ReferencesInBinaryContext binaryRefs) {
-		fFound= new ArrayList();
+		fFound= new ArrayList<SearchMatch>();
 		fBinaryRefs= binaryRefs;
 	}
 
@@ -53,6 +53,7 @@ public class CollectingSearchRequestor extends SearchRequestor {
 	 *
 	 * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)
 	 */
+	@Override
 	public void acceptSearchMatch(SearchMatch match) throws CoreException {
 		if (! filterMatch(match))
 			collectMatch(match);
@@ -109,7 +110,7 @@ public class CollectingSearchRequestor extends SearchRequestor {
 	/**
 	 * @return a List of {@link SearchMatch}es (not sorted)
 	 */
-	public List/*<SearchMatch>*/ getResults() {
+	public List<SearchMatch> getResults() {
 		return fFound;
 	}
 }

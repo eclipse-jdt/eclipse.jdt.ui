@@ -122,6 +122,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 			super(type, description);
 		}
 
+		@Override
 		protected String resolve(TemplateContext context) {
 			return context.getVariable(getType());
 		}
@@ -135,6 +136,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 			super(TAGS,  JavaTemplateMessages.CodeTemplateContextType_variable_description_tags);
 		}
 
+		@Override
 		protected String resolve(TemplateContext context) {
 			return "@"; //$NON-NLS-1$
 		}
@@ -149,6 +151,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 			super("todo", JavaTemplateMessages.CodeTemplateContextType_variable_description_todo);  //$NON-NLS-1$
 		}
 
+		@Override
 		protected String resolve(TemplateContext context) {
 			String todoTaskTag= StubUtility.getTodoTaskTag(((CodeTemplateContext) context).getJavaProject());
 			if (todoTaskTag == null)
@@ -278,8 +281,9 @@ public class CodeTemplateContextType extends TemplateContextType {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.ContextType#validateVariables(org.eclipse.jdt.internal.corext.template.TemplateVariable[])
 	 */
+	@Override
 	protected void validateVariables(TemplateVariable[] variables) throws TemplateException {
-		ArrayList required=  new ArrayList(5);
+		ArrayList<String> required=  new ArrayList<String>(5);
 		String contextName= getId();
 		if (NEWTYPE_CONTEXTTYPE.equals(contextName)) {
 			required.add(PACKAGE_DECLARATION);
@@ -294,7 +298,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 			required.remove(type);
 		}
 		if (!required.isEmpty()) {
-			String missing= BasicElementLabels.getJavaElementName((String) required.get(0));
+			String missing= BasicElementLabels.getJavaElementName(required.get(0));
 			throw new TemplateException(Messages.format(JavaTemplateMessages.CodeTemplateContextType_validate_missingvariable, missing));
 		}
 		super.validateVariables(variables);
@@ -333,6 +337,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.ContextType#validate(java.lang.String)
 	 */
+	@Override
 	public void validate(String pattern) throws TemplateException {
 		super.validate(pattern);
 		if (fIsComment) {

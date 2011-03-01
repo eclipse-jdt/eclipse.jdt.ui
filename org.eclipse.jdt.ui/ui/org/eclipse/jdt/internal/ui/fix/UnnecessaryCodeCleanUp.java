@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 
-	public UnnecessaryCodeCleanUp(Map options) {
+	public UnnecessaryCodeCleanUp(Map<String, String> options) {
 		super(options);
 	}
 
@@ -42,15 +42,17 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public CleanUpRequirements getRequirements() {
 		boolean requireAST= isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
-		Map requiredOptions= requireAST ? getRequiredOptions() : null;
+		Map<String, String> requiredOptions= requireAST ? getRequiredOptions() : null;
 		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		return UnusedCodeFix.createCleanUp(compilationUnit,
 				false,
@@ -65,6 +67,7 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		return UnusedCodeFix.createCleanUp(compilationUnit, problems,
 				false,
@@ -76,8 +79,8 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS));
 	}
 
-	private Map getRequiredOptions() {
-		Map result= new Hashtable();
+	private Map<String, String> getRequiredOptions() {
+		Map<String, String> result= new Hashtable<String, String>();
 
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS))
 			result.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.WARNING);
@@ -88,16 +91,18 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String[] getStepDescriptions() {
-		List result= new ArrayList();
+		List<String> result= new ArrayList<String>();
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS))
 			result.add(MultiFixMessages.UnusedCodeCleanUp_RemoveUnusedCasts_description);
-		return (String[])result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 
@@ -123,6 +128,7 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
 		IProblem[] problems= compilationUnit.getProblems();

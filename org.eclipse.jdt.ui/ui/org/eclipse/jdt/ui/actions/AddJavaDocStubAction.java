@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -100,6 +100,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		IMember[] members= getSelectedMembers(selection);
 		setEnabled(members != null && members.length > 0);
@@ -108,6 +109,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		IMember[] members= getSelectedMembers(selection);
 		if (members == null || members.length == 0) {
@@ -138,6 +140,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
@@ -148,6 +151,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		try {
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
@@ -203,7 +207,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	}
 
 	private IMember[] getSelectedMembers(IStructuredSelection selection) {
-		List elements= selection.toList();
+		List<?> elements= selection.toList();
 		int nElements= elements.size();
 		if (nElements > 0) {
 			IMember[] res= new IMember[nElements];

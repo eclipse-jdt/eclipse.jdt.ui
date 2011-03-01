@@ -39,6 +39,7 @@ class JavaCompareWithEditionActionImpl extends JavaHistoryActionImpl {
 		super(false);
 	}
 
+	@Override
 	public void run(ISelection selection) {
 
 		IMember input= getEditionElement(selection);

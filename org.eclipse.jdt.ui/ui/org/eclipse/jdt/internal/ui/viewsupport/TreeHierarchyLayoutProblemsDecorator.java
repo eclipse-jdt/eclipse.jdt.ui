@@ -50,6 +50,7 @@ public class TreeHierarchyLayoutProblemsDecorator extends ProblemsLabelDecorator
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.ProblemsLabelDecorator#computeAdornmentFlags(java.lang.Object)
 	 */
+	@Override
 	protected int computeAdornmentFlags(Object element) {
 		if (element instanceof IPackageFragment) {
 			return computePackageAdornmentFlags((IPackageFragment) element);

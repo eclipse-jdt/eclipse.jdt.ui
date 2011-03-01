@@ -50,6 +50,7 @@ public abstract class MemberProposalInfo extends ProposalInfo {
 	 * @return the java element that this computer corresponds to, possibly <code>null</code>
 	 * @throws JavaModelException if accessing the java model fails
 	 */
+	@Override
 	public IJavaElement getJavaElement() throws JavaModelException {
 		if (!fJavaElementResolved) {
 			fJavaElementResolved= true;

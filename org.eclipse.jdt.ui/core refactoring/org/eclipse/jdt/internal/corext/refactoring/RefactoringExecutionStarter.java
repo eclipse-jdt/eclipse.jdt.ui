@@ -400,9 +400,9 @@ public final class RefactoringExecutionStarter {
 	public static void startMoveStaticMembersRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
 		if (!RefactoringAvailabilityTester.isMoveStaticAvailable(members))
 			return;
-		final Set set= new HashSet();
+		final Set<IMember> set= new HashSet<IMember>();
 		set.addAll(Arrays.asList(members));
-		final IMember[] elements= (IMember[]) set.toArray(new IMember[set.size()]);
+		final IMember[] elements= set.toArray(new IMember[set.size()]);
 		IJavaProject project= null;
 		if (elements.length > 0)
 			project= elements[0].getJavaProject();

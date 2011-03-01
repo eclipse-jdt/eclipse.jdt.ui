@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -170,12 +171,13 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 		if (ast == null || progressMonitor.isCanceled())
 			return;
 
-		final Map annotationMap= new HashMap(50);
+		final Map<Annotation, Position> annotationMap= new HashMap<Annotation, Position>(50);
 
 		ast.accept(new ASTVisitor(false) {
 			/*
 			 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodDeclaration)
 			 */
+			@Override
 			public boolean visit(MethodDeclaration node) {
 				IMethodBinding binding= node.resolveBinding();
 				if (binding != null) {
@@ -213,13 +215,13 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 				((IAnnotationModelExtension)fAnnotationModel).replaceAnnotations(fOverrideAnnotations, annotationMap);
 			} else {
 				removeAnnotations();
-				Iterator iter= annotationMap.entrySet().iterator();
+				Iterator<Entry<Annotation, Position>> iter= annotationMap.entrySet().iterator();
 				while (iter.hasNext()) {
-					Map.Entry mapEntry= (Map.Entry)iter.next();
-					fAnnotationModel.addAnnotation((Annotation)mapEntry.getKey(), (Position)mapEntry.getValue());
+					Entry<Annotation, Position> mapEntry= iter.next();
+					fAnnotationModel.addAnnotation(mapEntry.getKey(), mapEntry.getValue());
 				}
 			}
-			fOverrideAnnotations= (Annotation[])annotationMap.keySet().toArray(new Annotation[annotationMap.keySet().size()]);
+			fOverrideAnnotations= annotationMap.keySet().toArray(new Annotation[annotationMap.keySet().size()]);
 		}
 	}
 

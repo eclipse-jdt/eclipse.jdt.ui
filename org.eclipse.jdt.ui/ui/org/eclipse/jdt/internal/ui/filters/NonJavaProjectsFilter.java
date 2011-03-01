@@ -26,6 +26,7 @@ public class NonJavaProjectsFilter extends ViewerFilter {
 	/*
 	 * @see ViewerFilter
 	 */
+	@Override
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IJavaProject)
 			return true;

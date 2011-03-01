@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -117,7 +118,7 @@ public class ASTNodes {
 		return flattener.getResult();
 	}
 
-	public static String asFormattedString(ASTNode node, int indent, String lineDelim, Map options) {
+	public static String asFormattedString(ASTNode node, int indent, String lineDelim, Map<String, String> options) {
 		String unformatted= asString(node);
 		TextEdit edit= CodeFormatterUtil.format2(node, unformatted, indent, lineDelim, options);
 		if (edit != null) {
@@ -172,10 +173,10 @@ public class ASTNodes {
      * @param node the node in question
      * @return the list that contains the node or <code>null</code>
      */
-    public static List getContainingList(ASTNode node) {
+    public static List<? extends ASTNode> getContainingList(ASTNode node) {
     	StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
     	if (locationInParent != null && locationInParent.isChildListProperty()) {
-    		return (List) node.getParent().getStructuralProperty(locationInParent);
+    		return (List<? extends ASTNode>) node.getParent().getStructuralProperty(locationInParent);
     	}
     	return null;
     }
@@ -185,22 +186,23 @@ public class ASTNodes {
 	 * @param node the node to get the children for
 	 * @return the children
 	 */
-	public static List getChildren(ASTNode node) {
+	public static List<ASTNode> getChildren(ASTNode node) {
 		ChildrenCollector visitor= new ChildrenCollector();
 		node.accept(visitor);
 		return visitor.result;
 	}
 
 	private static class ChildrenCollector extends GenericVisitor {
-		public List result;
+		public List<ASTNode> result;
 
 		public ChildrenCollector() {
 			super(true);
 			result= null;
 		}
+		@Override
 		protected boolean visitNode(ASTNode node) {
 			if (result == null) { // first visitNode: on the node's parent: do nothing, return true
-				result= new ArrayList();
+				result= new ArrayList<ASTNode>();
 				return true;
 			}
 			result.add(node);
@@ -280,7 +282,7 @@ public class ASTNodes {
 		return dim;
 	}
 
-	public static List getModifiers(VariableDeclaration declaration) {
+	public static List<IExtendedModifier> getModifiers(VariableDeclaration declaration) {
 		Assert.isNotNull(declaration);
 		if (declaration instanceof SingleVariableDeclaration) {
 			return ((SingleVariableDeclaration)declaration).modifiers();
@@ -291,7 +293,7 @@ public class ASTNodes {
 			else if (parent instanceof VariableDeclarationStatement)
 				return ((VariableDeclarationStatement)parent).modifiers();
 		}
-		return new ArrayList(0);
+		return new ArrayList<IExtendedModifier>(0);
 	}
 
 	public static boolean isSingleDeclaration(VariableDeclaration declaration) {
@@ -324,7 +326,7 @@ public class ASTNodes {
 		return Modifier.isStatic(declaration.getModifiers());
 	}
 
-	public static List getBodyDeclarations(ASTNode node) {
+	public static List<BodyDeclaration> getBodyDeclarations(ASTNode node) {
 		if (node instanceof AbstractTypeDeclaration) {
 			return ((AbstractTypeDeclaration)node).bodyDeclarations();
 		} else if (node instanceof AnonymousClassDeclaration) {
@@ -335,6 +337,13 @@ public class ASTNodes {
 		return null;
 	}
 
+	/**
+	 * Returns the structural property descriptor for the "bodyDeclarations" property
+	 * of this node (element type: {@link BodyDeclaration}).
+	 * 
+	 * @param node the node, either an {@link AbstractTypeDeclaration} or an {@link AnonymousClassDeclaration}
+	 * @return the property descriptor
+	 */
 	public static ChildListPropertyDescriptor getBodyDeclarationsProperty(ASTNode node) {
 		if (node instanceof AbstractTypeDeclaration) {
 			return ((AbstractTypeDeclaration)node).getBodyDeclarationsProperty();
@@ -349,18 +358,22 @@ public class ASTNodes {
 	public static String getTypeName(Type type) {
 		final StringBuffer buffer= new StringBuffer();
 		ASTVisitor visitor= new ASTVisitor() {
+			@Override
 			public boolean visit(PrimitiveType node) {
 				buffer.append(node.getPrimitiveTypeCode().toString());
 				return false;
 			}
+			@Override
 			public boolean visit(SimpleName node) {
 				buffer.append(node.getIdentifier());
 				return false;
 			}
+			@Override
 			public boolean visit(QualifiedName node) {
 				buffer.append(node.getName().getIdentifier());
 				return false;
 			}
+			@Override
 			public void endVisit(ArrayType node) {
 				buffer.append("[]"); //$NON-NLS-1$
 			}
@@ -490,7 +503,7 @@ public class ASTNodes {
 	 * @param parentClass the class of the sought ancestor node
 	 * @return the closest ancestor of <code>node</code> that is an instance of <code>parentClass</code>, or <code>null</code> if none
 	 */
-	public static ASTNode getParent(ASTNode node, Class parentClass) {
+	public static ASTNode getParent(ASTNode node, Class<? extends ASTNode> parentClass) {
 		do {
 			node= node.getParent();
 		} while (node != null && !parentClass.isInstance(node));
@@ -653,7 +666,7 @@ public class ASTNodes {
 		if (root == node)
 			return problems;
 		final int iterations= computeIterations(scope);
-		List result= new ArrayList(5);
+		List<IProblem> result= new ArrayList<IProblem>(5);
 		for (int i= 0; i < problems.length; i++) {
 			IProblem problem= problems[i];
 			boolean consider= false;
@@ -678,7 +691,7 @@ public class ASTNodes {
 				} while ((temp= temp.getParent()) != null && count > 0);
 			}
 		}
-		return (IProblem[]) result.toArray(new IProblem[result.size()]);
+		return result.toArray(new IProblem[result.size()]);
 	}
 
 	public static Message[] getMessages(ASTNode node, int flags) {
@@ -689,7 +702,7 @@ public class ASTNodes {
 		if (root == node)
 			return messages;
 		final int iterations= computeIterations(flags);
-		List result= new ArrayList(5);
+		List<Message> result= new ArrayList<Message>(5);
 		for (int i= 0; i < messages.length; i++) {
 			Message message= messages[i];
 			ASTNode temp= node;
@@ -705,7 +718,7 @@ public class ASTNodes {
 				}
 			} while ((temp= temp.getParent()) != null && count > 0);
 		}
-		return (Message[]) result.toArray(new Message[result.size()]);
+		return result.toArray(new Message[result.size()]);
 	}
 
 	private static int computeIterations(int flags) {
@@ -767,7 +780,7 @@ public class ASTNodes {
 	 * @param container a list containing objects of type <code>BodyDeclaration</code>
 	 * @return the insertion index to be used
 	 */
-	public static int getInsertionIndex(BodyDeclaration member, List container) {
+	public static int getInsertionIndex(BodyDeclaration member, List<? extends BodyDeclaration> container) {
 		int containerSize= container.size();
 
 		MembersOrderPreferenceCache orderStore= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
@@ -778,7 +791,7 @@ public class ASTNodes {
 		int insertPosOrderIndex= -1;
 
 		for (int i= containerSize - 1; i >= 0; i--) {
-			int currOrderIndex= getOrderPreference((BodyDeclaration) container.get(i), orderStore);
+			int currOrderIndex= getOrderPreference(container.get(i), orderStore);
 			if (orderIndex == currOrderIndex) {
 				if (insertPosOrderIndex != orderIndex) { // no perfect match yet
 					insertPos= i + 1; // after a same kind
@@ -805,6 +818,7 @@ public class ASTNodes {
 		} else {
 			final SimpleName[] result= new SimpleName[1];
 			ASTVisitor visitor= new ASTVisitor() {
+				@Override
 				public boolean visit(QualifiedName qualifiedName) {
 					Name left= qualifiedName.getQualifier();
 					if (left instanceof SimpleName)
@@ -822,6 +836,7 @@ public class ASTNodes {
 	public static SimpleType getLeftMostSimpleType(QualifiedType type) {
 		final SimpleType[] result= new SimpleType[1];
 		ASTVisitor visitor= new ASTVisitor() {
+			@Override
 			public boolean visit(QualifiedType qualifiedType) {
 				Type left= qualifiedType.getQualifier();
 				if (left instanceof SimpleType)
@@ -862,6 +877,7 @@ public class ASTNodes {
 	 */
 	public static void setFlagsToAST(ASTNode root, final int flags) {
 		root.accept(new GenericVisitor(true) {
+			@Override
 			protected boolean visitNode(ASTNode node) {
 				node.setFlags(node.getFlags() | flags);
 				return true;
@@ -892,7 +908,7 @@ public class ASTNodes {
 		}
 	}
 
-	public static Modifier findModifierNode(int flag, List modifiers) {
+	public static Modifier findModifierNode(int flag, List<IExtendedModifier> modifiers) {
 		for (int i= 0; i < modifiers.size(); i++) {
 			Object curr= modifiers.get(i);
 			if (curr instanceof Modifier && ((Modifier) curr).getKeyword().toFlagValue() == flag) {

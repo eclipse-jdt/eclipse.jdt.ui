@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -120,7 +120,7 @@ public class BuildPathsBlock {
 
 	private IWorkspaceRoot fWorkspaceRoot;
 
-	private CheckedListDialogField fClassPathList;
+	private CheckedListDialogField<CPListElement> fClassPathList;
 	private StringButtonDialogField fBuildPathDialogField;
 
 	private StatusInfo fClassPathStatus;
@@ -186,7 +186,7 @@ public class BuildPathsBlock {
 
 		};
 
-		fClassPathList= new CheckedListDialogField(adapter, buttonLabels, new CPListLabelProvider());
+		fClassPathList= new CheckedListDialogField<CPListElement>(adapter, buttonLabels, new CPListLabelProvider());
 		fClassPathList.setDialogFieldListener(adapter);
 		fClassPathList.setLabelText(NewWizardMessages.BuildPathsBlock_classpath_label);
 		fClassPathList.setUpButtonIndex(IDX_UP);
@@ -274,6 +274,7 @@ public class BuildPathsBlock {
 		folder.setSelection(fPageIndex);
 		fCurrPage= (BuildPathBasePage) folder.getItem(fPageIndex).getData();
 		folder.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				tabChanged(e.item);
 			}
@@ -305,7 +306,7 @@ public class BuildPathsBlock {
 	public void init(IJavaProject jproject, IPath outputLocation, IClasspathEntry[] classpathEntries) {
 		fCurrJProject= jproject;
 		boolean projectExists= false;
-		List newClassPath= null;
+		List<CPListElement> newClassPath= null;
 		IProject project= fCurrJProject.getProject();
 		projectExists= (project.exists() && project.getFile(".classpath").exists()); //$NON-NLS-1$
 		IClasspathEntry[] existingEntries= null;
@@ -329,9 +330,9 @@ public class BuildPathsBlock {
 			newClassPath= getDefaultClassPath(jproject);
 		}
 
-		List exportedEntries = new ArrayList();
+		List<CPListElement> exportedEntries = new ArrayList<CPListElement>();
 		for (int i= 0; i < newClassPath.size(); i++) {
-			CPListElement curr= (CPListElement) newClassPath.get(i);
+			CPListElement curr= newClassPath.get(i);
 			if (curr.isExported() || curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				exportedEntries.add(curr);
 			}
@@ -388,7 +389,7 @@ public class BuildPathsBlock {
 		int nElements= fClassPathList.getSize();
 		buf.append('[').append(nElements).append(']');
 		for (int i= 0; i < nElements; i++) {
-			CPListElement elem= (CPListElement) fClassPathList.getElement(i);
+			CPListElement elem= fClassPathList.getElement(i);
 			elem.appendEncodedSettings(buf);
 		}
 		return buf.toString();
@@ -414,9 +415,9 @@ public class BuildPathsBlock {
 		fUserSettingsTimeStamp= getEncodedSettings();
 	}
 
-	private ArrayList getCPListElements(IClasspathEntry[] classpathEntries, IClasspathEntry[] existingEntries) {
-		List existing= existingEntries == null ? Collections.EMPTY_LIST : Arrays.asList(existingEntries);
-		ArrayList newClassPath= new ArrayList();
+	private ArrayList<CPListElement> getCPListElements(IClasspathEntry[] classpathEntries, IClasspathEntry[] existingEntries) {
+		List<IClasspathEntry> existing= existingEntries == null ? Collections.<IClasspathEntry>emptyList() : Arrays.asList(existingEntries);
+		ArrayList<CPListElement> newClassPath= new ArrayList<CPListElement>();
 		for (int i= 0; i < classpathEntries.length; i++) {
 			IClasspathEntry curr= classpathEntries[i];
 			newClassPath.add(CPListElement.create(curr, ! existing.contains(curr), fCurrJProject));
@@ -445,12 +446,12 @@ public class BuildPathsBlock {
 	 *  @return Returns the current class path (raw). Note that the entries returned must not be valid.
 	 */
 	public IClasspathEntry[] getRawClassPath() {
-		List elements=  fClassPathList.getElements();
+		List<CPListElement> elements=  fClassPathList.getElements();
 		int nElements= elements.size();
 		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
 
 		for (int i= 0; i < nElements; i++) {
-			CPListElement currElement= (CPListElement) elements.get(i);
+			CPListElement currElement= elements.get(i);
 			entries[i]= currElement.getClasspathEntry();
 		}
 		return entries;
@@ -463,8 +464,8 @@ public class BuildPathsBlock {
 
 	// -------- evaluate default settings --------
 
-	private List getDefaultClassPath(IJavaProject jproj) {
-		List list= new ArrayList();
+	private List<CPListElement> getDefaultClassPath(IJavaProject jproj) {
+		List<CPListElement> list= new ArrayList<CPListElement>();
 		IResource srcFolder;
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		String sourceFolderName= store.getString(PreferenceConstants.SRCBIN_SRCNAME);
@@ -491,7 +492,7 @@ public class BuildPathsBlock {
 		}
 	}
 
-	private class BuildPathAdapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter {
+	private class BuildPathAdapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter<CPListElement> {
 
 		// -------- IStringButtonAdapter --------
 		public void changeControlPressed(DialogField field) {
@@ -504,14 +505,14 @@ public class BuildPathsBlock {
 		}
 
 		// ---------- IListAdapter --------
-		public void customButtonPressed(ListDialogField field, int index) {
+		public void customButtonPressed(ListDialogField<CPListElement> field, int index) {
 			buildPathCustomButtonPressed(field, index);
 		}
 
-		public void doubleClicked(ListDialogField field) {
+		public void doubleClicked(ListDialogField<CPListElement> field) {
 		}
 
-		public void selectionChanged(ListDialogField field) {
+		public void selectionChanged(ListDialogField<CPListElement> field) {
 			updateTopButtonEnablement();
 		}
 	}
@@ -530,8 +531,8 @@ public class BuildPathsBlock {
 		fClassPathList.enableButton(IDX_TOP, fClassPathList.canMoveUp());
 	}
 
-	public void buildPathCustomButtonPressed(ListDialogField field, int index) {
-		List elems= field.getSelectedElements();
+	public void buildPathCustomButtonPressed(ListDialogField<CPListElement> field, int index) {
+		List<CPListElement> elems= field.getSelectedElements();
 		field.removeElements(elems);
 		if (index == IDX_BOTTOM) {
 			field.addElements(elems);
@@ -572,7 +573,7 @@ public class BuildPathsBlock {
 	public void updateClassPathStatus() {
 		fClassPathStatus.setOK();
 
-		List elements= fClassPathList.getElements();
+		List<CPListElement> elements= fClassPathList.getElements();
 
 		CPListElement entryMissing= null;
 		CPListElement entryDeprecated= null;
@@ -580,7 +581,7 @@ public class BuildPathsBlock {
 		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
 
 		for (int i= elements.size()-1 ; i >= 0 ; i--) {
-			CPListElement currElement= (CPListElement)elements.get(i);
+			CPListElement currElement= elements.get(i);
 			boolean isChecked= fClassPathList.isChecked(currElement);
 			if (currElement.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				if (!isChecked) {
@@ -662,11 +663,11 @@ public class BuildPathsBlock {
 	}
 
 	private void updateBuildPathStatus() {
-		List elements= fClassPathList.getElements();
+		List<CPListElement> elements= fClassPathList.getElements();
 		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
 
 		for (int i= elements.size()-1 ; i >= 0 ; i--) {
-			CPListElement currElement= (CPListElement)elements.get(i);
+			CPListElement currElement= elements.get(i);
 			entries[i]= currElement.getClasspathEntry();
 		}
 
@@ -753,7 +754,7 @@ public class BuildPathsBlock {
 	 * @throws CoreException if flushing failed
 	 * @throws OperationCanceledException if flushing has been cancelled
 	 */
-	public static void flush(List classPathEntries, IPath outputLocation, IJavaProject javaProject, String newProjectCompliance, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+	public static void flush(List<CPListElement> classPathEntries, IPath outputLocation, IJavaProject javaProject, String newProjectCompliance, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
@@ -809,8 +810,8 @@ public class BuildPathsBlock {
 			IClasspathEntry[] classpath= new IClasspathEntry[nEntries];
 			int i= 0;
 
-			for (Iterator iter= classPathEntries.iterator(); iter.hasNext();) {
-				CPListElement entry= (CPListElement)iter.next();
+			for (Iterator<CPListElement> iter= classPathEntries.iterator(); iter.hasNext();) {
+				CPListElement entry= iter.next();
 				classpath[i]= entry.getClasspathEntry();
 				i++;
 
@@ -894,7 +895,7 @@ public class BuildPathsBlock {
 							}
 						}
 						if (newProjectCompliance != null) {
-							Map options= javaProject.getOptions(false);
+							Map<String, String> options= javaProject.getOptions(false);
 							JavaModelUtil.setComplianceOptions(options, newProjectCompliance);
 							JavaModelUtil.setDefaultClassfileOptions(options, newProjectCompliance); // complete compliance options
 							javaProject.setOptions(options);
@@ -973,10 +974,10 @@ public class BuildPathsBlock {
 	// ---------- util method ------------
 
 	private IContainer chooseContainer() {
-		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
+		Class<?>[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
 		ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 		IProject[] allProjects= fWorkspaceRoot.getProjects();
-		ArrayList rejectedElements= new ArrayList(allProjects.length);
+		ArrayList<IProject> rejectedElements= new ArrayList<IProject>(allProjects.length);
 		IProject currProject= fCurrJProject.getProject();
 		for (int i= 0; i < allProjects.length; i++) {
 			if (!allProjects[i].equals(currProject)) {
@@ -1015,7 +1016,7 @@ public class BuildPathsBlock {
 			TabItem tabItem= (TabItem) widget;
 			BuildPathBasePage newPage= (BuildPathBasePage) tabItem.getData();
 			if (fCurrPage != null) {
-				List selection= fCurrPage.getSelection();
+				List<?> selection= fCurrPage.getSelection();
 				if (!selection.isEmpty()) {
 					newPage.setSelection(selection, false);
 				}
@@ -1043,7 +1044,7 @@ public class BuildPathsBlock {
 		CPListElement prefixMatch= null;
 		int entryKind= entry.getEntryKind();
 		for (int i= 0, len= fClassPathList.getSize(); i < len; i++) {
-			CPListElement curr= (CPListElement) fClassPathList.getElement(i);
+			CPListElement curr= fClassPathList.getElement(i);
 			if (curr.getEntryKind() == entryKind) {
 				IPath entryPath= entry.getPath();
 				IPath currPath= curr.getPath();
@@ -1082,7 +1083,7 @@ public class BuildPathsBlock {
 					}
 				}
 				BuildPathBasePage page= (BuildPathBasePage) fTabFolder.getItem(pageIndex).getData();
-				List selection= new ArrayList(1);
+				List<Object> selection= new ArrayList<Object>(1);
 				selection.add(elementToSelect);
 				page.setSelection(selection, true);
 			}

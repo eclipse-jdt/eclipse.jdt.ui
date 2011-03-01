@@ -23,9 +23,11 @@ public final class RenameEnumConstWizard extends RenameRefactoringWizard {
 		super(refactoring, RefactoringMessages.RenameEnumConstWizard_defaultPageTitle, RefactoringMessages.RenameEnumConstWizard_inputPage_description, JavaPluginImages.DESC_WIZBAN_REFACTOR_FIELD, IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE);
 	}
 
+	@Override
 	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
 		return new RenameInputWizardPage(message, IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE, true, initialSetting) {
 
+			@Override
 			protected RefactoringStatus validateTextField(String text) {
 				return validateNewName(text);
 			}

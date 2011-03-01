@@ -636,14 +636,14 @@ public final class JavaModelUtil {
 	 *             accessing its corresponding resource
 	 */
 	public static ICompilationUnit[] getAllCompilationUnits(IJavaElement[] javaElements) throws JavaModelException {
-		HashSet result= new HashSet();
+		HashSet<ICompilationUnit> result= new HashSet<ICompilationUnit>();
 		for (int i= 0; i < javaElements.length; i++) {
 			addAllCus(result, javaElements[i]);
 		}
-		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
+		return result.toArray(new ICompilationUnit[result.size()]);
 	}
 
-	private static void addAllCus(HashSet/*<ICompilationUnit>*/ collector, IJavaElement javaElement) throws JavaModelException {
+	private static void addAllCus(HashSet<ICompilationUnit> collector, IJavaElement javaElement) throws JavaModelException {
 		switch (javaElement.getElementType()) {
 			case IJavaElement.JAVA_PROJECT:
 				IJavaProject javaProject= (IJavaProject) javaElement;
@@ -667,13 +667,13 @@ public final class JavaModelUtil {
 				return;
 
 			case IJavaElement.COMPILATION_UNIT:
-				collector.add(javaElement);
+				collector.add((ICompilationUnit) javaElement);
 				return;
 
 			default:
 				IJavaElement cu= javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
 				if (cu != null)
-					collector.add(cu);
+					collector.add((ICompilationUnit) cu);
 		}
 	}
 
@@ -682,15 +682,15 @@ public final class JavaModelUtil {
 	 * Sets all compliance settings in the given map to 5.0
 	 * @param map the map to update
 	 */
-	public static void set50ComplianceOptions(Map map) {
+	public static void set50ComplianceOptions(Map<String, String> map) {
 		setComplianceOptions(map, JavaCore.VERSION_1_5);
 	}
 
-	public static void setComplianceOptions(Map map, String compliance) {
+	public static void setComplianceOptions(Map<String, String> map, String compliance) {
 		JavaCore.setComplianceOptions(compliance, map);
 	}
 
-	public static void setDefaultClassfileOptions(Map map, String compliance) {
+	public static void setDefaultClassfileOptions(Map<String, String> map, String compliance) {
 		map.put(JavaCore.COMPILER_CODEGEN_INLINE_JSR_BYTECODE, is50OrHigher(compliance) ? JavaCore.ENABLED : JavaCore.DISABLED);
 		map.put(JavaCore.COMPILER_LOCAL_VARIABLE_ATTR, JavaCore.GENERATE);
 		map.put(JavaCore.COMPILER_LINE_NUMBER_ATTR, JavaCore.GENERATE);
@@ -779,7 +779,7 @@ public final class JavaModelUtil {
 	}
 
 	public static String getExecutionEnvironmentCompliance(IExecutionEnvironment executionEnvironment) {
-		Map complianceOptions= executionEnvironment.getComplianceOptions();
+		Map<String, String> complianceOptions= executionEnvironment.getComplianceOptions();
 		if (complianceOptions != null) {
 			Object compliance= complianceOptions.get(JavaCore.COMPILER_COMPLIANCE);
 			if (compliance instanceof String)

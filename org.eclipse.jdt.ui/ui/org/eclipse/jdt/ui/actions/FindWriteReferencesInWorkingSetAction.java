@@ -82,10 +82,12 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 		super(editor, workingSets);
 	}
 
-	Class[] getValidTypes() {
+	@Override
+	Class<?>[] getValidTypes() {
 		return new Class[] { IField.class, ILocalVariable.class };
 	}
 
+	@Override
 	void init() {
 		setText(SearchMessages.Search_FindWriteReferencesInWorkingSetAction_label);
 		setToolTipText(SearchMessages.Search_FindWriteReferencesInWorkingSetAction_tooltip);
@@ -93,10 +95,12 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKING_SET_ACTION);
 	}
 
+	@Override
 	int getLimitTo() {
 		return IJavaSearchConstants.WRITE_ACCESSES;
 	}
 
+	@Override
 	String getOperationUnavailableMessage() {
 		return SearchMessages.JavaElementAction_operationUnavailable_field;
 	}

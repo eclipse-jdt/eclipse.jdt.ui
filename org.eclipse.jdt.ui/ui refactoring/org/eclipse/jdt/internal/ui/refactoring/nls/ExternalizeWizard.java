@@ -46,6 +46,7 @@ public class ExternalizeWizard extends RefactoringWizard {
 	/**
 	 * @see RefactoringWizard#addUserInputPages()
 	 */
+	@Override
 	protected void addUserInputPages() {
 
 		NLSRefactoring nlsRefac= (NLSRefactoring) getRefactoring();
@@ -58,6 +59,7 @@ public class ExternalizeWizard extends RefactoringWizard {
 		 addPage(page2);*/
 	}
 
+	@Override
 	public boolean canFinish() {
 		IWizardPage page= getContainer().getCurrentPage();
 		return super.canFinish() && !(page instanceof ExternalizeWizardPage);

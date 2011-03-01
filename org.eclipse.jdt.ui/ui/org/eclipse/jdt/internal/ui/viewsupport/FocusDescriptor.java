@@ -29,6 +29,7 @@ public class FocusDescriptor extends CompositeImageDescriptor {
 	public FocusDescriptor(ImageDescriptor base) {
 		fBase= base;
 	}
+	@Override
 	protected void drawCompositeImage(int width, int height) {
 		drawImage(getImageData(fBase), 0, 0);
 		drawImage(getImageData(JavaPluginImages.DESC_OVR_FOCUS), 0, 0);
@@ -43,12 +44,15 @@ public class FocusDescriptor extends CompositeImageDescriptor {
 		return data;
 	}
 
+	@Override
 	protected Point getSize() {
 		return JavaElementImageProvider.BIG_SIZE;
 	}
+	@Override
 	public int hashCode() {
 		return fBase.hashCode();
 	}
+	@Override
 	public boolean equals(Object object) {
 		return object != null && FocusDescriptor.class.equals(object.getClass()) && ((FocusDescriptor)object).fBase.equals(fBase);
 	}

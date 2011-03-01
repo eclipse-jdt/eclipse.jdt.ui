@@ -151,6 +151,7 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.java.TemplateCompletionProposalComputer#computeCompletionEngine(org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
 	 */
+	@Override
 	protected TemplateEngine computeCompletionEngine(JavaContentAssistInvocationContext context) {
 		ICompilationUnit unit= context.getCompilationUnit();
 		if (unit == null)

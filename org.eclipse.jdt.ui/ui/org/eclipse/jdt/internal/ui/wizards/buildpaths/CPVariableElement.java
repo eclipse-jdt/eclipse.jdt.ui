@@ -69,6 +69,7 @@ public class CPVariableElement {
 	/*
 	 * @see Object#equals()
 	 */
+	@Override
 	public boolean equals(Object other) {
 		if (other != null && other.getClass().equals(getClass())) {
 			CPVariableElement elem= (CPVariableElement)other;
@@ -80,6 +81,7 @@ public class CPVariableElement {
 	/*
 	 * @see Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return fName.hashCode();
 	}

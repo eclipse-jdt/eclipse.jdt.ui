@@ -92,6 +92,7 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 		fWorkingSets= workingSets;
 	}
 
+	@Override
 	void init() {
 		setText(SearchMessages.Search_FindReferencesInWorkingSetAction_label);
 		setToolTipText(SearchMessages.Search_FindReferencesInWorkingSetAction_tooltip);
@@ -99,6 +100,7 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_WORKING_SET_ACTION);
 	}
 
+	@Override
 	QuerySpecification createQuery(IJavaElement element) throws JavaModelException, InterruptedException {
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 

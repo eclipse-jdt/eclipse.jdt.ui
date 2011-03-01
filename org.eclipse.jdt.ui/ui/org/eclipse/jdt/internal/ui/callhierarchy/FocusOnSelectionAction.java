@@ -85,6 +85,7 @@ class FocusOnSelectionAction extends Action {
 	/*
 	 * @see Action#run
 	 */
+	@Override
 	public void run() {
 		IMember[] members= getSelectedInputElements();
 		if (members != null) {

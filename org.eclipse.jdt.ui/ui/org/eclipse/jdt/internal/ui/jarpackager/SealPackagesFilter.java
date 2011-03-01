@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
 
 /**
  * Only selects packages (i.e. IPackageFragments) which are in
@@ -24,9 +25,9 @@ import org.eclipse.jdt.core.IJavaElement;
  */
 class SealPackagesFilter  extends ViewerFilter {
 
-	private List fAllowedPackages;
+	private List<IPackageFragment> fAllowedPackages;
 
-	public SealPackagesFilter(List packages) {
+	public SealPackagesFilter(List<IPackageFragment> packages) {
 		fAllowedPackages= packages;
 	}
 
@@ -34,6 +35,7 @@ class SealPackagesFilter  extends ViewerFilter {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
+	@Override
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IJavaElement) {
 			int type= ((IJavaElement)element).getElementType();

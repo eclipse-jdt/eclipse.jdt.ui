@@ -84,6 +84,7 @@ public class OptionalMessageDialog extends MessageDialog {
 		fCheckBoxText= checkBoxText;
 	}
 
+	@Override
 	protected Control createCustomArea(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -96,6 +97,7 @@ public class OptionalMessageDialog extends MessageDialog {
 		fHideDialogCheckBox= new Button(composite, SWT.CHECK | SWT.LEFT);
 		fHideDialogCheckBox.setText(fCheckBoxText);
 		fHideDialogCheckBox.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				setDialogEnabled(fId, !((Button)e.widget).getSelection());
 			}

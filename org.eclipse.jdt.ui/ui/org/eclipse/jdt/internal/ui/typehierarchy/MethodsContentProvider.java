@@ -74,7 +74,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 	}
 
 
-	private void addAll(Object[] arr, List res) {
+	private void addAll(Object[] arr, List<Object> res) {
 		if (arr != null) {
 			for (int j= 0; j < arr.length; j++) {
 				res.add(arr[j]);
@@ -89,7 +89,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 		if (element instanceof IType) {
 			IType type= (IType)element;
 
-			List res= new ArrayList();
+			List<Object> res= new ArrayList<Object>();
 			try {
 				ITypeHierarchy hierarchy= fHierarchyLifeCycle.getHierarchy();
 				if (fShowInheritedMethods && hierarchy != null) {

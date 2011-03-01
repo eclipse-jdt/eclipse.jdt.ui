@@ -53,7 +53,7 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult 
 
 	private Match[] computeContainedMatches(IAdaptable adaptable) {
 		IJavaElement javaElement= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
-		Set matches= new HashSet();
+		Set<Match> matches= new HashSet<Match>();
 		if (javaElement != null) {
 			collectMatches(matches, javaElement);
 		}
@@ -62,12 +62,12 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult 
 			collectMatches(matches, file);
 		}
 		if (!matches.isEmpty()) {
-			return (Match[]) matches.toArray(new Match[matches.size()]);
+			return matches.toArray(new Match[matches.size()]);
 		}
 		return NO_MATCHES;
 	}
 
-	private void collectMatches(Set matches, IFile element) {
+	private void collectMatches(Set<Match> matches, IFile element) {
 		Match[] m= getMatches(element);
 		if (m.length != 0) {
 			for (int i= 0; i < m.length; i++) {
@@ -76,7 +76,7 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult 
 		}
 	}
 
-	private void collectMatches(Set matches, IJavaElement element) {
+	private void collectMatches(Set<Match> matches, IJavaElement element) {
 		Match[] m= getMatches(element);
 		if (m.length != 0) {
 			for (int i= 0; i < m.length; i++) {
@@ -130,10 +130,12 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult 
 		return false;
 	}
 
+	@Override
 	public IFileMatchAdapter getFileMatchAdapter() {
 		return this;
 	}
 
+	@Override
 	public IEditorMatchAdapter getEditorMatchAdapter() {
 		return this;
 	}

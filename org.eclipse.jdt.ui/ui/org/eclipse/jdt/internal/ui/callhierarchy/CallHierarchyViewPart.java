@@ -143,6 +143,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.typehierarchy.SelectionProviderMediator#getSelection()
 		 */
+		@Override
 		public ISelection getSelection() {
 			ISelection selection= super.getSelection();
 			if (!selection.isEmpty()) {
@@ -161,19 +162,22 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			super(viewer);
 		}
 
+		@Override
 		protected void activate(ISelection selection) {
 			final Object selectedElement= SelectionUtil.getSingleElement(selection);
 			if (selectedElement != null)
 				CallHierarchyUI.openInEditor(selectedElement, getSite().getShell(), true);
 		}
 
+		@Override
 		protected void linkToEditor(ISelection selection) {
 			// not supported by this part
 		}
 
+		@Override
 		protected void open(ISelection selection, boolean activate) {
 			if (selection instanceof IStructuredSelection) {
-				for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
+				for (Iterator<?> iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
 					boolean noError= CallHierarchyUI.openInEditor(iter.next(), getSite().getShell(), OpenStrategy.activateOnOpen());
 					if (!noError)
 						return;
@@ -252,7 +256,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fIsPinned= false;
     }
 
-    public void setFocus() {
+    @Override
+	public void setFocus() {
         fPagebook.setFocus();
     }
 
@@ -279,7 +284,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
             updateHistoryEntries();
         }
 
-        return (IMember[][]) getMethodHistory().toArray(new IMember[getMethodHistory().size()][]);
+        return getMethodHistory().toArray(new IMember[getMethodHistory().size()][]);
     }
 
     public void setInputElements(IMember[] members) {
@@ -437,6 +442,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance(), ResourceTransfer.getInstance(), FileTransfer.getInstance()};
 
 		DelegatingDragAdapter dragAdapter= new DelegatingDragAdapter() {
+			@Override
 			public void dragStart(DragSourceEvent event) {
 				IStructuredSelection selection= (IStructuredSelection) fSelectionProviderMediator.getSelection();
 				if (selection.isEmpty()) {
@@ -454,7 +460,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		viewer.addDragSupport(ops, transfers, dragAdapter);
 	}
 
-    public void createPartControl(Composite parent) {
+    @Override
+	public void createPartControl(Composite parent) {
     	fParent= parent;
     	addResizeListener(parent);
         fPagebook = new PageBook(parent, SWT.NONE);
@@ -723,6 +730,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         viewMenu.add(fShowSearchInDialogAction);
     }
 
+	@Override
 	public void dispose() {
 		if (fActionGroups != null)
 			fActionGroups.dispose();
@@ -742,8 +750,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @param entry the history entry
      */
     public void gotoHistoryEntry(IMember[] entry) {
-    	for (Iterator iter= getMethodHistory().iterator(); iter.hasNext(); ) {
-			if (Arrays.equals(entry, (IMember[]) iter.next())) {
+    	for (Iterator<IMember[]> iter= getMethodHistory().iterator(); iter.hasNext(); ) {
+			if (Arrays.equals(entry, iter.next())) {
 				setInputElements(entry);
 				return;
 			}
@@ -753,7 +761,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     /* (non-Javadoc)
      * Method declared on IViewPart.
      */
-    public void init(IViewSite site, IMemento memento)
+    @Override
+	public void init(IViewSite site, IMemento memento)
         throws PartInitException {
         super.init(site, memento);
         fMemento = memento;
@@ -769,7 +778,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         updateView();
     }
 
-    public void saveState(IMemento memento) {
+    @Override
+	public void saveState(IMemento memento) {
         if (fPagebook == null) {
             // part has not been created
             if (fMemento != null) { //Keep the old state;
@@ -853,7 +863,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     /**
 	 * {@inheritDoc}
 	 */
-    public Object getAdapter(Class adapter) {
+    @Override
+	public Object getAdapter(Class adapter) {
     	if (adapter == IShowInSource.class) {
     		return getShowInSource();
     	}
@@ -943,6 +954,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @param entry the entry to add
      */
     private void addHistoryEntry(IMember[] entry) {
+
 		updateHistoryEntries(entry, entry);
     }
 
@@ -967,8 +979,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	 * @since 3.7
 	 */
 	private void updateHistoryEntries(IMember[] currentInput, IMember[] entry) {
-		for (Iterator iter= getMethodHistory().iterator(); iter.hasNext();) {
-			if (Arrays.equals(currentInput, (IMember[]) iter.next())) {
+		for (Iterator<IMember[]> iter= getMethodHistory().iterator(); iter.hasNext();) {
+			if (Arrays.equals(currentInput, iter.next())) {
 				iter.remove();
 			}
 		}
@@ -1109,7 +1121,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     private void updateHistoryEntries() {
         for (int i = getMethodHistory().size() - 1; i >= 0; i--) {
-            IMember[] members = (IMember[]) getMethodHistory().get(i);
+            IMember[] members = getMethodHistory().get(i);
             for (int j= 0; j < members.length; j++) {
 				IMember member= members[j];
 				if (! member.exists()) {
@@ -1134,6 +1146,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			if (fCurrentCallMode == CALL_MODE_CALLERS) {
 				// sort caller hierarchy alphabetically (bug 111423) and make RealCallers the last in 'Expand With Constructors' mode
 				fCallHierarchyViewer.setComparator(new ViewerComparator() {
+					@Override
 					public int category(Object element) {
 						return element instanceof RealCallers ? 1 : 0;
 					}
@@ -1324,7 +1337,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	 * @return the method history
 	 * @since 3.7
 	 */
-	private List/*<IMember[]>*/getMethodHistory() {
+	private List<IMember[]>getMethodHistory() {
 		return CallHierarchyUI.getDefault().getMethodHistory();
 	}
 
@@ -1332,6 +1345,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	 * @see org.eclipse.ui.part.WorkbenchPart#showBusy(boolean)
 	 * @since 3.7
 	 */
+	@Override
 	public void showBusy(boolean busy) {
 		super.showBusy(busy);
 		if (!busy)
@@ -1362,8 +1376,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		// Caveat: RemoveFromViewAction#run() disposes TreeItems. When we add a previously removed element,
 		// we have to consider the real Tree state, not only fInputElements.
 		
-		List/*<IMember>*/ inputElements= Arrays.asList(fInputElements);
-		List/*<IMember>*/ treeElements= new ArrayList/*<IMember>*/();
+		List<IMember> inputElements= Arrays.asList(fInputElements);
+		List<IMember> treeElements= new ArrayList<IMember>();
 		TreeItem[] treeItems= fCallHierarchyViewer.getTree().getItems();
 		for (int i= 0; i < treeItems.length; i++) {
 			Object data= treeItems[i].getData();
@@ -1371,9 +1385,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 				treeElements.add(((MethodWrapper) data).getMember());
 		}
 		
-		List/*<IMember>*/ newInput= new ArrayList/*<IMember>*/();
+		List<IMember> newInput= new ArrayList<IMember>();
 		newInput.addAll(inputElements);
-		List/*<IMember>*/ addedElements= new ArrayList/*<IMember>*/();
+		List<IMember> addedElements= new ArrayList<IMember>();
 		
 		for (int i= 0; i < newElements.length; i++) {
 			IMember newElement= newElements[i];
@@ -1385,9 +1399,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		if (treeElements.size() == 0)
 			updateInputHistoryAndDescription(fInputElements, newElements);
 		else if (newInput.size() > fInputElements.length)
-			updateInputHistoryAndDescription(fInputElements, (IMember[])newInput.toArray(new IMember[newInput.size()]));
+			updateInputHistoryAndDescription(fInputElements, newInput.toArray(new IMember[newInput.size()]));
 		if (addedElements.size() > 0)
-			updateViewWithAddedElements((IMember[]) addedElements.toArray(new IMember[addedElements.size()]));
+			updateViewWithAddedElements(addedElements.toArray(new IMember[addedElements.size()]));
 	}
 
 	/**

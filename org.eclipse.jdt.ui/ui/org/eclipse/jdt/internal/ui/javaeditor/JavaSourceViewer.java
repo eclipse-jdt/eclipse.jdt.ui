@@ -153,12 +153,13 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * @see org.eclipse.jface.text.source.SourceViewer#createFormattingContext()
 	 * @since 3.0
 	 */
+	@Override
 	public IFormattingContext createFormattingContext() {
 
 		// it's ok to use instance preferences here as subclasses replace
 		// with project dependent versions (see CompilationUnitEditor.AdaptedSourceViewer)
 		IFormattingContext context= new JavaFormattingContext();
-		Map map= new HashMap(JavaCore.getOptions());
+		Map<String, String> map= new HashMap<String, String>(JavaCore.getOptions());
 		context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, map);
 
 		return context;
@@ -167,6 +168,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	/*
 	 * @see ITextOperationTarget#doOperation(int)
 	 */
+	@Override
 	public void doOperation(int operation) {
 		if (getTextWidget() == null)
 			return;
@@ -192,6 +194,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	/*
 	 * @see ITextOperationTarget#canDoOperation(int)
 	 */
+	@Override
 	public boolean canDoOperation(int operation) {
 		if (operation == SHOW_OUTLINE)
 			return fOutlinePresenter != null;
@@ -206,6 +209,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	/*
 	 * @see ISourceViewer#configure(SourceViewerConfiguration)
 	 */
+	@Override
 	public void configure(SourceViewerConfiguration configuration) {
 
 		/*
@@ -360,6 +364,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * @see org.eclipse.jface.text.source.ISourceViewerExtension2#unconfigure()
 	 * @since 3.0
 	 */
+	@Override
 	public void unconfigure() {
 		if (fOutlinePresenter != null) {
 			fOutlinePresenter.uninstall();
@@ -393,6 +398,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewer#rememberSelection()
 	 */
+	@Override
 	public Point rememberSelection() {
 		return super.rememberSelection();
 	}
@@ -400,6 +406,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewer#restoreSelection()
 	 */
+	@Override
 	public void restoreSelection() {
 		super.restoreSelection();
 	}
@@ -444,6 +451,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewer#createControl(org.eclipse.swt.widgets.Composite, int)
 	 */
+	@Override
 	protected void createControl(Composite parent, int styles) {
 
 		// Use LEFT_TO_RIGHT unless otherwise specified.
@@ -485,6 +493,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewer#handleDispose()
 	 */
+	@Override
 	protected void handleDispose() {
 		if (fBackspaceManager != null) {
 			fBackspaceManager.uninstall();
@@ -507,7 +516,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		Assert.isNotNull(listener);
 
 		if (fTextPresentationListeners == null)
-			fTextPresentationListeners= new ArrayList();
+			fTextPresentationListeners= new ArrayList<ITextPresentationListener>();
 
 		fTextPresentationListeners.remove(listener);
 		fTextPresentationListeners.add(0, listener);
@@ -659,6 +668,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * @see #prepareDelayedProjection()
 	 * @since 3.1
 	 */
+	@Override
 	protected void setVisibleDocument(IDocument document) {
 		if (fIsSetVisibleDocumentDelayed) {
 			fIsSetVisibleDocumentDelayed= false;
@@ -681,6 +691,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * untouched we reuse the given range as return value.
 	 * </p>
 	 */
+	@Override
 	protected StyleRange modelStyleRange2WidgetStyleRange(StyleRange range) {
 		IRegion region= modelRange2WidgetRange(new Region(range.start, range.length));
 		if (region != null) {

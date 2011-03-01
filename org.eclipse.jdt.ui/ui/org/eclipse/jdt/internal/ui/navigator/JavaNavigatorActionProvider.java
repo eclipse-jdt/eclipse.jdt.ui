@@ -53,6 +53,7 @@ public class JavaNavigatorActionProvider extends CommonActionProvider {
 
 	private boolean fInViewPart= false;
 
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		if (fInViewPart) {
 			fOpenViewGroup.fillActionBars(actionBars);
@@ -63,6 +64,7 @@ public class JavaNavigatorActionProvider extends CommonActionProvider {
 		}
 	}
 
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		if (fInViewPart) {
 			fOpenViewGroup.fillContextMenu(menu);
@@ -73,6 +75,7 @@ public class JavaNavigatorActionProvider extends CommonActionProvider {
 		}
 	}
 
+	@Override
 	public void init(ICommonActionExtensionSite site) {
 
 		ICommonViewerWorkbenchSite workbenchSite= null;
@@ -95,6 +98,7 @@ public class JavaNavigatorActionProvider extends CommonActionProvider {
 		}
 	}
 
+	@Override
 	public void setContext(ActionContext context) {
 		super.setContext(context);
 		if (fInViewPart) {
@@ -110,6 +114,7 @@ public class JavaNavigatorActionProvider extends CommonActionProvider {
 	 * @see org.eclipse.ui.actions.ActionGroup#dispose()
 	 * @since 3.5
 	 */
+	@Override
 	public void dispose() {
 		if (fInViewPart) {
 			fOpenViewGroup.dispose();

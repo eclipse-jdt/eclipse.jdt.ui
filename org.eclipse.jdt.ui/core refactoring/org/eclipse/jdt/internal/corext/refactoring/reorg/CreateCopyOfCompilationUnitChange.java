@@ -143,12 +143,14 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 		setEncoding(oldCu);
 	}
 
+	@Override
 	public String getName() {
 		String cuName= BasicElementLabels.getResourceName(fOldCu.getElementName());
 		String cuContainerName= BasicElementLabels.getPathLabel(fOldCu.getParent().getPath(), false);
 		return Messages.format(RefactoringCoreMessages.CreateCopyOfCompilationUnitChange_create_copy, new String[] { cuName, cuContainerName});
 	}
 
+	@Override
 	protected IFile getOldFile(IProgressMonitor monitor) throws OperationCanceledException {
 		try {
 			monitor.beginTask("", 12); //$NON-NLS-1$
@@ -178,6 +180,7 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 		}
 	}
 
+	@Override
 	public Change perform(IProgressMonitor monitor) throws CoreException {
 		ResourceMapping mapping= JavaElementResourceMapping.create(fOldCu);
 		final Change result= super.perform(monitor);

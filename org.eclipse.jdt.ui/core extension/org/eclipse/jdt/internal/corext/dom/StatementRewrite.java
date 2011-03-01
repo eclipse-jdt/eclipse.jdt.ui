@@ -26,6 +26,7 @@ public class StatementRewrite extends ReplaceRewrite {
 		super(rewrite, nodes);
 	}
 
+	@Override
 	protected void handleOneMany(ASTNode[] replacements, TextEditGroup description) {
 		AST ast= fToReplace[0].getAST();
 		// to replace == 1, but more than one replacement. Have to check if we

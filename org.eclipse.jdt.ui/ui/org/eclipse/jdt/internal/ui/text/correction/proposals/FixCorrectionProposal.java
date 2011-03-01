@@ -86,6 +86,7 @@ public class FixCorrectionProposal extends CUCorrectionProposal implements IComp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#getImage()
 	 */
+	@Override
 	public Image getImage() {
 		IStatus status= getFixStatus();
 		if (status != null && !status.isOK()) {
@@ -110,6 +111,7 @@ public class FixCorrectionProposal extends CUCorrectionProposal implements IComp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getAdditionalProposalInfo()
 	 */
+	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 		StringBuffer result= new StringBuffer();
 
@@ -139,6 +141,7 @@ public class FixCorrectionProposal extends CUCorrectionProposal implements IComp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#getRelevance()
 	 */
+	@Override
 	public int getRelevance() {
 		IStatus status= getFixStatus();
 		if (status != null && !status.isOK()) {
@@ -151,6 +154,7 @@ public class FixCorrectionProposal extends CUCorrectionProposal implements IComp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createTextChange()
 	 */
+	@Override
 	protected TextChange createTextChange() throws CoreException {
 		CompilationUnitChange createChange= fFix.createChange(null);
 		createChange.setSaveMode(TextFileChange.LEAVE_DIRTY);

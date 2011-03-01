@@ -160,6 +160,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 		return null;
 	}
 
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			checkAndRun(getSelectedType(selection));
@@ -169,6 +170,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 	}
 
 
+	@Override
 	public void run(ITextSelection selection) {
 		try {
 			checkAndRun(SelectionConverter.getTypeAtOffset(fEditor));
@@ -402,6 +404,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 			fTypeBinding= declaration.resolveBinding();
 	}
 
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(canEnable(selection));
@@ -412,6 +415,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 		}
 	}
 
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		// Do nothing
 	}

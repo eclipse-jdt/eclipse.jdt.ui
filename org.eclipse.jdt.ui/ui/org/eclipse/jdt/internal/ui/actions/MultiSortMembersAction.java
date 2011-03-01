@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,6 +61,7 @@ public class MultiSortMembersAction extends CleanUpAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected ICleanUp[] getCleanUps(ICompilationUnit[] units) {
 		try {
 	        if (!hasMembersToSort(units)) {
@@ -72,7 +73,7 @@ public class MultiSortMembersAction extends CleanUpAction {
 	        return null;
         }
 
-		Map settings= getSettings();
+		Map<String, String> settings= getSettings();
 		if (settings == null)
 			return null;
 
@@ -81,12 +82,12 @@ public class MultiSortMembersAction extends CleanUpAction {
 		};
 	}
 
-	protected Map getSettings() {
+	protected Map<String, String> getSettings() {
 		SortMembersMessageDialog dialog= new SortMembersMessageDialog(getShell());
 		if (dialog.open() != Window.OK)
 			return null;
 
-		Hashtable settings= new Hashtable();
+		Hashtable<String, String> settings= new Hashtable<String, String>();
 		settings.put(CleanUpConstants.SORT_MEMBERS, CleanUpOptions.TRUE);
 		settings.put(CleanUpConstants.SORT_MEMBERS_ALL, !dialog.isNotSortingFieldsEnabled() ? CleanUpOptions.TRUE : CleanUpOptions.FALSE);
 		return settings;
@@ -95,6 +96,7 @@ public class MultiSortMembersAction extends CleanUpAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected String getActionName() {
 		return ActionMessages.SortMembersAction_dialog_title;
 	}

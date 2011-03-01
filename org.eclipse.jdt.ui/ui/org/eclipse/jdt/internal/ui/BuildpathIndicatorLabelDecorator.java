@@ -30,6 +30,7 @@ public class BuildpathIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void decorate(Object element, IDecoration decoration) {
 		ImageDescriptor overlay= getOverlay(element);
 		if (overlay != null) {
@@ -61,7 +62,8 @@ public class BuildpathIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		return null;
 	}
 
-	protected void processDelta(IJavaElementDelta delta, List result) {
+	@Override
+	protected void processDelta(IJavaElementDelta delta, List<IJavaElement> result) {
 		IJavaElement elem= delta.getElement();
 
 		boolean isChanged= delta.getKind() == IJavaElementDelta.CHANGED;

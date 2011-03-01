@@ -83,6 +83,7 @@ public class ExceptionInfo {
 		return fTypeBinding;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer result= new StringBuffer();
 		switch (fKind) {

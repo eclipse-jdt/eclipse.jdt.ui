@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,6 +77,7 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 		fPrevious= previous;
 	}
 
+	@Override
 	public void run(ISelection selection) {
 
 		Shell shell= getShell();
@@ -117,6 +118,7 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 			cc.setLeftEditable(false);
 			cc.setRightEditable(false);
 			HistoryPageCompareEditorInput ci = new HistoryPageCompareEditorInput(cc, pageSource, input) {
+				@Override
 				protected void performReplace(Object selectedElement) {
 					if (selectedElement instanceof ITypedElement) {
 						JavaReplaceWithEditionActionImpl.this.replace(input, file, (ITypedElement)selectedElement);
@@ -219,7 +221,7 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 					je.setFocus();
 			}
 
-			Map options= null;
+			Map<String, String> options= null;
 			IJavaProject javaProject= compilationUnit.getJavaProject();
 			if (javaProject != null)
 				options= javaProject.getOptions(true);

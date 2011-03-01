@@ -74,6 +74,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 	/**
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		IJavaElement elem= getJavaElement();
 		try {
@@ -132,6 +133,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		if (!fIsValidElement || fIsReadOnly) {
 			Composite inner= new Composite(parent, SWT.NONE);
@@ -193,6 +195,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
+	@Override
 	protected void performDefaults() {
 		if (fConfigurationBlock != null) {
 			fConfigurationBlock.performDefaults();
@@ -203,6 +206,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 	/**
 	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
+	@Override
 	public boolean performOk() {
 		if (fConfigurationBlock != null) {
 			String nativeLibraryPath= fConfigurationBlock.getNativeLibraryPath();

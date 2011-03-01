@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
@@ -103,6 +104,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		return canUpdateJavaReferences();
 	}
 	
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try {
 			Assert.isNotNull(fReorgQueries);
@@ -114,6 +116,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		}
 	}
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
@@ -127,16 +130,19 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		}
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		Assert.isTrue(fMovePolicy.getJavaElementDestination() == null || fMovePolicy.getResourceDestination() == null);
 		Assert.isTrue(fMovePolicy.getJavaElementDestination() != null || fMovePolicy.getResourceDestination() != null);
 		try {
 			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.JavaMoveProcessor_change_name) {
 
+				@Override
 				public ChangeDescriptor getDescriptor() {
 					return fMovePolicy.getDescriptor();
 				}
 
+				@Override
 				public Change perform(IProgressMonitor pm2) throws CoreException {
 					Change change= super.perform(pm2);
 					Change[] changes= getChildren();
@@ -176,10 +182,10 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 	private String[] getAffectedProjectNatures() throws CoreException {
 		String[] jNatures= JavaProcessors.computeAffectedNaturs(fMovePolicy.getJavaElements());
 		String[] rNatures= ResourceProcessors.computeAffectedNatures(fMovePolicy.getResources());
-		Set result= new HashSet();
+		Set<String> result= new HashSet<String>();
 		result.addAll(Arrays.asList(jNatures));
 		result.addAll(Arrays.asList(rNatures));
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	public Object getCommonParentForInputElements() {
@@ -197,8 +203,9 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		return fMovePolicy.getResourceDestination();
 	}
 
+	@Override
 	public Object[] getElements() {
-		List result= new ArrayList();
+		List<IAdaptable> result= new ArrayList<IAdaptable>();
 		result.addAll(Arrays.asList(fMovePolicy.getJavaElements()));
 		result.addAll(Arrays.asList(fMovePolicy.getResources()));
 		return result.toArray();
@@ -208,6 +215,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		return fMovePolicy.getFilePatterns();
 	}
 
+	@Override
 	public String getIdentifier() {
 		return IRefactoringProcessorIds.MOVE_PROCESSOR;
 	}
@@ -216,6 +224,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		return fMovePolicy.getJavaElements();
 	}
 
+	@Override
 	public String getProcessorName() {
 		return RefactoringCoreMessages.MoveRefactoring_0;
 	}
@@ -255,6 +264,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		return status;
 	}
 
+	@Override
 	public boolean isApplicable() throws CoreException {
 		return fMovePolicy.canEnable();
 	}
@@ -263,10 +273,12 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		return fMovePolicy.isTextualMove();
 	}
 
+	@Override
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
 		return fMovePolicy.loadParticipants(status, this, getAffectedProjectNatures(), shared);
 	}
 
+	@Override
 	public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
 		return fMovePolicy.postCreateChange(participantChanges, pm);
 	}

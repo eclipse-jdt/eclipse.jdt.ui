@@ -29,6 +29,7 @@ public final class ParameterizedTypeVariable2 extends ConstraintVariable2 {
 
 	// hashCode() and equals(..) not necessary (unique per construction)
 
+	@Override
 	public String toString() {
 		return getType().getName();
 	}

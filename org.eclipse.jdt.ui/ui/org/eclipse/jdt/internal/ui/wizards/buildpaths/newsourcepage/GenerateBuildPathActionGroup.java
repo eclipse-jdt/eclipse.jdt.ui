@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -118,7 +118,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 
     private final IWorkbenchSite fSite;
 	private final ISelectionProvider fSelectionProvider;
-	private final List/*<Action>*/fActions;
+	private final List<Action> fActions;
 
 	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
 
@@ -158,7 +158,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 	public GenerateBuildPathActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
         fSite= site;
 		fSelectionProvider= selectionProvider;
-        fActions= new ArrayList();
+        fActions= new ArrayList<Action>();
 
 		final CreateLinkedSourceFolderAction addLinkedSourceFolderAction= new CreateLinkedSourceFolderAction(site);
 		fActions.add(addLinkedSourceFolderAction);
@@ -199,8 +199,8 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		final ConfigureBuildPathAction configure= new ConfigureBuildPathAction(site);
 		fActions.add(configure);
 
-		for (Iterator iter= fActions.iterator(); iter.hasNext();) {
-			Action action= (Action)iter.next();
+		for (Iterator<Action> iter= fActions.iterator(); iter.hasNext();) {
+			Action action= iter.next();
 			if (action instanceof ISelectionChangedListener) {
 				ISelectionChangedListener listener= (ISelectionChangedListener)action;
 				selectionProvider.addSelectionChangedListener(listener);
@@ -213,7 +213,8 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     /* (non-Javadoc)
      * Method declared in ActionGroup
      */
-    public void fillActionBars(IActionBars actionBar) {
+    @Override
+	public void fillActionBars(IActionBars actionBar) {
         super.fillActionBars(actionBar);
         setGlobalActionHandlers(actionBar);
     }
@@ -221,7 +222,8 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     /* (non-Javadoc)
      * Method declared in ActionGroup
      */
-    public void fillContextMenu(IMenuManager menu) {
+    @Override
+	public void fillContextMenu(IMenuManager menu) {
         super.fillContextMenu(menu);
         if (!canOperateOnSelection())
         	return;
@@ -240,8 +242,8 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 	private void fillViewSubMenu(IMenuManager source) {
         int added= 0;
         int i=0;
-        for (Iterator iter= fActions.iterator(); iter.hasNext();) {
-			Action action= (Action)iter.next();
+        for (Iterator<Action> iter= fActions.iterator(); iter.hasNext();) {
+			Action action= iter.next();
 			if (action instanceof IUpdate)
 				((IUpdate) action).update();
 
@@ -282,7 +284,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     	IStructuredSelection selection= (IStructuredSelection)sel;
     	if (selection.isEmpty())
 			return false;
-    	for (Iterator iter= selection.iterator(); iter.hasNext();) {
+    	for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IWorkingSet)
 				return false;
@@ -293,10 +295,11 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void dispose() {
 		if (fActions != null) {
-			for (Iterator iter= fActions.iterator(); iter.hasNext();) {
-				Action action= (Action)iter.next();
+			for (Iterator<Action> iter= fActions.iterator(); iter.hasNext();) {
+				Action action= iter.next();
 				if (action instanceof ISelectionChangedListener)
 					fSelectionProvider.removeSelectionChangedListener((ISelectionChangedListener) action);
 			}

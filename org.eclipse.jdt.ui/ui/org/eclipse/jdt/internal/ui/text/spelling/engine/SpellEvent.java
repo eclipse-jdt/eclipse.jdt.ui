@@ -82,7 +82,7 @@ public class SpellEvent implements ISpellEvent {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent#getProposals()
 	 */
-	public final Set getProposals() {
+	public final Set<RankedWordProposal> getProposals() {
 		return fChecker.getProposals(fWord, fSentence);
 	}
 

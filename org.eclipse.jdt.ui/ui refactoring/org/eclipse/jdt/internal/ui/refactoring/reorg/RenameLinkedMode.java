@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,9 +52,9 @@ import org.eclipse.jface.text.IUndoManagerExtension;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
+import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
-import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 
@@ -132,6 +132,7 @@ public class RenameLinkedMode {
 			super(document);
 		}
 
+		@Override
 		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
 			fShowPreview= (event.stateMask & SWT.CTRL) != 0
 							&& (event.character == SWT.CR || event.character == SWT.LF);
@@ -226,9 +227,9 @@ public class RenameLinkedMode {
 
 			//TODO: copied from LinkedNamesAssistProposal#apply(..):
 			// sort for iteration order, starting with the node @ offset
-			Arrays.sort(sameNodes, new Comparator() {
-				public int compare(Object o1, Object o2) {
-					return rank((ASTNode) o1) - rank((ASTNode) o2);
+			Arrays.sort(sameNodes, new Comparator<ASTNode>() {
+				public int compare(ASTNode o1, ASTNode o2) {
+					return rank(o1) - rank(o2);
 				}
 				/**
 				 * Returns the absolute rank of an <code>ASTNode</code>. Nodes

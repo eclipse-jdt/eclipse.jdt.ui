@@ -19,30 +19,37 @@ public final class VoidType extends TType {
 		super(environment, Signature.createTypeSignature("void", true)); //$NON-NLS-1$
 	}
 
+	@Override
 	public int getKind() {
 		return VOID_TYPE;
 	}
 
+	@Override
 	public TType[] getSubTypes() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	protected boolean doEquals(TType type) {
 		return true;
 	}
 
+	@Override
 	public int hashCode() {
 		return 12345;
 	}
 	
+	@Override
 	protected boolean doCanAssignTo(TType lhs) {
 		return false;
 	}
 
+	@Override
 	public String getName() {
 		return "void"; //$NON-NLS-1$
 	}
 
+	@Override
 	protected String getPlainPrettySignature() {
 		return getName();
 	}

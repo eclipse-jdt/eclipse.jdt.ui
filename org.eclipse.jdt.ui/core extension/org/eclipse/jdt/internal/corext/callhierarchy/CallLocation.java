@@ -119,7 +119,8 @@ public class CallLocation implements IAdaptable {
         return buffer;
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return getCallText();
     }
 

@@ -37,6 +37,7 @@ public class TypeOccurrenceCollector extends CuCollectingSearchRequestor {
 		fOldQualifiedName= type.getFullyQualifiedName('.');
 	}
 
+	@Override
 	public void acceptSearchMatch(ICompilationUnit unit, SearchMatch match) throws CoreException {
 		collectMatch(acceptSearchMatch2(unit, match));
 	}

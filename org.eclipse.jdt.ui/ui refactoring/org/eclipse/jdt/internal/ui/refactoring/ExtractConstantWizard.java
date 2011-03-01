@@ -58,6 +58,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */
+	@Override
 	protected void addUserInputPages() {
 
 		String message= null;
@@ -168,6 +169,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 				if (data[i] == fAccessModifier)
 					radio.setSelection(true);
 				radio.addSelectionListener(new SelectionAdapter() {
+					@Override
 					public void widgetSelected(SelectionEvent event) {
 						setAccessModifier((String)event.widget.getData());
 					}
@@ -201,6 +203,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
 			getExtractConstantRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
 			checkBox.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					getExtractConstantRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
 				}
@@ -213,6 +216,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			fQualifyReferences= createCheckbox(result,  title, defaultValue, layouter);
 			getExtractConstantRefactoring().setQualifyReferencesWithDeclaringClassName(fQualifyReferences.getSelection());
 			fQualifyReferences.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					getExtractConstantRefactoring().setQualifyReferencesWithDeclaringClassName(fQualifyReferences.getSelection());
 				}
@@ -246,6 +250,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#validateTextField(String)
 		 */
+		@Override
 		protected RefactoringStatus validateTextField(String text) {
 			try {
 				getExtractConstantRefactoring().setConstantName(text);
@@ -283,6 +288,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isInitialInputValid()
 		 */
+		@Override
 		protected boolean isInitialInputValid() {
 			return fInitialValid;
 		}
@@ -290,6 +296,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#restoreMessage()
 		 */
+		@Override
 		protected void restoreMessage() {
 			setMessage(fOriginalMessage, fOriginalMessageType);
 		}
@@ -313,6 +320,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			return true;
 		}
 
+		@Override
 		public void dispose() {
 			if (saveSettings()) {
 				saveBooleanSetting(QUALIFY_REFERENCES, fQualifyReferences);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,13 +63,13 @@ public class CallHierarchyUI {
 
     private static CallHierarchyUI fgInstance;
     private int fViewCount= 0;
-    private final List/*<IMember[]>*/fMethodHistory= new ArrayList();
+    private final List<IMember[]> fMethodHistory= new ArrayList<IMember[]>();
 
 	/**
 	 * List of the Call Hierarchy views in LRU order, where the most recently used view is at index 0.
 	 * @since 3.7
 	 */
-	private List fLRUCallHierarchyViews= new ArrayList();
+	private List<CallHierarchyViewPart> fLRUCallHierarchyViews= new ArrayList<CallHierarchyViewPart>();
 
     private CallHierarchyUI() {
         // Do nothing
@@ -260,8 +260,8 @@ public class CallHierarchyUI {
 	 */
 	private CallHierarchyViewPart findLRUCallHierarchyViewPart(IWorkbenchPage page) {
 		boolean viewFoundInPage= false;
-		for (Iterator iter= fLRUCallHierarchyViews.iterator(); iter.hasNext();) {
-			CallHierarchyViewPart view= (CallHierarchyViewPart)iter.next();
+		for (Iterator<CallHierarchyViewPart> iter= fLRUCallHierarchyViews.iterator(); iter.hasNext();) {
+			CallHierarchyViewPart view= iter.next();
 			if (page.equals(view.getSite().getPage())) {
 				if (!view.isPinned()) {
 					return view;
@@ -321,8 +321,8 @@ public class CallHierarchyUI {
 
         if (selection instanceof IStructuredSelection) {
             IStructuredSelection structuredSelection= (IStructuredSelection) selection;
-            List javaElements= new ArrayList();
-            for (Iterator iter= structuredSelection.iterator(); iter.hasNext();) {
+            List<IMember> javaElements= new ArrayList<IMember>();
+            for (Iterator<?> iter= structuredSelection.iterator(); iter.hasNext();) {
                 Object element= iter.next();
                 if (element instanceof MethodWrapper) {
                     IMember member= ((MethodWrapper)element).getMember();
@@ -330,7 +330,7 @@ public class CallHierarchyUI {
                         javaElements.add(member);
                     }
                 } else if (element instanceof IMember) {
-                    javaElements.add(element);
+                    javaElements.add((IMember) element);
                 } else if (element instanceof CallLocation) {
                     IMember member = ((CallLocation) element).getMember();
                     javaElements.add(member);
@@ -347,8 +347,8 @@ public class CallHierarchyUI {
 	 * @since 3.7
 	 */
 	void clearHistory() {
-		for (Iterator iter= fLRUCallHierarchyViews.iterator(); iter.hasNext();) {
-			CallHierarchyViewPart part= (CallHierarchyViewPart)iter.next();
+		for (Iterator<CallHierarchyViewPart> iter= fLRUCallHierarchyViews.iterator(); iter.hasNext();) {
+			CallHierarchyViewPart part= iter.next();
 			part.setHistoryEntries(new IMember[0][]);
 			part.setInputElements(null);
 		}
@@ -360,7 +360,7 @@ public class CallHierarchyUI {
 	 * @return the method history
 	 * @since 3.7
 	 */
-	List/*<IMember[]>*/getMethodHistory() {
+	List<IMember[]> getMethodHistory() {
 		return fMethodHistory;
 	}
 }

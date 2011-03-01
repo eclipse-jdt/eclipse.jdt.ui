@@ -72,6 +72,7 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 		}
 	}
 
+	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		ASTNode boundNode= fAstRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
@@ -88,7 +89,7 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 		TypeParameter newTypeParam= ast.newTypeParameter();
 		newTypeParam.setName(ast.newSimpleName(fTypeParamName));
 		if (fBounds != null && fBounds.length > 0) {
-			List typeBounds= newTypeParam.typeBounds();
+			List<Type> typeBounds= newTypeParam.typeBounds();
 			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(declNode, getImportRewrite());
 			for (int i= 0; i < fBounds.length; i++) {
 				Type newBound= getImportRewrite().addImport(fBounds[i], ast, importRewriteContext);
@@ -98,7 +99,7 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		ListRewrite listRewrite;
 		Javadoc javadoc;
-		List otherTypeParams;
+		List<TypeParameter> otherTypeParams;
 		if (declNode instanceof TypeDeclaration) {
 			TypeDeclaration declaration= (TypeDeclaration) declNode;
 			listRewrite= rewrite.getListRewrite(declaration, TypeDeclaration.TYPE_PARAMETERS_PROPERTY);
@@ -114,7 +115,7 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 
 		if (javadoc != null && otherTypeParams != null) {
 			ListRewrite tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
-			Set previousNames= JavadocTagsSubProcessor.getPreviousTypeParamNames(otherTypeParams, null);
+			Set<String> previousNames= JavadocTagsSubProcessor.getPreviousTypeParamNames(otherTypeParams, null);
 
 			String name= '<' + fTypeParamName + '>';
 			TagElement newTag= ast.newTagElement();

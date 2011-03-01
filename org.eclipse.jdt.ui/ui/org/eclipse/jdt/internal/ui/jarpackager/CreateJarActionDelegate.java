@@ -78,13 +78,13 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 	}
 
 	private JarPackageData[] readJarPackages(IFile[] descriptions, MultiStatus readStatus) {
-		List jarPackagesList= new ArrayList(descriptions.length);
+		List<JarPackageData> jarPackagesList= new ArrayList<JarPackageData>(descriptions.length);
 		for (int i= 0; i < descriptions.length; i++) {
 			JarPackageData jarPackage= readJarPackage(descriptions[i], readStatus);
 			if (jarPackage != null)
 				jarPackagesList.add(jarPackage);
 		}
-		return (JarPackageData[])jarPackagesList.toArray(new JarPackageData[jarPackagesList.size()]);
+		return jarPackagesList.toArray(new JarPackageData[jarPackagesList.size()]);
 	}
 
 	private IStatus export(JarPackageData[] jarPackages) {

@@ -48,6 +48,7 @@ public class SortByDefiningTypeAction extends Action {
 	/*
 	 * @see Action#actionPerformed
 	 */
+	@Override
 	public void run() {
 		BusyIndicator.showWhile(fMethodsViewer.getControl().getDisplay(), new Runnable() {
 			public void run() {

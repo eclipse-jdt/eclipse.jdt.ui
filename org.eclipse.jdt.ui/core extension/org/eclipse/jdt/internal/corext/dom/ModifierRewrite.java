@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -126,13 +126,13 @@ public class ModifierRewrite {
 	
 	public void copyAllModifiers(ASTNode otherDecl, TextEditGroup editGroup, boolean copyIndividually) {
 		ListRewrite modifierList= evaluateListRewrite(fModifierRewrite.getASTRewrite(), otherDecl);
-		List originalList= modifierList.getOriginalList();
+		List<IExtendedModifier> originalList= modifierList.getOriginalList();
 		if (originalList.isEmpty()) {
 			return;
 		}
 
 		if (copyIndividually) {
-			for (Iterator iterator= originalList.iterator(); iterator.hasNext();) {
+			for (Iterator<IExtendedModifier> iterator= originalList.iterator(); iterator.hasNext();) {
 				ASTNode modifier= (ASTNode) iterator.next();
 				ASTNode copy= fModifierRewrite.getASTRewrite().createCopyTarget(modifier);
 				if (copy != null) { //paranoia check (only left here because we're in RC1)
@@ -149,10 +149,10 @@ public class ModifierRewrite {
 
 	public void copyAllAnnotations(ASTNode otherDecl, TextEditGroup editGroup) {
 		ListRewrite modifierList= evaluateListRewrite(fModifierRewrite.getASTRewrite(), otherDecl);
-		List originalList= modifierList.getOriginalList();
+		List<IExtendedModifier> originalList= modifierList.getOriginalList();
 
-		for (Iterator iterator= originalList.iterator(); iterator.hasNext();) {
-			IExtendedModifier modifier= (IExtendedModifier) iterator.next();
+		for (Iterator<IExtendedModifier> iterator= originalList.iterator(); iterator.hasNext();) {
+			IExtendedModifier modifier= iterator.next();
 			if (modifier.isAnnotation()) {
 				fModifierRewrite.insertLast(fModifierRewrite.getASTRewrite().createCopyTarget((Annotation) modifier), editGroup);
 			}
@@ -172,7 +172,7 @@ public class ModifierRewrite {
 		int newModifiers= modifiers & consideredFlags;
 
 		// remove modifiers
-		List originalList= fModifierRewrite.getOriginalList();
+		List<IExtendedModifier> originalList= fModifierRewrite.getOriginalList();
 		for (int i= 0; i < originalList.size(); i++) {
 			ASTNode curr= (ASTNode) originalList.get(i);
 			if (curr instanceof Modifier) {
@@ -188,17 +188,17 @@ public class ModifierRewrite {
 
 		// find last annotation
 		IExtendedModifier lastAnnotation= null;
-		List extendedList= fModifierRewrite.getRewrittenList();
+		List<IExtendedModifier> extendedList= fModifierRewrite.getRewrittenList();
 		for (int i= 0; i < extendedList.size(); i++) {
-			IExtendedModifier curr= (IExtendedModifier) extendedList.get(i);
+			IExtendedModifier curr= extendedList.get(i);
 			if (curr.isAnnotation())
 				lastAnnotation= curr;
 		}
 
 		// add modifiers
-		List newNodes= ASTNodeFactory.newModifiers(fAst, newModifiers);
+		List<Modifier> newNodes= ASTNodeFactory.newModifiers(fAst, newModifiers);
 		for (int i= 0; i < newNodes.size(); i++) {
-			Modifier curr= (Modifier) newNodes.get(i);
+			Modifier curr= newNodes.get(i);
 			if ((curr.getKeyword().toFlagValue() & VISIBILITY_MODIFIERS) != 0) {
 				if (lastAnnotation != null)
 					fModifierRewrite.insertAfter(curr, (ASTNode) lastAnnotation, editGroup);

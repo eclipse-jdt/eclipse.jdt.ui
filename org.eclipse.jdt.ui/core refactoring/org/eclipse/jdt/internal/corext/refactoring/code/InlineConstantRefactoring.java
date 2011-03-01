@@ -191,17 +191,17 @@ public class InlineConstantRefactoring extends Refactoring {
 
 			private final Expression fInitializer;
 			private ASTRewrite fInitializerRewrite;
-			private final HashSet fStaticImportsInInitializer2;
+			private final HashSet<SimpleName> fStaticImportsInInitializer2;
 
 			// cache:
-			private Set fNamesDeclaredLocallyAtNewLocation;
+			private Set<String> fNamesDeclaredLocallyAtNewLocation;
 
 			private final Expression fNewLocation;
-			private final HashSet fStaticImportsInReference;
+			private final HashSet<SimpleName> fStaticImportsInReference;
 			private final CompilationUnitRewrite fNewLocationCuRewrite;
 			private final ImportRewriteContext fNewLocationContext;
 
-			public InitializerTraversal(Expression initializer, HashSet staticImportsInInitializer, Expression newLocation, HashSet staticImportsInReference, CompilationUnitRewrite newLocationCuRewrite) {
+			public InitializerTraversal(Expression initializer, HashSet<SimpleName> staticImportsInInitializer, Expression newLocation, HashSet<SimpleName> staticImportsInReference, CompilationUnitRewrite newLocationCuRewrite) {
 				fInitializer= initializer;
 				fInitializerRewrite= ASTRewrite.create(initializer.getAST());
 				fStaticImportsInInitializer2= staticImportsInInitializer;
@@ -218,16 +218,17 @@ public class InlineConstantRefactoring extends Refactoring {
 			 * @param scope not a TypeDeclaration
 			 * @return Set containing Strings representing simple names
 			 */
-			private Set getLocallyDeclaredNames(BodyDeclaration scope) {
+			private Set<String> getLocallyDeclaredNames(BodyDeclaration scope) {
 				Assert.isTrue(!(scope instanceof AbstractTypeDeclaration));
 
-				final Set result= new HashSet();
+				final Set<String> result= new HashSet<String>();
 
 				if (scope instanceof FieldDeclaration)
 					return result;
 
 				scope.accept(new HierarchicalASTVisitor() {
 
+					@Override
 					public boolean visit(AbstractTypeDeclaration node) {
 						Assert.isTrue(node.getParent() instanceof TypeDeclarationStatement);
 
@@ -235,10 +236,12 @@ public class InlineConstantRefactoring extends Refactoring {
 						return false;
 					}
 
+					@Override
 					public boolean visit(AnonymousClassDeclaration anonDecl) {
 						return false;
 					}
 
+					@Override
 					public boolean visit(VariableDeclaration varDecl) {
 						result.add(varDecl.getName().getIdentifier());
 						return false;
@@ -284,23 +287,26 @@ public class InlineConstantRefactoring extends Refactoring {
 				}
 			}
 
+			@Override
 			public boolean visit(FieldAccess fieldAccess) {
 				fieldAccess.getExpression().accept(this);
 				return false;
 			}
 
+			@Override
 			public boolean visit(MethodInvocation invocation) {
 				if (invocation.getExpression() == null)
 					qualifyUnqualifiedMemberNameIfNecessary(invocation.getName());
 				else
 					invocation.getExpression().accept(this);
 
-				for (Iterator it= invocation.arguments().iterator(); it.hasNext();)
-					((Expression) it.next()).accept(this);
+				for (Iterator<Expression> it= invocation.arguments().iterator(); it.hasNext();)
+					it.next().accept(this);
 
 				return false;
 			}
 
+			@Override
 			public boolean visit(Name name) {
 				SimpleName leftmost= getLeftmost(name);
 
@@ -348,7 +354,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				return getNamesDeclaredLocallyAtNewLocation().contains(memberName.getIdentifier());
 			}
 
-			private Set getNamesDeclaredLocallyAtNewLocation() {
+			private Set<String> getNamesDeclaredLocallyAtNewLocation() {
 				if (fNamesDeclaredLocallyAtNewLocation != null)
 					return fNamesDeclaredLocallyAtNewLocation;
 
@@ -424,10 +430,10 @@ public class InlineConstantRefactoring extends Refactoring {
 		private final VariableDeclarationFragment fDeclarationToRemove;
 		private final CompilationUnitRewrite fCuRewrite;
 		private final TightSourceRangeComputer fSourceRangeComputer;
-		private final HashSet fStaticImportsInInitializer;
+		private final HashSet<SimpleName> fStaticImportsInInitializer;
 		private final boolean fIs15;
 
-		private InlineTargetCompilationUnit(CompilationUnitRewrite cuRewrite, Name[] references, InlineConstantRefactoring refactoring, HashSet staticImportsInInitializer) {
+		private InlineTargetCompilationUnit(CompilationUnitRewrite cuRewrite, Name[] references, InlineConstantRefactoring refactoring, HashSet<SimpleName> staticImportsInInitializer) {
 			fInitializer= refactoring.getInitializer();
 			fInitializerUnit= refactoring.getDeclaringCompilationUnit();
 
@@ -446,7 +452,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				fReferences[i]= getQualifiedReference(references[i]);
 
 			fIs15= JavaModelUtil.is50OrHigher(cuRewrite.getCu().getJavaProject());
-			fStaticImportsInInitializer= fIs15 ? staticImportsInInitializer : new HashSet(0);
+			fStaticImportsInInitializer= fIs15 ? staticImportsInInitializer : new HashSet<SimpleName>(0);
 		}
 
 		private static Expression getQualifiedReference(Name fieldName) {
@@ -543,10 +549,10 @@ public class InlineConstantRefactoring extends Refactoring {
 		}
 
 		private String prepareInitializerForLocation(Expression location) throws CoreException {
-			HashSet staticImportsInReference= new HashSet();
+			HashSet<SimpleName> staticImportsInReference= new HashSet<SimpleName>();
 			final IJavaProject project= fCuRewrite.getCu().getJavaProject();
 			if (fIs15)
-				ImportReferencesCollector.collect(location, project, null, new ArrayList(), staticImportsInReference);
+				ImportReferencesCollector.collect(location, project, null, new ArrayList<SimpleName>(), staticImportsInReference);
 
 			InitializerTraversal traversal= new InitializerTraversal(fInitializer, fStaticImportsInInitializer, location, staticImportsInReference, fCuRewrite);
 			ASTRewrite initializerRewrite= traversal.getInitializerRewrite();
@@ -689,6 +695,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		return new RefactoringStatus();
 	}
 
+	@Override
 	public String getName() {
 		return RefactoringCoreMessages.InlineConstantRefactoring_name;
 	}
@@ -703,6 +710,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		return fField;
 	}
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 3); //$NON-NLS-1$
@@ -794,14 +802,15 @@ public class InlineConstantRefactoring extends Refactoring {
 		return fField.getCompilationUnit();
 	}
 
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		pm.beginTask("", 3); //$NON-NLS-1$
 
 		try {
-			List/*<CompilationUnitChange>*/changes= new ArrayList();
-			HashSet staticImportsInInitializer= new HashSet();
-			ImportReferencesCollector.collect(getInitializer(), fField.getJavaProject(), null, new ArrayList(), staticImportsInInitializer);
+			List<CompilationUnitChange>changes= new ArrayList<CompilationUnitChange>();
+			HashSet<SimpleName> staticImportsInInitializer= new HashSet<SimpleName>();
+			ImportReferencesCollector.collect(getInitializer(), fField.getJavaProject(), null, new ArrayList<SimpleName>(), staticImportsInInitializer);
 
 			if (getReplaceAllReferences()) {
 				SearchResultGroup[] searchResultGroups= findReferences(pm, result);
@@ -834,8 +843,8 @@ public class InlineConstantRefactoring extends Refactoring {
 
 			if (getRemoveDeclaration() && getReplaceAllReferences()) {
 				boolean declarationRemoved= false;
-				for (Iterator iter= changes.iterator(); iter.hasNext();) {
-					CompilationUnitChange change= (CompilationUnitChange) iter.next();
+				for (Iterator<CompilationUnitChange> iter= changes.iterator(); iter.hasNext();) {
+					CompilationUnitChange change= iter.next();
 					if (change.getCompilationUnit().equals(fDeclarationCuRewrite.getCu())) {
 						declarationRemoved= true;
 						break;
@@ -851,14 +860,14 @@ public class InlineConstantRefactoring extends Refactoring {
 
 			ICompilationUnit[] cus= new ICompilationUnit[changes.size()];
 			for (int i= 0; i < changes.size(); i++) {
-				CompilationUnitChange change= (CompilationUnitChange) changes.get(i);
+				CompilationUnitChange change= changes.get(i);
 				cus[i]= change.getCompilationUnit();
 			}
 			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(cus), getValidationContext()));
 
 			pm.worked(1);
 
-			fChanges= (CompilationUnitChange[]) changes.toArray(new CompilationUnitChange[changes.size()]);
+			fChanges= changes.toArray(new CompilationUnitChange[changes.size()]);
 
 			return result;
 
@@ -904,10 +913,11 @@ public class InlineConstantRefactoring extends Refactoring {
 		return (SearchResultGroup[]) engine.getResults();
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.InlineConstantRefactoring_preview, 2);
-			final Map arguments= new HashMap();
+			final Map<String, String> arguments= new HashMap<String, String>();
 			String project= null;
 			IJavaProject javaProject= fSelectionCu.getJavaProject();
 			if (javaProject != null)

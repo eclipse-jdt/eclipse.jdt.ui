@@ -87,9 +87,9 @@ public class JavaMergeViewer extends TextMergeViewer {
 
 	private IPropertyChangeListener fPreferenceChangeListener;
 	private IPreferenceStore fPreferenceStore;
-	private Map /*<JavaSourceViewerConfiguration>*/ fSourceViewerConfiguration;
-	private Map /*<CompilationUnitEditorAdapter>*/ fEditor;
-	private ArrayList /*<SourceViewer>*/ fSourceViewer;
+	private Map <SourceViewer, JavaSourceViewerConfiguration> fSourceViewerConfiguration;
+	private Map <SourceViewer, CompilationUnitEditorAdapter> fEditor;
+	private ArrayList <SourceViewer> fSourceViewer;
 
 	private IWorkbenchPartSite fSite;
 
@@ -104,12 +104,13 @@ public class JavaMergeViewer extends TextMergeViewer {
 		return fPreferenceStore;
 	}
 	
+	@Override
 	protected void handleDispose(DisposeEvent event) {
 		setPreferenceStore(null);
 		fSourceViewer= null;
 		if (fEditor != null) {
-			for (Iterator iterator= fEditor.values().iterator(); iterator.hasNext();) {
-				CompilationUnitEditorAdapter editor= (CompilationUnitEditorAdapter)iterator.next();
+			for (Iterator<CompilationUnitEditorAdapter> iterator= fEditor.values().iterator(); iterator.hasNext();) {
+				CompilationUnitEditorAdapter editor= iterator.next();
 				editor.dispose();
 			}
 			fEditor= null;
@@ -148,7 +149,8 @@ public class JavaMergeViewer extends TextMergeViewer {
 		return null;
 	}
 
-    public void setInput(Object input) {
+    @Override
+	public void setInput(Object input) {
     	if (input instanceof ICompareInput) {
     		IJavaProject project= getJavaProject((ICompareInput)input);
 			if (project != null) {
@@ -159,33 +161,35 @@ public class JavaMergeViewer extends TextMergeViewer {
     }
 
     private ChainedPreferenceStore createChainedPreferenceStore(IJavaProject project) {
-    	ArrayList stores= new ArrayList(4);
+    	ArrayList<IPreferenceStore> stores= new ArrayList<IPreferenceStore>(4);
     	if (project != null)
     		stores.add(new EclipsePreferencesAdapter(new ProjectScope(project.getProject()), JavaCore.PLUGIN_ID));
 		stores.add(JavaPlugin.getDefault().getPreferenceStore());
 		stores.add(new PreferencesAdapter(JavaPlugin.getJavaCorePluginPreferences()));
 		stores.add(EditorsUI.getPreferenceStore());
-		return new ChainedPreferenceStore((IPreferenceStore[]) stores.toArray(new IPreferenceStore[stores.size()]));
+		return new ChainedPreferenceStore(stores.toArray(new IPreferenceStore[stores.size()]));
     }
 
 	private void handlePropertyChange(PropertyChangeEvent event) {
 		if (fSourceViewerConfiguration != null) {
-			for (Iterator iterator= fSourceViewerConfiguration.entrySet().iterator(); iterator.hasNext();) {
-				Entry entry= (Entry)iterator.next();
-				JavaSourceViewerConfiguration configuration= (JavaSourceViewerConfiguration)entry.getValue();
+			for (Iterator<Entry<SourceViewer, JavaSourceViewerConfiguration>> iterator= fSourceViewerConfiguration.entrySet().iterator(); iterator.hasNext();) {
+				Entry<SourceViewer, JavaSourceViewerConfiguration> entry= iterator.next();
+				JavaSourceViewerConfiguration configuration= entry.getValue();
 				if (configuration.affectsTextPresentation(event)) {
 					configuration.handlePropertyChangeEvent(event);
-					ITextViewer viewer= (ITextViewer)entry.getKey();
+					ITextViewer viewer= entry.getKey();
 					viewer.invalidateTextPresentation();
 				}
 			}
 		}
 	}
 
+	@Override
 	public String getTitle() {
 		return CompareMessages.JavaMergeViewer_title;
 	}
 
+	@Override
 	public ITokenComparator createTokenComparator(String s) {
 		return new JavaTokenComparator(s, new ITokenComparatorFactory() {
 			public ITokenComparator createTokenComparator(String text) {
@@ -194,19 +198,22 @@ public class JavaMergeViewer extends TextMergeViewer {
 		});
 	}
 
+	@Override
 	protected IDocumentPartitioner getDocumentPartitioner() {
 		return JavaCompareUtilities.createJavaPartitioner();
 	}
 
+	@Override
 	protected String getDocumentPartitioning() {
 		return IJavaPartitions.JAVA_PARTITIONING;
 	}
 
+	@Override
 	protected void configureTextViewer(TextViewer viewer) {
 		if (viewer instanceof SourceViewer) {
 			SourceViewer sourceViewer= (SourceViewer)viewer;
 			if (fSourceViewer == null)
-				fSourceViewer= new ArrayList();
+				fSourceViewer= new ArrayList<SourceViewer>();
 			if (!fSourceViewer.contains(sourceViewer))
 				fSourceViewer.add(sourceViewer);
 			JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
@@ -226,6 +233,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#setEditable(org.eclipse.jface.text.source.ISourceViewer, boolean)
 	 * @since 3.5
 	 */
+	@Override
 	protected void setEditable(ISourceViewer sourceViewer, boolean state) {
 		super.setEditable(sourceViewer, state);
 		if (fEditor != null) {
@@ -239,11 +247,13 @@ public class JavaMergeViewer extends TextMergeViewer {
 	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#isEditorBacked(org.eclipse.jface.text.ITextViewer)
 	 * @since 3.5
 	 */
+	@Override
 	protected boolean isEditorBacked(ITextViewer textViewer) {
 		return getSite() != null;
 	}
 
 
+	@Override
 	protected IEditorInput getEditorInput(ISourceViewer sourceViewer) {
 		IEditorInput editorInput= super.getEditorInput(sourceViewer);
 		if (editorInput == null)
@@ -265,7 +275,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 
 	private JavaSourceViewerConfiguration getSourceViewerConfiguration(SourceViewer sourceViewer, IEditorInput editorInput) {
 		if (fSourceViewerConfiguration == null) {
-			fSourceViewerConfiguration= new HashMap(3);
+			fSourceViewerConfiguration= new HashMap<SourceViewer, JavaSourceViewerConfiguration>(3);
 		}
 		if (fPreferenceStore == null)
 			getPreferenceStore();
@@ -273,7 +283,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 		JavaSourceViewerConfiguration configuration= new JavaSourceViewerConfiguration(tools.getColorManager(), fPreferenceStore, null, getDocumentPartitioning());
 		if (editorInput != null) {
 			// when input available, use editor
-			CompilationUnitEditorAdapter editor= (CompilationUnitEditorAdapter)fEditor.get(sourceViewer);
+			CompilationUnitEditorAdapter editor= fEditor.get(sourceViewer);
 			try {
 				editor.init((IEditorSite)editor.getSite(), editorInput);
 				editor.createActions();
@@ -283,9 +293,10 @@ public class JavaMergeViewer extends TextMergeViewer {
 			}
 		}
 		fSourceViewerConfiguration.put(sourceViewer, configuration);
-		return (JavaSourceViewerConfiguration)fSourceViewerConfiguration.get(sourceViewer);
+		return fSourceViewerConfiguration.get(sourceViewer);
 	}
 
+	@Override
 	protected int findInsertionPosition(char type, ICompareInput input) {
 
 		int pos= super.findInsertionPosition(type, input);
@@ -473,6 +484,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#createSourceViewer(org.eclipse.swt.widgets.Composite, int)
 	 * @since 3.5
 	 */
+	@Override
 	protected SourceViewer createSourceViewer(Composite parent, int textOrientation) {
 		SourceViewer sourceViewer;
 		if (getSite() != null) {
@@ -483,18 +495,19 @@ public class JavaMergeViewer extends TextMergeViewer {
 			Assert.isTrue(iSourceViewer instanceof SourceViewer);
 			sourceViewer= (SourceViewer)iSourceViewer;
 			if (fEditor == null)
-				fEditor= new HashMap(3);
+				fEditor= new HashMap<SourceViewer, CompilationUnitEditorAdapter>(3);
 			fEditor.put(sourceViewer, editor);
 		} else
 			sourceViewer= super.createSourceViewer(parent, textOrientation);
 
 		if (fSourceViewer == null)
-			fSourceViewer= new ArrayList();
+			fSourceViewer= new ArrayList<SourceViewer>();
 		fSourceViewer.add(sourceViewer);
 
 		return sourceViewer;
 	}
 	
+	@Override
 	protected void setActionsActivated(SourceViewer sourceViewer, boolean state) {
 		if (fEditor != null) {
 			Object editor= fEditor.get(sourceViewer);
@@ -515,6 +528,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 		}
 	}
 
+	@Override
 	protected void createControls(Composite composite) {
 		super.createControls(composite);
 		IWorkbenchPart workbenchPart = getCompareConfiguration().getContainer().getWorkbenchPart();
@@ -526,12 +540,13 @@ public class JavaMergeViewer extends TextMergeViewer {
 		}
 	}
 	
+	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter == ITextEditorExtension3.class) {
 			IEditorInput activeInput= (IEditorInput)super.getAdapter(IEditorInput.class);
 			if (activeInput != null) {
-				for (Iterator iterator= fEditor.values().iterator(); iterator.hasNext();) {
-					CompilationUnitEditorAdapter editor= (CompilationUnitEditorAdapter)iterator.next();
+				for (Iterator<CompilationUnitEditorAdapter> iterator= fEditor.values().iterator(); iterator.hasNext();) {
+					CompilationUnitEditorAdapter editor= iterator.next();
 					if (activeInput.equals(editor.getEditorInput()))
 						return editor;
 				}
@@ -555,9 +570,11 @@ public class JavaMergeViewer extends TextMergeViewer {
 		private void setEditable(boolean editable) {
 			fEditable= editable;
 		}
+		@Override
 		public IWorkbenchPartSite getSite() {
 			return JavaMergeViewer.this.getSite();
 		}
+		@Override
 		public void createActions() {
 			if (fInputSet) {
 				super.createActions();
@@ -569,29 +586,36 @@ public class JavaMergeViewer extends TextMergeViewer {
 			}
 			// else do nothing, we will create actions later, when input is available
 		}
+		@Override
 		public void createPartControl(Composite composite) {
 			SourceViewer sourceViewer= (SourceViewer)createJavaSourceViewer(composite, new CompositeRuler(), null, false, fTextOrientation | SWT.H_SCROLL | SWT.V_SCROLL, createChainedPreferenceStore(null));
 			setSourceViewer(this, sourceViewer);
 			getSelectionProvider().addSelectionChangedListener(getSelectionChangedListener());
 		}
+		@Override
 		protected void doSetInput(IEditorInput input) throws CoreException {
 			super.doSetInput(input);
 			// the editor input has been explicitly set
 			fInputSet = true;
 		}
 		// called by org.eclipse.ui.texteditor.TextEditorAction.canModifyEditor()
+		@Override
 		public boolean isEditable() {
 			return fEditable;
 		}
+		@Override
 		public boolean isEditorInputModifiable() {
 			return fEditable;
 		}
+		@Override
 		public boolean isEditorInputReadOnly() {
 			return !fEditable;
 		}
+		@Override
 		protected void setActionsActivated(boolean state) {
 			super.setActionsActivated(state);
 		}
+		@Override
 		public void close(boolean save) {
 			getDocumentProvider().disconnect(getEditorInput());
 		}

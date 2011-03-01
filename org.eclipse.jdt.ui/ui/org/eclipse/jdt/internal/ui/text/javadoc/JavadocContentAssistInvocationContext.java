@@ -58,6 +58,7 @@ public final class JavadocContentAssistInvocationContext extends JavaContentAssi
 	/*
 	 * @see org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (!super.equals(obj))
 			return false;
@@ -68,6 +69,7 @@ public final class JavadocContentAssistInvocationContext extends JavaContentAssi
 	/*
 	 * @see org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return super.hashCode() << 2 | fFlags;
 	}

@@ -63,6 +63,7 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 	/*
 	 * @see LabelProvider#getImage(java.lang.Object)
 	 */
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof CPVariableElement) {
 			CPVariableElement curr= (CPVariableElement) element;
@@ -78,6 +79,7 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 	/*
 	 * @see LabelProvider#getText(java.lang.Object)
 	 */
+	@Override
 	public String getText(Object element) {
 		if (element instanceof CPVariableElement) {
 			CPVariableElement curr= (CPVariableElement)element;
@@ -85,7 +87,7 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 			IPath path= curr.getPath();
 
 			String result= name;
-			ArrayList restrictions= new ArrayList(2);
+			ArrayList<String> restrictions= new ArrayList<String>(2);
 
 			if (curr.isReadOnly() && fHighlightReadOnly) {
 				restrictions.add(NewWizardMessages.CPVariableElementLabelProvider_read_only);
@@ -143,6 +145,7 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
 	 */
+	@Override
 	public void dispose() {
 		super.dispose();
 		fDeprecatedFolderImage.dispose();

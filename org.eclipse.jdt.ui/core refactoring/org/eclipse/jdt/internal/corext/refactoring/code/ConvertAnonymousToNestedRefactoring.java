@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -123,9 +123,10 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
 	public static class TypeVariableFinder extends ASTVisitor {
 
-		private final Map fBindings= new HashMap();
-		private final List fFound= new ArrayList();
+		private final Map<String, ITypeBinding> fBindings= new HashMap<String, ITypeBinding>();
+		private final List<ITypeBinding> fFound= new ArrayList<ITypeBinding>();
 
+		@Override
 		public final boolean visit(final SimpleName node) {
 			Assert.isNotNull(node);
 			final ITypeBinding binding= node.resolveTypeBinding();
@@ -154,7 +155,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
     private CompilationUnit fCompilationUnitNode;
     private AnonymousClassDeclaration fAnonymousInnerClassNode;
-    private Set fClassNamesUsed;
+    private Set<String> fClassNamesUsed;
 	private boolean fSelfInitializing= false;
 
 	private LinkedProposalModel fLinkedProposalModel;
@@ -248,7 +249,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         fDeclareStatic= declareStatic;
     }
 
-    public String getName() {
+    @Override
+	public String getName() {
         return RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name;
     }
 
@@ -260,7 +262,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	return StubUtility.doAddComments(fCu.getJavaProject());
     }
 
-    public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
+    @Override
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
         RefactoringStatus result= Checks.validateModifiesFiles(
         	ResourceUtil.getFiles(new ICompilationUnit[]{fCu}),
 			getValidationContext());
@@ -296,11 +299,11 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class);
 			if (declaration instanceof TypeDeclaration) {
 				final AbstractTypeDeclaration[] nested= ((TypeDeclaration) declaration).getTypes();
-				fClassNamesUsed= new HashSet(nested.length);
+				fClassNamesUsed= new HashSet<String>(nested.length);
 				for (int index= 0; index < nested.length; index++)
 					fClassNamesUsed.add(nested[index].getName().getIdentifier());
 			} else
-				fClassNamesUsed= Collections.EMPTY_SET;
+				fClassNamesUsed= Collections.emptySet();
 		}
 	}
 
@@ -341,12 +344,12 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     private boolean accessesAnonymousFields() {
-        List anonymousInnerFieldTypes = getAllEnclosingAnonymousTypesField();
-        List accessedField = getAllAccessedFields();
-        final Iterator it = anonymousInnerFieldTypes.iterator();
+        List<IVariableBinding> anonymousInnerFieldTypes = getAllEnclosingAnonymousTypesField();
+        List<IBinding> accessedField = getAllAccessedFields();
+        final Iterator<IVariableBinding> it = anonymousInnerFieldTypes.iterator();
         while(it.hasNext()) {
-            final IVariableBinding variableBinding = (IVariableBinding) it.next();
-            final Iterator it2 = accessedField.iterator();
+            final IVariableBinding variableBinding = it.next();
+            final Iterator<IBinding> it2 = accessedField.iterator();
             while (it2.hasNext()) {
                 IVariableBinding variableBinding2 = (IVariableBinding) it2.next();
                 if(Bindings.equals(variableBinding, variableBinding2)) {
@@ -357,11 +360,12 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         return false;
     }
 
-	private List getAllAccessedFields() {
-		final List accessedFields= new ArrayList();
+	private List<IBinding> getAllAccessedFields() {
+		final List<IBinding> accessedFields= new ArrayList<IBinding>();
 
 		ASTVisitor visitor= new ASTVisitor() {
 
+			@Override
 			public boolean visit(FieldAccess node) {
 				final IVariableBinding binding= node.resolveFieldBinding();
 				if (binding != null && !binding.isEnumConstant())
@@ -369,6 +373,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 				return super.visit(node);
 			}
 
+			@Override
 			public boolean visit(QualifiedName node) {
 				final IBinding binding= node.resolveBinding();
 				if (binding != null && binding instanceof IVariableBinding) {
@@ -379,6 +384,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 				return super.visit(node);
 			}
 
+			@Override
 			public boolean visit(SimpleName node) {
 				final IBinding binding= node.resolveBinding();
 				if (binding != null && binding instanceof IVariableBinding) {
@@ -389,6 +395,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 				return super.visit(node);
 			}
 
+			@Override
 			public boolean visit(SuperFieldAccess node) {
 				final IVariableBinding binding= node.resolveFieldBinding();
 				if (binding != null && !binding.isEnumConstant())
@@ -401,8 +408,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		return accessedFields;
 	}
 
-    private List getAllEnclosingAnonymousTypesField() {
-		final List ans= new ArrayList();
+    private List<IVariableBinding> getAllEnclosingAnonymousTypesField() {
+		final List<IVariableBinding> ans= new ArrayList<IVariableBinding>();
 		final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class);
 		AnonymousClassDeclaration anonymous= (AnonymousClassDeclaration) ASTNodes.getParent(fAnonymousInnerClassNode, ASTNode.ANONYMOUS_CLASS_DECLARATION);
 		while (anonymous != null) {
@@ -432,7 +439,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     /*
      * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
      */
-    public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
+    @Override
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
         try {
             RefactoringStatus status= validateInput();
             if (accessesAnonymousFields())
@@ -455,6 +463,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     /*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		final CompilationUnitChange result= createCompilationUnitChange(pm);
 		result.setDescriptor(createRefactoringDescriptor());
@@ -462,7 +471,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 	}
 
 	private ITypeBinding[] getTypeParameters() {
-		final List parameters= new ArrayList(4);
+		final List<ITypeBinding> parameters= new ArrayList<ITypeBinding>(4);
 		final ClassInstanceCreation creation= (ClassInstanceCreation) fAnonymousInnerClassNode.getParent();
 		if (fDeclareStatic) {
 			final TypeVariableFinder finder= new TypeVariableFinder();
@@ -473,8 +482,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			if (declaration != null) {
 				ITypeBinding binding= null;
 				TypeParameter parameter= null;
-				for (final Iterator iterator= declaration.typeParameters().iterator(); iterator.hasNext();) {
-					parameter= (TypeParameter) iterator.next();
+				for (final Iterator<TypeParameter> iterator= declaration.typeParameters().iterator(); iterator.hasNext();) {
+					parameter= iterator.next();
 					binding= parameter.resolveBinding();
 					if (binding != null)
 						parameters.add(binding);
@@ -484,13 +493,13 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		final TypeVariableFinder finder= new TypeVariableFinder();
 		creation.accept(finder);
 		final ITypeBinding[] variables= finder.getResult();
-		final List remove= new ArrayList(4);
+		final List<ITypeBinding> remove= new ArrayList<ITypeBinding>(4);
 		boolean match= false;
 		ITypeBinding binding= null;
 		ITypeBinding variable= null;
-		for (final Iterator iterator= parameters.iterator(); iterator.hasNext();) {
+		for (final Iterator<ITypeBinding> iterator= parameters.iterator(); iterator.hasNext();) {
 			match= false;
-			binding= (ITypeBinding) iterator.next();
+			binding= iterator.next();
 			for (int index= 0; index < variables.length; index++) {
 				variable= variables[index];
 				if (variable.equals(binding))
@@ -520,7 +529,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 	private RefactoringChangeDescriptor createRefactoringDescriptor() {
 		final ITypeBinding binding= fAnonymousInnerClassNode.resolveBinding();
 		final String[] labels= new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)};
-		final Map arguments= new HashMap();
+		final Map<String, String> arguments= new HashMap<String, String>();
 		final String projectName= fCu.getJavaProject().getElementName();
 		final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 		final String description= RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description_short;
@@ -590,19 +599,19 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     private void copyArguments(CompilationUnitRewrite rewrite, ClassInstanceCreation newClassCreation) {
-    	Iterator iter= ((ClassInstanceCreation) fAnonymousInnerClassNode.getParent()).arguments().iterator();
+    	Iterator<Expression> iter= ((ClassInstanceCreation) fAnonymousInnerClassNode.getParent()).arguments().iterator();
     	if (!iter.hasNext())
     		return;
 
     	IMethodBinding superConstructorBinding= getSuperConstructorBinding();
     	ITypeBinding[] parameterTypes= superConstructorBinding.getParameterTypes();
 
-    	List arguments= newClassCreation.arguments();
+    	List<Expression> arguments= newClassCreation.arguments();
 		ASTRewrite astRewrite= rewrite.getASTRewrite();
 		int last= parameterTypes.length - 1;
 
 		for (int i= 0; i < last; i++) {
-			arguments.add(astRewrite.createCopyTarget((Expression) iter.next()));
+			arguments.add((Expression) astRewrite.createCopyTarget(iter.next()));
 		}
     	if (superConstructorBinding.isVarargs()) {
     		AST ast= astRewrite.getAST();
@@ -614,7 +623,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     		arguments= initializer.expressions();
     	}
     	while (iter.hasNext()) {
-    		arguments.add(astRewrite.createCopyTarget((Expression) iter.next()));
+    		arguments.add((Expression) astRewrite.createCopyTarget(iter.next()));
     	}
     }
 
@@ -626,9 +635,9 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         rewrite.getASTRewrite().getListRewrite(declarations, declarations.getBodyDeclarationsProperty()).insertAt(createNewNestedClass(rewrite, typeParameters), index, null);
     }
 
-    private static int findIndexOfFistNestedClass(List bodyDeclarations) {
-        for (int i= 0, n= bodyDeclarations.size(); i < n; i++) {
-            BodyDeclaration each= (BodyDeclaration)bodyDeclarations.get(i);
+    private static int findIndexOfFistNestedClass(List<BodyDeclaration> list) {
+        for (int i= 0, n= list.size(); i < n; i++) {
+            BodyDeclaration each= list.get(i);
             if (isNestedType(each))
                 return i;
         }
@@ -661,7 +670,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		IJavaProject project= fCu.getJavaProject();
 
 		IVariableBinding[] bindings= getUsedLocalVariables();
-		ArrayList fieldNames= new ArrayList();
+		ArrayList<String> fieldNames= new ArrayList<String>();
 		for (int i= 0; i < bindings.length; i++) {
 			String name= StubUtility.getBaseName(bindings[i], project);
 			String[] fieldNameProposals= StubUtility.getVariableNameSuggestions(NamingConventions.VK_INSTANCE_FIELD, project, name, 0, fieldNames, true);
@@ -675,9 +684,9 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 				}
 			}
 		}
-		String[] allFieldNames= (String[]) fieldNames.toArray(new String[fieldNames.size()]);
+		String[] allFieldNames= fieldNames.toArray(new String[fieldNames.size()]);
 
-		List newBodyDeclarations= newDeclaration.bodyDeclarations();
+		List<BodyDeclaration> newBodyDeclarations= newDeclaration.bodyDeclarations();
 
 		createFieldsForAccessedLocals(rewrite, bindings, allFieldNames, newBodyDeclarations);
 
@@ -707,7 +716,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		return newDeclaration;
 	}
 
-	private void updateAndMoveBodyDeclarations(CompilationUnitRewrite rewriter, IVariableBinding[] bindings, String[] fieldNames, List newBodyDeclarations, MethodDeclaration newConstructorDecl) {
+	private void updateAndMoveBodyDeclarations(CompilationUnitRewrite rewriter, IVariableBinding[] bindings, String[] fieldNames, List<BodyDeclaration> newBodyDeclarations, MethodDeclaration newConstructorDecl) {
 		final ASTRewrite astRewrite= rewriter.getASTRewrite();
 		final AST ast= astRewrite.getAST();
 
@@ -715,8 +724,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
 		int fieldInsertIndex= newConstructorDecl != null ? newBodyDeclarations.lastIndexOf(newConstructorDecl) : newBodyDeclarations.size();
 
-		for (Iterator iterator= fAnonymousInnerClassNode.bodyDeclarations().iterator(); iterator.hasNext();) {
-			BodyDeclaration body= (BodyDeclaration) iterator.next();
+		for (Iterator<BodyDeclaration> iterator= fAnonymousInnerClassNode.bodyDeclarations().iterator(); iterator.hasNext();) {
+			BodyDeclaration body= iterator.next();
 
 			for (int i= 0; i < bindings.length; i++) {
 				SimpleName[] names= LinkedNodeFinder.findByBinding(body, bindings[i]);
@@ -735,19 +744,19 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 				}
 			}
 			if (body instanceof Initializer || body instanceof FieldDeclaration) {
-				newBodyDeclarations.add(fieldInsertIndex++, astRewrite.createMoveTarget(body));
+				newBodyDeclarations.add(fieldInsertIndex++, (BodyDeclaration) astRewrite.createMoveTarget(body));
 			} else {
-				newBodyDeclarations.add(astRewrite.createMoveTarget(body));
+				newBodyDeclarations.add((BodyDeclaration) astRewrite.createMoveTarget(body));
 			}
 		}
 
 		if (newConstructorDecl != null) {
 			// move initialization of existing fields to constructor if an outer is referenced
-			List bodyStatements= newConstructorDecl.getBody().statements();
+			List<Statement> bodyStatements= newConstructorDecl.getBody().statements();
 
-			List fieldsToInitializeInConstructor= getFieldsToInitializeInConstructor();
-			for (Iterator iter= fieldsToInitializeInConstructor.iterator(); iter.hasNext();) {
-				VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
+			List<VariableDeclarationFragment> fieldsToInitializeInConstructor= getFieldsToInitializeInConstructor();
+			for (Iterator<VariableDeclarationFragment> iter= fieldsToInitializeInConstructor.iterator(); iter.hasNext();) {
+				VariableDeclarationFragment fragment= iter.next();
 				Expression initializer= fragment.getInitializer();
 				Expression replacement= (Expression) astRewrite.get(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY);
 				if (replacement == initializer) {
@@ -760,7 +769,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		}
 	}
 
-    private void createFieldsForAccessedLocals(CompilationUnitRewrite rewrite, IVariableBinding[] varBindings, String[] fieldNames, List newBodyDeclarations) throws CoreException {
+    private void createFieldsForAccessedLocals(CompilationUnitRewrite rewrite, IVariableBinding[] varBindings, String[] fieldNames, List<BodyDeclaration> newBodyDeclarations) throws CoreException {
 		final ImportRewrite importRewrite= rewrite.getImportRewrite();
 		final ASTRewrite astRewrite= rewrite.getASTRewrite();
 		final AST ast= astRewrite.getAST();
@@ -796,21 +805,22 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
 
     private IVariableBinding[] getUsedLocalVariables() {
-        final Set result= new HashSet(0);
+        final Set<IBinding> result= new HashSet<IBinding>(0);
         collectRefrencedVariables(fAnonymousInnerClassNode, result);
-        ArrayList usedLocals= new ArrayList();
-        for (Iterator iterator= result.iterator(); iterator.hasNext();) {
+        ArrayList<IVariableBinding> usedLocals= new ArrayList<IVariableBinding>();
+        for (Iterator<IBinding> iterator= result.iterator(); iterator.hasNext();) {
         	IVariableBinding next= (IVariableBinding) iterator.next();
 			if (isBindingToTemp(next)) {
         		usedLocals.add(next);
         	}
 		}
-        return (IVariableBinding[])usedLocals.toArray(new IVariableBinding[usedLocals.size()]);
+        return usedLocals.toArray(new IVariableBinding[usedLocals.size()]);
     }
 
-    private void collectRefrencedVariables(ASTNode root, final Set result) {
+    private void collectRefrencedVariables(ASTNode root, final Set<IBinding> result) {
     	root.accept(new ASTVisitor() {
-            public boolean visit(SimpleName node) {
+            @Override
+			public boolean visit(SimpleName node) {
                 IBinding binding= node.resolveBinding();
                 if (binding instanceof IVariableBinding)
                 	result.add(binding);
@@ -853,10 +863,10 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
 		newConstructor.setBody(ast.newBlock());
 
-		List newStatements= newConstructor.getBody().statements();
+		List<Statement> newStatements= newConstructor.getBody().statements();
 
-        List newParameters= newConstructor.parameters();
-        List newParameterNames= new ArrayList();
+        List<SingleVariableDeclaration> newParameters= newConstructor.parameters();
+        List<String> newParameterNames= new ArrayList<String>();
 
         // add parameters for elements passed with the instance creation
         if (!instanceCreation.arguments().isEmpty()) {
@@ -920,7 +930,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
 		if (doAddComments()) {
 			try {
-				String[] allParamNames= (String[]) newParameterNames.toArray(new String[newParameterNames.size()]);
+				String[] allParamNames= newParameterNames.toArray(new String[newParameterNames.size()]);
 				String string= CodeGeneration.getMethodComment(fCu, fClassName, fClassName, allParamNames, new String[0], null, new String[0], null, StubUtility.getLineDelimiterUsed(fCu));
 				if (string != null) {
 					Javadoc javadoc= (Javadoc) astRewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
@@ -951,14 +961,14 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
 
     // live List of VariableDeclarationFragments
-    private List getFieldsToInitializeInConstructor() {
-        List result= new ArrayList(0);
-        for (Iterator iter= fAnonymousInnerClassNode.bodyDeclarations().iterator(); iter.hasNext(); ) {
+    private List<VariableDeclarationFragment> getFieldsToInitializeInConstructor() {
+        List<VariableDeclarationFragment> result= new ArrayList<VariableDeclarationFragment>(0);
+        for (Iterator<BodyDeclaration> iter= fAnonymousInnerClassNode.bodyDeclarations().iterator(); iter.hasNext(); ) {
             Object element= iter.next();
             if (element instanceof FieldDeclaration) {
-            	List fragments= ((FieldDeclaration) element).fragments();
-                for (Iterator fragmentIter= fragments.iterator(); fragmentIter.hasNext(); ) {
-                    VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragmentIter.next();
+            	List<VariableDeclarationFragment> fragments= ((FieldDeclaration) element).fragments();
+                for (Iterator<VariableDeclarationFragment> fragmentIter= fragments.iterator(); fragmentIter.hasNext(); ) {
+                    VariableDeclarationFragment fragment= fragmentIter.next();
                     if (isToBeInitializerInConstructor(fragment, result))
                         result.add(fragment);
                 }
@@ -967,17 +977,17 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         return result;
     }
 
-    private boolean isToBeInitializerInConstructor(VariableDeclarationFragment fragment, List fieldsToInitialize) {
+    private boolean isToBeInitializerInConstructor(VariableDeclarationFragment fragment, List<VariableDeclarationFragment> fieldsToInitialize) {
     	return fragment.getInitializer() != null && areLocalsUsedIn(fragment.getInitializer(), fieldsToInitialize);
     }
 
-    private boolean areLocalsUsedIn(Expression fieldInitializer, List fieldsToInitialize) {
-        Set localsUsed= new HashSet(0);
+    private boolean areLocalsUsedIn(Expression fieldInitializer, List<VariableDeclarationFragment> fieldsToInitialize) {
+        Set<IBinding> localsUsed= new HashSet<IBinding>(0);
         collectRefrencedVariables(fieldInitializer, localsUsed);
 
         ITypeBinding anonType= fAnonymousInnerClassNode.resolveBinding();
 
-        for (Iterator iterator= localsUsed.iterator(); iterator.hasNext();) {
+        for (Iterator<IBinding> iterator= localsUsed.iterator(); iterator.hasNext();) {
 			IVariableBinding curr= (IVariableBinding) iterator.next();
 			if (isBindingToTemp(curr)) { // reference a local from outside
 				return true;

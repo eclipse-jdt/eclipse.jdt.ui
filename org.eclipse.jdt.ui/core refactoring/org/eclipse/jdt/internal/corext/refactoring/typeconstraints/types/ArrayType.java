@@ -74,10 +74,12 @@ public final class ArrayType extends TType {
 		return fDimensions;
 	}
 
+	@Override
 	public int getKind() {
 		return ARRAY_TYPE;
 	}
 
+	@Override
 	public TType[] getSubTypes() {
 		TType[] subTypes= fElementType.getSubTypes();
 		TType[] result= new TType[subTypes.length];
@@ -87,19 +89,23 @@ public final class ArrayType extends TType {
 		return result;
 	}
 
+	@Override
 	public TType getErasure() {
 		return fErasure;
 	}
 
+	@Override
 	public boolean doEquals(TType other) {
 		ArrayType arrayType= (ArrayType)other;
 		return fElementType.equals(arrayType.fElementType) && fDimensions == arrayType.fDimensions;
 	}
 
+	@Override
 	public int hashCode() {
 		return fElementType.hashCode() << ARRAY_TYPE_SHIFT;
 	}
 
+	@Override
 	protected boolean doCanAssignTo(TType lhs) {
 		switch (lhs.getKind()) {
 			case NULL_TYPE: return false;
@@ -141,6 +147,7 @@ public final class ArrayType extends TType {
 		return lhsElementType.isJavaLangObject() || lhsElementType.isJavaLangCloneable() || lhsElementType.isJavaIoSerializable();
 	}
 
+	@Override
 	protected String getPlainPrettySignature() {
 		StringBuffer result= new StringBuffer(fElementType.getPlainPrettySignature());
 		for (int i= 0; i < fDimensions; i++) {
@@ -149,6 +156,7 @@ public final class ArrayType extends TType {
 		return result.toString();
 	}
 
+	@Override
 	public String getName() {
 		StringBuffer result= new StringBuffer(fElementType.getName());
 		for (int i= 0; i < fDimensions; i++) {

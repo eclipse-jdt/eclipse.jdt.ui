@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -102,6 +102,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		/*
 		 * allows to change the message
 		 */
+		@Override
 		protected void setMessage(String message) {
 			super.setMessage(message);
 		}
@@ -111,9 +112,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	private JarPackageData fJarPackage;
 	private JarPackageData[] fJarPackages;
 	private Shell fParentShell;
-	private Map fJavaNameToClassFilesMap;
+	private Map<String, ArrayList<IResource>> fJavaNameToClassFilesMap;
 	private IContainer fClassFilesMapContainer;
-	private Set fExportedClassContainers;
+	private Set<IContainer> fExportedClassContainers;
 	private MessageMultiStatus fStatus;
 	private StandardJavaElementContentProvider fJavaElementContentProvider;
 	private boolean fFilesSaved;
@@ -193,7 +194,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * @return int
 	 */
 	private int countSelectedElements() {
-		Set enclosingJavaProjects= new HashSet(10);
+		Set<IJavaProject> enclosingJavaProjects= new HashSet<IJavaProject>(10);
 		int count= 0;
 
 		int n= fJarPackage.getElements().length;
@@ -252,9 +253,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (fJarPackage.areOutputFoldersExported()) {
 			if (!fJarPackage.areJavaFilesExported())
 				count= 0;
-			Iterator iter= enclosingJavaProjects.iterator();
+			Iterator<IJavaProject> iter= enclosingJavaProjects.iterator();
 			while (iter.hasNext()) {
-				IJavaProject javaProject= (IJavaProject)iter.next();
+				IJavaProject javaProject= iter.next();
 				IContainer[] outputContainers;
 				try {
 					outputContainers= getOutputContainers(javaProject);
@@ -584,7 +585,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 					return;
 
 				// find corresponding file(s) on classpath and export
-				Iterator iter= filesOnClasspath(typeRootElement, destinationPath, progressMonitor);
+				Iterator<? extends IResource> iter= filesOnClasspath(typeRootElement, destinationPath, progressMonitor);
 				IPath baseDestinationPath= destinationPath.removeLastSegments(1);
 				while (iter.hasNext()) {
 					IFile file= (IFile)iter.next();
@@ -608,8 +609,8 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * @throws InterruptedException thrown when cancelled
 	 */
 	private void exportSelectedElements(IProgressMonitor progressMonitor) throws InterruptedException {
-		fExportedClassContainers= new HashSet(10);
-		Set enclosingJavaProjects= new HashSet(10);
+		fExportedClassContainers= new HashSet<IContainer>(10);
+		Set<IJavaProject> enclosingJavaProjects= new HashSet<IJavaProject>(10);
 		int n= fJarPackage.getElements().length;
 		for (int i= 0; i < n; i++) {
 			Object element= fJarPackage.getElements()[i];
@@ -639,13 +640,13 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		return null;
 	}
 
-	private void exportOutputFolders(IProgressMonitor progressMonitor, Set javaProjects) throws InterruptedException {
+	private void exportOutputFolders(IProgressMonitor progressMonitor, Set<IJavaProject> javaProjects) throws InterruptedException {
 		if (javaProjects == null)
 			return;
 
-		Iterator iter= javaProjects.iterator();
+		Iterator<IJavaProject> iter= javaProjects.iterator();
 		while (iter.hasNext()) {
-			IJavaProject javaProject= (IJavaProject)iter.next();
+			IJavaProject javaProject= iter.next();
 			IContainer[] outputContainers;
 			try {
 				outputContainers= getOutputContainers(javaProject);
@@ -660,7 +661,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	}
 
 	private IContainer[] getOutputContainers(IJavaProject javaProject) throws CoreException {
-		Set outputPaths= new HashSet();
+		Set<IPath> outputPaths= new HashSet<IPath>();
 		boolean includeDefaultOutputPath= false;
 		IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
@@ -682,10 +683,10 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		}
 
 		// Convert paths to containers
-		Set outputContainers= new HashSet(outputPaths.size());
-		Iterator iter= outputPaths.iterator();
+		Set<IContainer> outputContainers= new HashSet<IContainer>(outputPaths.size());
+		Iterator<IPath> iter= outputPaths.iterator();
 		while (iter.hasNext()) {
-			IPath path= (IPath)iter.next();
+			IPath path= iter.next();
 			if (javaProject.getProject().getFullPath().equals(path))
 				outputContainers.add(javaProject.getProject());
 			else {
@@ -697,7 +698,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 					outputContainers.add(outputFolder);
 			}
 		}
-		return (IContainer[])outputContainers.toArray(new IContainer[outputContainers.size()]);
+		return outputContainers.toArray(new IContainer[outputContainers.size()]);
 	}
 
 	/**
@@ -710,7 +711,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * @return	the iterator over the corresponding classpath files for the given file
 	 * @throws CoreException if an exception occurs when looking for the files
 	 */
-	private Iterator filesOnClasspath(ITypeRoot typeRootElement, IPath pathInJar, IProgressMonitor progressMonitor) throws CoreException {
+	private Iterator<? extends IResource> filesOnClasspath(ITypeRoot typeRootElement, IPath pathInJar, IProgressMonitor progressMonitor) throws CoreException {
 		IFile file= (IFile) typeRootElement.getResource();
 		IJavaProject javaProject= typeRootElement.getJavaProject();
 		IPackageFragmentRoot pkgRoot= JavaModelUtil.getPackageFragmentRoot(typeRootElement);
@@ -778,7 +779,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			}
 			fClassFilesMapContainer= classContainer;
 		}
-		ArrayList classFileList= (ArrayList)fJavaNameToClassFilesMap.get(file.getName());
+		ArrayList<IResource> classFileList= fJavaNameToClassFilesMap.get(file.getName());
 		if (classFileList == null || classFileList.isEmpty()) {
 			String msg= Messages.format(JarPackagerMessages.JarFileExportOperation_classFileOnClasspathNotAccessible, BasicElementLabels.getPathLabel(file.getFullPath(), false));
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, msg, null));
@@ -786,9 +787,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		return classFileList.iterator();
 	}
 
-	private Iterator getClassesIn(IContainer classContainer) throws CoreException {
+	private Iterator<IResource> getClassesIn(IContainer classContainer) throws CoreException {
 		IResource[] resources= classContainer.members();
-		List files= new ArrayList(resources.length);
+		List<IResource> files= new ArrayList<IResource>(resources.length);
 		for (int i= 0; i < resources.length; i++)
 			if (resources[i].getType() == IResource.FILE && isClassFile(resources[i]))
 				files.add(resources[i]);
@@ -828,15 +829,15 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * Builds and returns a map that has the class files
 	 * for each java file in a given directory
 	 */
-	private Map buildJavaToClassMap(IContainer container, IProgressMonitor monitor) throws CoreException {
+	private Map<String, ArrayList<IResource>> buildJavaToClassMap(IContainer container, IProgressMonitor monitor) throws CoreException {
 		if (container == null || !container.isAccessible())
-			return new HashMap(0);
+			return new HashMap<String, ArrayList<IResource>>(0);
 		/*
 		 * XXX: Bug 6584: Need a way to get class files for a java file (or CU)
 		 */
 		IClassFileReader cfReader= null;
 		IResource[] members= container.members();
-		Map map= new HashMap(members.length);
+		Map<String, ArrayList<IResource>> map= new HashMap<String, ArrayList<IResource>>(members.length);
 		for (int i= 0;  i < members.length; i++) {
 			if (isClassFile(members[i])) {
 				IFile classFile= (IFile)members[i];
@@ -870,12 +871,12 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 							return null;
 						}
 						String javaName= new String(sourceAttribute.getSourceFileName());
-						Object classFiles= map.get(javaName);
+						ArrayList<IResource> classFiles= map.get(javaName);
 						if (classFiles == null) {
-							classFiles= new ArrayList(3);
+							classFiles= new ArrayList<IResource>(3);
 							map.put(javaName, classFiles);
 						}
-						((ArrayList)classFiles).add(classFile);
+						classFiles.add(classFile);
 					}
 				}
 			}
@@ -974,6 +975,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * @throws InterruptedException thrown when cancelled
 	 * @see	#getStatus()
 	 */
+	@Override
 	protected void execute(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 		int count= fJarPackages.length;
 		progressMonitor.beginTask("", count); //$NON-NLS-1$
@@ -1143,7 +1145,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	}
 
 	private void buildProjects(IProgressMonitor progressMonitor) {
-		Set builtProjects= new HashSet(10);
+		Set<IProject> builtProjects= new HashSet<IProject>(10);
 		Object[] elements= fJarPackage.getElements();
 		for (int i= 0; i < elements.length; i++) {
 			IProject project= null;

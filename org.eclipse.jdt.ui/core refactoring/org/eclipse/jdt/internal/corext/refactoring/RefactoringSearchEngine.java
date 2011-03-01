@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,9 +59,10 @@ public class RefactoringSearchEngine {
 
 		class ResourceSearchRequestor extends SearchRequestor{
 			boolean hasPotentialMatches= false ;
-			Set resources= new HashSet(5);
+			Set<IResource> resources= new HashSet<IResource>(5);
 			private IResource fLastResource;
 
+			@Override
 			public void acceptSearchMatch(SearchMatch match) {
 				if (!tolerateInAccurateMatches && match.getAccuracy() == SearchMatch.A_INACCURATE) {
 					hasPotentialMatches= true;
@@ -79,9 +80,9 @@ public class RefactoringSearchEngine {
 			throw new JavaModelException(e);
 		}
 
-		List result= new ArrayList(requestor.resources.size());
-		for (Iterator iter= requestor.resources.iterator(); iter.hasNext(); ) {
-			IResource resource= (IResource) iter.next();
+		List<IJavaElement> result= new ArrayList<IJavaElement>(requestor.resources.size());
+		for (Iterator<IResource> iter= requestor.resources.iterator(); iter.hasNext(); ) {
+			IResource resource= iter.next();
 			IJavaElement element= JavaCore.create(resource);
 			if (element instanceof ICompilationUnit) {
 				result.add(element);
@@ -90,7 +91,7 @@ public class RefactoringSearchEngine {
 			}
 		}
 		addStatusErrors(status, requestor.hasPotentialMatches, hasNonCuMatches);
-		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
+		return result.toArray(new ICompilationUnit[result.size()]);
 	}
 
 	//TODO: throw CoreException
@@ -155,22 +156,22 @@ public class RefactoringSearchEngine {
 	 * @param status the status to report errors.
 	 * @return a SearchResultGroup[], grouped by SearchMatch#getResource()
 	 */
-	public static SearchResultGroup[] groupByCu(List matchList, RefactoringStatus status) {
-		Map/*<IResource, List<SearchMatch>>*/ grouped= new HashMap();
+	public static SearchResultGroup[] groupByCu(List<SearchMatch> matchList, RefactoringStatus status) {
+		Map<IResource, List<SearchMatch>> grouped= new HashMap<IResource, List<SearchMatch>>();
 		boolean hasPotentialMatches= false;
 		boolean hasNonCuMatches= false;
 
-		for (Iterator iter= matchList.iterator(); iter.hasNext();) {
-			SearchMatch searchMatch= (SearchMatch) iter.next();
+		for (Iterator<SearchMatch> iter= matchList.iterator(); iter.hasNext();) {
+			SearchMatch searchMatch= iter.next();
 			if (searchMatch.getAccuracy() == SearchMatch.A_INACCURATE)
 				hasPotentialMatches= true;
 			if (! grouped.containsKey(searchMatch.getResource()))
-				grouped.put(searchMatch.getResource(), new ArrayList(1));
-			((List) grouped.get(searchMatch.getResource())).add(searchMatch);
+				grouped.put(searchMatch.getResource(), new ArrayList<SearchMatch>(1));
+			grouped.get(searchMatch.getResource()).add(searchMatch);
 		}
 
-		for (Iterator iter= grouped.keySet().iterator(); iter.hasNext();) {
-			IResource resource= (IResource) iter.next();
+		for (Iterator<IResource> iter= grouped.keySet().iterator(); iter.hasNext();) {
+			IResource resource= iter.next();
 			IJavaElement element= JavaCore.create(resource);
 			if (! (element instanceof ICompilationUnit)) {
 				iter.remove();
@@ -180,10 +181,10 @@ public class RefactoringSearchEngine {
 
 		SearchResultGroup[] result= new SearchResultGroup[grouped.keySet().size()];
 		int i= 0;
-		for (Iterator iter= grouped.keySet().iterator(); iter.hasNext();) {
-			IResource resource= (IResource) iter.next();
-			List searchMatches= (List) grouped.get(resource);
-			SearchMatch[] matchArray= (SearchMatch[]) searchMatches.toArray(new SearchMatch[searchMatches.size()]);
+		for (Iterator<IResource> iter= grouped.keySet().iterator(); iter.hasNext();) {
+			IResource resource= iter.next();
+			List<SearchMatch> searchMatches= grouped.get(resource);
+			SearchMatch[] matchArray= searchMatches.toArray(new SearchMatch[searchMatches.size()]);
 			result[i]= new SearchResultGroup(resource, matchArray);
 			i++;
 		}
@@ -194,14 +195,14 @@ public class RefactoringSearchEngine {
 	public static SearchPattern createOrPattern(IJavaElement[] elements, int limitTo) {
 		if (elements == null || elements.length == 0)
 			return null;
-		Set set= new HashSet(Arrays.asList(elements));
-		Iterator iter= set.iterator();
-		IJavaElement first= (IJavaElement)iter.next();
+		Set<IJavaElement> set= new HashSet<IJavaElement>(Arrays.asList(elements));
+		Iterator<IJavaElement> iter= set.iterator();
+		IJavaElement first= iter.next();
 		SearchPattern pattern= SearchPattern.createPattern(first, limitTo, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		if (pattern == null) // check for bug 90138
 			throw new IllegalArgumentException("Invalid java element: " + first.getHandleIdentifier() + "\n" + first.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 		while(iter.hasNext()){
-			IJavaElement each= (IJavaElement)iter.next();
+			IJavaElement each= iter.next();
 			SearchPattern nextPattern= SearchPattern.createPattern(each, limitTo, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 			if (nextPattern == null) // check for bug 90138
 				throw new IllegalArgumentException("Invalid java element: " + each.getHandleIdentifier() + "\n" + each.toString()); //$NON-NLS-1$ //$NON-NLS-2$

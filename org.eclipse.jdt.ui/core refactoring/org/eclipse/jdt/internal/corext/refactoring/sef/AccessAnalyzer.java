@@ -68,7 +68,7 @@ class AccessAnalyzer extends ASTVisitor {
 	private String fSetter;
 	private ASTRewrite fRewriter;
 	private ImportRewrite fImportRewriter;
-	private List fGroupDescriptions;
+	private List<TextEditGroup> fGroupDescriptions;
 	private RefactoringStatus fStatus;
 	private boolean fSetterMustReturnValue;
 	private boolean fEncapsulateDeclaringClass;
@@ -95,7 +95,7 @@ class AccessAnalyzer extends ASTVisitor {
 		fDeclaringClassBinding= declaringClass;
 		fRewriter= rewriter;
 		fImportRewriter= importRewrite;
-		fGroupDescriptions= new ArrayList();
+		fGroupDescriptions= new ArrayList<TextEditGroup>();
 		fGetter= refactoring.getGetterName();
 		fSetter= refactoring.getSetterName();
 		fEncapsulateDeclaringClass= refactoring.getEncapsulateDeclaringClass();
@@ -115,10 +115,11 @@ class AccessAnalyzer extends ASTVisitor {
 		return fStatus;
 	}
 
-	public List getGroupDescriptions() {
+	public List<TextEditGroup> getGroupDescriptions() {
 		return fGroupDescriptions;
 	}
 
+	@Override
 	public boolean visit(Assignment node) {
 		Expression lhs= node.getLeftHandSide();
 		if (!considerBinding(resolveBinding(lhs), lhs))
@@ -134,9 +135,9 @@ class AccessAnalyzer extends ASTVisitor {
 			Expression receiver= getReceiver(lhs);
 			if (receiver != null)
 				invocation.setExpression((Expression)fRewriter.createCopyTarget(receiver));
-			List arguments= invocation.arguments();
+			List<Expression> arguments= invocation.arguments();
 			if (node.getOperator() == Assignment.Operator.ASSIGN) {
-				arguments.add(fRewriter.createCopyTarget(node.getRightHandSide()));
+				arguments.add((Expression)fRewriter.createCopyTarget(node.getRightHandSide()));
 			} else {
 				// This is the compound assignment case: field+= 10;
 				InfixExpression exp= ast.newInfixExpression();
@@ -163,6 +164,7 @@ class AccessAnalyzer extends ASTVisitor {
 		return false;
 	}
 
+	@Override
 	public boolean visit(SimpleName node) {
 		if (!node.isDeclaration() && considerBinding(node.resolveBinding(), node)) {
 			fReferencingGetter= true;
@@ -174,6 +176,7 @@ class AccessAnalyzer extends ASTVisitor {
 		return true;
 	}
 
+	@Override
 	public boolean visit(ImportDeclaration node) {
 		if (considerBinding(node.resolveBinding(), node)) {
 			fRemoveStaticImport= true;
@@ -181,6 +184,7 @@ class AccessAnalyzer extends ASTVisitor {
 		return false;
 	}
 
+	@Override
 	public boolean visit(PrefixExpression node) {
 		Expression operand= node.getOperand();
 		if (!considerBinding(resolveBinding(operand), operand))
@@ -198,6 +202,7 @@ class AccessAnalyzer extends ASTVisitor {
 		return false;
 	}
 
+	@Override
 	public boolean visit(PostfixExpression node) {
 		Expression operand= node.getOperand();
 		if (!considerBinding(resolveBinding(operand), operand))
@@ -215,6 +220,7 @@ class AccessAnalyzer extends ASTVisitor {
 		return false;
 	}
 
+	@Override
 	public boolean visit(MethodDeclaration node) {
 		String name= node.getName().getIdentifier();
 		if (name.equals(fGetter) || name.equals(fSetter))
@@ -222,6 +228,7 @@ class AccessAnalyzer extends ASTVisitor {
 		return true;
 	}
 
+	@Override
 	public void endVisit(CompilationUnit node) {
 		// If we don't had a static import to the field we don't
 		// have to add any, even if we generated a setter or

@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -40,7 +41,6 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -79,7 +79,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  */
 public class CustomBuilderGenerator extends AbstractToStringGenerator {
 
-	private final List primitiveTypes= Arrays.asList(new String[] { "byte", "short", "char", "int", "long", "float", "double", "boolean" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+	private final List<String> primitiveTypes= Arrays.asList(new String[] { "byte", "short", "char", "int", "long", "float", "double", "boolean" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 
 	private final String[] wrapperTypes= new String[] { "java.lang.Byte", "java.lang.Short", "java.lang.Character", "java.lang.Integer", "java.lang.Long", "java.lang.Float", "java.lang.Double", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
 			"java.lang.Boolean" }; //$NON-NLS-1$
@@ -118,8 +118,9 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 	 * 
 	 * value: {@link AppendMethodInformation} - information about corresponding method
 	 */
-	private HashMap appendMethodSpecificTypes= new HashMap();
+	private HashMap<String, AppendMethodInformation> appendMethodSpecificTypes= new HashMap<String, AppendMethodInformation>();
 
+	@Override
 	public RefactoringStatus checkConditions() {
 		RefactoringStatus status= super.checkConditions();
 		if (fContext.isCustomArray() || fContext.isLimitItems())
@@ -127,9 +128,11 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 		return status;
 	}
 
+	@Override
 	protected void addElement(Object element) {
 	}
 
+	@Override
 	protected void initialize() {
 		super.initialize();
 
@@ -138,6 +141,7 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 		tidyAppendsMethodsMap();
 	}
 
+	@Override
 	public MethodDeclaration generateToStringMethod() throws CoreException {
 		initialize();
 
@@ -236,7 +240,7 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 					IType returnType= javaProject.findType(returnTypeName);
 					appendMethodInformation.returnsBuilder= (returnType != null) && returnType.newSupertypeHierarchy(null).contains(type);
 
-					AppendMethodInformation oldAMI= (AppendMethodInformation)appendMethodSpecificTypes.get(specyficType);
+					AppendMethodInformation oldAMI= appendMethodSpecificTypes.get(specyficType);
 					if (oldAMI == null || oldAMI.methodType < appendMethodInformation.methodType) {
 						appendMethodSpecificTypes.put(specyficType, appendMethodInformation);
 					}
@@ -252,11 +256,11 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 	 * parametersType is worse than for java.lang.Object.
 	 */
 	private void tidyAppendsMethodsMap() {
-		int objectParametersType= ((AppendMethodInformation)appendMethodSpecificTypes.get("java.lang.Object")).methodType; //$NON-NLS-1$
-		Set entrySet= appendMethodSpecificTypes.entrySet();
-		for (Iterator iterator= entrySet.iterator(); iterator.hasNext();) {
-			Map.Entry entry= (Map.Entry)iterator.next();
-			if (((AppendMethodInformation)entry.getValue()).methodType < objectParametersType) {
+		int objectParametersType= appendMethodSpecificTypes.get("java.lang.Object").methodType; //$NON-NLS-1$
+		Set<Map.Entry<String, AppendMethodInformation>> entrySet= appendMethodSpecificTypes.entrySet();
+		for (Iterator<Map.Entry<String, AppendMethodInformation>> iterator= entrySet.iterator(); iterator.hasNext();) {
+			Map.Entry<String, AppendMethodInformation> entry= iterator.next();
+			if (entry.getValue().methodType < objectParametersType) {
 				iterator.remove();
 			}
 		}
@@ -268,11 +272,11 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 
 		Expression memberAccessExpression= null;
 
-		AppendMethodInformation ami= (AppendMethodInformation)appendMethodSpecificTypes.get(memberTypeName);
+		AppendMethodInformation ami= appendMethodSpecificTypes.get(memberTypeName);
 		if (ami == null && memberType.isPrimitive()) {
 			memberTypeName= wrapperTypes[primitiveTypes.indexOf(memberTypeName)];
 			memberType= fAst.resolveWellKnownType(memberTypeName);
-			ami= (AppendMethodInformation)appendMethodSpecificTypes.get(memberTypeName);
+			ami= appendMethodSpecificTypes.get(memberTypeName);
 			if (!getContext().is50orHigher()) {
 				ClassInstanceCreation classInstance= fAst.newClassInstanceCreation();
 				classInstance.setType(fAst.newSimpleType(addImport(memberTypeName)));
@@ -286,7 +290,7 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 				memberTypeName= memberType.getQualifiedName();
 			else
 				memberTypeName= "java.lang.Object"; //$NON-NLS-1$
-			ami= (AppendMethodInformation)appendMethodSpecificTypes.get(memberTypeName);
+			ami= appendMethodSpecificTypes.get(memberTypeName);
 		}
 
 		if (memberAccessExpression == null) {

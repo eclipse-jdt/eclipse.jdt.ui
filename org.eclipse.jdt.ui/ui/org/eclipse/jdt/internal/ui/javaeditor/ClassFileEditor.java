@@ -115,8 +115,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		private Color fBackgroundColor;
 		private Color fForegroundColor;
 		private Color fSeparatorColor;
-		private List fBannerLabels= new ArrayList();
-		private List fHeaderLabels= new ArrayList();
+		private List<Label> fBannerLabels= new ArrayList<Label>();
+		private List<Label> fHeaderLabels= new ArrayList<Label>();
 		private Font fFont;
 
 		/**
@@ -315,13 +315,13 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		 */
 		public void propertyChange(PropertyChangeEvent event) {
 
-			for (Iterator iterator = fBannerLabels.iterator(); iterator.hasNext();) {
-				Label label = (Label) iterator.next();
+			for (Iterator<Label> iterator = fBannerLabels.iterator(); iterator.hasNext();) {
+				Label label = iterator.next();
 				label.setFont(JFaceResources.getBannerFont());
 			}
 
-			for (Iterator iterator = fHeaderLabels.iterator(); iterator.hasNext();) {
-				Label label = (Label) iterator.next();
+			for (Iterator<Label> iterator = fHeaderLabels.iterator(); iterator.hasNext();) {
+				Label label = iterator.next();
 				label.setFont(JFaceResources.getHeaderFont());
 			}
 
@@ -529,6 +529,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	/*
 	 * @see AbstractTextEditor#createActions()
 	 */
+	@Override
 	protected void createActions() {
 		super.createActions();
 
@@ -557,6 +558,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	/*
 	 * @see AbstractTextEditor#editorContextMenuAboutToShow(IMenuManager)
 	 */
+	@Override
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
 		super.editorContextMenuAboutToShow(menu);
 
@@ -569,6 +571,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	/*
 	 * @see JavaEditor#getElementAt(int)
 	 */
+	@Override
 	protected IJavaElement getElementAt(int offset) {
 		if (getEditorInput() instanceof IClassFileEditorInput) {
 			try {
@@ -583,6 +586,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	/*
 	 * @see JavaEditor#getCorrespondingElement(IJavaElement)
 	 */
+	@Override
 	protected IJavaElement getCorrespondingElement(IJavaElement element) {
 		if (getEditorInput() instanceof IClassFileEditorInput) {
 			IClassFileEditorInput input= (IClassFileEditorInput) getEditorInput();
@@ -601,6 +605,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#isEditable()
 	 */
+	@Override
 	public boolean isEditable() {
 		return false;
 	}
@@ -609,6 +614,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#isEditorInputReadOnly()
 	 * @since 3.2
 	 */
+	@Override
 	public boolean isEditorInputReadOnly() {
 		return true;
 	}
@@ -635,6 +641,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	/*
 	 * @see AbstractTextEditor#doSetInput(IEditorInput)
 	 */
+	@Override
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		uninstallOccurrencesFinder();
 
@@ -686,6 +693,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#installSemanticHighlighting()
 	 * @since 3.7
 	 */
+	@Override
 	protected void installSemanticHighlighting() {
 		super.installSemanticHighlighting();
 		Job job= new Job(JavaEditorMessages.OverrideIndicatorManager_intallJob) {
@@ -693,6 +701,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 			 * @since 3.0
 			 */
+			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				CompilationUnit ast= SharedASTProvider.getAST(getInputJavaElement(), SharedASTProvider.WAIT_YES, null);
 				if (fOverrideIndicatorManager != null)
@@ -715,6 +724,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	/*
 	 * @see IWorkbenchPart#createPartControl(Composite)
 	 */
+	@Override
 	public void createPartControl(Composite parent) {
 
 		fParent= new Composite(parent, SWT.NONE);
@@ -788,6 +798,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			if (fNoSourceTextWidget != null) {
 				// Copy action for the no attached source case
 				final IAction copyAction= new Action() {
+					@Override
 					public void run() {
 						fNoSourceTextWidget.copy();
 					}
@@ -805,6 +816,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 				// Select All action for the no attached source case
 				final IAction selectAllAction= new Action() {
+					@Override
 					public void run() {
 						fNoSourceTextWidget.selectAll();
 						copyAction.setEnabled(true);
@@ -869,12 +881,14 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles, IPreferenceStore store) {
 		return new JavaSourceViewer(parent, ruler, null, false, styles, store) {
 
+			@Override
 			public boolean requestWidgetToken(IWidgetTokenKeeper requester) {
 				if (PlatformUI.getWorkbench().getHelpSystem().isContextHelpDisplayed())
 					return false;
 				return super.requestWidgetToken(requester);
 			}
 
+			@Override
 			public boolean requestWidgetToken(IWidgetTokenKeeper requester, int priority) {
 				if (PlatformUI.getWorkbench().getHelpSystem().isContextHelpDisplayed())
 					return false;
@@ -886,6 +900,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPart#dispose()
 	 */
+	@Override
 	public void dispose() {
 		// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18510
 		IDocumentProvider documentProvider= getDocumentProvider();
@@ -897,6 +912,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPart#setFocus()
 	 */
+	@Override
 	public void setFocus() {
 		super.setFocus();
 

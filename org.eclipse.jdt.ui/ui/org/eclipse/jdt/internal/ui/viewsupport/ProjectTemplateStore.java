@@ -54,10 +54,12 @@ public final class ProjectTemplateStore {
 				 * Make sure we keep the id of added code templates - add removes
 				 * it in the usual add() method
 				 */
+				@Override
 				public void add(TemplatePersistenceData data) {
 					internalAdd(data);
 				}
 
+				@Override
 				public void save() throws IOException {
 
 					TemplatePersistenceData[] templateData= ProjectTemplateStore.this.getTemplateData();
@@ -120,7 +122,7 @@ public final class ProjectTemplateStore {
 		if (fProjectStore != null) {
 			fProjectStore.load();
 
-			Set datas= new HashSet();
+			Set<String> datas= new HashSet<String>();
 			TemplatePersistenceData[] data= fProjectStore.getTemplateData(false);
 			for (int i= 0; i < data.length; i++) {
 				datas.add(data[i].getId());

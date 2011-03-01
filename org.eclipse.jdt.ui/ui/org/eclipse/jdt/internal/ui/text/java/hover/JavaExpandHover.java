@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,9 +43,9 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider.ProblemAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider.ProblemAnnotation;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.hover.AnnotationExpansionControl.AnnotationHoverInput;
 
@@ -91,6 +91,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 	/*
 	 * @see org.eclipse.ui.internal.texteditor.AnnotationExpandHover#getHoverInfoForLine(org.eclipse.jface.text.source.ISourceViewer, int)
 	 */
+	@Override
 	protected Object getHoverInfoForLine(final ISourceViewer viewer, final int line) {
 		final boolean showTemporaryProblems= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CORRECTION_INDICATION);
 		IAnnotationModel model= viewer.getAnnotationModel();
@@ -99,12 +100,12 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		if (model == null)
 			return null;
 
-		List exact= new ArrayList();
-		HashMap messagesAtPosition= new HashMap();
+		List<Annotation> exact= new ArrayList<Annotation>();
+		HashMap<Position, Object> messagesAtPosition= new HashMap<Position, Object>();
 
-		Iterator e= model.getAnnotationIterator();
+		Iterator<Annotation> e= model.getAnnotationIterator();
 		while (e.hasNext()) {
-			Annotation annotation= (Annotation) e.next();
+			Annotation annotation= e.next();
 
 			if (fAnnotationAccess instanceof IAnnotationAccessExtension)
 				if (!((IAnnotationAccessExtension)fAnnotationAccess).isPaintable(annotation))
@@ -139,7 +140,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 			setLastRulerMouseLocation(viewer, line);
 
 		if (exact.size() > 0) {
-			Annotation first= (Annotation) exact.get(0);
+			Annotation first= exact.get(0);
 			if (!isBreakpointAnnotation(first))
 				exact.add(0, new NoBreakpointAnnotation());
 		}
@@ -148,7 +149,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 			return null;
 
 		AnnotationHoverInput input= new AnnotationHoverInput();
-		input.fAnnotations= (Annotation[]) exact.toArray(new Annotation[0]);
+		input.fAnnotations= exact.toArray(new Annotation[0]);
 		input.fViewer= viewer;
 		input.fRulerInfo= fCompositeRuler;
 		input.fAnnotationListener= fgListener;
@@ -190,6 +191,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 	/*
 	 * @see org.eclipse.ui.internal.texteditor.AnnotationExpandHover#getOrder(org.eclipse.jface.text.source.Annotation)
 	 */
+	@Override
 	protected int getOrder(Annotation annotation) {
 		if (isBreakpointAnnotation(annotation))
 			return 1000;

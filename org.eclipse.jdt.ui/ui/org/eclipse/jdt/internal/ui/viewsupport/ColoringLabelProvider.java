@@ -38,6 +38,7 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 		super(labelProvider, decorator, decorationContext);
 	}
 
+	@Override
 	public void initialize(ColumnViewer viewer, ViewerColumn column) {
 		ColoredViewersManager.install(this);
 		setOwnerDrawEnabled(ColoredViewersManager.showColoredLabels());
@@ -45,6 +46,7 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 		super.initialize(viewer, column);
 	}
 
+	@Override
 	public void dispose() {
 		super.dispose();
 		ColoredViewersManager.uninstall(this);
@@ -71,6 +73,7 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 		}
 	}
 
+	@Override
 	protected StyleRange prepareStyleRange(StyleRange styleRange, boolean applyColors) {
 		if (!applyColors && styleRange.background != null) {
 			styleRange= super.prepareStyleRange(styleRange, applyColors);

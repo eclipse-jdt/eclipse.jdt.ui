@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,16 +55,16 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	private final int IDX_EDIT= 2;
 	private final int IDX_REMOVE= 3;
 
-	private final ListDialogField fClassPathList;
+	private final ListDialogField<CPListElement> fClassPathList;
 	private IJavaProject fCurrJProject;
 
-	private final TreeListDialogField fProjectsList;
+	private final TreeListDialogField<CPListElement> fProjectsList;
 
 	private Control fSWTControl;
 
 	private final IWorkbenchPreferenceContainer fPageContainer;
 
-	public ProjectsWorkbookPage(ListDialogField classPathList, IWorkbenchPreferenceContainer pageContainer) {
+	public ProjectsWorkbookPage(ListDialogField<CPListElement> classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
 		fPageContainer= pageContainer;
 		fSWTControl= null;
@@ -78,7 +78,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 
 		ProjectsAdapter adapter= new ProjectsAdapter();
 
-		fProjectsList= new TreeListDialogField(adapter, buttonLabels, new CPListLabelProvider());
+		fProjectsList= new TreeListDialogField<CPListElement>(adapter, buttonLabels, new CPListLabelProvider());
 		fProjectsList.setDialogFieldListener(adapter);
 		fProjectsList.setLabelText(NewWizardMessages.ProjectsWorkbookPage_projects_label);
 
@@ -88,6 +88,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		fProjectsList.setViewerComparator(new CPListElementSorter());
 	}
 
+	@Override
 	public void init(final IJavaProject jproject) {
 		fCurrJProject= jproject;
 
@@ -104,12 +105,12 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 
 	private void updateProjectsList() {
 		// add the projects-cpentries that are already on the class path
-		List cpelements= fClassPathList.getElements();
+		List<CPListElement> cpelements= fClassPathList.getElements();
 
-		final List checkedProjects= new ArrayList(cpelements.size());
+		final List<CPListElement> checkedProjects= new ArrayList<CPListElement>(cpelements.size());
 
 		for (int i= cpelements.size() - 1 ; i >= 0; i--) {
-			CPListElement cpelem= (CPListElement)cpelements.get(i);
+			CPListElement cpelem= cpelements.get(i);
 			if (isEntryKind(cpelem.getEntryKind())) {
 				checkedProjects.add(cpelem);
 			}
@@ -119,6 +120,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 
 	// -------- UI creation ---------
 
+	@Override
 	public Control getControl(Composite parent) {
 		PixelConverter converter= new PixelConverter(parent);
 
@@ -136,13 +138,13 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	}
 
 	private void updateClasspathList() {
-		List projelements= fProjectsList.getElements();
+		List<CPListElement> projelements= fProjectsList.getElements();
 
 		boolean remove= false;
-		List cpelements= fClassPathList.getElements();
+		List<CPListElement> cpelements= fClassPathList.getElements();
 		// backwards, as entries will be deleted
 		for (int i= cpelements.size() -1; i >= 0 ; i--) {
-			CPListElement cpe= (CPListElement)cpelements.get(i);
+			CPListElement cpe= cpelements.get(i);
 			if (isEntryKind(cpe.getEntryKind())) {
 				if (!projelements.remove(cpe)) {
 					cpelements.remove(i);
@@ -161,14 +163,16 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	/*
 	 * @see BuildPathBasePage#getSelection
 	 */
-	public List getSelection() {
+	@Override
+	public List<Object> getSelection() {
 		return fProjectsList.getSelectedElements();
 	}
 
 	/*
 	 * @see BuildPathBasePage#setSelection
 	 */
-	public void setSelection(List selElements, boolean expand) {
+	@Override
+	public void setSelection(List<?> selElements, boolean expand) {
 		fProjectsList.selectElements(new StructuredSelection(selElements));
 		if (expand) {
 			for (int i= 0; i < selElements.size(); i++) {
@@ -180,47 +184,48 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#isEntryKind(int)
 	 */
+	@Override
 	public boolean isEntryKind(int kind) {
 		return kind == IClasspathEntry.CPE_PROJECT;
 	}
 
 
-	private class ProjectsAdapter implements IDialogFieldListener, ITreeListAdapter {
+	private class ProjectsAdapter implements IDialogFieldListener, ITreeListAdapter<CPListElement> {
 
 		private final Object[] EMPTY_ARR= new Object[0];
 
 		// -------- IListAdapter --------
-		public void customButtonPressed(TreeListDialogField field, int index) {
+		public void customButtonPressed(TreeListDialogField<CPListElement> field, int index) {
 			projectPageCustomButtonPressed(field, index);
 		}
 
-		public void selectionChanged(TreeListDialogField field) {
+		public void selectionChanged(TreeListDialogField<CPListElement> field) {
 			projectPageSelectionChanged(field);
 		}
 
-		public void doubleClicked(TreeListDialogField field) {
+		public void doubleClicked(TreeListDialogField<CPListElement> field) {
 			projectPageDoubleClicked(field);
 		}
 
-		public void keyPressed(TreeListDialogField field, KeyEvent event) {
+		public void keyPressed(TreeListDialogField<CPListElement> field, KeyEvent event) {
 			projectPageKeyPressed(field, event);
 		}
 
-		public Object[] getChildren(TreeListDialogField field, Object element) {
+		public Object[] getChildren(TreeListDialogField<CPListElement> field, Object element) {
 			if (element instanceof CPListElement) {
 				return ((CPListElement) element).getChildren(false);
 			}
 			return EMPTY_ARR;
 		}
 
-		public Object getParent(TreeListDialogField field, Object element) {
+		public Object getParent(TreeListDialogField<CPListElement> field, Object element) {
 			if (element instanceof CPListElementAttribute) {
 				return ((CPListElementAttribute) element).getParent();
 			}
 			return null;
 		}
 
-		public boolean hasChildren(TreeListDialogField field, Object element) {
+		public boolean hasChildren(TreeListDialogField<CPListElement> field, Object element) {
 			return getChildren(field, element).length > 0;
 		}
 
@@ -251,8 +256,8 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		if (entries != null) {
 			int nElementsChosen= entries.length;
 			// remove duplicates
-			List cplist= fProjectsList.getElements();
-			List elementsToAdd= new ArrayList(nElementsChosen);
+			List<CPListElement> cplist= fProjectsList.getElements();
+			List<CPListElement> elementsToAdd= new ArrayList<CPListElement>(nElementsChosen);
 			for (int i= 0; i < nElementsChosen; i++) {
 				CPListElement curr= entries[i];
 				if (!cplist.contains(curr) && !elementsToAdd.contains(curr)) {
@@ -269,7 +274,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	}
 
 	private void removeEntry() {
-		List selElements= fProjectsList.getSelectedElements();
+		List<Object> selElements= fProjectsList.getSelectedElements();
 		for (int i= selElements.size() - 1; i >= 0 ; i--) {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
@@ -295,7 +300,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		}
 	}
 
-	private boolean canRemove(List selElements) {
+	private boolean canRemove(List<?> selElements) {
 		if (selElements.size() == 0) {
 			return false;
 		}
@@ -325,7 +330,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		return true;
 	}
 
-	private boolean canEdit(List selElements) {
+	private boolean canEdit(List<?> selElements) {
 		if (selElements.size() != 1) {
 			return false;
 		}
@@ -350,7 +355,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	 * Method editEntry.
 	 */
 	private void editEntry() {
-		List selElements= fProjectsList.getSelectedElements();
+		List<Object> selElements= fProjectsList.getSelectedElements();
 		if (selElements.size() != 1) {
 			return;
 		}
@@ -420,13 +425,13 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	}
 
 	private Object[] getNotYetRequiredProjects() throws JavaModelException {
-		ArrayList selectable= new ArrayList();
+		ArrayList<IJavaProject> selectable= new ArrayList<IJavaProject>();
 		selectable.addAll(Arrays.asList(fCurrJProject.getJavaModel().getJavaProjects()));
 		selectable.remove(fCurrJProject);
 
-		List elements= fProjectsList.getElements();
+		List<CPListElement> elements= fProjectsList.getElements();
 		for (int i= 0; i < elements.size(); i++) {
-			CPListElement curr= (CPListElement)elements.get(i);
+			CPListElement curr= elements.get(i);
 			IJavaProject proj= (IJavaProject) JavaCore.create(curr.getResource());
 			selectable.remove(proj);
 		}
@@ -437,17 +442,17 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	/**
 	 * @param field the dialog field
 	 */
-	protected void projectPageDoubleClicked(TreeListDialogField field) {
-		List selection= fProjectsList.getSelectedElements();
+	protected void projectPageDoubleClicked(TreeListDialogField<CPListElement> field) {
+		List<Object> selection= fProjectsList.getSelectedElements();
 		if (canEdit(selection)) {
 			editEntry();
 		}
 	}
 
-	protected void projectPageKeyPressed(TreeListDialogField field, KeyEvent event) {
+	protected void projectPageKeyPressed(TreeListDialogField<CPListElement> field, KeyEvent event) {
 		if (field == fProjectsList) {
 			if (event.character == SWT.DEL && event.stateMask == 0) {
-				List selection= field.getSelectedElements();
+				List<Object> selection= field.getSelectedElements();
 				if (canRemove(selection)) {
 					removeEntry();
 				}
@@ -469,7 +474,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	 * @param field the dialog field
 	 */
 	private void projectPageSelectionChanged(DialogField field) {
-		List selElements= fProjectsList.getSelectedElements();
+		List<Object> selElements= fProjectsList.getSelectedElements();
 		fProjectsList.enableButton(IDX_EDIT, canEdit(selElements));
 		fProjectsList.enableButton(IDX_REMOVE, canRemove(selElements));
 
@@ -485,7 +490,8 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	/**
      * {@inheritDoc}
      */
-    public void setFocus() {
+    @Override
+	public void setFocus() {
     	fProjectsList.setFocus();
     }
 }

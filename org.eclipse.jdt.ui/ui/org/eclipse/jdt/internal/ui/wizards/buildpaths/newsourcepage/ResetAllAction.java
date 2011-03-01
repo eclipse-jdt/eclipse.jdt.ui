@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,7 +48,7 @@ public class ResetAllAction extends BuildpathModifierAction {
 	private final HintTextGroup fProvider;
 	private final IRunnableContext fContext;
 	private IJavaProject fJavaProject;
-	private List fEntries;
+	private List<CPListElement> fEntries;
 	private IPath fOutputLocation;
 
 	public ResetAllAction(HintTextGroup provider, IRunnableContext context, ISetSelectionTarget selectionTarget) {
@@ -67,6 +67,7 @@ public class ResetAllAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getDetailedDescription() {
 		return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_ResetAll;
 	}
@@ -107,6 +108,7 @@ public class ResetAllAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void run() {
 
 		try {
@@ -121,13 +123,13 @@ public class ResetAllAction extends BuildpathModifierAction {
 	        			BuildpathDelta delta= new BuildpathDelta(getToolTipText());
 
 	        			ClasspathModifier.commitClassPath(fEntries, fJavaProject, monitor);
-        				delta.setNewEntries((CPListElement[])fEntries.toArray(new CPListElement[fEntries.size()]));
+        				delta.setNewEntries(fEntries.toArray(new CPListElement[fEntries.size()]));
 
 	        			fJavaProject.setOutputLocation(fOutputLocation, monitor);
 	        			delta.setDefaultOutputLocation(fOutputLocation);
 
-	        			for (Iterator iterator= fProvider.getCreatedResources().iterator(); iterator.hasNext();) {
-	                        IResource resource= (IResource)iterator.next();
+	        			for (Iterator<IResource> iterator= fProvider.getCreatedResources().iterator(); iterator.hasNext();) {
+	                        IResource resource= iterator.next();
 	                        resource.delete(false, null);
 	                        delta.addDeletedResource(resource);
                         }
@@ -161,7 +163,8 @@ public class ResetAllAction extends BuildpathModifierAction {
 	/**
      * {@inheritDoc}
      */
-    protected boolean canHandle(IStructuredSelection elements) {
+    @Override
+	protected boolean canHandle(IStructuredSelection elements) {
     	if (fJavaProject == null)
     		return false;
 
@@ -179,8 +182,8 @@ public class ResetAllAction extends BuildpathModifierAction {
             return true;
 
         int i= 0;
-        for (Iterator iterator= fEntries.iterator(); iterator.hasNext();) {
-	        CPListElement oldEntrie= (CPListElement)iterator.next();
+        for (Iterator<CPListElement> iterator= fEntries.iterator(); iterator.hasNext();) {
+	        CPListElement oldEntrie= iterator.next();
 	        if (!oldEntrie.getClasspathEntry().equals(currentEntries[i]))
 	        	return true;
 	        i++;

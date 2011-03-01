@@ -52,6 +52,7 @@ public final class FilledArgumentNamesMethodProposal extends JavaMethodCompletio
 	/*
 	 * @see ICompletionProposalExtension#apply(IDocument, char)
 	 */
+	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 		super.apply(document, trigger, offset);
 		int baseOffset= getReplacementOffset();
@@ -93,6 +94,7 @@ public final class FilledArgumentNamesMethodProposal extends JavaMethodCompletio
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal#needsLinkedMode()
 	 */
+	@Override
 	protected boolean needsLinkedMode() {
 		return false; // we handle it ourselves
 	}
@@ -100,6 +102,7 @@ public final class FilledArgumentNamesMethodProposal extends JavaMethodCompletio
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeReplacementString()
 	 */
+	@Override
 	protected String computeReplacementString() {
 
 		if (!hasParameters() || !hasArgumentList())
@@ -159,6 +162,7 @@ public final class FilledArgumentNamesMethodProposal extends JavaMethodCompletio
 	/*
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
+	@Override
 	public Point getSelection(IDocument document) {
 		if (fSelectedRegion == null)
 			return new Point(getReplacementOffset(), 0);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,6 +86,7 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 		fInitialSelection= selection;
 	}
 
+	@Override
 	protected String getPageId() {
 		return "org.eclipse.jdt.ui.JavaWorkingSetPage"; //$NON-NLS-1$
 	}
@@ -93,6 +94,7 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 
@@ -103,6 +105,7 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void configureTree(TreeViewer tree) {
 		tree.setContentProvider(new JavaWorkingSetPageContentProvider());
 
@@ -139,6 +142,7 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void configureTable(TableViewer table) {
 		AppearanceAwareLabelProvider javaElementLabelProvider= new AppearanceAwareLabelProvider(
 				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED
@@ -153,11 +157,12 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Object[] getInitialWorkingSetElements(IWorkingSet workingSet) {
 		Object[] elements;
 		if (workingSet == null) {
 			if (fInitialSelection == null)
-				return new Object[0];
+				return new IAdaptable[0];
 
 			elements= fInitialSelection.toArray();
 		} else {
@@ -190,7 +195,7 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 		if (deletedElements == 0)
 			return elements;
 
-		Object[] result= new Object[elements.length - deletedElements];
+		IAdaptable[] result= new IAdaptable[elements.length - deletedElements];
 		System.arraycopy(elements, 0, result, 0, result.length);
 		return result;
 	}

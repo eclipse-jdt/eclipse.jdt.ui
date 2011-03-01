@@ -28,6 +28,7 @@ public final class JavaVariable extends MultiVariable {
 	 * @see org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable#toString(java.lang.Object)
 	 * @since 3.3
 	 */
+	@Override
 	public String toString(Object object) {
 		if (object instanceof Variable)
 			return ((Variable) object).getName();

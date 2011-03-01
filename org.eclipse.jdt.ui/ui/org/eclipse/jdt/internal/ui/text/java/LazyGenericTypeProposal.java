@@ -145,6 +145,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		/*
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
+		@Override
 		public boolean equals(Object obj) {
 			if (obj instanceof ContextInformation) {
 				ContextInformation ci= (ContextInformation) obj;
@@ -157,6 +158,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		 * @see java.lang.Object#hashCode()
 		 * @since 3.1
 		 */
+		@Override
 		public int hashCode() {
 			int low= fContextDisplayString != null ? fContextDisplayString.hashCode() : 0;
 			return fPosition << 24 | fInformationDisplayString.hashCode() << 16 | low;
@@ -183,6 +185,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 			return fIsAmbiguous;
 		}
 
+		@Override
 		public String toString() {
 			return fProposal;
 		}
@@ -198,6 +201,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	/*
 	 * @see ICompletionProposalExtension#apply(IDocument, char)
 	 */
+	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 
 		if (shouldAppendArguments(document, offset, trigger)) {
@@ -249,6 +253,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal#computeTriggerCharacters()
 	 */
+	@Override
 	protected char[] computeTriggerCharacters() {
 		return GENERIC_TYPE_TRIGGERS;
 	}
@@ -454,7 +459,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		if (!hierarchy.contains(superType))
 			return null; // no path
 
-		List path= new LinkedList();
+		List<IType> path= new LinkedList<IType>();
 		path.add(superType);
 		do {
 			// any sub type must be on a hierarchy chain from superType to subType
@@ -462,7 +467,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 			path.add(superType);
 		} while (!superType.equals(subType)); // since the equality case is handled above, we can spare one check
 
-		return (IType[]) path.toArray(new IType[path.size()]);
+		return path.toArray(new IType[path.size()]);
 	}
 
 	private NullProgressMonitor getProgressMonitor() {
@@ -600,8 +605,9 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		parser.setResolveBindings(true);
 		parser.setStatementsRecovery(true);
 
-		final Map bindings= new HashMap();
+		final Map<String, IBinding> bindings= new HashMap<String, IBinding>();
 		ASTRequestor requestor= new ASTRequestor() {
+			@Override
 			public void acceptBinding(String bindingKey, IBinding binding) {
 				bindings.put(bindingKey, binding);
 			}
@@ -758,6 +764,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	/*
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
+	@Override
 	public Point getSelection(IDocument document) {
 		if (fSelectedRegion == null)
 			return super.getSelection(document);
@@ -773,6 +780,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeContextInformation()
 	 */
+	@Override
 	protected IContextInformation computeContextInformation() {
 		try {
 			if (hasParameters()) {
@@ -785,6 +793,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		return super.computeContextInformation();
 	}
 
+	@Override
 	protected int computeCursorPosition() {
 		if (fSelectedRegion != null)
 			return fSelectedRegion.getOffset() - getReplacementOffset();

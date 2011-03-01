@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -40,7 +41,7 @@ public class SourceCreationOperation extends AbstractCodeCreationOperation {
 	 * @param packages
 	 *            the list of packages to create source for
 	 */
-	public SourceCreationOperation(final URI uri, final List packages) {
+	public SourceCreationOperation(final URI uri, final List<IPackageFragment> packages) {
 		super(uri, packages);
 	}
 
@@ -49,6 +50,7 @@ public class SourceCreationOperation extends AbstractCodeCreationOperation {
 	 *
 	 * @return the operation label
 	 */
+	@Override
 	protected String getOperationLabel() {
 		return RefactoringCoreMessages.SourceCreationOperation_creating_source_folder;
 	}
@@ -65,6 +67,7 @@ public class SourceCreationOperation extends AbstractCodeCreationOperation {
 	 * @throws CoreException
 	 *             if an error occurs
 	 */
+	@Override
 	protected void run(final IClassFile file, final IFileStore parent, final IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(getOperationLabel(), 2);

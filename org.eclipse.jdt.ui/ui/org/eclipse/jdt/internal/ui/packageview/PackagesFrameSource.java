@@ -22,6 +22,7 @@ class PackagesFrameSource extends TreeViewerFrameSource {
 		fPackagesExplorer= explorer;
 	}
 
+	@Override
 	protected TreeFrame createFrame(Object input) {
 		TreeFrame frame = super.createFrame(input);
 		frame.setName(fPackagesExplorer.getFrameName(input));

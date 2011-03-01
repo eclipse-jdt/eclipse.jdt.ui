@@ -82,6 +82,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isExtractInterfaceAvailable(selection));
@@ -96,6 +97,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			if (RefactoringAvailabilityTester.isExtractInterfaceAvailable(selection)) {
@@ -112,6 +114,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
     /*
      * @see SelectionDispatchAction#selectionChanged(ITextSelection)
      */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
@@ -122,6 +125,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isExtractInterfaceAvailable(selection));
@@ -133,6 +137,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 	/*
      * @see SelectionDispatchAction#run(ITextSelection)
      */
+	@Override
 	public void run(ITextSelection selection) {
 		try {
 			if (!ActionUtil.isEditable(fEditor))

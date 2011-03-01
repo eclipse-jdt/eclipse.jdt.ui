@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -101,6 +101,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		fSenderBinding= senderBinding;
 	}
 
+	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		CompilationUnit cu= ASTResolving.findParentCompilationUnit(fOriginalNode);
 		switch (fVariableKind) {
@@ -143,9 +144,9 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			// add javadoc tag
 			Javadoc javadoc= methodDeclaration.getJavadoc();
 			if (javadoc != null) {
-				HashSet leadingNames= new HashSet();
-				for (Iterator iter= methodDeclaration.parameters().iterator(); iter.hasNext();) {
-					SingleVariableDeclaration curr= (SingleVariableDeclaration) iter.next();
+				HashSet<String> leadingNames= new HashSet<String>();
+				for (Iterator<SingleVariableDeclaration> iter= methodDeclaration.parameters().iterator(); iter.hasNext();) {
+					SingleVariableDeclaration curr= iter.next();
 					leadingNames.add(curr.getName().getIdentifier());
 				}
 				SimpleName newTagRef= ast.newSimpleName(node.getIdentifier());
@@ -185,7 +186,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 	private boolean isForStatementInit(Statement statement, SimpleName name) {
 		if (statement instanceof ForStatement) {
 			ForStatement forStatement= (ForStatement) statement;
-			List list = forStatement.initializers();
+			List<Expression> list = forStatement.initializers();
 			if (list.size() == 1 && list.get(0) instanceof Assignment) {
 				Assignment assignment= (Assignment) list.get(0);
 				return assignment.getLeftHandSide() == name;
@@ -281,7 +282,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		addLinkedPosition(rewrite.track(newDeclFrag.getName()), false, KEY_NAME);
 
 		Statement statement= dominantStatement;
-		List list= ASTNodes.getContainingList(statement);
+		List<? extends ASTNode> list= ASTNodes.getContainingList(statement);
 		while (list == null && statement.getParent() instanceof Statement) { // parent must be if, for or while
 			statement= (Statement) statement.getParent();
 			list= ASTNodes.getContainingList(statement);
@@ -305,9 +306,9 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			return new SimpleName[] { fOriginalNode };
 		}
 		if (names.length > 1) {
-			Arrays.sort(names, new Comparator() {
-				public int compare(Object o1, Object o2) {
-					return ((SimpleName) o1).getStartPosition() - ((SimpleName) o2).getStartPosition();
+			Arrays.sort(names, new Comparator<SimpleName>() {
+				public int compare(SimpleName s1, SimpleName s2) {
+					return s1.getStartPosition() - s2.getStartPosition();
 				}
 			});
 		}
@@ -377,7 +378,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			}
 
 			ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
-			List decls= (List) newTypeDecl.getStructuralProperty(property);
+			List<BodyDeclaration> decls= (List<BodyDeclaration>) newTypeDecl.getStructuralProperty(property);
 
 			int maxOffset= isInDifferentCU ? -1 : node.getStartPosition();
 
@@ -402,10 +403,10 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		return null;
 	}
 
-	private int findFieldInsertIndex(List decls, FieldDeclaration newDecl, int maxOffset) {
+	private int findFieldInsertIndex(List<BodyDeclaration> decls, FieldDeclaration newDecl, int maxOffset) {
 		if (maxOffset != -1) {
 			for (int i= decls.size() - 1; i >= 0; i--) {
-				ASTNode curr= (ASTNode) decls.get(i);
+				BodyDeclaration curr= decls.get(i);
 				if (maxOffset > curr.getStartPosition() + curr.getLength()) {
 					return ASTNodes.getInsertionIndex(newDecl, decls.subList(0, i + 1));
 				}

@@ -103,6 +103,7 @@ public abstract class ConstraintVariable2 {
 		fTypeEquivalenceSet= set;
 	}
 
+	@Override
 	public String toString() {
 		String toString= (String) getData(TO_STRING);
 		if (toString != null)

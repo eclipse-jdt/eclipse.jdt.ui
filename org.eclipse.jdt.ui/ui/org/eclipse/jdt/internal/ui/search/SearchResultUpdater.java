@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 
@@ -46,8 +48,8 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
 	public void elementChanged(ElementChangedEvent event) {
 		//long t0= System.currentTimeMillis();
 		IJavaElementDelta delta= event.getDelta();
-		Set removedElements= new HashSet();
-		Set potentiallyRemovedElements= new HashSet();
+		Set<IAdaptable> removedElements= new HashSet<IAdaptable>();
+		Set<IAdaptable> potentiallyRemovedElements= new HashSet<IAdaptable>();
 		collectRemoved(potentiallyRemovedElements, removedElements, delta);
 		if (removedElements.size() > 0)
 			handleRemoved(removedElements);
@@ -56,7 +58,7 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
 		//System.out.println(this+"handled delta in: "+(System.currentTimeMillis()-t0));
 	}
 
-	private void handleRemoved(Set removedElements) {
+	private void handleRemoved(Set<IAdaptable> removedElements) {
 		Object[] elements= fResult.getElements();
 		for (int i= 0; i < elements.length; i++) {
 			if (isContainedInRemoved(removedElements, elements[i])) {
@@ -84,8 +86,8 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
 		}
 	}
 
-	private boolean isContainedInRemoved(Set removedElements, Object object) {
-		for (Iterator elements= removedElements.iterator(); elements.hasNext();) {
+	private boolean isContainedInRemoved(Set<IAdaptable> removedElements, Object object) {
+		for (Iterator<IAdaptable> elements= removedElements.iterator(); elements.hasNext();) {
 			if (isParentOf(elements.next(), object))
 				return true;
 		}
@@ -106,7 +108,7 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
 		return null;
 	}
 
-	private void collectRemoved(Set potentiallyRemovedSet, Set removedElements, IJavaElementDelta delta) {
+	private void collectRemoved(Set<IAdaptable> potentiallyRemovedSet, Set<IAdaptable> removedElements, IJavaElementDelta delta) {
 		if (delta.getKind() == IJavaElementDelta.REMOVED)
 			removedElements.add(delta.getElement());
 		else if (delta.getKind() == IJavaElementDelta.CHANGED) {
@@ -139,7 +141,7 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
 		}
 	}
 
-	private void collectRemovals(Set removals, IResourceDelta delta) {
+	private void collectRemovals(Set<IAdaptable> removals, IResourceDelta delta) {
 		if (delta.getKind() == IResourceDelta.REMOVED)
 			removals.add(delta.getResource());
 		else {

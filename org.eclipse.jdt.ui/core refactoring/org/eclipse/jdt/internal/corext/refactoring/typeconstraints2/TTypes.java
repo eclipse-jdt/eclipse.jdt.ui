@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,11 +20,11 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeVar
 
 public class TTypes {
 
-	private static class AllSupertypesIterator implements Iterator {
-		private final Stack fWorklist;
+	private static class AllSupertypesIterator implements Iterator<TType> {
+		private final Stack<TType> fWorklist;
 
 		public AllSupertypesIterator(TType type) {
-			fWorklist= new Stack();
+			fWorklist= new Stack<TType>();
 			pushSupertypes(type);
 		}
 
@@ -32,8 +32,8 @@ public class TTypes {
 			return ! fWorklist.empty();
 		}
 
-		public Object next() {
-			TType result= (TType) fWorklist.pop();
+		public TType next() {
+			TType result= fWorklist.pop();
 			pushSupertypes(result);
 			return result;
 		}
@@ -66,11 +66,11 @@ public class TTypes {
 		}
 	}
 
-	private static class AllSubtypesIterator implements Iterator {
-		private final Stack fWorklist;
+	private static class AllSubtypesIterator implements Iterator<TType> {
+		private final Stack<TType> fWorklist;
 
 		public AllSubtypesIterator(TType type) {
-			fWorklist= new Stack();
+			fWorklist= new Stack<TType>();
 			fWorklist.push(type.getTypeDeclaration());
 		}
 
@@ -78,8 +78,8 @@ public class TTypes {
 			return ! fWorklist.empty();
 		}
 
-		public Object next() {
-			TType result= (TType) fWorklist.pop();
+		public TType next() {
+			TType result= fWorklist.pop();
 			TType[] subTypes= result.getSubTypes();
 			for (int i= 0; i < subTypes.length; i++)
 				fWorklist.push(subTypes[i].getTypeDeclaration());
@@ -103,14 +103,14 @@ public class TTypes {
 	/**
 	 * @return all subtypes of this type (including this type)
 	 */
-	public static Iterator getAllSubTypesIterator(TType type) {
+	public static Iterator<TType> getAllSubTypesIterator(TType type) {
 		return new AllSubtypesIterator(type);
 	}
 
 	/**
 	 * @return all proper supertypes of this type
 	 */
-	public static Iterator getAllSuperTypesIterator(TType type) {
+	public static Iterator<TType> getAllSuperTypesIterator(TType type) {
 		return new AllSupertypesIterator(type);
 	}
 

@@ -28,6 +28,7 @@ public class CreateLinkedSourceFolderAction2 extends CreateLinkedSourceFolderAct
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void selectAndReveal(ISelection selection) {
 	    fProvider.handleFolderCreation(((StructuredSelection)selection).toList());
 

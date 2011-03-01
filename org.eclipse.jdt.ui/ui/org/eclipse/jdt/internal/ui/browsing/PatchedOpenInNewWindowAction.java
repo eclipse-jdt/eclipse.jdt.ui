@@ -38,6 +38,7 @@ public class PatchedOpenInNewWindowAction extends OpenInNewWindowAction {
 		fWorkbenchWindow= window;
 	}
 
+	@Override
 	public void run() {
 		JavaBrowsingPerspectiveFactory.setInputFromAction(getSelectedJavaElement());
 		try {

@@ -86,6 +86,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 	public void setCompletionContext(final ICompilationUnit cuHandle, final String beforeString, final String afterString) {
 		fCompletionContextRequestor= new CompletionContextRequestor() {
 			final StubTypeContext fStubTypeContext= new StubTypeContext(cuHandle, beforeString, afterString);
+			@Override
 			public StubTypeContext getStubTypeContext() {
 				return fStubTypeContext;
 			}
@@ -211,20 +212,21 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 
 		private int fOffsetReduction;
 
-		private List fProposals;
+		private List<JavaCompletionProposal> fProposals;
 		private String fErrorMessage2;
 
 		private void setOffsetReduction(int offsetReduction) {
 			fOffsetReduction= offsetReduction;
-			fProposals= new ArrayList();
+			fProposals= new ArrayList<JavaCompletionProposal>();
 		}
 
+		@Override
 		public final void completionFailure(IProblem error) {
 			fErrorMessage2= error.getMessage();
 		}
 
 		public final JavaCompletionProposal[] getResults() {
-			return (JavaCompletionProposal[]) fProposals.toArray(new JavaCompletionProposal[fProposals.size()]);
+			return fProposals.toArray(new JavaCompletionProposal[fProposals.size()]);
 		}
 
 		public final String getErrorMessage() {

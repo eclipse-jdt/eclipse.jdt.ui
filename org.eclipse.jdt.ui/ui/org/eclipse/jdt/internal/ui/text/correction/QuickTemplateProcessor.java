@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -152,20 +152,18 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 				}
 			}
 
-			ArrayList resultingCollections= new ArrayList();
+			ArrayList<IJavaCompletionProposal> resultingCollections= new ArrayList<IJavaCompletionProposal>();
 			collectSurroundTemplates(document, cu, offset, length, resultingCollections, contextId);
 			sort(resultingCollections);
-			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
+			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		} catch (BadLocationException e) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, "", e)); //$NON-NLS-1$
 		}
 	}
 
-	private void sort(ArrayList proposals) {
-		Collections.sort(proposals, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				IJavaCompletionProposal p1= (IJavaCompletionProposal)o1;
-				IJavaCompletionProposal p2= (IJavaCompletionProposal)o2;
+	private void sort(ArrayList<IJavaCompletionProposal> proposals) {
+		Collections.sort(proposals, new Comparator<IJavaCompletionProposal>() {
+			public int compare(IJavaCompletionProposal p1, IJavaCompletionProposal p2) {
 				return Collator.getInstance().compare(p1.getDisplayString(), p2.getDisplayString());
 			}
 		});
@@ -180,7 +178,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		return document;
 	}
 
-	private void collectSurroundTemplates(IDocument document, ICompilationUnit cu, int offset, int length, Collection result, String contextId) throws BadLocationException, CoreException {
+	private void collectSurroundTemplates(IDocument document, ICompilationUnit cu, int offset, int length, Collection<IJavaCompletionProposal> result, String contextId) throws BadLocationException, CoreException {
 		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(contextId);
 		CompilationUnitContext context= contextType.createContext(document, offset, length, cu);
 		context.setVariable("selection", document.get(offset, length)); //$NON-NLS-1$
@@ -210,6 +208,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 						/**
 						 * {@inheritDoc}
 						 */
+						@Override
 						public boolean validate(IDocument doc, int off, DocumentEvent event) {
 							return false;
 						}

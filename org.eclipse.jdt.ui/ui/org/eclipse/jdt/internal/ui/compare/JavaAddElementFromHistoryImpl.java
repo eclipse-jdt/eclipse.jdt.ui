@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -79,6 +80,7 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 		super(true);
 	}
 
+	@Override
 	public void run(ISelection selection) {
 
 		String errorTitle= CompareMessages.AddFromHistory_title;
@@ -194,12 +196,12 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 					} else if (parent instanceof IType) {
 						ASTNode declaration= getBodyContainer(root, (IType)parent);
 						if (declaration instanceof TypeDeclaration || declaration instanceof AnnotationTypeDeclaration) {
-							List container= ASTNodes.getBodyDeclarations(declaration);
+							List<BodyDeclaration> container= ASTNodes.getBodyDeclarations(declaration);
 							int index= ASTNodes.getInsertionIndex((BodyDeclaration)newNode, container);
 							ListRewrite lw= rewriter.getListRewrite(declaration, ASTNodes.getBodyDeclarationsProperty(declaration));
 							lw.insertAt(newNode, index, null);
 						} else if (declaration instanceof EnumDeclaration) {
-							List container= ((EnumDeclaration)declaration).enumConstants();
+							List<EnumConstantDeclaration> container= ((EnumDeclaration)declaration).enumConstants();
 							int index= ASTNodes.getInsertionIndex((FieldDeclaration)newNode, container);
 							ListRewrite lw= rewriter.getListRewrite(declaration, EnumDeclaration.ENUM_CONSTANTS_PROPERTY);
 							lw.insertAt(newNode, index, null);
@@ -211,7 +213,7 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 				}
 			}
 
-			Map options= null;
+			Map<String, String> options= null;
 			IJavaProject javaProject= cu2.getJavaProject();
 			if (javaProject != null)
 				options= javaProject.getOptions(true);
@@ -305,6 +307,7 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 		return -1;
 	}
 
+	@Override
 	protected boolean isEnabled(ISelection selection) {
 
 		if (selection.isEmpty()) {

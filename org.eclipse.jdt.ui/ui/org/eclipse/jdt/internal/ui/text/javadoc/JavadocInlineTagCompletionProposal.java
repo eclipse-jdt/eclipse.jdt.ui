@@ -37,6 +37,7 @@ public final class JavadocInlineTagCompletionProposal extends LazyJavaCompletion
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeReplacementString()
 	 */
+	@Override
 	protected String computeReplacementString() {
 		String replacement= super.computeReplacementString();
 		// TODO respect the auto-close preference, but do so consistently with method completions
@@ -49,6 +50,7 @@ public final class JavadocInlineTagCompletionProposal extends LazyJavaCompletion
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal#apply(org.eclipse.jface.text.IDocument, char, int)
 	 */
+	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 		// TODO respect the auto-close preference, but do so consistently with method completions
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544

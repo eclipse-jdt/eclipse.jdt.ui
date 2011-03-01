@@ -85,6 +85,7 @@ public class ReplaceInvocationsInputPage extends UserInputWizardPage {
 		replaceAll.setEnabled(false); // does not work for now...
 		replaceAll.setSelection(! canSingle);
 		replaceAll.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				boolean all= ((Button) event.widget).getSelection();
 				changeMode(all ? ReplaceInvocationsRefactoring.Mode.REPLACE_ALL : ReplaceInvocationsRefactoring.Mode.REPLACE_SINGLE);

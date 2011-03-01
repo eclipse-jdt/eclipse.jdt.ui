@@ -78,6 +78,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 	/*
 	 * @see StructuredViewer#mapElement(Object, Widget)
 	 */
+	@Override
 	protected void mapElement(Object element, Widget item) {
 		super.mapElement(element, item);
 		if (item instanceof Item) {
@@ -88,6 +89,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 	/*
 	 * @see StructuredViewer#unmapElement(Object, Widget)
 	 */
+	@Override
 	protected void unmapElement(Object element, Widget item) {
 		if (item instanceof Item) {
 			fResourceToItemsMapper.removeFromMap(element, (Item) item);
@@ -98,6 +100,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 	/*
 	 * @see StructuredViewer#unmapAllElements()
 	 */
+	@Override
 	protected void unmapAllElements() {
 		fResourceToItemsMapper.clearMap();
 		super.unmapAllElements();
@@ -106,6 +109,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 	/*
 	 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 	 */
+	@Override
 	protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
 		if (event instanceof ProblemsLabelChangedEvent) {
 			ProblemsLabelChangedEvent e= (ProblemsLabelChangedEvent) event;
@@ -116,7 +120,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 
 		Object[] changed= event.getElements();
 		if (changed != null && !fResourceToItemsMapper.isEmpty()) {
-			ArrayList others= new ArrayList(changed.length);
+			ArrayList<Object> others= new ArrayList<Object>(changed.length);
 			for (int i= 0; i < changed.length; i++) {
 				Object curr= changed[i];
 				if (curr instanceof IResource) {

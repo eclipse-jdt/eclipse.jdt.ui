@@ -67,34 +67,40 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 			fRelevance= relevance;
 		}
 
+		@Override
 		public String getAdditionalProposalInfo() {
 			return fDescription;
 		}
 
+		@Override
 		public Change createChange(IProgressMonitor monitor) {
 			return fChange;
 		}
 
+		@Override
 		public String getDisplayString() {
 			return fName;
 		}
 
+		@Override
 		public Image getImage() {
 			return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		}
 
+		@Override
 		public int getRelevance() {
 			return fRelevance;
 		}
 	}
 
+	@Override
 	public ClasspathFixProposal[] getFixImportProposals(IJavaProject project, String missingType) throws CoreException {
-		ArrayList res= new ArrayList();
+		ArrayList<DefaultClasspathFixProposal> res= new ArrayList<DefaultClasspathFixProposal>();
 		collectProposals(project, missingType, res);
-		return (ClasspathFixProposal[]) res.toArray(new ClasspathFixProposal[res.size()]);
+		return res.toArray(new ClasspathFixProposal[res.size()]);
 	}
 
-	private void collectProposals(IJavaProject project, String name, Collection proposals) throws CoreException {
+	private void collectProposals(IJavaProject project, String name, Collection<DefaultClasspathFixProposal> proposals) throws CoreException {
 		int idx= name.lastIndexOf('.');
 		char[] packageName= idx != -1 ? name.substring(0, idx).toCharArray() : null; // no package provided
 		char[] typeName= name.substring(idx + 1).toCharArray();
@@ -104,7 +110,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 		}
 
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
-		ArrayList res= new ArrayList();
+		ArrayList<TypeNameMatch> res= new ArrayList<TypeNameMatch>();
 		TypeNameMatchCollector requestor= new TypeNameMatchCollector(res);
 		int matchMode= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
 		new SearchEngine().searchAllTypeNames(packageName, matchMode, typeName,
@@ -114,9 +120,9 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 		if (res.isEmpty()) {
 			return;
 		}
-		HashSet addedClaspaths= new HashSet();
+		HashSet<Object> addedClaspaths= new HashSet<Object>();
 		for (int i= 0; i < res.size(); i++) {
-			TypeNameMatch curr= (TypeNameMatch) res.get(i);
+			TypeNameMatch curr= res.get(i);
 			IType type= curr.getType();
 			if (type != null) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
@@ -165,7 +171,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 		}
 	}
 
-	private void addLibraryProposal(IJavaProject project, IPackageFragmentRoot root, IClasspathEntry entry, Collection addedClaspaths, Collection proposals) throws JavaModelException {
+	private void addLibraryProposal(IJavaProject project, IPackageFragmentRoot root, IClasspathEntry entry, Collection<Object> addedClaspaths, Collection<DefaultClasspathFixProposal> proposals) throws JavaModelException {
 		if (addedClaspaths.add(entry)) {
 			String label= getAddClasspathLabel(entry, root, project);
 			if (label != null) {

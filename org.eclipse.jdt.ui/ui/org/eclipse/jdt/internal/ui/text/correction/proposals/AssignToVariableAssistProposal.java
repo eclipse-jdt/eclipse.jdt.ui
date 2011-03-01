@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -120,6 +120,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
 	}
 
+	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		if (fVariableKind == FIELD) {
 			return doAddField();
@@ -284,7 +285,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 
 		ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
-		List decls= (List) newTypeDecl.getStructuralProperty(property);
+		List<BodyDeclaration> decls= (List<BodyDeclaration>) newTypeDecl.getStructuralProperty(property);
 		AST ast= newTypeDecl.getAST();
 		String[] varNames= suggestFieldNames(fTypeBinding, expression, modifiers);
 		for (int i= 0; i < varNames.length; i++) {
@@ -332,22 +333,22 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		return StubUtility.getVariableNameSuggestions(varKind, project, binding, expression, getUsedVariableNames());
 	}
 
-	private Collection getUsedVariableNames() {
+	private Collection<String> getUsedVariableNames() {
 		return Arrays.asList(ASTResolving.getUsedVariableNames(fNodeToAssign));
 	}
 
-	private int findAssignmentInsertIndex(List statements) {
+	private int findAssignmentInsertIndex(List<Statement> statements) {
 
-		HashSet paramsBefore= new HashSet();
-		List params = ((MethodDeclaration) fNodeToAssign.getParent()).parameters();
+		HashSet<String> paramsBefore= new HashSet<String>();
+		List<SingleVariableDeclaration> params = ((MethodDeclaration) fNodeToAssign.getParent()).parameters();
 		for (int i = 0; i < params.size() && (params.get(i) != fNodeToAssign); i++) {
-			SingleVariableDeclaration decl= (SingleVariableDeclaration) params.get(i);
+			SingleVariableDeclaration decl= params.get(i);
 			paramsBefore.add(decl.getName().getIdentifier());
 		}
 
 		int i= 0;
 		for (i = 0; i < statements.size(); i++) {
-			Statement curr= (Statement) statements.get(i);
+			Statement curr= statements.get(i);
 			switch (curr.getNodeType()) {
 				case ASTNode.CONSTRUCTOR_INVOCATION:
 				case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
@@ -374,9 +375,9 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	}
 
-	private int findFieldInsertIndex(List decls, int currPos) {
+	private int findFieldInsertIndex(List<BodyDeclaration> decls, int currPos) {
 		for (int i= decls.size() - 1; i >= 0; i--) {
-			ASTNode curr= (ASTNode) decls.get(i);
+			ASTNode curr= decls.get(i);
 			if (curr instanceof FieldDeclaration && currPos > curr.getStartPosition() + curr.getLength()) {
 				return i + 1;
 			}

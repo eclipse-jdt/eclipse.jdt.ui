@@ -59,6 +59,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void dispose() {
 		fWorkingSetModel.removePropertyChangeListener(fListener);
 		super.dispose();
@@ -67,6 +68,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean hasChildren(Object element) {
 		if (element instanceof IWorkingSet)
 			return true;
@@ -76,6 +78,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Object[] getChildren(Object element) {
 		Object[] children;
 		if (element instanceof WorkingSetModel) {
@@ -91,7 +94,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 
 	private Object[] getWorkingSetChildren(IWorkingSet set) {
 		IAdaptable[] elements= fWorkingSetModel.getChildren(set);
-		Set result= new HashSet(elements.length);
+		Set<IAdaptable> result= new HashSet<IAdaptable>(elements.length);
 		for (int i= 0; i < elements.length; i++) {
 			IAdaptable element= elements[i];
 			if (element instanceof IProject) {
@@ -119,7 +122,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		return result.toArray();
 	}
 
-	private void processResource(IResource resource, Collection result) {
+	private void processResource(IResource resource, Collection<IAdaptable> result) {
 		IJavaElement elem= JavaCore.create(resource);
 		if (elem != null && elem.exists()) {
 			result.add(elem);
@@ -143,16 +146,16 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 			TreePath path= new TreePath(new Object[] {element});
 			return new TreePath[] {path};
 		}
-		List modelParents= getModelPath(element);
-		List result= new ArrayList();
+		List<Object> modelParents= getModelPath(element);
+		List<TreePath> result= new ArrayList<TreePath>();
 		for (int i= 0; i < modelParents.size(); i++) {
 			result.addAll(getTreePaths(modelParents, i));
 		}
-		return (TreePath[])result.toArray(new TreePath[result.size()]);
+		return result.toArray(new TreePath[result.size()]);
 	}
 
-	private List getModelPath(Object element) {
-		List result= new ArrayList();
+	private List<Object> getModelPath(Object element) {
+		List<Object> result= new ArrayList<Object>();
 		result.add(element);
 		Object parent= super.getParent(element);
 		Object input= getViewerInput();
@@ -165,13 +168,13 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		return result;
 	}
 
-	private List/*<TreePath>*/ getTreePaths(List modelParents, int index) {
-		List result= new ArrayList();
+	private List<TreePath> getTreePaths(List<Object> modelParents, int index) {
+		List<TreePath> result= new ArrayList<TreePath>();
 		Object input= getViewerInput();
 		Object element= modelParents.get(index);
 		Object[] parents= fWorkingSetModel.getAllParents(element);
 		for (int i= 0; i < parents.length; i++) {
-			List chain= new ArrayList();
+			List<Object> chain= new ArrayList<Object>();
 			if (!parents[i].equals(input))
 				chain.add(parents[i]);
 			for (int m= index; m < modelParents.size(); m++) {
@@ -185,6 +188,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Object getParent(Object child) {
 		Object[] parents= fWorkingSetModel.getAllParents(child);
 		if(parents.length == 0)
@@ -193,7 +197,8 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		return first;
 	}
 
-	protected void augmentElementToRefresh(List toRefresh, int relation, Object affectedElement) {
+	@Override
+	protected void augmentElementToRefresh(List<Object> toRefresh, int relation, Object affectedElement) {
 		// we are refreshing the JavaModel and are in working set mode.
 		if (JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).equals(affectedElement)) {
 			toRefresh.remove(affectedElement);
@@ -204,11 +209,11 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 				toRefresh.addAll(Arrays.asList(fWorkingSetModel.getAllParents(parent)));
 			}
 		}
-		List nonProjetTopLevelElemens= fWorkingSetModel.getNonProjectTopLevelElements();
+		List<IAdaptable> nonProjetTopLevelElemens= fWorkingSetModel.getNonProjectTopLevelElements();
 		if (nonProjetTopLevelElemens.isEmpty())
 			return;
-		List toAdd= new ArrayList();
-		for (Iterator iter= nonProjetTopLevelElemens.iterator(); iter.hasNext();) {
+		List<Object> toAdd= new ArrayList<Object>();
+		for (Iterator<IAdaptable> iter= nonProjetTopLevelElemens.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (isChildOf(element, toRefresh))
 				toAdd.add(element);
@@ -219,7 +224,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 	private void workingSetModelChanged(PropertyChangeEvent event) {
 		String property= event.getProperty();
 		Object newValue= event.getNewValue();
-		List toRefresh= new ArrayList(1);
+		List<Object> toRefresh= new ArrayList<Object>(1);
 		if (WorkingSetModel.CHANGE_WORKING_SET_MODEL_CONTENT.equals(property)) {
 			toRefresh.add(fWorkingSetModel);
 		} else if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
@@ -227,17 +232,17 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		} else if (IWorkingSetManager.CHANGE_WORKING_SET_LABEL_CHANGE.equals(property)) {
 			toRefresh.add(newValue);
 		}
-		ArrayList runnables= new ArrayList();
+		ArrayList<Runnable> runnables= new ArrayList<Runnable>();
 		postRefresh(toRefresh, true, runnables);
 		executeRunnables(runnables);
 	}
 
-	private boolean isChildOf(Object element, List potentialParents) {
+	private boolean isChildOf(Object element, List<Object> potentialParents) {
 		// Calling super get parent to bypass working set mapping
 		Object parent= super.getParent(element);
 		if (parent == null)
 			return false;
-		for (Iterator iter= potentialParents.iterator(); iter.hasNext();) {
+		for (Iterator<Object> iter= potentialParents.iterator(); iter.hasNext();) {
 			Object potentialParent= iter.next();
 			while(parent != null) {
 				if (parent.equals(potentialParent))

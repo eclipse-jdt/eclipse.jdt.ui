@@ -107,17 +107,17 @@ class TextMatchUpdater {
 
 	private IProject[] getProjectsInScope() {
 		IPath[] enclosingProjects= fScope.enclosingProjectsAndJars();
-		Set enclosingProjectSet= new HashSet();
+		Set<IPath> enclosingProjectSet= new HashSet<IPath>();
 		enclosingProjectSet.addAll(Arrays.asList(enclosingProjects));
 
-		ArrayList projectsInScope= new ArrayList();
+		ArrayList<IProject> projectsInScope= new ArrayList<IProject>();
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i =0 ; i < projects.length; i++){
 			if (enclosingProjectSet.contains(projects[i].getFullPath()))
 				projectsInScope.add(projects[i]);
 		}
 
-		return (IProject[]) projectsInScope.toArray(new IProject[projectsInScope.size()]);
+		return projectsInScope.toArray(new IProject[projectsInScope.size()]);
 	}
 
 	private void addTextMatches(IResource resource, IProgressMonitor pm) throws JavaModelException{
@@ -156,7 +156,7 @@ class TextMatchUpdater {
 
 	private void addCuTextMatches(ICompilationUnit cu) throws JavaModelException{
 		fScanner.scan(cu);
-		Set matches= fScanner.getMatches(); //Set of TextMatch
+		Set<TextMatch> matches= fScanner.getMatches(); //Set of TextMatch
 		if (matches.size() == 0)
 			return;
 
@@ -165,7 +165,7 @@ class TextMatchUpdater {
 			addTextUpdates(cu, matches);
 	}
 
-	private void removeReferences(ICompilationUnit cu, Set matches) {
+	private void removeReferences(ICompilationUnit cu, Set<TextMatch> matches) {
 		for (int i= 0; i < fReferences.length; i++) {
 			SearchResultGroup group= fReferences[i];
 			if (cu.equals(group.getCompilationUnit())) {
@@ -174,22 +174,22 @@ class TextMatchUpdater {
 		}
 	}
 
-	private void removeReferences(Set matches, SearchResultGroup group) {
+	private void removeReferences(Set<TextMatch> matches, SearchResultGroup group) {
 		SearchMatch[] searchResults= group.getSearchResults();
 		for (int r= 0; r < searchResults.length; r++) {
 			//int start= searchResults[r].getStart(); // doesn't work for pack.ReferencedType
 			int unqualifiedStart= searchResults[r].getOffset() + searchResults[r].getLength() - fCurrentNameLength;
-			for (Iterator iter= matches.iterator(); iter.hasNext();) {
-				TextMatch element= (TextMatch) iter.next();
+			for (Iterator<TextMatch> iter= matches.iterator(); iter.hasNext();) {
+				TextMatch element= iter.next();
 				if (element.getStartPosition() == unqualifiedStart)
 					iter.remove();
 			}
 		}
 	}
 
-	private void addTextUpdates(ICompilationUnit cu, Set matches) {
-		for (Iterator resultIter= matches.iterator(); resultIter.hasNext();){
-			TextMatch match= (TextMatch) resultIter.next();
+	private void addTextUpdates(ICompilationUnit cu, Set<TextMatch> matches) {
+		for (Iterator<TextMatch> resultIter= matches.iterator(); resultIter.hasNext();){
+			TextMatch match= resultIter.next();
 			if (!match.isQualified() && fOnlyQualified)
 				continue;
 			int matchStart= match.getStartPosition();

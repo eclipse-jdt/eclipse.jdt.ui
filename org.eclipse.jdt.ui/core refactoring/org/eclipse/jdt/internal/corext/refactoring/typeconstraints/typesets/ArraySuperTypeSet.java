@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#anyMember()
 	 */
+	@Override
 	public TType anyMember() {
 		return getJavaLangObject();
 	}
@@ -39,6 +40,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#contains(TType)
 	 */
+	@Override
 	public boolean contains(TType t) {
 		if (t.equals(getJavaLangObject())) return true;
 		if (!(t instanceof ArrayType))
@@ -50,8 +52,8 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 		if (fElemTypeSet.contains(atElemType)) // try to avoid enumeration
 			return true;
 
-		for(Iterator iter= fElemTypeSet.iterator(); iter.hasNext(); ) {
-			TType elemType= (TType) iter.next();
+		for(Iterator<TType> iter= fElemTypeSet.iterator(); iter.hasNext(); ) {
+			TType elemType= iter.next();
 
 			if (TTypes.canAssignTo(elemType, atElemType))
 				return true;
@@ -62,6 +64,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#containsAll(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
 	 */
+	@Override
 	public boolean containsAll(TypeSet s) {
 		if (s instanceof ArraySuperTypeSet) {
 			ArraySuperTypeSet ats= (ArraySuperTypeSet) s;
@@ -78,6 +81,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#specialCasesIntersectedWith(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
 	 */
+	@Override
 	protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
 		if (s2 instanceof ArraySuperTypeSet) {
 			ArraySuperTypeSet ats2= (ArraySuperTypeSet) s2;
@@ -98,13 +102,14 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#enumerate()
 	 */
+	@Override
 	public EnumeratedTypeSet enumerate() {
 		if (fEnumCache == null) {
 			fEnumCache= new EnumeratedTypeSet(getTypeSetEnvironment());
 			TypeSet elemSupers= fElemTypeSet.superTypes();
 
-			for(Iterator iter= elemSupers.iterator(); iter.hasNext(); ) {
-				TType elemSuper= (TType) iter.next();
+			for(Iterator<TType> iter= elemSupers.iterator(); iter.hasNext(); ) {
+				TType elemSuper= iter.next();
 
 				fEnumCache.add(TTypes.createArrayType(elemSuper, 1));
 			}
@@ -118,6 +123,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#hasUniqueUpperBound()
 	 */
+	@Override
 	public boolean hasUniqueUpperBound() {
 		return true; // Object is the unique upper bound of any set of array types
 	}
@@ -125,6 +131,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#isSingleton()
 	 */
+	@Override
 	public boolean isSingleton() {
 		return false;
 	}
@@ -132,6 +139,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#isUniverse()
 	 */
+	@Override
 	public boolean isUniverse() {
 		return false;
 	}
@@ -139,13 +147,15 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#iterator()
 	 */
-	public Iterator iterator() {
+	@Override
+	public Iterator<TType> iterator() {
 		return enumerate().iterator();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#makeClone()
 	 */
+	@Override
 	public TypeSet makeClone() {
 		return new ArraySuperTypeSet(fElemTypeSet);
 	}
@@ -153,6 +163,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#superTypes()
 	 */
+	@Override
 	public TypeSet superTypes() {
 		return makeClone();
 	}
@@ -160,6 +171,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#uniqueUpperBound()
 	 */
+	@Override
 	public TType uniqueUpperBound() {
 		return getJavaLangObject();
 	}
@@ -167,6 +179,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#upperBound()
 	 */
+	@Override
 	public TypeSet upperBound() {
 		return new SingletonTypeSet(getJavaLangObject(), getTypeSetEnvironment());
 	}
@@ -174,6 +187,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
 		if (obj instanceof ArraySuperTypeSet) {
@@ -187,10 +201,12 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#subTypes()
 	 */
+	@Override
 	public TypeSet subTypes() {
 		return getTypeSetEnvironment().getUniverseTypeSet();
 	}
 
+	@Override
 	public String toString() {
 		return "{" + fID + ": array-super(" + fElemTypeSet + ")}"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}

@@ -56,7 +56,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class CompilationUnitRewrite {
 	//TODO: add RefactoringStatus fStatus;?
 	private ICompilationUnit fCu;
-	private List/*<TextEditGroup>*/ fTextEditGroups= new ArrayList();
+	private List<TextEditGroup> fTextEditGroups= new ArrayList<TextEditGroup>();
 
 	private CompilationUnit fRoot; // lazily initialized
 	private ASTRewrite fRewrite; // lazily initialized
@@ -149,7 +149,7 @@ public class CompilationUnitRewrite {
 
 	public void clearASTRewrite() {
 		fRewrite= null;
-		fTextEditGroups= new ArrayList();
+		fTextEditGroups= new ArrayList<TextEditGroup>();
 	}
 
 	public void clearImportRewrites() {
@@ -273,8 +273,8 @@ public class CompilationUnitRewrite {
 				if (!isEmptyEdit(rewriteEdit)) {
 					multiEdit.addChild(rewriteEdit);
 					if (generateGroups) {
-						for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
-							TextEditGroup group= (TextEditGroup) iter.next();
+						for (Iterator<TextEditGroup> iter= fTextEditGroups.iterator(); iter.hasNext();) {
+							TextEditGroup group= iter.next();
 							cuChange.addTextEditGroup(group);
 						}
 					}
@@ -363,8 +363,8 @@ public class CompilationUnitRewrite {
 	}
 
 	public void clearGroupDescriptions() {
-		for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
-			TextEditGroup group= (TextEditGroup) iter.next();
+		for (Iterator<TextEditGroup> iter= fTextEditGroups.iterator(); iter.hasNext();) {
+			TextEditGroup group= iter.next();
 			group.clearTextEdits();
 		}
 	}

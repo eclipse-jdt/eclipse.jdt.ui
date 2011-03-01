@@ -35,6 +35,7 @@ public class SourcePositionComparator extends ViewerComparator {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerSorter#compare(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
+	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		if (!(e1 instanceof ISourceReference))
 			return 0;

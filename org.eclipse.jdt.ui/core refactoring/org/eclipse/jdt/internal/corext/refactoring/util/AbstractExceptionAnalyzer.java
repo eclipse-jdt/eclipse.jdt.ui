@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,21 +29,25 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 
-	private List fCurrentExceptions;	// Elements in this list are of type TypeBinding
-	private Stack fTryStack;
+	private List<ITypeBinding> fCurrentExceptions;	// Elements in this list are of type TypeBinding
+	private Stack<List<ITypeBinding>> fTryStack;
 
 	protected AbstractExceptionAnalyzer() {
-		fTryStack= new Stack();
-		fCurrentExceptions= new ArrayList(1);
+		fTryStack= new Stack<List<ITypeBinding>>();
+		fCurrentExceptions= new ArrayList<ITypeBinding>(1);
 		fTryStack.push(fCurrentExceptions);
 	}
 
+	@Override
 	public abstract boolean visit(ThrowStatement node);
 
+	@Override
 	public abstract boolean visit(MethodInvocation node);
 
+	@Override
 	public abstract boolean visit(ClassInstanceCreation node);
 
+	@Override
 	public boolean visit(TypeDeclaration node) {
 		// Don't dive into a local type.
 		if (node.isLocalTypeDeclaration())
@@ -51,6 +55,7 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 		return true;
 	}
 
+	@Override
 	public boolean visit(EnumDeclaration node) {
 		// Don't dive into a local type.
 		if (node.isLocalTypeDeclaration())
@@ -58,6 +63,7 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 		return true;
 	}
 
+	@Override
 	public boolean visit(AnnotationTypeDeclaration node) {
 		// Don't dive into a local type.
 		if (node.isLocalTypeDeclaration())
@@ -65,31 +71,33 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 		return true;
 	}
 
+	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
 		// Don't dive into a local type.
 		return false;
 	}
 
+	@Override
 	public boolean visit(TryStatement node) {
-		fCurrentExceptions= new ArrayList(1);
+		fCurrentExceptions= new ArrayList<ITypeBinding>(1);
 		fTryStack.push(fCurrentExceptions);
 
 		// visit try block
 		node.getBody().accept(this);
 
 		// Remove those exceptions that get catch by following catch blocks
-		List catchClauses= node.catchClauses();
+		List<CatchClause> catchClauses= node.catchClauses();
 		if (!catchClauses.isEmpty())
 			handleCatchArguments(catchClauses);
-		List current= (List)fTryStack.pop();
-		fCurrentExceptions= (List)fTryStack.peek();
-		for (Iterator iter= current.iterator(); iter.hasNext();) {
-			addException((ITypeBinding)iter.next());
+		List<ITypeBinding> current= fTryStack.pop();
+		fCurrentExceptions= fTryStack.peek();
+		for (Iterator<ITypeBinding> iter= current.iterator(); iter.hasNext();) {
+			addException(iter.next());
 		}
 
 		// visit catch and finally
-		for (Iterator iter= catchClauses.iterator(); iter.hasNext(); ) {
-			((CatchClause)iter.next()).accept(this);
+		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext(); ) {
+			iter.next().accept(this);
 		}
 		if (node.getFinally() != null)
 			node.getFinally().accept(this);
@@ -111,18 +119,18 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 			fCurrentExceptions.add(exception);
 	}
 
-	protected List getCurrentExceptions() {
+	protected List<ITypeBinding> getCurrentExceptions() {
 		return fCurrentExceptions;
 	}
 
-	private void handleCatchArguments(List catchClauses) {
-		for (Iterator iter= catchClauses.iterator(); iter.hasNext(); ) {
-			CatchClause clause= (CatchClause)iter.next();
+	private void handleCatchArguments(List<CatchClause> catchClauses) {
+		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext(); ) {
+			CatchClause clause= iter.next();
 			ITypeBinding catchTypeBinding= clause.getException().getType().resolveBinding();
 			if (catchTypeBinding == null)	// No correct type resolve.
 				continue;
-			for (Iterator exceptions= new ArrayList(fCurrentExceptions).iterator(); exceptions.hasNext(); ) {
-				ITypeBinding throwTypeBinding= (ITypeBinding)exceptions.next();
+			for (Iterator<ITypeBinding> exceptions= new ArrayList<ITypeBinding>(fCurrentExceptions).iterator(); exceptions.hasNext(); ) {
+				ITypeBinding throwTypeBinding= exceptions.next();
 				if (catches(catchTypeBinding, throwTypeBinding))
 					fCurrentExceptions.remove(throwTypeBinding);
 			}

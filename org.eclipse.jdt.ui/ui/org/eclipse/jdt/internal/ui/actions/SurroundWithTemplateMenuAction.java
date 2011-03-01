@@ -88,6 +88,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void run() {
 			PreferencesUtil.createPreferenceDialogOn(getShell(), JAVA_TEMPLATE_PREFERENCE_PAGE_ID, new String[] {JAVA_TEMPLATE_PREFERENCE_PAGE_ID}, null).open();
 		}
@@ -98,9 +99,11 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 	}
 
 	private static Action NONE_APPLICABLE_ACTION= new Action(ActionMessages.SurroundWithTemplateMenuAction_NoneApplicable) {
+		@Override
 		public void run() {
 			//Do nothing
 		}
+		@Override
 		public boolean isEnabled() {
 			return false;
 		}
@@ -223,6 +226,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		final CompilationUnitEditor editor= (CompilationUnitEditor)activePart;
 
 		new JDTQuickMenuCreator(editor) {
+			@Override
 			protected void fillMenu(IMenuManager menu) {
 				SurroundWithTryCatchAction surroundWithTryCatch= createSurroundWithTryCatchAction(editor);
 				SurroundWithTemplateMenuAction.fillMenu(menu, editor, surroundWithTryCatch);
@@ -301,6 +305,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 
 	protected void initMenu() {
 		fMenu.addMenuListener(new MenuAdapter() {
+			@Override
 			public void menuShown(MenuEvent e) {
 				Menu m = (Menu)e.widget;
 				MenuItem[] items = m.getItems();
@@ -370,7 +375,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 	}
 
 	private static IAction[] getActionsFromProposals(IJavaCompletionProposal[] proposals, final int offset, final ITextViewer viewer) {
-		List result= new ArrayList();
+		List<Action> result= new ArrayList<Action>();
 
 		for (int i= 0, j= 1; i < proposals.length; i++) {
 			if (proposals[i] instanceof ICompletionProposalExtension2) {
@@ -386,6 +391,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 					/**
 					 * {@inheritDoc}
 					 */
+					@Override
 					public void run() {
 						applyProposal(proposal, viewer, (char)0, 0, offset);
 					}
@@ -398,7 +404,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		if (result.size() == 0)
 			return null;
 
-		return (IAction[])result.toArray(new IAction[result.size()]);
+		return result.toArray(new IAction[result.size()]);
 	}
 
 	private static void applyProposal(ICompletionProposal proposal, ITextViewer viewer, char trigger, int stateMask, final int offset) {

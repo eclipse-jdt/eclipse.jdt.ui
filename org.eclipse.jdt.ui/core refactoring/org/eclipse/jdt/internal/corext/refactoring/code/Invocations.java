@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
 public class Invocations {
 
-	public static List getArguments(ASTNode invocation) {
+	public static List<Expression> getArguments(ASTNode invocation) {
 		switch (invocation.getNodeType()) {
 			case ASTNode.METHOD_INVOCATION:
 				return ((MethodInvocation)invocation).arguments();

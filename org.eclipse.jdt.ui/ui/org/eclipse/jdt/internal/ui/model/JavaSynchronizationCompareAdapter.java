@@ -70,6 +70,7 @@ public final class JavaSynchronizationCompareAdapter extends AbstractSynchroniza
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public ICompareInput asCompareInput(final ISynchronizationContext context, final Object element) {
 		if (element instanceof RefactoringDescriptorProxy)
 			return super.asCompareInput(context, element);
@@ -84,7 +85,7 @@ public final class JavaSynchronizationCompareAdapter extends AbstractSynchroniza
 	 */
 	public ResourceMapping[] restore(final IMemento memento) {
 		IMemento[] children= memento.getChildren(RESOURCES);
-		final List result= new ArrayList();
+		final List<ResourceMapping> result= new ArrayList<ResourceMapping>();
 		for (int index= 0; index < children.length; index++) {
 			final Integer typeInt= children[index].getInteger(RESOURCE_TYPE);
 			if (typeInt == null)
@@ -146,7 +147,7 @@ public final class JavaSynchronizationCompareAdapter extends AbstractSynchroniza
 				JavaPlugin.log(event);
 			}
 		}
-		return (ResourceMapping[]) result.toArray(new ResourceMapping[result.size()]);
+		return result.toArray(new ResourceMapping[result.size()]);
 	}
 
 	/**

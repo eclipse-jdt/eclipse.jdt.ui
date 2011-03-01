@@ -54,6 +54,7 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		/*
 		 * @see org.eclipse.jface.resource.CompositeImageDescriptor#drawCompositeImage(int, int)
 		 */
+		@Override
 		protected void drawCompositeImage(int width, int height) {
 			if (fDeprecated) {
 				ImageData imageData= JavaPluginImages.DESC_OVR_DEPRECATED.getImageData();
@@ -72,6 +73,7 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		/*
 		 * @see org.eclipse.jface.resource.CompositeImageDescriptor#getSize()
 		 */
+		@Override
 		protected Point getSize() {
 			if (fgSize == null) {
 				ImageData imageData= JavaPluginImages.DESC_OVR_DEPRECATED.getImageData();
@@ -84,6 +86,7 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void decorate(Object element, IDecoration decoration) {
 		try {
 			addOverlays(element, decoration);
@@ -129,6 +132,7 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		}
 
 		TypeNameRequestor requestor= new TypeNameRequestor() {
+			@Override
 			public void acceptType(int modifiers, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
 				if (enclosingTypeNames.length == 0 /*&& Flags.isPublic(modifiers)*/) {
 					throw new Result(modifiers);
@@ -179,7 +183,8 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		}
 	}
 
-	protected void processDelta(IJavaElementDelta delta, List result) {
+	@Override
+	protected void processDelta(IJavaElementDelta delta, List<IJavaElement> result) {
 		IJavaElement elem= delta.getElement();
 
 		boolean isChanged= delta.getKind() == IJavaElementDelta.CHANGED;

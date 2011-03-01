@@ -143,6 +143,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		fLinkedProposalModel= model;
 	}
 
+	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 
 		final StringBuffer buf= new StringBuffer();
@@ -164,28 +165,34 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 					}
 				}
 
+				@Override
 				public boolean visit(MoveTargetEdit edit) {
 					return true; //rangeAdded(edit);
 				}
 
+				@Override
 				public boolean visit(CopyTargetEdit edit) {
 					return true; //return rangeAdded(edit);
 				}
 
+				@Override
 				public boolean visit(InsertEdit edit) {
 					return rangeAdded(edit);
 				}
 
+				@Override
 				public boolean visit(ReplaceEdit edit) {
 					if (edit.getLength() > 0)
 						return rangeAdded(edit);
 					return rangeRemoved(edit);
 				}
 
+				@Override
 				public boolean visit(MoveSourceEdit edit) {
 					return rangeRemoved(edit);
 				}
 
+				@Override
 				public boolean visit(DeleteEdit edit) {
 					return rangeRemoved(edit);
 				}
@@ -274,6 +281,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public void apply(IDocument document) {
 		try {
 			ICompilationUnit unit= getCompilationUnit();
@@ -318,6 +326,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.jface.text.IDocument, org.eclipse.ui.IEditorPart)
 	 */
+	@Override
 	protected void performChange(IEditorPart part, IDocument document) throws CoreException {
 		try {
 			super.performChange(part, document);
@@ -385,6 +394,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#createChange()
 	 */
+	@Override
 	protected final Change createChange() throws CoreException {
 		return createTextChange(); // make sure that only text changes are allowed here
 	}
@@ -421,6 +431,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		try {
 			return getPreviewContent();

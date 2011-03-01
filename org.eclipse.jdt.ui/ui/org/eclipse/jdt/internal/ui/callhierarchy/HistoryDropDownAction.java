@@ -45,6 +45,7 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
 			super(CallHierarchyMessages.HistoryDropDownAction_clearhistory_label);
 		}
 
+		@Override
 		public void run() {
 			CallHierarchyUI.getDefault().clearHistory();
 		}
@@ -111,7 +112,8 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
         return checked;
     }
 
-    public void run() {
+    @Override
+	public void run() {
         new HistoryListAction(fView).run();
     }
 }

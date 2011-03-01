@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.viewers.ISelection;
@@ -62,12 +64,12 @@ public final class HintTextGroup implements ISelectionChangedListener {
 
     private Composite fTopComposite;
     private DialogPackageExplorerActionGroup fActionGroup;
-    private List fNewFolders;
-    private HashMap fImageMap;
+    private List<IResource> fNewFolders;
+    private HashMap<String, Image> fImageMap;
 
     public HintTextGroup() {
-        fNewFolders= new ArrayList();
-        fImageMap= new HashMap();
+        fNewFolders= new ArrayList<IResource>();
+        fImageMap= new HashMap<String, Image>();
     }
 
     public Composite createControl(Composite parent) {
@@ -86,10 +88,10 @@ public final class HintTextGroup implements ISelectionChangedListener {
         fTopComposite.setData(null);
         fTopComposite.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
-                Collection collection= fImageMap.values();
-                Iterator iterator= collection.iterator();
+                Collection<Image> collection= fImageMap.values();
+                Iterator<Image> iterator= collection.iterator();
                 while(iterator.hasNext()) {
-                    Image image= (Image)iterator.next();
+                    Image image= iterator.next();
                     image.dispose();
                 }
             }
@@ -158,7 +160,7 @@ public final class HintTextGroup implements ISelectionChangedListener {
      */
     private void createLabel(Composite parent, String text, final BuildpathModifierAction action) {
         FormText formText= createFormText(parent, text);
-        Image image= (Image)fImageMap.get(action.getId());
+        Image image= fImageMap.get(action.getId());
         if (image == null) {
             image= action.getImageDescriptor().createImage();
             fImageMap.put(action.getId(), image);
@@ -166,7 +168,8 @@ public final class HintTextGroup implements ISelectionChangedListener {
         formText.setImage("defaultImage", image); //$NON-NLS-1$
         formText.addHyperlinkListener(new HyperlinkAdapter() {
 
-            public void linkActivated(HyperlinkEvent e) {
+            @Override
+			public void linkActivated(HyperlinkEvent e) {
                 action.run();
             }
 
@@ -190,17 +193,17 @@ public final class HintTextGroup implements ISelectionChangedListener {
      * <code>fPackageExplorer</code>, or an empty list if creation was
      * aborted
      */
-    void handleFolderCreation(List result) {
+    void handleFolderCreation(List<IPackageFragmentRoot> result) {
         if (result.size() == 1) {
             try {
-	            fNewFolders.add(((IPackageFragmentRoot)result.get(0)).getCorrespondingResource());
+	            fNewFolders.add(result.get(0).getCorrespondingResource());
             } catch (JavaModelException e) {
 	            JavaPlugin.log(e);
             }
         }
     }
 
-    public List getCreatedResources() {
+    public List<IResource> getCreatedResources() {
     	return fNewFolders;
     }
 
@@ -282,7 +285,7 @@ public final class HintTextGroup implements ISelectionChangedListener {
     	}
     }
 
-	private String noAction(List selectedElements) {
+	private String noAction(List<?> selectedElements) {
 		if (selectedElements.size() == 0)
 			return NewWizardMessages.PackageExplorerActionGroup_NoAction_NullSelection;
 

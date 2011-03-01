@@ -146,6 +146,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
@@ -167,6 +168,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		fSubstitutionPattern.setText(fRefactoring.getSubstitutionPattern());
 	}
 
+	@Override
 	protected Control createDialogArea(Composite ancestor) {
 		Composite parent= (Composite) super.createDialogArea(ancestor);
 
@@ -268,7 +270,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 			IPackageFragment fPkgFragment= fResourceBundlePackage.getSelected();
 			if (fPkgFragment == null)
 				return new Object[0];
-			List result= new ArrayList(1);
+			List<Object> result= new ArrayList<Object>(1);
 			Object[] nonjava= fPkgFragment.getNonJavaResources();
 			for (int i= 0; i < nonjava.length; i++) {
 				if (isPropertyFile(nonjava[i]))
@@ -419,6 +421,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
 	 */
+	@Override
 	protected void okPressed() {
 		updateRefactoring();
 		super.okPressed();

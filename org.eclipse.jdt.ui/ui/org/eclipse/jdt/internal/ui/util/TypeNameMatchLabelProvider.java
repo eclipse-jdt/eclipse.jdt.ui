@@ -47,6 +47,7 @@ public class TypeNameMatchLabelProvider extends LabelProvider {
 	/* non java-doc
 	 * @see ILabelProvider#getText
 	 */
+	@Override
 	public String getText(Object element) {
 		if (! (element instanceof TypeNameMatch))
 			return super.getText(element);
@@ -57,6 +58,7 @@ public class TypeNameMatchLabelProvider extends LabelProvider {
 	/* non java-doc
 	 * @see ILabelProvider#getImage
 	 */
+	@Override
 	public Image getImage(Object element) {
 		if (! (element instanceof TypeNameMatch))
 			return super.getImage(element);

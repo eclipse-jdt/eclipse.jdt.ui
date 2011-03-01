@@ -61,6 +61,7 @@ public class FindReadReferencesInProjectAction extends FindReadReferencesAction 
 		super(editor);
 	}
 
+	@Override
 	void init() {
 		setText(SearchMessages.Search_FindReadReferencesInProjectAction_label);
 		setToolTipText(SearchMessages.Search_FindReadReferencesInProjectAction_tooltip);
@@ -68,6 +69,7 @@ public class FindReadReferencesInProjectAction extends FindReadReferencesAction 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_PROJECT_ACTION);
 	}
 
+	@Override
 	QuerySpecification createQuery(IJavaElement element) throws JavaModelException {
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 		JavaEditor editor= getEditor();

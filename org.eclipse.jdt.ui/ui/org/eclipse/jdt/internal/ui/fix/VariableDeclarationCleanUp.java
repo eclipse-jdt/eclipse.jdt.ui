@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,7 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 public class VariableDeclarationCleanUp extends AbstractCleanUp {
 
-	public VariableDeclarationCleanUp(Map options) {
+	public VariableDeclarationCleanUp(Map<String, String> options) {
 		super(options);
 	}
 
@@ -38,6 +38,7 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(requireAST(), false, false, null);
 	}
@@ -55,6 +56,7 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
@@ -73,8 +75,9 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String[] getStepDescriptions() {
-		List result= new ArrayList();
+		List<String> result= new ArrayList<String>();
 		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS))
 			result.add(MultiFixMessages.VariableDeclarationCleanUp_AddFinalField_description);
 		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS))
@@ -82,12 +85,13 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES))
 			result.add(MultiFixMessages.VariableDeclarationCleanUp_AddFinalLocals_description);
 
-		return (String[])result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 

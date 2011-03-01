@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,9 +22,11 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 
 /**
- *
+ * History support for a view.
+ * 
+ * @param <E> the type of elements managed by this history
  */
-public abstract class ViewHistory {
+public abstract class ViewHistory<E> {
 
 	/**
 	 * Configure the history List action.
@@ -58,23 +60,23 @@ public abstract class ViewHistory {
 	 * @return An unmodifiable list of history entries, can be empty. The list
 	 *         is sorted by age, youngest first.
 	 */
-	public abstract List getHistoryEntries();
+	public abstract List<E> getHistoryEntries();
 
 	/**
 	 * @return the active entry from the history
 	 */
-	public abstract Object getCurrentEntry();
+	public abstract E getCurrentEntry();
 
 	/**
 	 * @param entry the entry to activate, or <code>null</code> if none should be active
 	 */
-	public abstract void setActiveEntry(Object entry);
+	public abstract void setActiveEntry(E entry);
 
 	/**
 	 * @param remainingEntries all the remaining history entries, can be empty
 	 * @param activeEntry the entry to activate, or <code>null</code> if none should be active
 	 */
-	public abstract void setHistoryEntries(List remainingEntries, Object activeEntry);
+	public abstract void setHistoryEntries(List<E> remainingEntries, E activeEntry);
 
 	/**
 	 * @param element the element to render
@@ -86,13 +88,13 @@ public abstract class ViewHistory {
 	 * @param element the element to render
 	 * @return the label text for the given element
 	 */
-	public abstract String getText(Object element);
+	public abstract String getText(E element);
 
 	/**
 	 * @return a history drop down action, ready for inclusion in a view toolbar
 	 */
 	public final IAction createHistoryDropDownAction() {
-		return new HistoryDropDownAction(this);
+		return new HistoryDropDownAction<E>(this);
 	}
 
 	public abstract void addMenuEntries(MenuManager manager);

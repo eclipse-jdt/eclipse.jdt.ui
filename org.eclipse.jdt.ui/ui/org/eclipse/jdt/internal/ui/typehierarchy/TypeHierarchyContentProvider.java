@@ -92,7 +92,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		return filterOverrides;
 	}
 
-	private void addCompatibleMethods(IMethod filterMethod, IType typeToFindIn, List children) throws JavaModelException {
+	private void addCompatibleMethods(IMethod filterMethod, IType typeToFindIn, List<IMember> children) throws JavaModelException {
 		int flags= filterMethod.getFlags();
 		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || filterMethod.isConstructor())
 			return;
@@ -174,10 +174,10 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 * @see IStructuredContentProvider#getElements
 	 */
 	public Object[] getElements(Object parent) {
-		ArrayList types= new ArrayList();
+		ArrayList<IType> types= new ArrayList<IType>();
 		getRootTypes(types);
 		for (int i= types.size() - 1; i >= 0; i--) {
-			IType curr= (IType) types.get(i);
+			IType curr= types.get(i);
 			try {
 				if (!isInTree(curr)) {
 					types.remove(i);
@@ -189,7 +189,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		return types.toArray();
 	}
 
-	protected void getRootTypes(List res) {
+	protected void getRootTypes(List<IType> res) {
 		ITypeHierarchy hierarchy= getHierarchy();
 		if (hierarchy != null) {
 			IType input= hierarchy.getType();
@@ -205,7 +205,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 * @param type the type
 	 * @param res all types in the hierarchy of the given type
 	 */
-	protected abstract void getTypesInHierarchy(IType type, List res);
+	protected abstract void getTypesInHierarchy(IType type, List<IType> res);
 
 	/**
 	 * Hook to overwrite. Return null if parent is ambiguous.
@@ -248,7 +248,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 			try {
 				IType type= (IType)element;
 
-				List children= new ArrayList();
+				List<IMember> children= new ArrayList<IMember>();
 				if (fMemberFilter != null) {
 					addFilteredMemberChildren(type, children);
 				}
@@ -278,7 +278,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		return false;
 	}
 
-	private void addFilteredMemberChildren(IType parent, List children) throws JavaModelException {
+	private void addFilteredMemberChildren(IType parent, List<IMember> children) throws JavaModelException {
 		for (int i= 0; i < fMemberFilter.length; i++) {
 			IMember member= fMemberFilter[i];
 			if (parent.equals(member.getDeclaringType())) {
@@ -291,12 +291,12 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 	}
 
-	private void addTypeChildren(IType type, List children) throws JavaModelException {
-		ArrayList types= new ArrayList();
+	private void addTypeChildren(IType type, List<IMember> children) throws JavaModelException {
+		ArrayList<IType> types= new ArrayList<IType>();
 		getTypesInHierarchy(type, types);
 		int len= types.size();
 		for (int i= 0; i < len; i++) {
-			IType curr= (IType) types.get(i);
+			IType curr= types.get(i);
 			if (isInTree(curr)) {
 				children.add(curr);
 			}
@@ -329,11 +329,11 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	}
 
 	private boolean hasTypeChildren(IType type) throws JavaModelException {
-		ArrayList types= new ArrayList();
+		ArrayList<IType> types= new ArrayList<IType>();
 		getTypesInHierarchy(type, types);
 		int len= types.size();
 		for (int i= 0; i < len; i++) {
-			IType curr= (IType) types.get(i);
+			IType curr= types.get(i);
 			if (isInTree(curr)) {
 				return true;
 			}
@@ -382,9 +382,5 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	protected final boolean isObject(IType type) {
 		return "Object".equals(type.getElementName()) && type.getDeclaringType() == null && "java.lang".equals(type.getPackageFragment().getElementName());  //$NON-NLS-1$//$NON-NLS-2$
 	}
-
-
-
-
 
 }

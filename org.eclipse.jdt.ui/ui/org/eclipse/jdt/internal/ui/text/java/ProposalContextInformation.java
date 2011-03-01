@@ -61,6 +61,7 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	/*
 	 * @see IContextInformation#equals
 	 */
+	@Override
 	public boolean equals(Object object) {
 		if (object instanceof IContextInformation) {
 			IContextInformation contextInformation= (IContextInformation) object;
@@ -76,6 +77,7 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	 * @see java.lang.Object#hashCode()
 	 * @since 3.5
 	 */
+	@Override
 	public int hashCode() {
 		int low= fContextDisplayString != null ? fContextDisplayString.hashCode() : 0;
 		return (fInformationDisplayString.hashCode() << 16) | low;

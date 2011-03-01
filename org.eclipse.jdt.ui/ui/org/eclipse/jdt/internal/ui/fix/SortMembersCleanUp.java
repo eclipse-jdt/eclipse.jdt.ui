@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,19 +43,20 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class SortMembersCleanUp extends AbstractCleanUp {
 
-	private HashSet fTouchedFiles;
+	private HashSet<IResource> fTouchedFiles;
 
 	public SortMembersCleanUp() {
 		super();
     }
 
-	public SortMembersCleanUp(Map options) {
+	public SortMembersCleanUp(Map<String, String> options) {
 		super(options);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
@@ -65,7 +66,7 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 		ICleanUpFix fix= SortMembersFix.createCleanUp(compilationUnit, sortMembers, sortMembers && isEnabled(CleanUpConstants.SORT_MEMBERS_ALL));
 		if (fix != null) {
 			if (fTouchedFiles == null) {
-				fTouchedFiles= new HashSet();
+				fTouchedFiles= new HashSet<IResource>();
 			}
 			fTouchedFiles.add(((ICompilationUnit)compilationUnit.getJavaElement()).getResource());
 		}
@@ -75,6 +76,7 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
 		if (fTouchedFiles == null) {
 			return super.checkPostConditions(monitor);
@@ -86,7 +88,7 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 
 			try {
 				RefactoringStatus result= new RefactoringStatus();
-    			for (Iterator iterator= fTouchedFiles.iterator(); iterator.hasNext();) {
+    			for (Iterator<IResource> iterator= fTouchedFiles.iterator(); iterator.hasNext();) {
     	            IFile file= (IFile)iterator.next();
     	            if (containsRelevantMarkers(file)) {
     	            	String fileLocation= BasicElementLabels.getPathLabel(file.getProjectRelativePath(), false);
@@ -109,6 +111,7 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String[] getStepDescriptions() {
 		if (isEnabled(CleanUpConstants.SORT_MEMBERS)) {
 			if (isEnabled(CleanUpConstants.SORT_MEMBERS_ALL)) {
@@ -123,6 +126,7 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 
@@ -152,7 +156,8 @@ public class SortMembersCleanUp extends AbstractCleanUp {
     /**
      * {@inheritDoc}
      */
-    public CleanUpRequirements getRequirements() {
+    @Override
+	public CleanUpRequirements getRequirements() {
     	return new CleanUpRequirements(isEnabled(CleanUpConstants.SORT_MEMBERS), false, false, null);
     }
 

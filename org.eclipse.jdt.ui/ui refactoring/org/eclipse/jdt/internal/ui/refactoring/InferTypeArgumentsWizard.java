@@ -43,6 +43,7 @@ public class InferTypeArgumentsWizard extends RefactoringWizard {
 	/*
 	 * @see org.eclipse.ltk.ui.refactoring.RefactoringWizard#addUserInputPages()
 	 */
+	@Override
 	protected void addUserInputPages() {
 		addPage(new InferTypeArgumentsInputPage());
 	}
@@ -90,6 +91,7 @@ public class InferTypeArgumentsWizard extends RefactoringWizard {
 			fRefactoring.setAssumeCloneReturnsSameType(assumeCloneValue);
 			cloneCheckBox.setSelection(assumeCloneValue);
 			cloneCheckBox.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					setAssumeCloseReturnsSameType(((Button)e.widget).getSelection());
 				}
@@ -101,6 +103,7 @@ public class InferTypeArgumentsWizard extends RefactoringWizard {
 			fRefactoring.setLeaveUnconstrainedRaw(leaveRawValue);
 			leaveRawCheckBox.setSelection(leaveRawValue);
 			leaveRawCheckBox.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					setLeaveUnconstrainedRaw(((Button)e.widget).getSelection());
 				}

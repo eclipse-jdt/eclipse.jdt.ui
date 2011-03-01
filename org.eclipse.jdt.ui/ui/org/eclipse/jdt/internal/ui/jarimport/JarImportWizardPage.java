@@ -177,14 +177,16 @@ public final class JarImportWizardPage extends WizardPage {
 		label.setText(JarImportMessages.JarImportWizardPage_import_message);
 		final StandardJavaElementContentProvider contentProvider= new StandardJavaElementContentProvider() {
 
+			@Override
 			public Object[] getChildren(Object element) {
 				if ((element instanceof IJavaProject) || (element instanceof IJavaModel))
 					return super.getChildren(element);
 				return new Object[0];
 			}
 
+			@Override
 			protected Object[] getJavaProjects(final IJavaModel model) throws JavaModelException {
-				final Set set= new HashSet();
+				final Set<IJavaProject> set= new HashSet<IJavaProject>();
 				final IJavaProject[] projects= model.getJavaProjects();
 				for (int index= 0; index < projects.length; index++) {
 					if (JarImportWizard.isValidJavaProject(projects[index])) {
@@ -196,8 +198,9 @@ public final class JarImportWizardPage extends WizardPage {
 				return set.toArray();
 			}
 
+			@Override
 			protected Object[] getPackageFragmentRoots(final IJavaProject project) throws JavaModelException {
-				final Set set= new HashSet();
+				final Set<IPackageFragmentRoot> set= new HashSet<IPackageFragmentRoot>();
 				final IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 				for (int offset= 0; offset < roots.length; offset++) {
 					IPackageFragmentRoot root= roots[offset];
@@ -209,6 +212,7 @@ public final class JarImportWizardPage extends WizardPage {
 				return set.toArray();
 			}
 
+			@Override
 			public boolean hasChildren(final Object element) {
 				return (element instanceof IJavaProject) || (element instanceof IJavaModel);
 			}
@@ -266,6 +270,7 @@ public final class JarImportWizardPage extends WizardPage {
 		});
 		fLocationControl.getControl().addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public final void widgetSelected(final SelectionEvent event) {
 				handleInputChanged();
 			}
@@ -277,6 +282,7 @@ public final class JarImportWizardPage extends WizardPage {
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public final void widgetSelected(final SelectionEvent event) {
 				handleBrowseButtonSelected();
 			}
@@ -297,6 +303,7 @@ public final class JarImportWizardPage extends WizardPage {
 		button.setSelection(!data.isRenameJarFile());
 		button.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(final SelectionEvent event) {
 				data.setRenameJarFile(!button.getSelection());
 			}
@@ -490,6 +497,7 @@ public final class JarImportWizardPage extends WizardPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setErrorMessage(final String message) {
 		if (!fFirstTime)
 			super.setErrorMessage(message);
@@ -500,6 +508,7 @@ public final class JarImportWizardPage extends WizardPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setVisible(final boolean visible) {
 		super.setVisible(visible);
 		if (visible)

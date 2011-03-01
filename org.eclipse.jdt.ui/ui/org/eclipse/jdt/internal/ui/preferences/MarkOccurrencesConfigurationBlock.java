@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore.OverlayKey;
 
 
 /**
@@ -54,13 +55,13 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 	private OverlayPreferenceStore fStore;
 
 
-	private Map fCheckBoxes= new HashMap();
+	private Map<Button, String> fCheckBoxes= new HashMap<Button, String>();
 	private SelectionListener fCheckBoxListener= new SelectionListener() {
 		public void widgetDefaultSelected(SelectionEvent e) {
 		}
 		public void widgetSelected(SelectionEvent e) {
 			Button button= (Button) e.widget;
-			fStore.setValue((String) fCheckBoxes.get(button), button.getSelection());
+			fStore.setValue(fCheckBoxes.get(button), button.getSelection());
 		}
 	};
 
@@ -70,7 +71,7 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 	 * @see #createDependency(Button, String, Control)
 	 * @since 3.0
 	 */
-	private ArrayList fMasterSlaveListeners= new ArrayList();
+	private ArrayList<SelectionListener> fMasterSlaveListeners= new ArrayList<SelectionListener>();
 
 	private StatusInfo fStatus;
 
@@ -83,7 +84,7 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 
-		ArrayList overlayKeys= new ArrayList();
+		ArrayList<OverlayKey> overlayKeys= new ArrayList<OverlayKey>();
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_OCCURRENCES));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES));
@@ -120,6 +121,7 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 		Link link= new Link(composite, SWT.NONE);
 		link.setText(PreferencesMessages.MarkOccurrencesConfigurationBlock_link);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String data= null;
 				AnnotationPreference preference= EditorsUI.getAnnotationPreferenceLookup().getAnnotationPreference("org.eclipse.jdt.ui.occurrences"); //$NON-NLS-1$
@@ -235,17 +237,17 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 
 	void initializeFields() {
 
-		Iterator iter= fCheckBoxes.keySet().iterator();
+		Iterator<Button> iter= fCheckBoxes.keySet().iterator();
 		while (iter.hasNext()) {
-			Button b= (Button) iter.next();
-			String key= (String) fCheckBoxes.get(b);
+			Button b= iter.next();
+			String key= fCheckBoxes.get(b);
 			b.setSelection(fStore.getBoolean(key));
 		}
 
         // Update slaves
-        iter= fMasterSlaveListeners.iterator();
-        while (iter.hasNext()) {
-            SelectionListener listener= (SelectionListener)iter.next();
+        Iterator<SelectionListener> iter2= fMasterSlaveListeners.iterator();
+        while (iter2.hasNext()) {
+            SelectionListener listener= iter2.next();
             listener.widgetSelected(null);
         }
 

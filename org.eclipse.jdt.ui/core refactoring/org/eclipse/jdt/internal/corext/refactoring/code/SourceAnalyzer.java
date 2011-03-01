@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -69,10 +70,10 @@ class SourceAnalyzer  {
 
 	public static class NameData {
 		private String fName;
-		private List fReferences;
+		private List<SimpleName> fReferences;
 		public NameData(String n) {
 			fName= n;
-			fReferences= new ArrayList(2);
+			fReferences= new ArrayList<SimpleName>(2);
 		}
 		public String getName() {
 			return fName;
@@ -80,7 +81,7 @@ class SourceAnalyzer  {
 		public void addReference(SimpleName ref) {
 			fReferences.add(ref);
 		}
-		public List references() {
+		public List<SimpleName> references() {
 			return fReferences;
 		}
 	}
@@ -89,24 +90,30 @@ class SourceAnalyzer  {
 		public RefactoringStatus status= new RefactoringStatus();
 		private ASTNode fLastNode= getLastNode();
 		private IMethodBinding fBinding= getBinding();
+		@Override
 		public boolean visit(ReturnStatement node) {
 			if (node != fLastNode) {
 				fInterruptedExecutionFlow= true;
 			}
 			return true;
 		}
+		@Override
 		public boolean visit(EnumDeclaration node) {
 			return false;
 		}
+		@Override
 		public boolean visit(AnnotationTypeDeclaration node) {
 			return false;
 		}
+		@Override
 		public boolean visit(TypeDeclaration node) {
 			return false;
 		}
+		@Override
 		public boolean visit(AnonymousClassDeclaration node) {
 			return false;
 		}
+		@Override
 		public boolean visit(MethodInvocation node) {
 			IMethodBinding methodBinding= node.resolveMethodBinding();
 			if (methodBinding != null)
@@ -117,6 +124,7 @@ class SourceAnalyzer  {
 			}
 			return true;
 		}
+		@Override
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
 			if (binding == null && !status.hasFatalError()) {
@@ -130,6 +138,7 @@ class SourceAnalyzer  {
 			}
 			return true;
 		}
+		@Override
 		public boolean visit(ThisExpression node) {
 			if (node.getQualifier() != null) {
 				status.addFatalError(
@@ -140,10 +149,10 @@ class SourceAnalyzer  {
 			return true;
 		}
 		private ASTNode getLastNode() {
-			List statements= fDeclaration.getBody().statements();
+			List<Statement> statements= fDeclaration.getBody().statements();
 			if (statements.size() == 0)
 				return null;
-			return (ASTNode)statements.get(statements.size() - 1);
+			return statements.get(statements.size() - 1);
 		}
 		private IMethodBinding getBinding() {
 			IMethodBinding result= fDeclaration.resolveBinding();
@@ -155,21 +164,27 @@ class SourceAnalyzer  {
 
 	private class UpdateCollector extends ASTVisitor {
 		private int fTypeCounter;
+		@Override
 		public boolean visit(TypeDeclaration node) {
 			return visitType(node);
 		}
+		@Override
 		public void endVisit(TypeDeclaration node) {
 			fTypeCounter--;
 		}
+		@Override
 		public boolean visit(EnumDeclaration node) {
 			return visitType(node);
 		}
+		@Override
 		public void endVisit(EnumDeclaration node) {
 			fTypeCounter--;
 		}
+		@Override
 		public boolean visit(AnnotationTypeDeclaration node) {
 			return visitType(node);
 		}
+		@Override
 		public void endVisit(AnnotationTypeDeclaration node) {
 			fTypeCounter--;
 		}
@@ -179,29 +194,34 @@ class SourceAnalyzer  {
 			}
 			return true;
 		}
+		@Override
 		public boolean visit(AnonymousClassDeclaration node) {
 			fTypeCounter++;
 			return true;
 		}
+		@Override
 		public void endVisit(AnonymousClassDeclaration node) {
 			fTypeCounter--;
 		}
+		@Override
 		public boolean visit(FieldAccess node) {
 			// only visit the expression and not the simple name
 			node.getExpression().accept(this);
 			addReferencesToName(node.getName());
 			return false;
 		}
+		@Override
 		public boolean visit(MethodDeclaration node) {
 			if (node.isConstructor()) {
 				AbstractTypeDeclaration decl= (AbstractTypeDeclaration) ASTNodes.getParent(node, AbstractTypeDeclaration.class);
-				NameData name= (NameData)fNames.get(decl.getName().resolveBinding());
+				NameData name= fNames.get(decl.getName().resolveBinding());
 				if (name != null) {
 					name.addReference(node.getName());
 				}
 			}
 			return true;
 		}
+		@Override
 		public boolean visit(MethodInvocation node) {
 			if (fTypeCounter == 0) {
 				Expression receiver= node.getExpression();
@@ -211,18 +231,21 @@ class SourceAnalyzer  {
 			}
 			return true;
 		}
+		@Override
 		public boolean visit(SuperMethodInvocation node) {
 			if (fTypeCounter == 0) {
 				fHasSuperMethodInvocation= true;
 			}
 			return true;
 		}
+		@Override
 		public boolean visit(SuperConstructorInvocation node) {
 			if (fTypeCounter == 0) {
 				fHasSuperMethodInvocation= true;
 			}
 			return true;
 		}
+		@Override
 		public boolean visit(ClassInstanceCreation node) {
 			if (fTypeCounter == 0) {
 				Expression receiver= node.getExpression();
@@ -233,16 +256,19 @@ class SourceAnalyzer  {
 			}
 			return true;
 		}
+		@Override
 		public boolean visit(SingleVariableDeclaration node) {
 			if (fTypeCounter == 0)
 				addNameReference(node.getName());
 			return true;
 		}
+		@Override
 		public boolean visit(VariableDeclarationFragment node) {
 			if (fTypeCounter == 0)
 				addNameReference(node.getName());
 			return true;
 		}
+		@Override
 		public boolean visit(SimpleName node) {
 			addReferencesToName(node);
 			IBinding binding= node.resolveBinding();
@@ -264,7 +290,7 @@ class SourceAnalyzer  {
 					}
 				} else if (!vb.isField()) {
 					// we have a local. Check if it is a parameter.
-					ParameterData data= (ParameterData)fParameters.get(binding);
+					ParameterData data= fParameters.get(binding);
 					if (data != null) {
 						ASTNode parent= node.getParent();
 						if (parent instanceof Expression) {
@@ -278,6 +304,7 @@ class SourceAnalyzer  {
 			}
 			return true;
 		}
+		@Override
 		public boolean visit(ThisExpression node) {
 			if (fTypeCounter == 0) {
 				fImplicitReceivers.add(node);
@@ -286,11 +313,11 @@ class SourceAnalyzer  {
 		}
 		private void addReferencesToName(SimpleName node) {
 			IBinding binding= node.resolveBinding();
-			ParameterData data= (ParameterData)fParameters.get(binding);
+			ParameterData data= fParameters.get(binding);
 			if (data != null)
 				data.addReference(node);
 
-			NameData name= (NameData)fNames.get(binding);
+			NameData name= fNames.get(binding);
 			if (name != null)
 				name.addReference(node);
 		}
@@ -298,9 +325,9 @@ class SourceAnalyzer  {
 			fNames.put(name.resolveBinding(), new NameData(name.getIdentifier()));
 		}
 		private void addTypeVariableReference(ITypeBinding variable, SimpleName name) {
-			NameData data= (NameData)fTypeParameterMapping.get(variable);
+			NameData data= fTypeParameterMapping.get(variable);
 			if (data == null) {
-				data= (NameData)fMethodTypeParameterMapping.get(variable);
+				data= fMethodTypeParameterMapping.get(variable);
 			}
 			data.addReference(name);
 		}
@@ -314,6 +341,7 @@ class SourceAnalyzer  {
 		public VarargAnalyzer(IBinding parameter) {
 			fParameter= parameter;
 		}
+		@Override
 		public boolean visit(ArrayAccess node) {
 			Expression array= node.getArray();
 			if (array instanceof SimpleName && fParameter.isEqualTo(((SimpleName)array).resolveBinding())) {
@@ -325,21 +353,21 @@ class SourceAnalyzer  {
 
 	private ITypeRoot fTypeRoot;
 	private MethodDeclaration fDeclaration;
-	private Map fParameters;
-	private Map fNames;
-	private List fImplicitReceivers;
+	private Map<IVariableBinding, ParameterData> fParameters;
+	private Map<IBinding, NameData> fNames;
+	private List<Expression> fImplicitReceivers;
 
 	private boolean fArrayAccess;
 	private boolean fHasSuperMethodInvocation;
 
-	private List/*<Name>*/ fTypesToImport;
-	private List/*<Name>*/ fStaticsToImport;
+	private List<SimpleName> fTypesToImport;
+	private List<SimpleName> fStaticsToImport;
 
-	private List/*<NameData>*/ fTypeParameterReferences;
-	private Map/*<ITypeBinding, NameData>*/ fTypeParameterMapping;
+	private List<NameData> fTypeParameterReferences;
+	private Map<ITypeBinding, NameData> fTypeParameterMapping;
 
-	private List/*<NameData>*/ fMethodTypeParameterReferences;
-	private Map/*<ITypeBinding, NameData>*/ fMethodTypeParameterMapping;
+	private List<NameData> fMethodTypeParameterReferences;
+	private Map<ITypeBinding, NameData> fMethodTypeParameterMapping;
 
 	private boolean fInterruptedExecutionFlow;
 
@@ -386,10 +414,10 @@ class SourceAnalyzer  {
 		fDeclaration.accept(analyzer);
 		result.merge(analyzer.status);
 		if (!result.hasFatalError()) {
-			List parameters= fDeclaration.parameters();
-			fParameters= new HashMap(parameters.size() * 2);
-			for (Iterator iter= parameters.iterator(); iter.hasNext();) {
-				SingleVariableDeclaration element= (SingleVariableDeclaration) iter.next();
+			List<SingleVariableDeclaration> parameters= fDeclaration.parameters();
+			fParameters= new HashMap<IVariableBinding, ParameterData>(parameters.size() * 2);
+			for (Iterator<SingleVariableDeclaration> iter= parameters.iterator(); iter.hasNext();) {
+				SingleVariableDeclaration element= iter.next();
 				IVariableBinding binding= element.resolveBinding();
 				if (binding == null) {
 					result.addFatalError(
@@ -397,13 +425,13 @@ class SourceAnalyzer  {
 						JavaStatusContext.create(fTypeRoot, fDeclaration));
 					return result;
 				}
-				fParameters.put(binding, element.getProperty(ParameterData.PROPERTY));
+				fParameters.put(binding, (ParameterData) element.getProperty(ParameterData.PROPERTY));
 			}
-			fNames= new HashMap();
-			fImplicitReceivers= new ArrayList(2);
+			fNames= new HashMap<IBinding, NameData>();
+			fImplicitReceivers= new ArrayList<Expression>(2);
 
-			fTypeParameterReferences= new ArrayList(0);
-			fTypeParameterMapping= new HashMap();
+			fTypeParameterReferences= new ArrayList<NameData>(0);
+			fTypeParameterMapping= new HashMap<ITypeBinding, NameData>();
 			ITypeBinding declaringType= declarationBinding.getDeclaringClass();
 			if (declaringType == null) {
 				result.addFatalError(
@@ -418,8 +446,8 @@ class SourceAnalyzer  {
 				fTypeParameterMapping.put(typeParameters[i], data);
 			}
 
-			fMethodTypeParameterReferences= new ArrayList(0);
-			fMethodTypeParameterMapping= new HashMap();
+			fMethodTypeParameterReferences= new ArrayList<NameData>(0);
+			fMethodTypeParameterMapping= new HashMap<ITypeBinding, NameData>();
 			IMethodBinding method= declarationBinding;
 			typeParameters= method.getTypeParameters();
 			for (int i= 0; i < typeParameters.length; i++) {
@@ -430,9 +458,9 @@ class SourceAnalyzer  {
 
 		}
 		if (fDeclaration.isVarargs()) {
-			List parameters= fDeclaration.parameters();
+			List<SingleVariableDeclaration> parameters= fDeclaration.parameters();
 			VarargAnalyzer vAnalyzer= new VarargAnalyzer(
-				((SingleVariableDeclaration)parameters.get(parameters.size() - 1)).getName().resolveBinding());
+				parameters.get(parameters.size() - 1).getName().resolveBinding());
 			fDeclaration.getBody().accept(vAnalyzer);
 		}
 		return result;
@@ -442,8 +470,8 @@ class SourceAnalyzer  {
 		Block body= fDeclaration.getBody();
 		// first collect the static imports. This is necessary to not mark
 		// static imported fields and methods as implicit visible.
-		fTypesToImport= new ArrayList();
-		fStaticsToImport= new ArrayList();
+		fTypesToImport= new ArrayList<SimpleName>();
+		fStaticsToImport= new ArrayList<SimpleName>();
 		ImportReferencesCollector.collect(body, fTypeRoot.getJavaProject(), null, fTypesToImport, fStaticsToImport);
 
 		// Now collect implicit references and name references
@@ -456,35 +484,35 @@ class SourceAnalyzer  {
 		InOutFlowAnalyzer flowAnalyzer= new InOutFlowAnalyzer(context);
 		FlowInfo info= flowAnalyzer.perform(getStatements());
 
-		for (Iterator iter= fDeclaration.parameters().iterator(); iter.hasNext();) {
-			SingleVariableDeclaration element= (SingleVariableDeclaration) iter.next();
+		for (Iterator<SingleVariableDeclaration> iter= fDeclaration.parameters().iterator(); iter.hasNext();) {
+			SingleVariableDeclaration element= iter.next();
 			IVariableBinding binding= element.resolveBinding();
 			ParameterData data= (ParameterData)element.getProperty(ParameterData.PROPERTY);
 			data.setAccessMode(info.getAccessMode(context, binding));
 		}
 	}
 
-	public Collection getUsedNames() {
+	public Collection<NameData> getUsedNames() {
 		return fNames.values();
 	}
 
-	public List getImplicitReceivers() {
+	public List<Expression> getImplicitReceivers() {
 		return fImplicitReceivers;
 	}
 
-	public List getTypesToImport() {
+	public List<SimpleName> getTypesToImport() {
 		return fTypesToImport;
 	}
 
-	public List getStaticsToImport() {
+	public List<SimpleName> getStaticsToImport() {
 		return fStaticsToImport;
 	}
 
-	public List getTypeParameterReferences() {
+	public List<NameData> getTypeParameterReferences() {
 		return fTypeParameterReferences;
 	}
 
-	public List getMethodTypeParameterReferences() {
+	public List<NameData> getMethodTypeParameterReferences() {
 		return fMethodTypeParameterReferences;
 	}
 
@@ -497,8 +525,8 @@ class SourceAnalyzer  {
 	}
 
 	private ASTNode[] getStatements() {
-		List statements= fDeclaration.getBody().statements();
-		return (ASTNode[]) statements.toArray(new ASTNode[statements.size()]);
+		List<Statement> statements= fDeclaration.getBody().statements();
+		return statements.toArray(new ASTNode[statements.size()]);
 	}
 
 }

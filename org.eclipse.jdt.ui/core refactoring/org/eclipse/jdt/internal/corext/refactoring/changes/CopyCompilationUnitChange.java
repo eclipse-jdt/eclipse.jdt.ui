@@ -35,11 +35,13 @@ public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
 		setValidationMethod(SAVE_IF_DIRTY);
 	}
 
+	@Override
 	Change doPerformReorg(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		getCu().copy(getDestinationPackage(), null, getNewName(), true, pm);
 		return null;
 	}
 
+	@Override
 	public String getName() {
 		return Messages.format(RefactoringCoreMessages.CopyCompilationUnitChange_copy,
 			new String[]{ BasicElementLabels.getFileName(getCu()), getPackageName(getDestinationPackage())});

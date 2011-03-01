@@ -73,6 +73,7 @@ public class ViewActionGroup extends ActionGroup {
 			fActiveActionGroup= fFilterActionGroup;
 	}
 
+	@Override
 	public void dispose() {
 		fFilterActionGroup.dispose();
 		fShowActionGroup.dispose();
@@ -87,6 +88,7 @@ public class ViewActionGroup extends ActionGroup {
 		fWorkingSetAssignementAction.setWorkingSetModel(model);
 	}
 
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		if (fWorkingSetAssignementAction.isEnabled())
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fWorkingSetAssignementAction);
@@ -95,6 +97,7 @@ public class ViewActionGroup extends ActionGroup {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		fMenuManager= actionBars.getMenuManager();

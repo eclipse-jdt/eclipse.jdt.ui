@@ -29,6 +29,7 @@ public class JavaEditorPropertyPage extends PropertyPage {
 
 	public JavaEditorPropertyPage() {}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		final Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -40,6 +41,7 @@ public class JavaEditorPropertyPage extends PropertyPage {
 		link.setLayoutData(data);
 		link.setText(PreferencesMessages.JavaEditorPropertyPage_SaveActionLink_Text);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer)getContainer();
 				container.openPage(SaveParticipantPreferencePage.PROPERTY_PAGE_ID, null);

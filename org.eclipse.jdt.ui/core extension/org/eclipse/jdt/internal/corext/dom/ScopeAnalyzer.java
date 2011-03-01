@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,16 +85,16 @@ public class ScopeAnalyzer {
 
 	private static class DefaultBindingRequestor implements IBindingRequestor {
 
-		private final List fResult;
-		private final HashSet fNamesAdded;
+		private final List<IBinding> fResult;
+		private final HashSet<String> fNamesAdded;
 		private final int fFlags;
 		private final ITypeBinding fParentTypeBinding;
 
 		public DefaultBindingRequestor(ITypeBinding parentTypeBinding, int flags) {
 			fParentTypeBinding= parentTypeBinding;
 			fFlags= flags;
-			fResult= new ArrayList();
-			fNamesAdded= new HashSet();
+			fResult= new ArrayList<IBinding>();
+			fNamesAdded= new HashSet<String>();
 		}
 
 		public DefaultBindingRequestor() {
@@ -115,10 +115,10 @@ public class ScopeAnalyzer {
 			return false;
 		}
 
-		public List getResult() {
+		public List<IBinding> getResult() {
 			if (hasFlag(CHECK_VISIBILITY, fFlags)) {
 				for (int i= fResult.size() - 1; i >= 0; i--) {
-					IBinding binding= (IBinding) fResult.get(i);
+					IBinding binding= fResult.get(i);
 					if (!isVisible(binding, fParentTypeBinding)) {
 						fResult.remove(i);
 					}
@@ -129,12 +129,12 @@ public class ScopeAnalyzer {
 
 	}
 
-	private final HashSet fTypesVisited;
+	private final HashSet<ITypeBinding> fTypesVisited;
 
 	private final CompilationUnit fRoot;
 
 	public ScopeAnalyzer(CompilationUnit root) {
-		fTypesVisited= new HashSet();
+		fTypesVisited= new HashSet<ITypeBinding>();
 		fRoot= root;
 	}
 
@@ -260,9 +260,9 @@ public class ScopeAnalyzer {
 					return true;
 			} else if (hasFlag(TYPES, flags)) {
 				if (fRoot.findDeclaringNode(binding) != null) {
-					List types= fRoot.types();
+					List<AbstractTypeDeclaration> types= fRoot.types();
 					for (int i= 0; i < types.size(); i++) {
-						if (requestor.acceptBinding(((AbstractTypeDeclaration) types.get(i)).resolveBinding()))
+						if (requestor.acceptBinding(types.get(i).resolveBinding()))
 							return true;
 					}
 				}
@@ -365,8 +365,8 @@ public class ScopeAnalyzer {
 					addInherited(binding, flags, requestor);
 				}
 
-				List result= requestor.getResult();
-				return (IBinding[]) result.toArray(new IBinding[result.size()]);
+				List<IBinding> result= requestor.getResult();
+				return result.toArray(new IBinding[result.size()]);
 			}
 			return NO_BINDING;
 		} finally {
@@ -469,14 +469,14 @@ public class ScopeAnalyzer {
 
 	private IVariableBinding[] getEnumContants(ITypeBinding binding) {
 		IVariableBinding[] declaredFields= binding.getDeclaredFields();
-		ArrayList res= new ArrayList(declaredFields.length);
+		ArrayList<IVariableBinding> res= new ArrayList<IVariableBinding>(declaredFields.length);
 		for (int i= 0; i < declaredFields.length; i++) {
 			IVariableBinding curr= declaredFields[i];
 			if (curr.isEnumConstant()) {
 				res.add(curr);
 			}
 		}
-		return (IVariableBinding[]) res.toArray(new IVariableBinding[res.size()]);
+		return res.toArray(new IVariableBinding[res.size()]);
 	}
 
 	private boolean hasEnumContants(IBinding declaration, ITypeBinding binding) {
@@ -507,8 +507,8 @@ public class ScopeAnalyzer {
 			if (binding != null) {
 				addTypeDeclarations(binding, flags, requestor);
 			}
-			List result= requestor.getResult();
-			return (IBinding[]) result.toArray(new IBinding[result.size()]);
+			List<IBinding> result= requestor.getResult();
+			return result.toArray(new IBinding[result.size()]);
 		} finally {
 			clearLists();
 		}
@@ -613,8 +613,8 @@ public class ScopeAnalyzer {
 				DefaultBindingRequestor requestor= new DefaultBindingRequestor();
 				DeclarationsAfterVisitor visitor= new DeclarationsAfterVisitor(node.getStartPosition(), flags, requestor);
 				declaration.accept(visitor);
-				List result= requestor.getResult();
-				return (IBinding[])result.toArray(new IBinding[result.size()]);
+				List<IBinding> result= requestor.getResult();
+				return result.toArray(new IBinding[result.size()]);
 			}
 			return NO_BINDING;
 		} finally {
@@ -644,6 +644,7 @@ public class ScopeAnalyzer {
 			return start <= fPosition && fPosition < end;
 		}
 
+		@Override
 		public boolean visit(MethodDeclaration node) {
 			if (isInside(node)) {
 				Block body= node.getBody();
@@ -662,6 +663,7 @@ public class ScopeAnalyzer {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.TypeParameter)
 		 */
+		@Override
 		public boolean visit(TypeParameter node) {
 			if (hasFlag(TYPES, fFlags) && node.getStartPosition() < fPosition) {
 				fBreak= fRequestor.acceptBinding(node.getName().resolveBinding());
@@ -669,6 +671,7 @@ public class ScopeAnalyzer {
 			return !fBreak;
 		}
 
+		@Override
 		public boolean visit(SwitchCase node) {
 			// switch on enum allows to use enum constants without qualification
 			if (hasFlag(VARIABLES, fFlags) && !node.isDefault() && isInside(node.getExpression())) {
@@ -689,18 +692,22 @@ public class ScopeAnalyzer {
 			return false;
 		}
 
+		@Override
 		public boolean visit(Initializer node) {
 			return !fBreak && isInside(node);
 		}
 
+		@Override
 		public boolean visit(Statement node) {
 			return !fBreak && isInside(node);
 		}
 
+		@Override
 		public boolean visit(ASTNode node) {
 			return false;
 		}
 
+		@Override
 		public boolean visit(Block node) {
 			if (isInside(node)) {
 				visitBackwards(node.statements());
@@ -708,6 +715,7 @@ public class ScopeAnalyzer {
 			return false;
 		}
 
+		@Override
 		public boolean visit(VariableDeclaration node) {
 			if (hasFlag(VARIABLES, fFlags) && node.getStartPosition() < fPosition) {
 				fBreak= fRequestor.acceptBinding(node.resolveBinding());
@@ -715,16 +723,19 @@ public class ScopeAnalyzer {
 			return !fBreak;
 		}
 
+		@Override
 		public boolean visit(VariableDeclarationStatement node) {
 			visitBackwards(node.fragments());
 			return false;
 		}
 
+		@Override
 		public boolean visit(VariableDeclarationExpression node) {
 			visitBackwards(node.fragments());
 			return false;
 		}
 
+		@Override
 		public boolean visit(CatchClause node) {
 			if (isInside(node)) {
 				node.getBody().accept(this);
@@ -733,6 +744,7 @@ public class ScopeAnalyzer {
 			return false;
 		}
 
+		@Override
 		public boolean visit(ForStatement node) {
 			if (isInside(node)) {
 				node.getBody().accept(this);
@@ -741,6 +753,7 @@ public class ScopeAnalyzer {
 			return false;
 		}
 
+		@Override
 		public boolean visit(TypeDeclarationStatement node) {
 			if (hasFlag(TYPES, fFlags) && node.getStartPosition() + node.getLength() < fPosition) {
 				fBreak= fRequestor.acceptBinding(node.resolveBinding());
@@ -749,12 +762,12 @@ public class ScopeAnalyzer {
 			return !fBreak && isInside(node);
 		}
 
-		private void visitBackwards(List list) {
+		private void visitBackwards(List<? extends ASTNode> list) {
 			if (fBreak)
 				return;
 
 			for (int i= list.size() - 1; i >= 0; i--) {
-				ASTNode curr= (ASTNode) list.get(i);
+				ASTNode curr= list.get(i);
 				if (curr.getStartPosition() <  fPosition) {
 					curr.accept(this);
 				}
@@ -775,10 +788,12 @@ public class ScopeAnalyzer {
 			fBreak= false;
 		}
 
+		@Override
 		public boolean visit(ASTNode node) {
 			return !fBreak;
 		}
 
+		@Override
 		public boolean visit(VariableDeclaration node) {
 			if (hasFlag(VARIABLES, fFlags) && fPosition < node.getStartPosition()) {
 				fBreak= fRequestor.acceptBinding(node.resolveBinding());
@@ -786,10 +801,12 @@ public class ScopeAnalyzer {
 			return false;
 		}
 
+		@Override
 		public boolean visit(AnonymousClassDeclaration node) {
 			return false;
 		}
 
+		@Override
 		public boolean visit(TypeDeclarationStatement node) {
 			if (hasFlag(TYPES, fFlags) && fPosition < node.getStartPosition()) {
 				fBreak= fRequestor.acceptBinding(node.resolveBinding());
@@ -815,8 +832,8 @@ public class ScopeAnalyzer {
 		return false;
 	}
 
-	public Collection getUsedVariableNames(int offset, int length) {
-		HashSet result= new HashSet();
+	public Collection<String> getUsedVariableNames(int offset, int length) {
+		HashSet<String> result= new HashSet<String>();
 		IBinding[] bindingsBefore= getDeclarationsInScope(offset, VARIABLES);
 		for (int i= 0; i < bindingsBefore.length; i++) {
 			result.add(bindingsBefore[i].getName());
@@ -825,9 +842,9 @@ public class ScopeAnalyzer {
 		for (int i= 0; i < bindingsAfter.length; i++) {
 			result.add(bindingsAfter[i].getName());
 		}
-		List imports= fRoot.imports();
+		List<ImportDeclaration> imports= fRoot.imports();
 		for (int i= 0; i < imports.size(); i++) {
-			ImportDeclaration decl= (ImportDeclaration) imports.get(i);
+			ImportDeclaration decl= imports.get(i);
 			if (decl.isStatic() && !decl.isOnDemand()) {
 				result.add(ASTNodes.getSimpleNameIdentifier(decl.getName()));
 			}

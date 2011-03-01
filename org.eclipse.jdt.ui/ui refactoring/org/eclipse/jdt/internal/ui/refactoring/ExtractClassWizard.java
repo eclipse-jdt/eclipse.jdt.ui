@@ -101,6 +101,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 		setDefaultPageTitle(RefactoringMessages.ExtractClassWizard_page_title);
 	}
 
+	@Override
 	protected void addUserInputPages() {
 		addPage(new ExtractClassUserInputWizardPage());
 	}
@@ -147,6 +148,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 			final Button topLvlRadio= new Button(composite, SWT.RADIO);
 			topLvlRadio.setText(RefactoringMessages.ExtractClassWizard_radio_top_level);
 			topLvlRadio.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					boolean fAsTopLevel= topLvlRadio.getSelection();
 					fDescriptor.setCreateTopLevel(fAsTopLevel);
@@ -169,6 +171,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 			button.setText(RefactoringMessages.ExtractClassWizard_checkbox_create_gettersetter);
 			button.addSelectionListener(new SelectionAdapter() {
 
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fDescriptor.setCreateGetterSetter(button.getSelection());
 					validateRefactoring();
@@ -305,6 +308,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 			editButton.setEnabled(!tv.getSelection().isEmpty());
 			SWTUtil.setButtonDimensionHint(editButton);
 			editButton.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					ISelection selection= tv.getSelection();
 					if (selection instanceof IStructuredSelection) {
@@ -353,6 +357,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 		}
 
 		private abstract class FieldInfoLabelProvider extends CellLabelProvider {
+			@Override
 			public void update(ViewerCell cell) {
 				Field pi= (Field) cell.getElement();
 				cell.setText(doGetValue(pi));
@@ -369,6 +374,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 				fTextEditor= textEditor;
 			}
 
+			@Override
 			protected void setValue(Object element, Object value) {
 				if (element instanceof Field) {
 					Field pi= (Field) element;
@@ -380,6 +386,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 
 			public abstract void doSetValue(Field pi, String string);
 
+			@Override
 			protected Object getValue(Object element) {
 				if (element instanceof Field) {
 					Field pi= (Field) element;
@@ -390,10 +397,12 @@ public class ExtractClassWizard extends RefactoringWizard {
 
 			public abstract String doGetValue(Field pi);
 
+			@Override
 			protected CellEditor getCellEditor(Object element) {
 				return fTextEditor;
 			}
 
+			@Override
 			protected boolean canEdit(Object element) {
 				if (element instanceof Field) {
 					return fTextEditor != null;
@@ -407,6 +416,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 
 			TableViewerColumn viewerColumn= new TableViewerColumn(tv, SWT.LEAD);
 			viewerColumn.setLabelProvider(new FieldInfoLabelProvider() {
+				@Override
 				protected String doGetValue(Field pi) {
 					IField field= fDescriptor.getType().getField(pi.getFieldName());
 					try {
@@ -421,6 +431,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 			column.setText(RefactoringMessages.ExtractClassWizard_column_type);
 			viewerColumn= new TableViewerColumn(tv, SWT.LEAD);
 			viewerColumn.setLabelProvider(new FieldInfoLabelProvider() {
+				@Override
 				protected String doGetValue(Field pi) {
 					if (pi.isCreateField())
 						return pi.getNewFieldName();
@@ -429,14 +440,17 @@ public class ExtractClassWizard extends RefactoringWizard {
 				}
 			});
 			viewerColumn.setEditingSupport(new FieldInfoEditingSupport(cellEditor, tv) {
+				@Override
 				public String doGetValue(Field pi) {
 					return pi.getNewFieldName();
 				}
 
+				@Override
 				public void doSetValue(Field pi, String string) {
 					pi.setNewFieldName(string);
 				}
 
+				@Override
 				protected boolean canEdit(Object element) {
 					if (element instanceof Field) {
 						Field field= (Field) element;
@@ -516,6 +530,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 				return defaultValue;
 		}
 
+		@Override
 		public void dispose() {
 			IDialogSettings settings= getRefactoringSettings();
 			settings.put(CREATE_GETTER_SETTER, fDescriptor.isCreateGetterSetter());

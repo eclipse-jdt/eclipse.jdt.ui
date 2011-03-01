@@ -147,9 +147,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 	private static JavaPlugin fgJavaPlugin;
 
-	private static LinkedHashMap fgRepeatedMessages= new LinkedHashMap(20, 0.75f, true) {
+	private static LinkedHashMap<String, Long> fgRepeatedMessages= new LinkedHashMap<String, Long>(20, 0.75f, true) {
 		private static final long serialVersionUID= 1L;
-		protected boolean removeEldestEntry(java.util.Map.Entry eldest) {
+		@Override
+		protected boolean removeEldestEntry(java.util.Map.Entry<String, Long> eldest) {
 			return size() >= 20;
 		}
 	};
@@ -330,7 +331,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		long now= System.currentTimeMillis();
 		boolean writeToLog= true;
 		if (fgRepeatedMessages.containsKey(message)) {
-			long last= ((Long) fgRepeatedMessages.get(message)).longValue();
+			long last= fgRepeatedMessages.get(message).longValue();
 			writeToLog= now - last > 5000;
 		}
 		fgRepeatedMessages.put(message, new Long(now));
@@ -354,10 +355,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 	/* (non - Javadoc)
 	 * Method declared in plug-in
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 
 		WorkingCopyOwner.setPrimaryBufferProvider(new WorkingCopyOwner() {
+			@Override
 			public IBuffer createBuffer(ICompilationUnit workingCopy) {
 				ICompilationUnit original= workingCopy.getPrimary();
 				IResource resource= original.getResource();
@@ -529,6 +532,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	/*
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#createImageRegistry()
 	 */
+	@Override
 	protected ImageRegistry createImageRegistry() {
 		return JavaPluginImages.getImageRegistry();
 	}
@@ -536,6 +540,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	/*
 	 * @see org.eclipse.core.runtime.Plugin#stop
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		try {
 			if (fImageDescriptorRegistry != null)
@@ -742,6 +747,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 				/*
 				 * @see org.eclipse.ui.texteditor.ConfigurationElementSorter#getConfigurationElement(java.lang.Object)
 				 */
+				@Override
 				public IConfigurationElement getConfigurationElement(Object object) {
 					return ((JavaEditorTextHoverDescriptor)object).getConfigurationElement();
 				}
@@ -838,9 +844,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	private static void registerJavaContext(ContributionContextTypeRegistry registry, String id, TemplateContextType parent) {
 		TemplateContextType contextType= registry.getContextType(id);
-		Iterator iter= parent.resolvers();
+		Iterator<TemplateVariableResolver> iter= parent.resolvers();
 		while (iter.hasNext())
-			contextType.addResolver((TemplateVariableResolver) iter.next());
+			contextType.addResolver(iter.next());
 	}
 
 	/**

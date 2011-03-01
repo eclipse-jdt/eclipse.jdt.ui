@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,10 +87,10 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		public boolean useBlocks= false;
 	}
 
-	private List allFields;
-	private List selectedFields;
+	private List<IVariableBinding> allFields;
+	private List<IVariableBinding> selectedFields;
 
-	private ArrayList alreadyCheckedMemberTypes;
+	private ArrayList<ITypeBinding> alreadyCheckedMemberTypes;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call
@@ -124,6 +124,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GENERATE_HASHCODE_EQUALS_ACTION);
 	}
 
+	@Override
 	boolean isMethodAlreadyImplemented(ITypeBinding typeBinding) {
 		HashCodeEqualsInfo info= getTypeInfo(typeBinding, false);
 		return (info.foundEquals || info.foundHashCode);
@@ -200,6 +201,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		return status;
 	}
 
+	@Override
 	CodeGenerationSettings createSettings(IType type, SourceActionDialog dialog) {
 		HashCodeEqualsGenerationSettings settings= new HashCodeEqualsGenerationSettings();
 		super.createSettings(type, dialog).setSettings(settings);
@@ -210,20 +212,23 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		return settings;
 	}
 
+	@Override
 	void initialize(IType type) throws JavaModelException {
 		super.initialize(type);
-		alreadyCheckedMemberTypes= new ArrayList();
+		alreadyCheckedMemberTypes= new ArrayList<ITypeBinding>();
 	}
 
+	@Override
 	String getAlreadyImplementedErrorMethodName() {
 		return ActionMessages.GenerateHashCodeEqualsAction_hashcode_or_equals;
 	}
 
+	@Override
 	boolean generateCandidates() {
 		IVariableBinding[] fCandidateFields= fTypeBinding.getDeclaredFields();
 
-		allFields= new ArrayList();
-		selectedFields= new ArrayList();
+		allFields= new ArrayList<IVariableBinding>();
+		selectedFields= new ArrayList<IVariableBinding>();
 		for (int i= 0; i < fCandidateFields.length; i++) {
 			if (!Modifier.isStatic(fCandidateFields[i].getModifiers())) {
 				allFields.add(fCandidateFields[i]);
@@ -237,20 +242,24 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		return true;
 	}
 
+	@Override
 	SourceActionDialog createDialog(Shell shell, IType type) throws JavaModelException {
-		IVariableBinding[] allFieldBindings= (IVariableBinding[]) allFields.toArray(new IVariableBinding[0]);
-		IVariableBinding[] selectedFieldBindings= (IVariableBinding[]) selectedFields.toArray(new IVariableBinding[0]);
+		IVariableBinding[] allFieldBindings= allFields.toArray(new IVariableBinding[0]);
+		IVariableBinding[] selectedFieldBindings= selectedFields.toArray(new IVariableBinding[0]);
 		return new GenerateHashCodeEqualsDialog(shell, fEditor, type, allFieldBindings, selectedFieldBindings);
 	}
 
+	@Override
 	RefactoringStatus checkSuperClass(ITypeBinding superclass) {
 		return checkHashCodeEqualsExists(superclass, true);
 	}
 
+	@Override
 	RefactoringStatus checkGeneralConditions(IType type, CodeGenerationSettings settings, Object[] selected) {
 		return new RefactoringStatus();
 	}
 
+	@Override
 	RefactoringStatus checkMember(Object memberBinding) {
 		RefactoringStatus status= new RefactoringStatus();
 		IVariableBinding variableBinding= (IVariableBinding)memberBinding;
@@ -267,8 +276,9 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		return status;
 	}
 
+	@Override
 	IWorkspaceRunnable createOperation(Object[] selectedBindings, CodeGenerationSettings settings, boolean regenerate, IJavaElement type, IJavaElement elementPosition) {
-		final IVariableBinding[] selectedVariableBindings= (IVariableBinding[]) Arrays.asList(selectedBindings).toArray(new IVariableBinding[0]);
+		final IVariableBinding[] selectedVariableBindings= Arrays.asList(selectedBindings).toArray(new IVariableBinding[0]);
 		HashCodeEqualsGenerationSettings hashCodeEqualsGenerationSettings= (HashCodeEqualsGenerationSettings)settings;
 		GenerateHashCodeEqualsOperation operation= new GenerateHashCodeEqualsOperation(fTypeBinding, selectedVariableBindings, fUnit, elementPosition, settings,
 				hashCodeEqualsGenerationSettings.useInstanceOf, regenerate, true, false);
@@ -276,10 +286,12 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		return operation;
 	}
 
+	@Override
 	String getErrorCaption() {
 		return ActionMessages.GenerateHashCodeEqualsAction_error_caption;
 	}
 
+	@Override
 	String getNoMembersError() {
 		return ActionMessages.GenerateHashCodeEqualsAction_no_nonstatic_fields_error;
 	}

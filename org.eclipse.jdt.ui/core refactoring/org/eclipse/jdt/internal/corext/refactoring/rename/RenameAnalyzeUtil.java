@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -89,25 +89,26 @@ class RenameAnalyzeUtil {
 
 		private static class NameNodeVisitor extends ASTVisitor {
 
-			private Collection fRanges;
-			private Collection fProblemNodes;
+			private Collection<IRegion> fRanges;
+			private Collection<SimpleName> fProblemNodes;
 			private String fKey;
 
 			public NameNodeVisitor(TextEdit[] edits, TextChange change, String key) {
 				Assert.isNotNull(edits);
 				Assert.isNotNull(key);
 
-				fRanges= new HashSet(Arrays.asList(RefactoringAnalyzeUtil.getNewRanges(edits, change)));
-				fProblemNodes= new ArrayList(0);
+				fRanges= new HashSet<IRegion>(Arrays.asList(RefactoringAnalyzeUtil.getNewRanges(edits, change)));
+				fProblemNodes= new ArrayList<SimpleName>(0);
 				fKey= key;
 			}
 
 			public SimpleName[] getProblemNodes() {
-				return (SimpleName[]) fProblemNodes.toArray(new SimpleName[fProblemNodes.size()]);
+				return fProblemNodes.toArray(new SimpleName[fProblemNodes.size()]);
 			}
 
 			//----- visit methods
 
+			@Override
 			public boolean visit(SimpleName node) {
 				VariableDeclaration decl= getVariableDeclaration(node);
 				if (decl == null)
@@ -259,7 +260,7 @@ class RenameAnalyzeUtil {
 			SearchResultGroup[] oldReferences, SearchResultGroup[] newReferences, String newElementName) {
 		RefactoringStatus result= new RefactoringStatus();
 
-		HashMap cuToNewResults= new HashMap(newReferences.length);
+		HashMap<ICompilationUnit, SearchMatch[]> cuToNewResults= new HashMap<ICompilationUnit, SearchMatch[]>(newReferences.length);
 		for (int i1= 0; i1 < newReferences.length; i1++) {
 			ICompilationUnit cu= newReferences[i1].getCompilationUnit();
 			if (cu != null)
@@ -273,7 +274,7 @@ class RenameAnalyzeUtil {
 			if (cu == null)
 				continue;
 
-			SearchMatch[] newSearchMatches= (SearchMatch[]) cuToNewResults.remove(cu);
+			SearchMatch[] newSearchMatches= cuToNewResults.remove(cu);
 			if (newSearchMatches == null) {
 				for (int j = 0; j < oldMatches.length; j++) {
 					SearchMatch oldMatch = oldMatches[j];
@@ -284,10 +285,10 @@ class RenameAnalyzeUtil {
 			}
 		}
 
-		for (Iterator iter= cuToNewResults.entrySet().iterator(); iter.hasNext();) {
-			Map.Entry entry= (Entry) iter.next();
-			ICompilationUnit cu= (ICompilationUnit) entry.getKey();
-			SearchMatch[] newSearchMatches= (SearchMatch[]) entry.getValue();
+		for (Iterator<Entry<ICompilationUnit, SearchMatch[]>> iter= cuToNewResults.entrySet().iterator(); iter.hasNext();) {
+			Entry<ICompilationUnit, SearchMatch[]> entry= iter.next();
+			ICompilationUnit cu= entry.getKey();
+			SearchMatch[] newSearchMatches= entry.getValue();
 			for (int i= 0; i < newSearchMatches.length; i++) {
 				SearchMatch newMatch= newSearchMatches[i];
 				addReferenceShadowedError(cu, newMatch, newElementName, result);
@@ -298,18 +299,18 @@ class RenameAnalyzeUtil {
 
 	private static void analyzeChanges(ICompilationUnit cu, TextChange change,
 			SearchMatch[] oldMatches, SearchMatch[] newMatches, String newElementName, RefactoringStatus result) {
-		Map updatedOldOffsets= getUpdatedChangeOffsets(change, oldMatches);
+		Map<Integer, SearchMatch> updatedOldOffsets= getUpdatedChangeOffsets(change, oldMatches);
 		for (int i= 0; i < newMatches.length; i++) {
 			SearchMatch newMatch= newMatches[i];
 			Integer offsetInNew= new Integer(newMatch.getOffset());
-			SearchMatch oldMatch= (SearchMatch) updatedOldOffsets.remove(offsetInNew);
+			SearchMatch oldMatch= updatedOldOffsets.remove(offsetInNew);
 			if (oldMatch == null) {
 				addReferenceShadowedError(cu, newMatch, newElementName, result);
 			}
 		}
-		for (Iterator iter= updatedOldOffsets.values().iterator(); iter.hasNext();) {
+		for (Iterator<SearchMatch> iter= updatedOldOffsets.values().iterator(); iter.hasNext();) {
 			// remaining old matches are not found any more -> they have been shadowed
-			SearchMatch oldMatch= (SearchMatch) iter.next();
+			SearchMatch oldMatch= iter.next();
 			addShadowsError(cu, oldMatch, result);
 		}
 	}
@@ -320,12 +321,12 @@ class RenameAnalyzeUtil {
 	 * @param oldMatches
 	 * @return Map &lt;Integer updatedOffset, SearchMatch oldMatch&gt;
 	 */
-	private static Map getUpdatedChangeOffsets(TextChange change, SearchMatch[] oldMatches) {
-		Map/*<Integer updatedOffset, SearchMatch oldMatch>*/ updatedOffsets= new HashMap();
-		Map oldToUpdatedOffsets= getEditChangeOffsetUpdates(change);
+	private static Map<Integer, SearchMatch> getUpdatedChangeOffsets(TextChange change, SearchMatch[] oldMatches) {
+		Map<Integer, SearchMatch> updatedOffsets= new HashMap<Integer, SearchMatch>();
+		Map<Integer, Integer> oldToUpdatedOffsets= getEditChangeOffsetUpdates(change);
 		for (int i= 0; i < oldMatches.length; i++) {
 			SearchMatch oldMatch= oldMatches[i];
-			Integer updatedOffset= (Integer) oldToUpdatedOffsets.get(new Integer(oldMatch.getOffset()));
+			Integer updatedOffset= oldToUpdatedOffsets.get(new Integer(oldMatch.getOffset()));
 			if (updatedOffset == null)
 				updatedOffset= new Integer(-1); //match not updated
 			updatedOffsets.put(updatedOffset, oldMatch);
@@ -338,9 +339,9 @@ class RenameAnalyzeUtil {
 	 * @param change
 	 * @return Map &lt;Integer oldOffset, Integer updatedOffset&gt;
 	 */
-	private static Map getEditChangeOffsetUpdates(TextChange change) {
+	private static Map<Integer, Integer> getEditChangeOffsetUpdates(TextChange change) {
 		TextEditChangeGroup[] editChanges= change.getTextEditChangeGroups();
-		Map/*<oldOffset, newOffset>*/ offsetUpdates= new HashMap(editChanges.length);
+		Map<Integer, Integer> offsetUpdates= new HashMap<Integer, Integer>(editChanges.length);
 		for (int i= 0; i < editChanges.length; i++) {
 			TextEditChangeGroup editChange= editChanges[i];
 			IRegion oldRegion= editChange.getRegion();

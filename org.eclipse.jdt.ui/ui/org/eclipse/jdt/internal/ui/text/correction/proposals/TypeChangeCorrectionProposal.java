@@ -87,6 +87,7 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 		}
 	}
 
+	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		ASTNode boundNode= fAstRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;

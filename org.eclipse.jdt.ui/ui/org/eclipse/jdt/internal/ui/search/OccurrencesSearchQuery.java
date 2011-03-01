@@ -69,9 +69,9 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		try {
 			OccurrenceLocation[] occurrences= fFinder.getOccurrences();
 			if (occurrences != null) {
-				HashMap lineMap= new HashMap();
+				HashMap<Integer, JavaElementLine> lineMap= new HashMap<Integer, JavaElementLine>();
 				CompilationUnit astRoot= fFinder.getASTRoot();
-				ArrayList resultingMatches= new ArrayList();
+				ArrayList<OccurrenceMatch> resultingMatches= new ArrayList<OccurrenceMatch>();
 
 				for (int i= 0; i < occurrences.length; i++) {
 					OccurrenceLocation loc= occurrences[i];
@@ -86,7 +86,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 				}
 
 				if (!resultingMatches.isEmpty()) {
-					fResult.addMatches((Match[]) resultingMatches.toArray(new Match[resultingMatches.size()]));
+					fResult.addMatches(resultingMatches.toArray(new Match[resultingMatches.size()]));
 				}
 			}
 
@@ -98,7 +98,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		return Status.OK_STATUS;
 	}
 
-	private JavaElementLine getLineElement(CompilationUnit astRoot, OccurrenceLocation location, HashMap lineToGroup) {
+	private JavaElementLine getLineElement(CompilationUnit astRoot, OccurrenceLocation location, HashMap<Integer, JavaElementLine> lineToGroup) {
 		int lineNumber= astRoot.getLineNumber(location.getOffset());
 		if (lineNumber <= 0) {
 			return null;
@@ -106,7 +106,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		JavaElementLine lineElement= null;
 		try {
 			Integer key= new Integer(lineNumber);
-			lineElement= (JavaElementLine) lineToGroup.get(key);
+			lineElement= lineToGroup.get(key);
 			if (lineElement == null) {
 				int lineStartOffset= astRoot.getPosition(lineNumber, 0);
 				if (lineStartOffset >= 0) {

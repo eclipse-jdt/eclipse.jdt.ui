@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,6 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -83,7 +82,7 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
  * elements that are not shown usually in the package explorer of the
  * workspace.
  */
-public class DialogPackageExplorer implements IMenuListener, ISelectionProvider, IPostSelectionProvider, ISetSelectionTarget {
+public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvider, ISetSelectionTarget {
     /**
      * A extended content provider for the package explorer which can additionally display
      * an output folder item.
@@ -100,7 +99,8 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
          * not be used, instead the project children are returned directly
          * @return returns the children of the project
          */
-        public Object[] getElements(Object element) {
+        @Override
+		public Object[] getElements(Object element) {
             if (fCurrJProject == null || !fCurrJProject.exists())
                 return new Object[0];
             return new Object[] {fCurrJProject};
@@ -115,7 +115,8 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
          * @param element the current element to get the children from
          * @return an array of children
          */
-        public Object[] getChildren(Object element) {
+        @Override
+		public Object[] getChildren(Object element) {
             Object[] children= super.getChildren(element);
             if (((element instanceof IPackageFragmentRoot && !ClasspathModifier.isInExternalOrArchive((IPackageFragmentRoot) element)) ||
                     (element instanceof IJavaProject && fCurrJProject.isOnClasspath(fCurrJProject))) && fShowOutputFolders) {
@@ -154,7 +155,8 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
             outputFolderLabel= new CPListLabelProvider();
         }
 
-        public String getText(Object element) {
+        @Override
+		public String getText(Object element) {
             if (element instanceof CPListElementAttribute)
                 return outputFolderLabel.getText(element);
             String text= super.getText(element);
@@ -198,7 +200,8 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
         /* (non-Javadoc)
          * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getForeground(java.lang.Object)
          */
-        public Color getForeground(Object element) {
+        @Override
+		public Color getForeground(Object element) {
             try {
                 if (element instanceof IPackageFragmentRoot) {
                     IPackageFragmentRoot root= (IPackageFragmentRoot)element;
@@ -228,13 +231,15 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
             return Display.getCurrent().getSystemColor(SWT.COLOR_BLUE);
         }
 
-        public Image getImage(Object element) {
+        @Override
+		public Image getImage(Object element) {
             if (element instanceof CPListElementAttribute)
                 return outputFolderLabel.getImage(element);
             return super.getImage(element);
         }
 
-        public void dispose() {
+        @Override
+		public void dispose() {
             outputFolderLabel.dispose();
             super.dispose();
         }
@@ -250,7 +255,8 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
             super();
         }
 
-        public int compare(Viewer viewer, Object e1, Object e2) {
+        @Override
+		public int compare(Viewer viewer, Object e1, Object e2) {
             if (e1 instanceof CPListElementAttribute)
                 return -1;
             if (e2 instanceof CPListElementAttribute)
@@ -268,7 +274,8 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
      */
     private final class PackageFilter extends LibraryFilter {
         private OutputFolderFilter fOutputFolderFilter= new OutputFolderFilter();
-        public boolean select(Viewer viewer, Object parentElement, Object element) {
+        @Override
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
             try {
                 if (element instanceof IFile) {
                     IFile file= (IFile) element;
@@ -426,7 +433,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
         	fContentProvider.inputChanged(fPackageViewer, oldProject, fCurrJProject);
 		fPackageViewer.setInput(new Object[0]);
 
-        List selectedElements= new ArrayList();
+        List<IJavaProject> selectedElements= new ArrayList<IJavaProject>();
         selectedElements.add(fCurrJProject);
         setSelection(selectedElements);
     }
@@ -447,7 +454,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
      * Set the selection and focus to the list of elements
      * @param elements the object to be selected and displayed
      */
-    public void setSelection(final List elements) {
+    public void setSelection(final List<?> elements) {
         if (elements == null || elements.size() == 0)
             return;
 		try {

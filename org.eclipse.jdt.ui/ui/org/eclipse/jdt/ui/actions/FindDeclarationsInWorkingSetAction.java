@@ -92,6 +92,7 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 		fWorkingSet= workingSets;
 	}
 
+	@Override
 	void init() {
 		setText(SearchMessages.Search_FindDeclarationsInWorkingSetAction_label);
 		setToolTipText(SearchMessages.Search_FindDeclarationsInWorkingSetAction_tooltip);
@@ -99,6 +100,7 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKING_SET_ACTION);
 	}
 
+	@Override
 	QuerySpecification createQuery(IJavaElement element) throws JavaModelException, InterruptedException {
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -467,6 +468,7 @@ public abstract class TType {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final boolean equals(Object other) {
 		if (this == other)
 			return true;
@@ -478,6 +480,7 @@ public abstract class TType {
 		return doEquals(otherType);
 	}
 
+	@Override
 	public abstract int hashCode();
 	
 	/**
@@ -514,14 +517,14 @@ public abstract class TType {
 	 * 		was not created with rememberSubtypes == true
 	 */
 	public TType[] getSubTypes() throws IllegalStateException {
-		Map subTypes= fEnvironment.getSubTypes();
+		Map<TType, ArrayList<TType>> subTypes= fEnvironment.getSubTypes();
 		if (subTypes == null)
 			throw new IllegalStateException("This TypeEnvironment does not remember subtypes"); //$NON-NLS-1$
-		List subtypes= (List) subTypes.get(this);
+		List<TType> subtypes= subTypes.get(this);
 		if (subtypes == null)
 			return EMPTY_TYPE_ARRAY;
 		else
-			return (TType[]) subtypes.toArray(new TType[subtypes.size()]);
+			return subtypes.toArray(new TType[subtypes.size()]);
 	}
 
 	/**
@@ -599,6 +602,7 @@ public abstract class TType {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String toString() {
 		return getPrettySignature();
 	}

@@ -237,12 +237,13 @@ public class PackageExplorerPart extends ViewPart
 
 	private class PackageExplorerProblemTreeViewer extends ProblemTreeViewer {
 		// fix for 64372  Projects showing up in Package Explorer twice [package explorer]
-		private List fPendingRefreshes;
+		private List<Object> fPendingRefreshes;
 
 		public PackageExplorerProblemTreeViewer(Composite parent, int style) {
 			super(parent, style);
-			fPendingRefreshes= Collections.synchronizedList(new ArrayList());
+			fPendingRefreshes= Collections.synchronizedList(new ArrayList<Object>());
 		}
+		@Override
 		public void add(Object parentElement, Object[] childElements) {
 			if (fPendingRefreshes.contains(parentElement)) {
 				return;
@@ -253,7 +254,8 @@ public class PackageExplorerPart extends ViewPart
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.AbstractTreeViewer#internalRefresh(java.lang.Object, boolean)
 		 */
-	    protected void internalRefresh(Object element, boolean updateLabels) {
+	    @Override
+		protected void internalRefresh(Object element, boolean updateLabels) {
 			try {
 				fPendingRefreshes.add(element);
 				super.internalRefresh(element, updateLabels);
@@ -262,6 +264,7 @@ public class PackageExplorerPart extends ViewPart
 			}
 		}
 
+		@Override
 		protected boolean evaluateExpandableWithFilters(Object parent) {
 			if (parent instanceof IJavaProject
 					|| parent instanceof ICompilationUnit || parent instanceof IClassFile
@@ -274,6 +277,7 @@ public class PackageExplorerPart extends ViewPart
 			return true;
 		}
 
+		@Override
 		protected boolean isFiltered(Object object, Object parent, ViewerFilter[] filters) {
 			boolean res= super.isFiltered(object, parent, filters);
 			if (res && isEssential(object)) {
@@ -299,16 +303,17 @@ public class PackageExplorerPart extends ViewPart
 			return false;
 		}
 
+		@Override
 		protected void handleInvalidSelection(ISelection invalidSelection, ISelection newSelection) {
 			IStructuredSelection is= (IStructuredSelection)invalidSelection;
-			List ns= null;
+			List<Object> ns= null;
 			if (newSelection instanceof IStructuredSelection) {
-				ns= new ArrayList(((IStructuredSelection)newSelection).toList());
+				ns= new ArrayList<Object>(((IStructuredSelection)newSelection).toList());
 			} else {
-				ns= new ArrayList();
+				ns= new ArrayList<Object>();
 			}
 			boolean changed= false;
-			for (Iterator iter= is.iterator(); iter.hasNext();) {
+			for (Iterator<?> iter= is.iterator(); iter.hasNext();) {
 				Object element= iter.next();
 				if (element instanceof IJavaProject) {
 					IProject project= ((IJavaProject)element).getProject();
@@ -336,6 +341,7 @@ public class PackageExplorerPart extends ViewPart
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		protected Object[] addAditionalProblemParents(Object[] elements) {
 			if (getRootMode() == WORKING_SETS_AS_ROOTS && elements != null) {
 				return fWorkingSetModel.addWorkingSets(elements);
@@ -369,7 +375,8 @@ public class PackageExplorerPart extends ViewPart
 
 	}
 
-    public void init(IViewSite site, IMemento memento) throws PartInitException {
+    @Override
+	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 		if (memento == null) {
 			String persistedMemento= fDialogSettings.get(TAG_MEMENTO);
@@ -437,7 +444,8 @@ public class PackageExplorerPart extends ViewPart
 		}
 	}
 
-	 public void dispose() {
+	 @Override
+	public void dispose() {
 		XMLMemento memento= XMLMemento.createWriteRoot("packageExplorer"); //$NON-NLS-1$
 		saveState(memento);
 		StringWriter writer= new StringWriter();
@@ -470,6 +478,7 @@ public class PackageExplorerPart extends ViewPart
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createPartControl(Composite parent) {
 
 		final PerformanceStats stats= PerformanceStats.getStats(PERF_CREATE_PART_CONTROL, this);
@@ -511,6 +520,7 @@ public class PackageExplorerPart extends ViewPart
 		});
 
 		fOpenAndLinkWithEditorHelper= new OpenAndLinkWithEditorHelper(fViewer) {
+			@Override
 			protected void activate(ISelection selection) {
 				try {
 					final Object selectedElement= SelectionUtil.getSingleElement(selection);
@@ -521,10 +531,12 @@ public class PackageExplorerPart extends ViewPart
 				}
 			}
 
+			@Override
 			protected void linkToEditor(ISelection selection) {
 				PackageExplorerPart.this.linkToEditor(selection);
 			}
 
+			@Override
 			protected void open(ISelection selection, boolean activate) {
 				fActionSet.handleOpen(selection, activate);
 			}
@@ -673,6 +685,7 @@ public class PackageExplorerPart extends ViewPart
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.part.WorkbenchPart#getAdapter(java.lang.Class)
 	 */
+	@Override
 	public Object getAdapter(Class key) {
 		if (key.equals(ISelectionProvider.class))
 			return fViewer;
@@ -754,6 +767,7 @@ public class PackageExplorerPart extends ViewPart
 		}
 	}
 
+	@Override
 	public String getTitleToolTip() {
 		if (fViewer == null)
 			return super.getTitleToolTip();
@@ -763,6 +777,7 @@ public class PackageExplorerPart extends ViewPart
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.part.WorkbenchPart#setFocus()
 	 */
+	@Override
 	public void setFocus() {
 		fViewer.getTree().setFocus();
 	}
@@ -924,6 +939,7 @@ public class PackageExplorerPart extends ViewPart
 		}
 	}
 
+	@Override
 	public void saveState(IMemento memento) {
 		if (fViewer == null && fMemento != null) {
 			// part has not been created -> keep the old state
@@ -985,6 +1001,7 @@ public class PackageExplorerPart extends ViewPart
 	 */
 	private void initKeyListener() {
 		fViewer.getControl().addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyReleased(KeyEvent event) {
 				fActionSet.handleKeyEvent(event);
 			}
@@ -1496,7 +1513,7 @@ public class PackageExplorerPart extends ViewPart
 		if (fWorkingSetModel == null)
 			createWorkingSetModel();
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
-		List list= Arrays.asList(manager.getAllWorkingSets());
+		List<IWorkingSet> list= Arrays.asList(manager.getAllWorkingSets());
 		for (int i= 0; i < workingSets.length; i++) {
 			IWorkingSet workingSet= workingSets[i];
 			if (!list.contains(workingSet))

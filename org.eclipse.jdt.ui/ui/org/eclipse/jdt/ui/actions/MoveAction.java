@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -110,6 +110,7 @@ public class MoveAction extends SelectionDispatchAction{
 	/*
 	 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
 	 */
+	@Override
 	public void selectionChanged(SelectionChangedEvent event) {
 		fMoveStaticMembersAction.selectionChanged(event);
 		fMoveInstanceMethodAction.selectionChanged(event);
@@ -120,6 +121,7 @@ public class MoveAction extends SelectionDispatchAction{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#setSpecialSelectionProvider(org.eclipse.jface.viewers.ISelectionProvider)
 	 */
+	@Override
 	public void setSpecialSelectionProvider(ISelectionProvider provider) {
 		super.setSpecialSelectionProvider(provider);
 
@@ -131,6 +133,7 @@ public class MoveAction extends SelectionDispatchAction{
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			if (fMoveInstanceMethodAction.isEnabled() && tryMoveInstanceMethod(selection))
@@ -151,6 +154,7 @@ public class MoveAction extends SelectionDispatchAction{
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		try {
 			if (!ActionUtil.isEditable(fEditor))
@@ -185,7 +189,7 @@ public class MoveAction extends SelectionDispatchAction{
 		if (selection.isEmpty())
 			return null;
 
-		for  (Iterator iter= selection.iterator(); iter.hasNext(); ) {
+		for  (Iterator<?> iter= selection.iterator(); iter.hasNext(); ) {
 			if (! (iter.next() instanceof IMember))
 				return null;
 		}
@@ -195,9 +199,9 @@ public class MoveAction extends SelectionDispatchAction{
 	private static IMember[] convertToMemberArray(Object[] obj) {
 		if (obj == null)
 			return null;
-		Set memberSet= new HashSet();
+		Set<Object> memberSet= new HashSet<Object>();
 		memberSet.addAll(Arrays.asList(obj));
-		return (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
+		return memberSet.toArray(new IMember[memberSet.size()]);
 	}
 
 	private boolean tryMoveStaticMembers(IStructuredSelection selection) throws JavaModelException {
@@ -258,6 +262,7 @@ public class MoveAction extends SelectionDispatchAction{
 	/*
 	 * @see SelectionDispatchAction#update(ISelection)
 	 */
+	@Override
 	public void update(ISelection selection) {
 		fMoveStaticMembersAction.update(selection);
 		fMoveInstanceMethodAction.update(selection);

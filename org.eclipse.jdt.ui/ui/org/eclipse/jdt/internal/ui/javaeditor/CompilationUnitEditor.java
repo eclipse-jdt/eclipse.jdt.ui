@@ -171,6 +171,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		/*
 		 * @see ITextOperationTarget#doOperation(int)
 		 */
+		@Override
 		public void doOperation(int operation) {
 
 			if (getTextWidget() == null)
@@ -202,6 +203,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		/*
 		 * @see IWidgetTokenOwner#requestWidgetToken(IWidgetTokenKeeper)
 		 */
+		@Override
 		public boolean requestWidgetToken(IWidgetTokenKeeper requester) {
 			if (PlatformUI.getWorkbench().getHelpSystem().isContextHelpDisplayed())
 				return false;
@@ -212,6 +214,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		 * @see IWidgetTokenOwnerExtension#requestWidgetToken(IWidgetTokenKeeper, int)
 		 * @since 3.0
 		 */
+		@Override
 		public boolean requestWidgetToken(IWidgetTokenKeeper requester, int priority) {
 			if (PlatformUI.getWorkbench().getHelpSystem().isContextHelpDisplayed())
 				return false;
@@ -222,16 +225,17 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		 * @see org.eclipse.jface.text.source.SourceViewer#createFormattingContext()
 		 * @since 3.0
 		 */
+		@Override
 		public IFormattingContext createFormattingContext() {
 			IFormattingContext context= new JavaFormattingContext();
 
-			Map preferences;
+			Map<String, String> preferences;
 			IJavaElement inputJavaElement= getInputJavaElement();
 			IJavaProject javaProject= inputJavaElement != null ? inputJavaElement.getJavaProject() : null;
 			if (javaProject == null)
-				preferences= new HashMap(JavaCore.getOptions());
+				preferences= new HashMap<String, String>(JavaCore.getOptions());
 			else
-				preferences= new HashMap(javaProject.getOptions(true));
+				preferences= new HashMap<String, String>(javaProject.getOptions(true));
 
 			context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, preferences);
 
@@ -244,10 +248,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 		final char fExitCharacter;
 		final char fEscapeCharacter;
-		final Stack fStack;
+		final Stack<BracketLevel> fStack;
 		final int fSize;
 
-		public ExitPolicy(char exitCharacter, char escapeCharacter, Stack stack) {
+		public ExitPolicy(char exitCharacter, char escapeCharacter, Stack<BracketLevel> stack) {
 			fExitCharacter= exitCharacter;
 			fEscapeCharacter= escapeCharacter;
 			fStack= stack;
@@ -261,7 +265,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 			if (fSize == fStack.size() && !isMasked(offset)) {
 				if (event.character == fExitCharacter) {
-					BracketLevel level= (BracketLevel) fStack.peek();
+					BracketLevel level= fStack.peek();
 					if (level.fFirstPosition.offset > offset || level.fSecondPosition.offset < offset)
 						return null;
 					if (level.fSecondPosition.offset == offset && length == 0)
@@ -381,7 +385,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		private boolean fCloseAngularBrackets= true;
 		private final String CATEGORY= toString();
 		private final IPositionUpdater fUpdater= new ExclusivePositionUpdater(CATEGORY);
-		private final Stack fBracketLevelStack= new Stack();
+		private final Stack<BracketLevel> fBracketLevelStack= new Stack<BracketLevel>();
 
 		public void setCloseBracketsEnabled(boolean enabled) {
 			fCloseBrackets= enabled;
@@ -563,7 +567,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		 */
 		public void left(LinkedModeModel environment, int flags) {
 
-			final BracketLevel level= (BracketLevel) fBracketLevelStack.pop();
+			final BracketLevel level= fBracketLevelStack.pop();
 
 			if (flags != ILinkedModeListener.EXTERNAL_MODIFICATION)
 				return;
@@ -1039,6 +1043,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see AbstractTextEditor#createActions()
 	 */
+	@Override
 	protected void createActions() {
 
 		super.createActions();
@@ -1167,6 +1172,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see JavaEditor#getElementAt(int)
 	 */
+	@Override
 	protected IJavaElement getElementAt(int offset) {
 		return getElementAt(offset, true);
 	}
@@ -1181,6 +1187,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @param reconcile <code>true</code> if working copy should be reconciled
 	 * @return the most narrow element which includes the given offset
 	 */
+	@Override
 	protected IJavaElement getElementAt(int offset, boolean reconcile) {
 		ICompilationUnit unit= (ICompilationUnit)getInputJavaElement();
 
@@ -1205,6 +1212,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see JavaEditor#getCorrespondingElement(IJavaElement)
 	 */
+	@Override
 	protected IJavaElement getCorrespondingElement(IJavaElement element) {
 		// XXX: With new working copy story: original == working copy.
 		// Note that the previous code could result in a reconcile as side effect. Should check if that
@@ -1215,6 +1223,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see AbstractTextEditor#editorContextMenuAboutToShow(IMenuManager)
 	 */
+	@Override
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
 		super.editorContextMenuAboutToShow(menu);
 
@@ -1227,6 +1236,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#performSave(boolean, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	protected void performSave(boolean overwrite, IProgressMonitor progressMonitor) {
 		IDocumentProvider p= getDocumentProvider();
 		if (p instanceof ICompilationUnitDocumentProvider) {
@@ -1246,6 +1256,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see AbstractTextEditor#doSave(IProgressMonitor)
 	 */
+	@Override
 	public void doSave(IProgressMonitor progressMonitor) {
 
 		IDocumentProvider p= getDocumentProvider();
@@ -1298,6 +1309,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#openSaveErrorDialog(java.lang.String, java.lang.String, org.eclipse.core.runtime.CoreException)
 	 * @since 3.3
 	 */
+	@Override
 	protected void openSaveErrorDialog(String title, String message, CoreException exception) {
 		IStatus status= exception.getStatus();
 		if (JavaUI.ID_PLUGIN.equals(status.getPlugin())
@@ -1339,6 +1351,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		IStatus status= exception.getStatus();
 		int mask= IStatus.WARNING | IStatus.ERROR;
 		ErrorDialog dialog= new ErrorDialog(getSite().getShell(), title, message, status, mask) {
+			@Override
 			protected Control createMessageArea(Composite parent) {
 				Control result= super.createMessageArea(parent);
 
@@ -1348,6 +1361,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				link.setText(linkText);
 				link.setFont(parent.getFont());
 				link.addSelectionListener(new SelectionAdapter() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						if (hasProjectSettings)
 							PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, SaveParticipantPreferencePage.PROPERTY_PAGE_ID, null, null).open();
@@ -1360,6 +1374,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 				return result;
 			}
+			@Override
 			protected Image getImage() {
 				return getWarningImage();
 			}
@@ -1367,6 +1382,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		dialog.open();
 	}
 
+	@Override
 	public boolean isSaveAsAllowed() {
 		return true;
 	}
@@ -1374,6 +1390,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see AbstractTextEditor#doSetInput(IEditorInput)
 	 */
+	@Override
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
 		configureToggleCommentAction();
@@ -1385,6 +1402,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#installOverrideIndicator(boolean)
 	 * @since 3.0
 	 */
+	@Override
 	protected void installOverrideIndicator(boolean provideAST) {
 		super.installOverrideIndicator(provideAST);
 
@@ -1398,6 +1416,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#uninstallOverrideIndicator()
 	 * @since 3.0
 	 */
+	@Override
 	protected void uninstallOverrideIndicator() {
 		if (fOverrideIndicatorManager != null)
 			removeReconcileListener(fOverrideIndicatorManager);
@@ -1422,6 +1441,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#installTabsToSpacesConverter()
 	 * @since 3.3
 	 */
+	@Override
 	protected void installTabsToSpacesConverter() {
 		ISourceViewer sourceViewer= getSourceViewer();
 		SourceViewerConfiguration config= getSourceViewerConfiguration();
@@ -1444,6 +1464,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#isTabsToSpacesConversionEnabled()
 	 * @since 3.3
 	 */
+	@Override
 	protected boolean isTabsToSpacesConversionEnabled() {
 		IJavaElement element= getInputJavaElement();
 		IJavaProject project= element == null ? null : element.getJavaProject();
@@ -1455,6 +1476,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		return JavaCore.SPACE.equals(option);
 	}
 
+	@Override
 	public void dispose() {
 
 		ISourceViewer sourceViewer= getSourceViewer();
@@ -1477,6 +1499,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see AbstractTextEditor#createPartControl(Composite)
 	 */
+	@Override
 	public void createPartControl(Composite parent) {
 
 		super.createPartControl(parent);
@@ -1542,6 +1565,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
 	 */
+	@Override
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
 
 		try {
@@ -1600,6 +1624,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#createJavaSourceViewer(org.eclipse.swt.widgets.Composite, org.eclipse.jface.text.source.IVerticalRuler, org.eclipse.jface.text.source.IOverviewRuler, boolean, int)
 	 */
+	@Override
 	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles, IPreferenceStore store) {
 		return new AdaptedSourceViewer(parent, verticalRuler, overviewRuler, isOverviewRulerVisible, styles, store);
 	}
@@ -1695,6 +1720,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see AbstractTextEditor#rememberSelection()
 	 */
+	@Override
 	protected void rememberSelection() {
 		fRememberedSelection.remember();
 	}
@@ -1702,6 +1728,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see AbstractTextEditor#restoreSelection()
 	 */
+	@Override
 	protected void restoreSelection() {
 		fRememberedSelection.restore();
 	}
@@ -1709,6 +1736,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see AbstractTextEditor#canHandleMove(IEditorInput, IEditorInput)
 	 */
+	@Override
 	protected boolean canHandleMove(IEditorInput originalElement, IEditorInput movedElement) {
 
 		String oldExtension= ""; //$NON-NLS-1$
@@ -1734,6 +1762,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#getAdapter(java.lang.Class)
 	 */
+	@Override
 	public Object getAdapter(Class required) {
 		if (SmartBackspaceManager.class.equals(required)) {
 			if (getSourceViewer() instanceof JavaSourceViewer) {
@@ -1776,6 +1805,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#createNavigationActions()
 	 */
+	@Override
 	protected void createNavigationActions() {
 		super.createNavigationActions();
 

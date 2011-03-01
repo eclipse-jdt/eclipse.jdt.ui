@@ -32,8 +32,8 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 public class LocalTypeAnalyzer extends ASTVisitor {
 
 	private Selection fSelection;
-	private List fTypeDeclarationsBefore= new ArrayList(2);
-	private List fTypeDeclarationsSelected= new ArrayList(2);
+	private List<AbstractTypeDeclaration> fTypeDeclarationsBefore= new ArrayList<AbstractTypeDeclaration>(2);
+	private List<AbstractTypeDeclaration> fTypeDeclarationsSelected= new ArrayList<AbstractTypeDeclaration>(2);
 	private String fBeforeTypeReferenced;
 	private String fSelectedTypeReferenced;
 
@@ -51,6 +51,7 @@ public class LocalTypeAnalyzer extends ASTVisitor {
 		fSelection= selection;
 	}
 
+	@Override
 	public boolean visit(SimpleName node) {
 		if (node.isDeclaration())
 			return true;
@@ -61,14 +62,17 @@ public class LocalTypeAnalyzer extends ASTVisitor {
 		return true;
 	}
 
+	@Override
 	public boolean visit(TypeDeclaration node) {
 		return visitType(node);
 	}
 
+	@Override
 	public boolean visit(AnnotationTypeDeclaration node) {
 		return visitType(node);
 	}
 
+	@Override
 	public boolean visit(EnumDeclaration node) {
 		return visitType(node);
 	}
@@ -103,9 +107,9 @@ public class LocalTypeAnalyzer extends ASTVisitor {
 		}
 	}
 
-	private boolean checkBinding(List declarations, ITypeBinding binding) {
-		for (Iterator iter= declarations.iterator(); iter.hasNext();) {
-			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration)iter.next();
+	private boolean checkBinding(List<AbstractTypeDeclaration> declarations, ITypeBinding binding) {
+		for (Iterator<AbstractTypeDeclaration> iter= declarations.iterator(); iter.hasNext();) {
+			AbstractTypeDeclaration declaration= iter.next();
 			if (declaration.resolveBinding() == binding) {
 				return true;
 			}

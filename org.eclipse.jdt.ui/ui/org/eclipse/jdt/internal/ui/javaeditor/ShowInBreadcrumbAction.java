@@ -40,6 +40,7 @@ public class ShowInBreadcrumbAction extends Action {
 	/*
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
+	@Override
 	public void run() {
 		IBreadcrumb breadcrumb= fEditor.getBreadcrumb();
 		if (breadcrumb == null)

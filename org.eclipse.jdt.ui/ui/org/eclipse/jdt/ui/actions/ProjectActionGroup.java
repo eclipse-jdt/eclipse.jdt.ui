@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -125,7 +125,7 @@ public class ProjectActionGroup extends ActionGroup {
 
 	protected void performSelectionChanged(IStructuredSelection structuredSelection) {
 		Object[] array= structuredSelection.toArray();
-		ArrayList openProjects= new ArrayList();
+		ArrayList<IProject> openProjects= new ArrayList<IProject>();
 		int selectionStatus= evaluateSelection(array, openProjects);
 		StructuredSelection sel= new StructuredSelection(openProjects);
 
@@ -139,7 +139,7 @@ public class ProjectActionGroup extends ActionGroup {
 	private int CLOSED_PROJECTS_SELECTED= 1;
 	private int NON_PROJECT_SELECTED= 2;
 
-	private int evaluateSelection(Object[] array, List allOpenProjects) {
+	private int evaluateSelection(Object[] array, List<IProject> allOpenProjects) {
 		int status= 0;
 		for (int i= 0; i < array.length; i++) {
 			Object curr= array[i];
@@ -177,6 +177,7 @@ public class ProjectActionGroup extends ActionGroup {
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		actionBars.setGlobalActionHandler(IDEActionFactory.CLOSE_PROJECT.getId(), fCloseAction);
@@ -187,6 +188,7 @@ public class ProjectActionGroup extends ActionGroup {
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 		if (fOpenAction.isEnabled() && fEnableOpenInContextMenu)
@@ -212,7 +214,7 @@ public class ProjectActionGroup extends ActionGroup {
 		if (selection.isEmpty())
 			return false;
 
-		Iterator iter= selection.iterator();
+		Iterator<?> iter= selection.iterator();
 		while (iter.hasNext()) {
 			Object obj= iter.next();
 			if (obj instanceof IAdaptable) {
@@ -226,6 +228,7 @@ public class ProjectActionGroup extends ActionGroup {
 	/*
 	 * @see ActionGroup#dispose()
 	 */
+	@Override
 	public void dispose() {
 		fSelectionProvider.removeSelectionChangedListener(fSelectionChangedListener);
 		fSelectionProvider= null;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -95,6 +95,7 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void addPages() {
 		super.addPages();
 		fJarPackageWizardPage= new FatJarPackageWizardPage(fJarPackage, fSelection);
@@ -135,10 +136,12 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 		return true;
 	}
 
+	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
 		return super.getNextPage(page);
 	}
 
+	@Override
 	public IWizardPage getPreviousPage(IWizardPage page) {
 		return super.getPreviousPage(page);
 	}
@@ -150,8 +153,8 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 		ISelection currentSelection= JavaPlugin.getActiveWorkbenchWindow().getSelectionService().getSelection();
 		if (currentSelection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) currentSelection;
-			HashSet selectedElements= new HashSet();
-			Iterator iter= structuredSelection.iterator();
+			HashSet<IJavaProject> selectedElements= new HashSet<IJavaProject>();
+			Iterator<?> iter= structuredSelection.iterator();
 			while (iter.hasNext()) {
 				Object selectedElement= iter.next();
 				if (selectedElement instanceof IJavaElement) {
@@ -203,6 +206,7 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean performFinish() {
 		LibraryHandler libraryHandler= fJarPackageWizardPage.getLibraryHandler();
 		fJarPackage.setJarBuilder(libraryHandler.getBuilder(fJarPackage));

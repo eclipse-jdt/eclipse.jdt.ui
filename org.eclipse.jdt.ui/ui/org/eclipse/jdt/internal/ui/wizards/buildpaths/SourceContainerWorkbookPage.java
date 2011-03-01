@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,7 +62,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private class OpenBuildPathWizardAction extends AbstractOpenWizardAction implements IPropertyChangeListener {
 
 		private final BuildPathWizard fWizard;
-		private final List fSelectedElements;
+		private final List<Object> fSelectedElements;
 
 		public OpenBuildPathWizardAction(BuildPathWizard wizard) {
 			fWizard= wizard;
@@ -73,6 +73,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		protected INewWizard createWizard() throws CoreException {
 			return fWizard;
 		}
@@ -81,6 +82,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		 * {@inheritDoc}
 		 * @since 3.7
 		 */
+		@Override
 		protected Shell getShell() {
 			return SourceContainerWorkbookPage.this.getShell();
 		}
@@ -99,7 +101,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 
 		protected void finishWizard() {
-			List insertedElements= fWizard.getInsertedElements();
+			List<CPListElement> insertedElements= fWizard.getInsertedElements();
 			refresh(insertedElements, fWizard.getRemovedElements(), fWizard.getModifiedElements(), fWizard.getOutputLocation());
 
 			if (insertedElements.isEmpty()) {
@@ -109,32 +111,32 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 	}
 
-	private static AddSourceFolderWizard newSourceFolderWizard(CPListElement element, List/*<CPListElement>*/ existingElements, String outputLocation, boolean newFolder) {
-		CPListElement[] existing= (CPListElement[])existingElements.toArray(new CPListElement[existingElements.size()]);
+	private static AddSourceFolderWizard newSourceFolderWizard(CPListElement element, List<CPListElement> existingElements, String outputLocation, boolean newFolder) {
+		CPListElement[] existing= existingElements.toArray(new CPListElement[existingElements.size()]);
 		AddSourceFolderWizard wizard= new AddSourceFolderWizard(existing, element, new Path(outputLocation).makeAbsolute(), false, newFolder, newFolder, newFolder?CPListElement.isProjectSourceFolder(existing, element.getJavaProject()):false, newFolder);
 		wizard.setDoFlushChange(false);
 		return wizard;
 	}
 
-	private static AddSourceFolderWizard newLinkedSourceFolderWizard(CPListElement element, List/*<CPListElement>*/ existingElements, String outputLocation, boolean newFolder) {
-		CPListElement[] existing= (CPListElement[])existingElements.toArray(new CPListElement[existingElements.size()]);
+	private static AddSourceFolderWizard newLinkedSourceFolderWizard(CPListElement element, List<CPListElement> existingElements, String outputLocation, boolean newFolder) {
+		CPListElement[] existing= existingElements.toArray(new CPListElement[existingElements.size()]);
 		AddSourceFolderWizard wizard= new AddSourceFolderWizard(existing, element, new Path(outputLocation).makeAbsolute(), true, newFolder, newFolder, newFolder?CPListElement.isProjectSourceFolder(existing, element.getJavaProject()):false, newFolder);
 		wizard.setDoFlushChange(false);
 		return wizard;
 	}
 
-	private static EditFilterWizard newEditFilterWizard(CPListElement element, List/*<CPListElement>*/ existingElements, String outputLocation) {
-		CPListElement[] existing= (CPListElement[])existingElements.toArray(new CPListElement[existingElements.size()]);
+	private static EditFilterWizard newEditFilterWizard(CPListElement element, List<CPListElement> existingElements, String outputLocation) {
+		CPListElement[] existing= existingElements.toArray(new CPListElement[existingElements.size()]);
 		EditFilterWizard result = new EditFilterWizard(existing, element, new Path(outputLocation).makeAbsolute());
 		result.setDoFlushChange(false);
 		return result;
 	}
 
-	private final ListDialogField fClassPathList;
+	private final ListDialogField<CPListElement> fClassPathList;
 	private IJavaProject fCurrJProject;
 
 	private Control fSWTControl;
-	private final TreeListDialogField fFoldersList;
+	private final TreeListDialogField<CPListElement> fFoldersList;
 
 	private final StringDialogField fOutputLocationField;
 
@@ -145,7 +147,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private final int IDX_EDIT= 3;
 	private final int IDX_REMOVE= 4;
 
-	public SourceContainerWorkbookPage(ListDialogField classPathList, StringDialogField outputLocationField) {
+	public SourceContainerWorkbookPage(ListDialogField<CPListElement> classPathList, StringDialogField outputLocationField) {
 		fClassPathList= classPathList;
 
 		fOutputLocationField= outputLocationField;
@@ -164,7 +166,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			NewWizardMessages.SourceContainerWorkbookPage_folders_remove_button
 		};
 
-		fFoldersList= new TreeListDialogField(adapter, buttonLabels, new CPListLabelProvider());
+		fFoldersList= new TreeListDialogField<CPListElement>(adapter, buttonLabels, new CPListLabelProvider());
 		fFoldersList.setDialogFieldListener(adapter);
 		fFoldersList.setLabelText(NewWizardMessages.SourceContainerWorkbookPage_folders_label);
 
@@ -177,6 +179,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fUseFolderOutputs.setDialogFieldListener(adapter);
 	}
 
+	@Override
 	public void init(IJavaProject jproject) {
 		fCurrJProject= jproject;
 		if (Display.getCurrent() != null) {
@@ -195,12 +198,12 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			return;
 		}
 
-		ArrayList folders= new ArrayList();
+		ArrayList<CPListElement> folders= new ArrayList<CPListElement>();
 
 		boolean useFolderOutputs= false;
-		List cpelements= fClassPathList.getElements();
+		List<CPListElement> cpelements= fClassPathList.getElements();
 		for (int i= 0; i < cpelements.size(); i++) {
-			CPListElement cpe= (CPListElement)cpelements.get(i);
+			CPListElement cpe= cpelements.get(i);
 			if (cpe.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				folders.add(cpe);
 				boolean hasOutputFolder= (cpe.getAttribute(CPListElement.OUTPUT) != null);
@@ -214,7 +217,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fUseFolderOutputs.setSelection(useFolderOutputs);
 
 		for (int i= 0; i < folders.size(); i++) {
-			CPListElement cpe= (CPListElement) folders.get(i);
+			CPListElement cpe= folders.get(i);
 			IPath[] ePatterns= (IPath[]) cpe.getAttribute(CPListElement.EXCLUSION);
 			IPath[] iPatterns= (IPath[])cpe.getAttribute(CPListElement.INCLUSION);
 			boolean hasOutputFolder= (cpe.getAttribute(CPListElement.OUTPUT) != null);
@@ -224,6 +227,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 	}
 
+	@Override
 	public Control getControl(Composite parent) {
 		PixelConverter converter= new PixelConverter(parent);
 		Composite composite= new Composite(parent, SWT.NONE);
@@ -237,9 +241,9 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fSWTControl= composite;
 
 		// expand
-		List elements= fFoldersList.getElements();
+		List<CPListElement> elements= fFoldersList.getElements();
 		for (int i= 0; i < elements.size(); i++) {
-			CPListElement elem= (CPListElement) elements.get(i);
+			CPListElement elem= elements.get(i);
 			IPath[] exclusionPatterns= (IPath[]) elem.getAttribute(CPListElement.EXCLUSION);
 			IPath[] inclusionPatterns= (IPath[]) elem.getAttribute(CPListElement.INCLUSION);
 			IPath output= (IPath) elem.getAttribute(CPListElement.OUTPUT);
@@ -258,42 +262,42 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	}
 
 
-	private class SourceContainerAdapter implements ITreeListAdapter, IDialogFieldListener {
+	private class SourceContainerAdapter implements ITreeListAdapter<CPListElement>, IDialogFieldListener {
 
 		private final Object[] EMPTY_ARR= new Object[0];
 
 		// -------- IListAdapter --------
-		public void customButtonPressed(TreeListDialogField field, int index) {
+		public void customButtonPressed(TreeListDialogField<CPListElement> field, int index) {
 			sourcePageCustomButtonPressed(field, index);
 		}
 
-		public void selectionChanged(TreeListDialogField field) {
+		public void selectionChanged(TreeListDialogField<CPListElement> field) {
 			sourcePageSelectionChanged(field);
 		}
 
-		public void doubleClicked(TreeListDialogField field) {
+		public void doubleClicked(TreeListDialogField<CPListElement> field) {
 			sourcePageDoubleClicked(field);
 		}
 
-		public void keyPressed(TreeListDialogField field, KeyEvent event) {
+		public void keyPressed(TreeListDialogField<CPListElement> field, KeyEvent event) {
 			sourcePageKeyPressed(field, event);
 		}
 
-		public Object[] getChildren(TreeListDialogField field, Object element) {
+		public Object[] getChildren(TreeListDialogField<CPListElement> field, Object element) {
 			if (element instanceof CPListElement) {
 				return ((CPListElement) element).getChildren(!fUseFolderOutputs.isSelected());
 			}
 			return EMPTY_ARR;
 		}
 
-		public Object getParent(TreeListDialogField field, Object element) {
+		public Object getParent(TreeListDialogField<CPListElement> field, Object element) {
 			if (element instanceof CPListElementAttribute) {
 				return ((CPListElementAttribute) element).getParent();
 			}
 			return null;
 		}
 
-		public boolean hasChildren(TreeListDialogField field, Object element) {
+		public boolean hasChildren(TreeListDialogField<CPListElement> field, Object element) {
 			return (element instanceof CPListElement);
 		}
 
@@ -304,10 +308,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 	}
 
-	protected void sourcePageKeyPressed(TreeListDialogField field, KeyEvent event) {
+	protected void sourcePageKeyPressed(TreeListDialogField<CPListElement> field, KeyEvent event) {
 		if (field == fFoldersList) {
 			if (event.character == SWT.DEL && event.stateMask == 0) {
-				List selection= field.getSelectedElements();
+				List<Object> selection= field.getSelectedElements();
 				if (canRemove(selection)) {
 					removeEntry();
 				}
@@ -315,9 +319,9 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 	}
 
-	protected void sourcePageDoubleClicked(TreeListDialogField field) {
+	protected void sourcePageDoubleClicked(TreeListDialogField<CPListElement> field) {
 		if (field == fFoldersList) {
-			List selection= field.getSelectedElements();
+			List<Object> selection= field.getSelectedElements();
 			if (canEdit(selection)) {
 				editEntry();
 			}
@@ -329,8 +333,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			if (index == IDX_ADD) {
 				IProject project= fCurrJProject.getProject();
 				if (project.isAccessible() && hasFolders(project)) {
-					List existingElements= fFoldersList.getElements();
-					CPListElement[] existing= (CPListElement[])existingElements.toArray(new CPListElement[existingElements.size()]);
+					List<CPListElement> existingElements= fFoldersList.getElements();
+					CPListElement[] existing= existingElements.toArray(new CPListElement[existingElements.size()]);
 					CreateMultipleSourceFoldersDialog dialog= new CreateMultipleSourceFoldersDialog(fCurrJProject, existing, fOutputLocationField.getText(), getShell());
 					if (dialog.open() == Window.OK) {
 						refresh(dialog.getInsertedElements(), dialog.getRemovedElements(), dialog.getModifiedElements(), dialog.getOutputLocation());
@@ -367,14 +371,14 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			// ignore
 		}
 
-		List elements= fFoldersList.getElements();
+		List<CPListElement> elements= fFoldersList.getElements();
 		if (elements.size() > 1)
 			return true;
 
 		if (elements.size() == 0)
 			return false;
 
-		CPListElement single= (CPListElement)elements.get(0);
+		CPListElement single= elements.get(0);
 		if (single.getPath().equals(fCurrJProject.getPath()))
 			return false;
 
@@ -382,7 +386,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	}
 
 	private void editEntry() {
-		List selElements= fFoldersList.getSelectedElements();
+		List<Object> selElements= fFoldersList.getSelectedElements();
 		if (selElements.size() != 1) {
 			return;
 		}
@@ -432,7 +436,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	 * @param field the dialog field
 	 */
 	protected void sourcePageSelectionChanged(DialogField field) {
-		List selected= fFoldersList.getSelectedElements();
+		List<Object> selected= fFoldersList.getSelectedElements();
 		fFoldersList.enableButton(IDX_EDIT, canEdit(selected));
 		fFoldersList.enableButton(IDX_REMOVE, canRemove(selected));
 		boolean noAttributes= containsOnlyTopLevelEntries(selected);
@@ -440,7 +444,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	}
 
 	private void removeEntry() {
-		List selElements= fFoldersList.getSelectedElements();
+		List<Object> selElements= fFoldersList.getSelectedElements();
 		for (int i= selElements.size() - 1; i >= 0 ; i--) {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
@@ -462,12 +466,12 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			fFoldersList.refresh();
 			fClassPathList.dialogFieldChanged(); // validate
 		} else {
-			for (Iterator iter= selElements.iterator(); iter.hasNext();) {
+			for (Iterator<Object> iter= selElements.iterator(); iter.hasNext();) {
 				CPListElement element= (CPListElement)iter.next();
 				if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-					List list= ClasspathModifier.removeFilters(element.getPath(), fCurrJProject, fFoldersList.getElements());
-					for (Iterator iterator= list.iterator(); iterator.hasNext();) {
-						CPListElement modified= (CPListElement)iterator.next();
+					List<CPListElement> list= ClasspathModifier.removeFilters(element.getPath(), fCurrJProject, fFoldersList.getElements());
+					for (Iterator<CPListElement> iterator= list.iterator(); iterator.hasNext();) {
+						CPListElement modified= iterator.next();
 						fFoldersList.refresh(modified);
 						fFoldersList.expandElement(modified, 3);
 					}
@@ -477,7 +481,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 	}
 
-	private boolean canRemove(List selElements) {
+	private boolean canRemove(List<Object> selElements) {
 		if (selElements.size() == 0) {
 			return false;
 		}
@@ -513,7 +517,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		return true;
 	}
 
-	private boolean canEdit(List selElements) {
+	private boolean canEdit(List<Object> selElements) {
 		if (selElements.size() != 1) {
 			return false;
 		}
@@ -546,7 +550,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			if (!fUseFolderOutputs.isSelected()) {
 				int nFolders= fFoldersList.getSize();
 				for (int i= 0; i < nFolders; i++) {
-					CPListElement cpe= (CPListElement) fFoldersList.getElement(i);
+					CPListElement cpe= fFoldersList.getElement(i);
 					cpe.setAttribute(CPListElement.OUTPUT, null);
 				}
 			}
@@ -558,15 +562,15 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 
 	private void updateClasspathList() {
-		List srcelements= fFoldersList.getElements();
+		List<CPListElement> srcelements= fFoldersList.getElements();
 
-		List cpelements= fClassPathList.getElements();
+		List<CPListElement> cpelements= fClassPathList.getElements();
 		int nEntries= cpelements.size();
 		// backwards, as entries will be deleted
 		int lastRemovePos= nEntries;
 		int afterLastSourcePos= 0;
 		for (int i= nEntries - 1; i >= 0; i--) {
-			CPListElement cpe= (CPListElement)cpelements.get(i);
+			CPListElement cpe= cpelements.get(i);
 			int kind= cpe.getEntryKind();
 			if (isEntryKind(kind)) {
 				if (!srcelements.remove(cpe)) {
@@ -591,14 +595,16 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	/*
 	 * @see BuildPathBasePage#getSelection
 	 */
-	public List getSelection() {
+	@Override
+	public List<Object> getSelection() {
 		return fFoldersList.getSelectedElements();
 	}
 
 	/*
 	 * @see BuildPathBasePage#setSelection
 	 */
-	public void setSelection(List selElements, boolean expand) {
+	@Override
+	public void setSelection(List<?> selElements, boolean expand) {
 		fFoldersList.selectElements(new StructuredSelection(selElements));
 		if (expand) {
 			for (int i= 0; i < selElements.size(); i++) {
@@ -610,21 +616,22 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#isEntryKind(int)
 	 */
+	@Override
 	public boolean isEntryKind(int kind) {
 		return kind == IClasspathEntry.CPE_SOURCE;
 	}
 
-	private void refresh(List insertedElements, List removedElements, List modifiedElements, IPath outputLocation) {
+	private void refresh(List<CPListElement> insertedElements, List<?> removedElements, List<CPListElement> modifiedElements, IPath outputLocation) {
 		fFoldersList.addElements(insertedElements);
-		for (Iterator iter= insertedElements.iterator(); iter.hasNext();) {
-			CPListElement element= (CPListElement)iter.next();
+		for (Iterator<CPListElement> iter= insertedElements.iterator(); iter.hasNext();) {
+			CPListElement element= iter.next();
 			fFoldersList.expandElement(element, 3);
 		}
 
 		fFoldersList.removeElements(removedElements);
 
-		for (Iterator iter= modifiedElements.iterator(); iter.hasNext();) {
-			CPListElement element= (CPListElement)iter.next();
+		for (Iterator<CPListElement> iter= modifiedElements.iterator(); iter.hasNext();) {
+			CPListElement element= iter.next();
 			fFoldersList.refresh(element);
 			fFoldersList.expandElement(element, 3);
 		}
@@ -640,7 +647,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	/**
      * {@inheritDoc}
      */
-    public void setFocus() {
+    @Override
+	public void setFocus() {
     	fFoldersList.setFocus();
     }
 

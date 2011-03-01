@@ -57,10 +57,12 @@ public class FindWriteReferencesInHierarchyAction extends FindReferencesInHierar
 		super(editor);
 	}
 
-	Class[] getValidTypes() {
+	@Override
+	Class<?>[] getValidTypes() {
 		return new Class[] { IField.class, ILocalVariable.class };
 	}
 
+	@Override
 	void init() {
 		setText(SearchMessages.Search_FindWriteReferencesInHierarchyAction_label);
 		setToolTipText(SearchMessages.Search_FindWriteReferencesInHierarchyAction_tooltip);
@@ -68,10 +70,12 @@ public class FindWriteReferencesInHierarchyAction extends FindReferencesInHierar
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_HIERARCHY_ACTION);
 	}
 
+	@Override
 	int getLimitTo() {
 		return IJavaSearchConstants.WRITE_ACCESSES;
 	}
 
+	@Override
 	String getOperationUnavailableMessage() {
 		return SearchMessages.JavaElementAction_operationUnavailable_field;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,6 +82,7 @@ public class ChangeParametersControl extends Composite {
 		public static final Mode EXTRACT_METHOD= new Mode("EXTRACT_METHOD"); //$NON-NLS-1$
 		public static final Mode CHANGE_METHOD_SIGNATURE= new Mode("CHANGE_METHOD_SIGNATURE"); //$NON-NLS-1$
 		public static final Mode INTRODUCE_PARAMETER= new Mode("INTRODUCE_PARAMETER"); //$NON-NLS-1$
+		@Override
 		public String toString() {
 			return fName;
 		}
@@ -97,17 +98,18 @@ public class ChangeParametersControl extends Composite {
 	}
 
 	private static class ParameterInfoContentProvider implements IStructuredContentProvider {
+		@SuppressWarnings("unchecked")
 		public Object[] getElements(Object inputElement) {
-			return removeMarkedAsDeleted((List) inputElement);
+			return removeMarkedAsDeleted((List<ParameterInfo>) inputElement);
 		}
-		private ParameterInfo[] removeMarkedAsDeleted(List paramInfos){
-			List result= new ArrayList(paramInfos.size());
-			for (Iterator iter= paramInfos.iterator(); iter.hasNext();) {
-				ParameterInfo info= (ParameterInfo) iter.next();
+		private ParameterInfo[] removeMarkedAsDeleted(List<ParameterInfo> paramInfos){
+			List<ParameterInfo> result= new ArrayList<ParameterInfo>(paramInfos.size());
+			for (Iterator<ParameterInfo> iter= paramInfos.iterator(); iter.hasNext();) {
+				ParameterInfo info= iter.next();
 				if (! info.isDeleted())
 					result.add(info);
 			}
-			return (ParameterInfo[]) result.toArray(new ParameterInfo[result.size()]);
+			return result.toArray(new ParameterInfo[result.size()]);
 		}
 		public void dispose() {
 			// do nothing
@@ -204,7 +206,7 @@ public class ChangeParametersControl extends Composite {
 
 	private final Mode fMode;
 	private final IParameterListChangeListener fListener;
-	private List fParameterInfos;
+	private List<ParameterInfo> fParameterInfos;
 	private final StubTypeContext fTypeContext;
 	private final String[] fParamNameProposals;
 	private ContentAssistHandler fNameContentAssistHandler;
@@ -259,7 +261,7 @@ public class ChangeParametersControl extends Composite {
 	}
 
 
-	public void setInput(List parameterInfos) {
+	public void setInput(List<ParameterInfo> parameterInfos) {
 		Assert.isNotNull(parameterInfos);
 		fParameterInfos= parameterInfos;
 		fTableViewer.setInput(fParameterInfos);
@@ -325,6 +327,7 @@ public class ChangeParametersControl extends Composite {
 			}
 		});
 		table.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == SWT.F2 && e.stateMask == SWT.NONE) {
 					editColumnOrNextPossible(0);
@@ -389,8 +392,8 @@ public class ChangeParametersControl extends Composite {
 		if (!(selection instanceof IStructuredSelection))
 			return new ParameterInfo[0];
 
-		List selected= ((IStructuredSelection) selection).toList();
-		return (ParameterInfo[]) selected.toArray(new ParameterInfo[selected.size()]);
+		List<?> selected= ((IStructuredSelection) selection).toList();
+		return selected.toArray(new ParameterInfo[selected.size()]);
 	}
 
 	// ---- Button bar --------------------------------------------------------------------------------------
@@ -456,6 +459,7 @@ public class ChangeParametersControl extends Composite {
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				try {
 					ParameterInfo[] selected= getSelectedElements();
@@ -479,10 +483,11 @@ public class ChangeParametersControl extends Composite {
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String[] excludedParamNames= new String[fParameterInfos.size()];
 				for (int i= 0; i < fParameterInfos.size(); i++) {
-					ParameterInfo info= (ParameterInfo) fParameterInfos.get(i);
+					ParameterInfo info= fParameterInfos.get(i);
 					excludedParamNames[i]= info.getNewName();
 				}
 				IJavaProject javaProject= fTypeContext.getCuHandle().getJavaProject();
@@ -490,7 +495,7 @@ public class ChangeParametersControl extends Composite {
 				ParameterInfo newInfo= ParameterInfo.createInfoForAddedParameter("Object", newParamName, "null"); //$NON-NLS-1$ //$NON-NLS-2$
 				int insertIndex= fParameterInfos.size();
 				for (int i= fParameterInfos.size() - 1;  i >= 0; i--) {
-					ParameterInfo info= (ParameterInfo) fParameterInfos.get(i);
+					ParameterInfo info= fParameterInfos.get(i);
 					if (info.isNewVarargs()) {
 						insertIndex= i;
 						break;
@@ -514,6 +519,7 @@ public class ChangeParametersControl extends Composite {
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				int index= getTable().getSelectionIndices()[0];
 				ParameterInfo[] selected= getSelectedElements();
@@ -547,6 +553,7 @@ public class ChangeParametersControl extends Composite {
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ISelection savedSelection= fTableViewer.getSelection();
 				if (savedSelection == null)
@@ -657,15 +664,15 @@ public class ChangeParametersControl extends Composite {
 		Collections.reverse(fParameterInfos);
 	}
 
-	private static void moveUp(List elements, List move) {
-		List res= new ArrayList(elements.size());
-		List deleted= new ArrayList();
-		Object floating= null;
-		for (Iterator iter= elements.iterator(); iter.hasNext();) {
-			Object curr= iter.next();
+	private static void moveUp(List<ParameterInfo> elements, List<ParameterInfo> move) {
+		List<ParameterInfo> res= new ArrayList<ParameterInfo>(elements.size());
+		List<ParameterInfo> deleted= new ArrayList<ParameterInfo>();
+		ParameterInfo floating= null;
+		for (Iterator<ParameterInfo> iter= elements.iterator(); iter.hasNext();) {
+			ParameterInfo curr= iter.next();
 			if (move.contains(curr)) {
 				res.add(curr);
-			} else if (((ParameterInfo) curr).isDeleted()) {
+			} else if (curr.isDeleted()) {
 				deleted.add(curr);
 			} else {
 				if (floating != null)
@@ -678,7 +685,7 @@ public class ChangeParametersControl extends Composite {
 		}
 		res.addAll(deleted);
 		elements.clear();
-		for (Iterator iter= res.iterator(); iter.hasNext();) {
+		for (Iterator<ParameterInfo> iter= res.iterator(); iter.hasNext();) {
 			elements.add(iter.next());
 		}
 	}
@@ -702,8 +709,8 @@ public class ChangeParametersControl extends Composite {
 		if (fParameterInfos == null) // during initialization
 			return 0;
 		int result= 0;
-		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+		for (Iterator<ParameterInfo> iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo info= iter.next();
 			if (! info.isDeleted())
 				result++;
 		}

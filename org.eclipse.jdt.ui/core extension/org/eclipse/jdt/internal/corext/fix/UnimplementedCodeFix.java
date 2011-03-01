@@ -66,6 +66,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedProposalPositions) throws CoreException {
 			AST ast= cuRewrite.getAST();
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -87,7 +88,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 		if (problems.length == 0)
 			return null;
 
-		ArrayList operations= new ArrayList();
+		ArrayList<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
 
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= problems[i];
@@ -113,7 +114,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 		} else {
 			label= CorrectionMessages.UnimplementedCodeFix_MakeAbstractFix_label;
 		}
-		return new UnimplementedCodeFix(label, root, (CompilationUnitRewriteOperation[]) operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
+		return new UnimplementedCodeFix(label, root, operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
 	}
 
 	public static IProposableFix createAddUnimplementedMethodsFix(final CompilationUnit root, IProblemLocation problem) {
@@ -131,6 +132,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 			return new IProposableFix() {
 				public CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
 					CompilationUnitChange change= new CompilationUnitChange(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, (ICompilationUnit) root.getJavaElement()) {
+						@Override
 						public Change perform(IProgressMonitor pm) throws CoreException {
 							Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 							String dialogTitle= CorrectionMessages.UnimplementedMethodsCorrectionProposal_description;

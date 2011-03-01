@@ -37,6 +37,7 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	/*
 	 * @see Object#equals(Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -49,6 +50,7 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	/*
 	 * @see Object#hashCode
 	 */
+	@Override
 	public int hashCode() {
 		return fClassFile.hashCode();
 	}

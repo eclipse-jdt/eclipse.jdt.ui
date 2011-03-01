@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,7 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
 	/*non java doc
 	 * for debugging only
 	 */
+	@Override
 	public String toString(){
 		return "<offset: " + fOffset +" length: " + fLength + "/>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
@@ -76,9 +77,9 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
 	 * @return the sorted ranges, which are identical to the parameter ranges
 	 */
 	public static ISourceRange[] reverseSortByOffset(ISourceRange[] ranges){
-		Comparator comparator= new Comparator(){
-			public int compare(Object o1, Object o2){
-				return ((ISourceRange)o2).getOffset() - ((ISourceRange)o1).getOffset();
+		Comparator<ISourceRange> comparator= new Comparator<ISourceRange>(){
+			public int compare(ISourceRange o1, ISourceRange o2){
+				return o2.getOffset() - o1.getOffset();
 			}
 		};
 		Arrays.sort(ranges, comparator);
@@ -88,7 +89,8 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
     /*
      * @see Object#equals(Object)
      */
-    public boolean equals(Object obj) {
+    @Override
+	public boolean equals(Object obj) {
     	if (! (obj instanceof ISourceRange))
 	        return false;
 	    return ((ISourceRange)obj).getOffset() == fOffset && ((ISourceRange)obj).getLength() == fLength;
@@ -97,7 +99,8 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
     /*
      * @see Object#hashCode()
      */
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return fLength ^ fOffset;
     }
 

@@ -50,6 +50,7 @@ public final class MultiStateCompilationUnitChange extends MultiStateTextFileCha
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.Change#getAdapter(java.lang.Class)
 	 */
+	@Override
 	public final Object getAdapter(final Class adapter) {
 
 		if (ICompilationUnit.class.equals(adapter))
@@ -70,6 +71,7 @@ public final class MultiStateCompilationUnitChange extends MultiStateTextFileCha
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getName() {
 		return Messages.format(RefactoringCoreMessages.MultiStateCompilationUnitChange_name_pattern, new String[] { BasicElementLabels.getFileName(fUnit), BasicElementLabels.getPathLabel(fUnit.getParent().getPath(), false) });
 	}

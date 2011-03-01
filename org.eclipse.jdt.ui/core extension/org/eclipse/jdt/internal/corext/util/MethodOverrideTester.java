@@ -31,7 +31,7 @@ public class MethodOverrideTester {
 
 		public static final Substitutions EMPTY_SUBST= new Substitutions();
 
-		private HashMap fMap;
+		private HashMap<String, String[]> fMap;
 
 		public Substitutions() {
 			fMap= null;
@@ -39,14 +39,14 @@ public class MethodOverrideTester {
 
 		public void addSubstitution(String typeVariable, String substitution, String erasure) {
 			if (fMap == null) {
-				fMap= new HashMap(3);
+				fMap= new HashMap<String, String[]>(3);
 			}
 			fMap.put(typeVariable, new String[] { substitution, erasure });
 		}
 
 		private String[] getSubstArray(String typeVariable) {
 			if (fMap != null) {
-				return (String[]) fMap.get(typeVariable);
+				return fMap.get(typeVariable);
 			}
 			return null;
 		}
@@ -71,8 +71,8 @@ public class MethodOverrideTester {
 	private final IType fFocusType;
 	private final ITypeHierarchy fHierarchy;
 
-	private Map /* <IMethod, Substitutions> */ fMethodSubstitutions;
-	private Map /* <IType, Substitutions> */ fTypeVariableSubstitutions;
+	private Map <IMethod, Substitutions> fMethodSubstitutions;
+	private Map<IType, Substitutions> fTypeVariableSubstitutions;
 
 	public MethodOverrideTester(IType focusType, ITypeHierarchy hierarchy) {
 		if (focusType == null || hierarchy == null) {
@@ -99,7 +99,7 @@ public class MethodOverrideTester {
 	 * @param overriding the overriding method
 	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
 	 * @return the declaring method, or <code>null</code>
-	 * @throws JavaModelException
+	 * @throws JavaModelException if a problem occurs
 	 */
 	public IMethod findDeclaringMethod(IMethod overriding, boolean testVisibility) throws JavaModelException {
 		IMethod result= null;
@@ -117,7 +117,7 @@ public class MethodOverrideTester {
 	 * @param overriding the overriding method
 	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
 	 * @return a method that is directly overridden by the given method, or <code>null</code>
-	 * @throws JavaModelException
+	 * @throws JavaModelException if a problem occurs
 	 */
 	public IMethod findOverriddenMethod(IMethod overriding, boolean testVisibility) throws JavaModelException {
 		int flags= overriding.getFlags();
@@ -151,7 +151,7 @@ public class MethodOverrideTester {
 	 * 	@param type The type to find methods in
 	 * @param overriding The overriding method
 	 * @return The first overridden method or <code>null</code> if no method is overridden
-	 * @throws JavaModelException
+	 * @throws JavaModelException if a problem occurs
 	 */
 	public IMethod findOverriddenMethodInHierarchy(IType type, IMethod overriding) throws JavaModelException {
 		IMethod method= findOverriddenMethodInType(type, overriding);
@@ -181,7 +181,7 @@ public class MethodOverrideTester {
 	 * @param overriddenType The type to find methods in
 	 * @param overriding The overriding method
 	 * @return The first overridden method or <code>null</code> if no method is overridden
-	 * @throws JavaModelException
+	 * @throws JavaModelException if a problem occurs
 	 */
 	public IMethod findOverriddenMethodInType(IType overriddenType, IMethod overriding) throws JavaModelException {
 		int flags= overriding.getFlags();
@@ -205,7 +205,7 @@ public class MethodOverrideTester {
 	 * @param overridingType The type to find methods in
 	 * @param overridden The overridden method
 	 * @return The overriding method or <code>null</code> if no method is overriding.
-	 * @throws JavaModelException
+	 * @throws JavaModelException if a problem occurs
 	 */
 	public IMethod findOverridingMethodInType(IType overridingType, IMethod overridden) throws JavaModelException {
 		int flags= overridden.getFlags();
@@ -232,7 +232,7 @@ public class MethodOverrideTester {
 	 * 		This is one of the requirements for m1 to override m2.
 	 * 		Accessibility and return types are not taken into account.
 	 * 		Note that subsignature is <em>not</em> symmetric!
-	 * @throws JavaModelException
+	 * @throws JavaModelException if a problem occurs
 	 */
 	public boolean isSubsignature(IMethod overriding, IMethod overridden) throws JavaModelException {
 		if (!overridden.getElementName().equals(overriding.getElementName())) {
@@ -347,10 +347,10 @@ public class MethodOverrideTester {
 	 */
 	private Substitutions getMethodSubstitions(IMethod method) throws JavaModelException {
 		if (fMethodSubstitutions == null) {
-			fMethodSubstitutions= new LRUMap(3);
+			fMethodSubstitutions= new LRUMap<IMethod, Substitutions>(3);
 		}
 
-		Substitutions s= (Substitutions) fMethodSubstitutions.get(method);
+		Substitutions s= fMethodSubstitutions.get(method);
 		if (s == null) {
 			ITypeParameter[] typeParameters= method.getTypeParameters();
 			if (typeParameters.length == 0) {
@@ -373,10 +373,10 @@ public class MethodOverrideTester {
 	 */
 	private Substitutions getTypeSubstitions(IType type) throws JavaModelException {
 		if (fTypeVariableSubstitutions == null) {
-			fTypeVariableSubstitutions= new HashMap();
+			fTypeVariableSubstitutions= new HashMap<IType, Substitutions>();
 			computeSubstitutions(fFocusType, null, null);
 		}
-		Substitutions subst= (Substitutions) fTypeVariableSubstitutions.get(type);
+		Substitutions subst= fTypeVariableSubstitutions.get(type);
 		if (subst == null) {
 			return Substitutions.EMPTY_SUBST;
 		}
@@ -452,7 +452,7 @@ public class MethodOverrideTester {
 	 * @param typeSig The type signature to translate
 	 * @param context The context for the substitution
 	 * @return a type name
-	 * @throws JavaModelException
+	 * @throws JavaModelException if a problem occurs
 	 */
 	private String getSubstitutedTypeName(String typeSig, IMember context) throws JavaModelException {
 		return internalGetSubstitutedTypeName(typeSig, context, false, new StringBuffer()).toString();

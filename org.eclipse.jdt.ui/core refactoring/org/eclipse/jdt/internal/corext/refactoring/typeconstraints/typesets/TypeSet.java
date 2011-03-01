@@ -65,8 +65,10 @@ public abstract class TypeSet implements ITypeSet {
 		return null;
 	}
 	
+	@Override
 	public abstract boolean equals(Object obj);
 	
+	@Override
 	public abstract int hashCode();
 
 	/**
@@ -230,7 +232,7 @@ public abstract class TypeSet implements ITypeSet {
 	/**
 	 * @return an iterator over the types in the receiver
 	 */
-	abstract public Iterator iterator();
+	abstract public Iterator<TType> iterator();
 
 	/**
 	 * @return a new TypeSet enumerating the receiver's contents

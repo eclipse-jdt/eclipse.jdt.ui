@@ -34,6 +34,7 @@ public class FileEntry implements IAdaptable {
 		return fMessage;
 	}
 
+	@Override
 	public String toString() {
 		return fMessage;
 	}

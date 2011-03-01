@@ -54,6 +54,7 @@ class ComboSelectionDialog extends Dialog{
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		getShell().setText(fShellTitle);
 
@@ -79,6 +80,7 @@ class ComboSelectionDialog extends Dialog{
 		gd.widthHint= convertWidthInCharsToPixels(getMaxStringLength());
 		combo.setLayoutData(gd);
 		combo.addSelectionListener(new SelectionAdapter(){
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fSelection= combo.getItem(combo.getSelectionIndex());
 			}

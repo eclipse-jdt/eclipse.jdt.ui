@@ -55,9 +55,9 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 	 */
 	private static class ProjectErrorVisitor implements IResourceDeltaVisitor {
 
-		private HashSet fChangedElements;
+		private HashSet<IResource> fChangedElements;
 
-		public ProjectErrorVisitor(HashSet changedElements) {
+		public ProjectErrorVisitor(HashSet<IResource> changedElements) {
 			fChangedElements= changedElements;
 		}
 
@@ -105,22 +105,22 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 
 	private ListenerList fListeners;
 
-	private Set fResourcesWithMarkerChanges;
-	private Set fResourcesWithAnnotationChanges;
+	private Set<IResource> fResourcesWithMarkerChanges;
+	private Set<IResource> fResourcesWithAnnotationChanges;
 
 	private UIJob fNotifierJob;
 
 	public ProblemMarkerManager() {
 		fListeners= new ListenerList();
-		fResourcesWithMarkerChanges= new HashSet();
-		fResourcesWithAnnotationChanges= new HashSet();
+		fResourcesWithMarkerChanges= new HashSet<IResource>();
+		fResourcesWithAnnotationChanges= new HashSet<IResource>();
 	}
 
 	/*
 	 * @see IResourceChangeListener#resourceChanged
 	 */
 	public void resourceChanged(IResourceChangeEvent event) {
-		HashSet changedElements= new HashSet();
+		HashSet<IResource> changedElements= new HashSet<IResource>();
 
 		try {
 			IResourceDelta delta= event.getDelta();
@@ -207,6 +207,7 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 	private void postAsyncUpdate(final Display display) {
 		if (fNotifierJob == null) {
 			fNotifierJob= new UIJob(display, JavaUIMessages.ProblemMarkerManager_problem_marker_update_job_description) {
+				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
 					runPendingUpdates();
 					return Status.OK_STATUS;
@@ -225,11 +226,11 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 		IResource[] annotationResources= null;
 		synchronized (this) {
 			if (!fResourcesWithMarkerChanges.isEmpty()) {
-				markerResources= (IResource[]) fResourcesWithMarkerChanges.toArray(new IResource[fResourcesWithMarkerChanges.size()]);
+				markerResources= fResourcesWithMarkerChanges.toArray(new IResource[fResourcesWithMarkerChanges.size()]);
 				fResourcesWithMarkerChanges.clear();
 			}
 			if (!fResourcesWithAnnotationChanges.isEmpty()) {
-				annotationResources= (IResource[]) fResourcesWithAnnotationChanges.toArray(new IResource[fResourcesWithAnnotationChanges.size()]);
+				annotationResources= fResourcesWithAnnotationChanges.toArray(new IResource[fResourcesWithAnnotationChanges.size()]);
 				fResourcesWithAnnotationChanges.clear();
 			}
 		}

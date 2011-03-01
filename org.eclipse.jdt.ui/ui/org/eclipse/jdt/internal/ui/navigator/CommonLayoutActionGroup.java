@@ -64,6 +64,7 @@ public class CommonLayoutActionGroup extends MultiActionGroup {
 		/*
 		 * @see org.eclipse.jface.action.IAction#run()
 		 */
+		@Override
 		public void run() {
 			if (fStateModel.getBooleanProperty(Values.IS_LAYOUT_FLAT) != fIsFlatLayout) {
 				fStateModel.setBooleanProperty(Values.IS_LAYOUT_FLAT, fIsFlatLayout);
@@ -90,6 +91,7 @@ public class CommonLayoutActionGroup extends MultiActionGroup {
 	 *
 	 * @see ActionGroup#fillActionBars(IActionBars)
 	 */
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		if (!fHasContributedToViewMenu) {
 

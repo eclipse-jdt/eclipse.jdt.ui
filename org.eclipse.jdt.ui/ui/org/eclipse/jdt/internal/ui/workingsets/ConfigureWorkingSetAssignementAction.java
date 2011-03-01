@@ -83,10 +83,10 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 	 */
 	private static final class GrayedCheckedModel {
 
-		private ArrayList fElements;
+		private ArrayList<GrayedCheckedModelElement> fElements;
 
 		public GrayedCheckedModel(GrayedCheckedModelElement[] elements) {
-			fElements= new ArrayList(Arrays.asList(elements));
+			fElements= new ArrayList<GrayedCheckedModelElement>(Arrays.asList(elements));
 		}
 
 		public void addElement(GrayedCheckedModelElement element) {
@@ -94,36 +94,36 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		}
 
 		public GrayedCheckedModelElement[] getElements() {
-			return (GrayedCheckedModelElement[]) fElements.toArray(new GrayedCheckedModelElement[fElements.size()]);
+			return fElements.toArray(new GrayedCheckedModelElement[fElements.size()]);
 		}
 
 		public GrayedCheckedModelElement[] getChecked() {
-			ArrayList result= new ArrayList();
+			ArrayList<GrayedCheckedModelElement> result= new ArrayList<GrayedCheckedModelElement>();
 			for (int i= 0; i < fElements.size(); i++) {
-				if (((GrayedCheckedModelElement)fElements.get(i)).isChecked())
+				if (fElements.get(i).isChecked())
 					result.add(fElements.get(i));
 			}
-			return (GrayedCheckedModelElement[])result.toArray(new GrayedCheckedModelElement[result.size()]);
+			return result.toArray(new GrayedCheckedModelElement[result.size()]);
 		}
 
 		public GrayedCheckedModelElement[] getGrayed() {
-			ArrayList result= new ArrayList();
+			ArrayList<GrayedCheckedModelElement> result= new ArrayList<GrayedCheckedModelElement>();
 			for (int i= 0; i < fElements.size(); i++) {
-				if (((GrayedCheckedModelElement)fElements.get(i)).isGrayed())
+				if (fElements.get(i).isGrayed())
 					result.add(fElements.get(i));
 			}
-			return (GrayedCheckedModelElement[])result.toArray(new GrayedCheckedModelElement[result.size()]);
+			return result.toArray(new GrayedCheckedModelElement[result.size()]);
 		}
 
 		public void selectAll() {
 			for (int i= 0; i < fElements.size(); i++) {
-				((GrayedCheckedModelElement) fElements.get(i)).select();
+				fElements.get(i).select();
 			}
 		}
 
 		public void deselectAll() {
 			for (int i= 0; i < fElements.size(); i++) {
-				((GrayedCheckedModelElement) fElements.get(i)).deselect();
+				fElements.get(i).deselect();
 			}
 		}
 
@@ -184,7 +184,9 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			return fElements;
 		}
 
-		public void dispose() {}
+		public void dispose() {
+			// do nothing
+		}
 
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			if (newInput instanceof GrayedCheckedModel) {
@@ -200,28 +202,30 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 	 */
 	private class GrayedCheckedModelLabelProvider extends LabelProvider {
 
-		private Map fIcons;
+		private Map<ImageDescriptor, Image> fIcons;
 
 		public GrayedCheckedModelLabelProvider() {
-			fIcons= new Hashtable();
+			fIcons= new Hashtable<ImageDescriptor, Image>();
 		}
 
+		@Override
 		public void dispose() {
-			Iterator iterator= fIcons.values().iterator();
+			Iterator<Image> iterator= fIcons.values().iterator();
 			while (iterator.hasNext()) {
-				Image icon= (Image)iterator.next();
+				Image icon= iterator.next();
 				icon.dispose();
 			}
 			super.dispose();
 		}
 
+		@Override
 		public Image getImage(Object object) {
 			IWorkingSet workingSet= ((GrayedCheckedModelElement)object).getWorkingSet();
 			ImageDescriptor imageDescriptor= workingSet.getImageDescriptor();
 			if (imageDescriptor == null)
 				return null;
 
-			Image icon= (Image)fIcons.get(imageDescriptor);
+			Image icon= fIcons.get(imageDescriptor);
 			if (icon == null) {
 				icon= imageDescriptor.createImage();
 				fIcons.put(imageDescriptor, icon);
@@ -230,6 +234,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			return icon;
 		}
 
+		@Override
 		public String getText(Object object) {
 			GrayedCheckedModelElement modelElement= (GrayedCheckedModelElement)object;
 			IWorkingSet workingSet= modelElement.getWorkingSet();
@@ -261,6 +266,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 
 		private final class GrayedCheckModelElementSorter extends ViewerSorter {
+			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				GrayedCheckedModelElement w1= (GrayedCheckedModelElement)e1;
 				GrayedCheckedModelElement w2= (GrayedCheckedModelElement)e2;
@@ -270,6 +276,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 		private class Filter extends ViewerFilter {
 
+			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				GrayedCheckedModelElement model= (GrayedCheckedModelElement) element;
 				IWorkingSet set= model.getWorkingSet();
@@ -295,7 +302,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		private boolean fShowVisibleOnly;
 		private GrayedCheckedModel fModel;
 		private final IAdaptable[] fElements;
-		private final ArrayList fCreatedWorkingSets;
+		private final ArrayList<IWorkingSet> fCreatedWorkingSets;
 
 		/**
 		 * @since 3.5
@@ -308,7 +315,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			setTitle(WorkingSetMessages.ConfigureWorkingSetAssignementAction_WorkingSetAssignments_title);
 			fModel= model;
 			fElements= elements;
-			fCreatedWorkingSets= new ArrayList();
+			fCreatedWorkingSets= new ArrayList<IWorkingSet>();
 			fSettings= JavaPlugin.getDefault().getDialogSettingsSection(DIALOG_SETTINGS_SECTION);
 			if (fSettings.get(SETTINGS_SHOW_VISIBLE_ONLY) == null) {
 				fSettings.put(SETTINGS_SHOW_VISIBLE_ONLY, true);
@@ -321,6 +328,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		 * 
 		 * @since 3.5
 		 */
+		@Override
 		protected void configureShell(Shell shell) {
 			super.configureShell(shell);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.WORKING_SET_ASSIGNMENTS_DIALOG);
@@ -344,6 +352,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			return result;
 		}
 
+		@Override
 		protected final Control createDialogArea(Composite parent) {
 			Composite composite= (Composite)super.createDialogArea(parent);
 
@@ -384,6 +393,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			selectAll.setText(WorkingSetMessages.ConfigureWorkingSetAssignementAction_SelectAll_button);
 			setButtonLayoutData(selectAll);
 			selectAll.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fTableViewer.setAllChecked(true);
 
@@ -397,6 +407,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			deselectAll.setText(WorkingSetMessages.ConfigureWorkingSetAssignementAction_DeselectAll_button);
 			setButtonLayoutData(deselectAll);
 			deselectAll.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fTableViewer.setAllChecked(false);
 
@@ -406,12 +417,14 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 				}
 			});
 
-			new Label(composite, SWT.NONE);
+			@SuppressWarnings("unused")
+			Label spacer= new Label(composite, SWT.NONE);
 
 			Button newWorkingSet= new Button(composite, SWT.PUSH);
 			newWorkingSet.setText(WorkingSetMessages.ConfigureWorkingSetAssignementAction_New_button);
 			setButtonLayoutData(newWorkingSet);
 			newWorkingSet.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 
@@ -497,6 +510,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			showVisibleOnly.setSelection(fShowVisibleOnly);
 			showVisibleOnly.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, true, false));
 			showVisibleOnly.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fShowVisibleOnly= showVisibleOnly.getSelection();
 
@@ -512,11 +526,12 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			ppwsLink.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, true, false));
 			ppwsLink.addSelectionListener(new SelectionAdapter() {
 
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 
-					List workingSets= new ArrayList(Arrays.asList(fWorkingSetModel.getAllWorkingSets()));
+					List<IWorkingSet> workingSets= new ArrayList<IWorkingSet>(Arrays.asList(fWorkingSetModel.getAllWorkingSets()));
 					boolean isSortingEnabled= fWorkingSetModel.isSortingEnabled();
-					WorkingSetConfigurationDialog dialog= new WorkingSetConfigurationDialog(getShell(), (IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()]), isSortingEnabled);
+					WorkingSetConfigurationDialog dialog= new WorkingSetConfigurationDialog(getShell(), workingSets.toArray(new IWorkingSet[workingSets.size()]), isSortingEnabled);
 					dialog.setSelection(fWorkingSetModel.getActiveWorkingSets());
 					if (dialog.open() == IDialogConstants.OK_ID) {
 						isSortingEnabled= dialog.isSortingEnabled();
@@ -532,14 +547,15 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 		 * @since 3.5
 		 */
+		@Override
 		protected void buttonPressed(int buttonId) {
 			if (IDialogConstants.OK_ID == buttonId)
 				fSettings.put(SETTINGS_SHOW_VISIBLE_ONLY, fShowVisibleOnly);
 			super.buttonPressed(buttonId);
 		}
 
-		private void recalculateCheckedState(List addedWorkingSets) {
-			Set checkedWorkingSets= new HashSet();
+		private void recalculateCheckedState(List<IWorkingSet> addedWorkingSets) {
+			Set<IWorkingSet> checkedWorkingSets= new HashSet<IWorkingSet>();
 			GrayedCheckedModelElement[] elements= fModel.getChecked();
 			for (int i= 0; i < elements.length; i++)
 				checkedWorkingSets.add(elements[i].getWorkingSet());
@@ -558,10 +574,11 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		protected void cancelPressed() {
 			IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 			for (int i= 0; i < fCreatedWorkingSets.size(); i++) {
-				manager.removeWorkingSet((IWorkingSet)fCreatedWorkingSets.get(i));
+				manager.removeWorkingSet(fCreatedWorkingSets.get(i));
 			}
 
 			super.cancelPressed();
@@ -588,6 +605,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		fWorkingSetModel= workingSetModel;
 	}
 
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canEnable(selection));
 	}
@@ -596,8 +614,8 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		if (selection.isEmpty())
 			return false;
 
-		List list= selection.toList();
-		for (Iterator iterator= list.iterator(); iterator.hasNext();) {
+		List<?> list= selection.toList();
+		for (Iterator<?> iterator= list.iterator(); iterator.hasNext();) {
 			Object object= iterator.next();
 			if (!(object instanceof IResource) && !(object instanceof IJavaElement))
 				return false;
@@ -607,19 +625,20 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 	}
 
 	private IAdaptable[] getSelectedElements(IStructuredSelection selection) {
-		ArrayList result= new ArrayList();
+		ArrayList<Object> result= new ArrayList<Object>();
 
-		List list= selection.toList();
-		for (Iterator iterator= list.iterator(); iterator.hasNext();) {
+		List<?> list= selection.toList();
+		for (Iterator<?> iterator= list.iterator(); iterator.hasNext();) {
 			Object object= iterator.next();
 			if (object instanceof IResource || object instanceof IJavaElement) {
 				result.add(object);
 			}
 		}
 
-		return (IAdaptable[])result.toArray(new IAdaptable[result.size()]);
+		return result.toArray(new IAdaptable[result.size()]);
 	}
 
+	@Override
 	public void run(IStructuredSelection selection) {
 		IAdaptable[] elements= getSelectedElements(selection);
 		GrayedCheckedModel model= createGrayedCheckedModel(elements, getAllWorkingSets(), null);
@@ -643,7 +662,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		}
 	}
 
-	private static GrayedCheckedModel createGrayedCheckedModel(IAdaptable[] elements, IWorkingSet[] workingSets, Set checkedWorkingSets) {
+	private static GrayedCheckedModel createGrayedCheckedModel(IAdaptable[] elements, IWorkingSet[] workingSets, Set<IWorkingSet> checkedWorkingSets) {
 		GrayedCheckedModelElement[] result= new GrayedCheckedModelElement[workingSets.length];
 
 		for (int i= 0; i < workingSets.length; i++) {
@@ -668,8 +687,8 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 	}
 
 	private void updateWorkingSets(IWorkingSet[] newWorkingSets, IWorkingSet[] grayedWorkingSets, IAdaptable[] elements) {
-		HashSet selectedSets= new HashSet(Arrays.asList(newWorkingSets));
-		HashSet grayedSets= new HashSet(Arrays.asList(grayedWorkingSets));
+		HashSet<IWorkingSet> selectedSets= new HashSet<IWorkingSet>(Arrays.asList(newWorkingSets));
+		HashSet<IWorkingSet> grayedSets= new HashSet<IWorkingSet>(Arrays.asList(grayedWorkingSets));
 		IWorkingSet[] workingSets= getAllWorkingSets();
 
 		for (int i= 0; i < workingSets.length; i++) {
@@ -698,7 +717,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 				if (checkForYetHiddenWorkingSet) {
 					IWorkingSet[] activeSets= getActiveWorkingSets();
 					if (activeSets != null) {
-						List activeWorkingSets= new ArrayList(Arrays.asList(activeSets));
+						List<IWorkingSet> activeWorkingSets= new ArrayList<IWorkingSet>(Arrays.asList(activeSets));
 						if (!activeWorkingSets.contains(set))
 							activateWorkingSet(set);
 					}
@@ -790,9 +809,9 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 	}
 
 	private static void remove(IWorkingSet workingSet, IAdaptable adaptedElement) {
-		HashSet set= new HashSet(Arrays.asList(workingSet.getElements()));
+		HashSet<IAdaptable> set= new HashSet<IAdaptable>(Arrays.asList(workingSet.getElements()));
 		set.remove(adaptedElement);
-		workingSet.setElements((IAdaptable[])set.toArray(new IAdaptable[set.size()]));
+		workingSet.setElements(set.toArray(new IAdaptable[set.size()]));
 	}
 
 	private static void add(IWorkingSet workingSet, IAdaptable adaptedElement) {

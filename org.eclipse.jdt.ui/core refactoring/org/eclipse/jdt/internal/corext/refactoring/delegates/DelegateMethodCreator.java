@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -46,6 +47,7 @@ public class DelegateMethodCreator extends DelegateCreator {
 	private ASTNode fDelegateInvocation;
 	private MethodRef fDocMethodReference;
 
+	@Override
 	protected void initialize() {
 
 		Assert.isTrue(getDeclaration() instanceof MethodDeclaration);
@@ -56,6 +58,7 @@ public class DelegateMethodCreator extends DelegateCreator {
 		setInsertBefore(true);
 	}
 
+	@Override
 	protected ASTNode createBody(BodyDeclaration bd) throws JavaModelException {
 
 		MethodDeclaration methodDeclaration= (MethodDeclaration) bd;
@@ -67,6 +70,7 @@ public class DelegateMethodCreator extends DelegateCreator {
 		return createDelegateMethodBody(methodDeclaration);
 	}
 
+	@Override
 	protected ASTNode createDocReference(final BodyDeclaration declaration) throws JavaModelException {
 		fDocMethodReference= getAst().newMethodRef();
 		fDocMethodReference.setName(getAst().newSimpleName(getNewElementName()));
@@ -76,14 +80,17 @@ public class DelegateMethodCreator extends DelegateCreator {
 		return fDocMethodReference;
 	}
 
+	@Override
 	protected ASTNode getBodyHead(BodyDeclaration result) {
 		return result;
 	}
 
+	@Override
 	protected ChildPropertyDescriptor getJavaDocProperty() {
 		return MethodDeclaration.JAVADOC_PROPERTY;
 	}
 
+	@Override
 	protected ChildPropertyDescriptor getBodyProperty() {
 		return MethodDeclaration.BODY_PROPERTY;
 	}
@@ -138,12 +145,14 @@ public class DelegateMethodCreator extends DelegateCreator {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected IBinding getDeclarationBinding() {
 		final MethodDeclaration declaration= (MethodDeclaration) getDeclaration();
 		return declaration.resolveBinding();
 	}
 
-	private void createArguments(final MethodDeclaration declaration, final List arguments, boolean methodInvocation) throws JavaModelException {
+	@SuppressWarnings("unchecked")
+	private void createArguments(final MethodDeclaration declaration, final List<? extends ASTNode> arguments, boolean methodInvocation) {
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(arguments);
 		SingleVariableDeclaration variable= null;
@@ -154,23 +163,23 @@ public class DelegateMethodCreator extends DelegateCreator {
 			if (methodInvocation) {
 				// we are creating method invocation parameters
 				final SimpleName expression= getAst().newSimpleName(variable.getName().getIdentifier());
-				arguments.add(expression);
+				((List<Expression>) arguments).add(expression);
 			} else {
 				// we are creating type info for the javadoc
 				final MethodRefParameter parameter= getAst().newMethodRefParameter();
 				parameter.setType(ASTNodeFactory.newType(getAst(), variable));
 				if ((index == size - 1) && declaration.isVarargs())
 					parameter.setVarargs(true);
-				arguments.add(parameter);
+				((List<MethodRefParameter>) arguments).add(parameter);
 			}
 		}
 	}
 
-	private Block createDelegateMethodBody(final MethodDeclaration declaration) throws JavaModelException {
+	private Block createDelegateMethodBody(final MethodDeclaration declaration) {
 		Assert.isNotNull(declaration);
 
 		MethodDeclaration old= (MethodDeclaration) getDeclaration();
-		List arguments;
+		List<Expression> arguments;
 		Statement call;
 		if (old.isConstructor()) {
 			ConstructorInvocation invocation= getAst().newConstructorInvocation();
@@ -217,6 +226,7 @@ public class DelegateMethodCreator extends DelegateCreator {
 		return statement;
 	}
 
+	@Override
 	protected String getTextEditGroupLabel() {
 		return RefactoringCoreMessages.DelegateMethodCreator_text_edit_group_field;
 	}

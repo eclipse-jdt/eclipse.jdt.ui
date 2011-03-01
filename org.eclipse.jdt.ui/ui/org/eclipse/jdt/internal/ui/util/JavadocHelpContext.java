@@ -95,7 +95,7 @@ public class JavadocHelpContext implements IContext2 {
 		if (context instanceof IContext2)
 			fTitle= ((IContext2)context).getTitle();
 
-		List helpResources= new ArrayList();
+		List<IHelpResource> helpResources= new ArrayList<IHelpResource>();
 
 		String javadocSummary= null;
 		for (int i= 0; i < elements.length; i++) {
@@ -150,7 +150,7 @@ public class JavadocHelpContext implements IContext2 {
 			}
 		}
 
-		fHelpResources= (IHelpResource[]) helpResources.toArray(new IHelpResource[helpResources.size()]);
+		fHelpResources= helpResources.toArray(new IHelpResource[helpResources.size()]);
 
 		if (context != null)
 			fText= context.getText();

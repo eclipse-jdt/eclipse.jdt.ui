@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,6 +50,7 @@ public class CutAction extends SelectionDispatchAction{
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CUT_ACTION);
 	}
 
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		if (!selection.isEmpty()) {
 			// cannot cut top-level types. this deletes the cu and then you cannot paste because the cu is gone.
@@ -64,7 +65,7 @@ public class CutAction extends SelectionDispatchAction{
 	}
 
 	private static boolean containsOnlyElementsInsideCompilationUnits(IStructuredSelection selection) {
-		for (Iterator iter = selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter = selection.iterator(); iter.hasNext();) {
 			Object object= iter.next();
 			if (! (object instanceof IJavaElement && ReorgUtils.isInsideCompilationUnit((IJavaElement)object)))
 				return false;
@@ -73,7 +74,7 @@ public class CutAction extends SelectionDispatchAction{
 	}
 
 	private static boolean containsTopLevelTypes(IStructuredSelection selection) {
-		for (Iterator iter = selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter = selection.iterator(); iter.hasNext();) {
 			Object each= iter.next();
 			if (each instanceof IType && ((IType)each).getDeclaringType() == null)
 				return true;
@@ -81,6 +82,7 @@ public class CutAction extends SelectionDispatchAction{
 		return false;
 	}
 
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			selectionChanged(selection);

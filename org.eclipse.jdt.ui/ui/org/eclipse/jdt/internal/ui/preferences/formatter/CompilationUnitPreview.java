@@ -37,12 +37,13 @@ public class CompilationUnitPreview extends JavaPreview {
      * @param workingValues
      * @param parent
      */
-    public CompilationUnitPreview(Map workingValues, Composite parent) {
+    public CompilationUnitPreview(Map<String, String> workingValues, Composite parent) {
 
         super(workingValues, parent);
     }
 
-    protected void doFormatPreview() {
+    @Override
+	protected void doFormatPreview() {
         if (fPreviewText == null) {
             fPreviewDocument.set(""); //$NON-NLS-1$
             return;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,19 +32,21 @@ import org.eclipse.jface.viewers.TableViewer;
  * A list with check boxes and a button bar. Typical buttons are 'Check All' and 'Uncheck All'.
  * List model is independent of widget creation.
  * DialogFields controls are: Label, List and Composite containing buttons.
+ * 
+ * @param <E> the type of the list elements
  */
-public class CheckedListDialogField extends ListDialogField {
+public class CheckedListDialogField<E> extends ListDialogField<E> {
 
 	private int fCheckAllButtonIndex;
 	private int fUncheckAllButtonIndex;
 
-	private List fCheckedElements;
-	private List fGrayedElements;
+	private List<E> fCheckedElements;
+	private List<E> fGrayedElements;
 
-	public CheckedListDialogField(IListAdapter adapter, String[] customButtonLabels, ILabelProvider lprovider) {
+	public CheckedListDialogField(IListAdapter<E> adapter, String[] customButtonLabels, ILabelProvider lprovider) {
 		super(adapter, customButtonLabels, lprovider);
-		fCheckedElements= new ArrayList();
-		fGrayedElements= new ArrayList();
+		fCheckedElements= new ArrayList<E>();
+		fGrayedElements= new ArrayList<E>();
 
 		fCheckAllButtonIndex= -1;
 		fUncheckAllButtonIndex= -1;
@@ -78,6 +80,7 @@ public class CheckedListDialogField extends ListDialogField {
 	/*
 	 * @see ListDialogField#createTableViewer
 	 */
+	@Override
 	protected TableViewer createTableViewer(Composite parent) {
 		Table table= new Table(parent, SWT.CHECK | getListStyle());
 		table.setFont(parent.getFont());
@@ -94,6 +97,7 @@ public class CheckedListDialogField extends ListDialogField {
 	/*
 	 * @see ListDialogField#getListControl
 	 */
+	@Override
 	public Control getListControl(Composite parent) {
 		Control control= super.getListControl(parent);
 		if (parent != null) {
@@ -107,6 +111,7 @@ public class CheckedListDialogField extends ListDialogField {
 	 * @see DialogField#dialogFieldChanged
 	 * Hooks in to get element changes to update check model.
 	 */
+	@Override
 	public void dialogFieldChanged() {
 		for (int i= fCheckedElements.size() -1; i >= 0; i--) {
 			if (!fElements.contains(fCheckedElements.get(i))) {
@@ -126,19 +131,20 @@ public class CheckedListDialogField extends ListDialogField {
 	 * 
 	 * @return the list of checked elements
 	 */
-	public List getCheckedElements() {
+	@SuppressWarnings("unchecked")
+	public List<E> getCheckedElements() {
 		if (isOkToUse(fTableControl)) {
 			// workaround for bug 53853
 			Object[] checked= ((CheckboxTableViewer) fTable).getCheckedElements();
-			ArrayList res= new ArrayList(checked.length);
+			ArrayList<E> res= new ArrayList<E>(checked.length);
 			for (int i= 0; i < checked.length; i++) {
-				res.add(checked[i]);
+				res.add((E) checked[i]);
 			}
 			return res;
 		}
 
 
-		return new ArrayList(fCheckedElements);
+		return new ArrayList<E>(fCheckedElements);
 	}
 
 	/**
@@ -177,8 +183,8 @@ public class CheckedListDialogField extends ListDialogField {
 	 * 
 	 * @param list the list of checked elements
 	 */
-	public void setCheckedElements(Collection list) {
-		fCheckedElements= new ArrayList(list);
+	public void setCheckedElements(Collection<E> list) {
+		fCheckedElements= new ArrayList<E>(list);
 		if (isOkToUse(fTableControl)) {
 			((CheckboxTableViewer)fTable).setCheckedElements(list.toArray());
 		}
@@ -191,7 +197,7 @@ public class CheckedListDialogField extends ListDialogField {
 	 * @param object the element for which to set the state
 	 * @param state the checked state
 	 */
-	public void setChecked(Object object, boolean state) {
+	public void setChecked(E object, boolean state) {
 		setCheckedWithoutUpdate(object, state);
 		checkStateChanged();
 	}
@@ -202,7 +208,7 @@ public class CheckedListDialogField extends ListDialogField {
 	 * @param object the element for which to set the state
 	 * @param state the checked state
 	 */
-	public void setCheckedWithoutUpdate(Object object, boolean state) {
+	public void setCheckedWithoutUpdate(E object, boolean state) {
 		if (state) {
 			if (!fCheckedElements.contains(object)) {
 				fCheckedElements.add(object);
@@ -215,7 +221,7 @@ public class CheckedListDialogField extends ListDialogField {
 		}
 	}
 
-	public void setGrayedWithoutUpdate(Object object, boolean state) {
+	public void setGrayedWithoutUpdate(E object, boolean state) {
 		if (state) {
 			if (!fGrayedElements.contains(object)) {
 				fGrayedElements.add(object);
@@ -248,7 +254,7 @@ public class CheckedListDialogField extends ListDialogField {
 
 	private void doCheckStateChanged(CheckStateChangedEvent e) {
 		if (e.getChecked()) {
-			fCheckedElements.add(e.getElement());
+			fCheckedElements.add((E) e.getElement());
 		} else {
 			fCheckedElements.remove(e.getElement());
 		}
@@ -258,7 +264,8 @@ public class CheckedListDialogField extends ListDialogField {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField#replaceElement(java.lang.Object, java.lang.Object)
 	 */
-	public void replaceElement(Object oldElement, Object newElement) throws IllegalArgumentException {
+	@Override
+	public void replaceElement(E oldElement, E newElement) throws IllegalArgumentException {
 		boolean wasChecked= isChecked(oldElement);
 		super.replaceElement(oldElement, newElement);
 		setChecked(newElement, wasChecked);
@@ -269,6 +276,7 @@ public class CheckedListDialogField extends ListDialogField {
 	/*
 	 * @see ListDialogField#getManagedButtonState
 	 */
+	@Override
 	protected boolean getManagedButtonState(ISelection sel, int index) {
 		if (index == fCheckAllButtonIndex) {
 			return !fElements.isEmpty();
@@ -281,6 +289,7 @@ public class CheckedListDialogField extends ListDialogField {
 	/*
 	 * @see ListDialogField#extraButtonPressed
 	 */
+	@Override
 	protected boolean managedButtonPressed(int index) {
 		if (index == fCheckAllButtonIndex) {
 			checkAll(true);
@@ -292,6 +301,7 @@ public class CheckedListDialogField extends ListDialogField {
 		return true;
 	}
 
+	@Override
 	public void refresh() {
 		super.refresh();
 		if (isOkToUse(fTableControl)) {

@@ -28,6 +28,7 @@ public class CodeAnalyzer extends StatementAnalyzer {
 		super(cunit, selection, traverseSelectedNode);
 	}
 
+	@Override
 	protected final void checkSelectedNodes() {
 		super.checkSelectedNodes();
 		RefactoringStatus status= getStatus();

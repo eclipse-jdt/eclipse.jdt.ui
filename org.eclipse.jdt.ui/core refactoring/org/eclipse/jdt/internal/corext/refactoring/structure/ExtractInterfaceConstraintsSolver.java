@@ -43,6 +43,7 @@ public final class ExtractInterfaceConstraintsSolver extends SuperTypeConstraint
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsSolver#computeTypeEstimate(org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2)
 	 */
+	@Override
 	protected final ITypeSet computeTypeEstimate(final ConstraintVariable2 variable) {
 		final TType type= variable.getType();
 		if (variable instanceof ImmutableTypeVariable2 || !type.getErasure().equals(fModel.getSubType().getErasure()))

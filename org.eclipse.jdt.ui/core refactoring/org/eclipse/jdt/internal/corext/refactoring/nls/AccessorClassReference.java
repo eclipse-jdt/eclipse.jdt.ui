@@ -44,7 +44,8 @@ public class AccessorClassReference {
 		return fResourceBundleName;
 	}
 
-    public boolean equals(Object obj) {
+    @Override
+	public boolean equals(Object obj) {
         if (obj instanceof AccessorClassReference) {
             AccessorClassReference cmp = (AccessorClassReference) obj;
             return fBinding == cmp.fBinding;
@@ -52,7 +53,8 @@ public class AccessorClassReference {
         return false;
     }
 
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return fBinding.hashCode();
     }
 }

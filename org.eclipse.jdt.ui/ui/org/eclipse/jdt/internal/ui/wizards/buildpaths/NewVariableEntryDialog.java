@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,11 +61,11 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 
 public class NewVariableEntryDialog extends StatusDialog {
 
-	private class VariablesAdapter implements IDialogFieldListener, IListAdapter {
+	private class VariablesAdapter implements IDialogFieldListener, IListAdapter<CPVariableElement> {
 
 		// -------- IListAdapter --------
 
-		public void customButtonPressed(ListDialogField field, int index) {
+		public void customButtonPressed(ListDialogField<CPVariableElement> field, int index) {
 			switch (index) {
 			case IDX_EXTEND: /* extend */
 				extendButtonPressed();
@@ -73,11 +73,11 @@ public class NewVariableEntryDialog extends StatusDialog {
 			}
 		}
 
-		public void selectionChanged(ListDialogField field) {
+		public void selectionChanged(ListDialogField<CPVariableElement> field) {
 			doSelectionChanged();
 		}
 
-		public void doubleClicked(ListDialogField field) {
+		public void doubleClicked(ListDialogField<CPVariableElement> field) {
 			doDoubleClick();
 		}
 
@@ -94,7 +94,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 
 	private final int IDX_EXTEND= 0;
 
-	private ListDialogField fVariablesList;
+	private ListDialogField<CPVariableElement> fVariablesList;
 	private boolean fCanExtend;
 	private boolean fIsValidSelection;
 
@@ -118,13 +118,14 @@ public class NewVariableEntryDialog extends StatusDialog {
 
 		CPVariableElementLabelProvider labelProvider= new CPVariableElementLabelProvider(false);
 
-		fVariablesList= new ListDialogField(adapter, buttonLabels, labelProvider);
+		fVariablesList= new ListDialogField<CPVariableElement>(adapter, buttonLabels, labelProvider);
 		fVariablesList.setDialogFieldListener(adapter);
 		fVariablesList.setLabelText(NewWizardMessages.NewVariableEntryDialog_vars_label);
 
 		fVariablesList.enableButton(IDX_EXTEND, false);
 
 		fVariablesList.setViewerComparator(new ViewerComparator() {
+			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				if (e1 instanceof CPVariableElement && e2 instanceof CPVariableElement) {
 					return getComparator().compare(((CPVariableElement)e1).getName(), ((CPVariableElement)e2).getName());
@@ -151,13 +152,14 @@ public class NewVariableEntryDialog extends StatusDialog {
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
 
 	private void initializeElements() {
 		String[] entries= JavaCore.getClasspathVariableNames();
-		ArrayList elements= new ArrayList(entries.length);
+		ArrayList<CPVariableElement> elements= new ArrayList<CPVariableElement>(entries.length);
 		for (int i= 0; i < entries.length; i++) {
 			String name= entries[i];
 			IPath entryPath= JavaCore.getClasspathVariable(name);
@@ -173,6 +175,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 	/* (non-Javadoc)
 	 * @see Window#configureShell(Shell)
 	 */
+	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.NEW_VARIABLE_ENTRY_DIALOG);
@@ -181,6 +184,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#getDialogBoundsSettings()
 	 */
+	@Override
 	protected IDialogSettings getDialogBoundsSettings() {
 		return JavaPlugin.getDefault().getDialogSettingsSection(getClass().getName());
 	}
@@ -188,6 +192,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -241,13 +246,13 @@ public class NewVariableEntryDialog extends StatusDialog {
 		boolean canExtend= false;
 		StatusInfo status= new StatusInfo();
 
-		List selected= fVariablesList.getSelectedElements();
+		List<CPVariableElement> selected= fVariablesList.getSelectedElements();
 		int nSelected= selected.size();
 
 		if (nSelected > 0) {
 			fResultPaths= new Path[nSelected];
 			for (int i= 0; i < nSelected; i++) {
-				CPVariableElement curr= (CPVariableElement) selected.get(i);
+				CPVariableElement curr= selected.get(i);
 				fResultPaths[i]= new Path(curr.getName());
 				File file= curr.getPath().toFile();
 				if (!file.exists()) {
@@ -283,8 +288,8 @@ public class NewVariableEntryDialog extends StatusDialog {
 		if (fWarning == null || fWarning.isDisposed())
 			return;
 
-		for (Iterator iter= fVariablesList.getSelectedElements().iterator(); iter.hasNext();) {
-			CPVariableElement element= (CPVariableElement) iter.next();
+		for (Iterator<CPVariableElement> iter= fVariablesList.getSelectedElements().iterator(); iter.hasNext();) {
+			CPVariableElement element= iter.next();
 			String deprecationMessage= element.getDeprecationMessage();
 			if (deprecationMessage != null) {
 				fWarning.setText(deprecationMessage);
@@ -320,9 +325,9 @@ public class NewVariableEntryDialog extends StatusDialog {
 	}
 
 	protected final void extendButtonPressed() {
-		List selected= fVariablesList.getSelectedElements();
+		List<CPVariableElement> selected= fVariablesList.getSelectedElements();
 		if (selected.size() == 1) {
-			IPath[] extendedPaths= chooseExtensions((CPVariableElement) selected.get(0));
+			IPath[] extendedPaths= chooseExtensions(selected.get(0));
 			if (extendedPaths != null) {
 				fResultPaths= extendedPaths;
 				super.buttonPressed(IDialogConstants.OK_ID);
@@ -332,17 +337,17 @@ public class NewVariableEntryDialog extends StatusDialog {
 
 	protected final void configButtonPressed() {
 		String id= ClasspathVariablesPreferencePage.ID;
-		Map options= new HashMap();
-		List selected= fVariablesList.getSelectedElements();
+		Map<String, String> options= new HashMap<String, String>();
+		List<CPVariableElement> selected= fVariablesList.getSelectedElements();
 		if (!selected.isEmpty()) {
-			String varName= ((CPVariableElement) selected.get(0)).getName();
+			String varName= selected.get(0).getName();
 			options.put(ClasspathVariablesPreferencePage.DATA_SELECT_VARIABLE, varName);
 		}
 		PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, options).open();
 
-		List oldElements= fVariablesList.getElements();
+		List<CPVariableElement> oldElements= fVariablesList.getElements();
 		initializeElements();
-		List newElements= fVariablesList.getElements();
+		List<CPVariableElement> newElements= fVariablesList.getElements();
 		newElements.removeAll(oldElements);
 		if (!newElements.isEmpty()) {
 			fVariablesList.selectElements(new StructuredSelection(newElements));

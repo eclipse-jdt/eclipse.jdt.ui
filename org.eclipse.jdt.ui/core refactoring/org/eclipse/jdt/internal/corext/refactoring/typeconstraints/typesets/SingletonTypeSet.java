@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isUniverse()
 	 */
+	@Override
 	public boolean isUniverse() {
 		return false;
 	}
@@ -37,6 +38,7 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
 	 */
+	@Override
 	public TypeSet makeClone() {
 		return this; //new SingletonTypeSet(fType, getTypeSetEnvironment());
 	}
@@ -44,6 +46,7 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#intersectedWith(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
 	 */
+	@Override
 	protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
 		if (s2.contains(fType))
 			return this;
@@ -54,6 +57,7 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isEmpty()
 	 */
+	@Override
 	public boolean isEmpty() {
 		return false;
 	}
@@ -61,6 +65,7 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#upperBound()
 	 */
+	@Override
 	public TypeSet upperBound() {
 		return this; // makeClone();
 	}
@@ -68,6 +73,7 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#lowerBound()
 	 */
+	@Override
 	public TypeSet lowerBound() {
 		return this; // makeClone();
 	}
@@ -75,6 +81,7 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueLowerBound()
 	 */
+	@Override
 	public boolean hasUniqueLowerBound() {
 		return true;
 	}
@@ -82,6 +89,7 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueUpperBound()
 	 */
+	@Override
 	public boolean hasUniqueUpperBound() {
 		return true;
 	}
@@ -89,6 +97,7 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueLowerBound()
 	 */
+	@Override
 	public TType uniqueLowerBound() {
 		return fType;
 	}
@@ -96,6 +105,7 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueUpperBound()
 	 */
+	@Override
 	public TType uniqueUpperBound() {
 		return fType;
 	}
@@ -103,6 +113,7 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(TType)
 	 */
+	@Override
 	public boolean contains(TType t) {
 		return fType.equals(t);
 	}
@@ -110,6 +121,7 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#containsAll(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
 	 */
+	@Override
 	public boolean containsAll(TypeSet s) {
 		if (s.isEmpty())
 			return true;
@@ -121,8 +133,9 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#iterator()
 	 */
-	public Iterator iterator() {
-		return new Iterator() {
+	@Override
+	public Iterator<TType> iterator() {
+		return new Iterator<TType>() {
 			private boolean done= false;
 			public void remove() {
 				throw new UnsupportedOperationException();
@@ -130,7 +143,7 @@ public class SingletonTypeSet extends TypeSet {
 			public boolean hasNext() {
 				return !done;
 			}
-			public Object next() {
+			public TType next() {
 				done= true;
 				return fType;
 			}
@@ -140,6 +153,7 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isSingleton()
 	 */
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -147,6 +161,7 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#anyMember()
 	 */
+	@Override
 	public TType anyMember() {
 		return fType;
 	}
@@ -154,12 +169,14 @@ public class SingletonTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#enumerate()
 	 */
+	@Override
 	public EnumeratedTypeSet enumerate() {
 		EnumeratedTypeSet enumeratedTypeSet= new EnumeratedTypeSet(fType, getTypeSetEnvironment());
 		enumeratedTypeSet.initComplete();
 		return enumeratedTypeSet;
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		if (o instanceof SingletonTypeSet) {
 			SingletonTypeSet other= (SingletonTypeSet) o;
@@ -173,10 +190,12 @@ public class SingletonTypeSet extends TypeSet {
 			return false;
 	}
 	
+	@Override
 	public int hashCode() {
 		return fType.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return "{" + fID + ": " + fType.getPrettySignature() + "}"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}

@@ -66,9 +66,9 @@ public class TypeFilterInputDialog extends StatusDialog {
 	}
 
 	private StringButtonDialogField fNameDialogField;
-	private List fExistingEntries;
+	private List<String> fExistingEntries;
 
-	public TypeFilterInputDialog(Shell parent, List existingEntries) {
+	public TypeFilterInputDialog(Shell parent, List<String> existingEntries) {
 		super(parent);
 
 		fExistingEntries= existingEntries;
@@ -94,6 +94,7 @@ public class TypeFilterInputDialog extends StatusDialog {
 		return fNameDialogField.getText();
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
 
@@ -149,6 +150,7 @@ public class TypeFilterInputDialog extends StatusDialog {
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.IMPORT_ORGANIZE_INPUT_DIALOG);

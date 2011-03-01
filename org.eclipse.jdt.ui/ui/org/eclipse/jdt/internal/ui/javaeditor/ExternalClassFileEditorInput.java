@@ -49,6 +49,7 @@ public class ExternalClassFileEditorInput extends FileEditorInput implements ICl
 	/*
 	 * @see IAdaptable#getAdapter(Class)
 	 */
+	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter == IClassFile.class)
 			return fClassFile;

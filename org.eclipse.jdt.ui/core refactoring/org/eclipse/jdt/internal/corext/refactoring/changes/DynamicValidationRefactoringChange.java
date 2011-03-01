@@ -65,6 +65,7 @@ public final class DynamicValidationRefactoringChange extends DynamicValidationS
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public ChangeDescriptor getDescriptor() {
 		return new RefactoringChangeDescriptor(fDescriptor);
 	}

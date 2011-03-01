@@ -34,6 +34,7 @@ public class GotoMatchingBracketAction extends Action {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_MATCHING_BRACKET_ACTION);
 	}
 
+	@Override
 	public void run() {
 		fEditor.gotoMatchingBracket();
 	}

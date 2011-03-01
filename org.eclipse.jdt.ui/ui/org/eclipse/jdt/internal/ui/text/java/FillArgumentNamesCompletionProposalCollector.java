@@ -52,6 +52,7 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.ResultCollector#createJavaCompletionProposal(org.eclipse.jdt.core.CompletionProposal)
 	 */
+	@Override
 	protected IJavaCompletionProposal createJavaCompletionProposal(CompletionProposal proposal) {
 		switch (proposal.getKind()) {
 			case CompletionProposal.METHOD_REF:

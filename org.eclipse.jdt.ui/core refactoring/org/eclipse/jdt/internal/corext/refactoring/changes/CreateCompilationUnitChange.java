@@ -27,6 +27,7 @@ public final class CreateCompilationUnitChange extends CreateTextFileChange {
 		fUnit= unit;
 	}
 
+	@Override
 	public String getName() {
 		String cuName= BasicElementLabels.getFileName(fUnit);
 		String cuContainerName= BasicElementLabels.getPathLabel(fUnit.getParent().getPath(), false);

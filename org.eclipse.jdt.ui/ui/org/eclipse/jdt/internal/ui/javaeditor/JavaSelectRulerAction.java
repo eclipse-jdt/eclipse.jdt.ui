@@ -22,6 +22,7 @@ public class JavaSelectRulerAction extends AbstractRulerActionDelegate {
 	/*
 	 * @see AbstractRulerActionDelegate#createAction(ITextEditor, IVerticalRulerInfo)
 	 */
+	@Override
 	protected IAction createAction(ITextEditor editor, IVerticalRulerInfo rulerInfo) {
 		return new JavaSelectAnnotationRulerAction(JavaEditorMessages.getBundleForConstructedKeys(), "JavaSelectAnnotationRulerAction.", editor, rulerInfo); //$NON-NLS-1$
 	}

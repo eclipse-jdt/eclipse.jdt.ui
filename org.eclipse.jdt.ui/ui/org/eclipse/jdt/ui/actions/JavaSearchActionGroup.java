@@ -129,6 +129,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 	/*
 	 * Method declared on ActionGroup.
 	 */
+	@Override
 	public void setContext(ActionContext context) {
 		fReferencesGroup.setContext(context);
 		fDeclarationsGroup.setContext(context);
@@ -141,6 +142,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 	/*
 	 * Method declared on ActionGroup.
 	 */
+	@Override
 	public void fillActionBars(IActionBars actionBar) {
 		super.fillActionBars(actionBar);
 		fReferencesGroup.fillActionBars(actionBar);
@@ -154,6 +156,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 	/*
 	 * Method declared on ActionGroup.
 	 */
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 
@@ -197,6 +200,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 	/*
 	 * Method declared on ActionGroup.
 	 */
+	@Override
 	public void dispose() {
 		fReferencesGroup.dispose();
 		fDeclarationsGroup.dispose();

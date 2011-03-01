@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -58,6 +59,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isMoveStaticMembersAvailable(getSelectedMembers(selection)));
@@ -69,6 +71,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		}
 	}
 
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
@@ -76,6 +79,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isMoveStaticAvailable(selection));
@@ -84,6 +88,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		}
 	}
 
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			IMember[] members= getSelectedMembers(selection);
@@ -98,6 +103,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		}
 	}
 
+	@Override
 	public void run(ITextSelection selection) {
 		try {
 			IMember member= getSelectedMemberFromEditor();
@@ -118,13 +124,15 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		if (selection.isEmpty())
 			return null;
 
-		for  (final Iterator iterator= selection.iterator(); iterator.hasNext(); ) {
+		for  (final Iterator<?> iterator= selection.iterator(); iterator.hasNext(); ) {
 			if (! (iterator.next() instanceof IMember))
 				return null;
 		}
-		Set memberSet= new HashSet();
-		memberSet.addAll(Arrays.asList(selection.toArray()));
-		return (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
+		Set<IMember> memberSet= new HashSet<IMember>();
+		@SuppressWarnings("unchecked")
+		List<IMember> selectionList= (List<IMember>) (List<?>) Arrays.asList(selection.toArray());
+		memberSet.addAll(selectionList);
+		return memberSet.toArray(new IMember[memberSet.size()]);
 	}
 
 	private IMember getSelectedMemberFromEditor() throws JavaModelException{

@@ -118,10 +118,12 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canEnable(selection.toArray()));
 	}
 
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		//Must not create an AST
 	}
@@ -176,6 +178,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
+	@Override
 	public void run() {
 
 		try {
@@ -276,8 +279,8 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		if (!(selection instanceof IStructuredSelection))
 			return null;
 
-		List result= new ArrayList();
-		for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
+		List<Object> result= new ArrayList<Object>();
+		for (Iterator<?> iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (isValidElement(element))
 				result.add(element);

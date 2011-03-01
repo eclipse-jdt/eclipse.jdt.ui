@@ -25,6 +25,7 @@ public class SortAction extends Action {
 		fSortOrder= sortOrder;
 	}
 
+	@Override
 	public void run() {
 		BusyIndicator.showWhile(fPage.getViewer().getControl().getDisplay(), new Runnable() {
 			public void run() {

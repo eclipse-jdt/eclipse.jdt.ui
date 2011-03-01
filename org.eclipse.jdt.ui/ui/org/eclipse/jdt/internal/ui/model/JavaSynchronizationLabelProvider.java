@@ -56,6 +56,7 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void dispose() {
 		if (fPackageImage != null && !fPackageImage.isDisposed())
 			fPackageImage.dispose();
@@ -67,6 +68,7 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Image getDelegateImage(final Object element) {
 		if (element instanceof IPackageFragment) {
 			final IPackageFragment fragment= (IPackageFragment) element;
@@ -83,6 +85,7 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected ILabelProvider getDelegateLabelProvider() {
 		if (fLabelProvider == null)
 			fLabelProvider= new DecoratingLabelProvider(new JavaModelLabelProvider(ModelMessages.JavaModelLabelProvider_project_preferences_label, ModelMessages.JavaModelLabelProvider_refactorings_label), new ProblemsLabelDecorator(null));
@@ -92,6 +95,7 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected IDiff getDiff(final Object element) {
 		final ISynchronizationContext context= getContext();
 		final IResource resource= JavaModelProvider.getResource(element);
@@ -108,6 +112,7 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected int getMarkerSeverity(final Object element) {
 		// Decoration label provider is handling this
 		return -1;
@@ -116,6 +121,7 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Object getModelRoot() {
 		if (fModelRoot == null)
 			fModelRoot= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
@@ -125,6 +131,7 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected boolean hasDecendantConflicts(final Object element) {
 		final ISynchronizationContext context= getContext();
 		final IResource resource= JavaModelProvider.getResource(element);
@@ -136,6 +143,7 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected boolean isBusy(final Object element) {
 		final ISynchronizationContext context= getContext();
 		final IResource resource= JavaModelProvider.getResource(element);
@@ -147,6 +155,7 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected boolean isIncludeOverlays() {
 		return true;
 	}

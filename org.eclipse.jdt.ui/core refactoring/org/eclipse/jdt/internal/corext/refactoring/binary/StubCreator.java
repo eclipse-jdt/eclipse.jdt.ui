@@ -45,7 +45,7 @@ public class StubCreator {
 
 	protected void appendEnumConstants(final IType type) throws JavaModelException {
 		final IField[] fields= type.getFields();
-		final List list= new ArrayList(fields.length);
+		final List<IField> list= new ArrayList<IField>(fields.length);
 		for (int index= 0; index < fields.length; index++) {
 			final IField field= fields[index];
 			if (Flags.isEnum(field.getFlags()))
@@ -54,7 +54,7 @@ public class StubCreator {
 		for (int index= 0; index < list.size(); index++) {
 			if (index > 0)
 				fBuffer.append(","); //$NON-NLS-1$
-			fBuffer.append(((IField) list.get(index)).getElementName());
+			fBuffer.append(list.get(index).getElementName());
 		}
 		fBuffer.append(";"); //$NON-NLS-1$
 	}

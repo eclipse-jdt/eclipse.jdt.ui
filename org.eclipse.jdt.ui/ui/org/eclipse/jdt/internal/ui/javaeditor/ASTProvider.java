@@ -360,9 +360,9 @@ public final class ASTProvider {
 		if (ast == null)
 			return "null"; //$NON-NLS-1$
 
-		List types= ast.types();
+		List<AbstractTypeDeclaration> types= ast.types();
 		if (types != null && types.size() > 0)
-			return ((AbstractTypeDeclaration)types.get(0)).getName().getIdentifier();
+			return types.get(0).getName().getIdentifier();
 		else
 			return "AST without any type"; //$NON-NLS-1$
 	}

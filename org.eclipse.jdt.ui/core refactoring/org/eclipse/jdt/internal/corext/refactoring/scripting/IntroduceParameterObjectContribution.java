@@ -30,6 +30,7 @@ public class IntroduceParameterObjectContribution extends JavaUIRefactoringContr
 	public IntroduceParameterObjectContribution() {
 	}
 
+	@Override
 	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		if (descriptor instanceof IntroduceParameterObjectDescriptor) {
 			IntroduceParameterObjectProcessor processor= new IntroduceParameterObjectProcessor((IntroduceParameterObjectDescriptor) descriptor);
@@ -38,10 +39,12 @@ public class IntroduceParameterObjectContribution extends JavaUIRefactoringContr
 		return null;
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return RefactoringSignatureDescriptorFactory.createIntroduceParameterObjectDescriptor();
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createIntroduceParameterObjectDescriptor(project, description, comment, arguments, flags);
 	}

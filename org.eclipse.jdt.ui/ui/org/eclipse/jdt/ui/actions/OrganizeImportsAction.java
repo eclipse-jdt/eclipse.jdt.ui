@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -113,10 +113,10 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		}
 	}
 
-	private static final class OrganizeImportComparator implements Comparator {
+	private static final class OrganizeImportComparator implements Comparator<String> {
 
-		public int compare(Object o1, Object o2) {
-			if (((String)o1).equals(o2))
+		public int compare(String o1, String o2) {
+			if (o1.equals(o2))
 				return 0;
 
 			History history= QualifiedTypeNameHistory.getDefault();
@@ -179,6 +179,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		fCleanUpDelegate.selectionChanged(selection);
 		setEnabled(fCleanUpDelegate.isEnabled());
@@ -187,6 +188,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		fCleanUpDelegate.selectionChanged(selection);
 		setEnabled(fCleanUpDelegate.isEnabled());
@@ -195,6 +197,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		ICompilationUnit cu= getCompilationUnit(fEditor);
 		if (cu != null) {
@@ -213,6 +216,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		ICompilationUnit[] cus= fCleanUpDelegate.getCompilationUnits(selection);
 		if (cus.length == 0) {
@@ -338,6 +342,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		ILabelProvider labelProvider= new TypeNameMatchLabelProvider(TypeNameMatchLabelProvider.SHOW_FULLYQUALIFIED);
 
 		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(getShell(), labelProvider) {
+			@Override
 			protected void handleSelectionChanged() {
 				super.handleSelectionChanged();
 				// show choices in editor

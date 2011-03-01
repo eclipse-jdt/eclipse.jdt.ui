@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -198,7 +198,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private int fDoubleCount;
 
 	/** The primitive types to generate custom hashCode() methods for */
-	private List fCustomHashCodeTypes= new ArrayList();
+	private List<ITypeBinding> fCustomHashCodeTypes= new ArrayList<ITypeBinding>();
 
 	/** <code>true</code> to use 'instanceof' to compare types, <code>false</code> otherwise */
 	private final boolean fUseInstanceOf;
@@ -290,7 +290,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			// get the declaration and the rewrite
 			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.findDeclaration(fType, fRewrite.getRoot());
 			ListRewrite rewriter= fRewrite.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
-			final List list= (List) declaration.getStructuralProperty(declaration.getBodyDeclarationsProperty());
+			final List<BodyDeclaration> list= (List<BodyDeclaration>) declaration.getStructuralProperty(declaration.getBodyDeclarationsProperty());
 			if (fType != null && rewriter != null) {
 
 				ICompilationUnit cu= (ICompilationUnit) fUnit.getJavaElement();
@@ -315,8 +315,8 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 				addMethod(rewriter, equalsMethod, hashCodeMethod, oldHash);
 
 				// helpers
-				for (final Iterator iterator= fCustomHashCodeTypes.iterator(); iterator.hasNext();) {
-					final ITypeBinding binding= (ITypeBinding) iterator.next();
+				for (final Iterator<ITypeBinding> iterator= fCustomHashCodeTypes.iterator(); iterator.hasNext();) {
+					final ITypeBinding binding= iterator.next();
 
 					if (findMethodToReplace(list, METHODNAME_HASH_CODE, objectAsParam) == null) {
 						final MethodDeclaration helperDecl= createHashCodeHelper(binding);
@@ -344,9 +344,9 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		return fType.isMember() && !Modifier.isStatic(fType.getModifiers());
 	}
 
-	private BodyDeclaration findMethodToReplace(final List list, String name, ITypeBinding[] paramTypes) {
-		for (final Iterator iterator= list.iterator(); iterator.hasNext();) {
-			final BodyDeclaration bodyDecl= (BodyDeclaration) iterator.next();
+	private BodyDeclaration findMethodToReplace(final List<BodyDeclaration> list, String name, ITypeBinding[] paramTypes) {
+		for (final Iterator<BodyDeclaration> iterator= list.iterator(); iterator.hasNext();) {
+			final BodyDeclaration bodyDecl= iterator.next();
 			if (bodyDecl instanceof MethodDeclaration) {
 				final MethodDeclaration method= (MethodDeclaration) bodyDecl;
 				final IMethodBinding binding= method.resolveBinding();
@@ -470,7 +470,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 	private Statement[] createAddSimpleHashCode(ITypeBinding type, IHashCodeAccessProvider provider, String name, boolean singleTemp) {
 
-		List statements= new ArrayList();
+		List<Statement> statements= new ArrayList<Statement>();
 
 		if (!type.isPrimitive()) {
 			// (element == null ? 0 : element.hashCode())
@@ -533,7 +533,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			statements.add(prepareAssignment(createShiftAssignment(fAst.newSimpleName(VARIABLE_NAME_DOUBLE_TEMPORARY), fAst.newSimpleName(VARIABLE_NAME_DOUBLE_TEMPORARY))));
 		}
 
-		return (Statement[]) statements.toArray(new Statement[statements.size()]);
+		return statements.toArray(new Statement[statements.size()]);
 	}
 
 	private Statement createAddArrayHashCode(IVariableBinding binding) {
@@ -592,7 +592,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		hashCodeMethod.setReturnType2(fAst.newPrimitiveType(PrimitiveType.INT));
 
 		// ARGUMENTS
-		List parameters= hashCodeMethod.parameters();
+		List<SingleVariableDeclaration> parameters= hashCodeMethod.parameters();
 		SingleVariableDeclaration hashCodeParam= fAst.newSingleVariableDeclaration();
 		if (!binding.isPrimitive())
 			hashCodeParam.setType(fAst.newArrayType(fAst.newSimpleType(getQualifiedName(JAVA_LANG_OBJECT)), 1));
@@ -772,7 +772,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		equalsMethodDeclaration.setConstructor(false);
 		equalsMethodDeclaration.setReturnType2(fAst.newPrimitiveType(PrimitiveType.BOOLEAN));
 
-		List parameters= equalsMethodDeclaration.parameters();
+		List<SingleVariableDeclaration> parameters= equalsMethodDeclaration.parameters();
 		SingleVariableDeclaration equalsParam= fAst.newSingleVariableDeclaration();
 		equalsParam.setType(fRewrite.getImportRewrite().addImport(fAst.resolveWellKnownType(JAVA_LANG_OBJECT), fAst, fImportRewriteContext));
 		equalsParam.setName(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM));

@@ -52,7 +52,8 @@ public class SelectFieldModeAction extends Action {
     /*
      * @see Action#actionPerformed
      */
-    public void run() {
+    @Override
+	public void run() {
         fView.setFieldMode(fMode); // will toggle the checked state
     }
 }

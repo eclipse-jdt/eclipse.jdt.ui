@@ -119,7 +119,8 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
      *
      * @see org.eclipse.ui.model.IWorkbenchAdapter#getChildren(java.lang.Object)
      */
-    public Object[] getChildren(Object o) {
+    @Override
+	public Object[] getChildren(Object o) {
         return this.fProvider.fetchChildren(((DeferredMethodWrapper) o).getMethodWrapper());
     }
 

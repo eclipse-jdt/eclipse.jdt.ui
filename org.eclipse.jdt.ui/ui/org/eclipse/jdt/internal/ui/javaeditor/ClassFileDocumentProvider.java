@@ -189,7 +189,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	}
 
 	/** Input change listeners. */
-	private List fInputListeners= new ArrayList();
+	private List<InputChangeListener> fInputListeners= new ArrayList<InputChangeListener>();
 
 	/**
 	 * Creates a new document provider.
@@ -201,6 +201,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	/*
 	 * @see StorageDocumentProvider#setDocumentContent(IDocument, IEditorInput)
 	 */
+	@Override
 	protected boolean setDocumentContent(IDocument document, IEditorInput editorInput, String encoding) throws CoreException {
 		if (editorInput instanceof IClassFileEditorInput) {
 			IClassFile classFile= ((IClassFileEditorInput) editorInput).getClassFile();
@@ -241,6 +242,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	 * @see org.eclipse.ui.editors.text.StorageDocumentProvider#createEmptyDocument()
 	 * @since 3.1
 	 */
+	@Override
 	protected IDocument createEmptyDocument() {
 		IDocument document= FileBuffers.getTextFileBufferManager().createEmptyDocument(null, LocationKind.IFILE);
 		if (document instanceof ISynchronizable)
@@ -251,6 +253,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	/*
 	 * @see AbstractDocumentProvider#createDocument(Object)
 	 */
+	@Override
 	protected IDocument createDocument(Object element) throws CoreException {
 		IDocument document= super.createDocument(element);
 		if (document != null) {
@@ -263,6 +266,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	/*
 	 * @see AbstractDocumentProvider#createElementInfo(Object)
 	 */
+	@Override
 	protected ElementInfo createElementInfo(Object element) throws CoreException {
 
 		if (element instanceof IClassFileEditorInput) {
@@ -303,6 +307,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	/*
 	 * @see FileDocumentProvider#disposeElementInfo(Object, ElementInfo)
 	 */
+	@Override
 	protected void disposeElementInfo(Object element, ElementInfo info) {
 		ClassFileInfo classFileInfo= (ClassFileInfo) info;
 		if (classFileInfo.fClassFileSynchronizer != null) {
@@ -317,6 +322,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	 * @see org.eclipse.ui.texteditor.IDocumentProviderExtension3#isSynchronized(java.lang.Object)
 	 * @since 3.0
 	 */
+	@Override
 	public boolean isSynchronized(Object element) {
 		Object elementInfo= getElementInfo(element);
 		if (elementInfo instanceof ClassFileInfo) {
@@ -376,9 +382,9 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	 * @param input the class file editor input
 	 */
 	protected void fireInputChanged(IClassFileEditorInput input) {
-		List list= new ArrayList(fInputListeners);
-		for (Iterator i = list.iterator(); i.hasNext();)
-			((InputChangeListener) i.next()).inputChanged(input);
+		List<InputChangeListener> list= new ArrayList<InputChangeListener>(fInputListeners);
+		for (Iterator<InputChangeListener> i = list.iterator(); i.hasNext();)
+			i.next().inputChanged(input);
 	}
 
 	/**

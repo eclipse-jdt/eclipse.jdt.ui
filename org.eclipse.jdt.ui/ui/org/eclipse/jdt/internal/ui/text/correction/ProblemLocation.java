@@ -125,6 +125,7 @@ public class ProblemLocation implements IProblemLocation {
 		return finder.getCoveredNode();
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer buf= new StringBuffer();
 		buf.append("Id: ").append(getErrorCode(fId)).append('\n'); //$NON-NLS-1$

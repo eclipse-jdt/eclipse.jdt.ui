@@ -24,7 +24,7 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
  */
 public final class RelevanceSorter extends AbstractProposalSorter {
 
-	private final Comparator fComparator= new CompletionProposalComparator();
+	private final Comparator<ICompletionProposal> fComparator= new CompletionProposalComparator();
 
 	public RelevanceSorter() {
 	}
@@ -32,6 +32,7 @@ public final class RelevanceSorter extends AbstractProposalSorter {
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.AbstractProposalSorter#compare(org.eclipse.jface.text.contentassist.ICompletionProposal, org.eclipse.jface.text.contentassist.ICompletionProposal)
 	 */
+	@Override
 	public int compare(ICompletionProposal p1, ICompletionProposal p2) {
 		return fComparator.compare(p1, p2);
 	}

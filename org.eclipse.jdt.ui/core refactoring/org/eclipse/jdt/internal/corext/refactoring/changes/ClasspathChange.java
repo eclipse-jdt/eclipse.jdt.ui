@@ -46,14 +46,14 @@ public class ClasspathChange extends ResourceChange {
 
 	public static ClasspathChange removeEntryChange(IJavaProject project, IClasspathEntry entryToRemove) throws JavaModelException {
 		IClasspathEntry[] rawClasspath= project.getRawClasspath();
-		ArrayList newClasspath= new ArrayList();
+		ArrayList<IClasspathEntry> newClasspath= new ArrayList<IClasspathEntry>();
 		for (int i= 0; i < rawClasspath.length; i++) {
 			IClasspathEntry curr= rawClasspath[i];
 			if (curr.getEntryKind() != entryToRemove.getEntryKind() || !curr.getPath().equals(entryToRemove.getPath())) {
 				newClasspath.add(curr);
 			}
 		}
-		IClasspathEntry[] entries= (IClasspathEntry[]) newClasspath.toArray(new IClasspathEntry[newClasspath.size()]);
+		IClasspathEntry[] entries= newClasspath.toArray(new IClasspathEntry[newClasspath.size()]);
 		IPath outputLocation= project.getOutputLocation();
 
 		return newChange(project, entries, outputLocation);
@@ -78,6 +78,7 @@ public class ClasspathChange extends ResourceChange {
 		setValidationMethod(VALIDATE_NOT_DIRTY | VALIDATE_NOT_READ_ONLY);
 	}
 
+	@Override
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.ClasspathChange_progress_message, 1);
 		try {
@@ -96,14 +97,17 @@ public class ClasspathChange extends ResourceChange {
 		}
 	}
 
+	@Override
 	public String getName() {
 		return RefactoringCoreMessages.ClasspathChange_change_name;
 	}
 
+	@Override
 	protected IResource getModifiedResource() {
 		return fProject.getResource();
 	}
 
+	@Override
 	public Object getModifiedElement() {
 		return fProject;
 	}

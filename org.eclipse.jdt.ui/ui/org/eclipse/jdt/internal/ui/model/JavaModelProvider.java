@@ -71,6 +71,7 @@ public final class JavaModelProvider extends ModelProvider {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public ResourceMapping[] getMappings(final IResource resource, final ResourceMappingContext context, final IProgressMonitor monitor) throws CoreException {
 		final IJavaElement element= JavaCore.create(resource);
 		if (element != null)

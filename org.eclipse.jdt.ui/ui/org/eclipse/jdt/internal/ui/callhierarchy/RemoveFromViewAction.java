@@ -71,16 +71,17 @@ class RemoveFromViewAction extends Action{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
+	@Override
 	public void run() {
 		IMember[] inputElements= fPart.getInputElements();
-		List inputList= new ArrayList(Arrays.asList(inputElements));
+		List<IMember> inputList= new ArrayList<IMember>(Arrays.asList(inputElements));
 		IMember[] selection= getSelectedElements();
 		for (int i= 0; i < selection.length; i++) {
 			if (inputList.contains(selection[i]))
 				inputList.remove(selection[i]);
 		}
 		if (inputList.size() > 0) {
-			fPart.updateInputHistoryAndDescription(inputElements, (IMember[])inputList.toArray(new IMember[inputList.size()]));
+			fPart.updateInputHistoryAndDescription(inputElements, inputList.toArray(new IMember[inputList.size()]));
 		}
 		TreeItem[] items= fCallHierarchyViewer.getTree().getSelection();
 		for (int i= 0; i < items.length; i++)
@@ -96,16 +97,16 @@ class RemoveFromViewAction extends Action{
 	private IMember[] getSelectedElements() {
 		ISelection selection= getSelection();
 		if (selection instanceof IStructuredSelection) {
-			List members= new ArrayList();
-			List elements= ((IStructuredSelection)selection).toList();
-			for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			List<IMember> members= new ArrayList<IMember>();
+			List<?> elements= ((IStructuredSelection)selection).toList();
+			for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 				Object obj= iter.next();
 				if (obj instanceof MethodWrapper) {
 					MethodWrapper wrapper= (MethodWrapper)obj;
 					members.add((wrapper).getMember());
 				}
 			}
-			return (IMember[])members.toArray(new IMember[members.size()]);
+			return members.toArray(new IMember[members.size()]);
 		}
 		return null;
 	}
@@ -129,7 +130,7 @@ class RemoveFromViewAction extends Action{
 		if (selection.isEmpty())
 			return false;
 
-		Iterator iter= selection.iterator();
+		Iterator<?> iter= selection.iterator();
 		while (iter.hasNext()) {
 			Object element= iter.next();
 			if (!(element instanceof MethodWrapper))//takes care of '...' node

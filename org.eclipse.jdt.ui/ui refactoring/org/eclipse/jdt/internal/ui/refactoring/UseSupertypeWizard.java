@@ -70,6 +70,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		setDefaultPageTitle(RefactoringMessages.UseSupertypeWizard_Use_Super_Type_Where_Possible);
 	}
 
+	@Override
 	protected void addUserInputPages(){
 		addPage(new UseSupertypeInputPage(fProcessor));
 	}
@@ -86,8 +87,8 @@ public class UseSupertypeWizard extends RefactoringWizard{
 				return getDirectSuperTypes((IType)element).toArray();
 			}
 
-			public Set/*<IType>*/ getDirectSuperTypes(IType type){
-				Set/*<IType>*/ result= new HashSet();
+			public Set<IType> getDirectSuperTypes(IType type){
+				Set<IType> result= new HashSet<IType>();
 				final IType superclass= fHierarchy.getSuperclass(type);
 				if (superclass != null) {
 					result.add(superclass);
@@ -136,7 +137,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		private static final String REWRITE_INSTANCEOF= "rewriteInstanceOf";  //$NON-NLS-1$
 		public static final String PAGE_NAME= "UseSupertypeInputPage";//$NON-NLS-1$
 		private TreeViewer fTreeViewer;
-		private final Map fFileCount;  //IType -> Integer
+		private final Map<IType, Integer> fFileCount;  //IType -> Integer
 		private final static String MESSAGE= RefactoringMessages.UseSupertypeInputPage_Select_supertype;
 		private JavaElementLabelProvider fLabelProvider;
 		private IDialogSettings fSettings;
@@ -144,7 +145,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 
 		public UseSupertypeInputPage(UseSuperTypeProcessor processor) {
 			super(PAGE_NAME);
-			fFileCount= new HashMap(2);
+			fFileCount= new HashMap<IType, Integer>(2);
 			fProcessor= processor;
 			setMessage(MESSAGE);
 		}
@@ -182,6 +183,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			checkbox.setLayoutData(new GridData());
 			checkbox.setSelection(getUseSupertypeProcessor().isInstanceOf());
 			checkbox.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					getUseSupertypeProcessor().setInstanceOf(checkbox.getSelection());
 					fSettings.put(REWRITE_INSTANCEOF, checkbox.getSelection());
@@ -207,10 +209,12 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			fTreeViewer.setContentProvider(new UseSupertypeContentProvider());
 			fTreeViewer.setComparator(new ViewerComparator() {
 
+				@Override
 				public boolean isSorterProperty(Object element, String property) {
 					return true;
 				}
 
+				@Override
 				public int compare(Viewer viewer, Object first, Object second) {
 					final IType type1= (IType)first;
 					final IType type2= (IType)second;
@@ -249,6 +253,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 				tree.setSelection(new TreeItem[] {items[0]});
 		}
 
+		@Override
 		public IWizardPage getNextPage() {
 			initializeRefactoring();
 			IWizardPage nextPage= super.getNextPage();
@@ -277,8 +282,8 @@ public class UseSupertypeWizard extends RefactoringWizard{
 
 		private int countFilesWithValue(int i) {
 			int count= 0;
-			for (Iterator iter= fFileCount.keySet().iterator(); iter.hasNext();) {
-				if (((Integer)fFileCount.get(iter.next())).intValue() == i)
+			for (Iterator<IType> iter= fFileCount.keySet().iterator(); iter.hasNext();) {
+				if (fFileCount.get(iter.next()).intValue() == i)
 					count++;
 			}
 			return count;
@@ -289,6 +294,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			return (IType)ss.getFirstElement();
 		}
 
+		@Override
 		public boolean performFinish(){
 			initializeRefactoring();
 			boolean superFinish= super.performFinish();
@@ -307,6 +313,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			getUseSupertypeProcessor().setSuperType((IType)ss.getFirstElement());
 		}
 
+		@Override
 		public void dispose() {
 			fTreeViewer= null;
 			fFileCount.clear();
@@ -315,15 +322,16 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		}
 
 		private static class UseSupertypeLabelProvider extends JavaElementLabelProvider{
-			private final Map fFileCount;
-			private UseSupertypeLabelProvider(Map fileCount){
+			private final Map<IType, Integer> fFileCount;
+			private UseSupertypeLabelProvider(Map<IType, Integer> fileCount){
 				fFileCount= fileCount;
 			}
+			@Override
 			public String getText(Object element) {
 				String superText= super.getText(element);
 				if  (! fFileCount.containsKey(element))
 					return superText;
-				int count= ((Integer)fFileCount.get(element)).intValue();
+				int count= fFileCount.get(element).intValue();
 				if (count == 0){
 					String[] keys= {superText};
 					return Messages.format(RefactoringMessages.UseSupertypeInputPage_no_possible_updates, keys);
@@ -337,6 +345,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			}
 		}
 
+		@Override
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);
 			if (visible && fTreeViewer != null)

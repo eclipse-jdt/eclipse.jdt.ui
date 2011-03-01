@@ -54,6 +54,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */
+	@Override
 	protected void addUserInputPages(){
 		addPage(new ConvertAnonymousToNestedInputPage());
 	}
@@ -192,6 +193,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			gd.horizontalSpan= 2;
 			declareFinalCheckbox.setLayoutData(gd);
 			declareFinalCheckbox.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					boolean declareFinal= declareFinalCheckbox.getSelection();
 					r.setDeclareFinal(declareFinal);
@@ -219,7 +221,8 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			gd.horizontalSpan= 2;
 			declareAsStaticCheckbox.setLayoutData(gd);
 			declareAsStaticCheckbox.addSelectionListener(new SelectionAdapter() {
-			    public void widgetSelected(SelectionEvent e) {
+			    @Override
+				public void widgetSelected(SelectionEvent e) {
 					boolean declareAsStatic= declareAsStaticCheckbox.getSelection();
 					r.setDeclareStatic(declareAsStatic);
 					fSettings.put(DECLARE_AS_STATIC, declareAsStatic);

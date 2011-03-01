@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -135,20 +135,26 @@ abstract class TargetProvider {
 		public ErrorTargetProvider(RefactoringStatus status) {
 			fErrorStatus= status;
 		}
+		@Override
 		public RefactoringStatus checkActivation() throws JavaModelException {
 			return fErrorStatus;
 		}
+		@Override
 		public void initialize() {
 		}
+		@Override
 		public ICompilationUnit[] getAffectedCompilationUnits(RefactoringStatus status, ReferencesInBinaryContext binaryRefs, IProgressMonitor pm) throws JavaModelException {
 			return null;
 		}
+		@Override
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
 			return null;
 		}
+		@Override
 		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
 			return null;
 		}
+		@Override
 		public int getStatusSeverity() {
 			return 0;
 		}
@@ -165,12 +171,15 @@ abstract class TargetProvider {
 			fCUnit= cu;
 			fInvocation= invocation;
 		}
+		@Override
 		public void initialize() {
 			fIterated= false;
 		}
+		@Override
 		public ICompilationUnit[] getAffectedCompilationUnits(RefactoringStatus status, ReferencesInBinaryContext binaryRefs, IProgressMonitor pm) {
 			return new ICompilationUnit[] { fCUnit };
 		}
+		@Override
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
 			Assert.isTrue(unit == fCUnit);
 			if (fIterated)
@@ -181,6 +190,7 @@ abstract class TargetProvider {
 			};
 		}
 
+		@Override
 		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
 			fastDone(pm);
 			if (fIterated)
@@ -188,29 +198,32 @@ abstract class TargetProvider {
 			fIterated= true;
 			return new ASTNode[] { fInvocation };
 		}
+		@Override
 		public RefactoringStatus checkActivation() throws JavaModelException {
 			return new RefactoringStatus();
 		}
+		@Override
 		public int getStatusSeverity() {
 			return RefactoringStatus.FATAL;
 		}
+		@Override
 		public boolean isSingle() {
 			return true;
 		}
 	}
 
 	private static class BodyData {
-		private List fInvocations;
+		private List<ASTNode> fInvocations;
 
 		public BodyData() {
 		}
 		public void addInvocation(ASTNode node) {
 			if (fInvocations == null)
-				fInvocations= new ArrayList(2);
+				fInvocations= new ArrayList<ASTNode>(2);
 			fInvocations.add(node);
 		}
 		public ASTNode[] getInvocations() {
-			return (ASTNode[])fInvocations.toArray(new ASTNode[fInvocations.size()]);
+			return fInvocations.toArray(new ASTNode[fInvocations.size()]);
 		}
 		public boolean hasInvocations() {
 			return fInvocations != null && !fInvocations.isEmpty();
@@ -218,8 +231,8 @@ abstract class TargetProvider {
 	}
 
 	private static class InvocationFinder extends ASTVisitor {
-		Map/*<BodyDeclaration, BodyData>*/ result= new HashMap(2);
-		Stack/*<BodyData>*/ fBodies= new Stack();
+		Map<BodyDeclaration, BodyData> result= new HashMap<BodyDeclaration, BodyData>(2);
+		Stack<BodyData> fBodies= new Stack<BodyData>();
 		BodyData fCurrent;
 		private IMethodBinding fBinding;
 		public InvocationFinder(IMethodBinding binding) {
@@ -227,45 +240,55 @@ abstract class TargetProvider {
 			fBinding= binding.getMethodDeclaration();
 			Assert.isNotNull(fBinding);
 		}
+		@Override
 		public boolean visit(MethodInvocation node) {
 			if (node.resolveTypeBinding() != null && matches(node.resolveMethodBinding()) && fCurrent != null) {
 				fCurrent.addInvocation(node);
 			}
 			return true;
 		}
+		@Override
 		public boolean visit(SuperMethodInvocation node) {
 			if (matches(node.getName().resolveBinding()) && fCurrent != null) {
 				fCurrent.addInvocation(node);
 			}
 			return true;
 		}
+		@Override
 		public boolean visit(ConstructorInvocation node) {
 			if (matches(node.resolveConstructorBinding()) && fCurrent != null) {
 				fCurrent.addInvocation(node);
 			}
 			return true;
 		}
+		@Override
 		public boolean visit(ClassInstanceCreation node) {
 			if (matches(node.resolveConstructorBinding()) && fCurrent != null) {
 				fCurrent.addInvocation(node);
 			}
 			return true;
 		}
+		@Override
 		public boolean visit(TypeDeclaration node) {
 			return visitType();
 		}
+		@Override
 		public void endVisit(TypeDeclaration node) {
 			endVisitBodyDeclaration();
 		}
+		@Override
 		public boolean visit(EnumDeclaration node) {
 			return visitType();
 		}
+		@Override
 		public void endVisit(EnumDeclaration node) {
 			endVisitBodyDeclaration();
 		}
+		@Override
 		public boolean visit(AnnotationTypeDeclaration node) {
 			return visitType();
 		}
+		@Override
 		public void endVisit(AnnotationTypeDeclaration node) {
 			endVisitBodyDeclaration();
 		}
@@ -280,20 +303,24 @@ abstract class TargetProvider {
 			return true;
 		}
 		protected void endVisitBodyDeclaration() {
-			fCurrent= (BodyData)fBodies.remove(fBodies.size() - 1);
+			fCurrent= fBodies.remove(fBodies.size() - 1);
 		}
+		@Override
 		public boolean visit(FieldDeclaration node) {
 			return visitNonTypeBodyDeclaration();
 		}
+		@Override
 		public void endVisit(FieldDeclaration node) {
 			if (fCurrent.hasInvocations()) {
 				result.put(node, fCurrent);
 			}
 			endVisitBodyDeclaration();
 		}
+		@Override
 		public boolean visit(MethodDeclaration node) {
 			return visitNonTypeBodyDeclaration();
 		}
+		@Override
 		public void endVisit(MethodDeclaration node) {
 			if (fCurrent.hasInvocations()) {
 				result.put(node, fCurrent);
@@ -301,9 +328,11 @@ abstract class TargetProvider {
 			endVisitBodyDeclaration();
 
 		}
+		@Override
 		public boolean visit(Initializer node) {
 			return visitNonTypeBodyDeclaration();
 		}
+		@Override
 		public void endVisit(Initializer node) {
 			if (fCurrent.hasInvocations()) {
 				result.put(node, fCurrent);
@@ -320,13 +349,14 @@ abstract class TargetProvider {
 	private static class LocalTypeTargetProvider extends TargetProvider {
 		private ICompilationUnit fCUnit;
 		private MethodDeclaration fDeclaration;
-		private Map fBodies;
+		private Map<BodyDeclaration, BodyData> fBodies;
 		public LocalTypeTargetProvider(ICompilationUnit unit, MethodDeclaration declaration) {
 			Assert.isNotNull(unit);
 			Assert.isNotNull(declaration);
 			fCUnit= unit;
 			fDeclaration= declaration;
 		}
+		@Override
 		public void initialize() {
 			IMethodBinding methodBinding= fDeclaration.resolveBinding();
 			InvocationFinder finder;
@@ -338,12 +368,14 @@ abstract class TargetProvider {
 				//scope of local class is enclosing block
 				ASTNode block= type.getParent().getParent();
 				finder= new InvocationFinder(methodBinding) {
+					@Override
 					public boolean visit(Block node) {
 						return visitNonTypeBodyDeclaration();
 					}
+					@Override
 					public void endVisit(Block node) {
 						if (fCurrent.hasInvocations()) {
-							result.put(ASTNodes.getParent(node, BodyDeclaration.class), fCurrent);
+							result.put((BodyDeclaration) ASTNodes.getParent(node, BodyDeclaration.class), fCurrent);
 						}
 						endVisitBodyDeclaration();
 					}
@@ -352,29 +384,34 @@ abstract class TargetProvider {
 			}
 			fBodies= finder.result;
 		}
+		@Override
 		public ICompilationUnit[] getAffectedCompilationUnits(RefactoringStatus status, ReferencesInBinaryContext binaryRefs, IProgressMonitor pm) {
 			fastDone(pm);
 			return new ICompilationUnit[] { fCUnit };
 		}
 
+		@Override
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
 			Assert.isTrue(unit == fCUnit);
-			Set result= fBodies.keySet();
+			Set<BodyDeclaration> result= fBodies.keySet();
 			fastDone(pm);
-			return (BodyDeclaration[])result.toArray(new BodyDeclaration[result.size()]);
+			return result.toArray(new BodyDeclaration[result.size()]);
 		}
 
+		@Override
 		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
-			BodyData data= (BodyData)fBodies.get(declaration);
+			BodyData data= fBodies.get(declaration);
 			Assert.isNotNull(data);
 			fastDone(pm);
 			return data.getInvocations();
 		}
 
+		@Override
 		public RefactoringStatus checkActivation() throws JavaModelException {
 			return new RefactoringStatus();
 		}
 
+		@Override
 		public int getStatusSeverity() {
 			return RefactoringStatus.ERROR;
 		}
@@ -382,24 +419,27 @@ abstract class TargetProvider {
 
 	private static class MemberTypeTargetProvider extends TargetProvider {
 		private final IMethodBinding fMethodBinding;
-		private Map fCurrentBodies;
+		private Map<BodyDeclaration, BodyData> fCurrentBodies;
 		public MemberTypeTargetProvider(IMethodBinding methodBinding) {
 			Assert.isNotNull(methodBinding);
 			fMethodBinding= methodBinding;
 		}
+		@Override
 		public void initialize() {
 			// do nothing.
 		}
 
+		@Override
 		public ICompilationUnit[] getAffectedCompilationUnits(final RefactoringStatus status, ReferencesInBinaryContext binaryRefs, IProgressMonitor pm) throws CoreException {
 			IMethod method= (IMethod)fMethodBinding.getJavaElement();
 			Assert.isTrue(method != null);
 
 			SearchPattern pattern= SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(method, true, false);
-			final HashSet affectedCompilationUnits= new HashSet();
+			final HashSet<ICompilationUnit> affectedCompilationUnits= new HashSet<ICompilationUnit>();
 			CollectingSearchRequestor requestor= new CollectingSearchRequestor(binaryRefs) {
 				private ICompilationUnit fLastCU;
+				@Override
 				public void acceptSearchMatch(SearchMatch match) throws CoreException {
 					if (filterMatch(match))
 						return;
@@ -423,30 +463,34 @@ abstract class TargetProvider {
 				}
 			};
 			new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, new SubProgressMonitor(pm, 1));
-			return (ICompilationUnit[]) affectedCompilationUnits.toArray(new ICompilationUnit[affectedCompilationUnits.size()]);
+			return affectedCompilationUnits.toArray(new ICompilationUnit[affectedCompilationUnits.size()]);
 		}
 
+		@Override
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
 			ASTNode root= new RefactoringASTParser(AST.JLS3).parse(unit, true);
 			InvocationFinder finder= new InvocationFinder(fMethodBinding);
 			root.accept(finder);
 			fCurrentBodies= finder.result;
-			Set result= fCurrentBodies.keySet();
+			Set<BodyDeclaration> result= fCurrentBodies.keySet();
 			fastDone(pm);
-			return (BodyDeclaration[])result.toArray(new BodyDeclaration[result.size()]);
+			return result.toArray(new BodyDeclaration[result.size()]);
 		}
 
+		@Override
 		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
-			BodyData data= (BodyData)fCurrentBodies.get(declaration);
+			BodyData data= fCurrentBodies.get(declaration);
 			Assert.isNotNull(data);
 			fastDone(pm);
 			return data.getInvocations();
 		}
 
+		@Override
 		public RefactoringStatus checkActivation() throws JavaModelException {
 			return new RefactoringStatus();
 		}
 
+		@Override
 		public int getStatusSeverity() {
 			return RefactoringStatus.ERROR;
 		}

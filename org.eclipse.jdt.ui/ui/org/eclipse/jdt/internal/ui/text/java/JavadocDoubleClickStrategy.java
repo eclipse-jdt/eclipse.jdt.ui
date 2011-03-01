@@ -36,6 +36,7 @@ public class JavadocDoubleClickStrategy extends PartitionDoubleClickSelector {
 	 * @param position the offset around which to return the word
 	 * @return the word's region, or <code>null</code> for no selection
 	 */
+	@Override
 	protected IRegion findExtendedDoubleClickSelection(IDocument document, int position) {
 		try {
 			IRegion match= super.findExtendedDoubleClickSelection(document, position);

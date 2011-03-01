@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,7 +62,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	protected int fPrevious= 0;
 
 	/** The sentence breaks */
-	private final LinkedList fSentenceBreaks= new LinkedList();
+	private final LinkedList<Integer> fSentenceBreaks= new LinkedList<Integer>();
 
 	/** Does the current word start a sentence? */
 	private boolean fStartsSentence= false;
@@ -271,7 +271,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	/*
 	 * @see java.util.Iterator#next()
 	 */
-	public Object next() {
+	public String next() {
 
 		String token= nextToken();
 		while (token == null && fSuccessor != BreakIterator.DONE)
@@ -299,7 +299,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	 * @return the next sentence break
 	 */
 	protected final int nextSentence() {
-		return ((Integer) fSentenceBreaks.getFirst()).intValue();
+		return fSentenceBreaks.getFirst().intValue();
 	}
 
 	/**

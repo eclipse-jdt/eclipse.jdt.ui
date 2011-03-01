@@ -39,6 +39,7 @@ public class ClearWorkingSetAction extends Action {
 	/*
 	 * Overrides method from Action
 	 */
+	@Override
 	public void run() {
 		fActionGroup.setWorkingSet(null, true);
 	}

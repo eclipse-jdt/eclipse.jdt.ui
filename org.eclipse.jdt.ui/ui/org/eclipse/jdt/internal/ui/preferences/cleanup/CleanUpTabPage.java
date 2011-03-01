@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
 
 public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICleanUpConfigurationUI {
 
-	private Map fValues;
+	private Map<String, String> fValues;
 	private JavaPreview fCleanUpPreview;
 	private boolean fIsSaveAction;
 
@@ -57,7 +57,8 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setWorkingValues(Map workingValues) {
+	@Override
+	public void setWorkingValues(Map<String, String> workingValues) {
 		super.setWorkingValues(workingValues);
 		fValues= workingValues;
 	}
@@ -82,16 +83,19 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		fSelectedCount= selectedCount;
 	}
 
+	@Override
 	protected JavaPreview doCreateJavaPreview(Composite parent) {
 		fCleanUpPreview= new CleanUpPreview(parent, this);
     	return fCleanUpPreview;
     }
 
+	@Override
 	protected void doUpdatePreview() {
 		fCleanUpPreview.setWorkingValues(fValues);
 		fCleanUpPreview.update();
 	}
 
+	@Override
 	protected void initializePage() {
 		fCleanUpPreview.update();
 	}

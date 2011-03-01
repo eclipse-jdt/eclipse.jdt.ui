@@ -29,6 +29,7 @@ public class PackageExplorerProblemsDecorator extends TreeHierarchyLayoutProblem
 		super(isFlatLayout);
 	}
 
+	@Override
 	protected int computeAdornmentFlags(Object obj) {
 		if (!(obj instanceof IWorkingSet))
 			return super.computeAdornmentFlags(obj);

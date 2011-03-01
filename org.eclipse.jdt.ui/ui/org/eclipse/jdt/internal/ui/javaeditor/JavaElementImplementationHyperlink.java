@@ -203,7 +203,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 
 		final boolean isMethodAbstract[]= new boolean[1];
 		final String dummyString= new String();
-		final ArrayList links= new ArrayList();
+		final ArrayList<IMethod> links= new ArrayList<IMethod>();
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
 
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -214,6 +214,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 					String methodLabel= JavaElementLabels.getElementLabel(method, JavaElementLabels.DEFAULT_QUALIFIED);
 					monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, methodLabel), 10);
 					SearchRequestor requestor= new SearchRequestor() {
+						@Override
 						public void acceptSearchMatch(SearchMatch match) throws CoreException {
 							if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
 								Object element= match.getElement();

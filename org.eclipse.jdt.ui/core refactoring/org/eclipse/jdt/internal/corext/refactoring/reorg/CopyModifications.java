@@ -42,14 +42,14 @@ import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
 public class CopyModifications extends RefactoringModifications {
 
-	private List fCopies;
-	private List fCopyArguments;
-	private List fParticipantDescriptorFilter;
+	private List<Object> fCopies;
+	private List<RefactoringArguments> fCopyArguments;
+	private List<IParticipantDescriptorFilter> fParticipantDescriptorFilter;
 
 	public CopyModifications() {
-		fCopies= new ArrayList();
-		fCopyArguments= new ArrayList();
-		fParticipantDescriptorFilter= new ArrayList();
+		fCopies= new ArrayList<Object>();
+		fCopyArguments= new ArrayList<RefactoringArguments>();
+		fParticipantDescriptorFilter= new ArrayList<IParticipantDescriptorFilter>();
 	}
 
 	public void copy(IResource resource, CopyArguments args) {
@@ -130,6 +130,7 @@ public class CopyModifications extends RefactoringModifications {
 		}
 	}
 
+	@Override
 	public void buildDelta(IResourceChangeDescriptionFactory builder) {
 		for (int i= 0; i < fCopies.size(); i++) {
 			Object element= fCopies.get(i);
@@ -140,17 +141,18 @@ public class CopyModifications extends RefactoringModifications {
 		getResourceModifications().buildDelta(builder);
 	}
 
+	@Override
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {
-		List result= new ArrayList();
+		List<RefactoringParticipant> result= new ArrayList<RefactoringParticipant>();
 		for (int i= 0; i < fCopies.size(); i++) {
 			result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(status,
 				owner, fCopies.get(i),
 				(CopyArguments) fCopyArguments.get(i),
-				(IParticipantDescriptorFilter) fParticipantDescriptorFilter.get(i),
+				fParticipantDescriptorFilter.get(i),
 				natures, shared)));
 		}
 		result.addAll(Arrays.asList(getResourceModifications().getParticipants(status, owner, natures, shared)));
-		return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
+		return result.toArray(new RefactoringParticipant[result.size()]);
 	}
 
 	private void add(Object element, RefactoringArguments args, IParticipantDescriptorFilter filter) {

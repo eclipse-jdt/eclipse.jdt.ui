@@ -33,6 +33,7 @@ public class ImageImageDescriptor extends ImageDescriptor {
 	/* (non-Javadoc)
 	 * @see ImageDescriptor#getImageData()
 	 */
+	@Override
 	public ImageData getImageData() {
 		return fImage.getImageData();
 	}
@@ -40,6 +41,7 @@ public class ImageImageDescriptor extends ImageDescriptor {
 	/* (non-Javadoc)
 	 * @see Object#equals(Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		return (obj != null) && getClass().equals(obj.getClass()) && fImage.equals(((ImageImageDescriptor)obj).fImage);
 	}
@@ -47,6 +49,7 @@ public class ImageImageDescriptor extends ImageDescriptor {
 	/* (non-Javadoc)
 	 * @see Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return fImage.hashCode();
 	}

@@ -29,6 +29,7 @@ class SimpleFragment extends ASTFragment {
 		fNode= node;
 	}
 
+	@Override
 	public IASTFragment[] getMatchingFragmentsWithNode(ASTNode node) {
 		if (! JdtASTMatcher.doNodesMatch(getAssociatedNode(), node))
 			return new IASTFragment[0];
@@ -67,10 +68,12 @@ class SimpleFragment extends ASTFragment {
 		}
 	}
 
+	@Override
 	public int hashCode() {
 		return fNode.hashCode();
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;

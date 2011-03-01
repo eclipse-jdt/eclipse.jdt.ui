@@ -30,13 +30,15 @@ public final class MemberAccessesTabPage extends AbstractCleanUpTabPage {
     	super();
     }
 
-	protected AbstractCleanUp[] createPreviewCleanUps(Map values) {
+	@Override
+	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] {
         	new CodeStyleCleanUp(values)
         };
     }
 
-    protected void doCreatePreferences(Composite composite, int numColumns) {
+    @Override
+	protected void doCreatePreferences(Composite composite, int numColumns) {
 
     	Group instanceGroup= createGroup(numColumns, composite, CleanUpMessages.MemberAccessesTabPage_GroupName_NonStaticAccesses);
 

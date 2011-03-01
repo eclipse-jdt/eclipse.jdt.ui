@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -257,7 +257,7 @@ public class BuildPathSupport {
 	private static void updateProjectClasspath(Shell shell, IJavaProject jproject, IClasspathEntry newEntry, String[] changedAttributes, IProgressMonitor monitor) throws JavaModelException {
 		IClasspathEntry[] oldClasspath= jproject.getRawClasspath();
 		int nEntries= oldClasspath.length;
-		ArrayList newEntries= new ArrayList(nEntries + 1);
+		ArrayList<IClasspathEntry> newEntries= new ArrayList<IClasspathEntry>(nEntries + 1);
 		int entryKind= newEntry.getEntryKind();
 		IPath jarPath= newEntry.getPath();
 		boolean found= false;
@@ -278,7 +278,7 @@ public class BuildPathSupport {
 			// add new
 			newEntries.add(newEntry);
 		}
-		IClasspathEntry[] newClasspath= (IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]);
+		IClasspathEntry[] newClasspath= newEntries.toArray(new IClasspathEntry[newEntries.size()]);
 		jproject.setRawClasspath(newClasspath, monitor);
 	}
 
@@ -309,7 +309,7 @@ public class BuildPathSupport {
 	private static void updateReferencedClasspathEntry(IJavaProject jproject, IClasspathEntry newReferencedEntry, String[] changedAttributes, IProgressMonitor monitor) throws CoreException {
 		IClasspathEntry[] oldReferencedClasspath= jproject.getReferencedClasspathEntries();
 		int nEntries= oldReferencedClasspath.length;
-		ArrayList newReferencedEntries= new ArrayList(nEntries + 1);
+		ArrayList<IClasspathEntry> newReferencedEntries= new ArrayList<IClasspathEntry>(nEntries + 1);
 		int entryKind= newReferencedEntry.getEntryKind();
 		IPath jarPath= newReferencedEntry.getPath();
 		boolean found= false;
@@ -326,7 +326,7 @@ public class BuildPathSupport {
 		if (!found) {
 			newReferencedEntries.add(newReferencedEntry);
 		}
-		IClasspathEntry[] newReferencedClasspath= (IClasspathEntry[]) newReferencedEntries.toArray(new IClasspathEntry[newReferencedEntries.size()]);
+		IClasspathEntry[] newReferencedClasspath= newReferencedEntries.toArray(new IClasspathEntry[newReferencedEntries.size()]);
 		
 		jproject.setRawClasspath(jproject.getRawClasspath(), newReferencedClasspath, jproject.getOutputLocation(), monitor);
 	}
@@ -343,9 +343,9 @@ public class BuildPathSupport {
 	 * 
 	 * @since 3.5
 	 */
-	public static void setEEComplianceOptions(IJavaProject javaProject, List modifiedClassPathEntries) {
-		for (Iterator iter= modifiedClassPathEntries.iterator(); iter.hasNext();) {
-			CPListElement entry= (CPListElement)iter.next();
+	public static void setEEComplianceOptions(IJavaProject javaProject, List<CPListElement> modifiedClassPathEntries) {
+		for (Iterator<CPListElement> iter= modifiedClassPathEntries.iterator(); iter.hasNext();) {
+			CPListElement entry= iter.next();
 			if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 				IPath path= entry.getPath();
 				if (! path.equals(entry.getOrginalPath())) {
@@ -374,8 +374,8 @@ public class BuildPathSupport {
 	public static void setEEComplianceOptions(IJavaProject javaProject, String eeID, String newProjectCompliance) {
 		IExecutionEnvironment ee= JavaRuntime.getExecutionEnvironmentsManager().getEnvironment(eeID);
 		if (ee != null) {
-			Map options= javaProject.getOptions(false);
-			Map eeOptions= getEEOptions(ee);
+			Map<String, String> options= javaProject.getOptions(false);
+			Map<String, String> eeOptions= getEEOptions(ee);
 			if (eeOptions != null) {
 				for (int i= 0; i < PREFS_COMPLIANCE.length; i++) {
 					String option= PREFS_COMPLIANCE[i];
@@ -387,7 +387,7 @@ public class BuildPathSupport {
 				}
 				
 				String option= JavaCore.COMPILER_CODEGEN_INLINE_JSR_BYTECODE;
-				String inlineJSR= (String)eeOptions.get(option);
+				String inlineJSR= eeOptions.get(option);
 				if (inlineJSR != null) {
 					options.put(option, inlineJSR);
 				}
@@ -413,10 +413,10 @@ public class BuildPathSupport {
 	 * @return the options, or <code>null</code> if none
 	 * @since 3.5
 	 */
-	public static Map getEEOptions(IExecutionEnvironment ee) {
+	public static Map<String, String> getEEOptions(IExecutionEnvironment ee) {
 		if (ee == null)
 			return null;
-		Map eeOptions= ee.getComplianceOptions();
+		Map<String, String> eeOptions= ee.getComplianceOptions();
 		if (eeOptions == null)
 			return null;
 		
@@ -425,7 +425,7 @@ public class BuildPathSupport {
 			return null;
 	
 		// eeOptions can miss some options, make sure they are complete:
-		HashMap options= new HashMap();
+		HashMap<String, String> options= new HashMap<String, String>();
 		JavaModelUtil.setComplianceOptions(options, (String)complianceOption);
 		options.putAll(eeOptions);
 		return options;

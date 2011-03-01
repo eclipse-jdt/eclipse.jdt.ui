@@ -58,6 +58,7 @@ public class SelectWorkingSetAction extends Action {
 	/*
 	 * Overrides method from Action
 	 */
+	@Override
 	public void run() {
 		Shell shell= getShell();
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();

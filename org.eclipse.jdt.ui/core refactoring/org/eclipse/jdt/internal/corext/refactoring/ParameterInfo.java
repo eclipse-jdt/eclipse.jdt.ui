@@ -176,6 +176,7 @@ public class ParameterInfo {
 		fDefaultValue= value;
 	}
 
+	@Override
 	public String toString() {
 		return fOldTypeName + " " + fOldName + " @" + fOldIndex + " -> " //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		+ fNewTypeName + " " + fNewName + ": " + fDefaultValue  //$NON-NLS-1$//$NON-NLS-2$

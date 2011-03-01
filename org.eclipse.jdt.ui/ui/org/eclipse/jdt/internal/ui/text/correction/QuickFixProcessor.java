@@ -243,8 +243,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			return null;
 		}
 
-		HashSet handledProblems= new HashSet(locations.length);
-		ArrayList resultingCollections= new ArrayList();
+		HashSet<Integer> handledProblems= new HashSet<Integer>(locations.length);
+		ArrayList<ICommandAccess> resultingCollections= new ArrayList<ICommandAccess>();
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation curr= locations[i];
 			Integer id= new Integer(curr.getProblemId());
@@ -252,10 +252,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				process(context, curr, resultingCollections);
 			}
 		}
-		return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
+		return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 	}
 
-	private void process(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	private void process(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		int id= problem.getProblemId();
 		if (id == 0) { // no proposals for none-problem locations
 			return;

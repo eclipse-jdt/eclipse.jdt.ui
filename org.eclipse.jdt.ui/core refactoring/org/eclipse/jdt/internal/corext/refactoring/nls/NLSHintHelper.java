@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -134,12 +134,12 @@ public class NLSHintHelper {
 
 			if (parent instanceof MethodInvocation) {
 				MethodInvocation methodInvocation= (MethodInvocation) parent;
-				List args= methodInvocation.arguments();
+				List<Expression> args= methodInvocation.arguments();
 				if (args.size() != 1 && args.indexOf(nlsStringLiteral) != 0) {
 					return null; // must be the only argument in lookup method
 				}
 
-				Expression firstArgument= (Expression)args.get(0);
+				Expression firstArgument= args.get(0);
 				ITypeBinding argumentBinding= firstArgument.resolveTypeBinding();
 				if (argumentBinding == null || !argumentBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
 					return null;
@@ -214,12 +214,13 @@ public class NLSHintHelper {
 		if (astRoot == null)
 			return null;
 
-		final Map resultCollector= new HashMap(5);
+		final Map<Object, Object> resultCollector= new HashMap<Object, Object>(5);
 		final Object RESULT_KEY= new Object();
 		final Object FIELD_KEY= new Object();
 
 		astRoot.accept(new ASTVisitor() {
 
+			@Override
 			public boolean visit(MethodInvocation node) {
 				IMethodBinding method= node.resolveMethodBinding();
 				if (method == null)
@@ -244,6 +245,7 @@ public class NLSHintHelper {
 				return false;
 			}
 
+			@Override
 			public boolean visit(VariableDeclarationFragment node) {
 				Expression initializer= node.getInitializer();
 				String bundleName= getBundleName(initializer);
@@ -256,6 +258,7 @@ public class NLSHintHelper {
 				return true;
 			}
 
+			@Override
 			public boolean visit(Assignment node) {
 				if (node.getLeftHandSide() instanceof Name) {
 					String bundleName= getBundleName(node.getRightHandSide());
@@ -302,7 +305,7 @@ public class NLSHintHelper {
 			return (String)resultCollector.get(fieldName);
 
 		// Now try hard-coded bundle name String field names from NLS tooling:
-		Iterator iter= resultCollector.keySet().iterator();
+		Iterator<Object> iter= resultCollector.keySet().iterator();
 		while (iter.hasNext()) {
 			Object o= iter.next();
 			if (!(o instanceof IBinding))

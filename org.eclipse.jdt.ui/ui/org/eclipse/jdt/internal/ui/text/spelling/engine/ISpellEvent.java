@@ -39,7 +39,7 @@ public interface ISpellEvent {
 	 *
 	 * @return Array of proposals for the word
 	 */
-	public Set getProposals();
+	public Set<RankedWordProposal> getProposals();
 
 	/**
 	 * Returns the incorrectly spelled word.

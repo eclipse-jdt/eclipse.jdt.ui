@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 
 	private final PreferencePage fPreferencePage;
 	private final IScopeContext fContext;
-	private final ArrayList fConfigurations;
+	private final ArrayList<ISaveParticipantPreferenceConfiguration> fConfigurations;
 
 	public SaveParticipantConfigurationBlock(IScopeContext context, PreferencePage preferencePage) {
 		Assert.isNotNull(context);
@@ -55,7 +55,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 
 		fContext= context;
 		fPreferencePage= preferencePage;
-		fConfigurations= new ArrayList();
+		fConfigurations= new ArrayList<ISaveParticipantPreferenceConfiguration>();
 	}
 
 	/*
@@ -76,10 +76,8 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 		if (descriptors.length == 0)
 			return composite;
 
-		Arrays.sort(descriptors, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				SaveParticipantDescriptor d1= (SaveParticipantDescriptor)o1;
-				SaveParticipantDescriptor d2= (SaveParticipantDescriptor)o2;
+		Arrays.sort(descriptors, new Comparator<SaveParticipantDescriptor>() {
+			public int compare(SaveParticipantDescriptor d1, SaveParticipantDescriptor d2) {
 				return Collator.getInstance().compare(d1.getPostSaveListener().getName(), d2.getPostSaveListener().getName());
 			}
 		});
@@ -167,7 +165,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 
 	private void delegateToPreferenceConfiguration(IDelegateOperation op) {
 		for (int i= 0; i < fConfigurations.size(); i++) {
-	        ISaveParticipantPreferenceConfiguration block= (ISaveParticipantPreferenceConfiguration)fConfigurations.get(i);
+	        ISaveParticipantPreferenceConfiguration block= fConfigurations.get(i);
 	        op.run(block);
         }
 	}

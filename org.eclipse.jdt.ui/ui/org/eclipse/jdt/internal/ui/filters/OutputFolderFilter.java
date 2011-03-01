@@ -46,6 +46,7 @@ public class OutputFolderFilter extends ViewerFilter {
 	 * @return <code>true</code> if element should be included
 	 * @since 3.0
 	 */
+	@Override
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IFolder) {
 			IFolder folder= (IFolder)element;

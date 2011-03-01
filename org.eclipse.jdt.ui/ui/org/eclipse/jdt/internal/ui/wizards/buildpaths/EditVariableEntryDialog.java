@@ -56,7 +56,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 
 	private IStatus fNameStatus;
 
-	private Set fExistingEntries;
+	private Set<IPath> fExistingEntries;
 	private VariablePathDialogField fFileNameField;
 	private CLabel fFullPathResolvedLabel;
 
@@ -65,7 +65,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 		super(parent);
 		setTitle(NewWizardMessages.EditVariableEntryDialog_title);
 
-		fExistingEntries= new HashSet();
+		fExistingEntries= new HashSet<IPath>();
 		if (existingEntries != null) {
 			for (int i = 0; i < existingEntries.length; i++) {
 				IPath curr= existingEntries[i];
@@ -90,6 +90,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
@@ -102,6 +103,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		initializeDialogUnits(parent);
 		Composite composite= (Composite) super.createDialogArea(parent);
@@ -329,6 +331,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 	 * overridden to ensure full message is visible
 	 * @see org.eclipse.jface.dialogs.StatusDialog#updateStatus(org.eclipse.core.runtime.IStatus)
 	 */
+	@Override
 	protected void updateStatus(IStatus status) {
 		super.updateStatus(status);
 		Shell shell= getShell();

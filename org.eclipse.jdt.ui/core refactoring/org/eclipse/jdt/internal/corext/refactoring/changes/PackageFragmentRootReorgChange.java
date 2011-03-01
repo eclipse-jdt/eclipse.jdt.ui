@@ -60,6 +60,7 @@ abstract class PackageFragmentRootReorgChange extends ResourceChange {
 	}
 
 
+	@Override
 	public final Change perform(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		pm.beginTask(getName(), 2);
 		try {
@@ -76,6 +77,7 @@ abstract class PackageFragmentRootReorgChange extends ResourceChange {
 
 	protected abstract Change doPerformReorg(IPath destinationPath, IProgressMonitor pm) throws JavaModelException;
 
+	@Override
 	public Object getModifiedElement() {
 		return getRoot();
 	}
@@ -83,6 +85,7 @@ abstract class PackageFragmentRootReorgChange extends ResourceChange {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
 	 */
+	@Override
 	protected IResource getModifiedResource() {
 		IPackageFragmentRoot root= getRoot();
 		if (root != null) {

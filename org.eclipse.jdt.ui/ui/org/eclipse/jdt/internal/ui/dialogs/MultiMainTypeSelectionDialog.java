@@ -64,6 +64,7 @@ public class MultiMainTypeSelectionDialog extends ElementListSelectionDialog {
 	/*
 	 * @see Window#open()
 	 */
+	@Override
 	public int open() {
 		MainMethodSearchEngine engine= new MainMethodSearchEngine();
 		IType[] types;
@@ -84,6 +85,7 @@ public class MultiMainTypeSelectionDialog extends ElementListSelectionDialog {
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.MULTI_MAIN_TYPE_SELECTION_DIALOG);

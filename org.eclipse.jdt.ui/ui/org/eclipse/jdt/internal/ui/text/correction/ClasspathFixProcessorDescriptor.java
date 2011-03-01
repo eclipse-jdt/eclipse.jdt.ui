@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,7 +56,7 @@ public final class ClasspathFixProcessorDescriptor {
 
 	private final IConfigurationElement fConfigurationElement;
 	private ClasspathFixProcessor fProcessorInstance;
-	private List fOverriddenIds;
+	private List<String> fOverriddenIds;
 	private Boolean fStatus;
 
 	public ClasspathFixProcessorDescriptor(IConfigurationElement element) {
@@ -68,12 +68,12 @@ public final class ClasspathFixProcessorDescriptor {
 		}
 		IConfigurationElement[] children= fConfigurationElement.getChildren(OVERRIDES);
 		if (children.length > 0) {
-			fOverriddenIds= new ArrayList(children.length);
+			fOverriddenIds= new ArrayList<String>(children.length);
 			for (int i= 0; i < children.length; i++) {
 				fOverriddenIds.add(children[i].getAttribute(ID));
 			}
 		} else {
-			fOverriddenIds= Collections.EMPTY_LIST;
+			fOverriddenIds= Collections.emptyList();
 		}
 	}
 
@@ -81,7 +81,7 @@ public final class ClasspathFixProcessorDescriptor {
 		return fConfigurationElement.getAttribute(ID);
 	}
 
-	public Collection/*String*/ getOverridenIds() {
+	public Collection<String> getOverridenIds() {
 		return fOverriddenIds;
 	}
 
@@ -144,7 +144,7 @@ public final class ClasspathFixProcessorDescriptor {
 	private static ClasspathFixProcessorDescriptor[] getCorrectionProcessors() {
 		if (fgContributedClasspathFixProcessors == null) {
 			IConfigurationElement[] elements= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, ATT_EXTENSION);
-			ArrayList res= new ArrayList(elements.length);
+			ArrayList<ClasspathFixProcessorDescriptor> res= new ArrayList<ClasspathFixProcessorDescriptor>(elements.length);
 
 			for (int i= 0; i < elements.length; i++) {
 				ClasspathFixProcessorDescriptor desc= new ClasspathFixProcessorDescriptor(elements[i]);
@@ -155,11 +155,9 @@ public final class ClasspathFixProcessorDescriptor {
 					JavaPlugin.log(status);
 				}
 			}
-			fgContributedClasspathFixProcessors= (ClasspathFixProcessorDescriptor[]) res.toArray(new ClasspathFixProcessorDescriptor[res.size()]);
-			Arrays.sort(fgContributedClasspathFixProcessors, new Comparator() {
-				public int compare(Object o1, Object o2) {
-					ClasspathFixProcessorDescriptor d1= (ClasspathFixProcessorDescriptor) o1;
-					ClasspathFixProcessorDescriptor d2= (ClasspathFixProcessorDescriptor) o2;
+			fgContributedClasspathFixProcessors= res.toArray(new ClasspathFixProcessorDescriptor[res.size()]);
+			Arrays.sort(fgContributedClasspathFixProcessors, new Comparator<ClasspathFixProcessorDescriptor>() {
+				public int compare(ClasspathFixProcessorDescriptor d1, ClasspathFixProcessorDescriptor d2) {
 					if (d1.getOverridenIds().contains(d2.getID())) {
 						return -1;
 					}
@@ -174,9 +172,9 @@ public final class ClasspathFixProcessorDescriptor {
 	}
 
 	public static ClasspathFixProposal[] getProposals(final IJavaProject project, final String missingType, final MultiStatus status) {
-		final ArrayList proposals= new ArrayList();
+		final ArrayList<ClasspathFixProposal> proposals= new ArrayList<ClasspathFixProposal>();
 
-		final HashSet overriddenIds= new HashSet();
+		final HashSet<String> overriddenIds= new HashSet<String>();
 		ClasspathFixProcessorDescriptor[] correctionProcessors= getCorrectionProcessors();
 		for (int i= 0; i < correctionProcessors.length; i++) {
 			final ClasspathFixProcessorDescriptor curr= correctionProcessors[i];
@@ -202,6 +200,6 @@ public final class ClasspathFixProcessorDescriptor {
 				});
 			}
 		}
-		return (ClasspathFixProposal[]) proposals.toArray(new ClasspathFixProposal[proposals.size()]);
+		return proposals.toArray(new ClasspathFixProposal[proposals.size()]);
 	}
 }

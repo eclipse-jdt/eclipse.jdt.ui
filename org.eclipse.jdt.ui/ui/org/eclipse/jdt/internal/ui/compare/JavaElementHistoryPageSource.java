@@ -56,6 +56,7 @@ public class JavaElementHistoryPageSource extends ElementLocalHistoryPageSource 
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.ui.history.ElementLocalHistoryPageSource#getFile(java.lang.Object)
 	 */
+	@Override
 	public IFile getFile(Object input) {
 		// extract CU from input
 		ICompilationUnit cu= null;

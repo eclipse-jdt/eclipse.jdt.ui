@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -136,12 +136,14 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isExternalizeStringsAvailable(selection));
@@ -155,6 +157,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		IJavaElement element= SelectionConverter.getInput(fEditor);
 		if (!(element instanceof ICompilationUnit))
@@ -165,6 +168,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		ICompilationUnit unit= getCompilationUnit(selection);
 		if (unit != null) {//run on cu
@@ -224,25 +228,25 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	}
 
 	private NonNLSElement[] doRun(IStructuredSelection selection, IProgressMonitor pm) throws CoreException {
-		List elements= getSelectedElementList(selection);
+		List<?> elements= getSelectedElementList(selection);
 		if (elements == null || elements.isEmpty())
 			return new NonNLSElement[0];
 
 		pm.beginTask(ActionMessages.FindStringsToExternalizeAction_find_strings, elements.size());
 
 		try{
-			List result= new ArrayList();
-			for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			List<NonNLSElement> result= new ArrayList<NonNLSElement>();
+			for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 				Object obj= iter.next();
 				result.addAll(analyze(obj, pm));
 			}
-			return (NonNLSElement[]) result.toArray(new NonNLSElement[result.size()]);
+			return result.toArray(new NonNLSElement[result.size()]);
 		} finally{
 			pm.done();
 		}
 	}
 
-	private List analyze(Object obj, IProgressMonitor pm) throws CoreException, JavaModelException {
+	private List<NonNLSElement> analyze(Object obj, IProgressMonitor pm) throws CoreException, JavaModelException {
 		if (obj instanceof IJavaElement) {
 			IJavaElement element= (IJavaElement) obj;
 			int elementType= element.getElementType();
@@ -264,7 +268,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 					NonNLSElement nlsElement= analyze(cu);
 					if (nlsElement != null) {
 						pm.worked(1);
-						ArrayList result= new ArrayList();
+						ArrayList<NonNLSElement> result= new ArrayList<NonNLSElement>();
 						result.add(nlsElement);
 						return result;
 					}
@@ -277,7 +281,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 					NonNLSElement nlsElement= analyze(cu);
 					if (nlsElement != null) {
 						pm.worked(1);
-						ArrayList result= new ArrayList();
+						ArrayList<NonNLSElement> result= new ArrayList<NonNLSElement>();
 						result.add(nlsElement);
 						return result;
 					}
@@ -287,7 +291,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 				pm.worked(1);
 			}
 		} else if (obj instanceof IWorkingSet) {
-			List result= new ArrayList();
+			List<NonNLSElement> result= new ArrayList<NonNLSElement>();
 
 			IWorkingSet workingSet= (IWorkingSet) obj;
 			IAdaptable[] elements= workingSet.getElements();
@@ -300,7 +304,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			pm.worked(1);
 		}
 
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 	private void showResults() {
@@ -323,17 +327,17 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	/*
 	 * returns List of Strings
 	 */
-	private List analyze(IPackageFragment pack, IProgressMonitor pm) throws CoreException {
+	private List<NonNLSElement> analyze(IPackageFragment pack, IProgressMonitor pm) throws CoreException {
 		try{
 			if (pack == null)
-				return new ArrayList(0);
+				return new ArrayList<NonNLSElement>(0);
 
 			ICompilationUnit[] cus= pack.getCompilationUnits();
 
 			pm.beginTask("", cus.length); //$NON-NLS-1$
 			pm.setTaskName(pack.getElementName());
 
-			List l= new ArrayList(cus.length);
+			List<NonNLSElement> l= new ArrayList<NonNLSElement>(cus.length);
 			for (int i= 0; i < cus.length; i++){
 				pm.subTask(BasicElementLabels.getFileName(cus[i]));
 				NonNLSElement element= analyze(cus[i]);
@@ -352,12 +356,12 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	/*
 	 * returns List of Strings
 	 */
-	private List analyze(IPackageFragmentRoot sourceFolder, IProgressMonitor pm) throws CoreException {
+	private List<NonNLSElement> analyze(IPackageFragmentRoot sourceFolder, IProgressMonitor pm) throws CoreException {
 		try{
 			IJavaElement[] children= sourceFolder.getChildren();
 			pm.beginTask("", children.length); //$NON-NLS-1$
 			pm.setTaskName(JavaElementLabels.getElementLabel(sourceFolder, JavaElementLabels.ALL_DEFAULT));
-			List result= new ArrayList();
+			List<NonNLSElement> result= new ArrayList<NonNLSElement>();
 			for (int i= 0; i < children.length; i++) {
 				IJavaElement iJavaElement= children[i];
 				if (iJavaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT){
@@ -378,11 +382,11 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	/*
 	 * returns List of Strings
 	 */
-	private List analyze(IJavaProject project, IProgressMonitor pm) throws CoreException {
+	private List<NonNLSElement> analyze(IJavaProject project, IProgressMonitor pm) throws CoreException {
 		try{
 			IPackageFragment[] packs= project.getPackageFragments();
 			pm.beginTask("", packs.length); //$NON-NLS-1$
-			List result= new ArrayList();
+			List<NonNLSElement> result= new ArrayList<NonNLSElement>();
 			for (int i= 0; i < packs.length; i++) {
 				if (! packs[i].isReadOnly())
 					result.addAll(analyze(packs[i], new SubProgressMonitor(pm, 1)));
@@ -445,7 +449,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	 * @param selection the selection
 	 * @return the selected elements
 	 */
-	private static List getSelectedElementList(IStructuredSelection selection) {
+	private static List<?> getSelectedElementList(IStructuredSelection selection) {
 		if (selection == null)
 			return null;
 
@@ -472,10 +476,12 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			setLabelProvider(createLabelProvider());
 		}
 
+		@Override
 		protected Point getInitialSize() {
 			return getShell().computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 		}
 
+		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite result= (Composite)super.createDialogArea(parent);
 			getTableViewer().addSelectionChangedListener(new ISelectionChangedListener(){
@@ -486,6 +492,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 				}
 			});
 			getTableViewer().getTable().addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					NonNLSElement element= (NonNLSElement)e.item.getData();
 					ExternalizeWizard.open(element.cu, getShell());
@@ -496,6 +503,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			return result;
 		}
 
+		@Override
 		protected void createButtonsForButtonBar(Composite parent) {
 			fOpenButton= createButton(parent, OPEN_BUTTON_ID, ActionMessages.FindStringsToExternalizeAction_button_label, true);
 			fOpenButton.setEnabled(false);
@@ -504,6 +512,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
 		}
 
+		@Override
 		protected void buttonPressed(int buttonId) {
 			if (buttonId != OPEN_BUTTON_ID){
 				super.buttonPressed(buttonId);
@@ -519,6 +528,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 
 		private static LabelProvider createLabelProvider() {
 			return new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT){
+				@Override
 				public String getText(Object element) {
 					NonNLSElement nlsel= (NonNLSElement)element;
 					String elementName= BasicElementLabels.getPathLabel(nlsel.cu.getResource().getFullPath(), false);
@@ -526,6 +536,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 							ActionMessages.FindStringsToExternalizeAction_foundStrings,
 							new Object[] {new Integer(nlsel.count), elementName} );
 				}
+				@Override
 				public Image getImage(Object element) {
 					return super.getImage(((NonNLSElement)element).cu);
 				}
@@ -535,6 +546,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		/*
 		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 		 */
+		@Override
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.NONNLS_DIALOG);

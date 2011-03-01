@@ -33,7 +33,8 @@ class RefreshViewAction extends Action {
     /**
      * @see org.eclipse.jface.action.Action#run()
      */
-    public void run() {
+    @Override
+	public void run() {
         fPart.refresh();
     }
 }

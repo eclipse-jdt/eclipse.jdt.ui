@@ -59,6 +59,7 @@ class RemoveLinkedFolderDialog extends MessageDialog {
 		Assert.isTrue(folder.isLinked());
 	}
 
+	@Override
 	protected Control createCustomArea(final Composite parent) {
 
 		final Composite composite= new Composite(parent, SWT.NONE);
@@ -84,6 +85,7 @@ class RemoveLinkedFolderDialog extends MessageDialog {
 
 	private SelectionListener selectionListener= new SelectionAdapter() {
 
+		@Override
 		public final void widgetSelected(final SelectionEvent event) {
 			final Button button= (Button) event.widget;
 			if (button.getSelection())

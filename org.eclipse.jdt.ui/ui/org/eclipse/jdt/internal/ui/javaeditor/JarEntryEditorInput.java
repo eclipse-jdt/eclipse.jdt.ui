@@ -43,6 +43,7 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 		fJarEntryFile= jarEntryFile;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -52,6 +53,7 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 		return fJarEntryFile.equals(other.fJarEntryFile);
 	}
 
+	@Override
 	public int hashCode() {
 		return fJarEntryFile.hashCode();
 	}

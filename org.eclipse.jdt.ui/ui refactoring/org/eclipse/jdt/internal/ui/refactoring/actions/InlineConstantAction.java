@@ -77,6 +77,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isInlineConstantAvailable(selection));
@@ -91,6 +92,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			Assert.isTrue(RefactoringAvailabilityTester.isInlineConstantAvailable(selection));
@@ -110,6 +112,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
     /*
      * @see SelectionDispatchAction#selectionChanged(ITextSelection)
      */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
     }
@@ -118,6 +121,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isInlineConstantAvailable(selection));
@@ -129,6 +133,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		run(selection.getOffset(), selection.getLength(), SelectionConverter.getInputAsCompilationUnit(fEditor));
 	}

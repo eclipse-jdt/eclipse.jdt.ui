@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,7 +93,7 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 	}
 
 	private Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
-		ArrayList result= new ArrayList();
+		ArrayList<Object> result= new ArrayList<Object>();
 
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
@@ -113,7 +113,7 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 	}
 
 	private Object[] getPackageFragments(IPackageFragmentRoot root) throws JavaModelException {
-		ArrayList packageFragments= new ArrayList();
+		ArrayList<IJavaElement> packageFragments= new ArrayList<IJavaElement>();
 
 		IJavaElement[] children= root.getChildren();
 		for (int i= 0; i < children.length; i++) {

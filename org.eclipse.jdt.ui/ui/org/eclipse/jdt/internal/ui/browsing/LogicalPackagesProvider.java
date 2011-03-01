@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -38,8 +39,8 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 
 	protected static final Object[] NO_CHILDREN= new Object[0];
 
-	protected Map fMapToLogicalPackage;
-	protected Map fMapToPackageFragments;
+	protected Map<String, LogicalPackage> fMapToLogicalPackage;
+	protected Map<String, IPackageFragment> fMapToPackageFragments;
 	protected boolean fCompoundState;
 	protected StructuredViewer fViewer;
 	protected boolean fInputIsProject;
@@ -48,8 +49,8 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 		fViewer= viewer;
 		fCompoundState= isInCompoundState();
 		fInputIsProject= true;
-		fMapToLogicalPackage= new HashMap();
-		fMapToPackageFragments= new HashMap();
+		fMapToLogicalPackage= new HashMap<String, LogicalPackage>();
+		fMapToPackageFragments= new HashMap<String, IPackageFragment>();
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	}
 
@@ -81,7 +82,7 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 	public LogicalPackage findLogicalPackage(IPackageFragment fragment) {
 		Assert.isNotNull(fragment);
 		if (isInCompoundState())
-			return (LogicalPackage)fMapToLogicalPackage.get(getKey(fragment));
+			return fMapToLogicalPackage.get(getKey(fragment));
 		else
 			return null;
 	}
@@ -99,7 +100,7 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 		if (!fCompoundState)
 			return packageFragments;
 
-		List newChildren= new ArrayList();
+		List<IAdaptable> newChildren= new ArrayList<IAdaptable>();
 
 		for (int i= 0; i < packageFragments.length; i++) {
 			IPackageFragment fragment=  packageFragments[i];
@@ -118,7 +119,7 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 
 			} else {
 				String key= getKey(fragment);
-				IPackageFragment frag= (IPackageFragment)fMapToPackageFragments.get(key);
+				IPackageFragment frag= fMapToPackageFragments.get(key);
 				if (frag != null && !fragment.equals(frag)) {
 					lp= new LogicalPackage(frag);
 					lp.add(fragment);

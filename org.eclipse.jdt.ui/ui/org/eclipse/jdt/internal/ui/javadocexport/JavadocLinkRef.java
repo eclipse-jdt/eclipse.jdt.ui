@@ -70,6 +70,7 @@ public class JavadocLinkRef {
 		}
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj != null && obj.getClass().equals(getClass())) {
 			JavadocLinkRef other= (JavadocLinkRef) obj;
@@ -83,6 +84,7 @@ public class JavadocLinkRef {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		if (isProjectRef()) {
 			return fProject.hashCode();

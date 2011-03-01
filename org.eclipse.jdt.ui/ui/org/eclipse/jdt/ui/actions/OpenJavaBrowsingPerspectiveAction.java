@@ -49,6 +49,7 @@ public class OpenJavaBrowsingPerspectiveAction extends Action {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_JAVA_BROWSING_PERSPECTIVE_ACTION);
 	}
 
+	@Override
 	public void run() {
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
 		IWorkbenchWindow window= workbench.getActiveWorkbenchWindow();

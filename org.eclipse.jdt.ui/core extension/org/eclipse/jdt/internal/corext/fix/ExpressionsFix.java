@@ -37,12 +37,13 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 	private static final class MissingParenthesisVisitor extends ASTVisitor {
 
-		private final ArrayList fNodes;
+		private final ArrayList<ASTNode> fNodes;
 
-		private MissingParenthesisVisitor(ArrayList nodes) {
+		private MissingParenthesisVisitor(ArrayList<ASTNode> nodes) {
 			fNodes= nodes;
 		}
 
+		@Override
 		public void postVisit(ASTNode node) {
 			if (needsParentesis(node)) {
 				fNodes.add(node);
@@ -75,12 +76,13 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 	private static final class UnnecessaryParenthesisVisitor extends ASTVisitor {
 
-		private final ArrayList fNodes;
+		private final ArrayList<ParenthesizedExpression> fNodes;
 
-		private UnnecessaryParenthesisVisitor(ArrayList nodes) {
+		private UnnecessaryParenthesisVisitor(ArrayList<ParenthesizedExpression> nodes) {
 			fNodes= nodes;
 		}
 
+		@Override
 		public boolean visit(ParenthesizedExpression node) {
 			if (NecessaryParenthesesChecker.canRemoveParentheses(node)) {
 				fNodes.add(node);
@@ -101,6 +103,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_addParanoiacParentheses_description, cuRewrite);
 
@@ -120,15 +123,16 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 	private static class RemoveParenthesisOperation extends CompilationUnitRewriteOperation {
 
-		private final HashSet/*<ParenthesizedExpression>*/ fExpressions;
+		private final HashSet<ParenthesizedExpression> fExpressions;
 
-		public RemoveParenthesisOperation(HashSet expressions) {
+		public RemoveParenthesisOperation(HashSet<ParenthesizedExpression> expressions) {
 			fExpressions= expressions;
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_removeUnnecessaryParentheses_description, cuRewrite);
 
@@ -136,7 +140,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			rewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 
 			while (fExpressions.size() > 0) {
-				ParenthesizedExpression parenthesizedExpression= (ParenthesizedExpression)fExpressions.iterator().next();
+				ParenthesizedExpression parenthesizedExpression= fExpressions.iterator().next();
 				fExpressions.remove(parenthesizedExpression);
 				ParenthesizedExpression down= parenthesizedExpression;
 				while (fExpressions.contains(down.getExpression())) {
@@ -164,7 +168,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		if (coveredNodes.length == 0)
 			return null;
 		// check sub-expressions in fully covered nodes
-		final ArrayList changedNodes = new ArrayList();
+		final ArrayList<ASTNode> changedNodes = new ArrayList<ASTNode>();
 		for (int i= 0; i < coveredNodes.length; i++) {
 			ASTNode covered = coveredNodes[i];
 			if (covered instanceof InfixExpression)
@@ -174,13 +178,13 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			return null;
 
 
-		CompilationUnitRewriteOperation op= new AddParenthesisOperation((Expression[])changedNodes.toArray(new Expression[changedNodes.size()]));
+		CompilationUnitRewriteOperation op= new AddParenthesisOperation(changedNodes.toArray(new Expression[changedNodes.size()]));
 		return new ExpressionsFix(FixMessages.ExpressionsFix_addParanoiacParentheses_description, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 	}
 
 	public static ExpressionsFix createRemoveUnnecessaryParenthesisFix(CompilationUnit compilationUnit, ASTNode[] nodes) {
 		// check sub-expressions in fully covered nodes
-		final ArrayList changedNodes= new ArrayList();
+		final ArrayList<ParenthesizedExpression> changedNodes= new ArrayList<ParenthesizedExpression>();
 		for (int i= 0; i < nodes.length; i++) {
 			ASTNode covered= nodes[i];
 			if (covered instanceof ParenthesizedExpression || covered instanceof InfixExpression)
@@ -189,7 +193,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		if (changedNodes.isEmpty())
 			return null;
 
-		HashSet expressions= new HashSet(changedNodes);
+		HashSet<ParenthesizedExpression> expressions= new HashSet<ParenthesizedExpression>(changedNodes);
 		RemoveParenthesisOperation op= new RemoveParenthesisOperation(expressions);
 		return new ExpressionsFix(FixMessages.ExpressionsFix_removeUnnecessaryParentheses_description, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 	}
@@ -199,22 +203,22 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			boolean removeUnnecessaryParenthesis) {
 
 		if (addParanoicParentesis) {
-			final ArrayList changedNodes = new ArrayList();
+			final ArrayList<ASTNode> changedNodes = new ArrayList<ASTNode>();
 			compilationUnit.accept(new MissingParenthesisVisitor(changedNodes));
 
 			if (changedNodes.isEmpty())
 				return null;
 
-			CompilationUnitRewriteOperation op= new AddParenthesisOperation((Expression[])changedNodes.toArray(new Expression[changedNodes.size()]));
+			CompilationUnitRewriteOperation op= new AddParenthesisOperation(changedNodes.toArray(new Expression[changedNodes.size()]));
 			return new ExpressionsFix(FixMessages.ExpressionsFix_add_parentheses_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 		} else if (removeUnnecessaryParenthesis) {
-			final ArrayList changedNodes = new ArrayList();
+			final ArrayList<ParenthesizedExpression> changedNodes = new ArrayList<ParenthesizedExpression>();
 			compilationUnit.accept(new UnnecessaryParenthesisVisitor(changedNodes));
 
 			if (changedNodes.isEmpty())
 				return null;
 
-			HashSet expressions= new HashSet(changedNodes);
+			HashSet<ParenthesizedExpression> expressions= new HashSet<ParenthesizedExpression>(changedNodes);
 			CompilationUnitRewriteOperation op= new RemoveParenthesisOperation(expressions);
 			return new ExpressionsFix(FixMessages.ExpressionsFix_remove_parentheses_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 		}

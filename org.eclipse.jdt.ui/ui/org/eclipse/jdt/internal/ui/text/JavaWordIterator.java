@@ -45,6 +45,7 @@ public class JavaWordIterator extends BreakIterator {
 	/*
 	 * @see java.text.BreakIterator#first()
 	 */
+	@Override
 	public int first() {
 		fIndex= fIterator.first();
 		return fIndex;
@@ -53,6 +54,7 @@ public class JavaWordIterator extends BreakIterator {
 	/*
 	 * @see java.text.BreakIterator#last()
 	 */
+	@Override
 	public int last() {
 		fIndex= fIterator.last();
 		return fIndex;
@@ -61,6 +63,7 @@ public class JavaWordIterator extends BreakIterator {
 	/*
 	 * @see java.text.BreakIterator#next(int)
 	 */
+	@Override
 	public int next(int n) {
 		int next= 0;
 		while (--n > 0 && next != DONE) {
@@ -72,6 +75,7 @@ public class JavaWordIterator extends BreakIterator {
 	/*
 	 * @see java.text.BreakIterator#next()
 	 */
+	@Override
 	public int next() {
 		fIndex= following(fIndex);
 		return fIndex;
@@ -80,6 +84,7 @@ public class JavaWordIterator extends BreakIterator {
 	/*
 	 * @see java.text.BreakIterator#previous()
 	 */
+	@Override
 	public int previous() {
 		fIndex= preceding(fIndex);
 		return fIndex;
@@ -89,6 +94,7 @@ public class JavaWordIterator extends BreakIterator {
 	/*
 	 * @see java.text.BreakIterator#preceding(int)
 	 */
+	@Override
 	public int preceding(int offset) {
 		int first= fIterator.preceding(offset);
 		if (isWhitespace(first, offset)) {
@@ -102,6 +108,7 @@ public class JavaWordIterator extends BreakIterator {
 	/*
 	 * @see java.text.BreakIterator#following(int)
 	 */
+	@Override
 	public int following(int offset) {
 		int first= fIterator.following(offset);
 		if (eatFollowingWhitespace(offset, first)) {
@@ -185,6 +192,7 @@ public class JavaWordIterator extends BreakIterator {
 	/*
 	 * @see java.text.BreakIterator#current()
 	 */
+	@Override
 	public int current() {
 		return fIndex;
 	}
@@ -192,6 +200,7 @@ public class JavaWordIterator extends BreakIterator {
 	/*
 	 * @see java.text.BreakIterator#getText()
 	 */
+	@Override
 	public CharacterIterator getText() {
 		return fIterator.getText();
 	}
@@ -208,6 +217,7 @@ public class JavaWordIterator extends BreakIterator {
 	/*
 	 * @see java.text.BreakIterator#setText(java.text.CharacterIterator)
 	 */
+	@Override
 	public void setText(CharacterIterator newText) {
 		fIterator.setText(newText);
 		first();
@@ -216,6 +226,7 @@ public class JavaWordIterator extends BreakIterator {
 	/*
 	 * @see java.text.BreakIterator#setText(java.lang.String)
 	 */
+	@Override
 	public void setText(String newText) {
 		setText((CharSequence) newText);
 	}

@@ -33,6 +33,7 @@ public final class CaptureType extends AbstractTypeVariable {
 		fJavaProject= javaProject;
 	}
 
+	@Override
 	public int getKind() {
 		return CAPTURE_TYPE;
 	}
@@ -41,15 +42,18 @@ public final class CaptureType extends AbstractTypeVariable {
 		return fWildcard;
 	}
 
+	@Override
 	public boolean doEquals(TType type) {
 		return getBindingKey().equals(((CaptureType)type).getBindingKey())
 				&& fJavaProject.equals(((CaptureType)type).fJavaProject);
 	}
 
+	@Override
 	public int hashCode() {
 		return getBindingKey().hashCode();
 	}
 
+	@Override
 	protected boolean doCanAssignTo(TType lhs) {
 		switch (lhs.getKind()) {
 			case NULL_TYPE:
@@ -98,10 +102,12 @@ public final class CaptureType extends AbstractTypeVariable {
 		return false;
 	}
 
+	@Override
 	public String getName() {
 		return ""; //$NON-NLS-1$
 	}
 
+	@Override
 	protected String getPlainPrettySignature() {
 		return "capture-of " + fWildcard.getPrettySignature(); //$NON-NLS-1$
 	}

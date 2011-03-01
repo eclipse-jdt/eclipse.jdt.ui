@@ -57,6 +57,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 	/*
 	 * @see PreferencePage#createControl(Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.TEMPLATE_PREFERENCE_PAGE);
@@ -66,6 +67,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 	 * @see org.eclipse.ui.texteditor.templates.TemplatePreferencePage#createContents(org.eclipse.swt.widgets.Composite)
 	 * @since 3.3
 	 */
+	@Override
 	protected Control createContents(Composite ancestor) {
 		ScrolledPageContent scrolled= new ScrolledPageContent(ancestor, SWT.H_SCROLL | SWT.V_SCROLL);
 		scrolled.setExpandHorizontal(true);
@@ -84,6 +86,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
+	@Override
 	public boolean performOk() {
 		boolean ok= super.performOk();
 		JavaPlugin.flushInstanceScope();
@@ -93,6 +96,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 	/*
 	 * @see org.eclipse.ui.texteditor.templates.TemplatePreferencePage#getFormatterPreferenceKey()
 	 */
+	@Override
 	protected String getFormatterPreferenceKey() {
 		return PreferenceConstants.TEMPLATES_USE_CODEFORMATTER;
 	}
@@ -100,6 +104,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 	/*
 	 * @see org.eclipse.ui.texteditor.templates.TemplatePreferencePage#createTemplateEditDialog2(org.eclipse.jface.text.templates.Template, boolean, boolean)
 	 */
+	@Override
 	protected Template editTemplate(Template template, boolean edit, boolean isNameModifiable) {
 		org.eclipse.jdt.internal.ui.preferences.EditTemplateDialog dialog= new org.eclipse.jdt.internal.ui.preferences.EditTemplateDialog(getShell(), template, edit, isNameModifiable, getContextTypeRegistry());
 		if (dialog.open() == Window.OK) {
@@ -111,6 +116,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 	/*
 	 * @see org.eclipse.ui.texteditor.templates.TemplatePreferencePage#createViewer(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected SourceViewer createViewer(Composite parent) {
 		IDocument document= new Document();
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
@@ -137,6 +143,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 	/*
 	 * @see org.eclipse.ui.texteditor.templates.TemplatePreferencePage#updateViewerInput()
 	 */
+	@Override
 	protected void updateViewerInput() {
 		IStructuredSelection selection= (IStructuredSelection) getTableViewer().getSelection();
 		SourceViewer viewer= getViewer();

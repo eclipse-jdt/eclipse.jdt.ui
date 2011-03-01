@@ -63,7 +63,7 @@ public class TemplateSet {
 	private static final String DESCRIPTION_ATTRIBUTE= "description"; //$NON-NLS-1$
 	private static final String CONTEXT_ATTRIBUTE= "context"; //$NON-NLS-1$
 
-	private List fTemplates= new ArrayList();
+	private List<Template> fTemplates= new ArrayList<Template>();
 	private String fTemplateTag;
 
 	private static final int TEMPLATE_PARSE_EXCEPTION= 10002;
@@ -239,7 +239,7 @@ public class TemplateSet {
 			document.appendChild(root);
 
 			for (int i= 0; i != fTemplates.size(); i++) {
-				Template template= (Template) fTemplates.get(i);
+				Template template= fTemplates.get(i);
 
 				Node node= document.createElement(getTemplateTag());
 				root.appendChild(node);
@@ -309,8 +309,8 @@ public class TemplateSet {
 	}
 
 	private boolean exists(Template template) {
-		for (Iterator iterator = fTemplates.iterator(); iterator.hasNext();) {
-			Template anotherTemplate = (Template) iterator.next();
+		for (Iterator<Template> iterator = fTemplates.iterator(); iterator.hasNext();) {
+			Template anotherTemplate = iterator.next();
 
 			if (template.equals(anotherTemplate))
 				return true;
@@ -341,7 +341,7 @@ public class TemplateSet {
 	 * @return all templates
 	 */
 	public Template[] getTemplates() {
-		return (Template[]) fTemplates.toArray(new Template[fTemplates.size()]);
+		return fTemplates.toArray(new Template[fTemplates.size()]);
 	}
 
 	/**
@@ -351,14 +351,14 @@ public class TemplateSet {
 	 * @return the templates with the given name
 	 */
 	public Template[] getTemplates(String name) {
-		ArrayList res= new ArrayList();
-		for (Iterator iterator= fTemplates.iterator(); iterator.hasNext();) {
-			Template curr= (Template) iterator.next();
+		ArrayList<Template> res= new ArrayList<Template>();
+		for (Iterator<Template> iterator= fTemplates.iterator(); iterator.hasNext();) {
+			Template curr= iterator.next();
 			if (curr.getName().equals(name)) {
 				res.add(curr);
 			}
 		}
-		return (Template[]) res.toArray(new Template[res.size()]);
+		return res.toArray(new Template[res.size()]);
 	}
 
 	/**
@@ -368,8 +368,8 @@ public class TemplateSet {
 	 * @return the first template with the given name
 	 */
 	public Template getFirstTemplate(String name) {
-		for (Iterator iterator= fTemplates.iterator(); iterator.hasNext();) {
-			Template curr= (Template) iterator.next();
+		for (Iterator<Template> iterator= fTemplates.iterator(); iterator.hasNext();) {
+			Template curr= iterator.next();
 			if (curr.getName().equals(name)) {
 				return curr;
 			}

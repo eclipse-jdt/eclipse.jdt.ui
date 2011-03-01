@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
+import org.eclipse.ltk.core.refactoring.participants.MoveParticipant;
 import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
@@ -74,14 +75,15 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.MoveStaticMembersDescriptor;
@@ -150,17 +152,19 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	private boolean fDelegateDeprecation;
 
 	private static class TypeReferenceFinder extends ASTVisitor {
-		List fResult= new ArrayList();
-		Set fDefined= new HashSet();
-		public static List perform(ASTNode root) {
+		List<IBinding> fResult= new ArrayList<IBinding>();
+		Set<ITypeBinding> fDefined= new HashSet<ITypeBinding>();
+		public static List<IBinding> perform(ASTNode root) {
 			TypeReferenceFinder visitor= new TypeReferenceFinder();
 			root.accept(visitor);
 			return visitor.fResult;
 		}
+		@Override
 		public boolean visit(TypeDeclaration node) {
 			fDefined.add(node.resolveBinding());
 			return true;
 		}
+		@Override
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
 			if (!(binding instanceof ITypeBinding))
@@ -170,11 +174,13 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			return true;
 		}
 
+		@Override
 		public boolean visit(AnnotationTypeDeclaration node) {
 			fDefined.add(node.resolveBinding());
 			return true;
 		}
 
+		@Override
 		public boolean visit(EnumDeclaration node) {
 			fDefined.add(node.resolveBinding());
 			return true;
@@ -203,6 +209,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isMoveStaticMembersAvailable(fMembersToMove);
 	}
@@ -210,6 +217,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Object[] getElements() {
 		Object[] result= new Object[fMembersToMove.length];
 		System.arraycopy(fMembersToMove, 0, result, 0, fMembersToMove.length);
@@ -219,6 +227,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getIdentifier() {
 		return IRefactoringProcessorIds.MOVE_STATIC_MEMBERS_PROCESSOR;
 	}
@@ -226,8 +235,9 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants sharedParticipants) throws CoreException {
-		List result= new ArrayList();
+		List<MoveParticipant> result= new ArrayList<MoveParticipant>();
 		MoveArguments args= new MoveArguments(fDestinationType, true);
 		String[] natures= JavaProcessors.computeAffectedNaturs(fMembersToMove);
 		for (int i= 0; i < fMembersToMove.length; i++) {
@@ -235,7 +245,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(
 				status, this, member, args, natures, sharedParticipants)));
 		}
-		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
+		return result.toArray(new RefactoringParticipant[result.size()]);
 	}
 
 	//------------------- IDelegateUpdating ----------------------
@@ -276,6 +286,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		fDelegateDeprecation= deprecate;
 	}
 
+	@Override
 	public String getProcessorName() {
 		return RefactoringCoreMessages.MoveMembersRefactoring_Move_Members;
 	}
@@ -309,6 +320,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 	//---- Activation checking ------------------------------------
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_checking, 1);
@@ -358,6 +370,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 	//---- Input checking ------------------------------------
 
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		fTarget= null;
 		try {
@@ -384,7 +397,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			if (result.hasFatalError())
 				return result;
 
-			List modifiedCus= new ArrayList();
+			List<ICompilationUnit> modifiedCus= new ArrayList<ICompilationUnit>();
 			createChange(modifiedCus, result, new SubProgressMonitor(pm, 7));
 			IFile[] changedFiles= getAllFilesToModify(modifiedCus);
 			ResourceChangeChecker checker= (ResourceChangeChecker)context.getChecker(ResourceChangeChecker.class);
@@ -398,8 +411,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		}
 	}
 
-	private IFile[] getAllFilesToModify(List modifiedCus) {
-		Set result= new HashSet();
+	private IFile[] getAllFilesToModify(List<ICompilationUnit> modifiedCus) {
+		Set<IResource> result= new HashSet<IResource>();
 		IResource resource= fDestinationType.getCompilationUnit().getResource();
 		result.add(resource);
 		for (int i= 0; i < fMembersToMove.length; i++) {
@@ -407,12 +420,12 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			if (resource != null)
 				result.add(resource);
 		}
-		for (Iterator iter= modifiedCus.iterator(); iter.hasNext();) {
-			ICompilationUnit unit= (ICompilationUnit)iter.next();
+		for (Iterator<ICompilationUnit> iter= modifiedCus.iterator(); iter.hasNext();) {
+			ICompilationUnit unit= iter.next();
 			if (unit.getResource() != null)
 				result.add(unit.getResource());
 		}
-		return (IFile[]) result.toArray(new IFile[result.size()]);
+		return result.toArray(new IFile[result.size()]);
 	}
 
 	private RefactoringStatus checkDestinationType() throws JavaModelException {
@@ -536,7 +549,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		if (JdtFlags.isPublic(member) && JdtFlags.isPublic(fDestinationType))
 			return new IType[0];
 
-		HashSet blindAccessorTypes= new HashSet(); // referencing, but access to destination type illegal
+		HashSet<IType> blindAccessorTypes= new HashSet<IType>(); // referencing, but access to destination type illegal
 		SearchResultGroup[] references= getReferences(member, new SubProgressMonitor(pm, 1), status);
 		for (int i = 0; i < references.length; i++) {
 			SearchMatch[] searchResults= references[i].getSearchResults();
@@ -560,7 +573,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				blindAccessorTypes.add(type);
 		}
 
-		return (IType[]) blindAccessorTypes.toArray(new IType[blindAccessorTypes.size()]);
+		return blindAccessorTypes.toArray(new IType[blindAccessorTypes.size()]);
 	}
 
 	private String createNonAccessibleMemberMessage(IMember member, IType accessingType, boolean moved){
@@ -694,12 +707,13 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		return result;
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.done();
 		return fChange;
 	}
 
-	private void createChange(List modifiedCus, RefactoringStatus status, IProgressMonitor monitor) throws CoreException {
+	private void createChange(List<ICompilationUnit> modifiedCus, RefactoringStatus status, IProgressMonitor monitor) throws CoreException {
 		monitor.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, 5);
 		fChange= new DynamicValidationRefactoringChange(createDescriptor(), RefactoringCoreMessages.MoveMembersRefactoring_move_members);
 		fTarget= getCuRewrite(fDestinationType.getCompilationUnit());
@@ -711,11 +725,11 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		}
 
 		try {
-			Map adjustments= new HashMap();
+			Map<IMember, IncomingMemberVisibilityAdjustment> adjustments= new HashMap<IMember, IncomingMemberVisibilityAdjustment>();
 			IMember member= null;
 			SubProgressMonitor sub= new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
 			sub.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, fMembersToMove.length);
-			Set rewritten= new HashSet();
+			Set<IMember> rewritten= new HashSet<IMember>();
 			for (int index= 0; index < fMembersToMove.length; index++) {
 				member= fMembersToMove[index];
 				final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fDestinationType, member);
@@ -730,7 +744,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					// Add a visibility adjustment so the moved member
 					// will be visible from within the delegate
 					ModifierKeyword threshold= adjustor.getVisibilityThreshold(member, fDestinationType, new NullProgressMonitor());
-					IncomingMemberVisibilityAdjustment adjustment= (IncomingMemberVisibilityAdjustment) adjustments.get(member);
+					IncomingMemberVisibilityAdjustment adjustment= adjustments.get(member);
 					ModifierKeyword kw= adjustment != null ? adjustment.getKeyword() : ModifierKeyword.fromFlagValue(JdtFlags.getVisibilityCode(member));
 					if (MemberVisibilityAdjustor.hasLowerVisibility(kw, threshold)) {
 						adjustments.put(member, new MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment(member, threshold, RefactoringStatus.createWarningStatus(Messages.format(MemberVisibilityAdjustor.getMessage(member), new String[] { MemberVisibilityAdjustor.getLabel(member), MemberVisibilityAdjustor.getLabel(threshold)}), JavaStatusContext.create(member))));
@@ -741,7 +755,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				// error message if not (for example, when moving into a private type)
 				status.merge(checkMovedMemberAvailability(member, new SubProgressMonitor(sub, 1)));
 				// Put rewrite info into code and into status
-				for (final Iterator iterator= rewritten.iterator(); iterator.hasNext();) {
+				for (final Iterator<IMember> iterator= rewritten.iterator(); iterator.hasNext();) {
 					adjustments.remove(iterator.next());
 				}
 				rewritten.addAll(adjustments.keySet());
@@ -758,10 +772,11 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description_plural);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(fMembersToMove, false);
 			SearchPattern pattern= RefactoringSearchEngine.createOrPattern(fMembersToMove, IJavaSearchConstants.ALL_OCCURRENCES);
-			final HashSet affectedCompilationUnits= new HashSet();
+			final HashSet<ICompilationUnit> affectedCompilationUnits= new HashSet<ICompilationUnit>();
 
 			CollectingSearchRequestor requestor= new CollectingSearchRequestor(binaryRefs) {
 				private ICompilationUnit fLastCU;
+				@Override
 				public void acceptSearchMatch(SearchMatch match) throws CoreException {
 					if (filterMatch(match))
 						return;
@@ -776,7 +791,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			};
 			RefactoringSearchEngine.search(pattern, scope, requestor, new NullProgressMonitor(), status);
 			binaryRefs.addErrorIfNecessary(status);
-			ICompilationUnit[] units= (ICompilationUnit[]) affectedCompilationUnits.toArray(new ICompilationUnit[affectedCompilationUnits.size()]);
+			ICompilationUnit[] units= affectedCompilationUnits.toArray(new ICompilationUnit[affectedCompilationUnits.size()]);
 
 			modifiedCus.addAll(Arrays.asList(units));
 			final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fDestinationType, fDestinationType);
@@ -882,10 +897,10 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	}
 
 	private String[] getUpdatedMemberSource(RefactoringStatus status, BodyDeclaration[] members, ITypeBinding target) throws CoreException, BadLocationException {
-		List typeRefs= new ArrayList();
+		List<IBinding> typeRefs= new ArrayList<IBinding>();
 		boolean targetNeedsSourceImport= false;
 		boolean isSourceNotTarget= fSource != fTarget;
-		Set exclude= new HashSet();
+		Set<IBinding> exclude= new HashSet<IBinding>();
 		for (int i= 0; i < members.length; i++) {
 			BodyDeclaration declaration= members[i];
 			if (declaration instanceof AbstractTypeDeclaration) {
@@ -900,8 +915,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					exclude.add(binding);
 			} else if (declaration instanceof FieldDeclaration) {
 				FieldDeclaration field= (FieldDeclaration) declaration;
-				for (final Iterator iterator= field.fragments().iterator(); iterator.hasNext();) {
-					VariableDeclarationFragment fragment= (VariableDeclarationFragment) iterator.next();
+				for (final Iterator<VariableDeclarationFragment> iterator= field.fragments().iterator(); iterator.hasNext();) {
+					VariableDeclarationFragment fragment= iterator.next();
 					IVariableBinding binding= fragment.resolveBinding();
 					if (binding != null)
 						exclude.add(binding);
@@ -915,7 +930,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				typeRefs.addAll(TypeReferenceFinder.perform(declaration));
 			MovedMemberAnalyzer analyzer= new MovedMemberAnalyzer(fSource, fMemberBindings, fSourceBinding, target);
 			declaration.accept(analyzer);
-			ImportRewriteUtil.addImports(fTarget, context, declaration, new HashMap(), new HashMap(), exclude, false);
+			ImportRewriteUtil.addImports(fTarget, context, declaration, new HashMap<Name, String>(), new HashMap<Name, String>(), exclude, false);
 			if (getDeclaringType().isInterface() && !fDestinationType.isInterface()) {
 				if (declaration instanceof FieldDeclaration) {
 					FieldDeclaration fieldDecl= (FieldDeclaration) declaration;
@@ -941,7 +956,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			fTarget.getImportRewrite().addImport(fSourceBinding, context);
 		}
 		if (isSourceNotTarget) {
-			for (Iterator iter= typeRefs.iterator(); iter.hasNext();) {
+			for (Iterator<IBinding> iter= typeRefs.iterator(); iter.hasNext();) {
 				ITypeBinding binding= (ITypeBinding) iter.next();
 				fTarget.getImportRewrite().addImport(binding, context);
 			}
@@ -1030,7 +1045,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				fSource.getImportRemover().registerRemovedNode(removeImportsOf);
 
 			ASTNode node= fTarget.getASTRewrite().createStringPlaceholder(sources[i], declaration.getNodeType());
-			List container= containerRewrite.getRewrittenList();
+			List<BodyDeclaration> container= containerRewrite.getRewrittenList();
 			int insertionIndex= ASTNodes.getInsertionIndex((BodyDeclaration) node, container);
 			containerRewrite.insertAt(node, insertionIndex, add);
 		}
@@ -1055,10 +1070,9 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		}
 
 		//Sorting members is important for field declarations referring to previous fields.
-		Arrays.sort(result, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				return ((BodyDeclaration) o1).getStartPosition()
-						- ((BodyDeclaration) o2).getStartPosition();
+		Arrays.sort(result, new Comparator<BodyDeclaration>() {
+			public int compare(BodyDeclaration o1, BodyDeclaration o2) {
+				return o1.getStartPosition() - o2.getStartPosition();
 			}
 		});
 		return result;
@@ -1087,7 +1101,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
 		int count= 1;
-		final List elements= new ArrayList();
+		final List<IJavaElement> elements= new ArrayList<IJavaElement>();
 		String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
 		final RefactoringStatus status= new RefactoringStatus();
 		while ((handle= extended.getAttribute(attribute)) != null) {
@@ -1099,7 +1113,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			count++;
 			attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
 		}
-		fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
+		fMembersToMove= elements.toArray(new IMember[elements.size()]);
 		if (elements.isEmpty())
 			return JavaRefactoringDescriptorUtil.createInputFatalStatus(null, getProcessorName(), IJavaRefactorings.MOVE_STATIC_MEMBERS);
 		IJavaProject project= null;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,7 @@ class CallSearchResultCollector {
     /**
      * A map from handle identifier ({@link String}) to {@link MethodCall}.
      */
-    private Map fCalledMembers;
+    private Map<String, MethodCall> fCalledMembers;
 
     public CallSearchResultCollector() {
         this.fCalledMembers = createCalledMethodsData();
@@ -31,7 +31,7 @@ class CallSearchResultCollector {
     /**
      * @return a map from handle identifier ({@link String}) to {@link MethodCall}
      */
-    public Map getCallers() {
+    public Map<String, MethodCall> getCallers() {
         return fCalledMembers;
     }
 
@@ -42,7 +42,7 @@ class CallSearchResultCollector {
     protected void addMember(IMember member, IMember calledMember, int start, int end, int lineNumber) {
         if ((member != null) && (calledMember != null)) {
             if (!isIgnored(calledMember)) {
-                MethodCall methodCall = (MethodCall) fCalledMembers.get(calledMember.getHandleIdentifier());
+                MethodCall methodCall = fCalledMembers.get(calledMember.getHandleIdentifier());
 
                 if (methodCall == null) {
                     methodCall = new MethodCall(calledMember);
@@ -55,8 +55,8 @@ class CallSearchResultCollector {
         }
     }
 
-    protected Map createCalledMethodsData() {
-        return new HashMap();
+    protected Map<String, MethodCall> createCalledMethodsData() {
+        return new HashMap<String, MethodCall>();
     }
 
     /**

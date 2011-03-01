@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -203,11 +203,13 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			fOmitSuper= fAddConstructorsSettings.getBoolean(OMIT_SUPER);
 		}
 
+		@Override
 		protected void configureShell(Shell shell) {
 			super.configureShell(shell);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.ADD_UNIMPLEMENTED_CONSTRUCTORS_DIALOG);
 		}
 
+		@Override
 		protected Control createDialogArea(Composite parent) {
 			initializeDialogUnits(parent);
 
@@ -270,6 +272,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			return composite;
 		}
 
+		@Override
 		protected Composite createInsertPositionCombo(Composite composite) {
 			Composite entryComposite= super.createInsertPositionCombo(composite);
 			addVisibilityAndModifiersChoices(entryComposite);
@@ -280,10 +283,12 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
 		 */
+		@Override
 		protected Control createLinkControl(Composite composite) {
 			Link link= new Link(composite, SWT.WRAP);
 			link.setText(ActionMessages.AddUnimplementedConstructorsAction_template_link_message);
 			link.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					openCodeTempatePage(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID);
 				}
@@ -327,6 +332,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			return omitSuperComposite;
 		}
 
+		@Override
 		protected Composite createVisibilityControlAndModifiers(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
 			Composite visibilityComposite= createVisibilityControl(parent, visibilityChangeListener, availableVisibilities, correctVisibility);
 			return visibilityComposite;
@@ -445,6 +451,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		Shell shell= getShell();
 		try {
@@ -472,6 +479,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(fEditor))
 			return;
@@ -528,14 +536,14 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 				return;
 			}
 
-			ArrayList result= new ArrayList();
+			ArrayList<IMethodBinding> result= new ArrayList<IMethodBinding>();
 			for (int i= 0; i < elements.length; i++) {
 				Object elem= elements[i];
 				if (elem instanceof IMethodBinding) {
-					result.add(elem);
+					result.add((IMethodBinding) elem);
 				}
 			}
-			IMethodBinding[] selected= (IMethodBinding[]) result.toArray(new IMethodBinding[result.size()]);
+			IMethodBinding[] selected= result.toArray(new IMethodBinding[result.size()]);
 
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 			settings.createComments= dialog.getGenerateComment();
@@ -598,6 +606,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(canEnable(selection));
@@ -614,6 +623,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 }

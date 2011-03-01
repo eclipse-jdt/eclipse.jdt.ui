@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,7 +53,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 	/**
 	 * Default comparator for body declarations.
 	 */
-	public static class DefaultJavaElementComparator implements Comparator {
+	public static class DefaultJavaElementComparator implements Comparator<BodyDeclaration> {
 
 		private final Collator fCollator;
 		private final MembersOrderPreferenceCache fMemberOrderCache;
@@ -117,10 +117,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 		 * @see Comparator#compare(java.lang.Object, java.lang.Object)
 		 * @see CompilationUnitSorter#sort(int, org.eclipse.jdt.core.ICompilationUnit, int[], java.util.Comparator, int, org.eclipse.core.runtime.IProgressMonitor)
 		 */
-		public int compare(Object e1, Object e2) {
-			BodyDeclaration bodyDeclaration1= (BodyDeclaration) e1;
-			BodyDeclaration bodyDeclaration2= (BodyDeclaration) e2;
-
+		public int compare(BodyDeclaration bodyDeclaration1, BodyDeclaration bodyDeclaration2) {
 			if (fDoNotSortFields && isSortPreserved(bodyDeclaration1) && isSortPreserved(bodyDeclaration2)) {
 				return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
 			}
@@ -164,15 +161,15 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 						}
 
 						// if names equal, sort by parameter types
-						List parameters1= method1.parameters();
-						List parameters2= method2.parameters();
+						List<SingleVariableDeclaration> parameters1= method1.parameters();
+						List<SingleVariableDeclaration> parameters2= method2.parameters();
 						int length1= parameters1.size();
 						int length2= parameters2.size();
 
 						int len= Math.min(length1, length2);
 						for (int i= 0; i < len; i++) {
-							SingleVariableDeclaration param1= (SingleVariableDeclaration) parameters1.get(i);
-							SingleVariableDeclaration param2= (SingleVariableDeclaration) parameters2.get(i);
+							SingleVariableDeclaration param1= parameters1.get(i);
+							SingleVariableDeclaration param2= parameters2.get(i);
 							cmp= this.fCollator.compare(buildSignature(param1.getType()), buildSignature(param2.getType()));
 							if (cmp != 0) {
 								return cmp;

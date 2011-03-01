@@ -16,6 +16,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	public JavaAddElementFromHistory() {
 	}
 
+	@Override
 	protected JavaHistoryActionImpl createDelegate() {
 		return new JavaAddElementFromHistoryImpl();
 	}

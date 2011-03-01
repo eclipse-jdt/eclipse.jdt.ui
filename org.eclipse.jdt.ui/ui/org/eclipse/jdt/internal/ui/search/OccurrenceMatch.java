@@ -25,6 +25,7 @@ public class OccurrenceMatch extends Match {
 		fOriginalLocation= null;
 	}
 
+	@Override
 	public void setOffset(int offset) {
 		if (fOriginalLocation == null) {
 			// remember the original location before changing it
@@ -33,6 +34,7 @@ public class OccurrenceMatch extends Match {
 		super.setOffset(offset);
 	}
 
+	@Override
 	public void setLength(int length) {
 		if (fOriginalLocation == null) {
 			// remember the original location before changing it

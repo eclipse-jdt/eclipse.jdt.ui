@@ -82,6 +82,7 @@ public class FindMethodExitOccurrencesAction extends SelectionDispatchAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
@@ -92,6 +93,7 @@ public class FindMethodExitOccurrencesAction extends SelectionDispatchAction {
 	 * @param selection the Java text selection
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		CompilationUnit astRoot= selection.resolvePartialAstAtOffset();
 		setEnabled(astRoot != null && new MethodExitsFinder().initialize(astRoot, selection.getOffset(), selection.getLength()) == null);
@@ -100,6 +102,7 @@ public class FindMethodExitOccurrencesAction extends SelectionDispatchAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(false);
 	}
@@ -107,6 +110,7 @@ public class FindMethodExitOccurrencesAction extends SelectionDispatchAction {
 	/* (non-JavaDoc)
 	 * Method declared in SelectionDispatchAction.
 	 */
+	@Override
 	public final void run(ITextSelection ts) {
 		ITypeRoot input= getEditorInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), input))

@@ -179,6 +179,7 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	/* (non-Javadoc)
 	 * Method declared in IDialogPage
 	 */
+	@Override
 	public void dispose() {
 		fTextField= null;
 	}
@@ -186,6 +187,7 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	/* (non-Javadoc)
 	 * Method declared in WizardPage
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
 			textModified(getText());

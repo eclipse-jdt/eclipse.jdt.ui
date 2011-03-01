@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,8 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
@@ -66,7 +68,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 	private int fCurrentPos;
 	private int fCurrentLength;
 	private String fErrorMessage;
-	private List fResult;
+	private List<ICompletionProposal> fResult;
 
 	private boolean fRestrictToMatchingCase;
 
@@ -124,9 +126,9 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#computeCompletionProposals(org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 * @since 3.2
 	 */
-	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (!(context instanceof JavadocContentAssistInvocationContext))
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 
 		JavadocContentAssistInvocationContext docContext= (JavadocContentAssistInvocationContext) context;
 		int flags= docContext.getFlags();
@@ -136,7 +138,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 
 		ICompilationUnit cu= docContext.getCompilationUnit();
 		if (cu == null)
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		IEditorInput editorInput= new FileEditorInput((IFile) cu.getResource());
 		fDocument= JavaUI.getDocumentProvider().getDocument(editorInput);
 		if (fDocument == null) {
@@ -144,7 +146,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 		}
 
 		try {
-			fResult= new ArrayList(100);
+			fResult= new ArrayList<ICompletionProposal>(100);
 			evalProposals();
 			return fResult;
 		} catch (JavaModelException e) {
@@ -229,8 +231,8 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#computeContextInformation(org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 * @since 3.2
 	 */
-	public List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
-		return Collections.EMPTY_LIST;
+	public List<IContextInformation> computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
+		return Collections.emptyList();
 	}
 
 	/*

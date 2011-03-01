@@ -131,6 +131,7 @@ public class NodeFinder extends GenericVisitor {
 		fEnd= offset + length;
 	}
 
+	@Override
 	protected boolean visitNode(ASTNode node) {
 		int nodeStart= node.getStartPosition();
 		int nodeEnd= nodeStart + node.getLength();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,18 +58,18 @@ public class FatJarManifestProvider implements IManifestProvider {
 		Manifest ownManifest= createOwn(jarPackage);
 		setManifestClasspath(ownManifest, fBuilder.getManifestClasspath());
 		if (fBuilder.isMergeManifests()) {
-			List openZips= new ArrayList();
+			List<ZipFile> openZips= new ArrayList<ZipFile>();
 			try {
-				List otherManifests= new ArrayList();
+				List<Manifest> otherManifests= new ArrayList<Manifest>();
 				Object[] elements= jarPackage.getElements();
 				for (int i= 0; i < elements.length; i++) {
 					Object element= elements[i];
 					if (element instanceof IPackageFragmentRoot && ((IPackageFragmentRoot) element).isArchive()) {
 						ZipFile zip= JarPackagerUtil.getArchiveFile(((IPackageFragmentRoot) element).getPath());
 						openZips.add(zip);
-						Enumeration entries= zip.entries();
+						Enumeration<? extends ZipEntry> entries= zip.entries();
 						while (entries.hasMoreElements()) {
-							ZipEntry entry= (ZipEntry) entries.nextElement();
+							ZipEntry entry= entries.nextElement();
 							if (entry.getName().equalsIgnoreCase("META-INF/MANIFEST.MF")) { //$NON-NLS-1$
 								InputStream inputStream= null;
 								try {
@@ -92,8 +92,8 @@ public class FatJarManifestProvider implements IManifestProvider {
 				}
 				result= merge(ownManifest, otherManifests);
 			} finally {
-				for (Iterator iter= openZips.iterator(); iter.hasNext(); ) {
-					ZipFile file= (ZipFile) iter.next();
+				for (Iterator<ZipFile> iter= openZips.iterator(); iter.hasNext(); ) {
+					ZipFile file= iter.next();
 					try {
 						file.close();
 					} catch (IOException e) {
@@ -114,14 +114,14 @@ public class FatJarManifestProvider implements IManifestProvider {
 		}
 	}
 
-	private Manifest merge(Manifest ownManifest, List otherManifests) {
+	private Manifest merge(Manifest ownManifest, List<Manifest> otherManifests) {
 		Manifest mergedManifest= new Manifest(ownManifest);
-		Map mergedEntries= mergedManifest.getEntries();
-		for (Iterator iter= otherManifests.iterator(); iter.hasNext();) {
-			Manifest otherManifest= (Manifest) iter.next();
-			Map otherEntries= otherManifest.getEntries();
-			for (Iterator iterator= otherEntries.keySet().iterator(); iterator.hasNext();) {
-				String attributeName= (String) iterator.next();
+		Map<String, Attributes> mergedEntries= mergedManifest.getEntries();
+		for (Iterator<Manifest> iter= otherManifests.iterator(); iter.hasNext();) {
+			Manifest otherManifest= iter.next();
+			Map<String, Attributes> otherEntries= otherManifest.getEntries();
+			for (Iterator<String> iterator= otherEntries.keySet().iterator(); iterator.hasNext();) {
+				String attributeName= iterator.next();
 				if (mergedEntries.containsKey(attributeName)) {
 					// TODO: WARNING
 				} else {

@@ -42,11 +42,13 @@ class OpenDeclarationAction extends OpenAction {
         return false;
     }
 
-    public ISelection getSelection() {
+    @Override
+	public ISelection getSelection() {
         return CallHierarchyUI.convertSelection(getSelectionProvider().getSelection());
     }
 
-    public Object getElementToOpen(Object object) {
+    @Override
+	public Object getElementToOpen(Object object) {
         if (object instanceof MethodWrapper) {
             return ((MethodWrapper) object).getMember();
         }

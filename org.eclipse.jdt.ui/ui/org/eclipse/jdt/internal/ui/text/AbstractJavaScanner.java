@@ -67,7 +67,7 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 	private IColorManager fColorManager;
 	private IPreferenceStore fPreferenceStore;
 
-	private Map fTokenMap= new HashMap();
+	private Map<String, Token> fTokenMap= new HashMap<String, Token>();
 	private String[] fPropertyNamesColor;
 	/**
 	 * Preference keys for boolean preferences which are <code>true</code>,
@@ -128,7 +128,7 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 	/**
 	 * Creates the list of rules controlling this scanner.
 	 */
-	abstract protected List createRules();
+	abstract protected List<IRule> createRules();
 
 
 	/**
@@ -186,6 +186,7 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		return colorKey + PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
 	}
 
+	@Override
 	public IToken nextToken() {
 		if (fNeedsLazyColorLoading)
 			resolveProxyAttributes();
@@ -218,7 +219,7 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		if (!fNeedsLazyColorLoading)
 			fTokenMap.put(colorKey, new Token(createTextAttribute(colorKey, boldKey, italicKey, strikethroughKey, underlineKey)));
 		else {
-			Token token= ((Token)fTokenMap.get(colorKey));
+			Token token= fTokenMap.get(colorKey);
 			if (token != null)
 				token.setData(createTextAttribute(colorKey, boldKey, italicKey, strikethroughKey, underlineKey));
 		}
@@ -256,11 +257,11 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 	protected Token getToken(String key) {
 		if (fNeedsLazyColorLoading)
 			resolveProxyAttributes();
-		return (Token) fTokenMap.get(key);
+		return fTokenMap.get(key);
 	}
 
 	private void initializeRules() {
-		List rules= createRules();
+		List<IRule> rules= createRules();
 		if (rules != null) {
 			IRule[] result= new IRule[rules.size()];
 			rules.toArray(result);

@@ -40,6 +40,7 @@ abstract class SearchScopeAction extends Action {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
+	@Override
 	public void run() {
 		this.fGroup.setSelected(this, true);
 		CallHierarchyViewPart part= this.fGroup.getView();

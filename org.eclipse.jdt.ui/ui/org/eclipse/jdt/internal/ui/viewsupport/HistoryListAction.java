@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,15 +44,15 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
-/*package*/ class HistoryListAction extends Action {
+/*package*/ class HistoryListAction<E> extends Action {
 
 	private class HistoryListDialog extends StatusDialog {
 		private static final int MAX_MAX_ENTRIES= 100;
-		private ListDialogField fHistoryList;
+		private ListDialogField<E> fHistoryList;
 		private StringDialogField fMaxEntriesField;
 		private int fMaxEntries;
 
-		private Object fResult;
+		private E fResult;
 
 		private HistoryListDialog() {
 			super(fHistory.getShell());
@@ -67,29 +67,30 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 		 * @since 3.4
 		 */
+		@Override
 		protected boolean isResizable() {
 			return true;
 		}
 
 		private void createHistoryList() {
-			IListAdapter adapter= new IListAdapter() {
-				public void customButtonPressed(ListDialogField field, int index) {
+			IListAdapter<E> adapter= new IListAdapter<E>() {
+				public void customButtonPressed(ListDialogField<E> field, int index) {
 					doCustomButtonPressed(index);
 				}
-				public void selectionChanged(ListDialogField field) {
+				public void selectionChanged(ListDialogField<E> field) {
 					doSelectionChanged();
 				}
 
-				public void doubleClicked(ListDialogField field) {
+				public void doubleClicked(ListDialogField<E> field) {
 					doDoubleClicked();
 				}
 			};
 			String[] buttonLabels= new String[] { JavaUIMessages.HistoryListAction_remove, JavaUIMessages.HistoryListAction_remove_all };
 			LabelProvider labelProvider= new TestRunLabelProvider();
-			fHistoryList= new ListDialogField(adapter, buttonLabels, labelProvider);
+			fHistoryList= new ListDialogField<E>(adapter, buttonLabels, labelProvider);
 			fHistoryList.setLabelText(fHistory.getHistoryListDialogMessage());
 
-			List historyEntries= fHistory.getHistoryEntries();
+			List<E> historyEntries= fHistory.getHistoryEntries();
 			fHistoryList.setElements(historyEntries);
 
 			Object currentEntry= fHistory.getCurrentEntry();
@@ -127,6 +128,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 		/*
 		 * @see Dialog#createDialogArea(Composite)
 		 */
+		@Override
 		protected Control createDialogArea(Composite parent) {
 			initializeDialogUnits(parent);
 
@@ -169,7 +171,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 		}
 
 		private void doSelectionChanged() {
-			List selected= fHistoryList.getSelectedElements();
+			List<E> selected= fHistoryList.getSelectedElements();
 			if (selected.size() >= 1) {
 				fResult= selected.get(0);
 			} else {
@@ -178,11 +180,11 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 			fHistoryList.enableButton(0, selected.size() != 0);
 		}
 
-		public Object getResult() {
+		public E getResult() {
 			return fResult;
 		}
 
-		public List getRemaining() {
+		public List<E> getRemaining() {
 			return fHistoryList.getElements();
 		}
 
@@ -193,12 +195,15 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 	}
 
 	private final class TestRunLabelProvider extends LabelProvider {
-		private final HashMap fImages= new HashMap();
+		private final HashMap<ImageDescriptor, Image> fImages= new HashMap<ImageDescriptor, Image>();
 
+		@SuppressWarnings("unchecked")
+		@Override
 		public String getText(Object element) {
-			return fHistory.getText(element);
+			return fHistory.getText((E) element);
 		}
 
+		@Override
 		public Image getImage(Object element) {
 			ImageDescriptor imageDescriptor= fHistory.getImageDescriptor(element);
 			return getCachedImage(imageDescriptor);
@@ -213,18 +218,19 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 			return image;
 		}
 
+		@Override
 		public void dispose() {
-			for (Iterator iter= fImages.values().iterator(); iter.hasNext();) {
-				Image image= (Image) iter.next();
+			for (Iterator<Image> iter= fImages.values().iterator(); iter.hasNext();) {
+				Image image= iter.next();
 				image.dispose();
 			}
 			fImages.clear();
 		}
 	}
 
-	private ViewHistory fHistory;
+	private ViewHistory<E> fHistory;
 
-	public HistoryListAction(ViewHistory history) {
+	public HistoryListAction(ViewHistory<E> history) {
 		super(null, IAction.AS_RADIO_BUTTON);
 		fHistory= history;
 		fHistory.configureHistoryListAction(this);
@@ -233,6 +239,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 	/*
 	 * @see IAction#run()
 	 */
+	@Override
 	public void run() {
 		HistoryListDialog dialog= new HistoryListDialog();
 		if (dialog.open() == Window.OK) {

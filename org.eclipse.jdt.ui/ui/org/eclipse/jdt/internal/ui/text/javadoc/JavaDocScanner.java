@@ -22,6 +22,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.ICharacterScanner;
+import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.IWordDetector;
 import org.eclipse.jface.text.rules.SingleLineRule;
@@ -111,6 +112,7 @@ public final class JavaDocScanner extends JavaCommentScanner {
 		/*
 		 * @see PatternRule#evaluate(ICharacterScanner)
 		 */
+		@Override
 		public IToken evaluate(ICharacterScanner scanner) {
 			IToken result= super.evaluate(scanner);
 			if (result == fToken)
@@ -150,9 +152,10 @@ public final class JavaDocScanner extends JavaCommentScanner {
 	/*
 	 * @see AbstractJavaScanner#createRules()
 	 */
-	protected List createRules() {
+	@Override
+	protected List<IRule> createRules() {
 
-		List list= new ArrayList();
+		List<IRule> list= new ArrayList<IRule>();
 
 		// Add rule for tags.
 		Token token= getToken(IJavaColorConstants.JAVADOC_TAG);
@@ -185,12 +188,14 @@ public final class JavaDocScanner extends JavaCommentScanner {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.JavaCommentScanner#createMatchers()
 	 */
-	protected List createMatchers() {
-		List list= super.createMatchers();
+	@Override
+	protected List<WordMatcher> createMatchers() {
+		List<WordMatcher> list= super.createMatchers();
 
 		// Add word rule for keywords.
 		final IToken token= getToken(IJavaColorConstants.JAVADOC_KEYWORD);
 		WordMatcher matcher= new CombinedWordRule.WordMatcher() {
+			@Override
 			public IToken evaluate(ICharacterScanner scanner, CharacterBuffer word) {
 				int length= word.length();
 				if (length > 1 && word.charAt(0) == '@') {

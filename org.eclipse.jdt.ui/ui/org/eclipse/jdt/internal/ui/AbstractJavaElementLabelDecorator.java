@@ -34,12 +34,12 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 		 * {@inheritDoc}
 		 */
 		public void elementChanged(ElementChangedEvent event) {
-			List changed= new ArrayList();
+			List<IJavaElement> changed= new ArrayList<IJavaElement>();
 			processDelta(event.getDelta(), changed);
 			if (changed.size() == 0)
 				return;
 
-			fireChange((IJavaElement[])changed.toArray(new IJavaElement[changed.size()]));
+			fireChange(changed.toArray(new IJavaElement[changed.size()]));
 		}
 
 	}
@@ -117,9 +117,9 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 	 */
 	public abstract void decorate(Object element, IDecoration decoration);
 
-	protected abstract void processDelta(IJavaElementDelta delta, List result);
+	protected abstract void processDelta(IJavaElementDelta delta, List<IJavaElement> result);
 
-	protected boolean processChildrenDelta(IJavaElementDelta delta, List result) {
+	protected boolean processChildrenDelta(IJavaElementDelta delta, List<IJavaElement> result) {
 		IJavaElementDelta[] children= delta.getAffectedChildren();
 		for (int i= 0; i < children.length; i++) {
 			processDelta(children[i], result);

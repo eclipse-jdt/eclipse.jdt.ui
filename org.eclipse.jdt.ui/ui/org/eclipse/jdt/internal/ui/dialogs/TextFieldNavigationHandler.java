@@ -133,11 +133,13 @@ public class TextFieldNavigationHandler {
 				fLastSelection= getSelection();
 				fCaretPosition= fLastSelection.y;
 				fText.addKeyListener(new KeyAdapter() {
+					@Override
 					public void keyReleased(KeyEvent e) {
 						selectionChanged();
 					}
 				});
 				fText.addMouseListener(new MouseAdapter() {
+					@Override
 					public void mouseUp(MouseEvent e) {
 						selectionChanged();
 					}
@@ -145,22 +147,27 @@ public class TextFieldNavigationHandler {
 			}
 		}
 
+		@Override
 		public Control getControl() {
 			return fText;
 		}
 
+		@Override
 		public String getText() {
 			return fText.getText();
 		}
 
+		@Override
 		public void setText(String text) {
 			fText.setText(text);
 		}
 
+		@Override
 		public Point getSelection() {
 			return fText.getSelection();
 		}
 
+		@Override
 		public int getCaretPosition() {
 			if (BUG_106024_TEXT_SELECTION) {
 				selectionChanged();
@@ -170,6 +177,7 @@ public class TextFieldNavigationHandler {
 			}
 		}
 
+		@Override
 		public void setSelection(int start, int end) {
 			fText.setSelection(start, end);
 		}
@@ -182,26 +190,32 @@ public class TextFieldNavigationHandler {
 			fStyledText= styledText;
 		}
 
+		@Override
 		public Control getControl() {
 			return fStyledText;
 		}
 
+		@Override
 		public String getText() {
 			return fStyledText.getText();
 		}
 
+		@Override
 		public void setText(String text) {
 			fStyledText.setText(text);
 		}
 
+		@Override
 		public Point getSelection() {
 			return fStyledText.getSelection();
 		}
 
+		@Override
 		public int getCaretPosition() {
 			return fStyledText.getCaretOffset();
 		}
 
+		@Override
 		public void setSelection(int start, int end) {
 			fStyledText.setSelection(start, end);
 		}
@@ -216,39 +230,47 @@ public class TextFieldNavigationHandler {
 			fLastSelection= getSelection();
 			fCaretPosition= fLastSelection.y;
 			fCombo.addKeyListener(new KeyAdapter() {
+				@Override
 				public void keyReleased(KeyEvent e) {
 					selectionChanged();
 				}
 			});
 			fCombo.addMouseListener(new MouseAdapter() {
+				@Override
 				public void mouseUp(MouseEvent e) {
 					selectionChanged();
 				}
 			});
 		}
 
+		@Override
 		public Control getControl() {
 			return fCombo;
 		}
 
+		@Override
 		public String getText() {
 			return fCombo.getText();
 		}
 
+		@Override
 		public void setText(String text) {
 			fCombo.setText(text);
 		}
 
+		@Override
 		public Point getSelection() {
 			return fCombo.getSelection();
 		}
 
+		@Override
 		public int getCaretPosition() {
 			selectionChanged();
 			return fCaretPosition;
 //			return fCombo.getCaretPosition(); // not available: bug 103630
 		}
 
+		@Override
 		public void setSelection(int start, int end) {
 			fCombo.setSelection(new Point(start, end));
 		}
@@ -303,8 +325,9 @@ public class TextFieldNavigationHandler {
 				fKeyListener= new KeyAdapter() {
 					private final boolean IS_WORKAROUND= (fNavigable instanceof ComboNavigable)
 							|| (fNavigable instanceof TextNavigable && TextNavigable.BUG_106024_TEXT_SELECTION);
-					private List/*<Submission>*/ fSubmissions;
+					private List<Submission> fSubmissions;
 
+					@Override
 					public void keyPressed(KeyEvent e) {
 						if (IS_WORKAROUND) {
 							if (e.keyCode == SWT.ARROW_LEFT && e.stateMask == SWT.MOD2) {
@@ -336,8 +359,8 @@ public class TextFieldNavigationHandler {
 						int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
 						KeySequence keySequence = KeySequence.getInstance(SWTKeySupport.convertAcceleratorToKeyStroke(accelerator));
 						getSubmissions();
-						for (Iterator iter= getSubmissions().iterator(); iter.hasNext();) {
-							Submission submission= (Submission) iter.next();
+						for (Iterator<Submission> iter= getSubmissions().iterator(); iter.hasNext();) {
+							Submission submission= iter.next();
 							TriggerSequence[] triggerSequences= submission.getTriggerSequences();
 							for (int i= 0; i < triggerSequences.length; i++) {
 								if (triggerSequences[i].equals(keySequence)) { // XXX does not work for multi-stroke bindings
@@ -349,11 +372,11 @@ public class TextFieldNavigationHandler {
 						}
 					}
 
-					private List/*<Submission>*/ getSubmissions() {
+					private List<Submission> getSubmissions() {
 						if (fSubmissions != null)
 							return fSubmissions;
 
-						fSubmissions= new ArrayList();
+						fSubmissions= new ArrayList<Submission>();
 
 						ICommandService commandService= (ICommandService) PlatformUI.getWorkbench().getAdapter(ICommandService.class);
 						IBindingService bindingService= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
@@ -388,6 +411,7 @@ public class TextFieldNavigationHandler {
 						}
 
 						fSubmissions.add(new Submission(getKeyBindings(localBindingManager, commandService, ITextEditorActionDefinitionIds.SELECT_WORD_NEXT)) {
+							@Override
 							public void execute() {
 								fIterator.setText(fNavigable.getText());
 								int caretPosition= fNavigable.getCaretPosition();
@@ -403,6 +427,7 @@ public class TextFieldNavigationHandler {
 							}
 						});
 						fSubmissions.add(new Submission(getKeyBindings(localBindingManager, commandService, ITextEditorActionDefinitionIds.SELECT_WORD_PREVIOUS)) {
+							@Override
 							public void execute() {
 								fIterator.setText(fNavigable.getText());
 								int caretPosition= fNavigable.getCaretPosition();
@@ -418,6 +443,7 @@ public class TextFieldNavigationHandler {
 							}
 						});
 						fSubmissions.add(new Submission(getKeyBindings(localBindingManager, commandService, ITextEditorActionDefinitionIds.WORD_NEXT)) {
+							@Override
 							public void execute() {
 								fIterator.setText(fNavigable.getText());
 								int caretPosition= fNavigable.getCaretPosition();
@@ -428,6 +454,7 @@ public class TextFieldNavigationHandler {
 							}
 						});
 						fSubmissions.add(new Submission(getKeyBindings(localBindingManager, commandService, ITextEditorActionDefinitionIds.WORD_PREVIOUS)) {
+							@Override
 							public void execute() {
 								fIterator.setText(fNavigable.getText());
 								int caretPosition= fNavigable.getCaretPosition();
@@ -438,6 +465,7 @@ public class TextFieldNavigationHandler {
 							}
 						});
 						fSubmissions.add(new Submission(getKeyBindings(localBindingManager, commandService, ITextEditorActionDefinitionIds.DELETE_NEXT_WORD)) {
+							@Override
 							public void execute() {
 								Point selection= fNavigable.getSelection();
 								String text= fNavigable.getText();
@@ -459,6 +487,7 @@ public class TextFieldNavigationHandler {
 							}
 						});
 						fSubmissions.add(new Submission(getKeyBindings(localBindingManager, commandService, ITextEditorActionDefinitionIds.DELETE_PREVIOUS_WORD)) {
+							@Override
 							public void execute() {
 								Point selection= fNavigable.getSelection();
 								String text= fNavigable.getText();

@@ -155,10 +155,12 @@ public class NLSRefactoring extends Refactoring {
 		return fCu;
 	}
 
+	@Override
 	public String getName() {
 		return Messages.format(NLSMessages.NLSRefactoring_compilation_unit, BasicElementLabels.getFileName(fCu));
 	}
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 
 		if (fSubstitutions.length == 0) {
@@ -168,6 +170,7 @@ public class NLSRefactoring extends Refactoring {
 		return new RefactoringStatus();
 	}
 
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		checkParameters();
 		try {
@@ -214,6 +217,7 @@ public class NLSRefactoring extends Refactoring {
 		}
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			checkParameters();
@@ -263,7 +267,7 @@ public class NLSRefactoring extends Refactoring {
 
 	private IFile[] getAllFilesToModify() {
 
-		List files= new ArrayList(2);
+		List<IResource> files= new ArrayList<IResource>(2);
 		if (willModifySource()) {
 			IResource resource= fCu.getResource();
 			if (resource.exists()) {
@@ -285,7 +289,7 @@ public class NLSRefactoring extends Refactoring {
 			}
 		}
 
-		return (IFile[]) files.toArray(new IFile[files.size()]);
+		return files.toArray(new IFile[files.size()]);
 	}
 
 	public IFile getPropertyFileHandle() {

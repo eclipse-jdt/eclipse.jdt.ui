@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,7 +74,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	private NLSSearchResult fResult;
 	private IFile fPropertiesFile;
 	private Properties fProperties;
-	private HashSet fUsedPropertyNames;
+	private HashSet<String> fUsedPropertyNames;
 
 	public NLSSearchResultRequestor(IFile propertiesFile, NLSSearchResult result) {
 		fPropertiesFile= propertiesFile;
@@ -84,14 +84,16 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	/*
 	 * @see org.eclipse.jdt.core.search.SearchRequestor#beginReporting()
 	 */
+	@Override
 	public void beginReporting() {
 		loadProperties();
-		fUsedPropertyNames= new HashSet(fProperties.size());
+		fUsedPropertyNames= new HashSet<String>(fProperties.size());
 	}
 
 	/*
 	 * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)
 	 */
+	@Override
 	public void acceptSearchMatch(SearchMatch match) throws CoreException {
 		if (match.getAccuracy() == SearchMatch.A_INACCURATE)
 			return;
@@ -151,7 +153,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		pm.setTaskName(NLSSearchMessages.NLSSearchResultRequestor_searching);
 		FileEntry groupElement= new FileEntry(fPropertiesFile, NLSSearchMessages.NLSSearchResultCollector_unusedKeys);
 
-		for (Enumeration enumeration= fProperties.propertyNames(); enumeration.hasMoreElements();) {
+		for (Enumeration<?> enumeration= fProperties.propertyNames(); enumeration.hasMoreElements();) {
 			String propertyName= (String) enumeration.nextElement();
 			if (!fUsedPropertyNames.contains(propertyName)) {
 				addMatch(groupElement, propertyName);
@@ -381,7 +383,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	}
 
 	private void loadProperties() {
-		Set duplicateKeys= new HashSet();
+		Set<Object> duplicateKeys= new HashSet<Object>();
 		fProperties= new Properties(duplicateKeys);
 		InputStream stream;
 		try {
@@ -416,12 +418,12 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		return propertiesFile.getContents();
 	}
 
-	private void reportDuplicateKeys(Set duplicateKeys) {
+	private void reportDuplicateKeys(Set<Object> duplicateKeys) {
 		if (duplicateKeys.size() == 0)
 			return;
 
 		FileEntry groupElement= new FileEntry(fPropertiesFile, NLSSearchMessages.NLSSearchResultCollector_duplicateKeys);
-		Iterator iter= duplicateKeys.iterator();
+		Iterator<Object> iter= duplicateKeys.iterator();
 		while (iter.hasNext()) {
 			String propertyName= (String) iter.next();
 			addMatch(groupElement, propertyName);

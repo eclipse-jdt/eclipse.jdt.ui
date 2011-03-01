@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,16 +91,16 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static IJavaElement[] getJavaElements(final Object[] elements) {
-		List result= new ArrayList();
+		List<IJavaElement> result= new ArrayList<IJavaElement>();
 		for (int index= 0; index < elements.length; index++) {
 			if (elements[index] instanceof IJavaElement)
-				result.add(elements[index]);
+				result.add((IJavaElement) elements[index]);
 		}
-		return (IJavaElement[]) result.toArray(new IJavaElement[result.size()]);
+		return result.toArray(new IJavaElement[result.size()]);
 	}
 
 	public static IMember[] getPullUpMembers(final IType type) throws JavaModelException {
-		final List list= new ArrayList(3);
+		final List<IMember> list= new ArrayList<IMember>(3);
 		if (type.exists()) {
 			IMember[] members= type.getFields();
 			for (int index= 0; index < members.length; index++) {
@@ -118,11 +118,11 @@ public final class RefactoringAvailabilityTester {
 					list.add(members[index]);
 			}
 		}
-		return (IMember[]) list.toArray(new IMember[list.size()]);
+		return list.toArray(new IMember[list.size()]);
 	}
 
 	public static IMember[] getPushDownMembers(final IType type) throws JavaModelException {
-		final List list= new ArrayList(3);
+		final List<IMember> list= new ArrayList<IMember>(3);
 		if (type.exists()) {
 			IMember[] members= type.getFields();
 			for (int index= 0; index < members.length; index++) {
@@ -135,16 +135,16 @@ public final class RefactoringAvailabilityTester {
 					list.add(members[index]);
 			}
 		}
-		return (IMember[]) list.toArray(new IMember[list.size()]);
+		return list.toArray(new IMember[list.size()]);
 	}
 
 	public static IResource[] getResources(final Object[] elements) {
-		List result= new ArrayList();
+		List<IResource> result= new ArrayList<IResource>();
 		for (int index= 0; index < elements.length; index++) {
 			if (elements[index] instanceof IResource)
-				result.add(elements[index]);
+				result.add((IResource) elements[index]);
 		}
-		return (IResource[]) result.toArray(new IResource[result.size()]);
+		return result.toArray(new IResource[result.size()]);
 	}
 
 	public static IType getSingleSelectedType(IStructuredSelection selection) throws JavaModelException {
@@ -296,7 +296,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isExternalizeStringsAvailable(final IStructuredSelection selection) throws JavaModelException {
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IJavaElement) {
 				IJavaElement javaElement= (IJavaElement)element;
@@ -432,13 +432,15 @@ public final class RefactoringAvailabilityTester {
 				if (type != null)
 					return Checks.isAvailable(type) && isExtractSupertypeAvailable(new IType[] { type});
 			}
-			for (final Iterator iterator= selection.iterator(); iterator.hasNext();) {
+			for (final Iterator<?> iterator= selection.iterator(); iterator.hasNext();) {
 				if (!(iterator.next() instanceof IMember))
 					return false;
 			}
-			final Set members= new HashSet();
-			members.addAll(Arrays.asList(selection.toArray()));
-			return isExtractSupertypeAvailable((IMember[]) members.toArray(new IMember[members.size()]));
+			final Set<IMember> members= new HashSet<IMember>();
+			@SuppressWarnings("unchecked")
+			List<IMember> selectionList= (List<IMember>) (List<?>) Arrays.asList(selection.toArray());
+			members.addAll(selectionList);
+			return isExtractSupertypeAvailable(members.toArray(new IMember[members.size()]));
 		}
 		return false;
 	}
@@ -549,7 +551,7 @@ public final class RefactoringAvailabilityTester {
 		if (selection.isEmpty())
 			return false;
 
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (!(element instanceof IJavaElement))
 				return false;
@@ -955,13 +957,15 @@ public final class RefactoringAvailabilityTester {
 				if (type != null)
 					return Checks.isAvailable(type) && isPullUpAvailable(new IType[] { type});
 			}
-			for (final Iterator iterator= selection.iterator(); iterator.hasNext();) {
+			for (final Iterator<?> iterator= selection.iterator(); iterator.hasNext();) {
 				if (!(iterator.next() instanceof IMember))
 					return false;
 			}
-			final Set members= new HashSet();
-			members.addAll(Arrays.asList(selection.toArray()));
-			return isPullUpAvailable((IMember[]) members.toArray(new IMember[members.size()]));
+			final Set<IMember> members= new HashSet<IMember>();
+			@SuppressWarnings("unchecked")
+			List<IMember> selectionList= (List<IMember>) (List<?>) Arrays.asList(selection.toArray());
+			members.addAll(selectionList);
+			return isPullUpAvailable(members.toArray(new IMember[members.size()]));
 		}
 		return false;
 	}
@@ -1023,13 +1027,15 @@ public final class RefactoringAvailabilityTester {
 				if (type != null)
 					return isPushDownAvailable(new IType[] { type});
 			}
-			for (final Iterator iterator= selection.iterator(); iterator.hasNext();) {
+			for (final Iterator<?> iterator= selection.iterator(); iterator.hasNext();) {
 				if (!(iterator.next() instanceof IMember))
 					return false;
 			}
-			final Set members= new HashSet();
-			members.addAll(Arrays.asList(selection.toArray()));
-			return isPushDownAvailable((IMember[]) members.toArray(new IMember[members.size()]));
+			final Set<IMember> members= new HashSet<IMember>();
+			@SuppressWarnings("unchecked")
+			List<IMember> selectionList= (List<IMember>) (List<?>) Arrays.asList(selection.toArray());
+			members.addAll(selectionList);
+			return isPushDownAvailable(members.toArray(new IMember[members.size()]));
 		}
 		return false;
 	}

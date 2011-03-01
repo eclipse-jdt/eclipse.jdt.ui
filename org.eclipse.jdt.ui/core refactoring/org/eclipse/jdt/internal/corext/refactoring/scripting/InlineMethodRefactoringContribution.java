@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,7 @@ public final class InlineMethodRefactoringContribution extends JavaUIRefactoring
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		int selectionStart= -1;
 		int selectionLength= -1;
@@ -58,8 +59,8 @@ public final class InlineMethodRefactoringContribution extends JavaUIRefactoring
 		CompilationUnit node= null;
 		if (descriptor instanceof InlineMethodDescriptor) {
 			InlineMethodDescriptor extended= (InlineMethodDescriptor) descriptor;
-			Map arguments= retrieveArgumentMap(extended);
-			final String selection= (String) arguments.get(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
+			Map<String, String> arguments= retrieveArgumentMap(extended);
+			final String selection= arguments.get(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -74,7 +75,7 @@ public final class InlineMethodRefactoringContribution extends JavaUIRefactoring
 				} else
 					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION}), null));
 			}
-			final String handle= (String) arguments.get(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+			final String handle= arguments.get(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(descriptor.getProject(), handle, false);
 				if (element == null || !element.exists())
@@ -114,6 +115,7 @@ public final class InlineMethodRefactoringContribution extends JavaUIRefactoring
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return RefactoringSignatureDescriptorFactory.createInlineMethodDescriptor();
 	}
@@ -121,6 +123,7 @@ public final class InlineMethodRefactoringContribution extends JavaUIRefactoring
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final RefactoringDescriptor createDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
 		return RefactoringSignatureDescriptorFactory.createInlineMethodDescriptor(project, description, comment, arguments, flags);
 	}

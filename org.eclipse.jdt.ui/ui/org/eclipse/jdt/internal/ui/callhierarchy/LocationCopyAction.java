@@ -54,10 +54,11 @@ class LocationCopyAction extends Action {
 		});
 	}
 
+	@Override
 	public void run() {
 		IStructuredSelection selection= (IStructuredSelection) fLocationViewer.getSelection();
 		StringBuffer buf= new StringBuffer();
-		for (Iterator iterator= selection.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator= selection.iterator(); iterator.hasNext();) {
 			CallLocation location= (CallLocation) iterator.next();
 			buf.append(location.getLineNumber()).append('\t').append(location.getCallText());
 			buf.append('\n');

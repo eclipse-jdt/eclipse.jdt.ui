@@ -314,9 +314,9 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 			fSkipAllExisting= (fSkipExistingQuery == null);
 			
-			Set accessors = new HashSet(Arrays.asList(fAccessorFields));
-			Set getters = new HashSet(Arrays.asList(fGetterFields));
-			Set setters= new HashSet(Arrays.asList(fSetterFields));
+			Set<IField> accessors = new HashSet<IField>(Arrays.asList(fAccessorFields));
+			Set<IField> getters = new HashSet<IField>(Arrays.asList(fGetterFields));
+			Set<IField> setters= new HashSet<IField>(Arrays.asList(fSetterFields));
 			IField[] fields= fType.getFields(); // generate methods in order of field declarations
 			if (!fSort) {
 				for (int i= 0; i < fields.length; i++) {

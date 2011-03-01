@@ -55,6 +55,7 @@ public final class LeadingWhitespacePredicateRule extends WordPatternRule {
 	/*
 	 * @see org.eclipse.jface.text.rules.WordPatternRule#endSequenceDetected(org.eclipse.jface.text.rules.ICharacterScanner)
 	 */
+	@Override
 	protected boolean endSequenceDetected(ICharacterScanner scanner) {
 		int c;
 		do {

@@ -339,7 +339,7 @@ public class TestRunnerViewPart extends ViewPart {
 	protected boolean fPartIsVisible= false;
 
 
-	private class RunnerViewHistory extends ViewHistory {
+	private class RunnerViewHistory extends ViewHistory<TestRunSession> {
 
 		@Override
 		public void configureHistoryListAction(IAction action) {
@@ -373,25 +373,25 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		@Override
-		public List getHistoryEntries() {
+		public List<TestRunSession> getHistoryEntries() {
 			return JUnitCorePlugin.getModel().getTestRunSessions();
 		}
 
 		@Override
-		public Object getCurrentEntry() {
+		public TestRunSession getCurrentEntry() {
 			return fTestRunSession;
 		}
 
 		@Override
-		public void setActiveEntry(Object entry) {
-			TestRunSession deactivatedSession= setActiveTestRunSession((TestRunSession) entry);
+		public void setActiveEntry(TestRunSession entry) {
+			TestRunSession deactivatedSession= setActiveTestRunSession(entry);
 			if (deactivatedSession != null)
 				deactivatedSession.swapOut();
 		}
 
 		@Override
-		public void setHistoryEntries(List remainingEntries, Object activeEntry) {
-			setActiveTestRunSession((TestRunSession) activeEntry);
+		public void setHistoryEntries(List<TestRunSession> remainingEntries, TestRunSession activeEntry) {
+			setActiveTestRunSession(activeEntry);
 
 			List<TestRunSession> testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
 			testRunSessions.removeAll(remainingEntries);
@@ -425,8 +425,7 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		@Override
-		public String getText(Object element) {
-			TestRunSession session= (TestRunSession) element;
+		public String getText(TestRunSession session) {
 			String testRunLabel= BasicElementLabels.getJavaElementName(session.getTestRunName());
 			if (session.getStartTime() <= 0) {
 				return testRunLabel;
@@ -866,7 +865,7 @@ public class TestRunnerViewPart extends ViewPart {
 		@Override
 		public void run() {
 			List<TestRunSession> testRunSessions= getRunningSessions();
-			Object first= testRunSessions.isEmpty() ? null : testRunSessions.get(0);
+			TestRunSession first= testRunSessions.isEmpty() ? null : testRunSessions.get(0);
 			fViewHistory.setHistoryEntries(testRunSessions, first);
 		}
 
@@ -1815,7 +1814,7 @@ action enablement
 
 			@Override
 			public String getName(Object page) {
-				return fViewHistory.getText(page);
+				return fViewHistory.getText((TestRunSession) page);
 			}
 
 			@Override
@@ -1825,7 +1824,7 @@ action enablement
 
 			@Override
 			public void activatePage(Object page) {
-				fViewHistory.setActiveEntry(page);
+				fViewHistory.setActiveEntry((TestRunSession) page);
 			}
 
 			@Override

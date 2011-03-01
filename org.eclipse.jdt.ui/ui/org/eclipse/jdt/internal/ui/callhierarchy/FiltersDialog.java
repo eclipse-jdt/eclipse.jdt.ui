@@ -48,7 +48,8 @@ class FiltersDialog extends StatusDialog {
     /* (non-Javadoc)
      * Method declared on Window.
      */
-    protected void configureShell(Shell newShell) {
+    @Override
+	protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
         newShell.setText(CallHierarchyMessages.FiltersDialog_filter);
         PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.CALL_HIERARCHY_FILTERS_DIALOG);
@@ -57,14 +58,16 @@ class FiltersDialog extends StatusDialog {
     /**
      * {@inheritDoc}
      */
-    protected boolean isResizable() {
+    @Override
+	protected boolean isResizable() {
     	return true;
     }
 
     /* (non-Javadoc)
      * Method declared on Dialog.
      */
-    protected Control createDialogArea(Composite parent) {
+    @Override
+	protected Control createDialogArea(Composite parent) {
     	Composite composite= (Composite) super.createDialogArea(parent);
 
         createNamesArea(composite);
@@ -143,6 +146,7 @@ class FiltersDialog extends StatusDialog {
 
         button.setText(text);
         button.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				validateInput();
 				updateEnabledState();
@@ -187,7 +191,8 @@ class FiltersDialog extends StatusDialog {
      * because after super.open() is called, the widgetry is disposed.
 	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
      */
-    protected void okPressed() {
+    @Override
+	protected void okPressed() {
         if (!isMaxCallDepthValid()) {
             if (fMaxCallDepth.forceFocus()) {
                 fMaxCallDepth.setSelection(0, fMaxCallDepth.getCharCount());

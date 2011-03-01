@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,7 +60,9 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
@@ -161,6 +163,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		/* (non-Javadoc)
 		 * @see org.eclipse.swt.dnd.Transfer#getTypeIds()
 		 */
+		@Override
 		protected int[] getTypeIds() {
 			return new int[] { TYPEID };
 		}
@@ -168,6 +171,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		/* (non-Javadoc)
 		 * @see org.eclipse.swt.dnd.Transfer#getTypeNames()
 		 */
+		@Override
 		protected String[] getTypeNames() {
 			return new String[] { TYPE_NAME };
 		}
@@ -175,6 +179,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		/* (non-Javadoc)
 		 * @see org.eclipse.swt.dnd.Transfer#javaToNative(java.lang.Object, org.eclipse.swt.dnd.TransferData)
 		 */
+		@Override
 		protected void javaToNative(Object data, TransferData transferData) {
 			if (data instanceof ClipboardData) {
 				try {
@@ -188,6 +193,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		/* (non-Javadoc)
 		 * Method declared on Transfer.
 		 */
+		@Override
 		protected Object nativeToJava(TransferData transferData) {
 			byte[] bytes = (byte[]) super.nativeToJava(transferData);
 			if (bytes != null) {
@@ -245,6 +251,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
+	@Override
 	public void run() {
 		if (fOperationCode == -1 || fOperationTarget == null)
 			return;
@@ -320,6 +327,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.IUpdate#update()
 	 */
+	@Override
 	public void update() {
 		super.update();
 
@@ -339,6 +347,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.TextEditorAction#setEditor(org.eclipse.ui.texteditor.ITextEditor)
 	 */
+	@Override
 	public void setEditor(ITextEditor editor) {
 		super.setEditor(editor);
 		fOperationTarget= null;
@@ -376,8 +385,8 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				if (textData == null)
 					return;
 
-				ArrayList datas= new ArrayList(3);
-				ArrayList transfers= new ArrayList(3);
+				ArrayList<Object> datas= new ArrayList<Object>(3);
+				ArrayList<ByteArrayTransfer> transfers= new ArrayList<ByteArrayTransfer>(3);
 				datas.add(textData);
 				transfers.add(TextTransfer.getInstance());
 
@@ -390,7 +399,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				datas.add(clipboardData);
 				transfers.add(fgTransferInstance);
 
-				Transfer[] dataTypes= (Transfer[]) transfers.toArray(new Transfer[transfers.size()]);
+				Transfer[] dataTypes= transfers.toArray(new Transfer[transfers.size()]);
 				Object[] data= datas.toArray();
 				setClipboardContents(clipboard, data, dataTypes);
 			} finally {
@@ -433,7 +442,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 
 		// do process import if selection spans over import declaration or package
-		List list= astRoot.imports();
+		List<ImportDeclaration> list= astRoot.imports();
 		if (!list.isEmpty()) {
 			if (offset < ((ASTNode) list.get(list.size() - 1)).getStartPosition()) {
 				return null;
@@ -444,8 +453,8 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			}
 		}
 
-		ArrayList typeImportsRefs= new ArrayList();
-		ArrayList staticImportsRefs= new ArrayList();
+		ArrayList<SimpleName> typeImportsRefs= new ArrayList<SimpleName>();
+		ArrayList<SimpleName> staticImportsRefs= new ArrayList<SimpleName>();
 
 		ImportReferencesCollector.collect(astRoot, inputElement.getJavaProject(), new Region(offset, length), typeImportsRefs, staticImportsRefs);
 
@@ -453,9 +462,9 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			return null;
 		}
 
-		HashSet namesToImport= new HashSet(typeImportsRefs.size());
+		HashSet<String> namesToImport= new HashSet<String>(typeImportsRefs.size());
 		for (int i= 0; i < typeImportsRefs.size(); i++) {
-			Name curr= (Name) typeImportsRefs.get(i);
+			Name curr= typeImportsRefs.get(i);
 			IBinding binding= curr.resolveBinding();
 			if (binding != null && binding.getKind() == IBinding.TYPE) {
 				ITypeBinding typeBinding= (ITypeBinding) binding;
@@ -475,9 +484,9 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			}
 		}
 
-		HashSet staticsToImport= new HashSet(staticImportsRefs.size());
+		HashSet<String> staticsToImport= new HashSet<String>(staticImportsRefs.size());
 		for (int i= 0; i < staticImportsRefs.size(); i++) {
-			Name curr= (Name) staticImportsRefs.get(i);
+			Name curr= staticImportsRefs.get(i);
 			IBinding binding= curr.resolveBinding();
 			if (binding != null) {
 				StringBuffer buf= new StringBuffer(Bindings.getImportName(binding));
@@ -493,8 +502,8 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			return null;
 		}
 
-		String[] typeImports= (String[]) namesToImport.toArray(new String[namesToImport.size()]);
-		String[] staticImports= (String[]) staticsToImport.toArray(new String[staticsToImport.size()]);
+		String[] typeImports= namesToImport.toArray(new String[namesToImport.size()]);
+		String[] staticImports= staticsToImport.toArray(new String[staticsToImport.size()]);
 		return new ClipboardData(inputElement, typeImports, staticImports);
 	}
 

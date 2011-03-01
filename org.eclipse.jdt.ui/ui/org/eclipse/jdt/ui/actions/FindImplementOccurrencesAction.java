@@ -82,6 +82,7 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
@@ -92,6 +93,7 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 	 * @param selection the Java text selection
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		CompilationUnit astRoot= selection.resolvePartialAstAtOffset();
 		setEnabled(astRoot != null && new ImplementOccurrencesFinder().initialize(astRoot, selection.getOffset(), selection.getLength()) == null);
@@ -102,6 +104,7 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 	 *
 	 * @since 3.2
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(false);
 	}
@@ -109,6 +112,7 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
 	 */
+	@Override
 	public final void run(ITextSelection ts) {
 		ITypeRoot input= getEditorInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), input))

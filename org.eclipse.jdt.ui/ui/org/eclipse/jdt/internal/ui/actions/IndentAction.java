@@ -131,6 +131,7 @@ public class IndentAction extends TextEditorAction {
 	/*
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
+	@Override
 	public void run() {
 		// update has been called by the framework
 		if (!isEnabled() || !validateEditorInputState())
@@ -254,7 +255,7 @@ public class IndentAction extends TextEditorAction {
 		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 		JavaIndenter indenter= new JavaIndenter(document, scanner, project);
 
-		ArrayList edits= new ArrayList();
+		ArrayList<ReplaceEdit> edits= new ArrayList<ReplaceEdit>();
 
 		int firstLine= document.getLineOfOffset(offset);
 		// check for marginal (zero-length) lines
@@ -281,11 +282,11 @@ public class IndentAction extends TextEditorAction {
 			return null;
 
 		if (edits.size() == 1)
-			return (TextEdit) edits.get(0);
+			return edits.get(0);
 
 		MultiTextEdit result= new MultiTextEdit();
-		for (Iterator iterator= edits.iterator(); iterator.hasNext();) {
-			TextEdit edit= (TextEdit) iterator.next();
+		for (Iterator<ReplaceEdit> iterator= edits.iterator(); iterator.hasNext();) {
+			TextEdit edit= iterator.next();
 			result.addChild(edit);
 		}
 
@@ -675,6 +676,7 @@ public class IndentAction extends TextEditorAction {
 	/*
 	 * @see org.eclipse.ui.texteditor.IUpdate#update()
 	 */
+	@Override
 	public void update() {
 		super.update();
 

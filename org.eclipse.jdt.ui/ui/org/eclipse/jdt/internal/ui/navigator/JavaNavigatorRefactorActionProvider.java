@@ -33,6 +33,7 @@ public class JavaNavigatorRefactorActionProvider extends CommonActionProvider {
 
 	private RefactorActionGroup fRefactorGroup;
 
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		if (fRefactorGroup != null) {
 			fRefactorGroup.fillActionBars(actionBars);
@@ -40,12 +41,14 @@ public class JavaNavigatorRefactorActionProvider extends CommonActionProvider {
 		}
 	}
 
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		if (fRefactorGroup != null) {
 			fRefactorGroup.fillContextMenu(menu);
 		}
 	}
 
+	@Override
 	public void init(ICommonActionExtensionSite site) {
 		ICommonViewerWorkbenchSite workbenchSite= null;
 		if (site.getViewSite() instanceof ICommonViewerWorkbenchSite)
@@ -62,6 +65,7 @@ public class JavaNavigatorRefactorActionProvider extends CommonActionProvider {
 		}
 	}
 
+	@Override
 	public void setContext(ActionContext context) {
 		if (fRefactorGroup != null) {
 			fRefactorGroup.setContext(context);
@@ -72,6 +76,7 @@ public class JavaNavigatorRefactorActionProvider extends CommonActionProvider {
 	 * @see org.eclipse.ui.actions.ActionGroup#dispose()
 	 * @since 3.5
 	 */
+	@Override
 	public void dispose() {
 		if (fRefactorGroup != null)
 			fRefactorGroup.dispose();

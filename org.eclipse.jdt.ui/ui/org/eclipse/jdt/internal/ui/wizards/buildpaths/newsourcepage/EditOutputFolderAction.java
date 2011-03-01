@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,6 +86,7 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getDetailedDescription() {
 	    return NewWizardMessages.PackageExplorerActionGroup_FormText_EditOutputFolder;
 	}
@@ -98,6 +99,7 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void run() {
 		try {
 
@@ -127,7 +129,7 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 				return;
 			}
 
-			final List classpathEntries= ClasspathModifier.getExistingEntries(javaProject);
+			final List<CPListElement> classpathEntries= ClasspathModifier.getExistingEntries(javaProject);
 			final CPListElement element= ClasspathModifier.getClasspathEntry(classpathEntries, cpElement);
 
 			final OutputLocationDialog dialog= new OutputLocationDialog(shell, element, classpathEntries, javaProject.getOutputLocation(), false);
@@ -182,7 +184,7 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 
 	private IFolder getOldOutputFolder(final BuildpathDelta delta) {
 	    IResource[] deletedResources= delta.getDeletedResources();
-	    List existingFolders= new ArrayList();
+	    List<IResource> existingFolders= new ArrayList<IResource>();
 	    for (int i= 0; i < deletedResources.length; i++) {
 	        if (deletedResources[i] instanceof IFolder && deletedResources[i].exists()) {
 	        	existingFolders.add(deletedResources[i]);
@@ -191,7 +193,7 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 	    if (existingFolders.size() > 0) {
 	    	if (existingFolders.size() > 1) {
 	    		String message= "Found more then one existing folders:"; //$NON-NLS-1$
-	    		for (Iterator iterator= existingFolders.iterator(); iterator.hasNext();) {
+	    		for (Iterator<IResource> iterator= existingFolders.iterator(); iterator.hasNext();) {
 	                IFolder folder= (IFolder)iterator.next();
 	                message+= "\n" + folder.toString(); //$NON-NLS-1$
 	            }
@@ -202,6 +204,7 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 	    return null;
     }
 
+	@Override
 	protected boolean canHandle(final IStructuredSelection elements) {
 		if (!fShowOutputFolders)
 			return false;

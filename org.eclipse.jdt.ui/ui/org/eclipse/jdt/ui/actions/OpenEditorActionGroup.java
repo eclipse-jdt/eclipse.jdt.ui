@@ -122,6 +122,7 @@ public class OpenEditorActionGroup extends ActionGroup {
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
+	@Override
 	public void fillActionBars(IActionBars actionBar) {
 		super.fillActionBars(actionBar);
 		setGlobalActionHandlers(actionBar);
@@ -130,6 +131,7 @@ public class OpenEditorActionGroup extends ActionGroup {
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 		appendToGroup(menu, fOpen);
@@ -141,6 +143,7 @@ public class OpenEditorActionGroup extends ActionGroup {
 	/*
 	 * @see ActionGroup#dispose()
 	 */
+	@Override
 	public void dispose() {
 		fSelectionProvider.removeSelectionChangedListener(fOpen);
 		super.dispose();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -148,6 +148,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			final IType type= getSelectedType(selection);
@@ -169,6 +170,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		try {
 			final IType type= SelectionConverter.getTypeAtOffset(fEditor);
@@ -216,14 +218,14 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			return;
 		}
 
-		ArrayList methods= new ArrayList();
+		ArrayList<IMethodBinding> methods= new ArrayList<IMethodBinding>();
 		for (int i= 0; i < selected.length; i++) {
 			Object elem= selected[i];
 			if (elem instanceof IMethodBinding) {
-				methods.add(elem);
+				methods.add((IMethodBinding) elem);
 			}
 		}
-		IMethodBinding[] methodToOverride= (IMethodBinding[]) methods.toArray(new IMethodBinding[methods.size()]);
+		IMethodBinding[] methodToOverride= methods.toArray(new IMethodBinding[methods.size()]);
 
 
 		final IEditorPart editor= JavaUI.openInEditor(type.getCompilationUnit());
@@ -277,6 +279,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(canEnable(selection));
@@ -290,6 +293,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		// Do nothing
 	}

@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class ReferencesInBinaryContext extends RefactoringStatusContext {
 
-	private List/*<SearchMatch>*/fMatches= new ArrayList();
+	private List<SearchMatch> fMatches= new ArrayList<SearchMatch>();
 
 	private final String fDescription;
 
@@ -39,13 +39,14 @@ public class ReferencesInBinaryContext extends RefactoringStatusContext {
 		fMatches.add(match);
 	}
 
-	public List/*<SearchMatch>*/getMatches() {
+	public List<SearchMatch> getMatches() {
 		return fMatches;
 	}
 
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.RefactoringStatusContext#getCorrespondingElement()
 	 */
+	@Override
 	public Object getCorrespondingElement() {
 		return null;
 	}
@@ -56,6 +57,7 @@ public class ReferencesInBinaryContext extends RefactoringStatusContext {
 		}
 	}
 
+	@Override
 	public String toString() {
 		return fDescription + " (" + fMatches.size() + " matches)"; //$NON-NLS-1$ //$NON-NLS-2$
 	}

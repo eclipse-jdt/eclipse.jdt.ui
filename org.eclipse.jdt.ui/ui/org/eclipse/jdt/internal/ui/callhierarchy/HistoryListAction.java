@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,7 +51,7 @@ public class HistoryListAction extends Action {
 
 	private class HistoryListDialog extends StatusDialog {
 
-		private ListDialogField fHistoryList;
+		private ListDialogField<IMember[]> fHistoryList;
 		private IStatus fHistoryStatus;
 		private IMember[] fResult;
 
@@ -63,15 +63,15 @@ public class HistoryListAction extends Action {
 				CallHierarchyMessages.HistoryListDialog_remove_button,
 			};
 
-			IListAdapter adapter= new IListAdapter() {
-				public void customButtonPressed(ListDialogField field, int index) {
+			IListAdapter<IMember[]> adapter= new IListAdapter<IMember[]>() {
+				public void customButtonPressed(ListDialogField<IMember[]> field, int index) {
 					doCustomButtonPressed();
 				}
-				public void selectionChanged(ListDialogField field) {
+				public void selectionChanged(ListDialogField<IMember[]> field) {
 					doSelectionChanged();
 				}
 
-				public void doubleClicked(ListDialogField field) {
+				public void doubleClicked(ListDialogField<IMember[]> field) {
 					doDoubleClicked();
 				}
 			};
@@ -81,6 +81,7 @@ public class HistoryListAction extends Action {
 				 * @see org.eclipse.jdt.ui.JavaElementLabelProvider#getStyledText(java.lang.Object)
 				 * @since 3.5
 				 */
+				@Override
 				public StyledString getStyledText(Object element) {
 					IMember[] members= (IMember[]) element;
 					return new StyledString(HistoryAction.getElementLabel(members));
@@ -88,6 +89,7 @@ public class HistoryListAction extends Action {
 				/*
 				 * @see org.eclipse.jdt.ui.JavaElementLabelProvider#getText(java.lang.Object)
 				 */
+				@Override
 				public String getText(Object element) {
 					IMember[] members= (IMember[]) element;
 					return HistoryAction.getElementLabel(members);
@@ -95,13 +97,14 @@ public class HistoryListAction extends Action {
 				/*
 				 * @see org.eclipse.jdt.ui.JavaElementLabelProvider#getImage(java.lang.Object)
 				 */
+				@Override
 				public Image getImage(Object element) {
 					IMember[] members= (IMember[]) element;
 					return super.getImage(members[0]);
 				}
 			};
 
-			fHistoryList= new ListDialogField(adapter, buttonLabels, new ColoringLabelProvider(labelProvider));
+			fHistoryList= new ListDialogField<IMember[]>(adapter, buttonLabels, new ColoringLabelProvider(labelProvider));
 			fHistoryList.setLabelText(CallHierarchyMessages.HistoryListDialog_label);
 			fHistoryList.setElements(Arrays.asList(elements));
 
@@ -119,6 +122,7 @@ public class HistoryListAction extends Action {
 		/*
 		 * @see Dialog#createDialogArea(Composite)
 		 */
+		@Override
 		protected Control createDialogArea(Composite parent) {
 			initializeDialogUnits(parent);
 
@@ -152,12 +156,12 @@ public class HistoryListAction extends Action {
 
 		private void doSelectionChanged() {
         	StatusInfo status= new StatusInfo();
-        	List selected= fHistoryList.getSelectedElements();
+        	List<IMember[]> selected= fHistoryList.getSelectedElements();
         	if (selected.size() != 1) {
         		status.setError(""); //$NON-NLS-1$
         		fResult= null;
         	} else {
-        		fResult= (IMember[]) selected.get(0);
+        		fResult= selected.get(0);
         	}
         	fHistoryList.enableButton(0, fHistoryList.getSize() > selected.size() && selected.size() != 0);
         	fHistoryStatus= status;
@@ -169,13 +173,14 @@ public class HistoryListAction extends Action {
 		}
 
 		public IMember[][] getRemaining() {
-			List elems= fHistoryList.getElements();
-			return (IMember[][]) elems.toArray(new IMember[elems.size()][]);
+			List<IMember[]> elems= fHistoryList.getElements();
+			return elems.toArray(new IMember[elems.size()][]);
 		}
 
 		/*
 		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 		 */
+		@Override
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.HISTORY_LIST_DIALOG);
@@ -185,6 +190,7 @@ public class HistoryListAction extends Action {
 		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 		 * @since 3.4
 		 */
+		@Override
 		protected boolean isResizable() {
 			return true;
 		}
@@ -202,6 +208,7 @@ public class HistoryListAction extends Action {
 	/*
 	 * @see IAction#run()
 	 */
+	@Override
 	public void run() {
 		IMember[][] historyEntries= fView.getHistoryEntries();
 		HistoryListDialog dialog= new HistoryListDialog(JavaPlugin.getActiveWorkbenchShell(), historyEntries);

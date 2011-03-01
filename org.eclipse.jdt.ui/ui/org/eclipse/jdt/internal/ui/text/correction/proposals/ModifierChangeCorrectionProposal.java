@@ -47,6 +47,7 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
 		fExcludedModifiers= excludedModifiers;
 	}
 
+	@Override
 	protected ASTRewrite getRewrite() {
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
 		ASTNode boundNode= astRoot.findDeclaringNode(fBinding);
