@@ -16,13 +16,14 @@ import java.util.Collection;
 public class CollectionsUtil {
 	/**
 	 * Returns an array containing all of the elements in the given collection. This is a
-	 * compile-time type-safe version of {@link Collection#toArray(Object[])}.
+	 * compile-time type-safe alternative to {@link Collection#toArray(Object[])}.
 	 * 
 	 * @param collection the source collection
 	 * @param clazz the type of the array elements
 	 * @param <A> the type of the array elements
 	 * @return an array of type <code>A</code> containing all of the elements in the given
 	 *         collection
+     * @throws NullPointerException if the specified collection or class is null
 	 */
 	public static <A> A[] toArray(Collection<? extends A> collection, Class<A> clazz) {
 		Object array= Array.newInstance(clazz, collection.size());
