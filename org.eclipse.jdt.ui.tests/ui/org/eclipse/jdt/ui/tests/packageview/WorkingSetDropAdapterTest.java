@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.TreeSelection;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
@@ -151,12 +152,10 @@ public class WorkingSetDropAdapterTest extends TestCase {
 	}
 
 	public void testRearrange1() throws Exception {
-		IWorkingSet ws1= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
-			"ws1", new IAdaptable[0]);
-		IWorkingSet ws2= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
-			"ws2", new IAdaptable[0]);
-		IWorkingSet ws3= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
-			"ws3", new IAdaptable[0]);
+		IWorkingSet ws1= createJavaWorkingSet("ws1", new IAdaptable[0]);
+		IWorkingSet ws2= createJavaWorkingSet("ws2", new IAdaptable[0]);
+		IWorkingSet ws3= createJavaWorkingSet("ws3", new IAdaptable[0]);
+
 		fPackageExplorer.internalTestShowWorkingSets(new IWorkingSet[] {ws1, ws2, ws3});
 		List selectedElements= new ArrayList();
 		selectedElements.add(ws3);
@@ -168,13 +167,22 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		assertEquals(ws2, actual[2]);
 	}
 
+	private static IWorkingSet createJavaWorkingSet(String name, IAdaptable[] elements) {
+		IWorkingSetManager workingSetManager= PlatformUI.getWorkbench().getWorkingSetManager();
+		IWorkingSet workingSet= workingSetManager.getWorkingSet(name);
+		if (workingSet != null)
+			workingSetManager.removeWorkingSet(workingSet);
+		workingSet= workingSetManager.createWorkingSet(name, elements);
+		workingSet.setId(IWorkingSetIDs.JAVA);
+		workingSetManager.addWorkingSet(workingSet);
+		return workingSet;
+	}
+
 	public void testRearrange2() throws Exception {
-		IWorkingSet ws1= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
-			"ws1", new IAdaptable[0]);
-		IWorkingSet ws2= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
-			"ws2", new IAdaptable[0]);
-		IWorkingSet ws3= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
-			"ws3", new IAdaptable[0]);
+		IWorkingSet ws1= createJavaWorkingSet("ws1", new IAdaptable[0]);
+		IWorkingSet ws2= createJavaWorkingSet("ws2", new IAdaptable[0]);
+		IWorkingSet ws3= createJavaWorkingSet("ws3", new IAdaptable[0]);
+
 		fPackageExplorer.internalTestShowWorkingSets(new IWorkingSet[] {ws1, ws2, ws3});
 		List selectedElements= new ArrayList();
 		selectedElements.add(ws3);
@@ -187,12 +195,10 @@ public class WorkingSetDropAdapterTest extends TestCase {
 	}
 
 	public void testRearrange3() throws Exception {
-		IWorkingSet ws1= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
-			"ws1", new IAdaptable[0]);
-		IWorkingSet ws2= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
-			"ws2", new IAdaptable[0]);
-		IWorkingSet ws3= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
-			"ws3", new IAdaptable[0]);
+		IWorkingSet ws1= createJavaWorkingSet("ws1", new IAdaptable[0]);
+		IWorkingSet ws2= createJavaWorkingSet("ws2", new IAdaptable[0]);
+		IWorkingSet ws3= createJavaWorkingSet("ws3", new IAdaptable[0]);
+
 		fPackageExplorer.internalTestShowWorkingSets(new IWorkingSet[] {ws1, ws2, ws3});
 		List selectedElements= new ArrayList();
 		selectedElements.add(ws1);
