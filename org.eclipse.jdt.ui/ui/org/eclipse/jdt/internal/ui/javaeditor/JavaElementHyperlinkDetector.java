@@ -178,7 +178,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 	 * @since 3.7
 	 */
 	public static ASTNode getBreakOrContinueLabelNode(IJavaElement input, IRegion region) {
-		CompilationUnit ast= SharedASTProvider.getAST((ITypeRoot)input, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
+		CompilationUnit ast= SharedASTProvider.getAST((ITypeRoot)input, SharedASTProvider.WAIT_NO, null);
 		if (ast == null)
 			return null;
 
