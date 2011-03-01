@@ -24,9 +24,10 @@ public class CollectionsUtil {
 	 * @return an array of type <code>A</code> containing all of the elements in the given
 	 *         collection
 	 */
-	@SuppressWarnings("unchecked")
 	public static <A> A[] toArray(Collection<? extends A> collection, Class<A> clazz) {
 		Object array= Array.newInstance(clazz, collection.size());
-		return collection.toArray((A[]) array);
+		@SuppressWarnings("unchecked")
+		A[] typedArray= collection.toArray((A[]) array);
+		return typedArray;
 	}
 }
