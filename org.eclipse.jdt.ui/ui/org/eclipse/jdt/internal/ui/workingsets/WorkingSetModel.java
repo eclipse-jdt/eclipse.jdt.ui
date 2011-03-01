@@ -388,12 +388,12 @@ public class WorkingSetModel {
 		result.addAll(fActiveWorkingSets);
 		IWorkingSet[] locals= fLocalWorkingSetManager.getWorkingSets();
 		for (int i= 0; i < locals.length; i++) {
-			if (!result.contains(locals[i]))
+			if (!result.contains(locals[i]) && isSupportedAsTopLevelElement(locals[i]))
 				result.add(locals[i]);
 		}
 		IWorkingSet[] globals= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets();
 		for (int i= 0; i < globals.length; i++) {
-			if (!result.contains(globals[i]))
+			if (!result.contains(globals[i]) && isSupportedAsTopLevelElement(locals[i]))
 				result.add(globals[i]);
 		}
 
