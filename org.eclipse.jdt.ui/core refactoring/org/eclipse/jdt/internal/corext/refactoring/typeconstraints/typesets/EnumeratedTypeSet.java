@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TTypes;
 
 /**
- * A type-safe wrapper for Set<TType> that also adds TType-specific
+ * A type-safe wrapper for {@code Set<TType>} that also adds {@code TType}-specific
  * functionality, e.g. subTypes() and superTypes().
  */
 public class EnumeratedTypeSet extends TypeSet {
@@ -43,6 +43,9 @@ public class EnumeratedTypeSet extends TypeSet {
 	/**
 	 * Constructs a new EnumeratedTypeSet with the members of Set s in it.
 	 * All elements of s must be TTypes.
+	 * 
+	 * @param types the types
+	 * @param typeSetEnvironment the environment
 	 */
 	public EnumeratedTypeSet(Iterator<TType> types, TypeSetEnvironment typeSetEnvironment) {
 		super(typeSetEnvironment);
@@ -54,6 +57,8 @@ public class EnumeratedTypeSet extends TypeSet {
 
 	/**
 	 * Constructs an empty EnumeratedTypeSet.
+	 * 
+	 * @param typeSetEnvironment the environment
 	 */
 	public EnumeratedTypeSet(TypeSetEnvironment typeSetEnvironment) {
 		super(typeSetEnvironment);
@@ -62,6 +67,9 @@ public class EnumeratedTypeSet extends TypeSet {
 
 	/**
 	 * Constructs a new EnumeratedTypeSet with the given single TType in it.
+	 * 
+	 * @param t the type
+	 * @param typeSetEnvironment the environment
 	 */
 	public EnumeratedTypeSet(TType t, TypeSetEnvironment typeSetEnvironment) {
 		super(typeSetEnvironment);
@@ -113,7 +121,7 @@ public class EnumeratedTypeSet extends TypeSet {
 	/**
 	 * Computes and returns a <em>new</em> EnumeratedTypeSet representing the intersection of the
 	 * receiver with s2. Does not modify the receiver.
-	 * @param s2
+	 * @param s2 the other type set
 	 */
 	@Override
 	protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
@@ -132,7 +140,7 @@ public class EnumeratedTypeSet extends TypeSet {
 
 	/**
 	 * Modifies this EnumeratedTypeSet to represent the intersection of the receiver with s2.
-	 * @param s2
+	 * @param s2 the other type set
 	 */
 	public void intersectWith(TypeSet s2) {
 		if (isUniverse()) {
@@ -455,13 +463,6 @@ public class EnumeratedTypeSet extends TypeSet {
 	@Override
 	public Iterator<TType> iterator() {
 		return fMembers.iterator();
-	}
-
-	/* (non-Javadoc)
-	 * @see java.util.Set#toArray(java.lang.Object[])
-	 */
-	public TType[] toArray(TType[] a) {
-		return fMembers.toArray(a);
 	}
 
 	/**
