@@ -1512,14 +1512,6 @@ public class PackageExplorerPart extends ViewPart
 	public void internalTestShowWorkingSets(IWorkingSet[] workingSets) {
 		if (fWorkingSetModel == null)
 			createWorkingSetModel();
-		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
-		List<IWorkingSet> list= Arrays.asList(manager.getAllWorkingSets());
-		for (int i= 0; i < workingSets.length; i++) {
-			IWorkingSet workingSet= workingSets[i];
-			if (!list.contains(workingSet))
-				manager.addWorkingSet(workingSet);
-		}
-		fWorkingSetModel.setActiveWorkingSets(workingSets);
 		fWorkingSetModel.setWorkingSets(workingSets, false, workingSets);
 		fWorkingSetModel.configured();
 		rootModeChanged(PackageExplorerPart.WORKING_SETS_AS_ROOTS);
