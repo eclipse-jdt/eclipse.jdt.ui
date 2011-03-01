@@ -379,12 +379,12 @@ public class WorkingSetModel {
 		result.addAll(fActiveWorkingSets);
 		IWorkingSet[] locals= fLocalWorkingSetManager.getWorkingSets();
 		for (int i= 0; i < locals.length; i++) {
-			if (!result.contains(locals[i]) && isSupportedAsTopLevelElement(locals[i]))
+			if (!result.contains(locals[i]))
 				result.add(locals[i]);
 		}
 		IWorkingSet[] globals= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets();
 		for (int i= 0; i < globals.length; i++) {
-			if (!result.contains(globals[i]) && isSupportedAsTopLevelElement(globals[i]))
+			if (!result.contains(globals[i]))
 				result.add(globals[i]);
 		}
 
@@ -416,7 +416,7 @@ public class WorkingSetModel {
 	 * @since 3.7
 	 */
 	public void setWorkingSets(IWorkingSet[] workingSets, boolean isSortingEnabled, IWorkingSet[] activeWorkingSets) {
-		Assert.isLegal(fAllWorkingSets.containsAll(Arrays.asList(activeWorkingSets)));
+		Assert.isLegal(Arrays.asList(getAllWorkingSets()).containsAll(Arrays.asList(activeWorkingSets)));
 		if (isSortingEnabled)
 			Arrays.sort(workingSets, new WorkingSetComparator(true));
 		fAllWorkingSets= new ArrayList(Arrays.asList(workingSets));
@@ -424,7 +424,7 @@ public class WorkingSetModel {
 	}
 
 	public void setActiveWorkingSets(IWorkingSet[] workingSets) {
-		Assert.isLegal(fAllWorkingSets.containsAll(Arrays.asList(workingSets)));
+		Assert.isLegal(Arrays.asList(getAllWorkingSets()).containsAll(Arrays.asList(workingSets)));
 		if (fIsSortingEnabled) {
 			Arrays.sort(workingSets, new WorkingSetComparator(true));
 		}
@@ -527,7 +527,7 @@ public class WorkingSetModel {
 		}
 
 		List result= getActiveAndAllWorkingSetsFromManagers();
-		if (fAllWorkingSets.size() > 0 && (!fAllWorkingSets.containsAll(result)))
+		if (!fAllWorkingSets.containsAll(result))
 			addNewlyCreatedWorkingSets(result);
 		return true;
 	}

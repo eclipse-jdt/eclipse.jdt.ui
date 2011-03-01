@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -78,8 +79,10 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.OpenAndLinkWithEditorHelper;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.actions.ActionContext;
@@ -1492,7 +1495,15 @@ public class PackageExplorerPart extends ViewPart
 	public void internalTestShowWorkingSets(IWorkingSet[] workingSets) {
 		if (fWorkingSetModel == null)
 			createWorkingSetModel();
+		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
+		List list= Arrays.asList(manager.getAllWorkingSets());
+		for (int i= 0; i < workingSets.length; i++) {
+			IWorkingSet workingSet= workingSets[i];
+			if (!list.contains(workingSet))
+				manager.addWorkingSet(workingSet);
+		}
 		fWorkingSetModel.setActiveWorkingSets(workingSets);
+		fWorkingSetModel.setWorkingSets(workingSets, false, workingSets);
 		fWorkingSetModel.configured();
 		rootModeChanged(PackageExplorerPart.WORKING_SETS_AS_ROOTS);
 	}
