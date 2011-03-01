@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.CollectionsUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -338,7 +339,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * @return the unsorted list of received proposals
 	 */
 	public final IJavaCompletionProposal[] getJavaCompletionProposals() {
-		return fJavaProposals.toArray(new IJavaCompletionProposal[fJavaProposals.size()]);
+		return CollectionsUtil.toArray(fJavaProposals, IJavaCompletionProposal.class);
 	}
 
 	/**
@@ -347,7 +348,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * @return the unsorted list of received keyword proposals
 	 */
 	public final IJavaCompletionProposal[] getKeywordCompletionProposals() {
-		return fKeywords.toArray(new JavaCompletionProposal[fKeywords.size()]);
+		return CollectionsUtil.toArray(fKeywords, IJavaCompletionProposal.class);
 	}
 
 	/**
