@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -79,10 +78,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.OpenAndLinkWithEditorHelper;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.actions.ActionContext;
@@ -197,10 +194,10 @@ public class PackageExplorerPart extends ViewPart
 	private OpenAndLinkWithEditorHelper fOpenAndLinkWithEditorHelper;
 
 	private String fWorkingSetLabel;
-	private IDialogSettings fDialogSettings;
+	private final IDialogSettings fDialogSettings;
 
 
-	private IPartListener2 fLinkWithEditorListener= new IPartListener2() {
+	private final IPartListener2 fLinkWithEditorListener= new IPartListener2() {
 		public void partVisible(IWorkbenchPartReference partRef) {}
 		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
 		public void partClosed(IWorkbenchPartReference partRef) {}
@@ -222,7 +219,7 @@ public class PackageExplorerPart extends ViewPart
 
 	};
 
-	private ITreeViewerListener fExpansionListener= new ITreeViewerListener() {
+	private final ITreeViewerListener fExpansionListener= new ITreeViewerListener() {
 		public void treeCollapsed(TreeExpansionEvent event) {
 		}
 
@@ -237,7 +234,7 @@ public class PackageExplorerPart extends ViewPart
 
 	private class PackageExplorerProblemTreeViewer extends ProblemTreeViewer {
 		// fix for 64372  Projects showing up in Package Explorer twice [package explorer]
-		private List<Object> fPendingRefreshes;
+		private final List<Object> fPendingRefreshes;
 
 		public PackageExplorerProblemTreeViewer(Composite parent, int style) {
 			super(parent, style);
@@ -1193,6 +1190,7 @@ public class PackageExplorerPart extends ViewPart
 	 * @param decorator a label decorator or <code>null</code> for no decorations.
 	 * @deprecated To be removed
 	 */
+	@Deprecated
 	public void setLabelDecorator(ILabelDecorator decorator) {
 	}
 
