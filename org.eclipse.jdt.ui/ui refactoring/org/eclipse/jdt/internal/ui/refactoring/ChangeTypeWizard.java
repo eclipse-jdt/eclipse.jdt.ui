@@ -18,13 +18,13 @@ import java.util.Iterator;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -284,21 +284,14 @@ public class ChangeTypeWizard extends RefactoringWizard {
 		 */
 		private void addTreeComponent(Composite parent) {
 			fTreeViewer= new TreeViewer(parent, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+			
 			GridData gd= new GridData(GridData.FILL_BOTH);
 			gd.grabExcessHorizontalSpace= true;
 			gd.grabExcessVerticalSpace= true;
-			GC gc= null;
-			try {
-				gc= new GC(parent);
-				gc.setFont(gc.getFont());
-				gd.heightHint= Dialog.convertHeightInCharsToPixels(gc.getFontMetrics(), 6); // 6 characters tall
-			} finally {
-				if (gc != null) {
-					gc.dispose();
-					gc= null;
-				}
-			}
-			fTreeViewer.getTree().setLayoutData(gd);
+			Tree tree= fTreeViewer.getTree();
+			Dialog.applyDialogFont(tree);
+			gd.heightHint= tree.getItemHeight() * 12;
+			tree.setLayoutData(gd);
 
 			fTreeViewer.setContentProvider(new ChangeTypeContentProvider(((ChangeTypeRefactoring)getRefactoring())));
 			fLabelProvider= new ChangeTypeLabelProvider();
