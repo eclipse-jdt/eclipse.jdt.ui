@@ -564,7 +564,7 @@ public class WorkingSetModel {
 					List<IWorkingSet> allElements= new ArrayList<IWorkingSet>(Arrays.asList(getAllWorkingSets()));
 					if (!allElements.contains(workingSet))
 						allElements.add(workingSet);
-					setWorkingSets(allElements.toArray(new IWorkingSet[elements.size()]), fIsSortingEnabled, elements.toArray(new IWorkingSet[elements.size()]));
+					setWorkingSets(allElements.toArray(new IWorkingSet[allElements.size()]), fIsSortingEnabled, elements.toArray(new IWorkingSet[elements.size()]));
 				}
 			}
 		}
@@ -585,7 +585,7 @@ public class WorkingSetModel {
 			elements.remove(workingSet);
 			List<IWorkingSet> allElements= new ArrayList<IWorkingSet>(Arrays.asList(getAllWorkingSets()));
 			allElements.remove(workingSet);
-			setWorkingSets(allElements.toArray(new IWorkingSet[elements.size()]), fIsSortingEnabled, elements.toArray(new IWorkingSet[elements.size()]));
+			setWorkingSets(allElements.toArray(new IWorkingSet[allElements.size()]), fIsSortingEnabled, elements.toArray(new IWorkingSet[elements.size()]));
 		} else if (IWorkingSetManager.CHANGE_WORKING_SET_LABEL_CHANGE.equals(property)) {
 			IWorkingSet workingSet= (IWorkingSet)event.getNewValue();
 			if (isSortingEnabled() && Arrays.asList(getAllWorkingSets()).contains(workingSet)) {
