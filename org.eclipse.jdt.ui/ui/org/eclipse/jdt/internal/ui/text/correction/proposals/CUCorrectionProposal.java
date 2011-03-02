@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,6 +80,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	private ICompilationUnit fCompilationUnit;
 	private LinkedProposalModel fLinkedProposalModel;
+	private boolean fSwitchedEditor;
 
 
 	/**
@@ -295,6 +296,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				if (part == null) {
 					part= JavaUI.openInEditor(unit);
 					if (part != null) {
+						fSwitchedEditor= true;
 						document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 					}
 				}
@@ -338,7 +340,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				if (fLinkedProposalModel.hasLinkedPositions() && part instanceof JavaEditor) {
 					// enter linked mode
 					ITextViewer viewer= ((JavaEditor) part).getViewer();
-					new LinkedProposalModelPresenter().enterLinkedMode(viewer, part, fLinkedProposalModel);
+					new LinkedProposalModelPresenter().enterLinkedMode(viewer, part, fSwitchedEditor, fLinkedProposalModel);
 				} else if (part instanceof ITextEditor) {
 					LinkedProposalPositionGroup.PositionInformation endPosition= fLinkedProposalModel.getEndPosition();
 					if (endPosition != null) {

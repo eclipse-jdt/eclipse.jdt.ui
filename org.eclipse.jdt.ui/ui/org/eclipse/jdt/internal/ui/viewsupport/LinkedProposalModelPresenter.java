@@ -60,7 +60,7 @@ public class LinkedProposalModelPresenter {
 	public LinkedProposalModelPresenter() {
 	}
 
-	public void enterLinkedMode(ITextViewer viewer, IEditorPart editor, LinkedProposalModel linkedProposalModel) throws BadLocationException {
+	public void enterLinkedMode(ITextViewer viewer, IEditorPart editor, boolean switchedEditor, LinkedProposalModel linkedProposalModel) throws BadLocationException {
 		IDocument document= viewer.getDocument();
 
 		LinkedModeModel model= new LinkedModeModel();
@@ -111,7 +111,7 @@ public class LinkedProposalModelPresenter {
 			LinkedProposalPositionGroup.PositionInformation endPosition= linkedProposalModel.getEndPosition();
 			if (endPosition != null && endPosition.getOffset() != -1) {
 				ui.setExitPosition(viewer, endPosition.getOffset() + endPosition.getLength(), 0, Integer.MAX_VALUE);
-			} else {
+			} else if (! switchedEditor) {
 				int cursorPosition= viewer.getSelectedRange().x;
 				if (cursorPosition != 0) {
 					ui.setExitPosition(viewer, cursorPosition, 0, Integer.MAX_VALUE);
