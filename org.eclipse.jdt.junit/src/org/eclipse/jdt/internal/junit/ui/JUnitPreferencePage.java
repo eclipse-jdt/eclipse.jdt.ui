@@ -413,7 +413,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 		fFilterTable= new Table(layouter, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 
-		new TableColumn(fFilterTable, SWT.NONE);
+		@SuppressWarnings("unused")
+		TableColumn tableColumn= new TableColumn(fFilterTable, SWT.NONE);
 		fFilterViewer= new CheckboxTableViewer(fFilterTable);
 		fTableEditor= new TableEditor(fFilterTable);
 		fFilterViewer.setLabelProvider(new FilterLabelProvider());
