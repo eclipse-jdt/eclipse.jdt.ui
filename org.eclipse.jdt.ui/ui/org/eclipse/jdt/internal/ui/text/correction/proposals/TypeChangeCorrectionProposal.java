@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,9 @@
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
+
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -23,6 +26,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -37,8 +41,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -55,10 +59,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 
-	private IBinding fBinding;
-	private CompilationUnit fAstRoot;
-	private ITypeBinding fNewType;
-	private boolean fOfferSuperTypeProposals;
+	private final IBinding fBinding;
+	private final CompilationUnit fAstRoot;
+	private final ITypeBinding fNewType;
+	private final ITypeBinding[] fTypeProposals;
 
 	public TypeChangeCorrectionProposal(ICompilationUnit targetCU, IBinding binding, CompilationUnit astRoot, ITypeBinding newType, boolean offerSuperTypeProposals, int relevance) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
@@ -67,10 +71,17 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 
 		fBinding= binding; // must be generic method or (generic) variable
 		fAstRoot= astRoot;
-		fNewType= newType;
-		fOfferSuperTypeProposals= offerSuperTypeProposals;
 
-		String typeName= BindingLabelProvider.getBindingLabel(newType, JavaElementLabels.ALL_DEFAULT);
+		if (offerSuperTypeProposals) {
+			fTypeProposals= ASTResolving.getRelaxingTypes(astRoot.getAST(), newType);
+			sortTypes(fTypeProposals);
+			fNewType= fTypeProposals[0];
+		} else {
+			fNewType= newType;
+			fTypeProposals= null;
+		}
+		
+		String typeName= BindingLabelProvider.getBindingLabel(fNewType, JavaElementLabels.ALL_DEFAULT);
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding varBinding= (IVariableBinding) binding;
 			String[] args= { BasicElementLabels.getJavaElementName(varBinding.getName()),  BasicElementLabels.getJavaElementName(typeName)};
@@ -184,15 +195,38 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 			// set up linked mode
 			final String KEY_TYPE= "type"; //$NON-NLS-1$
 			addLinkedPosition(rewrite.track(type), true, KEY_TYPE);
-			if (fOfferSuperTypeProposals) {
-				ITypeBinding[] typeProposals= ASTResolving.getRelaxingTypes(ast, fNewType);
-				for (int i= 0; i < typeProposals.length; i++) {
-					addLinkedPositionProposal(KEY_TYPE, typeProposals[i]);
+			if (fTypeProposals != null) {
+				for (int i= 0; i < fTypeProposals.length; i++) {
+					addLinkedPositionProposal(KEY_TYPE, fTypeProposals[i]);
 				}
 			}
 			return rewrite;
 		}
 		return null;
+	}
+
+	private void sortTypes(ITypeBinding[] typeProposals) {
+		ITypeBinding oldType;
+		if (fBinding instanceof IMethodBinding) {
+			oldType= ((IMethodBinding) fBinding).getReturnType();
+		} else {
+			oldType= ((IVariableBinding) fBinding).getType();
+		}
+		if (! oldType.isParameterizedType())
+			return;
+		
+		final ITypeBinding oldTypeDeclaration= oldType.getTypeDeclaration();
+		Arrays.sort(typeProposals, new Comparator<ITypeBinding>() {
+			public int compare(ITypeBinding o1, ITypeBinding o2) {
+				return rank(o2) - rank(o1);
+			}
+
+			private int rank(ITypeBinding type) {
+				if (type.getTypeDeclaration().equals(oldTypeDeclaration))
+					return 1;
+				return 0;
+			}
+		});
 	}
 
 
