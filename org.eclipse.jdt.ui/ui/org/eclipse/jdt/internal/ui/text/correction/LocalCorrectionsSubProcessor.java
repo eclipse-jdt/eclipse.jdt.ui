@@ -335,7 +335,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 		String name= CorrectionMessages.LocalCorrectionsSubProcessor_externalizestrings_description;
 
-		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 4, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 			@Override
 			public void apply(IDocument document) {
 				ExternalizeWizard.open(cu, JavaPlugin.getActiveWorkbenchShell());
@@ -353,7 +353,7 @@ public class LocalCorrectionsSubProcessor {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
 			Map<String, String> options= new Hashtable<String, String>();
 			options.put(CleanUpConstants.ADD_MISSING_NLS_TAGS, CleanUpOptions.TRUE);
-			FixCorrectionProposal addNLS= new FixCorrectionProposal(fix, new StringCleanUp(options), 3, image, context);
+			FixCorrectionProposal addNLS= new FixCorrectionProposal(fix, new StringCleanUp(options), 5, image, context);
 			addNLS.setCommandId(ADD_NON_NLS_ID);
 			proposals.add(addNLS);
 		}
