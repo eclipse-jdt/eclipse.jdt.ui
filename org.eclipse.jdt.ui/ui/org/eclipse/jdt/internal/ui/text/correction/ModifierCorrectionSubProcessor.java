@@ -194,8 +194,16 @@ public class ModifierCorrectionSubProcessor {
 					excludedModifiers= Modifier.STATIC;
 					break;
 				case TO_NON_PRIVATE:
-					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertodefault_description, name);
-					excludedModifiers= Modifier.PRIVATE;
+					int visibility;
+					if (cu.getParent().getElementName().equals(typeBinding.getPackage().getName())) {
+						visibility= Modifier.NONE;
+						excludedModifiers= Modifier.PRIVATE;
+					} else {
+						visibility= Modifier.PUBLIC;
+						includedModifiers= Modifier.PUBLIC;
+						excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
+					}
+					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changevisibility_description, new String[] { name, getVisibilityString(visibility) });
 					break;
 				case TO_NON_FINAL:
 					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertononfinal_description, name);

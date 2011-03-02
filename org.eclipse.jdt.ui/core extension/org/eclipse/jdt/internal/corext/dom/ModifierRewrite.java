@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -31,7 +32,11 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.PositionInformation;
 
 /**
  *
@@ -90,9 +95,10 @@ public class ModifierRewrite {
 	 * @param modifiers the modifiers to set
 	 * @param editGroup the edit group in which to collect the corresponding text edits, or
 	 *            <code>null</code> if ungrouped
+	 * @return a tracked position that contains the changed modifiers
 	 */
-	public void setModifiers(int modifiers, TextEditGroup editGroup) {
-		internalSetModifiers(modifiers, -1, editGroup);
+	public PositionInformation setModifiers(int modifiers, TextEditGroup editGroup) {
+		return internalSetModifiers(modifiers, -1, editGroup);
 	}
 
 	/**
@@ -103,9 +109,10 @@ public class ModifierRewrite {
 	 * @param excluded the modifiers to remove
 	 * @param editGroup the edit group in which to collect the corresponding text edits, or
 	 *            <code>null</code> if ungrouped
+	 * @return a tracked position that contains the changed modifiers
 	 */
-	public void setModifiers(int included, int excluded, TextEditGroup editGroup) {
-		internalSetModifiers(included, included | excluded, editGroup);
+	public PositionInformation setModifiers(int included, int excluded, TextEditGroup editGroup) {
+		return 	internalSetModifiers(included, included | excluded, editGroup);
 	}
 
 	/**
@@ -115,9 +122,10 @@ public class ModifierRewrite {
 	 * @param visibilityFlags the new visibility modifiers
 	 * @param editGroup the edit group in which to collect the corresponding text edits, or
 	 *            <code>null</code> if ungrouped
+	 * @return a tracked position that contains the changed modifiers, or <code>null</code> iff <code>editGroup == null</code>
 	 */
-	public void setVisibility(int visibilityFlags, TextEditGroup editGroup) {
-		internalSetModifiers(visibilityFlags, VISIBILITY_MODIFIERS, editGroup);
+	public PositionInformation setVisibility(int visibilityFlags, TextEditGroup editGroup) {
+		return internalSetModifiers(visibilityFlags, VISIBILITY_MODIFIERS, editGroup);
 	}
 
 	public void copyAllModifiers(ASTNode otherDecl, TextEditGroup editGroup) {
@@ -167,9 +175,13 @@ public class ModifierRewrite {
 	 * @param consideredFlags mask of modifiers to consider
 	 * @param editGroup the edit group in which to collect the corresponding text edits, or
 	 *            <code>null</code> if ungrouped
+	 * @return a tracked position that contains the changed modifiers
 	 */
-	private void internalSetModifiers(int modifiers, int consideredFlags, TextEditGroup editGroup) {
+	private PositionInformation internalSetModifiers(int modifiers, int consideredFlags, TextEditGroup editGroup) {
 		int newModifiers= modifiers & consideredFlags;
+
+		ITrackedNodePosition trackedFallback= null;
+		List<ITrackedNodePosition> trackedNodes= new ArrayList<ITrackedNodePosition>();
 
 		// remove modifiers
 		List<IExtendedModifier> originalList= fModifierRewrite.getOriginalList();
@@ -180,6 +192,8 @@ public class ModifierRewrite {
 				if ((consideredFlags & flag) != 0) {
 					if ((newModifiers & flag) == 0) {
 						fModifierRewrite.remove(curr, editGroup);
+						if (trackedFallback == null)
+							trackedFallback= fModifierRewrite.getASTRewrite().track(curr);
 					}
 					newModifiers &= ~flag;
 				}
@@ -207,6 +221,17 @@ public class ModifierRewrite {
 			} else {
 				fModifierRewrite.insertLast(curr, editGroup);
 			}
+			trackedNodes.add(fModifierRewrite.getASTRewrite().track(curr));
+		}
+		
+		if (trackedNodes.isEmpty()) {
+			if (trackedFallback == null) {
+				// out of tricks...
+				trackedFallback= fModifierRewrite.getASTRewrite().track(fModifierRewrite.getParent());
+			}
+			return new LinkedProposalPositionGroup.StartPositionInformation(trackedFallback);
+		} else {
+			return new LinkedProposalPositionGroup.TrackedNodesPosition(trackedNodes);
 		}
 	}
 }
