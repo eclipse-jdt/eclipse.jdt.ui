@@ -61,11 +61,8 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -679,30 +676,15 @@ public class JavadocTagsSubProcessor {
 			return;
 		}
 		ITypeBinding typeBinding= (ITypeBinding)binding;
-		String typeQualifiedName= Bindings.getTypeQualifiedName(typeBinding);
-		if (typeQualifiedName.equals(name.getFullyQualifiedName())) {
-			return;
-		}
-		ITypeBinding outerClass= typeBinding;
-		while (outerClass.getDeclaringClass() != null) {
-			outerClass= outerClass.getDeclaringClass();
-		}
 
 		AST ast= node.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
+		rewrite.replace(name, ast.newName(typeBinding.getQualifiedName()), null);
 
 		String label= CorrectionMessages.JavadocTagsSubProcessor_qualifylinktoinner_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
 
-		ImportRewrite importRewrite= proposal.createImportRewrite(context.getASTRoot());
-		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, importRewrite);
-		String importedType= importRewrite.addImport(outerClass, importRewriteContext);
-		if (importedType.equals(outerClass.getName())) {
-			rewrite.replace(name, ast.newName(typeQualifiedName), null);
-		} else {
-			rewrite.replace(name, ast.newName(typeBinding.getQualifiedName()), null);
-		}
 		proposals.add(proposal);
 	}
 }

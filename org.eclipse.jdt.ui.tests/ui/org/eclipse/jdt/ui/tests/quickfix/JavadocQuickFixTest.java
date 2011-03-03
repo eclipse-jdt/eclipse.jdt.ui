@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1280,11 +1280,10 @@ public class JavadocQuickFixTest extends QuickFixTest {
 			buf= new StringBuffer();
 			buf.append("package pack2;\n");
 			buf.append("\n");
-			buf.append("import pack.A;\n");
 			buf.append("import pack.A.B.C;\n");
 			buf.append("\n");
 			buf.append("/**\n");
-			buf.append(" * {@link A.B.C} \n");
+			buf.append(" * {@link pack.A.B.C} \n");
 			buf.append(" */\n");
 			buf.append("public class E {\n");
 			buf.append("}\n");
@@ -1296,5 +1295,97 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		}
 	}
 
+	public void testInvalidQualification2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public static class B {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("pack2", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack2;\n");
+		buf.append("\n");
+		buf.append("import pack.A;\n");
+		buf.append("\n");
+		buf.append("/**\n");
+		buf.append(" * {@link A.B} \n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package pack2;\n");
+		buf.append("\n");
+		buf.append("import pack.A;\n");
+		buf.append("\n");
+		buf.append("/**\n");
+		buf.append(" * {@link pack.A.B} \n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testInvalidQualification3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public interface B {\n");
+		buf.append("        void foo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("pack2", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack2;\n");
+		buf.append("\n");
+		buf.append("import pack.A;\n");
+		buf.append("\n");
+		buf.append("/**\n");
+		buf.append(" * {@link A.B#foo()} \n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package pack2;\n");
+		buf.append("\n");
+		buf.append("import pack.A;\n");
+		buf.append("\n");
+		buf.append("/**\n");
+		buf.append(" * {@link pack.A.B#foo()} \n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
 
 }
