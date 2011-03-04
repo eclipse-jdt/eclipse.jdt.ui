@@ -26,7 +26,9 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.Region;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
@@ -37,6 +39,7 @@ import org.eclipse.ui.texteditor.IEditorStatusLine;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -52,6 +55,8 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkDetector;
+import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
@@ -138,16 +143,24 @@ public class OpenAction extends SelectionDispatchAction {
 	 */
 	@Override
 	public void run(ITextSelection selection) {
+		ITypeRoot input= EditorUtility.getEditorInputJavaElement(fEditor, false);
+		if (input == null) {
+			setStatusLineMessage();
+			return;
+		}
+		IRegion region= new Region(selection.getOffset(), selection.getLength());
+		OccurrenceLocation location= JavaElementHyperlinkDetector.findBreakOrContinueTarget(input, region);
+		if (location != null) {
+			fEditor.selectAndReveal(location.getOffset(), location.getLength());
+			return;
+		}
 		try {
 			IJavaElement[] elements= SelectionConverter.codeResolveForked(fEditor, false);
 			elements= selectOpenableElements(elements);
 			if (elements == null || elements.length == 0) {
 				if (!ActionUtil.isProcessable(fEditor))
 					return;
-				IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
-				if (statusLine != null)
-					statusLine.setMessage(true, ActionMessages.OpenAction_error_messageBadSelection, null);
-				getShell().getDisplay().beep();
+				setStatusLineMessage();
 				return;
 			}
 
@@ -164,6 +177,19 @@ public class OpenAction extends SelectionDispatchAction {
 		} catch (InterruptedException e) {
 			// ignore
 		}
+	}
+
+	/**
+	 * Sets the error message in the status line.
+	 * 
+	 * @since 3.7
+	 */
+	private void setStatusLineMessage() {
+		IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
+		if (statusLine != null)
+			statusLine.setMessage(true, ActionMessages.OpenAction_error_messageBadSelection, null);
+		getShell().getDisplay().beep();
+		return;
 	}
 
 	/**
