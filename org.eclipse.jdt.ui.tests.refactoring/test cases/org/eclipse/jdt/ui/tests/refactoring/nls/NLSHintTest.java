@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,8 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class NLSHintTest extends TestCase {
 
+	private static final Class THIS= NLSHintTest.class;
+
     private IJavaProject javaProject;
 
     private IPackageFragmentRoot fSourceFolder;
@@ -55,25 +57,17 @@ public class NLSHintTest extends TestCase {
 		"	}\n" +
 		"}\n";
 
-	private static final boolean ALL_TESTS= true;
-
 
     public NLSHintTest(String arg) {
         super(arg);
     }
 
-    public static Test allTests() {
-		if (ALL_TESTS) {
-    		return new ProjectTestSetup(new TestSuite(NLSHintTest.class));
-    	} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new NLSHintTest("testResourceBundleHint"));
-			return new ProjectTestSetup(suite);
-    	}
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
 	}
 
-	public static Test suite() {
-		return allTests();
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 
     protected void setUp() throws Exception {

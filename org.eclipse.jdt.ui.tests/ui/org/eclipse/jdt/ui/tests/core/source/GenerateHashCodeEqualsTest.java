@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,16 +54,12 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 		super(name);
 	}
 
-	public static Test setupTest(Test test) {
+	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
-	}
-	
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
 	}
 
 	public static Test suite() {
-		return allTests();
+		return setUpTest(new TestSuite(THIS));
 	}
 
 	public void runOperation(IType type, IField[] fields, IJavaElement insertBefore, boolean createComments, boolean useInstanceof, boolean useBlocks, boolean force) throws CoreException {
@@ -1370,55 +1366,55 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	 */
 	public void testAbstractSuperMethods() throws Exception {
 	
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + 
-				"\r\n" + 
-				"abstract class Super {\r\n" + 
-				"	public abstract int hashCode();\r\n" + 
-				"	public abstract boolean equals(Object other);\r\n" + 
-				"}\r\n" + 
-				"\r\n" + 
-				"class Sub extends Super {\r\n" + 
-				"	String name;\r\n" + 
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"abstract class Super {\r\n" +
+				"	public abstract int hashCode();\r\n" +
+				"	public abstract boolean equals(Object other);\r\n" +
+				"}\r\n" +
+				"\r\n" +
+				"class Sub extends Super {\r\n" +
+				"	String name;\r\n" +
 				"}" +
 				"", true, null);
 	
 		IField[] fields= getFields(a.getType("Sub"), new String[] {"name" });
 		runOperation(a.getType("Sub"), fields, null, false, false, false, false);
 	
-		String expected= "package p;\r\n" + 
-				"\r\n" + 
-				"abstract class Super {\r\n" + 
-				"	public abstract int hashCode();\r\n" + 
-				"	public abstract boolean equals(Object other);\r\n" + 
-				"}\r\n" + 
-				"\r\n" + 
-				"class Sub extends Super {\r\n" + 
-				"	String name;\r\n" + 
-				"\r\n" + 
-				"	@Override\r\n" + 
-				"	public int hashCode() {\r\n" + 
-				"		final int prime = 31;\r\n" + 
-				"		int result = 1;\r\n" + 
-				"		result = prime * result + ((name == null) ? 0 : name.hashCode());\r\n" + 
-				"		return result;\r\n" + 
-				"	}\r\n" + 
-				"\r\n" + 
-				"	@Override\r\n" + 
-				"	public boolean equals(Object obj) {\r\n" + 
-				"		if (this == obj)\r\n" + 
-				"			return true;\r\n" + 
-				"		if (obj == null)\r\n" + 
-				"			return false;\r\n" + 
-				"		if (getClass() != obj.getClass())\r\n" + 
-				"			return false;\r\n" + 
-				"		Sub other = (Sub) obj;\r\n" + 
-				"		if (name == null) {\r\n" + 
-				"			if (other.name != null)\r\n" + 
-				"				return false;\r\n" + 
-				"		} else if (!name.equals(other.name))\r\n" + 
-				"			return false;\r\n" + 
-				"		return true;\r\n" + 
-				"	}\r\n" + 
+		String expected= "package p;\r\n" +
+				"\r\n" +
+				"abstract class Super {\r\n" +
+				"	public abstract int hashCode();\r\n" +
+				"	public abstract boolean equals(Object other);\r\n" +
+				"}\r\n" +
+				"\r\n" +
+				"class Sub extends Super {\r\n" +
+				"	String name;\r\n" +
+				"\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		final int prime = 31;\r\n" +
+				"		int result = 1;\r\n" +
+				"		result = prime * result + ((name == null) ? 0 : name.hashCode());\r\n" +
+				"		return result;\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (obj == null)\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		Sub other = (Sub) obj;\r\n" +
+				"		if (name == null) {\r\n" +
+				"			if (other.name != null)\r\n" +
+				"				return false;\r\n" +
+				"		} else if (!name.equals(other.name))\r\n" +
+				"			return false;\r\n" +
+				"		return true;\r\n" +
+				"	}\r\n" +
 				"}" +
 				"";
 	

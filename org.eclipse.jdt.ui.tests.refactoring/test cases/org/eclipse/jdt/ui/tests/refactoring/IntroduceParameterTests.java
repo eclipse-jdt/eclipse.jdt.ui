@@ -28,6 +28,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefact
 
 public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 
+	private static final Class clazz= IntroduceParameterTests.class;
+
 	private static final String SLASH_OUT= "/out";
 	public IntroduceParameterTests(String name) {
 		super(name);
@@ -38,14 +40,7 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	}
 
 	public static Test suite() {
-		if (true) {
-			return new RefactoringTestSetup(new TestSuite(IntroduceParameterTests.class));
-		} else {
-			System.err.println("*** Running only parts of IntroduceParameterTests!");
-			TestSuite suite= new TestSuite();
-			suite.addTest(new IntroduceParameterTests("testSimple_StaticGetter1"));
-			return new RefactoringTestSetup(suite);
-		}
+		return setUpTest(new TestSuite(clazz));
 	}
 
 	protected String getResourceLocation() {

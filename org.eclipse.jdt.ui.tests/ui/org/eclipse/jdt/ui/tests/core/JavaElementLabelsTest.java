@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,18 +40,8 @@ public class JavaElementLabelsTest extends CoreTests {
 		super(name);
 	}
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
-	}
-
 	public static Test suite() {
-		if (true) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new JavaElementLabelsTest("testOrganizeImportOnRange2"));
-			return new ProjectTestSetup(suite);
-		}
+		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {

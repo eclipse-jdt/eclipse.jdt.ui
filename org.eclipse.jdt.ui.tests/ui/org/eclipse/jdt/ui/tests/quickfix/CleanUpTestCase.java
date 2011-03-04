@@ -75,7 +75,7 @@ public class CleanUpTestCase extends QuickFixTest {
 
 	private CustomProfile fProfile;
 
-	public static Test allTests() {
+	public static Test suite() {
 		TestSuite suite= new TestSuite();
 
 		suite.addTest(CleanUpStressTest.suite());
@@ -85,13 +85,6 @@ public class CleanUpTestCase extends QuickFixTest {
 		suite.addTest(CleanUpActionTest.suite());
 
 		return suite;
-	}
-
-	public static Test suite() {
-		if (true)
-			return allTests();
-
-		return setUpTest(new CleanUpTest("testRemoveBlock05"));
 	}
 
 	public static Test setUpTest(Test test) {

@@ -71,28 +71,28 @@ public class QuickFixTest extends TestCase {
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
-		suite.addTest(SerialVersionQuickFixTest.allTests());
-		suite.addTest(UtilitiesTest.allTests());
-		suite.addTest(UnresolvedTypesQuickFixTest.allTests());
-		suite.addTest(UnresolvedVariablesQuickFixTest.allTests());
-		suite.addTest(UnresolvedMethodsQuickFixTest.allTests());
-		suite.addTest(ReturnTypeQuickFixTest.allTests());
-		suite.addTest(LocalCorrectionsQuickFixTest.allTests());
-		suite.addTest(TypeMismatchQuickFixTests.allTests());
-		suite.addTest(ReorgQuickFixTest.allTests());
-		suite.addTest(ModifierCorrectionsQuickFixTest.allTests());
-		suite.addTest(GetterSetterQuickFixTest.allTests());
-		suite.addTest(AssistQuickFixTest.allTests());
+		suite.addTest(SerialVersionQuickFixTest.suite());
+		suite.addTest(UtilitiesTest.suite());
+		suite.addTest(UnresolvedTypesQuickFixTest.suite());
+		suite.addTest(UnresolvedVariablesQuickFixTest.suite());
+		suite.addTest(UnresolvedMethodsQuickFixTest.suite());
+		suite.addTest(ReturnTypeQuickFixTest.suite());
+		suite.addTest(LocalCorrectionsQuickFixTest.suite());
+		suite.addTest(TypeMismatchQuickFixTests.suite());
+		suite.addTest(ReorgQuickFixTest.suite());
+		suite.addTest(ModifierCorrectionsQuickFixTest.suite());
+		suite.addTest(GetterSetterQuickFixTest.suite());
+		suite.addTest(AssistQuickFixTest.suite());
 		suite.addTest(ChangeNonStaticToStaticTest.suite());
-		suite.addTest(MarkerResolutionTest.allTests());
-		suite.addTest(JavadocQuickFixTest.allTests());
-		suite.addTest(ConvertForLoopQuickFixTest.allTests());
-		suite.addTest(ConvertIterableLoopQuickFixTest.allTests());
-		suite.addTest(AdvancedQuickAssistTest.allTests());
-		suite.addTest(CleanUpTestCase.allTests());
-		suite.addTest(QuickFixEnablementTest.allTests());
-		suite.addTest(SurroundWithTemplateTest.allTests());
-		suite.addTest(TypeParameterMismatchTest.allTests());
+		suite.addTest(MarkerResolutionTest.suite());
+		suite.addTest(JavadocQuickFixTest.suite());
+		suite.addTest(ConvertForLoopQuickFixTest.suite());
+		suite.addTest(ConvertIterableLoopQuickFixTest.suite());
+		suite.addTest(AdvancedQuickAssistTest.suite());
+		suite.addTest(CleanUpTestCase.suite());
+		suite.addTest(QuickFixEnablementTest.suite());
+		suite.addTest(SurroundWithTemplateTest.suite());
+		suite.addTest(TypeParameterMismatchTest.suite());
 
 		return new ProjectTestSetup(suite);
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,16 +27,12 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 
 	private static final Class THIS= TypeCompletionTest.class;
 
-	public static Test allTests() {
-		return new TestSuite(THIS, suiteName(THIS));
-	}
-
 	public static Test setUpTest(Test test) {
 		return new CompletionTestSetup(test);
 	}
 
 	public static Test suite() {
-		return new CompletionTestSetup(allTests());
+		return setUpTest(new TestSuite(THIS, suiteName(THIS)));
 	}
 
 	/*

@@ -47,16 +47,12 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		super(name);
 	}
 
-	public static Test allTests() {
+	public static Test suite() {
 		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
-	}
-
-	public static Test suite() {
-		return allTests();
 	}
 
 	protected void setUp() throws Exception {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,14 +59,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public static Test suite() {
-		if (true) {
-			return new RefactoringTestSetup(new TestSuite(clazz));
-		} else {
-			System.err.println("*** Running only parts of " + clazz.getName() + "!");
-			TestSuite suite= new TestSuite();
-			suite.addTest(new ChangeSignatureTests("testDelegate05"));
-			return new RefactoringTestSetup(suite);
-		}
+		return setUpTest(new TestSuite(clazz));
 	}
 
 	public static Test setUpTest(Test someTest) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,16 +64,12 @@ public class MethodOverrideTest extends CoreTests {
 	private static final Class THIS= MethodOverrideTest.class;
 	private static final boolean DEBUG_SHOWRESULTS= false;
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
-	}
-
-	public static Test suite() {
-		return allTests();
 	}
 
 	private IJavaProject fJProject1;

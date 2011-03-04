@@ -58,19 +58,12 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		super(name);
 	}
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
-	}
-
-	public static Test suite() {
-		if (true) {
-			return allTests();
-		}
-		return setUpTest(new AdvancedQuickAssistTest("testAssignToLocal1"));
 	}
 
 

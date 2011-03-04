@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,16 +38,12 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	private static final String[] FIELD_INLINE_TAGS= {"@docRoot", "@link", "@linkplain", "@value", "@code", "@literal", };
 	private static final String[] HTML_TAGS= {"b", "blockquote", "br", "code", "dd", "dl", "dt", "em", "hr", "h1", "h2", "h3", "h4", "h5", "h6", "i", "li", "nl", "ol", "p", "pre", "q", "td", "th", "tr", "tt", "ul",};
 
-	public static Test allTests() {
-		return new TestSuite(THIS, suiteName(THIS));
-	}
-
 	public static Test setUpTest(Test test) {
 		return new CompletionTestSetup(test);
 	}
 
 	public static Test suite() {
-		return new CompletionTestSetup(allTests());
+		return setUpTest(new TestSuite(THIS, suiteName(THIS)));
 	}
 
 	/*

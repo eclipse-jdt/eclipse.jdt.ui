@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,8 +58,12 @@ public class ContentAssistHistoryTest extends TestCase {
 		super(name);
 	}
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS, "ContentAssistHistoryTest")) {
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS, "ContentAssistHistoryTest"));
+	}
+
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test) {
 			/*
 			 * @see org.eclipse.jdt.ui.tests.core.ProjectTestSetup#setUp()
 			 */
@@ -76,10 +80,6 @@ public class ContentAssistHistoryTest extends TestCase {
 				fgLinkedListT= project.findType(LINKED_LIST);
 			}
 		};
-	}
-
-	public static Test suite() {
-		return allTests();
 	}
 
 	public void testContentAssistHistoryIntInt() {

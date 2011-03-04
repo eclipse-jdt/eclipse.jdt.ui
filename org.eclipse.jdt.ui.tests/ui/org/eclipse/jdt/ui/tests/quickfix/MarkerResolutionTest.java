@@ -99,14 +99,10 @@ public class MarkerResolutionTest extends QuickFixTest {
 		super(name);
 	}
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
 	}
 
-	public static Test suite() {
-		return allTests();
-	}
-	
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
 	}

@@ -66,18 +66,13 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		super(name);
 	}
 
-	public static Test allTests() {
+	public static Test suite() {
 		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
 	}
-
-	public static Test suite() {
-		return allTests();
-	}
-
 
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getDefaultOptions();
@@ -719,7 +714,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 	public void testTypeMismatchForParameterizedType() throws Exception {
 		Map<String, String> options= fJProject1.getOptions(false);
 		try {
-			Map<String, String> tempOptions= new HashMap<String, String>(options); 
+			Map<String, String> tempOptions= new HashMap<String, String>(options);
 			tempOptions.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
 			tempOptions.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 			fJProject1.setOptions(tempOptions);
@@ -1411,7 +1406,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 	public void testMismatchingReturnTypeOnGenericMethod14() throws Exception {
 		Map<String, String> options= fJProject1.getOptions(false);
 		try {
-			Map<String, String> options14= new HashMap<String, String>(options); 
+			Map<String, String> options14= new HashMap<String, String>(options);
 			JavaModelUtil.setComplianceOptions(options14, JavaCore.VERSION_1_4);
 			fJProject1.setOptions(options14);
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

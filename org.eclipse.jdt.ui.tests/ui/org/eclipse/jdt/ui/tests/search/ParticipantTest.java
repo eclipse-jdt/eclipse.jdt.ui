@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,8 @@ import org.eclipse.jdt.internal.ui.search.SearchParticipantsExtensionPoint;
  */
 public class ParticipantTest extends TestCase {
 
+	private static Class THIS= ParticipantTest.class;
+
 	static class TestExtensionPoint extends SearchParticipantsExtensionPoint {
 		public SearchParticipantRecord[] getSearchParticipants(IProject[] concernedProjects) {
 			return new SearchParticipantRecord[] { new SearchParticipantRecord(new TestParticipantRecord(), new TestParticipant()) };
@@ -63,12 +65,12 @@ public class ParticipantTest extends TestCase {
 		}
 	}
 
-	public static Test allTests() {
-		return new JUnitSourceSetup(new TestSuite(ParticipantTest.class), new TestExtensionPoint());
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
 	}
 
-	public static Test suite() {
-		return allTests();
+	public static Test setUpTest(Test test) {
+		return new JUnitSourceSetup(test, new TestExtensionPoint());
 	}
 
 	public ParticipantTest(String name) {

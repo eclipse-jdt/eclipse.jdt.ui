@@ -46,22 +46,12 @@ public class TypeRulesTest extends CoreTests {
 		super(name);
 	}
 
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
+	}
+
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
-	}
-
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
-	}
-
-	public static Test suite() {
-		if (true) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new TypeRulesTest("test1"));
-			return new ProjectTestSetup(suite);
-		}
 	}
 
 	protected void setUp() throws Exception {

@@ -60,12 +60,8 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		super(name);
 	}
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
-	}
-
 	public static Test suite() {
-		return allTests();
+		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {

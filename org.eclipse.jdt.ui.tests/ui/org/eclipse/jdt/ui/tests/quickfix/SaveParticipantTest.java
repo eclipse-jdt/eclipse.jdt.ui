@@ -36,12 +36,18 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class SaveParticipantTest extends CleanUpTestCase {
 
+	private static final Class THIS= SaveParticipantTest.class;
+
 	public SaveParticipantTest(String name) {
 		super(name);
 	}
 
 	public static Test suite() {
-		return new ProjectTestSetup(new TestSuite(SaveParticipantTest.class));
+		return setUpTest(new TestSuite(THIS));
+	}
+
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 
 	protected void setUp() throws Exception {
