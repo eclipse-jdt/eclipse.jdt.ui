@@ -2009,7 +2009,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	/**
-	 * @return the source viewer used by this editor
+	 * Returns the editor's source viewer. May return <code>null</code> before
+	 * the editor's part has been created and after disposal.
+	 *
+	 * @return the editor's source viewer, which may be <code>null</code>
 	 */
 	public final ISourceViewer getViewer() {
 		return getSourceViewer();
