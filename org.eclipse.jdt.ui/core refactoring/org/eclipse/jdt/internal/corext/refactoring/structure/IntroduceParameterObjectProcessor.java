@@ -74,6 +74,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor.Parameter;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
+import org.eclipse.jdt.core.refactoring.participants.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -528,7 +529,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 
 	@Override
 	public String getIdentifier() {
-		return "org.eclipse.jdt.ui.introduceParameterObjectRefactoring"; //$NON-NLS-1$;
+		return IRefactoringProcessorIds.INTRODUCE_PARAMETER_OBJECT_PROCESSOR;
 	}
 
 	@Override

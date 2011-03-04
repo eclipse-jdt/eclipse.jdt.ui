@@ -95,6 +95,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureArguments;
 import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureArguments.Parameter;
 import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureArguments.ThrownException;
+import org.eclipse.jdt.core.refactoring.participants.IRefactoringProcessorIds;
 import org.eclipse.jdt.core.refactoring.participants.JavaParticipantManager;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -2787,7 +2788,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	@Override
 	public String getIdentifier() {
-		return "org.eclipse.jdt.ui.changeMethodSignatureRefactoring"; //$NON-NLS-1$;
+		return IRefactoringProcessorIds.CHANGE_METHOD_SIGNATURE_PROCESSOR;
 	}
 
 	@Override
