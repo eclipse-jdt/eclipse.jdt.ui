@@ -32,7 +32,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpMessages;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.BuiltInProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.KeySet;
@@ -178,8 +177,8 @@ public class CleanUpPreferenceUtil {
     }
 
 	/**
-	 * Returns a list of {@link ProfileManager.Profile} stored in the <code>scope</code>
-	 * including the built in profiles.
+	 * Returns a list of {@link org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile} stored in the <code>scope</code>,
+	 * including the built-in profiles.
 	 * @param scope the context from which to retrieve the profiles
 	 * @return list of profiles, not null
 	 * @since 3.3
