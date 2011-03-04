@@ -1224,7 +1224,25 @@ public class SemanticHighlightings {
 		@Override
 		public boolean consumes(SemanticToken token) {
 			IBinding binding= getMethodBinding(token);
-			return binding != null ? binding.isDeprecated() : false;
+			if (binding != null) {
+				if (binding.isDeprecated())
+					return true;
+				if (binding instanceof IMethodBinding) {
+					IMethodBinding methodBinding= (IMethodBinding) binding;
+					if (methodBinding.isConstructor() && methodBinding.getJavaElement() == null) {
+						ITypeBinding declaringClass= methodBinding.getDeclaringClass();
+						if (declaringClass.isAnonymous()) {
+							ITypeBinding[] interfaces= declaringClass.getInterfaces();
+							if (interfaces.length > 0)
+								return interfaces[0].isDeprecated();
+							else
+								return declaringClass.getSuperclass().isDeprecated();
+						}
+						return declaringClass.isDeprecated();
+					}
+				}
+			}
+			return false;
 		}
 
 		/**
