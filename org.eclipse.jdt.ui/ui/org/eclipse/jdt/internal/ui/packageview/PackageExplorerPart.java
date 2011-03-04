@@ -1510,7 +1510,7 @@ public class PackageExplorerPart extends ViewPart
 	public void internalTestShowWorkingSets(IWorkingSet[] workingSets) {
 		if (fWorkingSetModel == null)
 			createWorkingSetModel();
-		fWorkingSetModel.setWorkingSets(workingSets, false, workingSets);
+		fWorkingSetModel.setActiveWorkingSets(workingSets);
 		fWorkingSetModel.configured();
 		rootModeChanged(PackageExplorerPart.WORKING_SETS_AS_ROOTS);
 	}

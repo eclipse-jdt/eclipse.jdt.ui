@@ -418,29 +418,92 @@ public class WorkingSetModel {
 
 	/**
 	 * Sets the working sets lists.
+	 * <p>
+	 * Note : All the active working sets must be contained in allWorkingSets and the relative
+	 * ordering of the active working sets must be same in both allWorkingSets and activeWorkingSets
+	 * arrays, else the method throws an <code>IllegalArgumentException</code.
+	 * </p>
 	 * 
-	 * @param workingSets the array of all working sets
+	 * @param allWorkingSets the array of all working sets
 	 * @param isSortingEnabled <code>true</code> if sorting is enabled, <code>false</code> otherwise
 	 * @param activeWorkingSets the array of active working sets
 	 * @since 3.7
 	 */
-	public void setWorkingSets(IWorkingSet[] workingSets, boolean isSortingEnabled, IWorkingSet[] activeWorkingSets) {
-		Assert.isLegal(Arrays.asList(getAllWorkingSets()).containsAll(Arrays.asList(activeWorkingSets)));
+	public void setWorkingSets(IWorkingSet[] allWorkingSets, boolean isSortingEnabled, IWorkingSet[] activeWorkingSets) {
+		Assert.isLegal(Arrays.asList(allWorkingSets).containsAll(Arrays.asList(activeWorkingSets)));
+		Assert.isLegal(!isOrderDifferentInWorkingSetLists(Arrays.asList(allWorkingSets), Arrays.asList(activeWorkingSets)));
 		if (isSortingEnabled)
-			Arrays.sort(workingSets, new WorkingSetComparator(true));
-		fAllWorkingSets= new ArrayList<IWorkingSet>(Arrays.asList(workingSets));
+			Arrays.sort(allWorkingSets, new WorkingSetComparator(true));
+		fAllWorkingSets= new ArrayList<IWorkingSet>(Arrays.asList(allWorkingSets));
 		setActiveWorkingSets(activeWorkingSets, isSortingEnabled);
 	}
 
+	/**
+	 * Sets the active working sets.
+	 * <p>
+	 * Note: If the relative ordering of the active working sets is not same in both fAllWorkingSets
+	 * and fActiveWorkingSets, fAllWorkingSets is re-ordered according to fActiveWorkingSets.
+	 * </p>
+	 * 
+	 * @param workingSets the active working sets to be set
+	 * 
+	 */
 	public void setActiveWorkingSets(IWorkingSet[] workingSets) {
 		Assert.isLegal(Arrays.asList(getAllWorkingSets()).containsAll(Arrays.asList(workingSets)));
 		if (fIsSortingEnabled) {
 			Arrays.sort(workingSets, new WorkingSetComparator(true));
 		}
 		fActiveWorkingSets= new ArrayList<IWorkingSet>(Arrays.asList(workingSets));
+		if (isOrderDifferentInWorkingSetLists(fAllWorkingSets, fActiveWorkingSets)) { //see bug 338531
+			adjustOrderingOfAllWorkingSets();
+		}
 		fElementMapper.rebuild(getActiveWorkingSets());
 		fOthersWorkingSetUpdater.updateElements();
 		fireEvent(new PropertyChangeEvent(this, CHANGE_WORKING_SET_MODEL_CONTENT, null, null));
+	}
+
+	/**
+	 * Adjusts the relative ordering of the active working sets in fAllWorkingSets according to
+	 * fActiveWorkingSets.
+	 * 
+	 * @since 3.7
+	 */
+	private void adjustOrderingOfAllWorkingSets() {
+		int countActive= 0;
+		for (Iterator<IWorkingSet> iter= fAllWorkingSets.iterator(); iter.hasNext();) {
+			IWorkingSet set= iter.next();
+			if (fActiveWorkingSets.contains(set)) {
+				IWorkingSet workingSet= fActiveWorkingSets.get(countActive++);
+				if (!workingSet.equals(set)) {
+					int index= fAllWorkingSets.indexOf(workingSet);
+					fAllWorkingSets.set(fAllWorkingSets.indexOf(set), workingSet);
+					fAllWorkingSets.set(index, set);
+				}
+				if (countActive == fActiveWorkingSets.size())
+					return;
+			}
+		}
+	}
+
+	/**
+	 * Checks if the order of active working sets is different in the active and all working set
+	 * lists.
+	 * 
+	 * @param allWorkingSets the list of all working sets
+	 * @param activeWorkingSets the list of active working sets
+	 * @return <code>true</code> if the order is different, <code>false</code> otherwise
+	 * @since 3.7
+	 */
+	private boolean isOrderDifferentInWorkingSetLists(List<IWorkingSet> allWorkingSets, List<IWorkingSet> activeWorkingSets) {
+		int count= 0;
+		for (Iterator<IWorkingSet> iter= allWorkingSets.iterator(); iter.hasNext();) {
+			IWorkingSet set= iter.next();
+			if (activeWorkingSets.contains(set)) {
+				if (!activeWorkingSets.get(count++).equals(set))
+					return true;
+			}
+		}
+		return false;
 	}
 
 	/**
