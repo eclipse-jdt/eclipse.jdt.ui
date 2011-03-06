@@ -704,6 +704,18 @@ public class UnresolvedElementsSubProcessor {
 		return name.length() == 1 && Character.isUpperCase(name.charAt(0));
 	}
 
+	private static boolean isLikelyMethodTypeParameterName(String name) {
+		if (name.length() == 1) {
+			switch (name.charAt(0)) {
+				case 'S':
+				case 'T':
+				case 'U':
+					return true;
+			}
+		}
+		return false;
+	}
+
 	public static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, Collection<ICommandAccess> proposals) throws JavaModelException {
 		Name node= refNode;
 		do {
@@ -771,13 +783,15 @@ public class UnresolvedElementsSubProcessor {
 			BodyDeclaration declaration= ASTResolving.findParentBodyDeclaration(refNode);
 			int baseRel= relevance;
 			if (isLikelyTypeParameterName(name)) {
-				baseRel += 4;
+				baseRel += 8;
 			}
 			while (declaration != null) {
 				IBinding binding= null;
 				int rel= baseRel;
 				if (declaration instanceof MethodDeclaration) {
 					binding= ((MethodDeclaration) declaration).resolveBinding();
+					if (isLikelyMethodTypeParameterName(name))
+						rel+= 2;
 				} else if (declaration instanceof TypeDeclaration) {
 					binding= ((TypeDeclaration) declaration).resolveBinding();
 					rel++;
