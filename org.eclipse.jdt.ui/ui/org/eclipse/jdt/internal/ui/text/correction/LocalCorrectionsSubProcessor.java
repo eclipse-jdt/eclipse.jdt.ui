@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
@@ -106,6 +107,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
+import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -990,7 +992,12 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	private static void addRemoveIncludingConditionProposal(IInvocationContext context, ASTNode toRemove, ASTNode replacement, Collection<ICommandAccess> proposals) {
-		ASTRewrite rewrite= ASTRewrite.create(toRemove.getAST());
+		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+		String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeunreachablecode_including_condition_description;
+		AST ast= toRemove.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
+		
 		if (replacement == null
 				|| replacement instanceof EmptyStatement
 				|| replacement instanceof Block && ((Block)replacement).statements().size() == 0) {
@@ -999,6 +1006,27 @@ public class LocalCorrectionsSubProcessor {
 			} else {
 				rewrite.remove(toRemove, null);
 			}
+			
+		} else if (toRemove instanceof Expression && replacement instanceof Expression) {
+			Expression moved= (Expression) rewrite.createMoveTarget(replacement);
+			Expression toRemoveExpression= (Expression) toRemove;
+			Expression replacementExpression= (Expression) replacement;
+			ITypeBinding explicitCast= ASTNodes.getExplicitCast(replacementExpression, toRemoveExpression);
+			if (explicitCast != null) {
+				CastExpression cast= ast.newCastExpression();
+				if (NecessaryParenthesesChecker.needsParentheses(replacementExpression, cast, CastExpression.EXPRESSION_PROPERTY)) {
+					ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
+					parenthesized.setExpression(moved);
+					moved= parenthesized;
+				}
+				cast.setExpression(moved);
+				ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
+				ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(toRemove, imports);
+				cast.setType(imports.addImport(explicitCast, ast, importRewriteContext));
+				moved= cast;
+			}
+			rewrite.replace(toRemove, moved, null);
+			
 		} else {
 			ASTNode parent= toRemove.getParent();
 			ASTNode moveTarget;
@@ -1013,8 +1041,8 @@ public class LocalCorrectionsSubProcessor {
 
 			rewrite.replace(toRemove, moveTarget, null);
 		}
-		String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeunreachablecode_including_condition_description;
-		addRemoveProposal(context, rewrite, label, proposals);
+		
+		proposals.add(proposal);
 	}
 
 	private static void addRemoveProposal(IInvocationContext context, ASTRewrite rewrite, String label, Collection<ICommandAccess> proposals) {

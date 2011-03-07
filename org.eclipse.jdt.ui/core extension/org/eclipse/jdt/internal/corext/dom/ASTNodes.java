@@ -462,6 +462,11 @@ public class ASTNodes {
 			else if (needsExplicitBoxing(reference))
 				return referenceType;
 			
+		} else if (! initializerType.isPrimitive() && referenceType.isPrimitive()) { // initializer is autounboxed
+			ITypeBinding unboxedInitializerType= Bindings.getUnboxedTypeBinding(initializerType, reference.getAST());
+			if (!unboxedInitializerType.isEqualTo(referenceType))
+				return referenceType;
+			
 		} else if (initializerType.isRawType() && referenceType.isParameterizedType()) {
 			return referenceType; // don't lose the unchecked conversion
 			
