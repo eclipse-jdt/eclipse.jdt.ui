@@ -365,7 +365,7 @@ public class JavadocTagsSubProcessor {
 	 	} else {
 	 		return;
 	 	}
-	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), bodyDeclaration, node, 1);
+	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), bodyDeclaration, node, 4);
 	 	proposals.add(proposal);
 
 	 	String label2= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_allmissing_description;

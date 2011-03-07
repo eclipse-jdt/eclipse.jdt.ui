@@ -1023,13 +1023,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		
 		ICompilationUnit cu= context.getCompilationUnit();
 
-		AssignToVariableAssistProposal localProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.LOCAL, expressionStatement, typeBinding, 2);
+		AssignToVariableAssistProposal localProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.LOCAL, expressionStatement, typeBinding, 3);
 		localProposal.setCommandId(ASSIGN_TO_LOCAL_ID);
 		resultingCollections.add(localProposal);
 
 		ASTNode type= ASTResolving.findParentType(expression);
 		if (type != null) {
-			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.FIELD, expressionStatement, typeBinding, 1);
+			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.FIELD, expressionStatement, typeBinding, 2);
 			fieldProposal.setCommandId(ASSIGN_TO_FIELD_ID);
 			resultingCollections.add(fieldProposal);
 		}
@@ -2031,6 +2031,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		 * @throws CoreException if something goes wrong during init
 		 */
 		protected void init(Refactoring refactoring) throws CoreException {
+			// empty default implementation
 		}
 
 		@Override
