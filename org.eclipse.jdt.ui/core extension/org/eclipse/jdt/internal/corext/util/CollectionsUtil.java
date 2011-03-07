@@ -23,7 +23,10 @@ public class CollectionsUtil {
 	 * @param <A> the type of the array elements
 	 * @return an array of type <code>A</code> containing all of the elements in the given
 	 *         collection
+	 * 
 	 * @throws NullPointerException if the specified collection or class is null
+	 * 
+	 * @see <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7023484">Sun bug 7023484</a>
 	 */
 	public static <A> A[] toArray(Collection<? extends A> collection, Class<A> clazz) {
 		Object array= Array.newInstance(clazz, collection.size());
