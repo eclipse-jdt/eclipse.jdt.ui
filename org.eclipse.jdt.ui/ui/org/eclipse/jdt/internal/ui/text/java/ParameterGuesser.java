@@ -320,7 +320,7 @@ public class ParameterGuesser {
 			// insert a proposal with the argument name
 			ICompletionProposal[] extended= new ICompletionProposal[ret.length + 1];
 			System.arraycopy(ret, 0, extended, 1, ret.length);
-			extended[0]= new PositionBasedCompletionProposal(paramName, pos, replacementLength, null, paramName, null, null, NO_TRIGGERS);
+			extended[0]= new PositionBasedCompletionProposal(paramName, pos, replacementLength, null, paramName, null, null, new char[] {','});
 			return extended;
 		}
 		return ret;
