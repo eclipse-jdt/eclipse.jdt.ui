@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.workingsets;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -380,6 +381,9 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	protected void okPressed() {
 		List<IWorkingSet> newResult= getResultWorkingSets();
 		fResult= newResult.toArray(new IWorkingSet[newResult.size()]);
+		if (fIsSortingEnabled) {
+			Collections.sort(fAllWorkingSets, new WorkingSetComparator(true));
+		}
 		setResult(newResult);
 		super.okPressed();
 	}
