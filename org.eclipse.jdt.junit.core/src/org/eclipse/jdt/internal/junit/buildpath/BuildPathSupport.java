@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,6 @@ package org.eclipse.jdt.internal.junit.buildpath;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import org.osgi.framework.Version;
 
@@ -23,11 +20,9 @@ import org.eclipse.equinox.frameworkadmin.BundleInfo;
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.osgi.service.resolver.VersionRange;
 
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.URIUtil;
 
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
@@ -126,9 +121,9 @@ public class BuildPathSupport {
 
 		private IPath getLocationIfExists(BundleInfo bundleInfo, final String entryInBundle) {
 			IPath srcLocation= null;
-			try {
-				URL bundleUrl= FileLocator.toFileURL(URIUtil.toURL(bundleInfo.getLocation()));
-				File bundleFile= new File(bundleUrl.getFile());
+			IPath bundleLocationPath= P2Utils.getBundleLocationPath(bundleInfo);
+			if (bundleLocationPath != null) {
+				File bundleFile= bundleLocationPath.toFile();
 				if (bundleFile.isDirectory()) {
 					File srcFile= null;
 					final int starIdx= entryInBundle.indexOf('*');
@@ -153,10 +148,6 @@ public class BuildPathSupport {
 						}
 					}
 				}
-			} catch (MalformedURLException e) {
-				//continue
-			} catch (IOException e) {
-				//continue
 			}
 			return srcLocation;
 		}
