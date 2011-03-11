@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.io.CharConversionException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -85,13 +86,15 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 				JavaPlugin.log(exception);
 			}
 		}
-		for (final Iterator iterator= selection.iterator(); iterator.hasNext();) {
+		for (final Iterator<?> iterator= selection.iterator(); iterator.hasNext();) {
 			if (!(iterator.next() instanceof IMember))
 				return null;
 		}
-		final Set set= new HashSet();
-		set.addAll(Arrays.asList(selection.toArray()));
-		return (IMember[]) set.toArray(new IMember[set.size()]);
+		final Set<IMember> set= new HashSet<IMember>();
+		@SuppressWarnings("unchecked")
+		List<IMember> selectionList= (List<IMember>) (List<?>) Arrays.asList(selection.toArray());
+		set.addAll(selectionList);
+		return set.toArray(new IMember[set.size()]);
 	}
 
 	/** The java editor */
@@ -134,6 +137,7 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void run(final IStructuredSelection selection) {
 		try {
 			final IMember[] members= getSelectedMembers(selection);
@@ -147,6 +151,7 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void run(final ITextSelection selection) {
 		try {
 			if (! ActionUtil.isEditable(fEditor))
@@ -166,6 +171,7 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void selectionChanged(final IStructuredSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isExtractSupertypeAvailable(selection));
@@ -180,6 +186,7 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void selectionChanged(final ITextSelection selection) {
 		setEnabled(true);
 	}
@@ -187,6 +194,7 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void selectionChanged(final JavaTextSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isExtractSupertypeAvailable(selection));

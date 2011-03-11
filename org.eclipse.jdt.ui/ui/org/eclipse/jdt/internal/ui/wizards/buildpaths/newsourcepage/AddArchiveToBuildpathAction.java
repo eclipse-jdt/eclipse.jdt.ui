@@ -74,6 +74,7 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getDetailedDescription() {
 		return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath_archives;
 	}
@@ -81,6 +82,7 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void run() {
 
 		final Shell shell= getShell();
@@ -103,7 +105,7 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
         	final IRunnableWithProgress runnable= new IRunnableWithProgress() {
         		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         			try {
-        				List result= addExternalJars(selected, javaProject, monitor);
+        				List<IJavaElement> result= addExternalJars(selected, javaProject, monitor);
         				if (result.size() > 0)
         					selectAndReveal(new StructuredSelection(result));
         			} catch (CoreException e) {
@@ -125,7 +127,7 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
         }
 	}
 
-	private List addExternalJars(IPath[] jarPaths, IJavaProject project, IProgressMonitor monitor) throws CoreException {
+	private List<IJavaElement> addExternalJars(IPath[] jarPaths, IJavaProject project, IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -137,10 +139,10 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
 
     		informListeners(delta);
 
-    		List addedEntries= delta.getAddedEntries();
-			List result= new ArrayList(addedEntries.size());
+    		List<CPListElement> addedEntries= delta.getAddedEntries();
+			List<IJavaElement> result= new ArrayList<IJavaElement>(addedEntries.size());
 			for (int i= 0; i < addedEntries.size(); i++) {
-				IClasspathEntry entry= ((CPListElement) addedEntries.get(i)).getClasspathEntry();
+				IClasspathEntry entry= addedEntries.get(i).getClasspathEntry();
 				IJavaElement elem= project.findPackageFragmentRoot(entry.getPath());
 				if (elem != null) {
 					result.add(elem);
@@ -153,6 +155,7 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
 		}
 	}
 
+	@Override
 	protected boolean canHandle(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return false;

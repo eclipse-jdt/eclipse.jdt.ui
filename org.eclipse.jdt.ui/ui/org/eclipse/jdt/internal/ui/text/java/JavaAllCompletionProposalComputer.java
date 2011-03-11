@@ -22,6 +22,7 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
  */
 public class JavaAllCompletionProposalComputer extends JavaTypeCompletionProposalComputer {
 
+	@Override
 	protected CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context) {
 		CompletionProposalCollector collector= super.createCollector(context);
 		collector.setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, false);
@@ -44,6 +45,7 @@ public class JavaAllCompletionProposalComputer extends JavaTypeCompletionProposa
 		return collector;
 	}
 
+	@Override
 	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
 		int invocationOffset= context.getInvocationOffset();
 		int typeContext= super.guessContextInformationPosition(context);

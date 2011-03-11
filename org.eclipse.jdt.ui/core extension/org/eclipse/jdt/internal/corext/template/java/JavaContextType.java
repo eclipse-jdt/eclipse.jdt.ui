@@ -42,6 +42,7 @@ public class JavaContextType extends AbstractJavaContextType {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType#initializeContext(org.eclipse.jdt.internal.corext.template.java.JavaContext)
 	 */
+	@Override
 	protected void initializeContext(JavaContext context) {
 		if (!getId().equals(JavaContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere
 			context.addCompatibleContextType(JavaContextType.ID_ALL);

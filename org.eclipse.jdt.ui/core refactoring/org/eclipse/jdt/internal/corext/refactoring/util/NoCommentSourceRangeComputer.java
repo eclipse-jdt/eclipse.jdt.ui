@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 
 public class NoCommentSourceRangeComputer extends TargetSourceRangeComputer {
+	@Override
 	public SourceRange computeSourceRange(ASTNode node) {
 		return new SourceRange(node.getStartPosition(), node.getLength());
 	}

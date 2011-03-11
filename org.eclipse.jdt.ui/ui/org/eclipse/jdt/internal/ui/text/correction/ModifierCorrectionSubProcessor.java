@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -105,7 +106,7 @@ public class ModifierCorrectionSubProcessor {
 	public static final int TO_NON_STATIC= 4;
 	public static final int TO_NON_FINAL= 5;
 
-	public static void addNonAccessibleReferenceProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int kind, int relevance) throws CoreException {
+	public static void addNonAccessibleReferenceProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals, int kind, int relevance) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -193,8 +194,16 @@ public class ModifierCorrectionSubProcessor {
 					excludedModifiers= Modifier.STATIC;
 					break;
 				case TO_NON_PRIVATE:
-					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertodefault_description, name);
-					excludedModifiers= Modifier.PRIVATE;
+					int visibility;
+					if (cu.getParent().getElementName().equals(typeBinding.getPackage().getName())) {
+						visibility= Modifier.NONE;
+						excludedModifiers= Modifier.PRIVATE;
+					} else {
+						visibility= Modifier.PUBLIC;
+						includedModifiers= Modifier.PUBLIC;
+						excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
+					}
+					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changevisibility_description, new String[] { name, getVisibilityString(visibility) });
 					break;
 				case TO_NON_FINAL:
 					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertononfinal_description, name);
@@ -214,7 +223,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 
-	public static void addChangeOverriddenModifierProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int kind) throws JavaModelException {
+	public static void addChangeOverriddenModifierProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals, int kind) throws JavaModelException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -276,7 +285,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 
-	public static void addNonFinalLocalProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addNonFinalLocalProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -295,7 +304,7 @@ public class ModifierCorrectionSubProcessor {
 
 
 
-	public static void addRemoveInvalidModifiersProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int relevance) {
+	public static void addRemoveInvalidModifiersProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals, int relevance) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -445,7 +454,7 @@ public class ModifierCorrectionSubProcessor {
 		return Modifier.PUBLIC;
 	}
 
-	public static void addAbstractMethodProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addAbstractMethodProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
@@ -522,7 +531,7 @@ public class ModifierCorrectionSubProcessor {
 
 	}
 
-	private static void addMakeTypeAbstractProposal(IInvocationContext context, TypeDeclaration parentTypeDecl, Collection proposals) {
+	private static void addMakeTypeAbstractProposal(IInvocationContext context, TypeDeclaration parentTypeDecl, Collection<ICommandAccess> proposals) {
 		MakeTypeAbstractOperation operation= new UnimplementedCodeFix.MakeTypeAbstractOperation(parentTypeDecl);
 	
 		String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_addabstract_description, BasicElementLabels.getJavaElementName(parentTypeDecl.getName().getIdentifier()));
@@ -533,7 +542,7 @@ public class ModifierCorrectionSubProcessor {
 		proposals.add(proposal);
 	}
 
-	public static void addAbstractTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addAbstractTypeProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		CompilationUnit astRoot= context.getASTRoot();
 
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
@@ -558,7 +567,7 @@ public class ModifierCorrectionSubProcessor {
 		addMakeTypeAbstractProposal(context, parentTypeDecl, proposals);
 	}
 
-	public static void addNativeMethodProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addNativeMethodProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
@@ -616,7 +625,7 @@ public class ModifierCorrectionSubProcessor {
 
 	}
 
-	public static void addMethodRequiresBodyProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addMethodRequiresBodyProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 		AST ast= context.getASTRoot().getAST();
 
@@ -673,7 +682,7 @@ public class ModifierCorrectionSubProcessor {
 	}
 
 
-	public static void addNeedToEmulateProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addNeedToEmulateProposal(IInvocationContext context, IProblemLocation problem, Collection<ModifierChangeCorrectionProposal> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -690,11 +699,11 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 
-	public static void addOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		IProposableFix fix= Java50Fix.createAddOverrideAnnotationFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			Map options= new Hashtable();
+			Map<String, String> options= new Hashtable<String, String>();
 			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
 			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpOptions.TRUE);
 			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION, CleanUpOptions.TRUE);
@@ -703,11 +712,11 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 
-	public static void addDeprecatedAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addDeprecatedAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		IProposableFix fix= Java50Fix.createAddDeprectatedAnnotation(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			Map options= new Hashtable();
+			Map<String, String> options= new Hashtable<String, String>();
 			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
 			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(options), 15, image, context);
@@ -715,7 +724,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 
-	public static void addOverridingDeprecatedMethodProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addOverridingDeprecatedMethodProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -749,7 +758,7 @@ public class ModifierCorrectionSubProcessor {
 		proposals.add(proposal);
 	}
 
-	public static void removeOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void removeOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -771,15 +780,15 @@ public class ModifierCorrectionSubProcessor {
 	}
 
 
-	public static void addSynchronizedMethodProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addSynchronizedMethodProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		addAddMethodModifierProposal(context, problem, proposals, Modifier.SYNCHRONIZED, CorrectionMessages.ModifierCorrectionSubProcessor_addsynchronized_description);
 	}
 
-	public static void addStaticMethodProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addStaticMethodProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		addAddMethodModifierProposal(context, problem, proposals, Modifier.STATIC, CorrectionMessages.ModifierCorrectionSubProcessor_addstatic_description);
 	}
 	
-	private static void addAddMethodModifierProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int modifier, String label) {
+	private static void addAddMethodModifierProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals, int modifier, String label) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -806,10 +815,12 @@ public class ModifierCorrectionSubProcessor {
 			fModifier= modifier;
 		}
 
+		@Override
 		public String getAdditionalProposalInfo() {
 			return getDisplayString();
 		}
 
+		@Override
 		public String getDisplayString() {
 			if (fModifier == 0) {
 				return CorrectionMessages.ModifierCorrectionSubProcessor_default_visibility_label;
@@ -821,6 +832,7 @@ public class ModifierCorrectionSubProcessor {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.fix.PositionGroup.Proposal#computeEdits(int, org.eclipse.jface.text.link.LinkedPosition, char, int, org.eclipse.jface.text.link.LinkedModeModel)
 		 */
+		@Override
 		public TextEdit computeEdits(int offset, LinkedPosition currentPosition, char trigger, int stateMask, LinkedModeModel model) throws CoreException {
 			try {
 				IDocument document= currentPosition.getDocument();
@@ -850,7 +862,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 
-	public static void installLinkedVisibilityProposals(LinkedProposalModel linkedProposalModel, ASTRewrite rewrite, List modifiers, boolean inInterface) {
+	public static void installLinkedVisibilityProposals(LinkedProposalModel linkedProposalModel, ASTRewrite rewrite, List<IExtendedModifier> modifiers, boolean inInterface) {
 		ASTNode modifier= findVisibilityModifier(modifiers);
 		if (modifier != null) {
 			int selected= ((Modifier) modifier).getKeyword().toFlagValue();
@@ -869,9 +881,9 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 
-	private static Modifier findVisibilityModifier(List modifiers) {
+	private static Modifier findVisibilityModifier(List<IExtendedModifier> modifiers) {
 		for (int i= 0; i < modifiers.size(); i++) {
-			Object curr= modifiers.get(i);
+			IExtendedModifier curr= modifiers.get(i);
 			if (curr instanceof Modifier) {
 				Modifier modifier= (Modifier) curr;
 				ModifierKeyword keyword= modifier.getKeyword();
@@ -883,9 +895,9 @@ public class ModifierCorrectionSubProcessor {
 		return null;
 	}
 
-	private static Annotation findAnnotation(String qualifiedTypeName, List modifiers) {
+	private static Annotation findAnnotation(String qualifiedTypeName, List<IExtendedModifier> modifiers) {
 		for (int i= 0; i < modifiers.size(); i++) {
-			Object curr= modifiers.get(i);
+			IExtendedModifier curr= modifiers.get(i);
 			if (curr instanceof Annotation) {
 				Annotation annot= (Annotation) curr;
 				ITypeBinding binding= annot.getTypeName().resolveTypeBinding();

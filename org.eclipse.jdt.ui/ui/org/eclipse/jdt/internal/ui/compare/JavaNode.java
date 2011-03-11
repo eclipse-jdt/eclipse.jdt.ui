@@ -171,6 +171,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	/*
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return getType() + ": " + getName() //$NON-NLS-1$
 				+ "[" + getRange().offset + "+" + getRange().length + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

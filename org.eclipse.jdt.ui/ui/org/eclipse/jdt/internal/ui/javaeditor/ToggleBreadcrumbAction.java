@@ -71,6 +71,7 @@ public class ToggleBreadcrumbAction extends ResourceAction implements IPropertyC
 	/*
 	 * @see IAction#actionPerformed
 	 */
+	@Override
 	public void run() {
 		fStore.setValue(getPreferenceKey(), isChecked());
 	}

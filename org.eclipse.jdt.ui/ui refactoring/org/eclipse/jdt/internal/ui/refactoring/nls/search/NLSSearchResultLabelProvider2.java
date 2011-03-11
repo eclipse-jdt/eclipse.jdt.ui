@@ -44,6 +44,7 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements I
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
 	 */
+	@Override
 	public String getText(Object element) {
 		return getLabelWithCounts(element, internalGetText(element).getString());
 	}
@@ -76,6 +77,7 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements I
 	/*
 	 * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
 	 */
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof FileEntry)
 			element= ((FileEntry) element).getPropertiesFile();
@@ -88,6 +90,7 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements I
 	/*
 	 * @see org.eclipse.jface.viewers.LabelProvider#dispose()
 	 */
+	@Override
 	public void dispose() {
 		fLabelProvider.dispose();
 		fLabelProvider= null;

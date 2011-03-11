@@ -31,6 +31,7 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 	/*
 	 * @see TypeHierarchyViewer#updateContent
 	 */
+	@Override
 	public void updateContent(boolean expand) {
 		getTree().setRedraw(false);
 		refresh();
@@ -53,7 +54,8 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 			super(lifeCycle);
 		}
 
-		protected final void getTypesInHierarchy(IType type, List res) {
+		@Override
+		protected final void getTypesInHierarchy(IType type, List<IType> res) {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
 				IType[] types= hierarchy.getSubtypes(type);
@@ -73,6 +75,7 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 
 		}
 
+		@Override
 		protected IType getParentType(IType type) {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {

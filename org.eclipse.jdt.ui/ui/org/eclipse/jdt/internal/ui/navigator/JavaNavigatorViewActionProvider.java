@@ -92,11 +92,13 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 	};
 
 
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		fActionBars= actionBars;
 		fLayoutActionGroup.fillActionBars(actionBars);
 	}
 
+	@Override
 	public void init(ICommonActionExtensionSite site) {
 
 		fExtensionSite= site;
@@ -113,16 +115,19 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 
 	}
 
+	@Override
 	public void dispose() {
 		fLayoutActionGroup.dispose();
 		fExtensionSite.getContentService().getActivationService().removeExtensionActivationListener(fMenuUpdater);
 		super.dispose();
 	}
 
+	@Override
 	public void setContext(ActionContext context) {
 		super.setContext(context);
 	}
 
+	@Override
 	public void restoreState(IMemento memento) {
 		boolean isCurrentLayoutFlat= true;
 		Integer state= null;
@@ -145,6 +150,7 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 		fLayoutActionGroup.setFlatLayout(isCurrentLayoutFlat);
 	}
 
+	@Override
 	public void saveState(IMemento aMemento) {
 		super.saveState(aMemento);
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();

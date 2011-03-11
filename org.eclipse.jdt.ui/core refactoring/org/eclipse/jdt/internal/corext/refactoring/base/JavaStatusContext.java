@@ -37,15 +37,19 @@ public abstract class JavaStatusContext extends RefactoringStatusContext {
 		private MemberSourceContext(IMember member) {
 			fMember= member;
 		}
+		@Override
 		public boolean isBinary() {
 			return fMember.isBinary();
 		}
+		@Override
 		public ICompilationUnit getCompilationUnit() {
 			return fMember.getCompilationUnit();
 		}
+		@Override
 		public IClassFile getClassFile() {
 			return fMember.getClassFile();
 		}
+		@Override
 		public ISourceRange getSourceRange() {
 			try {
 				return fMember.getSourceRange();
@@ -60,15 +64,19 @@ public abstract class JavaStatusContext extends RefactoringStatusContext {
 		private ImportDeclarationSourceContext(IImportDeclaration declaration) {
 			fImportDeclartion= declaration;
 		}
+		@Override
 		public boolean isBinary() {
 			return false;
 		}
+		@Override
 		public ICompilationUnit getCompilationUnit() {
 			return (ICompilationUnit)fImportDeclartion.getParent().getParent();
 		}
+		@Override
 		public IClassFile getClassFile() {
 			return null;
 		}
+		@Override
 		public ISourceRange getSourceRange() {
 			try {
 				return fImportDeclartion.getSourceRange();
@@ -87,18 +95,23 @@ public abstract class JavaStatusContext extends RefactoringStatusContext {
 			if (fSourceRange == null)
 				fSourceRange= new SourceRange(0,0);
 		}
+		@Override
 		public boolean isBinary() {
 			return false;
 		}
+		@Override
 		public ICompilationUnit getCompilationUnit() {
 			return fCUnit;
 		}
+		@Override
 		public IClassFile getClassFile() {
 			return null;
 		}
+		@Override
 		public ISourceRange getSourceRange() {
 			return fSourceRange;
 		}
+		@Override
 		public String toString() {
 			return getSourceRange() + " in " + super.toString(); //$NON-NLS-1$
 		}
@@ -113,18 +126,23 @@ public abstract class JavaStatusContext extends RefactoringStatusContext {
 			if (fSourceRange == null)
 				fSourceRange= new SourceRange(0,0);
 		}
+		@Override
 		public boolean isBinary() {
 			return true;
 		}
+		@Override
 		public ICompilationUnit getCompilationUnit() {
 			return null;
 		}
+		@Override
 		public IClassFile getClassFile() {
 			return fClassFile;
 		}
+		@Override
 		public ISourceRange getSourceRange() {
 			return fSourceRange;
 		}
+		@Override
 		public String toString() {
 			return getSourceRange() + " in " + super.toString(); //$NON-NLS-1$
 		}
@@ -264,6 +282,7 @@ public abstract class JavaStatusContext extends RefactoringStatusContext {
 	/* (non-Javadoc)
 	 * Method declared on Context.
 	 */
+	@Override
 	public Object getCorrespondingElement() {
 		if (isBinary())
 			return getClassFile();

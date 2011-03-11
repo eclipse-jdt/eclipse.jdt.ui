@@ -69,6 +69,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 	/*
 	 * Overrides method from WizardExportPage
 	 */
+	@Override
 	protected void createDestinationGroup(Composite parent) {
 
 		initializeDialogUnits(parent);
@@ -107,6 +108,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 		fDestinationBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		SWTUtil.setButtonDimensionHint(fDestinationBrowseButton);
 		fDestinationBrowseButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleDestinationBrowseButtonPressed();
 			}
@@ -171,6 +173,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 		return "." + JarPackagerUtil.JAR_EXTENSION; //$NON-NLS-1$
 	}
 
+	@Override
 	protected void restoreWidgetValues() {
 		// destination
 		if (fJarPackage.getJarLocation().isEmpty())
@@ -227,6 +230,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 	/*
 	 * Overrides method from WizardDataTransferPage
 	 */
+	@Override
 	protected boolean validateDestinationGroup() {
 		if (fDestinationNamesCombo.getText().length() == 0) {
 			// Clear error
@@ -279,6 +283,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void saveWidgetValues() {
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
@@ -326,6 +331,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 		updatePageCompletion();
 	}
 
+	@Override
 	protected void updatePageCompletion() {
 		boolean pageComplete= isPageComplete();
 		setPageComplete(pageComplete);

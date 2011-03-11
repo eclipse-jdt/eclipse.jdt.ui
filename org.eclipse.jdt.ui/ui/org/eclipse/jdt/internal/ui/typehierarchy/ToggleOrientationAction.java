@@ -66,6 +66,7 @@ public class ToggleOrientationAction extends Action {
 	/*
 	 * @see Action#actionPerformed
 	 */
+	@Override
 	public void run() {
 		if (isChecked()) {
 			fView.setViewLayout(fActionOrientation);

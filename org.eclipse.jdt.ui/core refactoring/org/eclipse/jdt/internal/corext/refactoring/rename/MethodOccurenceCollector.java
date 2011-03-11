@@ -35,6 +35,7 @@ class MethodOccurenceCollector extends CuCollectingSearchRequestor {
 		fName= methodName;
 	}
 
+	@Override
 	public void acceptSearchMatch(ICompilationUnit unit, SearchMatch match) throws CoreException {
 		if (match instanceof MethodReferenceMatch
 				&& ((MethodReferenceMatch) match).isSuperInvocation()

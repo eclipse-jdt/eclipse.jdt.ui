@@ -21,9 +21,9 @@ import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 
 public class TypeNameMatchCollector extends TypeNameMatchRequestor {
 
-	private final Collection fCollection;
+	private final Collection<TypeNameMatch> fCollection;
 
-	public TypeNameMatchCollector(Collection collection) {
+	public TypeNameMatchCollector(Collection<TypeNameMatch> collection) {
 		Assert.isNotNull(collection);
 		fCollection= collection;
 	}
@@ -46,6 +46,7 @@ public class TypeNameMatchCollector extends TypeNameMatchRequestor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.search.TypeNameMatchRequestor#acceptTypeNameMatch(org.eclipse.jdt.core.search.TypeNameMatch)
 	 */
+	@Override
 	public void acceptTypeNameMatch(TypeNameMatch match) {
 		if (inScope(match)) {
 			fCollection.add(match);

@@ -35,16 +35,19 @@ public final class UseSupertypeRefactoringContribution extends JavaUIRefactoring
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		UseSuperTypeProcessor processor= new UseSuperTypeProcessor(arguments, status);
 		return new ProcessorBasedRefactoring(processor);
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return RefactoringSignatureDescriptorFactory.createUseSupertypeDescriptor();
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createUseSupertypeDescriptor(project, description, comment, arguments, flags);
 	}

@@ -105,7 +105,7 @@ public class ClasspathContainerDescriptor {
 	}
 
 	public static ClasspathContainerDescriptor[] getDescriptors() {
-		ArrayList containers= new ArrayList();
+		ArrayList<ClasspathContainerDescriptor> containers= new ArrayList<ClasspathContainerDescriptor>();
 
 		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(JavaUI.ID_PLUGIN, ATT_EXTENSION);
 		if (extensionPoint != null) {
@@ -132,7 +132,7 @@ public class ClasspathContainerDescriptor {
 				containers.add(defaultPage);
 			}
 		}
-		return (ClasspathContainerDescriptor[]) containers.toArray(new ClasspathContainerDescriptor[containers.size()]);
+		return containers.toArray(new ClasspathContainerDescriptor[containers.size()]);
 	}
 
 }

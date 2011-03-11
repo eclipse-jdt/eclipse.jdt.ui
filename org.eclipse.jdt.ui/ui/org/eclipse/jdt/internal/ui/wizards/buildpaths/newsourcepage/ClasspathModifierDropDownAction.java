@@ -34,7 +34,7 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
 
 	/** The menu to be populated with items*/
     private Menu fMenu;
-    private List fActions;
+    private List<BuildpathModifierAction> fActions;
     //The action to execute on run iff enabled
 	private BuildpathModifierAction fFirstValidAction;
 
@@ -46,7 +46,7 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
     public ClasspathModifierDropDownAction() {
         super(null, null, BuildpathModifierAction.DROP_DOWN_ACTION, IAction.AS_DROP_DOWN_MENU);
 
-        fActions= new ArrayList();
+        fActions= new ArrayList<BuildpathModifierAction>();
         fFirstValidAction= null;
 
         setText(""); //$NON-NLS-1$
@@ -56,11 +56,12 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
 	/**
      * {@inheritDoc}
      */
-    public String getDetailedDescription() {
+    @Override
+	public String getDetailedDescription() {
     	if (fFirstValidAction != null) {
     		return fFirstValidAction.getDetailedDescription();
     	} else if (fActions.size() > 0) {
-    		return ((BuildpathModifierAction)fActions.get(0)).getDetailedDescription();
+    		return fActions.get(0).getDetailedDescription();
     	} else {
     		return ""; //$NON-NLS-1$
     	}
@@ -69,11 +70,13 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
     /**
      * Runs the first action of the list of managed actions that is valid.
      */
-    public void run() {
+    @Override
+	public void run() {
     	fFirstValidAction.run();
     }
 
-    public IMenuCreator getMenuCreator() {
+    @Override
+	public IMenuCreator getMenuCreator() {
         return this;
     }
 
@@ -129,7 +132,7 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
      */
     private void createEntries(Menu menu) {
         for(int i= 0; i < fActions.size(); i++) {
-            IAction action= (IAction)fActions.get(i);
+            IAction action= fActions.get(i);
             addActionToMenu(menu, action);
         }
     }
@@ -144,14 +147,15 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
 	/**
      * {@inheritDoc}
      */
-    protected boolean canHandle(IStructuredSelection elements) {
+    @Override
+	protected boolean canHandle(IStructuredSelection elements) {
     	update();
     	return fFirstValidAction != null;
     }
 
 	private void update() {
-		for (Iterator iterator= fActions.iterator(); iterator.hasNext();) {
-	        BuildpathModifierAction action= (BuildpathModifierAction)iterator.next();
+		for (Iterator<BuildpathModifierAction> iterator= fActions.iterator(); iterator.hasNext();) {
+	        BuildpathModifierAction action= iterator.next();
 	        if (action.isEnabled()) {
 	        	if (action != fFirstValidAction) {
 	        		updateButton(action);
@@ -162,7 +166,7 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
         }
 		if (fFirstValidAction != null) {
 			if (fActions.size() > 0) {
-				updateButton((BuildpathModifierAction)fActions.get(0));
+				updateButton(fActions.get(0));
 			} else {
 				updateButton(this);
 			}

@@ -58,12 +58,13 @@ class ExpandWithConstructorsAction extends Action {
 	/*
 	 * @see Action#run
 	 */
+	@Override
 	public void run() {
 		boolean isChecked= isChecked();
 		fCallHierarchyViewer.cancelJobs();
 
 		IStructuredSelection selection= (IStructuredSelection)getSelection();
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			CallerMethodWrapper member= (CallerMethodWrapper)iter.next();
 			member.setExpandWithConstructors(isChecked);
 			if (!isChecked) { // must collapse before refresh
@@ -102,7 +103,7 @@ class ExpandWithConstructorsAction extends Action {
 		IStructuredSelection structuredSelection= (IStructuredSelection)selection;
 		CallerMethodWrapper[] wrappers= new CallerMethodWrapper[structuredSelection.size()];
 		int i= 0;
-		for (Iterator iter= structuredSelection.iterator(); iter.hasNext(); i++) {
+		for (Iterator<?> iter= structuredSelection.iterator(); iter.hasNext(); i++) {
 			Object element= iter.next();
 			if (!(element instanceof CallerMethodWrapper) || element instanceof RealCallers)
 				return false;

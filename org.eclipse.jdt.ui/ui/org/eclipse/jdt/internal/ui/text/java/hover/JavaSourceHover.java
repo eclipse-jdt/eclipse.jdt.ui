@@ -115,6 +115,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 	 * @see org.eclipse.jface.text.ITextHoverExtension#getHoverControlCreator()
 	 * @since 3.0
 	 */
+	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
@@ -131,6 +132,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 * @since 3.0
 	 */
+	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {

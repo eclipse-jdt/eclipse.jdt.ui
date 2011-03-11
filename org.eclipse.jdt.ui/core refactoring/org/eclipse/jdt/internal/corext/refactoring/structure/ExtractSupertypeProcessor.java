@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -44,7 +45,6 @@ import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 
 import org.eclipse.jdt.core.Flags;
@@ -72,8 +72,8 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
@@ -134,7 +134,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 * compilation units.
 	 * </p>
 	 */
-	private final Map fLayerChanges= new HashMap();
+	private final Map<ICompilationUnit, CompilationUnitChange> fLayerChanges= new HashMap<ICompilationUnit, CompilationUnitChange>();
 
 	/** The possible extract supertype candidates, or the empty array */
 	private IType[] fPossibleCandidates= {};
@@ -184,6 +184,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getProcessorName() {
 		return RefactoringCoreMessages.ExtractSupertypeProcessor_extract_supertype;
 	}
@@ -191,14 +192,16 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected final RefactoringStatus checkDeclaringSuperTypes(final IProgressMonitor monitor) throws JavaModelException {
 		return new RefactoringStatus();
 	}
 
-	protected CompilationUnitRewrite getCompilationUnitRewrite(final Map rewrites, final ICompilationUnit unit) {
+	@Override
+	protected CompilationUnitRewrite getCompilationUnitRewrite(final Map<ICompilationUnit, CompilationUnitRewrite> rewrites, final ICompilationUnit unit) {
 		Assert.isNotNull(rewrites);
 		Assert.isNotNull(unit);
-		CompilationUnitRewrite rewrite= (CompilationUnitRewrite) rewrites.get(unit);
+		CompilationUnitRewrite rewrite= rewrites.get(unit);
 		if (rewrite == null) {
 			rewrite= new CompilationUnitRewrite(fOwner, unit);
 			rewrite.rememberContent();
@@ -230,6 +233,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public RefactoringStatus checkFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
@@ -276,9 +280,10 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Change createChange(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		try {
-			final Map arguments= new HashMap();
+			final Map<String, String> arguments= new HashMap<String, String>();
 			String project= null;
 			final IType declaring= getDeclaringType();
 			final IJavaProject javaProject= declaring.getJavaProject();
@@ -654,8 +659,8 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		if (sourceDeclaration instanceof TypeDeclaration) {
 			TypeParameter parameter= null;
 			final ListRewrite rewrite= targetRewrite.getASTRewrite().getListRewrite(targetDeclaration, TypeDeclaration.TYPE_PARAMETERS_PROPERTY);
-			for (final Iterator iterator= ((TypeDeclaration) sourceDeclaration).typeParameters().iterator(); iterator.hasNext();) {
-				parameter= (TypeParameter) iterator.next();
+			for (final Iterator<TypeParameter> iterator= ((TypeDeclaration) sourceDeclaration).typeParameters().iterator(); iterator.hasNext();) {
+				parameter= iterator.next();
 				final ASTNode node= ASTNode.copySubtree(targetRewrite.getAST(), parameter);
 				rewrite.insertLast(node, null);
 			}
@@ -761,6 +766,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final RefactoringStatus createWorkingCopyLayer(final IProgressMonitor monitor) {
 		Assert.isNotNull(monitor);
 		final RefactoringStatus status= new RefactoringStatus();
@@ -773,32 +779,32 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				return status;
 			final IType extractedType= computeExtractedType(fTypeName);
 			setDestinationType(extractedType);
-			final List subTypes= new ArrayList(Arrays.asList(fTypesToExtract));
+			final List<IType> subTypes= new ArrayList<IType>(Arrays.asList(fTypesToExtract));
 			if (!subTypes.contains(declaring))
 				subTypes.add(declaring);
-			final Map unitToTypes= new HashMap(subTypes.size());
-			final Set units= new HashSet(subTypes.size());
+			final Map<ICompilationUnit, Collection<IType>> unitToTypes= new HashMap<ICompilationUnit, Collection<IType>>(subTypes.size());
+			final Set<ICompilationUnit> units= new HashSet<ICompilationUnit>(subTypes.size());
 			for (int index= 0; index < subTypes.size(); index++) {
-				final IType type= (IType) subTypes.get(index);
+				final IType type= subTypes.get(index);
 				final ICompilationUnit unit= type.getCompilationUnit();
 				units.add(unit);
-				Collection collection= (Collection) unitToTypes.get(unit);
+				Collection<IType> collection= unitToTypes.get(unit);
 				if (collection == null) {
-					collection= new ArrayList(2);
+					collection= new ArrayList<IType>(2);
 					unitToTypes.put(unit, collection);
 				}
 				collection.add(type);
 			}
-			final Map projectToUnits= new HashMap();
-			Collection collection= null;
+			final Map<IJavaProject, Collection<ICompilationUnit>> projectToUnits= new HashMap<IJavaProject, Collection<ICompilationUnit>>();
+			Collection<ICompilationUnit> collection= null;
 			IJavaProject project= null;
 			ICompilationUnit current= null;
-			for (final Iterator iterator= units.iterator(); iterator.hasNext();) {
-				current= (ICompilationUnit) iterator.next();
+			for (final Iterator<ICompilationUnit> iterator= units.iterator(); iterator.hasNext();) {
+				current= iterator.next();
 				project= current.getJavaProject();
-				collection= (Collection) projectToUnits.get(project);
+				collection= projectToUnits.get(project);
 				if (collection == null) {
-					collection= new ArrayList();
+					collection= new ArrayList<ICompilationUnit>();
 					projectToUnits.put(project, collection);
 				}
 				collection.add(current);
@@ -818,12 +824,12 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			final ASTParser parser= ASTParser.newParser(AST.JLS3);
 			final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 30);
 			try {
-				final Set keySet= projectToUnits.keySet();
+				final Set<IJavaProject> keySet= projectToUnits.keySet();
 				subMonitor.beginTask("", keySet.size()); //$NON-NLS-1$
 				subMonitor.setTaskName(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing);
-				for (final Iterator iterator= keySet.iterator(); iterator.hasNext();) {
-					project= (IJavaProject) iterator.next();
-					collection= (Collection) projectToUnits.get(project);
+				for (final Iterator<IJavaProject> iterator= keySet.iterator(); iterator.hasNext();) {
+					project= iterator.next();
+					collection= projectToUnits.get(project);
 					parser.setWorkingCopyOwner(fOwner);
 					parser.setResolveBindings(true);
 					parser.setProject(project);
@@ -832,14 +838,15 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					try {
 						subsubMonitor.beginTask("", collection.size()); //$NON-NLS-1$
 						subsubMonitor.setTaskName(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing);
-						parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
+						parser.createASTs(collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
 
+							@Override
 							public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
 								try {
-									final Collection types= (Collection) unitToTypes.get(unit);
+									final Collection<IType> types= unitToTypes.get(unit);
 									if (types != null) {
-										for (final Iterator innerIterator= types.iterator(); innerIterator.hasNext();) {
-											final IType currentType= (IType) innerIterator.next();
+										for (final Iterator<IType> innerIterator= types.iterator(); innerIterator.hasNext();) {
+											final IType currentType= innerIterator.next();
 											final AbstractTypeDeclaration currentDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(currentType, node);
 											if (currentDeclaration != null)
 												createModifiedSubType(unit, node, extractedType, extractBindings[0], currentDeclaration, status);
@@ -853,6 +860,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 								}
 							}
 
+							@Override
 							public final void acceptBinding(final String key, final IBinding binding) {
 								// Do nothing
 							}
@@ -876,6 +884,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IType[] getCandidateTypes(final RefactoringStatus status, final IProgressMonitor monitor) {
 		Assert.isNotNull(monitor);
 		if (fPossibleCandidates == null || fPossibleCandidates.length == 0) {
@@ -886,16 +895,16 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					final IType superType= getDeclaringSuperTypeHierarchy(new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)).getSuperclass(declaring);
 					if (superType != null) {
 						fPossibleCandidates= superType.newTypeHierarchy(fOwner, new SubProgressMonitor(monitor, 9, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)).getSubtypes(superType);
-						final LinkedList list= new LinkedList(Arrays.asList(fPossibleCandidates));
-						final Set names= new HashSet();
-						for (final Iterator iterator= list.iterator(); iterator.hasNext();) {
-							final IType type= (IType) iterator.next();
+						final LinkedList<IType> list= new LinkedList<IType>(Arrays.asList(fPossibleCandidates));
+						final Set<String> names= new HashSet<String>();
+						for (final Iterator<IType> iterator= list.iterator(); iterator.hasNext();) {
+							final IType type= iterator.next();
 							if (type.isReadOnly() || type.isBinary() || type.isAnonymous() || !type.isClass() || names.contains(type.getFullyQualifiedName()))
 								iterator.remove();
 							else
 								names.add(type.getFullyQualifiedName());
 						}
-						fPossibleCandidates= (IType[]) list.toArray(new IType[list.size()]);
+						fPossibleCandidates= list.toArray(new IType[list.size()]);
 					}
 				} catch (JavaModelException exception) {
 					JavaPlugin.log(exception);
@@ -910,6 +919,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Object[] getElements() {
 		return new Object[] { getDeclaringType()};
 	}
@@ -1027,7 +1037,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TYPES));
 		final RefactoringStatus status= new RefactoringStatus();
-		List elements= new ArrayList();
+		List<IJavaElement> elements= new ArrayList<IJavaElement>();
 		for (int index= 0; index < extractCount; index++) {
 			final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
 			handle= extended.getAttribute(attribute);
@@ -1040,8 +1050,8 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
 		}
-		fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
-		elements= new ArrayList();
+		fMembersToMove= elements.toArray(new IMember[elements.size()]);
+		elements= new ArrayList<IJavaElement>();
 		for (int index= 0; index < deleteCount; index++) {
 			final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (extractCount + index + 1);
 			handle= extended.getAttribute(attribute);
@@ -1054,8 +1064,8 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
 		}
-		fDeletedMethods= (IMethod[]) elements.toArray(new IMethod[elements.size()]);
-		elements= new ArrayList();
+		fDeletedMethods= elements.toArray(new IMethod[elements.size()]);
+		elements= new ArrayList<IJavaElement>();
 		for (int index= 0; index < abstractCount; index++) {
 			final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (extractCount + abstractCount + index + 1);
 			handle= extended.getAttribute(attribute);
@@ -1068,8 +1078,8 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
 		}
-		fAbstractMethods= (IMethod[]) elements.toArray(new IMethod[elements.size()]);
-		elements= new ArrayList();
+		fAbstractMethods= elements.toArray(new IMethod[elements.size()]);
+		elements= new ArrayList<IJavaElement>();
 		for (int index= 0; index < typeCount; index++) {
 			final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (extractCount + abstractCount + deleteCount + index + 1);
 			handle= extended.getAttribute(attribute);
@@ -1082,7 +1092,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
 		}
-		fTypesToExtract= (IType[]) elements.toArray(new IType[elements.size()]);
+		fTypesToExtract= elements.toArray(new IType[elements.size()]);
 		IJavaProject project= null;
 		if (fMembersToMove.length > 0)
 			project= fMembersToMove[0].getJavaProject();
@@ -1095,15 +1105,16 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void registerChanges(final TextEditBasedChangeManager manager) throws CoreException {
 		try {
 			final ICompilationUnit extractedUnit= getExtractedType().getCompilationUnit();
 			ICompilationUnit unit= null;
 			CompilationUnitRewrite rewrite= null;
-			for (final Iterator iterator= fCompilationUnitRewrites.keySet().iterator(); iterator.hasNext();) {
-				unit= (ICompilationUnit) iterator.next();
+			for (final Iterator<ICompilationUnit> iterator= fCompilationUnitRewrites.keySet().iterator(); iterator.hasNext();) {
+				unit= iterator.next();
 				if (unit.equals(extractedUnit)) {
-					rewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit);
+					rewrite= fCompilationUnitRewrites.get(unit);
 					if (rewrite != null) {
 						CompilationUnitChange change= rewrite.createChange(true);
 
@@ -1124,9 +1135,9 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 						}
 					}
 				} else {
-					rewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit);
+					rewrite= fCompilationUnitRewrites.get(unit);
 					if (rewrite != null) {
-						final CompilationUnitChange layerChange= (CompilationUnitChange) fLayerChanges.get(unit.getPrimary());
+						final CompilationUnitChange layerChange= fLayerChanges.get(unit.getPrimary());
 						final CompilationUnitChange rewriteChange= rewrite.createChange(true);
 						if (rewriteChange != null && layerChange != null) {
 							final MultiStateCompilationUnitChange change= new MultiStateCompilationUnitChange(rewriteChange.getName(), unit);
@@ -1143,9 +1154,9 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					}
 				}
 			}
-			for (Iterator iterator= fLayerChanges.entrySet().iterator(); iterator.hasNext();) {
-				final Map.Entry entry= (Map.Entry) iterator.next();
-				manager.manage((ICompilationUnit) entry.getKey(), (TextEditBasedChange) entry.getValue());
+			for (Iterator<Entry<ICompilationUnit, CompilationUnitChange>> iterator= fLayerChanges.entrySet().iterator(); iterator.hasNext();) {
+				final Entry<ICompilationUnit, CompilationUnitChange> entry= iterator.next();
+				manager.manage(entry.getKey(), entry.getValue());
 			}
 			ICompilationUnit[] units= manager.getAllCompilationUnits();
 			for (int index= 0; index < units.length; index++) {

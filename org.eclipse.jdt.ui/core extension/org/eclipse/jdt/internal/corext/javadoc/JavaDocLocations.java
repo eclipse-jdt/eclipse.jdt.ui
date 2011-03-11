@@ -103,7 +103,7 @@ public class JavaDocLocations {
 	private static final QualifiedName PROJECT_JAVADOC= new QualifiedName(JavaUI.ID_PLUGIN, "project_javadoc_location"); //$NON-NLS-1$
 
 	public static void migrateToClasspathAttributes() {
-		final Map oldLocations= loadOldForCompatibility();
+		final Map<IPath, String> oldLocations= loadOldForCompatibility();
 		if (oldLocations.isEmpty()) {
 			IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
 			preferenceStore.setValue(PREF_JAVADOCLOCATIONS, ""); //$NON-NLS-1$
@@ -112,6 +112,7 @@ public class JavaDocLocations {
 		}
 
 		Job job= new Job(CorextMessages.JavaDocLocations_migratejob_name) {
+			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
@@ -134,14 +135,14 @@ public class JavaDocLocations {
 		job.schedule();
 	}
 
-	final static void updateClasspathEntries(Map oldLocationMap, IProgressMonitor monitor) throws JavaModelException {
+	final static void updateClasspathEntries(Map<IPath, String> oldLocationMap, IProgressMonitor monitor) throws JavaModelException {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		IJavaProject[] javaProjects= JavaCore.create(root).getJavaProjects();
 		try {
 			monitor.beginTask(CorextMessages.JavaDocLocations_migrate_operation, javaProjects.length);
 			for (int i= 0; i < javaProjects.length; i++) {
 				IJavaProject project= javaProjects[i];
-				String projectJavadoc= (String) oldLocationMap.get(project.getPath());
+				String projectJavadoc= oldLocationMap.get(project.getPath());
 				if (projectJavadoc != null) {
 					try {
 						setProjectJavadocLocation(project, projectJavadoc);
@@ -170,7 +171,7 @@ public class JavaDocLocations {
 		}
 	}
 
-	private static IClasspathEntry getConvertedEntry(IClasspathEntry entry, IJavaProject project, Map oldLocationMap) {
+	private static IClasspathEntry getConvertedEntry(IClasspathEntry entry, IJavaProject project, Map<IPath, String> oldLocationMap) {
 		IPath path= null;
 		switch (entry.getEntryKind()) {
 			case IClasspathEntry.CPE_SOURCE:
@@ -197,7 +198,7 @@ public class JavaDocLocations {
 				return null;
 			}
 		}
-		String libraryJavadocLocation= (String) oldLocationMap.get(path);
+		String libraryJavadocLocation= oldLocationMap.get(path);
 		if (libraryJavadocLocation != null) {
 			CPListElement element= CPListElement.createFromExisting(entry, project);
 			element.setAttribute(CPListElement.JAVADOC, libraryJavadocLocation);
@@ -206,7 +207,7 @@ public class JavaDocLocations {
 		return null;
 	}
 
-	private static void convertContainer(IClasspathEntry entry, IJavaProject project, Map oldLocationMap) {
+	private static void convertContainer(IClasspathEntry entry, IJavaProject project, Map<IPath, String> oldLocationMap) {
 		try {
 			IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), project);
 			if (container == null) {
@@ -327,8 +328,8 @@ public class JavaDocLocations {
 		return new JavaUIException(JavaUIStatus.createError(IStatus.ERROR, message, t));
 	}
 
-	private static Map/*<Path, String>*/ loadOldForCompatibility() {
-		HashMap resultingOldLocations= new HashMap();
+	private static Map<IPath, String> loadOldForCompatibility() {
+		HashMap<IPath, String> resultingOldLocations= new HashMap<IPath, String>();
 
 		// in 3.0, the javadoc locations were stored as one big string in the preferences
 		String string= PreferenceConstants.getPreferenceStore().getString(PREF_JAVADOCLOCATIONS);
@@ -409,7 +410,7 @@ public class JavaDocLocations {
 		return resultingOldLocations;
 	}
 
-	private static void loadFromStream(InputSource inputSource, Map/*<Path, String>*/ oldLocations) throws CoreException {
+	private static void loadFromStream(InputSource inputSource, Map<IPath, String> oldLocations) throws CoreException {
 		Element cpElement;
 		try {
 			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();

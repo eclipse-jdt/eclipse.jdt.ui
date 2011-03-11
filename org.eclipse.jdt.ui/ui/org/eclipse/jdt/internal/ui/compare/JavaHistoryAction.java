@@ -63,6 +63,7 @@ public abstract class JavaHistoryAction extends Action implements IActionDelegat
 		getDelegate().run(selection);
 	}
 
+	@Override
 	public final void run() {
 		getDelegate().runFromEditor(this);
 	}

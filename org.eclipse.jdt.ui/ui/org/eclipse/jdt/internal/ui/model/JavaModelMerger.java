@@ -48,9 +48,10 @@ public final class JavaModelMerger extends AbstractResourceMappingMerger {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected IProject[] getDependencies(final IProject[] projects) {
 		Assert.isNotNull(projects);
-		final Set set= new HashSet();
+		final Set<IProject> set= new HashSet<IProject>();
 		for (int index= 0; index < projects.length; index++)
 			getDependentProjects(set, projects[index]);
 		final IProject[] result= new IProject[set.size()];
@@ -66,7 +67,7 @@ public final class JavaModelMerger extends AbstractResourceMappingMerger {
 	 * @param project
 	 *            the project to get its dependent projects
 	 */
-	private void getDependentProjects(final Set set, final IProject project) {
+	private void getDependentProjects(final Set<IProject> set, final IProject project) {
 		Assert.isNotNull(set);
 		Assert.isNotNull(project);
 		final IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());

@@ -142,7 +142,7 @@ public abstract class JavadocExportWizardPage {
 	 * @param toolOptions A {@link List} of {@link String} with the Javadoc tool arguments.
 	 * See the <a href="http://java.sun.com/javase/6/docs/technotes/guides/javadoc/index.html"> Javadoc command specification</a> for the format of the arguments.
 	 */
-	public void updateArguments(List vmOptions, List toolOptions) {
+	public void updateArguments(List<String> vmOptions, List<String> toolOptions) {
 	}
 
 	/**

@@ -48,10 +48,12 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 			super(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_POST_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT);
 		}
 
+		@Override
 		public Image getImage(Object element) {
 			return super.getImage(((IType)element).getPackageFragment());
 		}
 
+		@Override
 		public String getText(Object element) {
 			return super.getText(((IType)element).getPackageFragment());
 		}
@@ -72,6 +74,7 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.MAINTYPE_SELECTION_DIALOG);
@@ -80,6 +83,7 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 	/*
 	 * @see Window#open()
 	 */
+	@Override
 	public int open() {
 		MainMethodSearchEngine engine= new MainMethodSearchEngine();
 		IType[] types;

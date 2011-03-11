@@ -31,6 +31,7 @@ abstract class AbstractDeleteChange extends ResourceChange {
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
+	@Override
 	public final Change perform(IProgressMonitor pm) throws CoreException {
 		try {
 			Change undo= doDelete(pm);

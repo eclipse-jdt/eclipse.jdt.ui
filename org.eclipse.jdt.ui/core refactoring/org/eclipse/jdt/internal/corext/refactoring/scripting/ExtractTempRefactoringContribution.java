@@ -34,15 +34,18 @@ public final class ExtractTempRefactoringContribution extends JavaUIRefactoringC
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		return new ExtractTempRefactoring(arguments, status);
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return RefactoringSignatureDescriptorFactory.createExtractLocalDescriptor();
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createExtractLocalDescriptor(project, description, comment, arguments, flags);
 	}

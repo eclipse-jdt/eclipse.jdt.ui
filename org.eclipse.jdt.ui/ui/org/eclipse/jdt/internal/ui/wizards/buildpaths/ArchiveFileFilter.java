@@ -40,12 +40,12 @@ public class ArchiveFileFilter extends ViewerFilter {
 
 	private static final String[] fgArchiveExtensions= { "jar", "zip" }; //$NON-NLS-1$ //$NON-NLS-2$
 
-	private List fExcludes;
+	private List<IResource> fExcludes;
 	private boolean fRecursive;
 	private boolean fAllowAllArchives;
 
 
-	public ArchiveFileFilter(List excludedFiles, boolean recusive, boolean allowAllArchives) {
+	public ArchiveFileFilter(List<IResource> excludedFiles, boolean recusive, boolean allowAllArchives) {
 		fExcludes= excludedFiles;
 		fRecursive= recusive;
 		fAllowAllArchives= allowAllArchives;
@@ -54,6 +54,7 @@ public class ArchiveFileFilter extends ViewerFilter {
 	/*
 	 * @see ViewerFilter#select
 	 */
+	@Override
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IFile) {
 			if (fExcludes != null && fExcludes.contains(element)) {

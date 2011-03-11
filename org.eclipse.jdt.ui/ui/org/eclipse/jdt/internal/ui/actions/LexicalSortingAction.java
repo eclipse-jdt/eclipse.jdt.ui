@@ -51,6 +51,7 @@ public class LexicalSortingAction extends Action {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LEXICAL_SORTING_BROWSING_ACTION);
 	}
 
+	@Override
 	public void run() {
 		valueChanged(isChecked(), true);
 	}

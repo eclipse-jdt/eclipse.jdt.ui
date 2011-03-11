@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 
 	protected boolean fNeedsImport;
 
-	protected Set fProcessed;
+	protected Set<SimpleName> fProcessed;
 
 	protected static final String REFERENCE_UPDATE= RefactoringCoreMessages.MoveMembersRefactoring_referenceUpdate;
 
@@ -62,7 +62,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 		fMembers= members;
 		fSource= source;
 		fTarget= target;
-		fProcessed= new HashSet();
+		fProcessed= new HashSet<SimpleName>();
 	}
 
 	public RefactoringStatus getStatus() {

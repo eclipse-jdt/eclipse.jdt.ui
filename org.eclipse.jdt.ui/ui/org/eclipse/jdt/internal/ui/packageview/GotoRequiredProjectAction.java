@@ -27,6 +27,7 @@ class GotoRequiredProjectAction extends Action {
 		fPackageExplorer= part;
 	}
 
+	@Override
 	public void run() {
 		IStructuredSelection selection= (IStructuredSelection)fPackageExplorer.getSite().getSelectionProvider().getSelection();
 		Object element= selection.getFirstElement();

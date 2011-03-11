@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 
 public class RenameUserInterfaceStarter extends UserInterfaceStarter {
 
+	@Override
 	public boolean activate(Refactoring refactoring, Shell parent, int saveMode) throws CoreException {
 		RenameProcessor processor= (RenameProcessor)refactoring.getAdapter(RenameProcessor.class);
 		Object[] elements= processor.getElements();

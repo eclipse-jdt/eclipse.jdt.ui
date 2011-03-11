@@ -180,6 +180,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher#evaluate(org.eclipse.jface.text.rules.ICharacterScanner, org.eclipse.jdt.internal.ui.text.CombinedWordRule.CharacterBuffer)
 		 */
+		@Override
 		public IToken evaluate(ICharacterScanner scanner, CombinedWordRule.CharacterBuffer word) {
 			IToken token= super.evaluate(scanner, word);
 
@@ -402,7 +403,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		ANNOTATION_COLOR_KEY,
 	};
 
-	private List fVersionDependentRules= new ArrayList(3);
+	private List<ISourceVersionDependent> fVersionDependentRules= new ArrayList<ISourceVersionDependent>(3);
 
 	/**
 	 * Creates a Java code scanner
@@ -418,6 +419,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	/*
 	 * @see AbstractJavaScanner#getTokenProperties()
 	 */
+	@Override
 	protected String[] getTokenProperties() {
 		return fgTokenProperties;
 	}
@@ -425,9 +427,10 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	/*
 	 * @see AbstractJavaScanner#createRules()
 	 */
-	protected List createRules() {
+	@Override
+	protected List<IRule> createRules() {
 
-		List rules= new ArrayList();
+		List<IRule> rules= new ArrayList<IRule>();
 
 		// Add rule for character constants.
 		Token token= getToken(IJavaColorConstants.JAVA_STRING);
@@ -504,6 +507,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractJavaScanner#getBoldKey(java.lang.String)
 	 */
+	@Override
 	protected String getBoldKey(String colorKey) {
 		if ((ANNOTATION_COLOR_KEY).equals(colorKey))
 			return ANNOTATION_BASE_KEY + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX;
@@ -513,6 +517,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractJavaScanner#getItalicKey(java.lang.String)
 	 */
+	@Override
 	protected String getItalicKey(String colorKey) {
 		if ((ANNOTATION_COLOR_KEY).equals(colorKey))
 			return ANNOTATION_BASE_KEY + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX;
@@ -522,6 +527,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractJavaScanner#getStrikethroughKey(java.lang.String)
 	 */
+	@Override
 	protected String getStrikethroughKey(String colorKey) {
 		if ((ANNOTATION_COLOR_KEY).equals(colorKey))
 			return ANNOTATION_BASE_KEY + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_STRIKETHROUGH_SUFFIX;
@@ -531,6 +537,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractJavaScanner#getUnderlineKey(java.lang.String)
 	 */
+	@Override
 	protected String getUnderlineKey(String colorKey) {
 		if ((ANNOTATION_COLOR_KEY).equals(colorKey))
 			return ANNOTATION_BASE_KEY + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_UNDERLINE_SUFFIX;
@@ -540,6 +547,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	/*
 	 * @see AbstractJavaScanner#affectsBehavior(PropertyChangeEvent)
 	 */
+	@Override
 	public boolean affectsBehavior(PropertyChangeEvent event) {
 		return event.getProperty().equals(SOURCE_VERSION) || super.affectsBehavior(event);
 	}
@@ -547,6 +555,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	/*
 	 * @see AbstractJavaScanner#adaptToPreferenceChange(PropertyChangeEvent)
 	 */
+	@Override
 	public void adaptToPreferenceChange(PropertyChangeEvent event) {
 
 		if (event.getProperty().equals(SOURCE_VERSION)) {
@@ -555,8 +564,8 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			if (value instanceof String) {
 				String s= (String) value;
 
-				for (Iterator it= fVersionDependentRules.iterator(); it.hasNext();) {
-					ISourceVersionDependent dependent= (ISourceVersionDependent) it.next();
+				for (Iterator<ISourceVersionDependent> it= fVersionDependentRules.iterator(); it.hasNext();) {
+					ISourceVersionDependent dependent= it.next();
 					dependent.setSourceVersion(s);
 				}
 			}

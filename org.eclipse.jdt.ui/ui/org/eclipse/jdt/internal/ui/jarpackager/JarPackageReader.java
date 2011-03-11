@@ -35,6 +35,7 @@ import org.w3c.dom.NodeList;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -173,7 +174,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		if (element.getNodeName().equals("storedRefactorings")) { //$NON-NLS-1$
 			jarPackage.setExportStructuralOnly(getBooleanAttribute(element, "structuralOnly", jarPackage.isExportStructuralOnly())); //$NON-NLS-1$
 			jarPackage.setDeprecationAware(getBooleanAttribute(element, "deprecationInfo", jarPackage.isDeprecationAware())); //$NON-NLS-1$
-			List elements= new ArrayList();
+			List<IAdaptable> elements= new ArrayList<IAdaptable>();
 			int count= 1;
 			String value= element.getAttribute("project" + count); //$NON-NLS-1$
 			while (value != null && !"".equals(value)) { //$NON-NLS-1$
@@ -183,7 +184,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 				count++;
 				value= element.getAttribute("project" + count); //$NON-NLS-1$
 			}
-			jarPackage.setRefactoringProjects((IProject[]) elements.toArray(new IProject[elements.size()]));
+			jarPackage.setRefactoringProjects(elements.toArray(new IProject[elements.size()]));
 			elements.clear();
 			count= 1;
 			IRefactoringHistoryService service= RefactoringCore.getHistoryService();
@@ -211,7 +212,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			} finally {
 				service.disconnect();
 			}
-			jarPackage.setRefactoringDescriptors((RefactoringDescriptorProxy[]) elements.toArray(new RefactoringDescriptorProxy[elements.size()]));
+			jarPackage.setRefactoringDescriptors(elements.toArray(new RefactoringDescriptorProxy[elements.size()]));
 		}
 	}
 
@@ -254,7 +255,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			jarPackage.setExportOutputFolders(getBooleanAttribute(element, "exportOutputFolder", false)); //$NON-NLS-1$
 			jarPackage.setExportJavaFiles(getBooleanAttribute(element, "exportJavaFiles")); //$NON-NLS-1$
 			NodeList selectedElements= element.getChildNodes();
-			Set elementsToExport= new HashSet(selectedElements.getLength());
+			Set<IAdaptable> elementsToExport= new HashSet<IAdaptable>(selectedElements.getLength());
 			for (int j= 0; j < selectedElements.getLength(); j++) {
 				Node selectedNode= selectedElements.item(j);
 				if (selectedNode.getNodeType() != Node.ELEMENT_NODE)
@@ -277,7 +278,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	private void xmlReadSelectedProjects(JarPackageData jarPackage, Element element) throws java.io.IOException {
 		if (element.getNodeName().equals("selectedProjects")) { //$NON-NLS-1$
 			NodeList selectedElements= element.getChildNodes();
-			Set selectedProjects= new HashSet(selectedElements.getLength());
+			Set<IAdaptable> selectedProjects= new HashSet<IAdaptable>(selectedElements.getLength());
 			for (int index= 0; index < selectedElements.getLength(); index++) {
 				Node node= selectedElements.item(index);
 				if (node.getNodeType() != Node.ELEMENT_NODE)
@@ -286,7 +287,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 				if (selectedElement.getNodeName().equals("project")) //$NON-NLS-1$
 					addProject(selectedProjects ,selectedElement);
 			}
-			jarPackage.setRefactoringProjects((IProject[]) selectedProjects.toArray(new IProject[selectedProjects.size()]));
+			jarPackage.setRefactoringProjects(selectedProjects.toArray(new IProject[selectedProjects.size()]));
 		}
 	}
 
@@ -306,7 +307,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		throw new IOException(JarPackagerMessages.JarPackageReader_error_illegalValueForBooleanAttribute);
 	}
 
-	private void addFile(Set selectedElements, Element element) throws IOException {
+	private void addFile(Set<IAdaptable> selectedElements, Element element) throws IOException {
 		IPath path= getPath(element);
 		if (path != null) {
 			IFile file= JavaPlugin.getWorkspace().getRoot().getFile(path);
@@ -315,7 +316,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		}
 	}
 
-	private void addFolder(Set selectedElements, Element element) throws IOException {
+	private void addFolder(Set<IAdaptable> selectedElements, Element element) throws IOException {
 		IPath path= getPath(element);
 		if (path != null) {
 			IFolder folder= JavaPlugin.getWorkspace().getRoot().getFolder(path);
@@ -324,7 +325,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		}
 	}
 
-	private void addProject(Set selectedElements, Element element) throws IOException {
+	private void addProject(Set<IAdaptable> selectedElements, Element element) throws IOException {
 		String name= element.getAttribute("name"); //$NON-NLS-1$
 		if (name.length() == 0)
 			throw new IOException(JarPackagerMessages.JarPackageReader_error_tagNameNotFound);
@@ -340,7 +341,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		return Path.fromPortableString(element.getAttribute("path")); //$NON-NLS-1$
 	}
 
-	private void addJavaElement(Set selectedElements, Element element) throws IOException {
+	private void addJavaElement(Set<IAdaptable> selectedElements, Element element) throws IOException {
 		String handleId= element.getAttribute("handleIdentifier"); //$NON-NLS-1$
 		if (handleId.length() == 0)
 			throw new IOException(JarPackagerMessages.JarPackageReader_error_tagHandleIdentifierNotFoundOrEmpty);
@@ -357,7 +358,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		if (list.getLength() == 0)
 			return null; // optional entry is not present
 		NodeList packageNodes= list.item(0).getChildNodes();
-		List packages= new ArrayList(packageNodes.getLength());
+		List<IJavaElement> packages= new ArrayList<IJavaElement>(packageNodes.getLength());
 		for (int i= 0; i < packageNodes.getLength(); i++) {
 			Node packageNode= packageNodes.item(i);
 			if (packageNode.getNodeType() == Node.ELEMENT_NODE && packageNode.getNodeName().equals("package")) { //$NON-NLS-1$
@@ -371,7 +372,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 					addWarning(JarPackagerMessages.JarPackageReader_warning_javaElementDoesNotExist, null);
 			}
 		}
-		return (IPackageFragment[])packages.toArray(new IPackageFragment[packages.size()]);
+		return packages.toArray(new IPackageFragment[packages.size()]);
 	}
 
 	private IType getMainClass(Element element) {

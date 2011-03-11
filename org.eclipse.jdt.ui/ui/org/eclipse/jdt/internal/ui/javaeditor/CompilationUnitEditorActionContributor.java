@@ -44,6 +44,7 @@ public class CompilationUnitEditorActionContributor extends BasicCompilationUnit
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.BasicEditorActionContributor#contributeToMenu(org.eclipse.jface.action.IMenuManager)
 	 */
+	@Override
 	public void contributeToMenu(IMenuManager menu) {
 		super.contributeToMenu(menu);
 
@@ -56,6 +57,7 @@ public class CompilationUnitEditorActionContributor extends BasicCompilationUnit
 	/*
 	 * @see IEditorActionBarContributor#setActiveEditor(IEditorPart)
 	 */
+	@Override
 	public void setActiveEditor(IEditorPart part) {
 		super.setActiveEditor(part);
 

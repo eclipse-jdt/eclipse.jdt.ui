@@ -31,7 +31,7 @@ public class GenerateConstructorUsingFieldsValidator implements ISelectionStatus
 
 	private final int fEntries;
 
-	private List fSignatures;
+	private List<String> fSignatures;
 
 	private ITypeBinding fType= null;
 
@@ -67,8 +67,8 @@ public class GenerateConstructorUsingFieldsValidator implements ISelectionStatus
 		}
 	}
 
-	private List getExistingConstructorSignatures() {
-		List existing= new ArrayList();
+	private List<String> getExistingConstructorSignatures() {
+		List<String> existing= new ArrayList<String>();
 		IMethodBinding[] methods= fType.getDeclaredMethods();
 		for (int index= 0; index < methods.length; index++) {
 			if (methods[index].isConstructor()) {

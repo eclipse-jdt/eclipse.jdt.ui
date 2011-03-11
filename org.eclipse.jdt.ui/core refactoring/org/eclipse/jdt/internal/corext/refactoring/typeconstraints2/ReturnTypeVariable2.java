@@ -37,6 +37,7 @@ public final class ReturnTypeVariable2 extends ConstraintVariable2 implements IS
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return getKey().hashCode();
 	}
@@ -44,6 +45,7 @@ public final class ReturnTypeVariable2 extends ConstraintVariable2 implements IS
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object other) {
 		if (this == other)
 			return true;

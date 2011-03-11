@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,7 @@ public class CorrectionCommandInstaller {
 	 */
 	public static final String ASSIST_SUFFIX= ".assist"; //$NON-NLS-1$
 
-	private List fCorrectionHandlerActivations;
+	private List<IHandlerActivation> fCorrectionHandlerActivations;
 
 	public CorrectionCommandInstaller() {
 		fCorrectionHandlerActivations= null;
@@ -55,11 +55,11 @@ public class CorrectionCommandInstaller {
 		if (fCorrectionHandlerActivations != null) {
 			JavaPlugin.logErrorMessage("correction handler activations not released"); //$NON-NLS-1$
 		}
-		fCorrectionHandlerActivations= new ArrayList();
+		fCorrectionHandlerActivations= new ArrayList<IHandlerActivation>();
 
-		Collection definedCommandIds= commandService.getDefinedCommandIds();
-		for (Iterator iter= definedCommandIds.iterator(); iter.hasNext();) {
-			String id= (String) iter.next();
+		Collection<String> definedCommandIds= commandService.getDefinedCommandIds();
+		for (Iterator<String> iter= definedCommandIds.iterator(); iter.hasNext();) {
+			String id= iter.next();
 			if (id.startsWith(COMMAND_PREFIX)) {
 				boolean isAssist= id.endsWith(ASSIST_SUFFIX);
 				CorrectionCommandHandler handler= new CorrectionCommandHandler(editor, id, isAssist);

@@ -42,6 +42,7 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.AbstractSpellDictionary#acceptsWords()
 	 */
+	@Override
 	public boolean acceptsWords() {
 		return true;
 	}
@@ -49,6 +50,7 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#addWord(java.lang.String)
 	 */
+	@Override
 	public void addWord(final String word) {
 		if (isCorrect(word))
 			return;
@@ -91,6 +93,7 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#getURL()
 	 */
+	@Override
 	protected final URL getURL() {
 		return fLocation;
 	}

@@ -65,7 +65,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	private int fLRUMenuCount;
 	private IMenuManager fMenuManager;
 	private IMenuListener fMenuListener;
-	private List fContributions= new ArrayList();
+	private List<IContributionItem> fContributions= new ArrayList<IContributionItem>();
 	private final IWorkbenchPage fWorkbenchPage;
 	private boolean fAllowWindowWorkingSetByDefault;
 
@@ -199,6 +199,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	/* (non-Javadoc)
 	 * @see ActionGroup#fillActionBars(IActionBars)
 	 */
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		fillToolBar(actionBars.getToolBarManager());
 		fillViewMenu(actionBars.getMenuManager());
@@ -285,8 +286,8 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 
 
 	public void cleanViewMenu(IMenuManager menuManager) {
-		for (Iterator iter= fContributions.iterator(); iter.hasNext();) {
-			IContributionItem removed= menuManager.remove((IContributionItem) iter.next());
+		for (Iterator<IContributionItem> iter= fContributions.iterator(); iter.hasNext();) {
+			IContributionItem removed= menuManager.remove(iter.next());
 			if (removed != null) {
 				removed.dispose();
 			}
@@ -299,6 +300,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	/* (non-Javadoc)
 	 * @see ActionGroup#dispose()
 	 */
+	@Override
 	public void dispose() {
 		if (fMenuManager != null && fMenuListener != null)
 			fMenuManager.removeMenuListener(fMenuListener);

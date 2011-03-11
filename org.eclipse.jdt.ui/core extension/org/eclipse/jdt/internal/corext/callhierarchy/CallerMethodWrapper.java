@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,13 +64,15 @@ public class CallerMethodWrapper extends MethodWrapper {
         return CallHierarchy.getDefault().getSearchScope();
     }
 
-    protected String getTaskName() {
+    @Override
+	protected String getTaskName() {
         return CallHierarchyMessages.CallerMethodWrapper_taskname;
     }
 
     /* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#createMethodWrapper(org.eclipse.jdt.internal.corext.callhierarchy.MethodCall)
 	 */
+	@Override
 	public MethodWrapper createMethodWrapper(MethodCall methodCall) {
         return new CallerMethodWrapper(this, methodCall);
     }
@@ -78,6 +80,7 @@ public class CallerMethodWrapper extends MethodWrapper {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#canHaveChildren()
 	 */
+	@Override
 	public boolean canHaveChildren() {
 		IMember member= getMember();
 		if (member instanceof IField) {
@@ -93,7 +96,8 @@ public class CallerMethodWrapper extends MethodWrapper {
 	 * @return The result of the search for children
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#findChildren(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	protected Map findChildren(IProgressMonitor progressMonitor) {
+	@Override
+	protected Map<String, MethodCall> findChildren(IProgressMonitor progressMonitor) {
 		try {
 
 			IProgressMonitor monitor= new SubProgressMonitor(progressMonitor, 95, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
@@ -140,7 +144,7 @@ public class CallerMethodWrapper extends MethodWrapper {
 				pattern= SearchPattern.createPattern(member, limitTo, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 			}
 			if (pattern == null) { // e.g. for initializers
-				return new HashMap(0);
+				return new HashMap<String, MethodCall>(0);
 			}
 
 			SearchEngine searchEngine= new SearchEngine();
@@ -154,7 +158,7 @@ public class CallerMethodWrapper extends MethodWrapper {
 
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			return new HashMap(0);
+			return new HashMap<String, MethodCall>(0);
 		}
 	}
 

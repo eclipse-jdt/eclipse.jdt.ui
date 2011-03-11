@@ -47,7 +47,7 @@ public class TypeArgumentMismatchSubProcessor {
 
 //	}
 
-	public static void removeMismatchedArguments(IInvocationContext context, IProblemLocation problem, Collection proposals){
+	public static void removeMismatchedArguments(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals){
 		ICompilationUnit cu= context.getCompilationUnit();
 		ASTNode selectedNode= problem.getCoveredNode(context.getASTRoot());
 		if (!(selectedNode instanceof SimpleName)) {

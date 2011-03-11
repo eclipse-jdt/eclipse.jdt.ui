@@ -191,6 +191,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 	/*
 	 * @see org.eclipse.jface.text.IAutoIndentStrategy#customizeDocumentCommand(IDocument, DocumentCommand)
 	 */
+	@Override
 	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
 		try {
 			if (command.text == null)

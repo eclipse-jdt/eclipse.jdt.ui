@@ -78,11 +78,13 @@ public class StringConcatenationGenerator extends AbstractToStringGenerator {
 
 	private SumExpressionBuilder toStringExpressionBuilder;
 
+	@Override
 	protected void initialize() {
 		super.initialize();
 		toStringExpressionBuilder= new SumExpressionBuilder(null);
 	}
 
+	@Override
 	protected void complete() throws CoreException {
 		super.complete();
 		ReturnStatement returnStatement= fAst.newReturnStatement();
@@ -90,6 +92,7 @@ public class StringConcatenationGenerator extends AbstractToStringGenerator {
 		toStringMethod.getBody().statements().add(returnStatement);
 	}
 
+	@Override
 	protected void addElement(Object element) {
 		addElement(element, toStringExpressionBuilder);
 	}
@@ -109,6 +112,7 @@ public class StringConcatenationGenerator extends AbstractToStringGenerator {
 		}
 	}
 
+	@Override
 	protected void addMember(Object member, boolean addSeparator) {
 		boolean[] interfaces= implementsInterfaces(getMemberType(member).getErasure(), new String[] { "java.util.Collection", "java.util.Map" }); //$NON-NLS-1$ //$NON-NLS-2$
 		if (getContext().isLimitItems() && getContext().isSkipNulls() && (interfaces[0] || interfaces[1] || getMemberType(member).isArray())) {
@@ -118,6 +122,7 @@ public class StringConcatenationGenerator extends AbstractToStringGenerator {
 		}
 	}
 
+	@Override
 	protected void addMemberCheckNull(Object member, boolean addSeparator) {
 		ConditionalExpression cExpression= fAst.newConditionalExpression();
 

@@ -78,6 +78,7 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void dispose() {
 		super.dispose();
 		fHistoryLabelProvider.dispose();
@@ -90,6 +91,7 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Image getImage(final Object element) {
 		if (element instanceof IFolder) {
 			final IFolder folder= (IFolder) element;
@@ -115,6 +117,7 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getText(final Object element) {
 		if (element instanceof IFolder) {
 			final IFolder folder= (IFolder) element;

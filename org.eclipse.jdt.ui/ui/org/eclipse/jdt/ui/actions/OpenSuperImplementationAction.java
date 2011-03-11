@@ -110,12 +110,14 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		IMethod method= getMethod(selection);
 
@@ -125,6 +127,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(fEditor))
 			return;
@@ -139,6 +142,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		run(getMethod(selection));
 	}

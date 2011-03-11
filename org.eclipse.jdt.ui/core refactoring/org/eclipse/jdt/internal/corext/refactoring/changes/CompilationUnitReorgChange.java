@@ -56,6 +56,7 @@ abstract class CompilationUnitReorgChange extends ResourceChange {
 		fCuHandle= cuHandle;
 	}
 
+	@Override
 	public final Change perform(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		pm.beginTask(getName(), 1);
 		try {
@@ -71,6 +72,7 @@ abstract class CompilationUnitReorgChange extends ResourceChange {
 
 	abstract Change doPerformReorg(IProgressMonitor pm) throws CoreException, OperationCanceledException;
 
+	@Override
 	public Object getModifiedElement() {
 		return getCu();
 	}
@@ -78,6 +80,7 @@ abstract class CompilationUnitReorgChange extends ResourceChange {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
 	 */
+	@Override
 	protected IResource getModifiedResource() {
 		ICompilationUnit cu= getCu();
 		if (cu != null) {

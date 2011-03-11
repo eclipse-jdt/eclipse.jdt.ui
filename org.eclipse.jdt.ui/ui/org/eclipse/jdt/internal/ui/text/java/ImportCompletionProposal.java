@@ -66,6 +66,7 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getReplacementString()
 	 */
+	@Override
 	public final String getReplacementString() {
 		if (!fReplacementStringComputed)
 			setReplacementString(computeReplacementString());
@@ -129,6 +130,7 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#apply(org.eclipse.jface.text.IDocument, char, int)
 	 */
+	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 		try {
 			super.apply(document, trigger, offset);

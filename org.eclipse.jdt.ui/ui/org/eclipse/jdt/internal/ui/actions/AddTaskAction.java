@@ -33,10 +33,12 @@ public class AddTaskAction extends SelectionDispatchAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_TASK_ACTION);
 	}
 
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(getElement(selection) != null);
 	}
 
+	@Override
 	public void run(IStructuredSelection selection) {
 		IResource resource= getElement(selection);
 		if (resource == null)

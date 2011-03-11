@@ -26,6 +26,7 @@ public class ClassFilter extends ViewerFilter {
 	/*
 	 * @see ViewerFilter
 	 */
+	@Override
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IType) {
 			try {

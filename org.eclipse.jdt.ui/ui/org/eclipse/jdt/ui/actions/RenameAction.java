@@ -75,6 +75,7 @@ public class RenameAction extends SelectionDispatchAction {
 	/*
 	 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
 	 */
+	@Override
 	public void selectionChanged(SelectionChangedEvent event) {
 		fRenameJavaElement.selectionChanged(event);
 		if (fRenameResource != null)
@@ -85,6 +86,7 @@ public class RenameAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#update(ISelection)
 	 */
+	@Override
 	public void update(ISelection selection) {
 		fRenameJavaElement.update(selection);
 
@@ -102,6 +104,7 @@ public class RenameAction extends SelectionDispatchAction {
 		}
 	}
 
+	@Override
 	public void run(IStructuredSelection selection) {
 		if (fRenameJavaElement.isEnabled())
 			fRenameJavaElement.run(selection);
@@ -109,6 +112,7 @@ public class RenameAction extends SelectionDispatchAction {
 			fRenameResource.run(selection);
 	}
 
+	@Override
 	public void run(ITextSelection selection) {
 		if (fRenameJavaElement.isEnabled())
 			fRenameJavaElement.run(selection);

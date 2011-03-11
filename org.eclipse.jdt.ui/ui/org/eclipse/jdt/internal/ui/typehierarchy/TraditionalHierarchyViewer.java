@@ -35,6 +35,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	/*
 	 * @see TypeHierarchyViewer#updateContent
 	 */
+	@Override
 	public void updateContent(boolean expand) {
 		getTree().setRedraw(false);
 		refresh();
@@ -86,7 +87,8 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyContentProvider#getRootTypes(java.util.List)
 		 */
-		protected final void getRootTypes(List res) {
+		@Override
+		protected final void getRootTypes(List<IType> res) {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
 				IType input= hierarchy.getType();
@@ -121,7 +123,8 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 		/*
 		 * @see TypeHierarchyContentProvider.getTypesInHierarchy
 		 */
-		protected final void getTypesInHierarchy(IType type, List res) {
+		@Override
+		protected final void getTypesInHierarchy(IType type, List<IType> res) {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
 				IType[] types= hierarchy.getSubtypes(type);
@@ -152,6 +155,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 			}
 		}
 
+		@Override
 		protected IType getParentType(IType type) {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,6 +63,7 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getDetailedDescription() {
 	    return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath_library;
 	}
@@ -70,6 +71,7 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void run() {
 		final IJavaProject project= (IJavaProject)getSelectedElements().get(0);
 
@@ -91,6 +93,7 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 			/**
 			 * {@inheritDoc}
 			 */
+			@Override
 			public boolean performFinish() {
 				if (super.performFinish()) {
 					IWorkspaceRunnable op= new IWorkspaceRunnable() {
@@ -130,7 +133,7 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 					try {
 						pm.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4);
 
-						List addedEntries= new ArrayList();
+						List<CPListElement> addedEntries= new ArrayList<CPListElement>();
 						for (int i= 0; i < selected.length; i++) {
 							addedEntries.add(CPListElement.create(selected[i], true, project));
 						}
@@ -139,7 +142,7 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 						if (pm.isCanceled())
 							throw new InterruptedException();
 
-						List existingEntries= ClasspathModifier.getExistingEntries(project);
+						List<CPListElement> existingEntries= ClasspathModifier.getExistingEntries(project);
 						ClasspathModifier.setNewEntry(existingEntries, addedEntries, project, new SubProgressMonitor(pm, 1));
 						if (pm.isCanceled())
 							throw new InterruptedException();
@@ -147,10 +150,10 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 						ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(pm, 1));
 
 			        	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
-			        	delta.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
+			        	delta.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));
 			        	informListeners(delta);
 
-						List result= new ArrayList(addedEntries.size());
+						List<ClassPathContainer> result= new ArrayList<ClassPathContainer>(addedEntries.size());
 						for (int i= 0; i < addedEntries.size(); i++) {
 							result.add(new ClassPathContainer(project, selected[i]));
 						}
@@ -174,6 +177,7 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 		dialog.open();
 	}
 
+	@Override
 	protected boolean canHandle(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return false;

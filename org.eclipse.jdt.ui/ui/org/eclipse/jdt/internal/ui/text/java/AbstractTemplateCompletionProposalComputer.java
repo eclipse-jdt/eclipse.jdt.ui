@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -46,24 +49,24 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (!(context instanceof JavaContentAssistInvocationContext))
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 
 		JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
 		ICompilationUnit unit= javaContext.getCompilationUnit();
 		if (unit == null)
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 
 		fEngine= computeCompletionEngine(javaContext);
 		if (fEngine == null)
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 
 		fEngine.reset();
 		fEngine.complete(javaContext.getViewer(), javaContext.getInvocationOffset(), unit);
 
 		TemplateProposal[] templateProposals= fEngine.getResults();
-		List result= new ArrayList(Arrays.asList(templateProposals));
+		List<ICompletionProposal> result= new ArrayList<ICompletionProposal>(Arrays.asList(templateProposals));
 
 		IJavaCompletionProposal[] keyWordResults= javaContext.getKeywordProposals();
 		if (keyWordResults.length == 0)
@@ -101,8 +104,8 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
-		return Collections.EMPTY_LIST;
+	public List<IContextInformation> computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
+		return Collections.emptyList();
 	}
 
 	/*

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,11 +28,8 @@ import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 public class TemplateVariableProcessor implements IContentAssistProcessor {
 
-	private static Comparator fgTemplateVariableProposalComparator= new Comparator() {
-		public int compare(Object arg0, Object arg1) {
-			TemplateVariableProposal proposal0= (TemplateVariableProposal) arg0;
-			TemplateVariableProposal proposal1= (TemplateVariableProposal) arg1;
-
+	private static Comparator<TemplateVariableProposal> fgTemplateVariableProposalComparator= new Comparator<TemplateVariableProposal>() {
+		public int compare(TemplateVariableProposal proposal0, TemplateVariableProposal proposal1) {
 			return proposal0.getDisplayString().compareTo(proposal1.getDisplayString());
 		}
 	};
@@ -67,7 +64,7 @@ public class TemplateVariableProcessor implements IContentAssistProcessor {
 		if (fContextType == null)
 			return null;
 
-		List proposals= new ArrayList();
+		List<TemplateVariableProposal> proposals= new ArrayList<TemplateVariableProposal>();
 
 		String text= viewer.getDocument().get();
 		int start= getStart(text, documentOffset);
@@ -95,15 +92,15 @@ public class TemplateVariableProcessor implements IContentAssistProcessor {
 
 		int length= end - offset;
 
-		for (Iterator iterator= fContextType.resolvers(); iterator.hasNext(); ) {
-			TemplateVariableResolver variable= (TemplateVariableResolver) iterator.next();
+		for (Iterator<TemplateVariableResolver> iterator= fContextType.resolvers(); iterator.hasNext(); ) {
+			TemplateVariableResolver variable= iterator.next();
 
 			if (variable.getType().startsWith(prefix))
 				proposals.add(new TemplateVariableProposal(variable, offset, length, viewer, includeBrace));
 		}
 
 		Collections.sort(proposals, fgTemplateVariableProposalComparator);
-		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+		return proposals.toArray(new ICompletionProposal[proposals.size()]);
 	}
 
 	/* Guesses the start position of the completion */

@@ -74,6 +74,7 @@ class CopyCallHierarchyAction extends Action {
 	/*
 	 * @see IAction#run()
 	 */
+	@Override
 	public void run() {
 		StringBuffer buf= new StringBuffer();
 		addCalls(fViewer.getTree().getSelection()[0], 0, buf);

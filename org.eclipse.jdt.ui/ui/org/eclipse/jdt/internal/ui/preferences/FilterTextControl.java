@@ -95,6 +95,7 @@ public class FilterTextControl {
 	public FilterTextControl(Composite parent) {
 		boolean nativeField= useNativeSearchField(parent);
 		fComposite= new Composite(parent, nativeField ? SWT.NONE : SWT.BORDER) {
+			@Override
 			public void setEnabled(boolean enabled) {
 				super.setEnabled(enabled);
 				
@@ -174,6 +175,7 @@ public class FilterTextControl {
 			clearButton.addMouseListener(new MouseAdapter() {
 				private MouseMoveListener fMoveListener;
 
+				@Override
 				public void mouseDown(MouseEvent e) {
 					clearButton.setImage(pressedImage);
 					fMoveListener= new MouseMoveListener() {
@@ -190,6 +192,7 @@ public class FilterTextControl {
 					clearButton.addMouseMoveListener(fMoveListener);
 				}
 
+				@Override
 				public void mouseUp(MouseEvent e) {
 					if (fMoveListener != null) {
 						clearButton.removeMouseMoveListener(fMoveListener);
@@ -229,12 +232,14 @@ public class FilterTextControl {
 			});
 			clearButton.getAccessible().addAccessibleListener(
 					new AccessibleAdapter() {
+						@Override
 						public void getName(AccessibleEvent e) {
 							e.result= PreferencesMessages.FilterTextControl_ClearFilterField;
 						}
 					});
 			clearButton.getAccessible().addAccessibleControlListener(
 					new AccessibleControlAdapter() {
+						@Override
 						public void getRole(AccessibleControlEvent e) {
 							e.detail= ACC.ROLE_PUSHBUTTON;
 						}

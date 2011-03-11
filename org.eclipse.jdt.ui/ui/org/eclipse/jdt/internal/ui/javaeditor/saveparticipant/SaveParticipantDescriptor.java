@@ -55,10 +55,12 @@ public class SaveParticipantDescriptor {
 	public ISaveParticipantPreferenceConfiguration createPreferenceConfiguration() {
 		return new AbstractSaveParticipantPreferenceConfiguration() {
 
+			@Override
 			protected String getPostSaveListenerId() {
 	            return fPostSaveListener.getId();
             }
 
+			@Override
 			protected String getPostSaveListenerName() {
 	            return fPostSaveListener.getName();
             }

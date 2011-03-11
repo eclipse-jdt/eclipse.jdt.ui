@@ -35,16 +35,19 @@ public final class PullUpRefactoringContribution extends JavaUIRefactoringContri
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		PullUpRefactoringProcessor processor= new PullUpRefactoringProcessor(arguments, status);
 		return new ProcessorBasedRefactoring(processor);
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return RefactoringSignatureDescriptorFactory.createPullUpDescriptor();
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createPullUpDescriptor(project, description, comment, arguments, flags);
 	}

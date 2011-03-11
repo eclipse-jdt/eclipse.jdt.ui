@@ -35,16 +35,19 @@ public final class PushDownRefactoringContribution extends JavaUIRefactoringCont
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		PushDownRefactoringProcessor processor= new PushDownRefactoringProcessor(arguments, status);
 		return new ProcessorBasedRefactoring(processor);
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return RefactoringSignatureDescriptorFactory.createPushDownDescriptor();
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createPushDownDescriptor(project, description, comment, arguments, flags);
 	}

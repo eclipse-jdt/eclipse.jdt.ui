@@ -176,6 +176,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	/*
 	 * @see SourceViewerConfiguration#getPresentationReconciler(ISourceViewer)
 	 */
+	@Override
 	public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
 
 		PresentationReconciler reconciler= new JavaPresentationReconciler();
@@ -199,6 +200,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	/*
 	 * @see SourceViewerConfiguration#getDoubleClickStrategy(ISourceViewer, String)
 	 */
+	@Override
 	public ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType) {
 		if (IDocument.DEFAULT_CONTENT_TYPE.equals(contentType))
 			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 0, 0, 0);
@@ -213,6 +215,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	/*
 	 * @see SourceViewerConfiguration#getConfiguredContentTypes(ISourceViewer)
 	 */
+	@Override
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
 		int length= IPropertiesFilePartitions.PARTITIONS.length;
 		String[] contentTypes= new String[length + 1];
@@ -226,6 +229,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getConfiguredDocumentPartitioning(org.eclipse.jface.text.source.ISourceViewer)
 	 */
+	@Override
 	public String getConfiguredDocumentPartitioning(ISourceViewer sourceViewer) {
 		if (fDocumentPartitioning != null)
 			return fDocumentPartitioning;
@@ -265,8 +269,9 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinkDetectorTargets(org.eclipse.jface.text.source.ISourceViewer)
 	 * @since 3.3
 	 */
-	protected Map getHyperlinkDetectorTargets(ISourceViewer sourceViewer) {
-		Map targets= super.getHyperlinkDetectorTargets(sourceViewer);
+	@Override
+	protected Map<String, ITextEditor> getHyperlinkDetectorTargets(ISourceViewer sourceViewer) {
+		Map<String, ITextEditor> targets= super.getHyperlinkDetectorTargets(sourceViewer);
 		targets.put("org.eclipse.jdt.ui.PropertiesFileEditor", fTextEditor); //$NON-NLS-1$
 		return targets;
 	}
@@ -274,8 +279,10 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	/*
 	 * @see SourceViewerConfiguration#getAnnotationHover(ISourceViewer)
 	 */
+	@Override
 	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
 		return new HTMLAnnotationHover(false) {
+			@Override
 			protected boolean isIncluded(Annotation annotation) {
 				return isShowInVerticalRuler(annotation);
 			}
@@ -285,8 +292,10 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	/*
 	 * @see SourceViewerConfiguration#getOverviewRulerAnnotationHover(ISourceViewer)
 	 */
+	@Override
 	public IAnnotationHover getOverviewRulerAnnotationHover(ISourceViewer sourceViewer) {
 		return new HTMLAnnotationHover(true) {
+			@Override
 			protected boolean isIncluded(Annotation annotation) {
 				return isShowInOverviewRuler(annotation);
 			}
@@ -296,6 +305,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	/*
 	 * @see SourceViewerConfiguration#getInformationControlCreator(ISourceViewer)
 	 */
+	@Override
 	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
@@ -307,11 +317,13 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	/*
 	 * @see org.eclipse.ui.editors.text.TextSourceViewerConfiguration#getReconciler(org.eclipse.jface.text.source.ISourceViewer)
 	 */
+	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		if (!EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED))
 			return null;
 
 		IReconcilingStrategy strategy= new SpellingReconcileStrategy(sourceViewer, EditorsUI.getSpellingService()) {
+			@Override
 			protected IContentType getContentType() {
 				return PROPERTIES_CONTENT_TYPE;
 			}
@@ -326,6 +338,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getDefaultPrefixes(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
 	 * @since 3.4
 	 */
+	@Override
 	public String[] getDefaultPrefixes(ISourceViewer sourceViewer, String contentType) {
 		return new String[] {"#", ""}; //$NON-NLS-1$ //$NON-NLS-2$
 	}
@@ -335,6 +348,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getAutoEditStrategies(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
 	 * @since 3.7
 	 */
+	@Override
 	public IAutoEditStrategy[] getAutoEditStrategies(ISourceViewer sourceViewer, String contentType) {
 		IAutoEditStrategy[] autoEditStrategies= super.getAutoEditStrategies(sourceViewer, contentType);
 
@@ -345,12 +359,12 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 			if (!PropertiesFileDocumentProvider.isJavaPropertiesFile(fTextEditor.getEditorInput())) {
 				return autoEditStrategies;
 			}
-			List stratergies= new ArrayList();
+			List<IAutoEditStrategy> stratergies= new ArrayList<IAutoEditStrategy>();
 			for (int i= 0; i < autoEditStrategies.length; i++) {
 				stratergies.add(autoEditStrategies[i]);
 			}
 			stratergies.add(new PropertiesFileAutoEditStrategy(((IFileEditorInput)fTextEditor.getEditorInput()).getFile(), sourceViewer));
-			return (IAutoEditStrategy[])stratergies.toArray(new IAutoEditStrategy[stratergies.size()]);
+			return stratergies.toArray(new IAutoEditStrategy[stratergies.size()]);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			return autoEditStrategies;
@@ -362,6 +376,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getTextHover(org.eclipse.jface.text.source.ISourceViewer, java.lang.String, int)
 	 * @since 3.7
 	 */
+	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
 		return new PropertiesFileHover(super.getTextHover(sourceViewer, contentType));
 	}
@@ -371,6 +386,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 * @see org.eclipse.ui.editors.text.TextSourceViewerConfiguration#getQuickAssistAssistant(org.eclipse.jface.text.source.ISourceViewer)
 	 * @since 3.7
 	 */
+	@Override
 	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
 		if (getEditor() != null) {
 			PropertiesCorrectionAssistant assistant= new PropertiesCorrectionAssistant();

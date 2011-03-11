@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -63,14 +64,14 @@ public abstract class SurroundWith {
 
 	private static final class SplitSelectedOperator implements ISplitOperation {
 
-		private List fAccessedInside;
-		private List fStatements;
-		private List fAccessedAfter;
+		private List<VariableDeclaration> fAccessedInside;
+		private List<ASTNode> fStatements;
+		private List<VariableDeclarationFragment> fAccessedAfter;
 		private ASTRewrite fRewrite;
 		private ListRewrite fBlockRewrite;
 		private VariableDeclarationStatement fLastStatement= null;
 
-		public SplitSelectedOperator(List inside, List after, ListRewrite blockRewrite, ASTRewrite rewrite, List statements) {
+		public SplitSelectedOperator(List<VariableDeclaration> inside, List<VariableDeclarationFragment> after, ListRewrite blockRewrite, ASTRewrite rewrite, List<ASTNode> statements) {
 			super();
 			fAccessedInside= inside;
 			fStatements= statements;
@@ -119,12 +120,12 @@ public abstract class SurroundWith {
 
 	private static final class SplitUnselectedOperator implements ISplitOperation {
 
-		private List fAccessedInside;
+		private List<VariableDeclaration> fAccessedInside;
 		private ListRewrite fBlockRewrite;
 		private ASTRewrite fRewrite;
 		private VariableDeclarationStatement fLastStatement;
 
-		private SplitUnselectedOperator(List accessedInside, ListRewrite blockRewrite, ASTRewrite rewrite) {
+		private SplitUnselectedOperator(List<VariableDeclaration> accessedInside, ListRewrite blockRewrite, ASTRewrite rewrite) {
 			super();
 			fAccessedInside= accessedInside;
 			fBlockRewrite= blockRewrite;
@@ -220,11 +221,11 @@ public abstract class SurroundWith {
 
 		fIsNewContext= isNewContext();
 
-		List accessedAfter= getVariableDeclarationsAccessedAfter(selectedStatements[selectedStatements.length - 1], maxVariableId);
-		List readInside;
+		List<VariableDeclarationFragment> accessedAfter= getVariableDeclarationsAccessedAfter(selectedStatements[selectedStatements.length - 1], maxVariableId);
+		List<VariableDeclaration> readInside;
 		readInside= getVariableDeclarationReadsInside(selectedStatements, maxVariableId);
 
-		List inserted= new ArrayList();
+		List<ASTNode> inserted= new ArrayList<ASTNode>();
 		moveToBlock(selectedStatements, inserted, accessedAfter, readInside, rewrite);
 		if (fIsNewContext) {
 			ImportRewrite importRewrite= StubUtility.createImportRewrite((CompilationUnit)selectedStatements[0].getRoot(), false);
@@ -239,8 +240,8 @@ public abstract class SurroundWith {
 			rewrite.replace(selectedStatements[0], wrap, null);
 			ListRewrite listRewrite= rewrite.getListRewrite(wrap, Block.STATEMENTS_PROPERTY);
 
-			for (Iterator iterator= inserted.iterator(); iterator.hasNext();) {
-				ASTNode node= (ASTNode)iterator.next();
+			for (Iterator<ASTNode> iterator= inserted.iterator(); iterator.hasNext();) {
+				ASTNode node= iterator.next();
 				listRewrite.insertLast(node, null);
 			}
 
@@ -248,15 +249,15 @@ public abstract class SurroundWith {
 			ListRewrite listRewrite= getListRewrite(selectedStatements[0], rewrite);
 
 			ASTNode current= selectedStatements[selectedStatements.length - 1];
-			for (Iterator iterator= inserted.iterator(); iterator.hasNext();) {
-				ASTNode node= (ASTNode)iterator.next();
+			for (Iterator<ASTNode> iterator= inserted.iterator(); iterator.hasNext();) {
+				ASTNode node= iterator.next();
 				listRewrite.insertAfter(node, current, null);
 				current= node;
 			}
 		}
 
-		fFirstInsertedPosition= rewrite.track((ASTNode)inserted.get(0));
-		fLastInsertedPosition= rewrite.track((ASTNode)inserted.get(inserted.size() - 1));
+		fFirstInsertedPosition= rewrite.track(inserted.get(0));
+		fLastInsertedPosition= rewrite.track(inserted.get(inserted.size() - 1));
 
 		return rewrite;
 	}
@@ -274,8 +275,8 @@ public abstract class SurroundWith {
 	 * @param selectedNodes The selectedNodes
 	 * @return	List of VariableDeclaration
 	 */
-	protected List getVariableDeclarationReadsInside(Statement[] selectedNodes, int maxVariableId) {
-		ArrayList result= new ArrayList();
+	protected List<VariableDeclaration> getVariableDeclarationReadsInside(Statement[] selectedNodes, int maxVariableId) {
+		ArrayList<VariableDeclaration> result= new ArrayList<VariableDeclaration>();
 		if (!fIsNewContext)
 			return result;
 
@@ -285,7 +286,7 @@ public abstract class SurroundWith {
 			if (!read.isField()) {
 				ASTNode readDecl= getRootNode().findDeclaringNode(read);
 				if (readDecl instanceof VariableDeclaration) {
-					result.add(readDecl);
+					result.add((VariableDeclaration) readDecl);
 				}
 			}
 		}
@@ -300,9 +301,9 @@ public abstract class SurroundWith {
 	 * @param maxVariableId The maximum number of variable declarations
 	 * @return List of VariableDeclarationFragments which can't be moved to the new block
 	 */
-	protected List getVariableDeclarationsAccessedAfter(ASTNode startNode, int maxVariableId) {
+	protected List<VariableDeclarationFragment> getVariableDeclarationsAccessedAfter(ASTNode startNode, int maxVariableId) {
 
-		List statements;
+		List<Statement> statements;
 		if (startNode.getLocationInParent() == SwitchStatement.STATEMENTS_PROPERTY) {
 			SwitchStatement block= (SwitchStatement)ASTNodes.getParent(startNode, SwitchStatement.class);
 			statements= block.statements();
@@ -310,19 +311,19 @@ public abstract class SurroundWith {
 			Block block= (Block)ASTNodes.getParent(startNode, Block.class);
 			statements= block.statements();
 		}
-		List bodyAfterSelection= statements.subList(statements.indexOf(startNode) + 1, statements.size());
+		List<Statement> bodyAfterSelection= statements.subList(statements.indexOf(startNode) + 1, statements.size());
 
-		List result= new ArrayList();
+		List<VariableDeclarationFragment> result= new ArrayList<VariableDeclarationFragment>();
 		if (!bodyAfterSelection.isEmpty()) {
 
-			IVariableBinding[] accesses= getAccesses((ASTNode[]) bodyAfterSelection.toArray(new ASTNode[bodyAfterSelection.size()]), maxVariableId);
+			IVariableBinding[] accesses= getAccesses(bodyAfterSelection.toArray(new ASTNode[bodyAfterSelection.size()]), maxVariableId);
 
 			for (int i= 0; i < accesses.length; i++) {
 				IVariableBinding curVar= accesses[i];
 				if (!curVar.isField()) {
 					ASTNode readDecl= ASTNodes.findDeclaration(curVar, getRootNode());
 					if (readDecl instanceof VariableDeclarationFragment) {
-						result.add(readDecl);
+						result.add((VariableDeclarationFragment) readDecl);
 					}
 				}
 			}
@@ -377,7 +378,7 @@ public abstract class SurroundWith {
 	 * @param accessedInside VariableDeclaration which can be made final
 	 * @param rewrite The rewrite to use.
 	 */
-	private final void moveToBlock(Statement[] toMove, List statements, final List/*<VariableDeclarationFragment>*/ accessedAfter, final List/*<VariableDeclaration>*/ accessedInside, final ASTRewrite rewrite) {
+	private final void moveToBlock(Statement[] toMove, List<ASTNode> statements, final List<VariableDeclarationFragment> accessedAfter, final List<VariableDeclaration> accessedInside, final ASTRewrite rewrite) {
 
 		for (int i= 0; i < toMove.length; i++) {
 			ASTNode node= toMove[i];
@@ -387,7 +388,7 @@ public abstract class SurroundWith {
 
 				splitVariableDeclarationStatement(statement, createSplitSelectedOperator(accessedAfter, accessedInside, rewrite, statements, blockRewrite), rewrite);
 
-				for (Iterator iter= statement.fragments().iterator(); iter.hasNext();) {
+				for (Iterator<VariableDeclarationFragment> iter= statement.fragments().iterator(); iter.hasNext();) {
 					accessedInside.remove(iter.next());
 				}
 			} else {
@@ -396,7 +397,7 @@ public abstract class SurroundWith {
 		}
 
 		while (!accessedInside.isEmpty()) {
-			VariableDeclaration variableDeclaration= (VariableDeclaration)accessedInside.get(0);
+			VariableDeclaration variableDeclaration= accessedInside.get(0);
 			if (variableDeclaration instanceof SingleVariableDeclaration) {
 				if (ASTNodes.findModifierNode(Modifier.FINAL, ASTNodes.getModifiers(variableDeclaration)) == null) {
 					ModifierRewrite.create(rewrite, variableDeclaration).setModifiers(Modifier.FINAL, Modifier.NONE, null);
@@ -408,8 +409,8 @@ public abstract class SurroundWith {
 
 				splitVariableDeclarationStatement(statement, createSplitUnselectedOperator(accessedInside, rewrite, blockRewrite), rewrite);
 
-				for (Iterator iter= statement.fragments().iterator(); iter.hasNext();) {
-					VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
+				for (Iterator<VariableDeclarationFragment> iter= statement.fragments().iterator(); iter.hasNext();) {
+					VariableDeclarationFragment fragment= iter.next();
 					accessedInside.remove(fragment);
 				}
 			} else if (variableDeclaration.getParent() instanceof VariableDeclarationExpression) {
@@ -417,23 +418,23 @@ public abstract class SurroundWith {
 
 				VariableDeclarationRewrite.rewriteModifiers(expression, Modifier.FINAL, 0, rewrite, null);
 
-				for (Iterator iter= expression.fragments().iterator(); iter.hasNext();) {
-					VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
+				for (Iterator<VariableDeclarationFragment> iter= expression.fragments().iterator(); iter.hasNext();) {
+					VariableDeclarationFragment fragment= iter.next();
 					accessedInside.remove(fragment);
 				}
 			}
 		}
 	}
 
-	private void insertNodeAtEnd(final ASTRewrite rewrite, final List statements, ASTNode node) {
+	private void insertNodeAtEnd(final ASTRewrite rewrite, final List<ASTNode> statements, ASTNode node) {
 		statements.add(rewrite.createMoveTarget(node));
 	}
 
-	protected ISplitOperation createSplitUnselectedOperator(List accessedInside, ASTRewrite rewrite, ListRewrite blockRewrite) {
+	protected ISplitOperation createSplitUnselectedOperator(List<VariableDeclaration> accessedInside, ASTRewrite rewrite, ListRewrite blockRewrite) {
 		return new SplitUnselectedOperator(accessedInside, blockRewrite, rewrite);
 	}
 
-	protected ISplitOperation createSplitSelectedOperator(List accessedAfter, List accessedInside, ASTRewrite rewrite, List statements, ListRewrite blockRewrite) {
+	protected ISplitOperation createSplitSelectedOperator(List<VariableDeclarationFragment> accessedAfter, List<VariableDeclaration> accessedInside, ASTRewrite rewrite, List<ASTNode> statements, ListRewrite blockRewrite) {
 		return new SplitSelectedOperator(accessedInside, accessedAfter, blockRewrite, rewrite, statements);
 	}
 
@@ -449,23 +450,23 @@ public abstract class SurroundWith {
 	 */
 	private void splitVariableDeclarationStatement(VariableDeclarationStatement statement, ISplitOperation splitOperator, ASTRewrite rewrite) {
 
-		List fragments= statement.fragments();
-		Iterator iter= fragments.iterator();
-		VariableDeclarationFragment lastFragment= (VariableDeclarationFragment)iter.next();
+		List<VariableDeclarationFragment> fragments= statement.fragments();
+		Iterator<VariableDeclarationFragment> iter= fragments.iterator();
+		VariableDeclarationFragment lastFragment= iter.next();
 		VariableDeclarationStatement lastStatement= statement;
 
 		splitOperator.initializeStatement(lastStatement, lastFragment);
 
 		ListRewrite fragmentsRewrite= null;
 		while (iter.hasNext()) {
-			VariableDeclarationFragment currentFragment= (VariableDeclarationFragment)iter.next();
+			VariableDeclarationFragment currentFragment= iter.next();
 
 			if (splitOperator.needsSplit(lastFragment, currentFragment)) {
 
 				VariableDeclarationStatement newStatement= getAst().newVariableDeclarationStatement((VariableDeclarationFragment)rewrite.createMoveTarget(currentFragment));
 
 				ListRewrite modifierRewrite= rewrite.getListRewrite(newStatement, VariableDeclarationStatement.MODIFIERS2_PROPERTY);
-				for (Iterator iterator= statement.modifiers().iterator(); iterator.hasNext();) {
+				for (Iterator<IExtendedModifier> iterator= statement.modifiers().iterator(); iterator.hasNext();) {
 					modifierRewrite.insertLast(rewrite.createCopyTarget((ASTNode)iterator.next()), null);
 				}
 
@@ -502,6 +503,7 @@ public abstract class SurroundWith {
 			/**
 			 * {@inheritDoc}
 			 */
+			@Override
 			public boolean visit(ThisExpression thisExpr) {
 				if (thisExpr.getQualifier() == null) {
 					ITypeBinding typeBinding= thisExpr.resolveTypeBinding();
@@ -522,7 +524,7 @@ public abstract class SurroundWith {
 	 * @param fragment The fragment to split.
 	 * @param rewrite The rewrite to use.
 	 */
-	protected static void splitOffInitializer(List statements, VariableDeclarationFragment fragment, ASTRewrite rewrite) {
+	protected static void splitOffInitializer(List<ASTNode> statements, VariableDeclarationFragment fragment, ASTRewrite rewrite) {
 		Expression initializer= fragment.getInitializer();
 		if (initializer != null) {
 			AST ast= rewrite.getAST();

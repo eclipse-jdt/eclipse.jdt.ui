@@ -60,10 +60,12 @@ public class PropertiesFileViewer extends Viewer {
 			fSourceViewer.getTextWidget().setFont(font);
 	}
 
+	@Override
 	public Control getControl() {
 		return fSourceViewer.getControl();
 	}
 
+	@Override
 	public void setInput(Object input) {
 		if (input instanceof IStreamContentAccessor) {
 			Document document= new Document(getString(input));
@@ -73,17 +75,21 @@ public class PropertiesFileViewer extends Viewer {
 		fInput= input;
 	}
 
+	@Override
 	public Object getInput() {
 		return fInput;
 	}
 
+	@Override
 	public ISelection getSelection() {
 		return null;
 	}
 
+	@Override
 	public void setSelection(ISelection s, boolean reveal) {
 	}
 
+	@Override
 	public void refresh() {
 	}
 

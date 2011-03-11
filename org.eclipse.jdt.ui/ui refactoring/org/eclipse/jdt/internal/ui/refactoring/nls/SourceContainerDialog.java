@@ -43,6 +43,7 @@ public class SourceContainerDialog extends ElementTreeSelectionDialog {
 			super(new Class[]{IPackageFragmentRoot.class},false);
 		}
 
+		@Override
 		public boolean isSelectedValid(Object element) {
 			try {
 				if (element instanceof IJavaProject) {
@@ -71,6 +72,7 @@ public class SourceContainerDialog extends ElementTreeSelectionDialog {
 			super(new Class[]{IPackageFragmentRoot.class, IJavaProject.class});
 		}
 
+		@Override
 		public boolean select(Viewer viewer, Object parent, Object element) {
 			if (element instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot fragmentRoot= (IPackageFragmentRoot)element;

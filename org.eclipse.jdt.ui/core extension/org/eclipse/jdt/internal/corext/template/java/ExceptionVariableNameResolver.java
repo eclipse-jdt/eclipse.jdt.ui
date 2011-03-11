@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
  */
 public class ExceptionVariableNameResolver extends TemplateVariableResolver {
 
+	@Override
 	protected String[] resolveAll(TemplateContext context) {
 		if (context instanceof JavaContext) {
 			JavaContext jc= (JavaContext) context;

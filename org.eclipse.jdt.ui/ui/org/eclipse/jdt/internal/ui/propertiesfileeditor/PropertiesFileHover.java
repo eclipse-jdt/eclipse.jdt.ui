@@ -70,6 +70,7 @@ public class PropertiesFileHover implements ITextHover, ITextHoverExtension, ITe
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
+		@Override
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			return new PropertiesFileHoverControl(parent, EditorsUI.getTooltipAffordanceString());
 		}

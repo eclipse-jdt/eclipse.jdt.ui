@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -216,6 +216,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 	/*
 	 * Implements method from IViewPart.
 	 */
+	@Override
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 		fMemento= memento;
@@ -224,6 +225,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 	/*
 	 * Implements method from IViewPart.
 	 */
+	@Override
 	public void saveState(IMemento memento) {
 		if (fViewer == null) {
 			// part has not been created
@@ -283,7 +285,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		IMemento childMem;
 		childMem= memento.getChild(TAG_SELECTED_ELEMENTS);
 		if (childMem != null) {
-			ArrayList list= new ArrayList();
+			ArrayList<Object> list= new ArrayList<Object>();
 			IMemento[] elementMem= childMem.getChildren(TAG_SELECTED_ELEMENT);
 			for (int i= 0; i < elementMem.length; i++) {
 				String javaElementHandle= elementMem[i].getString(TAG_SELECTED_ELEMENT_PATH);
@@ -324,6 +326,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createPartControl(Composite parent) {
 		Assert.isTrue(fViewer == null);
 
@@ -388,6 +391,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.part.WorkbenchPart#getAdapter(java.lang.Class)
 	 */
+	@Override
 	public Object getAdapter(Class key) {
 		if (key == IShowInSource.class) {
 			return getShowInSource();
@@ -471,10 +475,12 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 	//---- IWorkbenchPart ------------------------------------------------------
 
 
+	@Override
 	public void setFocus() {
 		fViewer.getControl().setFocus();
 	}
 
+	@Override
 	public void dispose() {
 		if (fViewer != null) {
 			getViewSite().getPage().removePostSelectionListener(this);
@@ -499,6 +505,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 	 */
 	protected void addKeyListener() {
 		fViewer.getControl().addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyReleased(KeyEvent event) {
 				handleKeyReleased(event);
 			}
@@ -646,7 +653,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		if (input == null)
 			return false;
 		if (input instanceof Collection)
-			return ((Collection)input).contains(element);
+			return ((Collection<?>)input).contains(element);
 		else
 			return input.equals(element);
 
@@ -657,7 +664,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 			return part == fPreviousSelectionProvider;
 
 		if (input instanceof IJavaElement && newInput instanceof IJavaElement)
-			return getTypeComparator().compare(newInput, input)  > 0;
+			return getTypeComparator().compare((IJavaElement) newInput, (IJavaElement) input)  > 0;
 
 		if((newInput instanceof List) && (part instanceof PackagesView))
 			return true;
@@ -673,13 +680,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		Object partInput= ((JavaBrowsingPart)part).getViewer().getInput();
 
 		if(thisInput instanceof Collection)
-			thisInput= ((Collection)thisInput).iterator().next();
+			thisInput= ((Collection<?>)thisInput).iterator().next();
 
 		if(partInput instanceof Collection)
-			partInput= ((Collection)partInput).iterator().next();
+			partInput= ((Collection<?>)partInput).iterator().next();
 
 		if (thisInput instanceof IJavaElement && partInput instanceof IJavaElement)
-			return getTypeComparator().compare(partInput, thisInput) > 0;
+			return getTypeComparator().compare((IJavaElement) partInput, (IJavaElement) thisInput) > 0;
 		else
 			return true;
 	}
@@ -730,7 +737,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		Object currentInput= getViewer().getInput();
 		if (selectedElement != null && selectedElement.equals(currentInput)) {
 			IJavaElement elementToSelect= findElementToSelect(selectedElement);
-			if (elementToSelect != null && getTypeComparator().compare(selectedElement, elementToSelect) < 0)
+			if (elementToSelect != null && getTypeComparator().compare((IJavaElement) selectedElement, elementToSelect) < 0)
 				setSelection(new StructuredSelection(elementToSelect), true);
 			else if (elementToSelect == null && (this instanceof MembersView)) {
 				setSelection(StructuredSelection.EMPTY, true);
@@ -827,6 +834,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.part.WorkbenchPart#getTitleToolTip()
 	 */
+	@Override
 	public String getTitleToolTip() {
 		if (fViewer == null)
 			return super.getTitleToolTip();
@@ -964,6 +972,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 
 
 		fOpenAndLinkWithEditorHelper= new OpenAndLinkWithEditorHelper(fViewer) {
+			@Override
 			protected void activate(ISelection selection) {
 				try {
 					final Object selectedElement= SelectionUtil.getSingleElement(selection);
@@ -974,6 +983,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 				}
 			}
 
+			@Override
 			protected void linkToEditor(ISelection selection) {
 				if (!fProcessSelectionEvents)
 					return;
@@ -989,6 +999,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 				}
 			}
 
+			@Override
 			protected void open(ISelection selection, boolean activate) {
 				IAction open= fOpenEditorGroup.getOpenAction();
 				if (open.isEnabled()) {
@@ -1087,7 +1098,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		if (!(selection instanceof IStructuredSelection) || selection.isEmpty())
 			return null;
 
-		Iterator iter= ((IStructuredSelection)selection).iterator();
+		Iterator<?> iter= ((IStructuredSelection)selection).iterator();
 		Object firstElement= iter.next();
 		if (!(firstElement instanceof IJavaElement)) {
 			if (firstElement instanceof IMarker)
@@ -1129,7 +1140,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 	 * Gets the typeComparator.
 	 * @return Returns a JavaElementTypeComparator
 	 */
-	protected Comparator getTypeComparator() {
+	protected Comparator<IJavaElement> getTypeComparator() {
 		return fTypeComparator;
 	}
 

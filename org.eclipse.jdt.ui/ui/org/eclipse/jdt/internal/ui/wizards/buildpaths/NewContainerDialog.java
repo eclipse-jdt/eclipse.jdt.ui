@@ -72,6 +72,7 @@ public class NewContainerDialog extends StatusDialog {
 		fContainerDialogField.setLabelText(message);
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
 
@@ -155,6 +156,7 @@ public class NewContainerDialog extends StatusDialog {
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.NEW_CONTAINER_DIALOG);

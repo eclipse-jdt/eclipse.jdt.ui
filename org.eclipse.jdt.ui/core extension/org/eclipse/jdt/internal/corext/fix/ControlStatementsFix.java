@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 
 	private final static class ControlStatementFinder extends GenericVisitor {
 
-		private final List/*<CompilationUnitRewriteOperation>*/ fResult;
+		private final List<CompilationUnitRewriteOperation> fResult;
 		private final boolean fFindControlStatementsWithoutBlock;
 		private final boolean fRemoveUnnecessaryBlocks;
 		private final boolean fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow;
@@ -49,7 +49,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		public ControlStatementFinder(boolean findControlStatementsWithoutBlock,
 				boolean removeUnnecessaryBlocks,
 				boolean removeUnnecessaryBlocksOnlyWhenReturnOrThrow,
-				List resultingCollection) {
+				List<CompilationUnitRewriteOperation> resultingCollection) {
 
 			fFindControlStatementsWithoutBlock= findControlStatementsWithoutBlock;
 			fRemoveUnnecessaryBlocks= removeUnnecessaryBlocks;
@@ -60,6 +60,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.DoStatement)
 		 */
+		@Override
 		public boolean visit(DoStatement node) {
 			handle(node.getBody(), DoStatement.BODY_PROPERTY);
 
@@ -69,6 +70,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.ForStatement)
 		 */
+		@Override
 		public boolean visit(ForStatement node) {
 			handle(node.getBody(), ForStatement.BODY_PROPERTY);
 
@@ -78,6 +80,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public boolean visit(EnhancedForStatement node) {
 			handle(node.getBody(), EnhancedForStatement.BODY_PROPERTY);
 
@@ -87,6 +90,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.IfStatement)
 		 */
+		@Override
 		public boolean visit(IfStatement statement) {
 			handle(statement.getThenStatement(), IfStatement.THEN_STATEMENT_PROPERTY);
 
@@ -101,6 +105,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.WhileStatement)
 		 */
+		@Override
 		public boolean visit(WhileStatement node) {
 			handle(node.getBody(), WhileStatement.BODY_PROPERTY);
 
@@ -187,6 +192,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			String label;
@@ -220,6 +226,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
@@ -247,11 +254,11 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
         		return false;
 
         	Block block= (Block)child;
-        	List list= block.statements();
+        	List<Statement> list= block.statements();
         	if (list.size() != 1)
         		return false;
 
-        	ASTNode singleStatement= (ASTNode)list.get(0);
+        	ASTNode singleStatement= list.get(0);
 
         	if (onlyReturnAndThrows)
         		if (!(singleStatement instanceof ReturnStatement) && !(singleStatement instanceof ThrowStatement))
@@ -368,9 +375,9 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		if (statement instanceof IfStatement) {
-			List result= new ArrayList();
+			List<ControlStatementsFix> result= new ArrayList<ControlStatementsFix>();
 
-			List removeAllList= new ArrayList();
+			List<RemoveBlockOperation> removeAllList= new ArrayList<RemoveBlockOperation>();
 
 			IfElseIterator iter= new IfElseIterator((IfStatement)statement);
 			IfStatement item= null;
@@ -392,11 +399,11 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
             }
 
 			if (removeAllList.size() > 1) {
-				CompilationUnitRewriteOperation[] allConvert= (CompilationUnitRewriteOperation[])removeAllList.toArray(new CompilationUnitRewriteOperation[removeAllList.size()]);
+				CompilationUnitRewriteOperation[] allConvert= removeAllList.toArray(new CompilationUnitRewriteOperation[removeAllList.size()]);
 				result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeIfElseBlock_proposalDescription, compilationUnit, allConvert));
             }
 
-            return (ControlStatementsFix[])result.toArray(new ControlStatementsFix[result.size()]);
+            return result.toArray(new ControlStatementsFix[result.size()]);
 		} else if (statement instanceof WhileStatement) {
 			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(statement, WhileStatement.BODY_PROPERTY)) {
 				RemoveBlockOperation op= new RemoveBlockOperation(statement, WhileStatement.BODY_PROPERTY);
@@ -430,14 +437,14 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		if (!convertSingleStatementToBlock && !removeUnnecessaryBlock && !removeUnnecessaryBlockContainingReturnOrThrow)
 			return null;
 
-		List operations= new ArrayList();
+		List<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
 		ControlStatementFinder finder= new ControlStatementFinder(convertSingleStatementToBlock, removeUnnecessaryBlock, removeUnnecessaryBlockContainingReturnOrThrow, operations);
 		compilationUnit.accept(finder);
 
 		if (operations.isEmpty())
 			return null;
 
-		CompilationUnitRewriteOperation[] ops= (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
+		CompilationUnitRewriteOperation[] ops= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
 		return new ControlStatementsFix(FixMessages.ControlStatementsFix_change_name, compilationUnit, ops);
 	}
 

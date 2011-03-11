@@ -40,6 +40,7 @@ public class StructureSelectEnclosingAction extends StructureSelectionAction {
     /*
      * @see StructureSelectionAction#internalGetNewSelectionRange(ISourceRange, ICompilationUnit, SelectionAnalyzer)
      */
+	@Override
 	ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ISourceReference sr, SelectionAnalyzer selAnalyzer) throws JavaModelException{
 		ASTNode first= selAnalyzer.getFirstSelectedNode();
 		if (first == null || first.getParent() == null)

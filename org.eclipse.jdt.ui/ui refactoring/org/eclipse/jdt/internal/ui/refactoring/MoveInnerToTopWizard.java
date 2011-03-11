@@ -76,6 +76,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 			fFinalCheckBox.setLayoutData(data);
 			fFinalCheckBox.addSelectionListener(new SelectionAdapter() {
 
+				@Override
 				public void widgetSelected(SelectionEvent event) {
 					getMoveRefactoring().setMarkInstanceFieldAsFinal(fFinalCheckBox.getSelection());
 				}
@@ -127,6 +128,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isEmptyInputValid()
 		 */
+		@Override
 		protected boolean isEmptyInputValid() {
 			return !getMoveRefactoring().isCreatingInstanceFieldMandatory();
 		}
@@ -134,6 +136,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isInitialInputValid()
 		 */
+		@Override
 		protected boolean isInitialInputValid() {
 			return fInitialInputValid;
 		}
@@ -141,6 +144,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 		 */
+		@Override
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);
 			if (visible) {
@@ -155,6 +159,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#validateTextField(String)
 		 */
+		@Override
 		protected RefactoringStatus validateTextField(String text) {
 			final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();
 			refactoring.setEnclosingInstanceName(text);
@@ -175,6 +180,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 	/*
 	 * @see RefactoringWizard#addUserInputPages
 	 */
+	@Override
 	protected void addUserInputPages() {
 		final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();
 		if (refactoring.isCreatingInstanceFieldPossible())

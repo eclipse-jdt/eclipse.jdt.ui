@@ -22,6 +22,7 @@ public abstract class WildcardType extends TType {
 		super(environment);
 	}
 
+	@Override
 	protected void initialize(ITypeBinding binding) {
 		Assert.isTrue(binding.isWildcardType());
 		super.initialize(binding);
@@ -35,10 +36,12 @@ public abstract class WildcardType extends TType {
 		return fBound;
 	}
 
+	@Override
 	public TType[] getSubTypes() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public boolean doEquals(TType type) {
 		WildcardType other= (WildcardType)type;
 		if (fBound == null)
@@ -46,6 +49,7 @@ public abstract class WildcardType extends TType {
 		return fBound.equals(other.fBound);
 	}
 
+	@Override
 	public int hashCode() {
 		if (fBound == null)
 			return 123;

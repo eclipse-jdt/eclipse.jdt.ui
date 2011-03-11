@@ -55,14 +55,16 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getDetailedDescription() {
 	    return null;
 	}
 
+	@Override
 	public void run() {
 		IProject project= null;
 		Object firstElement= getSelectedElements().get(0);
-		HashMap data= new HashMap();
+		HashMap<Object, IClasspathEntry> data= new HashMap<Object, IClasspathEntry>();
 
 		if (firstElement instanceof IJavaElement) {
 			IJavaElement element= (IJavaElement) firstElement;
@@ -86,6 +88,7 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 		PreferencesUtil.createPropertyDialogOn(getShell(), project, BuildPathsPropertyPage.PROP_ID, null, data).open();
 	}
 
+	@Override
 	protected boolean canHandle(IStructuredSelection elements) {
 		if (elements.size() != 1)
 			return false;

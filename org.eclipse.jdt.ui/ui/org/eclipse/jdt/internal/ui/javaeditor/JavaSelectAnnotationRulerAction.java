@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,6 +71,7 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.JAVA_SELECT_MARKER_RULER_ACTION);
 	}
 
+	@Override
 	public void run() {
 		if (fStore.getBoolean(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER))
 			return;
@@ -82,6 +83,7 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 	 * @see org.eclipse.jface.action.IAction#runWithEvent(org.eclipse.swt.widgets.Event)
 	 * @since 3.2
 	 */
+	@Override
 	public void runWithEvent(Event event) {
 		if (fAnnotation instanceof OverrideIndicatorManager.OverrideIndicator) {
 			((OverrideIndicatorManager.OverrideIndicator)fAnnotation).open();
@@ -101,6 +103,7 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 		super.run();
 	}
 
+	@Override
 	public void update() {
 		findJavaAnnotation();
 		setEnabled(true); // super.update() might change this later
@@ -135,11 +138,11 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 
 		boolean hasAssistLightbulb= fStore.getBoolean(PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB);
 
-		Iterator iter= model.getAnnotationIterator();
+		Iterator<Annotation> iter= model.getAnnotationIterator();
 		int layer= Integer.MIN_VALUE;
 
 		while (iter.hasNext()) {
-			Annotation annotation= (Annotation) iter.next();
+			Annotation annotation= iter.next();
 			if (annotation.isMarkedDeleted())
 				continue;
 

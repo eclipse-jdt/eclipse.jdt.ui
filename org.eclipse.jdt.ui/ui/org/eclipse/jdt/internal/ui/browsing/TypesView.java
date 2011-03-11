@@ -54,6 +54,7 @@ public class TypesView extends JavaBrowsingPart {
 	 * @return the label provider
 	 * @see org.eclipse.jface.viewers.ILabelProvider
 	 */
+	@Override
 	protected JavaUILabelProvider createLabelProvider() {
 		return new AppearanceAwareLabelProvider(
 						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.T_CATEGORY,
@@ -63,6 +64,7 @@ public class TypesView extends JavaBrowsingPart {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getAdapter(java.lang.Class)
 	 */
+	@Override
 	public Object getAdapter(Class key) {
 		if (key == IShowInTargetList.class) {
 			return new IShowInTargetList() {
@@ -78,6 +80,7 @@ public class TypesView extends JavaBrowsingPart {
 	/**
 	 * Adds filters the viewer of this part.
 	 */
+	@Override
 	protected void addFilters() {
 		super.addFilters();
 		getViewer().addFilter(new NonJavaElementFilter());
@@ -90,6 +93,7 @@ public class TypesView extends JavaBrowsingPart {
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid input
 	 */
+	@Override
 	protected boolean isValidInput(Object element) {
 		return element instanceof IPackageFragment;
 	}
@@ -101,6 +105,7 @@ public class TypesView extends JavaBrowsingPart {
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid element
 	 */
+	@Override
 	protected boolean isValidElement(Object element) {
 		if (element instanceof ICompilationUnit)
 			return super.isValidElement(((ICompilationUnit)element).getParent());
@@ -117,6 +122,7 @@ public class TypesView extends JavaBrowsingPart {
 	 * @param je	the Java element which has the focus
 	 * @return the element to select
 	 */
+	@Override
 	protected IJavaElement findElementToSelect(IJavaElement je) {
 		if (je == null)
 			return null;
@@ -148,19 +154,23 @@ public class TypesView extends JavaBrowsingPart {
 	 *
 	 * @return	the string used as ID for the Help context
 	 */
+	@Override
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.TYPES_VIEW;
 	}
 
+	@Override
 	protected String getLinkToEditorKey() {
 		return PreferenceConstants.LINK_BROWSING_TYPES_TO_EDITOR;
 	}
 
+	@Override
 	protected void createActions() {
 		super.createActions();
 		fSelectAllAction= new SelectAllAction((TableViewer)getViewer());
 	}
 
+	@Override
 	protected void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 
@@ -174,6 +184,7 @@ public class TypesView extends JavaBrowsingPart {
 	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
 	 * @since 2.1
 	 */
+	@Override
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (!needsToProcessSelectionChanged(part))
 			return;
@@ -183,7 +194,7 @@ public class TypesView extends JavaBrowsingPart {
 			Object selectedElement= sel.getFirstElement();
 			if (sel.size() == 1 && (selectedElement instanceof LogicalPackage)) {
 				IPackageFragment[] fragments= ((LogicalPackage)selectedElement).getFragments();
-				List selectedElements= Arrays.asList(fragments);
+				List<IPackageFragment> selectedElements= Arrays.asList(fragments);
 				if (selectedElements.size() > 1) {
 					adjustInput(selectedElements);
 					fPreviousSelectedElement= selectedElements;
@@ -198,7 +209,7 @@ public class TypesView extends JavaBrowsingPart {
 		super.selectionChanged(part, selection);
 	}
 
-	private void adjustInput(List selectedElements) {
+	private void adjustInput(List<IPackageFragment> selectedElements) {
 		Object currentInput= getViewer().getInput();
 		if (!selectedElements.equals(currentInput))
 			setInput(selectedElements);
@@ -206,6 +217,7 @@ public class TypesView extends JavaBrowsingPart {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createDecoratingLabelProvider(org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider)
 	 */
+	@Override
 	protected DecoratingJavaLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
 		DecoratingJavaLabelProvider decoratingLabelProvider= super.createDecoratingLabelProvider(provider);
 		provider.addLabelDecorator(new TopLevelTypeProblemsLabelDecorator(null));

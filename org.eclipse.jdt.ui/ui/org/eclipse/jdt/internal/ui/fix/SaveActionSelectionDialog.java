@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,11 +30,12 @@ public class SaveActionSelectionDialog extends CleanUpSelectionDialog {
 
 	private static final String PREFERENCE_KEY= "clean_up_save_particpant_modify_dialog"; //$NON-NLS-1$
 
-	public SaveActionSelectionDialog(Shell parentShell, Map settings) {
+	public SaveActionSelectionDialog(Shell parentShell, Map<String, String> settings) {
 		super(parentShell, settings, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_CleanUpSaveParticipantConfiguration_Title);
 	}
 
-	protected NamedCleanUpTabPage[] createTabPages(Map workingValues) {
+	@Override
+	protected NamedCleanUpTabPage[] createTabPages(Map<String, String> workingValues) {
 		CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS);
 
 		NamedCleanUpTabPage[] result= new NamedCleanUpTabPage[descriptors.length];
@@ -53,6 +54,7 @@ public class SaveActionSelectionDialog extends CleanUpSelectionDialog {
 		return result;
 	}
 
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		GridLayout layout= (GridLayout)parent.getLayout();
 		layout.numColumns++;
@@ -64,14 +66,17 @@ public class SaveActionSelectionDialog extends CleanUpSelectionDialog {
 		super.createButtonsForButtonBar(parent);
 	}
 
+	@Override
 	protected String getEmptySelectionMessage() {
 		return SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_SelectAnAction_Error;
 	}
 
+	@Override
 	protected String getSelectionCountMessage(int selectionCount, int size) {
 		return Messages.format(SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_XofYSelected_Label, new Object[] {new Integer(selectionCount), new Integer(size)});
 	}
 
+	@Override
 	protected String getPreferenceKeyPrefix() {
 		return PREFERENCE_KEY;
 	}

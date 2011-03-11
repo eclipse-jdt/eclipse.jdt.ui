@@ -38,7 +38,7 @@ import org.eclipse.jdt.core.IJarEntryResource;
 public class StorageLabelProvider extends LabelProvider {
 
 	private IEditorRegistry fEditorRegistry= null;
-	private Map fJarImageMap= new HashMap(10);
+	private Map<String, Image> fJarImageMap= new HashMap<String, Image>(10);
 	private Image fDefaultImage;
 
 	private IEditorRegistry getEditorRegistry() {
@@ -50,6 +50,7 @@ public class StorageLabelProvider extends LabelProvider {
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getImage
 	 */
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof IStorage)
 			return getImageForJarEntry((IStorage)element);
@@ -60,6 +61,7 @@ public class StorageLabelProvider extends LabelProvider {
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getText
 	 */
+	@Override
 	public String getText(Object element) {
 		if (element instanceof IStorage) {
 			return BasicElementLabels.getResourceName(((IStorage)element).getName());
@@ -71,11 +73,12 @@ public class StorageLabelProvider extends LabelProvider {
 	 *
 	 * @see IBaseLabelProvider#dispose
 	 */
+	@Override
 	public void dispose() {
 		if (fJarImageMap != null) {
-			Iterator each= fJarImageMap.values().iterator();
+			Iterator<Image> each= fJarImageMap.values().iterator();
 			while (each.hasNext()) {
-				Image image= (Image)each.next();
+				Image image= each.next();
 				image.dispose();
 			}
 			fJarImageMap= null;
@@ -100,7 +103,7 @@ public class StorageLabelProvider extends LabelProvider {
 
 		// Try to find icon for full name
 		String name= element.getName();
-		Image image= (Image)fJarImageMap.get(name);
+		Image image= fJarImageMap.get(name);
 		if (image != null)
 			return image;
 		IFileEditorMapping[] mappings= getEditorRegistry().getFileEditorMappings();
@@ -119,7 +122,7 @@ public class StorageLabelProvider extends LabelProvider {
 			key= path.getFileExtension();
 			if (key == null)
 				return getDefaultImage();
-			image= (Image)fJarImageMap.get(key);
+			image= fJarImageMap.get(key);
 			if (image != null)
 				return image;
 		}

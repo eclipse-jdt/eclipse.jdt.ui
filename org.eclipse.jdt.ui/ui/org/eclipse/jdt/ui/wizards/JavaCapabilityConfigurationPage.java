@@ -101,7 +101,8 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
      * @see org.eclipse.jface.dialogs.DialogPage#dispose()
      * @since 3.3
      */
-    public void dispose() {
+    @Override
+	public void dispose() {
     	try {
         	super.dispose();
         } finally {

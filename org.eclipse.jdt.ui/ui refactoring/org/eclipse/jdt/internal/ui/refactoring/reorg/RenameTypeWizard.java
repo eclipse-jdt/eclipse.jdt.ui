@@ -45,6 +45,7 @@ public class RenameTypeWizard extends RenameRefactoringWizard {
 	 *
 	 * @see RefactoringWizard#addUserInputPages
 	 */
+	@Override
 	protected void addUserInputPages() {
 		super.addUserInputPages();
 		if (isRenameType())
@@ -68,9 +69,11 @@ public class RenameTypeWizard extends RenameRefactoringWizard {
 		return true;
 	}
 
+	@Override
 	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
 		return new RenameTypeWizardInputPage(message, IJavaHelpContextIds.RENAME_TYPE_WIZARD_PAGE, true, initialSetting) {
 
+			@Override
 			protected RefactoringStatus validateTextField(String text) {
 				return validateNewName(text);
 			}

@@ -40,6 +40,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
 import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
@@ -53,7 +54,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 
 	// the visual selection widget group
 	private TableViewer fTableViewer;
-	private Set fProjectsWithSpecifics;
+	private Set<IJavaProject> fProjectsWithSpecifics;
 
 	// sizing constants
 	private final static int SIZING_SELECTION_WIDGET_HEIGHT= 250;
@@ -63,13 +64,14 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 
 	private ViewerFilter fFilter;
 
-	public ProjectSelectionDialog(Shell parentShell, Set projectsWithSpecifics) {
+	public ProjectSelectionDialog(Shell parentShell, Set<IJavaProject> projectsWithSpecifics) {
 		super(parentShell);
 		setTitle(PreferencesMessages.ProjectSelectionDialog_title);
 		setMessage(PreferencesMessages.ProjectSelectionDialog_desciption);
 		fProjectsWithSpecifics= projectsWithSpecifics;
 
 		fFilter= new ViewerFilter() {
+			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				return fProjectsWithSpecifics.contains(element);
 			}
@@ -80,6 +82,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 	/* (non-Javadoc)
 	 * Method declared on Dialog.
 	 */
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		// page group
 		Composite composite= (Composite) super.createDialogArea(parent);
@@ -156,6 +159,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.dialogs.SelectionStatusDialog#computeResult()
 	 */
+	@Override
 	protected void computeResult() {
 	}
 }

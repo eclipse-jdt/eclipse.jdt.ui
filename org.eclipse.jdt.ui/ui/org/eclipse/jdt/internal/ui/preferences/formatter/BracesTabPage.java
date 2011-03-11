@@ -95,10 +95,11 @@ public class BracesTabPage extends FormatterTabPage {
 	 * @param modifyDialog the modify dialog
 	 * @param workingValues the working values
 	 */
-	public BracesTabPage(ModifyDialog modifyDialog, Map workingValues) {
+	public BracesTabPage(ModifyDialog modifyDialog, Map<String, String> workingValues) {
 		super(modifyDialog, workingValues);
 	}
 
+	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 
 		final Group group= createGroup(numColumns, composite, FormatterMessages.BracesTabPage_group_brace_positions_title);
@@ -128,10 +129,12 @@ public class BracesTabPage extends FormatterTabPage {
 		arrayInitCheckBox.setEnabled(!arrayInitOption.hasValue(DefaultCodeFormatterConstants.END_OF_LINE));
 	}
 
+	@Override
 	protected void initializePage() {
 	    fPreview.setPreviewText(PREVIEW);
 	}
 
+	@Override
 	protected JavaPreview doCreateJavaPreview(Composite parent) {
 	    fPreview= new CompilationUnitPreview(fWorkingValues, parent);
 	    return fPreview;
@@ -153,7 +156,8 @@ public class BracesTabPage extends FormatterTabPage {
 	}
 
 
-    protected void doUpdatePreview() {
+    @Override
+	protected void doUpdatePreview() {
     	super.doUpdatePreview();
         fPreview.update();
     }

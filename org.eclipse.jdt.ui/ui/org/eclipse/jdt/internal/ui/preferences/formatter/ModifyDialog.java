@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -90,8 +91,8 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 	private final ProfileStore fProfileStore;
 	private final boolean fNewProfile;
 	private Profile fProfile;
-	private final Map fWorkingValues;
-	private final List fTabPages;
+	private final Map<String, String> fWorkingValues;
+	private final List<IModifyDialogTabPage> fTabPages;
 	private final IDialogSettings fDialogSettings;
 	private TabFolder fTabFolder;
 	private final ProfileManager fProfileManager;
@@ -116,9 +117,9 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 
 		fProfile= profile;
 		setTitle(Messages.format(FormatterMessages.ModifyDialog_dialog_title, profile.getName()));
-		fWorkingValues= new HashMap(fProfile.getSettings());
+		fWorkingValues= new HashMap<String, String>(fProfile.getSettings());
 		setStatusLineAboveButtons(false);
-		fTabPages= new ArrayList();
+		fTabPages= new ArrayList<IModifyDialogTabPage>();
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 	}
 
@@ -126,12 +127,14 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
 
-	protected abstract void addPages(Map values);
+	protected abstract void addPages(Map<String, String> values);
 
+	@Override
 	public void create() {
 		super.create();
 		int lastFocusNr= 0;
@@ -151,6 +154,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 
 
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 
 		final Composite composite= (Composite)super.createDialogArea(parent);
@@ -206,6 +210,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 	 */
 	 protected abstract String getHelpContextId();
 
+	@Override
 	public void updateStatus(IStatus status) {
 		if (status == null) {
 			doValidate();
@@ -217,6 +222,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.window.Window#getInitialSize()
 	 */
+	@Override
 	protected Point getInitialSize() {
 		Point initialSize= super.getInitialSize();
 		try {
@@ -235,6 +241,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.window.Window#getInitialLocation(org.eclipse.swt.graphics.Point)
 	 */
+	@Override
 	protected Point getInitialLocation(Point initialSize) {
 		try {
 			return new Point(fDialogSettings.getInt(fKeyPreferredX), fDialogSettings.getInt(fKeyPreferredY));
@@ -243,6 +250,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		}
 	}
 
+	@Override
 	public boolean close() {
 		final Rectangle shell= getShell().getBounds();
 
@@ -257,12 +265,14 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
 	 */
+	@Override
 	protected void okPressed() {
 		applyPressed();
 		super.okPressed();
 	}
 
-    protected void buttonPressed(int buttonId) {
+    @Override
+	protected void buttonPressed(int buttonId) {
 		if (buttonId == APPLAY_BUTTON_ID) {
 			applyPressed();
 			setTitle(Messages.format(FormatterMessages.ModifyDialog_dialog_title, fProfile.getName()));
@@ -277,13 +287,13 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		if (!fProfile.getName().equals(fProfileNameField.getText())) {
 			fProfile= fProfile.rename(fProfileNameField.getText(), fProfileManager);
 		}
-		fProfile.setSettings(new HashMap(fWorkingValues));
+		fProfile.setSettings(new HashMap<String, String>(fWorkingValues));
 		fProfileManager.setSelected(fProfile);
 		doValidate();
 	}
 
 	private void saveButtonPressed() {
-		Profile selected= new CustomProfile(fProfileNameField.getText(), new HashMap(fWorkingValues), fProfile.getVersion(), fProfileManager.getProfileVersioner().getProfileKind());
+		Profile selected= new CustomProfile(fProfileNameField.getText(), new HashMap<String, String>(fWorkingValues), fProfile.getVersion(), fProfileManager.getProfileVersioner().getProfileKind());
 
 		final FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
 		dialog.setText(FormatterMessages.CodingStyleConfigurationBlock_save_profile_dialog_title);
@@ -307,7 +317,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		final IContentType type= Platform.getContentTypeManager().getContentType("org.eclipse.core.runtime.xml"); //$NON-NLS-1$
 		if (type != null)
 			encoding= type.getDefaultCharset();
-		final Collection profiles= new ArrayList();
+		final Collection<Profile> profiles= new ArrayList<Profile>();
 		profiles.add(selected);
 		try {
 			fProfileStore.writeProfilesToFile(profiles, file, encoding);
@@ -318,7 +328,8 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		}
 	}
 
-    protected void createButtonsForButtonBar(Composite parent) {
+    @Override
+	protected void createButtonsForButtonBar(Composite parent) {
 	    fApplyButton= createButton(parent, APPLAY_BUTTON_ID, FormatterMessages.ModifyDialog_apply_button, false);
 		fApplyButton.setEnabled(false);
 
@@ -345,6 +356,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		doValidate();
 	}
 
+	@Override
 	protected void updateButtonsEnableState(IStatus status) {
 	    super.updateButtonsEnableState(status);
 	    if (fApplyButton != null && !fApplyButton.isDisposed()) {
@@ -407,9 +419,9 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		if (!fProfileNameField.getText().trim().equals(fProfile.getName()))
 			return true;
 
-		Iterator iter= fProfile.getSettings().entrySet().iterator();
+		Iterator<Entry<String, String>> iter= fProfile.getSettings().entrySet().iterator();
 		for (;iter.hasNext();) {
-			Map.Entry curr= (Map.Entry) iter.next();
+			Entry<String, String> curr= iter.next();
 			if (!fWorkingValues.get(curr.getKey()).equals(curr.getValue())) {
 				return true;
 			}

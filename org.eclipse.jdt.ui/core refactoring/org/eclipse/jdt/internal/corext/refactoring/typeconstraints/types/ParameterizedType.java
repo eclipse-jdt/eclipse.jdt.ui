@@ -26,6 +26,7 @@ public final class ParameterizedType extends HierarchyType {
 		super(environment);
 	}
 
+	@Override
 	protected void initialize(ITypeBinding binding, IType javaElementType) {
 		Assert.isTrue(binding.isParameterizedType());
 		super.initialize(binding, javaElementType);
@@ -38,22 +39,26 @@ public final class ParameterizedType extends HierarchyType {
 		}
 	}
 
+	@Override
 	public int getKind() {
 		return PARAMETERIZED_TYPE;
 	}
 
+	@Override
 	public TType getTypeDeclaration() {
 		return fTypeDeclaration;
 	}
 
+	@Override
 	public TType getErasure() {
 		return fTypeDeclaration;
 	}
 
 	public TType[] getTypeArguments() {
-		return (TType[]) fTypeArguments.clone();
+		return fTypeArguments.clone();
 	}
 
+	@Override
 	public boolean doEquals(TType type) {
 		ParameterizedType other= (ParameterizedType)type;
 		if (! getBindingKey().equals(other.getBindingKey()))
@@ -63,10 +68,12 @@ public final class ParameterizedType extends HierarchyType {
 		return true;
 	}
 
+	@Override
 	public int hashCode() {
 		return getBindingKey().hashCode();
 	}
 
+	@Override
 	protected boolean doCanAssignTo(TType lhs) {
 		int targetType= lhs.getKind();
 		switch (targetType) {
@@ -93,6 +100,7 @@ public final class ParameterizedType extends HierarchyType {
 		return false;
 	}
 
+	@Override
 	protected boolean isTypeEquivalentTo(TType other) {
 		int otherElementType= other.getKind();
 		if (otherElementType == RAW_TYPE || otherElementType == GENERIC_TYPE)
@@ -142,6 +150,7 @@ public final class ParameterizedType extends HierarchyType {
 		return null;
 	}
 
+	@Override
 	public String getName() {
 		StringBuffer result= new StringBuffer(getJavaElementType().getElementName());
 		result.append("<"); //$NON-NLS-1$
@@ -154,6 +163,7 @@ public final class ParameterizedType extends HierarchyType {
 		return result.toString();
 	}
 
+	@Override
 	protected String getPlainPrettySignature() {
 		StringBuffer result= new StringBuffer(getJavaElementType().getFullyQualifiedName('.'));
 		result.append("<"); //$NON-NLS-1$

@@ -51,6 +51,7 @@ public class ReturnTypeInfo {
 		return !fOldTypeName.equals(fNewTypeName);
 	}
 
+	@Override
 	public String toString() {
 		return fOldTypeName + " -> " + fNewTypeName; //$NON-NLS-1$
 	}

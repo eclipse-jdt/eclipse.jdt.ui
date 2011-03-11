@@ -108,7 +108,7 @@ public class JavaSourcePackageFragmentRootCompletionProcessor implements IConten
 	 * @return array with sourcepackagefragmentroots
 	 */
 	private ICompletionProposal[] createSourcePackageFragmentRootProposals(String prefix, int replacementLength) {
-		List proposals= new ArrayList();
+		List<JavaCompletionProposal> proposals= new ArrayList<JavaCompletionProposal>();
 		try {
 			IJavaProject[] projects= fRoot.getJavaProjects();
 			for (int i= 0; i < projects.length; i++) {
@@ -134,7 +134,7 @@ public class JavaSourcePackageFragmentRootCompletionProcessor implements IConten
 			// nothing to do
 		}
 
-		return (ICompletionProposal[])proposals.toArray(new ICompletionProposal[proposals.size()]);
+		return proposals.toArray(new ICompletionProposal[proposals.size()]);
 	}
 
 	public IContextInformation[] computeContextInformation(IContentAssistSubjectControl contentAssistSubject, int documentOffset) {

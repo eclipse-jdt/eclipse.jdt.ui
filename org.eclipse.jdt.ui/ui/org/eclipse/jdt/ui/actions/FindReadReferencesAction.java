@@ -56,10 +56,12 @@ public class FindReadReferencesAction extends FindReferencesAction {
 		super(editor);
 	}
 
-	Class[] getValidTypes() {
+	@Override
+	Class<?>[] getValidTypes() {
 		return new Class[] { IField.class, ILocalVariable.class };
 	}
 
+	@Override
 	void init() {
 		setText(SearchMessages.Search_FindReadReferencesAction_label);
 		setToolTipText(SearchMessages.Search_FindReadReferencesAction_tooltip);
@@ -67,10 +69,12 @@ public class FindReadReferencesAction extends FindReferencesAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKSPACE_ACTION);
 	}
 
+	@Override
 	int getLimitTo() {
 		return IJavaSearchConstants.READ_ACCESSES;
 	}
 
+	@Override
 	String getOperationUnavailableMessage() {
 		return SearchMessages.JavaElementAction_operationUnavailable_field;
 	}

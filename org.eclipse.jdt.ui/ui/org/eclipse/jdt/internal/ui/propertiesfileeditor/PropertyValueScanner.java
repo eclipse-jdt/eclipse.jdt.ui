@@ -21,6 +21,7 @@ import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.IWordDetector;
 import org.eclipse.jface.text.rules.WhitespaceRule;
@@ -98,6 +99,7 @@ public final class PropertyValueScanner extends AbstractJavaScanner {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractJavaScanner#getTokenProperties()
 	 */
+	@Override
 	protected String[] getTokenProperties() {
 		return fgTokenProperties;
 	}
@@ -105,9 +107,10 @@ public final class PropertyValueScanner extends AbstractJavaScanner {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractJavaScanner#createRules()
 	 */
-	protected List createRules() {
+	@Override
+	protected List<IRule> createRules() {
 		setDefaultReturnToken(getToken(PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE));
-		List rules= new ArrayList();
+		List<IRule> rules= new ArrayList<IRule>();
 
 		// Add rule for arguments.
 		IToken token= getToken(PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT);

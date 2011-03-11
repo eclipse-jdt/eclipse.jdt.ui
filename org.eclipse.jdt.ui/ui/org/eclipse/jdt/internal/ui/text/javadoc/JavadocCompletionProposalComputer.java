@@ -25,6 +25,7 @@ public class JavadocCompletionProposalComputer extends JavaCompletionProposalCom
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer#createCollector(org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
 	 */
+	@Override
 	protected CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context) {
 		CompletionProposalCollector collector= super.createCollector(context);
 		collector.setIgnored(CompletionProposal.JAVADOC_TYPE_REF, false);

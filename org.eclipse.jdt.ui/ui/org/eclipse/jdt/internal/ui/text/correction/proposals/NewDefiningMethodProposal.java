@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -27,6 +28,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
@@ -53,6 +55,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#isConstructor()
 	 */
+	@Override
 	protected boolean isConstructor() {
 		return fMethod.isConstructor();
 	}
@@ -60,7 +63,8 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewParameters(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List, java.util.List)
 	 */
-	protected void addNewParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException {
+	@Override
+	protected void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params) throws CoreException {
 		AST ast= rewrite.getAST();
 		ImportRewrite importRewrite= getImportRewrite();
 		ITypeBinding[] bindings= fMethod.getParameterTypes();
@@ -92,6 +96,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getNewName()
 	 */
+	@Override
 	protected SimpleName getNewName(ASTRewrite rewrite) {
 		AST ast= rewrite.getAST();
 		SimpleName nameNode= ast.newSimpleName(fMethod.getName());
@@ -113,13 +118,15 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewModifiers(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List)
 	 */
-	protected void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List modifiers) {
+	@Override
+	protected void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> modifiers) {
 		modifiers.addAll(rewrite.getAST().newModifiers(evaluateModifiers()));
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getNewMethodType(org.eclipse.jdt.core.dom.rewrite.ASTRewrite)
 	 */
+	@Override
 	protected Type getNewMethodType(ASTRewrite rewrite) throws CoreException {
 		return getImportRewrite().addImport(fMethod.getReturnType(), rewrite.getAST());
 	}
@@ -127,7 +134,8 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewExceptions(org.eclipse.jdt.core.dom.AST, java.util.List)
 	 */
-	protected void addNewExceptions(ASTRewrite rewrite, List exceptions) throws CoreException {
+	@Override
+	protected void addNewExceptions(ASTRewrite rewrite, List<Name> exceptions) throws CoreException {
 		AST ast= rewrite.getAST();
 		ImportRewrite importRewrite= getImportRewrite();
 		ITypeBinding[] bindings= fMethod.getExceptionTypes();
@@ -143,7 +151,8 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewTypeParameters(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List, java.util.List)
 	 */
-	protected void addNewTypeParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException {
+	@Override
+	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params) throws CoreException {
 
 	}
 

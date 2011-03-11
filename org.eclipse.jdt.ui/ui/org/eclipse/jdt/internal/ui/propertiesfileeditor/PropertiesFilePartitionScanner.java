@@ -94,7 +94,7 @@ public class PropertiesFilePartitionScanner extends RuleBasedPartitionScanner im
 		IToken propertyValue= new Token(PROPERTY_VALUE);
 		IToken key= new Token(IDocument.DEFAULT_CONTENT_TYPE);
 
-		List rules= new ArrayList();
+		List<IPredicateRule> rules= new ArrayList<IPredicateRule>();
 
 		// Add rule for leading white space.
 		rules.add(new LeadingWhitespacePredicateRule(key, "\t")); //$NON-NLS-1$

@@ -25,7 +25,7 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 	}
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof AbstractTextSearchResult) {
-			Set filteredElements= new HashSet();
+			Set<Object> filteredElements= new HashSet<Object>();
 			Object[] rawElements= ((AbstractTextSearchResult)inputElement).getElements();
 			int limit= getPage().getElementLimit().intValue();
 			for (int i= 0; i < rawElements.length; i++) {
@@ -41,6 +41,7 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 		return EMPTY_ARR;
 	}
 
+	@Override
 	public void elementsChanged(Object[] updatedElements) {
 		if (getSearchResult() == null)
 			return;
@@ -48,9 +49,9 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 		int addLimit= getAddLimit();
 
 		TableViewer viewer= (TableViewer) getPage().getViewer();
-		Set updated= new HashSet();
-		Set added= new HashSet();
-		Set removed= new HashSet();
+		Set<Object> updated= new HashSet<Object>();
+		Set<Object> added= new HashSet<Object>();
+		Set<Object> removed= new HashSet<Object>();
 		for (int i= 0; i < updatedElements.length; i++) {
 			if (getPage().getDisplayedMatchCount(updatedElements[i]) > 0) {
 				if (viewer.testFindItem(updatedElements[i]) != null)
@@ -84,6 +85,7 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 		return Integer.MAX_VALUE;
 	}
 
+	@Override
 	public void clear() {
 		getPage().getViewer().refresh();
 	}

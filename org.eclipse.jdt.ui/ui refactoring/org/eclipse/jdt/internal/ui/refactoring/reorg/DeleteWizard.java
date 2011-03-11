@@ -56,6 +56,7 @@ public class DeleteWizard extends RefactoringWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#addUserInputPages()
 	 */
+	@Override
 	protected void addUserInputPages() {
 		addPage(new DeleteInputPage(fProcessor));
 	}
@@ -63,6 +64,7 @@ public class DeleteWizard extends RefactoringWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#getMessageLineWidthInChars()
 	 */
+	@Override
 	public int getMessageLineWidthInChars() {
 		return 0;
 	}
@@ -70,6 +72,7 @@ public class DeleteWizard extends RefactoringWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.Wizard#needsProgressMonitor()
 	 */
+	@Override
 	public boolean needsProgressMonitor() {
 		return fProcessor.needsProgressMonitor();
 	}
@@ -85,6 +88,7 @@ public class DeleteWizard extends RefactoringWizard {
 			fProcessor= processor;
 		}
 
+		@Override
 		protected String getMessageString() {
 			int numberOfSelectedElements= numberOfSelectedElements();
 			try {
@@ -108,6 +112,7 @@ public class DeleteWizard extends RefactoringWizard {
 			}
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			super.createControl(parent);
 
@@ -141,6 +146,7 @@ public class DeleteWizard extends RefactoringWizard {
 
 			fDeleteSubPackagesCheckBox.addSelectionListener(new SelectionAdapter() {
 
+				@Override
 				public void widgetSelected(SelectionEvent event) {
 					getDeleteProcessor().setDeleteSubPackages(fDeleteSubPackagesCheckBox.getSelection());
 				}
@@ -174,6 +180,7 @@ public class DeleteWizard extends RefactoringWizard {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
 		 */
+		@Override
 		protected boolean performFinish() {
 			return super.performFinish() || getDeleteProcessor().wasCanceled(); //close the dialog if canceled
 		}
@@ -184,6 +191,7 @@ public class DeleteWizard extends RefactoringWizard {
 			return true;
 		}
 
+		@Override
 		public void dispose() {
 			if (fDeleteSubPackagesCheckBox != null && saveSettings())
 				getRefactoringSettings().put(DIALOG_SETTINGS_DELETE_SUB_PACKAGES, fDeleteSubPackagesCheckBox.getSelection());

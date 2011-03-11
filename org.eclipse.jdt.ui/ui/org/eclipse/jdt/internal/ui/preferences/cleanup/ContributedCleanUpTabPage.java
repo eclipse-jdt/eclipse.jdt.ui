@@ -41,13 +41,15 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage#setWorkingValues(java.util.Map)
 	 */
-	public void setWorkingValues(Map workingValues) {
+	@Override
+	public void setWorkingValues(Map<String, String> workingValues) {
 		super.setWorkingValues(workingValues);
 
 		final CleanUpOptions options= new CleanUpOptions(workingValues) {
 			/*
 			 * @see org.eclipse.jdt.internal.ui.fix.CleanUpOptions#setOption(java.lang.String, java.lang.String)
 			 */
+			@Override
 			public void setOption(String key, String value) {
 				super.setOption(key, value);
 
@@ -75,6 +77,7 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreatePreferences(org.eclipse.swt.widgets.Composite, int)
 	 */
+	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 		final Composite parent= new Composite(composite, SWT.NONE);
 		GridData layoutData= new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -117,6 +120,7 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage#getSelectedCleanUpCount()
 	 */
+	@Override
 	public int getSelectedCleanUpCount() {
 		final int[] result= new int[] { 0 };
 		SafeRunner.run(new ISafeRunnable() {
@@ -136,6 +140,7 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage#getCleanUpCount()
 	 */
+	@Override
 	public int getCleanUpCount() {
 		final int[] result= new int[] { 0 };
 		SafeRunner.run(new ISafeRunnable() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,7 +76,7 @@ class DeleteChangeCreator {
 	 * @throws CoreException
 	 */
 	static Change createDeleteChange(TextChangeManager manager, IResource[] resources,
-			IJavaElement[] javaElements, String changeName, List/*<IResource>*/ packageDeletes) throws CoreException {
+			IJavaElement[] javaElements, String changeName, List<IResource> packageDeletes) throws CoreException {
 		/*
 		 * Problem: deleting a package and subpackages can result in
 		 * multiple package fragments in fJavaElements but only
@@ -101,12 +101,12 @@ class DeleteChangeCreator {
 			result.add(createDeleteChange(resources[i]));
 		}
 
-		Map grouped= ReorgUtils.groupByCompilationUnit(getElementsSmallerThanCu(javaElements));
+		Map<ICompilationUnit, List<IJavaElement>> grouped= ReorgUtils.groupByCompilationUnit(getElementsSmallerThanCu(javaElements));
 		if (grouped.size() != 0 ){
 			Assert.isNotNull(manager);
-			for (Iterator iter= grouped.keySet().iterator(); iter.hasNext();) {
-				ICompilationUnit cu= (ICompilationUnit) iter.next();
-				result.add(createDeleteChange(cu, (List)grouped.get(cu), manager));
+			for (Iterator<ICompilationUnit> iter= grouped.keySet().iterator(); iter.hasNext();) {
+				ICompilationUnit cu= iter.next();
+				result.add(createDeleteChange(cu, grouped.get(cu), manager));
 			}
 		}
 
@@ -122,10 +122,10 @@ class DeleteChangeCreator {
 	/*
 	 * List<IJavaElement> javaElements
 	 */
-	private static Change createDeleteChange(ICompilationUnit cu, List javaElements, TextChangeManager manager) throws CoreException {
+	private static Change createDeleteChange(ICompilationUnit cu, List<IJavaElement> javaElements, TextChangeManager manager) throws CoreException {
 		CompilationUnit cuNode= RefactoringASTParser.parseWithASTProvider(cu, false, null);
 		CompilationUnitRewrite rewriter= new CompilationUnitRewrite(cu, cuNode);
-		IJavaElement[] elements= (IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]);
+		IJavaElement[] elements= javaElements.toArray(new IJavaElement[javaElements.size()]);
 		ASTNodeDeleteUtil.markAsDeleted(elements, rewriter, null);
 		return addTextEditFromRewrite(manager, cu, rewriter.getASTRewrite());
 	}
@@ -148,8 +148,8 @@ class DeleteChangeCreator {
 	}
 
 	//List<IJavaElement>
-	private static List getElementsSmallerThanCu(IJavaElement[] javaElements){
-		List result= new ArrayList();
+	private static List<IJavaElement> getElementsSmallerThanCu(IJavaElement[] javaElements){
+		List<IJavaElement> result= new ArrayList<IJavaElement>();
 		for (int i= 0; i < javaElements.length; i++) {
 			IJavaElement element= javaElements[i];
 			if (ReorgUtils.isInsideCompilationUnit(element))

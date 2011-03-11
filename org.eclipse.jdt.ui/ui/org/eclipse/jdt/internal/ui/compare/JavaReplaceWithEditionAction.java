@@ -18,6 +18,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 	public JavaReplaceWithEditionAction() {
 	}
 
+	@Override
 	protected JavaHistoryActionImpl createDelegate() {
 		return new JavaReplaceWithEditionActionImpl(false);
 	}

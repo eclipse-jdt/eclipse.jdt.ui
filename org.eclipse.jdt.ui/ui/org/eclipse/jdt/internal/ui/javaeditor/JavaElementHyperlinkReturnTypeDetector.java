@@ -35,9 +35,10 @@ public class JavaElementHyperlinkReturnTypeDetector extends JavaElementHyperlink
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkDetector#createHyperlink(org.eclipse.jface.text.IRegion, org.eclipse.jdt.ui.actions.SelectionDispatchAction, org.eclipse.jdt.core.IJavaElement, boolean, org.eclipse.jdt.internal.ui.javaeditor.JavaEditor)
 	 */
+	@Override
 	protected IHyperlink createHyperlink(IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
 		try {
-			if (element.getElementType() == IJavaElement.METHOD && !JavaModelUtil.isPrimitive(((IMethod)element).getReturnType()) && SelectionConverter.canOperateOn(editor)) {
+			if (element != null && element.getElementType() == IJavaElement.METHOD && !JavaModelUtil.isPrimitive(((IMethod)element).getReturnType()) && SelectionConverter.canOperateOn(editor)) {
 				return new JavaElementReturnTypeHyperlink(wordRegion, openAction, (IMethod)element, qualify);
 			}
 		} catch (JavaModelException e) {

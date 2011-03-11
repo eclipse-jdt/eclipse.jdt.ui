@@ -387,6 +387,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	/*
 	 * @see IAutoIndentStrategy#customizeDocumentCommand
 	 */
+	@Override
 	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
 
 		if (!isSmartMode())

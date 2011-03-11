@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,9 +98,9 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	 * @param path
 	 *            the path
 	 */
-	private static void addExclusionPatterns(final List entries, final IPath path) {
+	private static void addExclusionPatterns(final List<IClasspathEntry> entries, final IPath path) {
 		for (int index= 0; index < entries.size(); index++) {
-			final IClasspathEntry entry= (IClasspathEntry) entries.get(index);
+			final IClasspathEntry entry= entries.get(index);
 			if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE && entry.getPath().isPrefixOf(path)) {
 				final IPath[] patterns= entry.getExclusionPatterns();
 				if (!JavaModelUtil.isExcludedPath(path, patterns)) {
@@ -195,7 +195,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 200);
 			final IClasspathEntry entry= root.getRawClasspathEntry();
 			final IClasspathEntry[] entries= project.getRawClasspath();
-			final List list= new ArrayList();
+			final List<IClasspathEntry> list= new ArrayList<IClasspathEntry>();
 			list.addAll(Arrays.asList(entries));
 			final IFileStore store= EFS.getLocalFileSystem().getStore(JavaPlugin.getDefault().getStateLocation().append(STUB_FOLDER).append(project.getElementName()));
 			if (store.fetchInfo(EFS.NONE, new SubProgressMonitor(monitor, 25, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)).exists())
@@ -207,7 +207,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 				if (entries[index].equals(entry))
 					list.add(index, JavaCore.newSourceEntry(folder.getFullPath()));
 			}
-			project.setRawClasspath((IClasspathEntry[]) list.toArray(new IClasspathEntry[list.size()]), false, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+			project.setRawClasspath(list.toArray(new IClasspathEntry[list.size()]), false, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 		} finally {
 			monitor.done();
 		}
@@ -248,7 +248,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	 * The packages which already have been processed (element type:
 	 * &lt;IPackageFragment&gt;)
 	 */
-	private final Collection fProcessedFragments= new HashSet();
+	private final Collection<IJavaElement> fProcessedFragments= new HashSet<IJavaElement>();
 
 	/** The temporary source folder, or <code>null</code> */
 	private IFolder fSourceFolder= null;
@@ -287,6 +287,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected RefactoringStatus aboutToPerformHistory(final IProgressMonitor monitor) {
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
@@ -337,6 +338,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected RefactoringStatus aboutToPerformRefactoring(final Refactoring refactoring, final RefactoringDescriptor descriptor, final IProgressMonitor monitor) {
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
@@ -413,13 +415,13 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 				try {
 					final SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 40, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
 					final IJavaElement[] elements= root.getChildren();
-					final List list= new ArrayList(elements.length);
+					final List<IPackageFragment> list= new ArrayList<IPackageFragment>(elements.length);
 					try {
 						subMonitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, elements.length);
 						for (int index= 0; index < elements.length; index++) {
 							final IJavaElement element= elements[index];
 							if (!fProcessedFragments.contains(element) && !element.getElementName().equals(META_INF_FRAGMENT))
-								list.add(element);
+								list.add((IPackageFragment) element);
 							subMonitor.worked(1);
 						}
 					} finally {
@@ -436,10 +438,12 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 
 									private IPackageFragment fFragment= null;
 
+									@Override
 									protected final void createCompilationUnit(final IFileStore store, final String name, final String content, final IProgressMonitor pm) throws CoreException {
 										fFragment.createCompilationUnit(name, content, true, pm);
 									}
 
+									@Override
 									protected final void createPackageFragment(final IFileStore store, final String name, final IProgressMonitor pm) throws CoreException {
 										fFragment= sourceFolder.createPackageFragment(name, true, pm);
 									}
@@ -449,10 +453,12 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 
 									private IPackageFragment fFragment= null;
 
+									@Override
 									protected final void createCompilationUnit(final IFileStore store, final String name, final String content, final IProgressMonitor pm) throws CoreException {
 										fFragment.createCompilationUnit(name, content, true, pm);
 									}
 
+									@Override
 									protected final void createPackageFragment(final IFileStore store, final String name, final IProgressMonitor pm) throws CoreException {
 										fFragment= sourceFolder.createPackageFragment(name, true, pm);
 									}
@@ -478,6 +484,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Refactoring createRefactoring(RefactoringDescriptor descriptor, RefactoringStatus status, IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(descriptor);
 
@@ -487,7 +494,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 			JavaRefactoringDescriptor javaDescriptor= (JavaRefactoringDescriptor) descriptor;
 			RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(javaDescriptor.getID());
 
-			Map map= contribution.retrieveArgumentMap(descriptor);
+			Map<String, String> map= contribution.retrieveArgumentMap(descriptor);
 			if (fJavaProject == null) {
 				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments));
 				return null;
@@ -495,13 +502,13 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 
 			String name= fJavaProject.getElementName();
 
-			String handle= (String) map.get(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+			String handle= map.get(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
 			if (handle != null && handle.length() > 0)
 				map.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, getTransformedHandle(name, handle));
 
 			int count= 1;
 			String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
-			while ((handle= (String) map.get(attribute)) != null) {
+			while ((handle= map.get(attribute)) != null) {
 				if (handle.length() > 0)
 					map.put(attribute, getTransformedHandle(name, handle));
 				count++;
@@ -632,6 +639,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected RefactoringStatus historyPerformed(final IProgressMonitor monitor) {
 		try {
 			monitor.beginTask(JarImportMessages.JarImportWizard_cleanup_import, 100);
@@ -658,6 +666,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean performCancel() {
 		fCancelled= true;
 		return super.performCancel();
@@ -666,6 +675,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected RefactoringStatus refactoringPerformed(final Refactoring refactoring, final IProgressMonitor monitor) {
 		try {
 			monitor.beginTask("", 120); //$NON-NLS-1$
@@ -688,6 +698,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected boolean selectPreviewChange(final Change change) {
 		if (fSourceFolder != null) {
 			final IPath source= fSourceFolder.getFullPath();
@@ -705,6 +716,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected boolean selectStatusEntry(final RefactoringStatusEntry entry) {
 		if (fSourceFolder != null) {
 			final IPath source= fSourceFolder.getFullPath();

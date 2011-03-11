@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,8 +98,8 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 		if (! (viewerSelection instanceof IStructuredSelection))
 			return viewerSelection;
 		IStructuredSelection selection= (IStructuredSelection)viewerSelection;
-		List result= new ArrayList(selection.size());
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		List<Object> result= new ArrayList<Object>(selection.size());
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IResource || element instanceof IJavaElement) {
 				result.add(element);

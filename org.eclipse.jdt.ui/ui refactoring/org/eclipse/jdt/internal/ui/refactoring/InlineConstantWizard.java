@@ -45,6 +45,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */
+	@Override
 	protected void addUserInputPages() {
 		String message= null;
 		if(!getInlineConstantRefactoring().isInitializerAllStaticFinal()) {
@@ -97,6 +98,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 			all.setText(RefactoringMessages.InlineConstantInputPage_All_references);
 			all.setSelection(fRefactoring.getReplaceAllReferences());
 			all.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent event) {
 					fRefactoring.setReplaceAllReferences(true);
 					fRemove.setEnabled(true);
@@ -111,6 +113,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 			fRemove.setEnabled(all.getSelection());
 			fRemove.setSelection(fRefactoring.getRemoveDeclaration());
 			fRemove.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fRefactoring.setRemoveDeclaration(fRemove.getSelection());
 				}
@@ -128,6 +131,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 				onlySelected.setFocus();
 			}
 			onlySelected.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent event) {
 					fRefactoring.setReplaceAllReferences(false);
 					fRemove.setEnabled(false);

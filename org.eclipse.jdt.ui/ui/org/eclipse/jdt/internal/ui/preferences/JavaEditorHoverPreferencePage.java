@@ -32,6 +32,7 @@ public class JavaEditorHoverPreferencePage extends AbstractConfigurationBlockPre
 	/*
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigureationBlockPreferencePage#getHelpId()
 	 */
+	@Override
 	protected String getHelpId() {
 		return IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE;
 	}
@@ -39,6 +40,7 @@ public class JavaEditorHoverPreferencePage extends AbstractConfigurationBlockPre
 	/*
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setDescription()
 	 */
+	@Override
 	protected void setDescription() {
 		String description= PreferencesMessages.JavaEditorPreferencePage_hoverTab_title;
 		setDescription(description);
@@ -47,11 +49,13 @@ public class JavaEditorHoverPreferencePage extends AbstractConfigurationBlockPre
 	/*
 	 * @see org.org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setPreferenceStore()
 	 */
+	@Override
 	protected void setPreferenceStore() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 	}
 
 
+	@Override
 	protected Label createDescriptionLabel(Composite parent) {
 		return null; // no description for new look.
 	}
@@ -59,6 +63,7 @@ public class JavaEditorHoverPreferencePage extends AbstractConfigurationBlockPre
 	/*
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigureationBlockPreferencePage#createConfigurationBlock(org.eclipse.ui.internal.editors.text.OverlayPreferenceStore)
 	 */
+	@Override
 	protected IPreferenceConfigurationBlock createConfigurationBlock(OverlayPreferenceStore overlayPreferenceStore) {
 		return new JavaEditorHoverConfigurationBlock(this, overlayPreferenceStore);
 	}

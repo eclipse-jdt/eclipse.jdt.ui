@@ -65,6 +65,7 @@ public class SimilarElement {
 	/* (non-Javadoc)
 	 * @see Object#equals(Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof SimilarElement) {
 			SimilarElement elem= (SimilarElement) obj;
@@ -76,6 +77,7 @@ public class SimilarElement {
 	/* (non-Javadoc)
 	 * @see Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return fName.hashCode() + fKind;
 	}

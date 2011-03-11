@@ -39,6 +39,7 @@ public final class TypeVariable2 extends ConstraintVariable2 implements ITypeCon
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return getRange().hashCode() ^ getType().hashCode();
 	}
@@ -46,6 +47,7 @@ public final class TypeVariable2 extends ConstraintVariable2 implements ITypeCon
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object other) {
 		//TODO: unique per construction?  //return this == other;
 		if (this == other)
@@ -66,6 +68,7 @@ public final class TypeVariable2 extends ConstraintVariable2 implements ITypeCon
 		return fRange.getCompilationUnit();
 	}
 
+	@Override
 	public String toString() {
 		return super.toString() + " [" + fRange.getSourceRange().getOffset() + '+' + fRange.getSourceRange().getLength() + ']'; //$NON-NLS-1$
 	}

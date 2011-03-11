@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -95,6 +95,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureArguments;
 import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureArguments.Parameter;
 import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureArguments.ThrownException;
+import org.eclipse.jdt.core.refactoring.participants.IRefactoringProcessorIds;
 import org.eclipse.jdt.core.refactoring.participants.JavaParticipantManager;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -133,6 +134,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
@@ -166,10 +168,10 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	private static final String ATTRIBUTE_DELEGATE= "delegate"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DEPRECATE= "deprecate"; //$NON-NLS-1$
 
-	private List fParameterInfos;
+	private List<ParameterInfo> fParameterInfos;
 
 	private CompilationUnitRewrite fBaseCuRewrite;
-	private List fExceptionInfos;
+	private List<ExceptionInfo> fExceptionInfos;
 	private TextChangeManager fChangeManager;
 
 	private IMethod fMethod;
@@ -217,11 +219,11 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 	}
 
-	private static List createParameterInfoList(IMethod method) {
+	private static List<ParameterInfo> createParameterInfoList(IMethod method) {
 		try {
 			String[] typeNames= method.getParameterTypes();
 			String[] oldNames= method.getParameterNames();
-			List result= new ArrayList(typeNames.length);
+			List<ParameterInfo> result= new ArrayList<ParameterInfo>(typeNames.length);
 			for (int i= 0; i < oldNames.length; i++){
 				ParameterInfo parameterInfo;
 				if (i == oldNames.length - 1 && Flags.isVarargs(method.getFlags())) {
@@ -239,13 +241,14 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			return result;
 		} catch(JavaModelException e) {
 			JavaPlugin.log(e);
-			return new ArrayList(0);
+			return new ArrayList<ParameterInfo>(0);
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
+	@Override
 	public String getProcessorName() {
 		return RefactoringCoreMessages.ChangeSignatureRefactoring_modify_Parameters;
 	}
@@ -321,14 +324,14 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	 *
 	 * @return List of <code>ParameterInfo</code> objects.
 	 */
-	public List getParameterInfos(){
+	public List<ParameterInfo> getParameterInfos(){
 		return fParameterInfos;
 	}
 
 	/**
 	 * @return List of <code>ExceptionInfo</code> objects.
 	 */
-	public List getExceptionInfos(){
+	public List<ExceptionInfo> getExceptionInfos(){
 		return fExceptionInfos;
 	}
 
@@ -457,8 +460,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	}
 
 	private boolean areParameterTypesSameAsInitial() {
-		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+		for (Iterator<ParameterInfo> iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo info= iter.next();
 			if (! info.isAdded() && ! info.isDeleted() && info.isTypeNameChanged())
 				return false;
 		}
@@ -474,8 +477,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	}
 
 	private boolean areExceptionsSameAsInitial() {
-		for (Iterator iter= fExceptionInfos.iterator(); iter.hasNext();) {
-			ExceptionInfo info= (ExceptionInfo) iter.next();
+		for (Iterator<ExceptionInfo> iter= fExceptionInfos.iterator(); iter.hasNext();) {
+			ExceptionInfo info= iter.next();
 			if (! info.isOld())
 				return false;
 		}
@@ -484,8 +487,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	private void checkParameterNamesAndValues(RefactoringStatus result) {
 		int i= 1;
-		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext(); i++) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+		for (Iterator<ParameterInfo> iter= fParameterInfos.iterator(); iter.hasNext(); i++) {
+			ParameterInfo info= iter.next();
 			if (info.isDeleted())
 				continue;
 			checkParameterName(result, info, i);
@@ -558,9 +561,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 				// Vararg method can override method that takes an array as last argument
 				fOldVarargIndex= rippleMethod.getNumberOfParameters() - 1;
-				List notDeletedInfos= getNotDeletedInfos();
+				List<ParameterInfo> notDeletedInfos= getNotDeletedInfos();
 				for (int i= 0; i < notDeletedInfos.size(); i++) {
-					ParameterInfo info= (ParameterInfo) notDeletedInfos.get(i);
+					ParameterInfo info= notDeletedInfos.get(i);
 					if (fOldVarargIndex != -1 && info.getOldIndex() == fOldVarargIndex && ! info.isNewVarargs()) {
 						String rippleMethodType= rippleMethod.getDeclaringType().getFullyQualifiedName('.');
 						String message= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_ripple_cannot_convert_vararg, new Object[] { BasicElementLabels.getJavaElementName(info.getNewName()), BasicElementLabels.getJavaElementName(rippleMethodType)});
@@ -576,9 +579,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	private RefactoringStatus checkOriginalVarargs() throws JavaModelException {
 		if (JdtFlags.isVarargs(fMethod))
 			fOldVarargIndex= fMethod.getNumberOfParameters() - 1;
-		List notDeletedInfos= getNotDeletedInfos();
+		List<ParameterInfo> notDeletedInfos= getNotDeletedInfos();
 		for (int i= 0; i < notDeletedInfos.size(); i++) {
-			ParameterInfo info= (ParameterInfo) notDeletedInfos.get(i);
+			ParameterInfo info= notDeletedInfos.get(i);
 			if (info.isOldVarargs() && ! info.isNewVarargs())
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_cannot_convert_vararg, BasicElementLabels.getJavaElementName(info.getNewName())));
 			if (i != notDeletedInfos.size() - 1) {
@@ -596,22 +599,22 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 		RefactoringStatus result= new RefactoringStatus();
 		if (fReturnTypeInfo.isTypeNameChanged() && fReturnTypeInfo.getNewTypeBinding() != null) {
-			HashSet typeVariablesCollector= new HashSet();
+			HashSet<ITypeBinding> typeVariablesCollector= new HashSet<ITypeBinding>();
 			collectTypeVariables(fReturnTypeInfo.getNewTypeBinding(), typeVariablesCollector);
 			if (typeVariablesCollector.size() != 0) {
-				ITypeBinding first= (ITypeBinding) typeVariablesCollector.iterator().next();
+				ITypeBinding first= typeVariablesCollector.iterator().next();
 				String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_return_type_contains_type_variable, new String[] {BasicElementLabels.getJavaElementName(fReturnTypeInfo.getNewTypeName()), BasicElementLabels.getJavaElementName(first.getName())});
 				result.addError(msg);
 			}
 		}
 
-		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext();) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+		for (Iterator<ParameterInfo> iter= getNotDeletedInfos().iterator(); iter.hasNext();) {
+			ParameterInfo info= iter.next();
 			if (info.isTypeNameChanged() && info.getNewTypeBinding() != null) {
-				HashSet typeVariablesCollector= new HashSet();
+				HashSet<ITypeBinding> typeVariablesCollector= new HashSet<ITypeBinding>();
 				collectTypeVariables(info.getNewTypeBinding(), typeVariablesCollector);
 				if (typeVariablesCollector.size() != 0) {
-					ITypeBinding first= (ITypeBinding) typeVariablesCollector.iterator().next();
+					ITypeBinding first= typeVariablesCollector.iterator().next();
 					String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_parameter_type_contains_type_variable, new String[] {BasicElementLabels.getJavaElementName(info.getNewTypeName()), BasicElementLabels.getJavaElementName(info.getNewName()), BasicElementLabels.getJavaElementName(first.getName())});
 					result.addError(msg);
 				}
@@ -620,7 +623,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		return result;
 	}
 
-	private void collectTypeVariables(ITypeBinding typeBinding, Set typeVariablesCollector) {
+	private void collectTypeVariables(ITypeBinding typeBinding, Set<ITypeBinding> typeVariablesCollector) {
 		if (typeBinding.isTypeVariable()) {
 			typeVariablesCollector.add(typeBinding);
 			ITypeBinding[] typeBounds= typeBinding.getTypeBounds();
@@ -710,6 +713,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	/* (non-Javadoc)
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#checkInitialConditions(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask("", 5); //$NON-NLS-1$
@@ -767,16 +771,16 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	private RefactoringStatus createExceptionInfoList() {
 		if (fExceptionInfos == null || fExceptionInfos.isEmpty()) {
-			fExceptionInfos= new ArrayList(0);
+			fExceptionInfos= new ArrayList<ExceptionInfo>(0);
 			try {
 				ASTNode nameNode= NodeFinder.perform(fBaseCuRewrite.getRoot(), fMethod.getNameRange());
 				if (nameNode == null || !(nameNode instanceof Name) || !(nameNode.getParent() instanceof MethodDeclaration))
 					return null;
 				MethodDeclaration methodDeclaration= (MethodDeclaration) nameNode.getParent();
-				List exceptions= methodDeclaration.thrownExceptions();
-				List result= new ArrayList(exceptions.size());
+				List<Name> exceptions= methodDeclaration.thrownExceptions();
+				List<ExceptionInfo> result= new ArrayList<ExceptionInfo>(exceptions.size());
 				for (int i= 0; i < exceptions.size(); i++) {
-					Name name= (Name) exceptions.get(i);
+					Name name= exceptions.get(i);
 					ITypeBinding typeBinding= name.resolveTypeBinding();
 					if (typeBinding == null)
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_no_exception_binding);
@@ -794,6 +798,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	/* (non-Javadoc)
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor, org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext)
 	 */
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.ChangeSignatureRefactoring_checking_preconditions, 8);
@@ -930,8 +935,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	private String getMethodThrows() {
 		final String throwsString= " throws "; //$NON-NLS-1$
 		StringBuffer buff= new StringBuffer(throwsString);
-		for (Iterator iter= fExceptionInfos.iterator(); iter.hasNext(); ) {
-			ExceptionInfo info= (ExceptionInfo) iter.next();
+		for (Iterator<ExceptionInfo> iter= fExceptionInfos.iterator(); iter.hasNext(); ) {
+			ExceptionInfo info= iter.next();
 			if (! info.isDeleted()) {
 				buff.append(info.getElement().getElementName());
 				buff.append(", "); //$NON-NLS-1$
@@ -946,8 +951,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	private String getOldMethodThrows() {
 		final String throwsString= " throws "; //$NON-NLS-1$
 		StringBuffer buff= new StringBuffer(throwsString);
-		for (Iterator iter= fExceptionInfos.iterator(); iter.hasNext(); ) {
-			ExceptionInfo info= (ExceptionInfo) iter.next();
+		for (Iterator<ExceptionInfo> iter= fExceptionInfos.iterator(); iter.hasNext(); ) {
+			ExceptionInfo info= iter.next();
 			if (! info.isAdded()) {
 				buff.append(info.getElement().getElementName());
 				buff.append(", "); //$NON-NLS-1$
@@ -960,10 +965,10 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	}
 
 	private void checkForDuplicateParameterNames(RefactoringStatus result){
-		Set found= new HashSet();
-		Set doubled= new HashSet();
-		for (Iterator iter = getNotDeletedInfos().iterator(); iter.hasNext();) {
-			ParameterInfo info= (ParameterInfo)iter.next();
+		Set<String> found= new HashSet<String>();
+		Set<String> doubled= new HashSet<String>();
+		for (Iterator<ParameterInfo> iter = getNotDeletedInfos().iterator(); iter.hasNext();) {
+			ParameterInfo info= iter.next();
 			String newName= info.getNewName();
 			if (found.contains(newName) && !doubled.contains(newName)){
 				result.addFatalError(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_duplicate_name, BasicElementLabels.getJavaElementName(newName)));
@@ -1021,8 +1026,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	private String getOldMethodParameters() {
 		StringBuffer buff= new StringBuffer();
 		int i= 0;
-		for (Iterator iter= getNotAddedInfos().iterator(); iter.hasNext(); i++) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+		for (Iterator<ParameterInfo> iter= getNotAddedInfos().iterator(); iter.hasNext(); i++) {
+			ParameterInfo info= iter.next();
 			if (i != 0 )
 				buff.append(", ");  //$NON-NLS-1$
 			buff.append(createDeclarationString(info));
@@ -1033,8 +1038,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	private String getMethodParameters() {
 		StringBuffer buff= new StringBuffer();
 		int i= 0;
-		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext(); i++) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+		for (Iterator<ParameterInfo> iter= getNotDeletedInfos().iterator(); iter.hasNext(); i++) {
+			ParameterInfo info= iter.next();
 			if (i != 0 )
 				buff.append(", ");  //$NON-NLS-1$
 			buff.append(createDeclarationString(info));
@@ -1042,41 +1047,41 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		return buff.toString();
 	}
 
-	private List getAddedInfos(){
-		List result= new ArrayList(1);
-		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+	private List<ParameterInfo> getAddedInfos(){
+		List<ParameterInfo> result= new ArrayList<ParameterInfo>(1);
+		for (Iterator<ParameterInfo> iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo info= iter.next();
 			if (info.isAdded())
 				result.add(info);
 		}
 		return result;
 	}
 
-	private List getDeletedInfos(){
-		List result= new ArrayList(1);
-		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+	private List<ParameterInfo> getDeletedInfos(){
+		List<ParameterInfo> result= new ArrayList<ParameterInfo>(1);
+		for (Iterator<ParameterInfo> iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo info= iter.next();
 			if (info.isDeleted())
 				result.add(info);
 		}
 		return result;
 	}
 
-	private List getNotAddedInfos(){
-		List all= new ArrayList(fParameterInfos);
+	private List<ParameterInfo> getNotAddedInfos(){
+		List<ParameterInfo> all= new ArrayList<ParameterInfo>(fParameterInfos);
 		all.removeAll(getAddedInfos());
 		return all;
 	}
 
-	private List getNotDeletedInfos(){
-		List all= new ArrayList(fParameterInfos);
+	private List<ParameterInfo> getNotDeletedInfos(){
+		List<ParameterInfo> all= new ArrayList<ParameterInfo>(fParameterInfos);
 		all.removeAll(getDeletedInfos());
 		return all;
 	}
 
 	private boolean areNamesSameAsInitial() {
-		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+		for (Iterator<ParameterInfo> iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo info= iter.next();
 			if (info.isRenamed())
 				return false;
 		}
@@ -1085,8 +1090,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	private boolean isOrderSameAsInitial(){
 		int i= 0;
-		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext(); i++) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+		for (Iterator<ParameterInfo> iter= fParameterInfos.iterator(); iter.hasNext(); i++) {
+			ParameterInfo info= iter.next();
 			if (info.getOldIndex() != i) // includes info.isAdded()
 				return false;
 			if (info.isDeleted())
@@ -1115,7 +1120,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	private RefactoringStatus checkParameterNamesInRippleMethods() throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		Set newParameterNames= getNewParameterNamesList();
+		Set<String> newParameterNames= getNewParameterNamesList();
 		for (int i= 0; i < fRippleMethods.length; i++) {
 			String[] paramNames= fRippleMethods[i].getParameterNames();
 			for (int j= 0; j < paramNames.length; j++) {
@@ -1130,26 +1135,26 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		return result;
 	}
 
-	private Set getNewParameterNamesList() {
-		Set oldNames= getOriginalParameterNames();
-		Set currentNames= getNamesOfNotDeletedParameters();
+	private Set<String> getNewParameterNamesList() {
+		Set<String> oldNames= getOriginalParameterNames();
+		Set<String> currentNames= getNamesOfNotDeletedParameters();
 		currentNames.removeAll(oldNames);
 		return currentNames;
 	}
 
-	private Set getNamesOfNotDeletedParameters() {
-		Set result= new HashSet();
-		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext();) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+	private Set<String> getNamesOfNotDeletedParameters() {
+		Set<String> result= new HashSet<String>();
+		for (Iterator<ParameterInfo> iter= getNotDeletedInfos().iterator(); iter.hasNext();) {
+			ParameterInfo info= iter.next();
 			result.add(info.getNewName());
 		}
 		return result;
 	}
 
-	private Set getOriginalParameterNames() {
-		Set result= new HashSet();
-		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+	private Set<String> getOriginalParameterNames() {
+		Set<String> result= new HashSet<String>();
+		for (Iterator<ParameterInfo> iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo info= iter.next();
 			if (! info.isAdded())
 				result.add(info.getOldName());
 		}
@@ -1179,6 +1184,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	/* (non-Javadoc)
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public Change createChange(IProgressMonitor pm) {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
@@ -1190,12 +1196,12 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	}
 
 	private ChangeMethodSignatureArguments getParticipantArguments() {
-		ArrayList parameterList= new ArrayList();
-		List pis= getParameterInfos();
+		ArrayList<Parameter> parameterList= new ArrayList<Parameter>();
+		List<ParameterInfo> pis= getParameterInfos();
 		String[] originalParameterTypeSigs= fMethod.getParameterTypes();
 
-		for (Iterator iter= pis.iterator(); iter.hasNext();) {
-			ParameterInfo pi= (ParameterInfo) iter.next();
+		for (Iterator<ParameterInfo> iter= pis.iterator(); iter.hasNext();) {
+			ParameterInfo pi= iter.next();
 			if (!pi.isDeleted()) {
 				int oldIndex= pi.isAdded() ? -1 : pi.getOldIndex();
 				String newName= pi.getNewName();
@@ -1213,12 +1219,12 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				parameterList.add(new Parameter(oldIndex, newName, typeSig, defaultValue));
 			}
 		}
-		Parameter[] parameters= (Parameter[]) parameterList.toArray(new Parameter[parameterList.size()]);
+		Parameter[] parameters= parameterList.toArray(new Parameter[parameterList.size()]);
 
-		ArrayList exceptionList= new ArrayList();
-		List exceptionInfos= getExceptionInfos();
+		ArrayList<ThrownException> exceptionList= new ArrayList<ThrownException>();
+		List<ExceptionInfo> exceptionInfos= getExceptionInfos();
 		for (int i= 0; i < exceptionInfos.size(); i++) {
-			ExceptionInfo ei= (ExceptionInfo) exceptionInfos.get(i);
+			ExceptionInfo ei= exceptionInfos.get(i);
 			if (!ei.isDeleted()) {
 				int oldIndex= ei.isAdded() ? -1 : i;
 				String qualifiedTypeName= ei.getFullyQualifiedName();
@@ -1226,7 +1232,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				exceptionList.add(new ThrownException(oldIndex, newTypeSig));
 			}
 		}
-		ThrownException[] exceptions= (ThrownException[]) exceptionList.toArray(new ThrownException[exceptionList.size()]);
+		ThrownException[] exceptions= exceptionList.toArray(new ThrownException[exceptionList.size()]);
 		String returnTypeSig;
 		if (fReturnTypeInfo.isTypeNameChanged()) {
 			returnTypeSig= Signature.createTypeSignature(fReturnTypeInfo.getNewTypeName(), false);
@@ -1242,7 +1248,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 
 	public JavaRefactoringDescriptor createDescriptor() {
-		final Map arguments= new HashMap();
+		final Map<String, String> arguments= new HashMap<String, String>();
 		String project= null;
 		IJavaProject javaProject= fMethod.getJavaProject();
 		if (javaProject != null)
@@ -1266,8 +1272,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				JavaPlugin.log(exception);
 			}
 			int count= 1;
-			for (final Iterator iterator= fParameterInfos.iterator(); iterator.hasNext();) {
-				final ParameterInfo info= (ParameterInfo) iterator.next();
+			for (final Iterator<ParameterInfo> iterator= fParameterInfos.iterator(); iterator.hasNext();) {
+				final ParameterInfo info= iterator.next();
 				final StringBuffer buffer= new StringBuffer(64);
 				if (info.isAdded())
 					buffer.append("{added}"); //$NON-NLS-1$
@@ -1299,8 +1305,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				count++;
 			}
 			count= 1;
-			for (final Iterator iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
-				final ExceptionInfo info= (ExceptionInfo) iterator.next();
+			for (final Iterator<ExceptionInfo> iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
+				final ExceptionInfo info= iterator.next();
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count, JavaRefactoringDescriptorUtil.elementToHandle(project,info.getElement()));
 				arguments.put(ATTRIBUTE_KIND + count, new Integer(info.getKind()).toString());
 				count++;
@@ -1338,11 +1344,11 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 		if (fReturnTypeInfo.isTypeNameChanged())
 			comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_new_return_type_pattern, BasicElementLabels.getJavaElementName(fReturnTypeInfo.getNewTypeName())));
-		List deleted= new ArrayList();
-		List added= new ArrayList();
-		List changed= new ArrayList();
-		for (final Iterator iterator= fParameterInfos.iterator(); iterator.hasNext();) {
-			final ParameterInfo info= (ParameterInfo) iterator.next();
+		List<String> deleted= new ArrayList<String>();
+		List<String> added= new ArrayList<String>();
+		List<String> changed= new ArrayList<String>();
+		for (final Iterator<ParameterInfo> iterator= fParameterInfos.iterator(); iterator.hasNext();) {
+			final ParameterInfo info= iterator.next();
 			if (info.isDeleted())
 				deleted.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_deleted_parameter_pattern, new String[] { BasicElementLabels.getJavaElementName(info.getOldTypeName()), BasicElementLabels.getJavaElementName(info.getOldName())}));
 			else if (info.isAdded())
@@ -1351,25 +1357,25 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				changed.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_changed_parameter_pattern, new String[] { BasicElementLabels.getJavaElementName(info.getOldTypeName()), BasicElementLabels.getJavaElementName(info.getOldName())}));
 		}
 		if (!added.isEmpty())
-			comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_added_parameters, (String[]) added.toArray(new String[added.size()])));
+			comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_added_parameters, added.toArray(new String[added.size()])));
 		if (!deleted.isEmpty())
-			comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_removed_parameters, (String[]) deleted.toArray(new String[deleted.size()])));
+			comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_removed_parameters, deleted.toArray(new String[deleted.size()])));
 		if (!changed.isEmpty())
-			comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_changed_parameters, (String[]) changed.toArray(new String[changed.size()])));
+			comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_changed_parameters, changed.toArray(new String[changed.size()])));
 		added.clear();
 		deleted.clear();
 		changed.clear();
-		for (final Iterator iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
-			final ExceptionInfo info= (ExceptionInfo) iterator.next();
+		for (final Iterator<ExceptionInfo> iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
+			final ExceptionInfo info= iterator.next();
 			if (info.isAdded())
 				added.add(info.getElement().getElementName());
 			else if (info.isDeleted())
 				deleted.add(info.getElement().getElementName());
 		}
 		if (!added.isEmpty())
-			comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_added_exceptions, (String[]) added.toArray(new String[added.size()])));
+			comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_added_exceptions, added.toArray(new String[added.size()])));
 		if (!deleted.isEmpty())
-			comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_removed_exceptions, (String[]) deleted.toArray(new String[deleted.size()])));
+			comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_removed_exceptions, deleted.toArray(new String[deleted.size()])));
 		return comment;
 	}
 
@@ -1381,7 +1387,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		pm.beginTask(RefactoringCoreMessages.ChangeSignatureRefactoring_preview, 2);
 		fChangeManager= new TextChangeManager();
 		boolean isNoArgConstructor= isNoArgConstructor();
-		Map namedSubclassMapping= null;
+		Map<ICompilationUnit, Set<IType>> namedSubclassMapping= null;
 		if (isNoArgConstructor){
 			//create only when needed;
 			namedSubclassMapping= createNamedSubclassMapping(new SubProgressMonitor(pm, 1));
@@ -1405,24 +1411,24 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			ASTNode[] nodes= ASTNodeSearchUtil.findNodes(group.getSearchResults(), cuRewrite.getRoot());
 
 			//IntroduceParameterObjectRefactoring needs to update declarations first:
-			List/*<OccurrenceUpdate>*/ deferredUpdates= new ArrayList();
+			List<OccurrenceUpdate<? extends ASTNode>> deferredUpdates= new ArrayList<OccurrenceUpdate<? extends ASTNode>>();
 			for (int j= 0; j < nodes.length; j++) {
-				OccurrenceUpdate update= createOccurrenceUpdate(nodes[j], cuRewrite, result);
+				OccurrenceUpdate<? extends ASTNode> update= createOccurrenceUpdate(nodes[j], cuRewrite, result);
 				if (update instanceof DeclarationUpdate) {
 					update.updateNode();
 				} else {
 					deferredUpdates.add(update);
 				}
 			}
-			for (Iterator iter= deferredUpdates.iterator(); iter.hasNext();) {
-				((OccurrenceUpdate) iter.next()).updateNode();
+			for (Iterator<OccurrenceUpdate<? extends ASTNode>> iter= deferredUpdates.iterator(); iter.hasNext();) {
+				iter.next().updateNode();
 			}
 
 			if (isNoArgConstructor && namedSubclassMapping.containsKey(cu)){
 				//only non-anonymous subclasses may have noArgConstructors to modify - see bug 43444
-				Set subtypes= (Set)namedSubclassMapping.get(cu);
-				for (Iterator iter= subtypes.iterator(); iter.hasNext();) {
-					IType subtype= (IType) iter.next();
+				Set<IType> subtypes= namedSubclassMapping.get(cu);
+				for (Iterator<IType> iter= subtypes.iterator(); iter.hasNext();) {
+					IType subtype= iter.next();
 					AbstractTypeDeclaration subtypeNode= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(subtype, cuRewrite.getRoot());
 					if (subtypeNode != null)
 						modifyImplicitCallsToNoArgConstructor(subtypeNode, cuRewrite);
@@ -1437,18 +1443,17 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		return fChangeManager;
 	}
 
-	//Map<ICompilationUnit, Set<IType>>
-	private Map createNamedSubclassMapping(IProgressMonitor pm) throws JavaModelException{
+	private Map<ICompilationUnit, Set<IType>> createNamedSubclassMapping(IProgressMonitor pm) throws JavaModelException{
 		IType[] subclasses= getCachedTypeHierarchy(new SubProgressMonitor(pm, 1)).getSubclasses(fMethod.getDeclaringType());
-		Map result= new HashMap();
+		Map<ICompilationUnit, Set<IType>> result= new HashMap<ICompilationUnit, Set<IType>>();
 		for (int i= 0; i < subclasses.length; i++) {
 			IType subclass= subclasses[i];
 			if (subclass.isAnonymous())
 				continue;
 			ICompilationUnit cu= subclass.getCompilationUnit();
 			if (! result.containsKey(cu))
-				result.put(cu, new HashSet());
-			((Set)result.get(cu)).add(subclass);
+				result.put(cu, new HashSet<IType>());
+			result.get(cu).add(subclass);
 		}
 		return result;
 	}
@@ -1475,9 +1480,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	}
 
 	private void addArgumentsToNewSuperConstructorCall(SuperConstructorInvocation superCall, CompilationUnitRewrite cuRewrite) {
-		Iterator iter= getNotDeletedInfos().iterator();
+		Iterator<ParameterInfo> iter= getNotDeletedInfos().iterator();
 		while (iter.hasNext()) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+			ParameterInfo info= iter.next();
 			Expression newExpression= createNewExpression(info, getParameterInfos(), superCall.arguments(), cuRewrite, (MethodDeclaration) ASTNodes.getParent(superCall, MethodDeclaration.class));
 			if (newExpression != null)
 				superCall.arguments().add(newExpression);
@@ -1534,20 +1539,20 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	private MethodDeclaration[] getAllConstructors(AbstractTypeDeclaration typeDeclaration) {
 		BodyDeclaration decl;
-		List result= new ArrayList(1);
-		for (Iterator it = typeDeclaration.bodyDeclarations().listIterator(); it.hasNext(); ) {
-			decl= (BodyDeclaration) it.next();
+		List<BodyDeclaration> result= new ArrayList<BodyDeclaration>(1);
+		for (Iterator<BodyDeclaration> it = typeDeclaration.bodyDeclarations().listIterator(); it.hasNext(); ) {
+			decl= it.next();
 			if (decl instanceof MethodDeclaration && ((MethodDeclaration) decl).isConstructor())
 				result.add(decl);
 		}
-		return (MethodDeclaration[]) result.toArray(new MethodDeclaration[result.size()]);
+		return result.toArray(new MethodDeclaration[result.size()]);
 	}
 
 	private boolean isNoArgConstructor() throws JavaModelException {
 		return fMethod.isConstructor() && fMethod.getNumberOfParameters() == 0;
 	}
 
-	private Expression createNewExpression(ParameterInfo info, List parameterInfos, List nodes, CompilationUnitRewrite cuRewrite, MethodDeclaration method) {
+	private Expression createNewExpression(ParameterInfo info, List<ParameterInfo> parameterInfos, List<Expression> nodes, CompilationUnitRewrite cuRewrite, MethodDeclaration method) {
 		if (info.isNewVarargs() && info.getDefaultValue().trim().length() == 0)
 			return null;
 		else {
@@ -1569,6 +1574,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	private SearchResultGroup[] findOccurrences(IProgressMonitor pm, ReferencesInBinaryContext binaryRefs, RefactoringStatus status) throws JavaModelException{
 		final boolean isConstructor= fMethod.isConstructor();
 		CuCollectingSearchRequestor requestor= new CuCollectingSearchRequestor(binaryRefs) {
+			@Override
 			protected void acceptSearchMatch(ICompilationUnit unit, SearchMatch match) throws CoreException {
 				// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=27236 :
 				if (isConstructor && match instanceof MethodReferenceMatch) {
@@ -1620,11 +1626,11 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	private static final boolean BUG_89686= true; //see bug 83693: Search for References to methods/constructors: do ranges include parameter lists?
 
-	private OccurrenceUpdate createOccurrenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
+	private OccurrenceUpdate<? extends ASTNode> createOccurrenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
 		if (BUG_89686 && node instanceof SimpleName && node.getParent() instanceof EnumConstantDeclaration)
 			node= node.getParent();
 
-		if (isReferenceNode(node))
+		if (Invocations.isInvocationWithArguments(node))
 			return new ReferenceUpdate(node, cuRewrite, result);
 
 		else if (node instanceof SimpleName && node.getParent() instanceof MethodDeclaration)
@@ -1640,22 +1646,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			return new NullOccurrenceUpdate(node, cuRewrite, result);
 	}
 
-	private static boolean isReferenceNode(ASTNode node){
-		switch (node.getNodeType()) {
-			case ASTNode.METHOD_INVOCATION :
-			case ASTNode.SUPER_METHOD_INVOCATION :
-			case ASTNode.CLASS_INSTANCE_CREATION :
-			case ASTNode.CONSTRUCTOR_INVOCATION :
-			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION :
-			case ASTNode.ENUM_CONSTANT_DECLARATION :
-				return true;
-
-			default :
-				return false;
-		}
-	}
-
-	abstract class OccurrenceUpdate {
+	abstract class OccurrenceUpdate<N extends ASTNode> {
 		protected final CompilationUnitRewrite fCuRewrite;
 		protected final TextEditGroup fDescription;
 		protected RefactoringStatus fResult;
@@ -1717,72 +1708,72 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			// }
 
 			ListRewrite listRewrite= getParamgumentsRewrite();
-			Map newOldMap= new LinkedHashMap();
-			List nodes= listRewrite.getRewrittenList();
-			Iterator rewriteIter= nodes.iterator();
-			List original= listRewrite.getOriginalList();
-			for (Iterator iter= original.iterator(); iter.hasNext();) {
+			Map<N, N> newOldMap= new LinkedHashMap<N, N>();
+			List<N> nodes= listRewrite.getRewrittenList();
+			Iterator<N> rewriteIter= nodes.iterator();
+			List<N> original= listRewrite.getOriginalList();
+			for (Iterator<N> iter= original.iterator(); iter.hasNext();) {
 				newOldMap.put(rewriteIter.next(),iter.next());
 			}
-			List newNodes= new ArrayList();
+			List<N> newNodes= new ArrayList<N>();
 			// register removed nodes, and collect nodes in new sequence:
 			for (int i= 0; i < fParameterInfos.size(); i++) {
-				ParameterInfo info= (ParameterInfo) fParameterInfos.get(i);
+				ParameterInfo info= fParameterInfos.get(i);
 				int oldIndex= info.getOldIndex();
 
 				if (info.isDeleted()) {
 					if (oldIndex != fOldVarargIndex) {
-						registerImportRemoveNode((ASTNode) nodes.get(oldIndex));
+						registerImportRemoveNode(nodes.get(oldIndex));
 					} else {
 						//vararg deleted -> remove all remaining nodes:
 						for (int n= oldIndex; n < nodes.size(); n++) {
-							registerImportRemoveNode((ASTNode) nodes.get(n));
+							registerImportRemoveNode(nodes.get(n));
 						}
 					}
 
 				} else if (info.isAdded()) {
-					ASTNode newParamgument= createNewParamgument(info, fParameterInfos, nodes);
+					N newParamgument= createNewParamgument(info, fParameterInfos, nodes);
 					if (newParamgument != null)
 						newNodes.add(newParamgument);
 
 				} else /* parameter stays */ {
 					if (oldIndex != fOldVarargIndex) {
-						ASTNode oldNode= (ASTNode) nodes.get(oldIndex);
-						ASTNode movedNode= moveNode(oldNode, getASTRewrite());
+						N oldNode= nodes.get(oldIndex);
+						N movedNode= moveNode(oldNode, getASTRewrite());
 						newNodes.add(movedNode);
 					} else {
 						//vararg stays and is last parameter -> copy all remaining nodes:
 						for (int n= oldIndex; n < nodes.size(); n++) {
-							ASTNode oldNode= (ASTNode) nodes.get(n);
-							ASTNode movedNode= moveNode(oldNode, getASTRewrite());
+							N oldNode= nodes.get(n);
+							N movedNode= moveNode(oldNode, getASTRewrite());
 							newNodes.add(movedNode);
 						}
 					}
 				}
 			}
 
-			Iterator nodesIter= nodes.iterator();
-			Iterator newIter= newNodes.iterator();
+			Iterator<N> nodesIter= nodes.iterator();
+			Iterator<N> newIter= newNodes.iterator();
 			//replace existing nodes with new ones:
 			while (nodesIter.hasNext() && newIter.hasNext()) {
-				ASTNode node= (ASTNode) nodesIter.next();
-				ASTNode newNode= (ASTNode) newIter.next();
+				ASTNode node= nodesIter.next();
+				ASTNode newNode= newIter.next();
 				if (!ASTNodes.isExistingNode(node)) //XXX:should better be addressed in ListRewriteEvent.replaceEntry(ASTNode, ASTNode)
-					listRewrite.replace((ASTNode) newOldMap.get(node), newNode, fDescription);
+					listRewrite.replace(newOldMap.get(node), newNode, fDescription);
 				else
 					listRewrite.replace(node, newNode, fDescription);
 			}
 			//remove remaining existing nodes:
 			while (nodesIter.hasNext()) {
-				ASTNode node= (ASTNode) nodesIter.next();
+				ASTNode node= nodesIter.next();
 				if (!ASTNodes.isExistingNode(node))
-					listRewrite.remove((ASTNode) newOldMap.get(node), fDescription);
+					listRewrite.remove(newOldMap.get(node), fDescription);
 				else
 					listRewrite.remove(node, fDescription);
 			}
 			//add additional new nodes:
 			while (newIter.hasNext()) {
-				ASTNode node= (ASTNode) newIter.next();
+				ASTNode node= newIter.next();
 				listRewrite.insertLast(node, fDescription);
 			}
 		}
@@ -1793,8 +1784,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		protected abstract ListRewrite getParamgumentsRewrite();
 
 		protected final void changeParamguments() {
-			for (Iterator iter= getParameterInfos().iterator(); iter.hasNext();) {
-				ParameterInfo info= (ParameterInfo) iter.next();
+			for (Iterator<ParameterInfo> iter= getParameterInfos().iterator(); iter.hasNext();) {
+				ParameterInfo info= iter.next();
 				if (info.isAdded() || info.isDeleted())
 					continue;
 
@@ -1833,7 +1824,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		 * @param nodes TODO
 		 * @return a new method parameter or argument, or <code>null</code> for an empty vararg argument
 		 */
-		protected abstract ASTNode createNewParamgument(ParameterInfo info, List parameterInfos, List nodes);
+		protected abstract N createNewParamgument(ParameterInfo info, List<ParameterInfo> parameterInfos, List<N> nodes);
 
 		protected abstract SimpleName getMethodNameNode();
 
@@ -1867,7 +1858,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 	}
 
-	class ReferenceUpdate extends OccurrenceUpdate {
+	class ReferenceUpdate extends OccurrenceUpdate<Expression> {
 		/** isReferenceNode(fNode) */
 		private ASTNode fNode;
 
@@ -1876,35 +1867,20 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			fNode= node; //holds: Assert.isTrue(isReferenceNode(node));
 		}
 
+		@Override
 		public void updateNode() {
 			reshuffleElements();
 			changeMethodName();
 		}
 
 		/** @return {@inheritDoc} (element type: Expression) */
+		@Override
 		protected ListRewrite getParamgumentsRewrite() {
-			if (fNode instanceof MethodInvocation)
-				return getASTRewrite().getListRewrite(fNode, MethodInvocation.ARGUMENTS_PROPERTY);
-
-			if (fNode instanceof SuperMethodInvocation)
-				return getASTRewrite().getListRewrite(fNode, SuperMethodInvocation.ARGUMENTS_PROPERTY);
-
-			if (fNode instanceof ClassInstanceCreation)
-				return getASTRewrite().getListRewrite(fNode, ClassInstanceCreation.ARGUMENTS_PROPERTY);
-
-			if (fNode instanceof ConstructorInvocation)
-				return getASTRewrite().getListRewrite(fNode, ConstructorInvocation.ARGUMENTS_PROPERTY);
-
-			if (fNode instanceof SuperConstructorInvocation)
-				return getASTRewrite().getListRewrite(fNode, SuperConstructorInvocation.ARGUMENTS_PROPERTY);
-
-			if (fNode instanceof EnumConstantDeclaration)
-				return getASTRewrite().getListRewrite(fNode, EnumConstantDeclaration.ARGUMENTS_PROPERTY);
-
-			return null;
+			return getASTRewrite().getListRewrite(fNode, Invocations.getArgumentsProperty(fNode));
 		}
 
-		protected ASTNode createNewParamgument(ParameterInfo info, List parameterInfos, List nodes) {
+		@Override
+		protected Expression createNewParamgument(ParameterInfo info, List<ParameterInfo> parameterInfos, List<Expression> nodes) {
 			CompilationUnitRewrite cuRewrite= getCompilationUnitRewrite();
 			MethodDeclaration declaration= (MethodDeclaration) ASTNodes.getParent(fNode, MethodDeclaration.class);
 			if (isRecursiveReference()) {
@@ -1913,13 +1889,14 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				return createNewExpression(info, parameterInfos, nodes, cuRewrite, declaration);
 		}
 
-		private Expression createNewExpressionRecursive(ParameterInfo info, List parameterInfos, List nodes, CompilationUnitRewrite cuRewrite, MethodDeclaration methodDeclaration) {
+		private Expression createNewExpressionRecursive(ParameterInfo info, List<ParameterInfo> parameterInfos, List<Expression> nodes, CompilationUnitRewrite cuRewrite, MethodDeclaration methodDeclaration) {
 			if (fDefaultValueAdvisor != null && info.isAdded()) {
 				return fDefaultValueAdvisor.createDefaultExpression(nodes, info, parameterInfos, methodDeclaration, true, cuRewrite);
 			}
 			return (Expression) getASTRewrite().createStringPlaceholder(info.getNewName(), ASTNode.METHOD_INVOCATION);
 		}
 
+		@Override
 		protected SimpleName getMethodNameNode() {
 			if (fNode instanceof MethodInvocation)
 				return ((MethodInvocation)fNode).getName();
@@ -1994,7 +1971,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	}
 
-	class DeclarationUpdate extends OccurrenceUpdate {
+	class DeclarationUpdate extends OccurrenceUpdate<SingleVariableDeclaration> {
 		private MethodDeclaration fMethDecl;
 
 		protected DeclarationUpdate(MethodDeclaration decl, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
@@ -2003,11 +1980,13 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 
 		// Prevent import removing if delegate is created.
+		@Override
 		protected void registerImportRemoveNode(ASTNode node) {
 			if (!fDelegateUpdating)
 				super.registerImportRemoveNode(node);
 		}
 
+		@Override
 		public void updateNode() throws CoreException {
 			changeParamguments();
 
@@ -2059,10 +2038,12 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 
 		/** @return {@inheritDoc} (element type: SingleVariableDeclaration) */
+		@Override
 		protected ListRewrite getParamgumentsRewrite() {
 			return getASTRewrite().getListRewrite(fMethDecl, MethodDeclaration.PARAMETERS_PROPERTY);
 		}
 
+		@Override
 		protected void changeParamgumentName(ParameterInfo info) {
 			SingleVariableDeclaration param= (SingleVariableDeclaration) fMethDecl.parameters().get(info.getOldIndex());
 			if (! info.getOldName().equals(param.getName().getIdentifier()))
@@ -2079,6 +2060,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			}
 		}
 
+		@Override
 		protected void changeParamgumentType(ParameterInfo info) {
 			SingleVariableDeclaration oldParam= (SingleVariableDeclaration) fMethDecl.parameters().get(info.getOldIndex());
 			getASTRewrite().set(oldParam, SingleVariableDeclaration.VARARGS_PROPERTY, Boolean.valueOf(info.isNewVarargs()), fDescription);
@@ -2124,8 +2106,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 
 		private void changeExceptions() {
-			for (Iterator iter= fExceptionInfos.iterator(); iter.hasNext();) {
-				ExceptionInfo info= (ExceptionInfo) iter.next();
+			for (Iterator<ExceptionInfo> iter= fExceptionInfos.iterator(); iter.hasNext();) {
+				ExceptionInfo info= iter.next();
 				if (info.isOld())
 					continue;
 				if (info.isDeleted())
@@ -2135,10 +2117,10 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			}
 		}
 
-		private void removeExceptionFromNodeList(ExceptionInfo toRemove, List exceptionsNodeList) {
+		private void removeExceptionFromNodeList(ExceptionInfo toRemove, List<Name> list) {
 			ITypeBinding typeToRemove= toRemove.getTypeBinding();
-			for (Iterator iter= exceptionsNodeList.iterator(); iter.hasNext(); ) {
-				Name currentName= (Name) iter.next();
+			for (Iterator<Name> iter= list.iterator(); iter.hasNext(); ) {
+				Name currentName= iter.next();
 				ITypeBinding currentType= currentName.resolveTypeBinding();
 				/* Maybe remove all subclasses of typeToRemove too.
 				 * Problem:
@@ -2159,7 +2141,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 		private void addExceptionToNodeList(ExceptionInfo exceptionInfo, ListRewrite exceptionListRewrite) {
 			String fullyQualified= exceptionInfo.getFullyQualifiedName();
-			for (Iterator iter= exceptionListRewrite.getOriginalList().iterator(); iter.hasNext(); ) {
+			for (Iterator<? extends ASTNode> iter= exceptionListRewrite.getOriginalList().iterator(); iter.hasNext(); ) {
 				Name exName= (Name) iter.next();
 				//XXX: existing superclasses of the added exception are redundant and could be removed
 				ITypeBinding typeBinding= exName.resolveTypeBinding();
@@ -2191,13 +2173,13 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			//add tags: only iff top of ripple; change and remove: always.
 			//TODO: should have preference for adding tags in (overriding) methods (with template: todo, inheritDoc, ...)
 
-			List tags= javadoc.tags(); // List of TagElement
+			List<TagElement> tags= javadoc.tags();
 			ListRewrite tagsRewrite= getASTRewrite().getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 
 			if (! isReturnTypeSameAsInitial()) {
 				if (PrimitiveType.VOID.toString().equals(fReturnTypeInfo.getNewTypeName())) {
 					for (int i = 0; i < tags.size(); i++) {
-						TagElement tag= (TagElement) tags.get(i);
+						TagElement tag= tags.get(i);
 						if (TagElement.TAG_RETURN.equals(tag.getTagName())) {
 							getASTRewrite().remove(tag, fDescription);
 							registerImportRemoveNode(tag);
@@ -2212,19 +2194,19 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			}
 
 			if (! (areNamesSameAsInitial() && isOrderSameAsInitial())) {
-				ArrayList paramTags= new ArrayList(); // <TagElement>, only not deleted tags with simpleName
+				ArrayList<TagElement> paramTags= new ArrayList<TagElement>(); // <TagElement>, only not deleted tags with simpleName
 				// delete & rename:
-				for (Iterator iter = tags.iterator(); iter.hasNext(); ) {
-					TagElement tag = (TagElement) iter.next();
+				for (Iterator<TagElement> iter = tags.iterator(); iter.hasNext(); ) {
+					TagElement tag = iter.next();
 					String tagName= tag.getTagName();
-					List fragments= tag.fragments();
+					List<? extends ASTNode> fragments= tag.fragments();
 					if (! (TagElement.TAG_PARAM.equals(tagName) && fragments.size() > 0 && fragments.get(0) instanceof SimpleName))
 						continue;
 					SimpleName simpleName= (SimpleName) fragments.get(0);
 					String identifier= simpleName.getIdentifier();
 					boolean removed= false;
 					for (int i= 0; i < fParameterInfos.size(); i++) {
-						ParameterInfo info= (ParameterInfo) fParameterInfos.get(i);
+						ParameterInfo info= fParameterInfos.get(i);
 						if (identifier.equals(info.getOldName())) {
 							if (info.isDeleted()) {
 								getASTRewrite().remove(tag, fDescription);
@@ -2248,8 +2230,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					TagElement previousTag= findTagElementToInsertAfter(tags, TagElement.TAG_PARAM);
 					boolean first= true; // workaround for bug 92111: preserve first tag if possible
 					// reshuffle:
-					for (Iterator infoIter= fParameterInfos.iterator(); infoIter.hasNext();) {
-						ParameterInfo info= (ParameterInfo) infoIter.next();
+					for (Iterator<ParameterInfo> infoIter= fParameterInfos.iterator(); infoIter.hasNext();) {
+						ParameterInfo info= infoIter.next();
 						String oldName= info.getOldName();
 						String newName= info.getNewName();
 						if (info.isAdded()) {
@@ -2260,8 +2242,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 							insertTag(paramNode, previousTag, tagsRewrite);
 							previousTag= paramNode;
 						} else {
-							for (Iterator tagIter= paramTags.iterator(); tagIter.hasNext();) {
-								TagElement tag= (TagElement) tagIter.next();
+							for (Iterator<TagElement> tagIter= paramTags.iterator(); tagIter.hasNext();) {
+								TagElement tag= tagIter.next();
 								SimpleName tagName= (SimpleName) tag.fragments().get(0);
 								if (oldName.equals(tagName.getIdentifier())) {
 									tagIter.remove();
@@ -2279,8 +2261,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 						}
 					}
 					// params with bad names:
-					for (Iterator iter= paramTags.iterator(); iter.hasNext();) {
-						TagElement tag= (TagElement) iter.next();
+					for (Iterator<TagElement> iter= paramTags.iterator(); iter.hasNext();) {
+						TagElement tag= iter.next();
 						TagElement movedTag= (TagElement) getASTRewrite().createMoveTarget(tag);
 						getASTRewrite().remove(tag, fDescription);
 						insertTag(movedTag, previousTag, tagsRewrite);
@@ -2292,9 +2274,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 			if (! areExceptionsSameAsInitial()) {
 				// collect exceptionTags and remove deleted:
-				ArrayList exceptionTags= new ArrayList(); // <TagElement>, only not deleted tags with name
+				ArrayList<TagElement> exceptionTags= new ArrayList<TagElement>(); // <TagElement>, only not deleted tags with name
 				for (int i= 0; i < tags.size(); i++) {
-					TagElement tag= (TagElement) tags.get(i);
+					TagElement tag= tags.get(i);
 					if (! TagElement.TAG_THROWS.equals(tag.getTagName()) && ! TagElement.TAG_EXCEPTION.equals(tag.getTagName()))
 						continue;
 					if (! (tag.fragments().size() > 0 && tag.fragments().get(0) instanceof Name))
@@ -2302,7 +2284,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					boolean tagDeleted= false;
 					Name name= (Name) tag.fragments().get(0);
 					for (int j= 0; j < fExceptionInfos.size(); j++) {
-						ExceptionInfo info= (ExceptionInfo) fExceptionInfos.get(j);
+						ExceptionInfo info= fExceptionInfos.get(j);
 						if (info.isDeleted()) {
 							boolean remove= false;
 							final ITypeBinding nameBinding= name.resolveTypeBinding();
@@ -2327,8 +2309,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				// reshuffle:
 				tags= tagsRewrite.getRewrittenList();
 				TagElement previousTag= findTagElementToInsertAfter(tags, TagElement.TAG_THROWS);
-				for (Iterator infoIter= fExceptionInfos.iterator(); infoIter.hasNext();) {
-					ExceptionInfo info= (ExceptionInfo) infoIter.next();
+				for (Iterator<ExceptionInfo> infoIter= fExceptionInfos.iterator(); infoIter.hasNext();) {
+					ExceptionInfo info= infoIter.next();
 					if (info.isAdded()) {
 						if (!isTopOfRipple)
 							continue;
@@ -2336,8 +2318,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 						insertTag(excptNode, previousTag, tagsRewrite);
 						previousTag= excptNode;
 					} else {
-						for (Iterator tagIter= exceptionTags.iterator(); tagIter.hasNext();) {
-							TagElement tag= (TagElement) tagIter.next();
+						for (Iterator<TagElement> tagIter= exceptionTags.iterator(); tagIter.hasNext();) {
+							TagElement tag= tagIter.next();
 							Name tagName= (Name) tag.fragments().get(0);
 							final ITypeBinding nameBinding= tagName.resolveTypeBinding();
 							if (nameBinding != null) {
@@ -2359,8 +2341,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					}
 				}
 				// exceptions with bad names:
-				for (Iterator iter= exceptionTags.iterator(); iter.hasNext();) {
-					TagElement tag= (TagElement) iter.next();
+				for (Iterator<TagElement> iter= exceptionTags.iterator(); iter.hasNext();) {
+					TagElement tag= iter.next();
 					TagElement movedTag= (TagElement) getASTRewrite().createMoveTarget(tag);
 					getASTRewrite().remove(tag, fDescription);
 					insertTag(movedTag, previousTag, tagsRewrite);
@@ -2411,8 +2393,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		 * @return the <code>TagElement<code> just before a new <code>TagElement</code> with name <code>tagName</code>,
 		 *   or <code>null</code>.
 		 */
-		private TagElement findTagElementToInsertAfter(List tags, String tagName) {
-			List tagOrder= Arrays.asList(new String[] {
+		private TagElement findTagElementToInsertAfter(List<TagElement> tags, String tagName) {
+			List<String> tagOrder= Arrays.asList(new String[] {
 					TagElement.TAG_AUTHOR,
 					TagElement.TAG_VERSION,
 					TagElement.TAG_PARAM,
@@ -2431,7 +2413,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			if (goalOrdinal == -1) // unknown tag -> to end
 				return (tags.size() == 0) ? null : (TagElement) tags.get(tags.size());
 			for (int i= 0; i < tags.size(); i++) {
-				int tagOrdinal= tagOrder.indexOf(((TagElement) tags.get(i)).getTagName());
+				int tagOrdinal= tagOrder.indexOf(tags.get(i).getTagName());
 				if (tagOrdinal >= goalOrdinal)
 					return (i == 0) ? null : (TagElement) tags.get(i-1);
 			}
@@ -2440,8 +2422,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 		//TODO: already reported as compilation error -> don't report there?
 		private void checkIfDeletedParametersUsed() {
-			for (Iterator iter= getDeletedInfos().iterator(); iter.hasNext();) {
-				ParameterInfo info= (ParameterInfo) iter.next();
+			for (Iterator<ParameterInfo> iter= getDeletedInfos().iterator(); iter.hasNext();) {
+				ParameterInfo info= iter.next();
 				SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) fMethDecl.parameters().get(info.getOldIndex());
 				TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(paramDecl, false);
 				analyzer.perform();
@@ -2475,7 +2457,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			}
 		}
 
-		protected ASTNode createNewParamgument(ParameterInfo info, List parameterInfos, List nodes) {
+		@Override
+		protected SingleVariableDeclaration createNewParamgument(ParameterInfo info, List<ParameterInfo> parameterInfos, List<SingleVariableDeclaration> nodes) {
 			return createNewSingleVariableDeclaration(info);
 		}
 
@@ -2487,13 +2470,14 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			return newP;
 		}
 
+		@Override
 		protected SimpleName getMethodNameNode() {
 			return fMethDecl.getName();
 		}
 
 	}
 
-	class DocReferenceUpdate extends OccurrenceUpdate {
+	class DocReferenceUpdate extends OccurrenceUpdate<MethodRefParameter> {
 		/** instanceof MemberRef || MethodRef */
 		private ASTNode fNode;
 
@@ -2502,6 +2486,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			fNode= node;
 		}
 
+		@Override
 		public void updateNode() {
 			if (fNode instanceof MethodRef) {
 				changeParamguments();
@@ -2511,7 +2496,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				changeMethodName();
 		}
 
-		protected ASTNode createNewParamgument(ParameterInfo info, List parameterInfos, List nodes) {
+		@Override
+		protected MethodRefParameter createNewParamgument(ParameterInfo info, List<ParameterInfo> parameterInfos, List<MethodRefParameter> nodes) {
 			return createNewMethodRefParameter(info);
 		}
 
@@ -2519,7 +2505,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			MethodRefParameter newP= getASTRewrite().getAST().newMethodRefParameter();
 
 			// only add name iff first parameter already has a name:
-			List parameters= getParamgumentsRewrite().getOriginalList();
+			List<? extends ASTNode> parameters= getParamgumentsRewrite().getOriginalList();
 			if (parameters.size() > 0)
 				if (((MethodRefParameter) parameters.get(0)).getName() != null)
 					newP.setName(getASTRewrite().getAST().newSimpleName(info.getNewName()));
@@ -2537,6 +2523,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			return createNewTypeNode(newTypeName, newTypeBinding);
 		}
 
+		@Override
 		protected SimpleName getMethodNameNode() {
 			if (fNode instanceof MemberRef)
 				return ((MemberRef) fNode).getName();
@@ -2548,10 +2535,12 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 
 		/** @return {@inheritDoc} (element type: MethodRefParameter) */
+		@Override
 		protected ListRewrite getParamgumentsRewrite() {
 			return getASTRewrite().getListRewrite(fNode, MethodRef.PARAMETERS_PROPERTY);
 		}
 
+		@Override
 		protected void changeParamgumentName(ParameterInfo info) {
 			if (! (fNode instanceof MethodRef))
 				return;
@@ -2562,6 +2551,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				getASTRewrite().set(oldParamName, SimpleName.IDENTIFIER_PROPERTY, info.getNewName(), fDescription);
 		}
 
+		@Override
 		protected void changeParamgumentType(ParameterInfo info) {
 			if (! (fNode instanceof MethodRef))
 				return;
@@ -2587,7 +2577,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 	}
 
-	class StaticImportUpdate extends OccurrenceUpdate {
+	class StaticImportUpdate extends OccurrenceUpdate<ASTNode> {
 
 		private final ImportDeclaration fImportDecl;
 
@@ -2596,6 +2586,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			fImportDecl= importDecl;
 		}
 
+		@Override
 		public void updateNode() throws JavaModelException {
 			ImportRewrite importRewrite= fCuRewrite.getImportRewrite();
 			QualifiedName name= (QualifiedName) fImportDecl.getName();
@@ -2603,25 +2594,29 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			importRewrite.addStaticImport(name.getQualifier().getFullyQualifiedName(), fMethodName, false);
 		}
 
+		@Override
 		protected ListRewrite getParamgumentsRewrite() {
 			return null;
 		}
 
-		protected ASTNode createNewParamgument(ParameterInfo info, List parameterInfos, List nodes) {
+		@Override
+		protected ASTNode createNewParamgument(ParameterInfo info, List<ParameterInfo> parameterInfos, List<ASTNode> nodes) {
 			return null;
 		}
 
+		@Override
 		protected SimpleName getMethodNameNode() {
 			return null;
 		}
 	}
 
-	class NullOccurrenceUpdate extends OccurrenceUpdate {
+	class NullOccurrenceUpdate extends OccurrenceUpdate<ASTNode> {
 		private ASTNode fNode;
 		protected NullOccurrenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
 			super(cuRewrite, null, result);
 			fNode= node;
 		}
+		@Override
 		public void updateNode() throws JavaModelException {
 			int start= fNode.getStartPosition();
 			int length= fNode.getLength();
@@ -2630,12 +2625,15 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			JavaPlugin.log(new Exception(msg + ":\n" + fCuRewrite.getCu().getSource().substring(start, start + length))); //$NON-NLS-1$
 			fResult.addError(msg, JavaStatusContext.create(fCuRewrite.getCu(), fNode));
 		}
+		@Override
 		protected ListRewrite getParamgumentsRewrite() {
 			return null;
 		}
-		protected ASTNode createNewParamgument(ParameterInfo info, List parameterInfos, List nodes) {
+		@Override
+		protected ASTNode createNewParamgument(ParameterInfo info, List<ParameterInfo> parameterInfos, List<ASTNode> nodes) {
 			return null;
 		}
+		@Override
 		protected SimpleName getMethodNameNode() {
 			return null;
 		}
@@ -2684,7 +2682,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		int count= 1;
 		String attribute= ATTRIBUTE_PARAMETER + count;
 		String value= null;
-		fParameterInfos= new ArrayList(3);
+		fParameterInfos= new ArrayList<ParameterInfo>(3);
 		while ((value= arguments.getAttribute(attribute)) != null) {
 			StringTokenizer tokenizer= new StringTokenizer(value, " "); //$NON-NLS-1$
 			if (tokenizer.countTokens() < 6)
@@ -2718,7 +2716,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			attribute= ATTRIBUTE_PARAMETER + count;
 		}
 		count= 1;
-		fExceptionInfos= new ArrayList(2);
+		fExceptionInfos= new ArrayList<ExceptionInfo>(2);
 		attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
 		while ((value= arguments.getAttribute(attribute)) != null) {
 			ExceptionInfo info= null;
@@ -2766,12 +2764,12 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	 * @param rewrite an AST rewrite
 	 * @return the node to insert at the target location
 	 */
-	protected ASTNode moveNode(ASTNode oldNode, ASTRewrite rewrite) {
-		ASTNode movedNode;
+	protected <T extends ASTNode> T moveNode(T oldNode, ASTRewrite rewrite) {
+		T movedNode;
 		if (ASTNodes.isExistingNode(oldNode))
-			movedNode= rewrite.createMoveTarget(oldNode); //node must be one of ast
+			movedNode= (T) rewrite.createMoveTarget(oldNode); //node must be one of ast
 		else
-			movedNode= ASTNode.copySubtree(rewrite.getAST(), oldNode);
+			movedNode= (T) ASTNode.copySubtree(rewrite.getAST(), oldNode);
 		return movedNode;
 	}
 
@@ -2783,18 +2781,22 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		fDefaultValueAdvisor= defaultValueAdvisor;
 	}
 
+	@Override
 	public Object[] getElements() {
 		return new Object[] { fMethod };
 	}
 
+	@Override
 	public String getIdentifier() {
-		return "org.eclipse.jdt.ui.changeMethodSignatureRefactoring"; //$NON-NLS-1$;
+		return IRefactoringProcessorIds.CHANGE_METHOD_SIGNATURE_PROCESSOR;
 	}
 
+	@Override
 	public boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isChangeSignatureAvailable(fMethod);
 	}
 
+	@Override
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants sharedParticipants) throws CoreException {
 		String[] affectedNatures= JavaProcessors.computeAffectedNatures(fMethod);
 		return JavaParticipantManager.loadChangeMethodSignatureParticipants(status, this, fMethod, getParticipantArguments(), null, affectedNatures, sharedParticipants);

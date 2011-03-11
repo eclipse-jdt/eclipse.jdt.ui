@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,7 @@ public class ImportsCleanUp extends AbstractCleanUp {
 	private CodeGenerationSettings fCodeGeneratorSettings;
 	private RefactoringStatus fStatus;
 
-	public ImportsCleanUp(Map options) {
+	public ImportsCleanUp(Map<String, String> options) {
 		super(options);
     }
 
@@ -47,6 +47,7 @@ public class ImportsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public CleanUpRequirements getRequirements() {
 		boolean isOrganizeImports= isEnabled(CleanUpConstants.ORGANIZE_IMPORTS);
 		return new CleanUpRequirements(isOrganizeImports, isOrganizeImports, false, null);
@@ -55,7 +56,8 @@ public class ImportsCleanUp extends AbstractCleanUp {
 	/**
      * {@inheritDoc}
      */
-    public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
+    @Override
+	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
     	CompilationUnit compilationUnit= context.getAST();
     	if (compilationUnit == null)
     		return null;
@@ -67,7 +69,8 @@ public class ImportsCleanUp extends AbstractCleanUp {
     /**
      * {@inheritDoc}
      */
-    public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
+    @Override
+	public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 
 		if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS)) {
     		fCodeGeneratorSettings= JavaPreferencesSettings.getCodeGenerationSettings(project);
@@ -80,7 +83,8 @@ public class ImportsCleanUp extends AbstractCleanUp {
     /**
      * {@inheritDoc}
      */
-    public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
+    @Override
+	public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
     	fCodeGeneratorSettings= null;
     	try {
 	    	if (fStatus == null || fStatus.isOK()) {
@@ -96,7 +100,8 @@ public class ImportsCleanUp extends AbstractCleanUp {
 	/**
      * {@inheritDoc}
      */
-    public String[] getStepDescriptions() {
+    @Override
+	public String[] getStepDescriptions() {
     	if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS))
     		return new String[] {MultiFixMessages.ImportsCleanUp_OrganizeImports_Description};
 
@@ -106,7 +111,8 @@ public class ImportsCleanUp extends AbstractCleanUp {
 	/**
      * {@inheritDoc}
      */
-    public String getPreview() {
+    @Override
+	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 
 		if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS)) {

@@ -30,7 +30,8 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
     	super();
     }
 
-	protected AbstractCleanUp[] createPreviewCleanUps(Map values) {
+	@Override
+	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] {
         		new UnusedCodeCleanUp(values),
         		new UnnecessaryCodeCleanUp(values),
@@ -38,7 +39,8 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
         };
     }
 
-    protected void doCreatePreferences(Composite composite, int numColumns) {
+    @Override
+	protected void doCreatePreferences(Composite composite, int numColumns) {
 
     	Group unusedCodeGroup= createGroup(5, composite, CleanUpMessages.UnnecessaryCodeTabPage_GroupName_UnusedCode);
 

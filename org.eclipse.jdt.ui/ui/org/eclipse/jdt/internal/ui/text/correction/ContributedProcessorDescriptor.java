@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,7 @@ public final class ContributedProcessorDescriptor {
 	private Object fProcessorInstance;
 	private Boolean fStatus;
 	private String fRequiredSourceLevel;
-	private final Set fHandledMarkerTypes;
+	private final Set<String> fHandledMarkerTypes;
 
 	private static final String ID= "id"; //$NON-NLS-1$
 	private static final String CLASS= "class"; //$NON-NLS-1$
@@ -64,8 +64,8 @@ public final class ContributedProcessorDescriptor {
 		fHandledMarkerTypes= testMarkerTypes ? getHandledMarkerTypes(element) : null;
 	}
 
-	private Set getHandledMarkerTypes(IConfigurationElement element) {
-		HashSet map= new HashSet(7);
+	private Set<String> getHandledMarkerTypes(IConfigurationElement element) {
+		HashSet<String> map= new HashSet<String>(7);
 		IConfigurationElement[] children= element.getChildren(HANDLED_MARKER_TYPES);
 		for (int i= 0; i < children.length; i++) {
 			IConfigurationElement[] types= children[i].getChildren(MARKER_TYPE);
@@ -126,7 +126,7 @@ public final class ContributedProcessorDescriptor {
 		return false;
 	}
 
-	public Object getProcessor(ICompilationUnit cunit, Class expectedType) {
+	public Object getProcessor(ICompilationUnit cunit, Class<?> expectedType) {
 		if (matches(cunit)) {
 			if (fProcessorInstance == null) {
 				try {

@@ -144,12 +144,12 @@ public class RefactoringASTParser {
 	 * @param element an element (not the Java model)
 	 * @return compiler options
 	 */
-	public static Map getCompilerOptions(IJavaElement element) {
+	public static Map<String, String> getCompilerOptions(IJavaElement element) {
 		IJavaProject project= element.getJavaProject();
-		Map options= project.getOptions(true);
-		for (Iterator iter= options.keySet().iterator(); iter.hasNext();) {
-			String key= (String)iter.next();
-			String value= (String)options.get(key);
+		Map<String, String> options= project.getOptions(true);
+		for (Iterator<String> iter= options.keySet().iterator(); iter.hasNext();) {
+			String key= iter.next();
+			String value= options.get(key);
 			if (JavaCore.ERROR.equals(value) || JavaCore.WARNING.equals(value)) {
 				// System.out.println("Ignoring - " + key);
 				options.put(key, JavaCore.IGNORE);

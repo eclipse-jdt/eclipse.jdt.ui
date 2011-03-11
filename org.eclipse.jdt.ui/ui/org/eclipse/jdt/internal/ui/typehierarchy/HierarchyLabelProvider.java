@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,12 +98,13 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getImage
 	 */
+	@Override
 	public Image getImage(Object element) {
 		Image result= null;
 		if (element instanceof IType) {
 			ImageDescriptor desc= getTypeImageDescriptor((IType) element);
 			if (desc != null) {
-				List inputElements= Arrays.asList(fHierarchy.getInputElements());
+				List<IJavaElement> inputElements= Arrays.asList(fHierarchy.getInputElements());
 				if (inputElements.contains(element)) {
 					desc= new FocusDescriptor(desc);
 				}
@@ -165,6 +166,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 	 */
+	@Override
 	public Color getForeground(Object element) {
 		if (element instanceof IMethod) {
 			if (fSpecialColor == null) {

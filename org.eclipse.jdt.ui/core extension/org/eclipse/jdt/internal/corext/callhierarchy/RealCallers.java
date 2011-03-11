@@ -30,6 +30,7 @@ package org.eclipse.jdt.internal.corext.callhierarchy;
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#canHaveChildren()
 		 */
+		@Override
 		public boolean canHaveChildren() {
 			return true;
 	}
@@ -37,6 +38,7 @@ package org.eclipse.jdt.internal.corext.callhierarchy;
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#isRecursive()
 		 */
+		@Override
 		public boolean isRecursive() {
 			return false;
 		}

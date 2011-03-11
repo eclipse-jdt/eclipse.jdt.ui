@@ -171,18 +171,22 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		fRenameSetter= false;
 	}
 
+	@Override
 	public String getIdentifier() {
 		return IRefactoringProcessorIds.RENAME_FIELD_PROCESSOR;
 	}
 
+	@Override
 	public boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isRenameFieldAvailable(fField);
 	}
 
+	@Override
 	public String getProcessorName() {
 		return RefactoringCoreMessages.RenameFieldRefactoring_name;
 	}
 
+	@Override
 	protected String[] getAffectedProjectNatures() throws CoreException {
 		return JavaProcessors.computeAffectedNatures(fField);
 	}
@@ -191,10 +195,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return fField;
 	}
 
+	@Override
 	public Object[] getElements() {
 		return new Object[] { fField};
 	}
 
+	@Override
 	protected RenameModifications computeRenameModifications() throws CoreException {
 		RenameModifications result= new RenameModifications();
 		result.rename(fField, new RenameArguments(getNewElementName(), getUpdateReferences()));
@@ -213,6 +219,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return result;
 	}
 
+	@Override
 	protected IFile[] getChangedFiles() {
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
@@ -403,10 +410,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return count;
 	}
 
+	@Override
 	public int getSaveMode() {
 		return RefactoringSaveHelper.SAVE_REFACTORING;
 	}
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		IField primary= (IField) fField.getPrimaryElement();
 		if (primary == null || !primary.exists()) {
@@ -418,6 +427,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return Checks.checkIfCuBroken(fField);
 	}
 
+	@Override
 	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try{
 			pm.beginTask("", 18); //$NON-NLS-1$
@@ -588,6 +598,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return result;
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.RenameFieldRefactoring_checking, 1);
@@ -818,7 +829,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			RefactoringStatus result= new RefactoringStatus();
 			SearchResultGroup[] oldReferences= fReferences;
 
-			List compilationUnitsToModify= new ArrayList();
+			List<ICompilationUnit> compilationUnitsToModify= new ArrayList<ICompilationUnit>();
 			if (fIsComposite) {
 				// limited change set, no accessors.
 				for (int i= 0; i < oldReferences.length; i++)
@@ -829,7 +840,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				compilationUnitsToModify.addAll(Arrays.asList(fChangeManager.getAllCompilationUnits()));
 			}
 
-			newWorkingCopies= RenameAnalyzeUtil.createNewWorkingCopies((ICompilationUnit[]) compilationUnitsToModify.toArray(new ICompilationUnit[compilationUnitsToModify.size()]),
+			newWorkingCopies= RenameAnalyzeUtil.createNewWorkingCopies(compilationUnitsToModify.toArray(new ICompilationUnit[compilationUnitsToModify.size()]),
 					fChangeManager, newWCOwner, new SubProgressMonitor(pm, 1));
 
 			SearchResultGroup[] newReferences= getNewReferences(new SubProgressMonitor(pm, 1), result, newWCOwner, newWorkingCopies);
@@ -861,6 +872,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			// and the javadoc) which are OK and must not be reported.
 			final IField oldField= getFieldInWorkingCopy(declaringCuWorkingCopy, getCurrentElementName());
 			requestor= new CollectingSearchRequestor() {
+				@Override
 				public void acceptSearchMatch(SearchMatch match) throws CoreException {
 					if (!oldField.equals(match.getElement()))
 						super.acceptSearchMatch(match);

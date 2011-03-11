@@ -35,16 +35,19 @@ public final class CopyRefactoringContribution extends JavaUIRefactoringContribu
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final Refactoring createRefactoring(final JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		JavaCopyProcessor processor= new JavaCopyProcessor(arguments, status);
 		return new CopyRefactoring(processor);
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return RefactoringSignatureDescriptorFactory.createCopyDescriptor();
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createCopyDescriptor(project, description, comment, arguments, flags);
 	}

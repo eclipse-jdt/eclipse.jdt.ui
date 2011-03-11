@@ -64,10 +64,12 @@ public class WorkingSetFindAction extends FindAction {
 		init(action, workingSetName);
 	}
 
-	Class[] getValidTypes() {
+	@Override
+	Class<?>[] getValidTypes() {
 		return null; // ignore, we override canOperateOn
 	}
 
+	@Override
 	void init() {
 		// ignore: do our own init in 'init(FindAction, String)'
 	}
@@ -81,18 +83,22 @@ public class WorkingSetFindAction extends FindAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.WORKING_SET_FIND_ACTION);
 	}
 
+	@Override
 	public void run(IJavaElement element) {
 		fAction.run(element);
 	}
 
+	@Override
 	boolean canOperateOn(IJavaElement element) {
 		return fAction.canOperateOn(element);
 	}
 
+	@Override
 	int getLimitTo() {
 		return -1;
 	}
 
+	@Override
 	String getOperationUnavailableMessage() {
 		return fAction.getOperationUnavailableMessage();
 	}

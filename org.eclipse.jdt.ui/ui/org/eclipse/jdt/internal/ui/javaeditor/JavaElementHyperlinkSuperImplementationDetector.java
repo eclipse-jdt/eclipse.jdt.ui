@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,8 +34,9 @@ public class JavaElementHyperlinkSuperImplementationDetector extends JavaElement
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkDetector#createHyperlink(org.eclipse.jface.text.IRegion, org.eclipse.jdt.ui.actions.SelectionDispatchAction, org.eclipse.jdt.core.IJavaElement, boolean, org.eclipse.ui.texteditor.ITextEditor)
 	 * @since 3.7
 	 */
+	@Override
 	protected IHyperlink createHyperlink(IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
-		if (element.getElementType() == IJavaElement.METHOD && SelectionConverter.canOperateOn(editor) && isOverriddenMethod((IMethod)element)) {
+		if (element != null && element.getElementType() == IJavaElement.METHOD && SelectionConverter.canOperateOn(editor) && isOverriddenMethod((IMethod)element)) {
 			return new JavaElementSuperImplementationHyperlink(wordRegion, openAction, (IMethod)element, qualify);
 		}
 		return null;

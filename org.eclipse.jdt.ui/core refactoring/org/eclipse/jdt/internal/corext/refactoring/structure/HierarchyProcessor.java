@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -142,6 +142,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			fMapping= mapping;
 		}
 
+		@Override
 		public final boolean visit(final SimpleName node) {
 			final ITypeBinding binding= node.resolveTypeBinding();
 			if (binding != null && binding.isTypeVariable()) {
@@ -168,8 +169,8 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		}
 	}
 
-	protected static boolean areAllFragmentsDeleted(final FieldDeclaration declaration, final List declarationNodes) {
-		for (final Iterator iterator= declaration.fragments().iterator(); iterator.hasNext();) {
+	protected static boolean areAllFragmentsDeleted(final FieldDeclaration declaration, final List<ASTNode> declarationNodes) {
+		for (final Iterator<VariableDeclarationFragment> iterator= declaration.fragments().iterator(); iterator.hasNext();) {
 			if (!declarationNodes.contains(iterator.next()))
 				return false;
 		}
@@ -183,9 +184,9 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 				try {
 					BodyDeclaration decl= ASTNodeSearchUtil.getBodyDeclarationNode(members[index], sourceRewriter.getRoot());
 					if (decl != null) {
-						for (final Iterator iterator= decl.modifiers().iterator(); iterator.hasNext();) {
+						for (final Iterator<IExtendedModifier> iterator= decl.modifiers().iterator(); iterator.hasNext();) {
 							boolean reported= false;
-							final IExtendedModifier modifier= (IExtendedModifier) iterator.next();
+							final IExtendedModifier modifier= iterator.next();
 							if (!reported && modifier.isAnnotation()) {
 								status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_incompatible_langauge_constructs, new String[] { JavaElementLabels.getTextLabel(members[index], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(destination, JavaElementLabels.ALL_DEFAULT)}), JavaStatusContext.create(members[index])));
 								reported= true;
@@ -213,9 +214,9 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		final AST ast= newField.getAST();
 		for (int index= 0, n= oldField.modifiers().size(); index < n; index++) {
 			final IExtendedModifier modifier= (IExtendedModifier) oldField.modifiers().get(index);
-			final List modifiers= newField.modifiers();
+			final List<IExtendedModifier> modifiers= newField.modifiers();
 			if (modifier.isAnnotation() && !modifiers.contains(modifier))
-				modifiers.add(index, ASTNode.copySubtree(ast, (Annotation) modifier));
+				modifiers.add(index, (IExtendedModifier) ASTNode.copySubtree(ast, (Annotation) modifier));
 		}
 	}
 
@@ -223,9 +224,9 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		final AST ast= newMethod.getAST();
 		for (int index= 0, n= oldMethod.modifiers().size(); index < n; index++) {
 			final IExtendedModifier modifier= (IExtendedModifier) oldMethod.modifiers().get(index);
-			final List modifiers= newMethod.modifiers();
+			final List<IExtendedModifier> modifiers= newMethod.modifiers();
 			if (modifier.isAnnotation() && !modifiers.contains(modifier))
-				modifiers.add(index, ASTNode.copySubtree(ast, (Annotation) modifier));
+				modifiers.add(index, (IExtendedModifier) ASTNode.copySubtree(ast, (Annotation) modifier));
 		}
 	}
 
@@ -335,16 +336,19 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			final ITrackedNodePosition position= rewriter.track(bodyDeclaration);
 			bodyDeclaration.accept(new TypeVariableMapper(rewriter, mapping) {
 
+				@Override
 				public final boolean visit(final AnnotationTypeDeclaration node) {
 					ModifierRewrite.create(fRewrite, bodyDeclaration).setVisibility(Modifier.PROTECTED, null);
 					return true;
 				}
 
+				@Override
 				public final boolean visit(final EnumDeclaration node) {
 					ModifierRewrite.create(fRewrite, bodyDeclaration).setVisibility(Modifier.PROTECTED, null);
 					return true;
 				}
 
+				@Override
 				public final boolean visit(final TypeDeclaration node) {
 					ModifierRewrite.create(fRewrite, bodyDeclaration).setVisibility(Modifier.PROTECTED, null);
 					return true;
@@ -423,10 +427,10 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		return result;
 	}
 
-	protected static void deleteDeclarationNodes(final CompilationUnitRewrite sourceRewriter, final boolean sameCu, final CompilationUnitRewrite unitRewriter, final List members, final GroupCategorySet set) throws JavaModelException {
-		final List declarationNodes= getDeclarationNodes(unitRewriter.getRoot(), members);
-		for (final Iterator iterator= declarationNodes.iterator(); iterator.hasNext();) {
-			final ASTNode node= (ASTNode) iterator.next();
+	protected static void deleteDeclarationNodes(final CompilationUnitRewrite sourceRewriter, final boolean sameCu, final CompilationUnitRewrite unitRewriter, final List<IMember> members, final GroupCategorySet set) throws JavaModelException {
+		final List<ASTNode> declarationNodes= getDeclarationNodes(unitRewriter.getRoot(), members);
+		for (final Iterator<ASTNode> iterator= declarationNodes.iterator(); iterator.hasNext();) {
+			final ASTNode node= iterator.next();
 			final ASTRewrite rewriter= unitRewriter.getASTRewrite();
 			final ImportRemover remover= unitRewriter.getImportRemover();
 			if (node instanceof VariableDeclarationFragment) {
@@ -450,10 +454,10 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		}
 	}
 
-	protected static List getDeclarationNodes(final CompilationUnit cuNode, final List members) throws JavaModelException {
-		final List result= new ArrayList(members.size());
-		for (final Iterator iterator= members.iterator(); iterator.hasNext();) {
-			final IMember member= (IMember) iterator.next();
+	protected static List<ASTNode> getDeclarationNodes(final CompilationUnit cuNode, final List<IMember> members) throws JavaModelException {
+		final List<ASTNode> result= new ArrayList<ASTNode>(members.size());
+		for (final Iterator<IMember> iterator= members.iterator(); iterator.hasNext();) {
+			final IMember member= iterator.next();
 			ASTNode node= null;
 			if (member instanceof IField) {
 				if (Flags.isEnum(member.getFlags()))
@@ -488,7 +492,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	protected IType fCachedDeclaringType;
 
 	/** The cached member references */
-	protected final Map fCachedMembersReferences= new HashMap(2);
+	protected final Map<IMember, Object[]> fCachedMembersReferences= new HashMap<IMember, Object[]>(2);
 
 	/** The cached type references */
 	protected IType[] fCachedReferencedTypes;
@@ -629,6 +633,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		newMethod.setReturnType2(newReturnType);
 	}
 
+	@Override
 	protected SuperTypeConstraintsSolver createContraintSolver(final SuperTypeConstraintsModel model) {
 		return new SuperTypeConstraintsSolver(model);
 	}
@@ -649,8 +654,8 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	protected IType[] getTypesReferencedInMovedMembers(final IProgressMonitor monitor) throws JavaModelException {
 		if (fCachedReferencedTypes == null) {
 			final IType[] types= ReferenceFinderUtil.getTypesReferencedIn(fMembersToMove, fOwner, monitor);
-			final List result= new ArrayList(types.length);
-			final List members= Arrays.asList(fMembersToMove);
+			final List<IType> result= new ArrayList<IType>(types.length);
+			final List<IMember> members= Arrays.asList(fMembersToMove);
 			for (int index= 0; index < types.length; index++) {
 				if (!members.contains(types[index]) && !types[index].equals(getDeclaringType()))
 					result.add(types[index]);
@@ -697,6 +702,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		return false;
 	}
 
+	@Override
 	public RefactoringParticipant[] loadParticipants(final RefactoringStatus status, final SharableParticipants sharedParticipants) throws CoreException {
 		return new RefactoringParticipant[0];
 	}

@@ -69,6 +69,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		setDefaultPageTitle(RefactoringMessages.ChangeSignatureRefactoring_modify_Parameters);
 	}
 
+	@Override
 	protected void addUserInputPages(){
 		addPage(new ChangeSignatureInputPage(fProcessor));
 	}
@@ -116,12 +117,14 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 					fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(processor));
 					processor.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
 					fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+						@Override
 						public void widgetSelected(SelectionEvent e) {
 							processor.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
 						}
 					});
 					fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
 					fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+						@Override
 						public void widgetSelected(SelectionEvent e) {
 							fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
 						}
@@ -175,6 +178,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 					combo.add(getAccessModifierString(availableVisibilities[i]));
 				}
 				combo.addSelectionListener(new SelectionAdapter() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						int newVisibility= availableVisibilities[combo.getSelectionIndex()];
 						getChangeMethodSignatureProcessor().setVisibility(newVisibility);
@@ -282,6 +286,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			itemEx.setControl(createExceptionsTableControl(folder));
 
 			folder.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					((TabItem) e.item).getControl().setFocus();
 				}
@@ -323,6 +328,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			return border;
 		}
 
+		@Override
 		public void dispose() {
 			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
 			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);

@@ -26,6 +26,7 @@ public class ImportDeclarationFilter extends ViewerFilter {
 	/*
 	 * @see ViewerFilter
 	 */
+	@Override
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		return !((element instanceof IImportContainer) || (element instanceof IImportDeclaration));
 	}

@@ -91,6 +91,7 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 		RefactoringExecutionStarter.startCleanupRefactoring(units, cleanUps, false, getShell(), false, getActionName());
 	}
 
+	@Override
 	public void run(ITextSelection selection) {
 		ICompilationUnit cu= getCompilationUnit(fEditor);
 		if (cu != null) {
@@ -98,6 +99,7 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 		}
 	}
 
+	@Override
 	public void run(IStructuredSelection selection) {
 		ICompilationUnit[] cus= getCompilationUnits(selection);
 		if (cus.length == 0) {
@@ -109,10 +111,12 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 		}
 	}
 
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(getCompilationUnit(fEditor) != null);
 	}
 
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(isEnabled(selection));
 	}
@@ -215,16 +219,16 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 	}
 
 	public ICompilationUnit[] getCompilationUnits(IStructuredSelection selection) {
-		HashSet result= new HashSet();
+		HashSet<IJavaElement> result= new HashSet<IJavaElement>();
 		Object[] selected= selection.toArray();
 		for (int i= 0; i < selected.length; i++) {
 			Object element= selected[i];
 			collectCompilationUnits(element, result);
 		}
-		return (ICompilationUnit[])result.toArray(new ICompilationUnit[result.size()]);
+		return result.toArray(new ICompilationUnit[result.size()]);
 	}
 
-	private void collectCompilationUnits(Object element, Collection result) {
+	private void collectCompilationUnits(Object element, Collection<IJavaElement> result) {
 		try {
 			if (element instanceof IJavaElement) {
 				IJavaElement elem= (IJavaElement)element;
@@ -276,11 +280,11 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 		}
 	}
 
-	private void collectCompilationUnits(IPackageFragment pack, Collection result) throws JavaModelException {
+	private void collectCompilationUnits(IPackageFragment pack, Collection<IJavaElement> result) throws JavaModelException {
 		result.addAll(Arrays.asList(pack.getCompilationUnits()));
 	}
 
-	private void collectCompilationUnits(IPackageFragmentRoot root, Collection result) throws JavaModelException {
+	private void collectCompilationUnits(IPackageFragmentRoot root, Collection<IJavaElement> result) throws JavaModelException {
 		if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
 			IJavaElement[] children= root.getChildren();
 			for (int i= 0; i < children.length; i++) {

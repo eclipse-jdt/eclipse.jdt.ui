@@ -45,6 +45,7 @@ public class FocusOnTypeAction extends Action {
 	/*
 	 * @see Action#run
 	 */
+	@Override
 	public void run() {
 		Shell parent= fViewPart.getSite().getShell();
 		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(parent, false,

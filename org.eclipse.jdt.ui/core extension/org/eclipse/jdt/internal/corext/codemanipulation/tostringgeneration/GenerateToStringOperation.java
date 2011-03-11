@@ -86,14 +86,14 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 
 				MethodDeclaration toStringMethod= fGenerator.generateToStringMethod();
 
-				final List list= (List)declaration.getStructuralProperty(declaration.getBodyDeclarationsProperty());
+				final List<BodyDeclaration> list= (List<BodyDeclaration>) declaration.getStructuralProperty(declaration.getBodyDeclarationsProperty());
 				BodyDeclaration replace= findMethodToReplace(list, toStringMethod);
 				if (replace == null || ((Boolean)toStringMethod.getProperty(AbstractToStringGenerator.OVERWRITE_METHOD_PROPERTY)).booleanValue())
 					insertMethod(toStringMethod, rewriter, replace);
 
-				List helperMethods= fGenerator.generateHelperMethods();
-				for (Iterator iterator= helperMethods.iterator(); iterator.hasNext();) {
-					MethodDeclaration method= (MethodDeclaration)iterator.next();
+				List<MethodDeclaration> helperMethods= fGenerator.generateHelperMethods();
+				for (Iterator<MethodDeclaration> iterator= helperMethods.iterator(); iterator.hasNext();) {
+					MethodDeclaration method= iterator.next();
 					replace= findMethodToReplace(list, method);
 					if (replace == null || ((Boolean)method.getProperty(AbstractToStringGenerator.OVERWRITE_METHOD_PROPERTY)).booleanValue()) {
 						insertMethod(method, rewriter, replace);
@@ -137,17 +137,17 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 	 * @return declaration of method from the list that has the same name and parameter types, or
 	 *         null if not found
 	 */
-	protected BodyDeclaration findMethodToReplace(final List list, MethodDeclaration method) {
-		for (final Iterator iterator= list.iterator(); iterator.hasNext();) {
-			final BodyDeclaration bodyDecl= (BodyDeclaration)iterator.next();
+	protected BodyDeclaration findMethodToReplace(final List<BodyDeclaration> list, MethodDeclaration method) {
+		for (final Iterator<BodyDeclaration> iterator= list.iterator(); iterator.hasNext();) {
+			final BodyDeclaration bodyDecl= iterator.next();
 			if (bodyDecl instanceof MethodDeclaration) {
 				final MethodDeclaration method2= (MethodDeclaration)bodyDecl;
 				if (method2.getName().getIdentifier().equals(method.getName().getIdentifier()) && method2.parameters().size() == method.parameters().size()) {
-					Iterator iterator1= method.parameters().iterator();
-					Iterator iterator2= method2.parameters().iterator();
+					Iterator<SingleVariableDeclaration> iterator1= method.parameters().iterator();
+					Iterator<SingleVariableDeclaration> iterator2= method2.parameters().iterator();
 					boolean ok= true;
 					while (iterator1.hasNext()) {
-						if (!((SingleVariableDeclaration)iterator1.next()).getType().subtreeMatch(new ASTMatcher(), ((SingleVariableDeclaration)iterator2.next()).getType())) {
+						if (!iterator1.next().getType().subtreeMatch(new ASTMatcher(), iterator2.next().getType())) {
 							ok= false;
 							break;
 						}

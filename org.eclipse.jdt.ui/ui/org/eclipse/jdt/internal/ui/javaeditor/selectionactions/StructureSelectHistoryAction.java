@@ -43,6 +43,7 @@ public class StructureSelectHistoryAction extends Action implements IUpdate {
 		setEnabled(!fHistory.isEmpty());
 	}
 
+	@Override
 	public void run() {
 		ISourceRange old= fHistory.getLast();
 		if (old != null) {

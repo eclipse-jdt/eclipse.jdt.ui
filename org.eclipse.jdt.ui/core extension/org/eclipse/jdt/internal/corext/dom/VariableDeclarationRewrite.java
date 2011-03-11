@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SwitchStatement;
@@ -50,7 +51,7 @@ public class VariableDeclarationRewrite {
 	}
 
 	public static void rewriteModifiers(final FieldDeclaration declarationNode, final VariableDeclarationFragment[] toChange, final int includedModifiers, final int excludedModifiers, final ASTRewrite rewrite, final TextEditGroup group) {
-		final List fragmentsToChange= Arrays.asList(toChange);
+		final List<VariableDeclarationFragment> fragmentsToChange= Arrays.asList(toChange);
 		AST ast= declarationNode.getAST();
 /*
  * Problem: Same declarationNode can be the subject of multiple calls to this method.
@@ -65,8 +66,8 @@ public class VariableDeclarationRewrite {
  * - When a later fragment needs different modifiers, we create a new FieldDeclaration and move all successive fragments into that declaration
  * - When a fragment has been moved to a new declaration, make sure we don't create a new move target again, but instead use the already created one 
  */
-		List fragments= declarationNode.fragments();
-		Iterator iter= fragments.iterator();
+		List<VariableDeclarationFragment> fragments= declarationNode.fragments();
+		Iterator<VariableDeclarationFragment> iter= fragments.iterator();
 
 		ListRewrite blockRewrite;
 		if (declarationNode.getParent() instanceof AbstractTypeDeclaration) {
@@ -75,7 +76,7 @@ public class VariableDeclarationRewrite {
 			blockRewrite= rewrite.getListRewrite(declarationNode.getParent(), AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 		}
 
-		VariableDeclarationFragment lastFragment= (VariableDeclarationFragment)iter.next();
+		VariableDeclarationFragment lastFragment= iter.next();
 		ASTNode lastStatement= declarationNode;
 
 		if (fragmentsToChange.contains(lastFragment)) {
@@ -85,14 +86,14 @@ public class VariableDeclarationRewrite {
 
 		ListRewrite fragmentsRewrite= null;
 		while (iter.hasNext()) {
-			VariableDeclarationFragment currentFragment= (VariableDeclarationFragment)iter.next();
+			VariableDeclarationFragment currentFragment= iter.next();
 			
-			Map/*<VariableDeclarationFragment, MovedFragment>*/ lookup= (Map) rewrite.getProperty(MovedFragment.class.getName());
+			Map<VariableDeclarationFragment, MovedFragment> lookup= (Map<VariableDeclarationFragment, MovedFragment>) rewrite.getProperty(MovedFragment.class.getName());
 			if (lookup == null) {
-				lookup= new HashMap();
+				lookup= new HashMap<VariableDeclarationFragment, MovedFragment>();
 				rewrite.setProperty(MovedFragment.class.getName(), lookup);
 			}
-			MovedFragment currentMovedFragment= (MovedFragment)lookup.get(currentFragment);
+			MovedFragment currentMovedFragment= lookup.get(currentFragment);
 			
 			boolean changeLast= fragmentsToChange.contains(lastFragment);
 			boolean changeCurrent= fragmentsToChange.contains(currentFragment);
@@ -105,7 +106,7 @@ public class VariableDeclarationRewrite {
 						// Need to put in the right modifiers (removing any existing ones).
 						modifierRewrite= ModifierRewrite.create(rewrite, currentMovedFragment.fDeclaration);
 						ListRewrite listRewrite= rewrite.getListRewrite(currentMovedFragment.fDeclaration, FieldDeclaration.MODIFIERS2_PROPERTY);
-						List extendedList= listRewrite.getRewrittenList();
+						List<IExtendedModifier> extendedList= listRewrite.getRewrittenList();
 						for (int i= 0; i < extendedList.size(); i++) {
 							ASTNode curr= (ASTNode)extendedList.get(i);
 							if (curr instanceof Modifier)
@@ -171,11 +172,11 @@ public class VariableDeclarationRewrite {
 	}
 
 	public static void rewriteModifiers(final VariableDeclarationStatement declarationNode, final VariableDeclarationFragment[] toChange, final int includedModifiers, final int excludedModifiers, ASTRewrite rewrite, final TextEditGroup group) {
-		final List fragmentsToChange= Arrays.asList(toChange);
+		final List<VariableDeclarationFragment> fragmentsToChange= Arrays.asList(toChange);
 		AST ast= declarationNode.getAST();
 
-		List fragments= declarationNode.fragments();
-		Iterator iter= fragments.iterator();
+		List<VariableDeclarationFragment> fragments= declarationNode.fragments();
+		Iterator<VariableDeclarationFragment> iter= fragments.iterator();
 
 		ListRewrite blockRewrite= null;
 		ASTNode parentStatement= declarationNode.getParent();
@@ -188,7 +189,7 @@ public class VariableDeclarationRewrite {
 			Assert.isTrue(false);
 		}
 
-		VariableDeclarationFragment lastFragment= (VariableDeclarationFragment)iter.next();
+		VariableDeclarationFragment lastFragment= iter.next();
 		ASTNode lastStatement= declarationNode;
 
 		boolean modifiersModified= false;
@@ -200,7 +201,7 @@ public class VariableDeclarationRewrite {
 
 		ListRewrite fragmentsRewrite= null;
 		while (iter.hasNext()) {
-			VariableDeclarationFragment currentFragment= (VariableDeclarationFragment)iter.next();
+			VariableDeclarationFragment currentFragment= iter.next();
 
 			if (fragmentsToChange.contains(lastFragment) != fragmentsToChange.contains(currentFragment)) {
 

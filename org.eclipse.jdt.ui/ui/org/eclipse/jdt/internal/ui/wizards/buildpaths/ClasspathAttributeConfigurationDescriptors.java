@@ -70,13 +70,13 @@ public class ClasspathAttributeConfigurationDescriptors {
 
 	private static final String ATT_EXTENSION = "classpathAttributeConfiguration"; //$NON-NLS-1$
 
-	private HashMap fDescriptors;
+	private HashMap<String, Descriptor> fDescriptors;
 
 	public ClasspathAttributeConfigurationDescriptors() {
 		fDescriptors= null;
 	}
 
-	private HashMap getDescriptors() {
+	private HashMap<String, Descriptor> getDescriptors() {
 		if (fDescriptors == null) {
 			fDescriptors= readExtensions();
 		}
@@ -88,7 +88,7 @@ public class ClasspathAttributeConfigurationDescriptors {
 	}
 
 	public ClasspathAttributeConfiguration get(final String attributeKey) {
-		final Descriptor desc= (Descriptor) getDescriptors().get(attributeKey);
+		final Descriptor desc= getDescriptors().get(attributeKey);
 		if (desc == null) {
 			return null;
 		}
@@ -107,9 +107,9 @@ public class ClasspathAttributeConfigurationDescriptors {
 		return res[0];
 	}
 
-	private static HashMap readExtensions() {
+	private static HashMap<String, Descriptor> readExtensions() {
 		IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, ATT_EXTENSION);
-		HashMap descriptors= new HashMap(elements.length * 2);
+		HashMap<String, Descriptor> descriptors= new HashMap<String, Descriptor>(elements.length * 2);
 		for (int i= 0; i < elements.length; i++) {
 			try {
 				Descriptor curr= new Descriptor(elements[i]);

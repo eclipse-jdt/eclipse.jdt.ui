@@ -99,7 +99,7 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner implements I
 		IToken multiLineComment= new Token(JAVA_MULTI_LINE_COMMENT);
 		IToken singleLineComment= new Token(JAVA_SINGLE_LINE_COMMENT);
 
-		List rules= new ArrayList();
+		List<IPredicateRule> rules= new ArrayList<IPredicateRule>();
 
 		// Add rule for single line comments.
 		rules.add(new EndOfLineRule("//", singleLineComment)); //$NON-NLS-1$

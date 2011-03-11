@@ -45,6 +45,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 
 
 	private static class ClasspathContainerLabelProvider extends LabelProvider {
+		@Override
 		public String getText(Object element) {
 			return ((ClasspathContainerDescriptor) element).getName();
 		}
@@ -137,6 +138,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 	/* (non-Javadoc)
 	 * @see IWizardPage#canFlipToNextPage()
 	 */
+	@Override
 	public boolean canFlipToNextPage() {
 		return isPageComplete(); // avoid the getNextPage call to prevent potential plugin load
 	}
@@ -144,6 +146,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		if (!visible && fListViewer != null) {
 			fDialogSettings.put(DIALOGSTORE_CONTAINER_IDX, fListViewer.getList().getSelectionIndex());

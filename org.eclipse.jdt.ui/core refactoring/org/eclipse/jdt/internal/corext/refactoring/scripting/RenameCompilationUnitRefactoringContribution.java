@@ -36,16 +36,19 @@ public final class RenameCompilationUnitRefactoringContribution extends JavaUIRe
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		RenameCompilationUnitProcessor processor= new RenameCompilationUnitProcessor(arguments, status);
 		return new RenameRefactoring(processor);
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_COMPILATION_UNIT);
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(id, project, description, comment, arguments, flags);
 	}

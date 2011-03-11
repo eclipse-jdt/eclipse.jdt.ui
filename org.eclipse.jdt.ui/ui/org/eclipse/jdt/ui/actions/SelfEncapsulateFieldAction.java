@@ -86,6 +86,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
@@ -96,6 +97,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 * @param selection the Java text selection
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection));
@@ -110,6 +112,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		try {
 			if (!ActionUtil.isEditable(fEditor))
@@ -137,6 +140,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection));
@@ -152,6 +156,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 * (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			IField firstElement= (IField)selection.getFirstElement();

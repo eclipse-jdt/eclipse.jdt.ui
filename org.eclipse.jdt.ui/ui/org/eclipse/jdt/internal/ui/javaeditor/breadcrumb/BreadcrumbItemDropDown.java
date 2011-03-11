@@ -112,6 +112,7 @@ class BreadcrumbItemDropDown {
 		/*
 		 * @see org.eclipse.jface.resource.CompositeImageDescriptor#drawCompositeImage(int, int)
 		 */
+		@Override
 		protected void drawCompositeImage(int width, int height) {
 			Display display= fParentComposite.getDisplay();
 
@@ -165,6 +166,7 @@ class BreadcrumbItemDropDown {
 		/*
 		 * @see org.eclipse.jface.resource.CompositeImageDescriptor#getSize()
 		 */
+		@Override
 		protected Point getSize() {
 			return new Point(10, 16);
 		}
@@ -210,6 +212,7 @@ class BreadcrumbItemDropDown {
 		ToolBarManager manager= new ToolBarManager(fToolBar);
 
 		final Action showDropDownMenuAction= new Action(null, SWT.NONE) {
+			@Override
 			public void run() {
 				Shell shell= fParent.getDropDownShell();
 				if (shell != null)
@@ -233,6 +236,7 @@ class BreadcrumbItemDropDown {
 		if (IS_MAC_WORKAROUND) {
 			manager.getControl().addMouseListener(new MouseAdapter() {
 				// see also BreadcrumbItemDetails#addElementListener(Control)
+				@Override
 				public void mouseDown(MouseEvent e) {
 					showDropDownMenuAction.run();
 				}
@@ -338,6 +342,7 @@ class BreadcrumbItemDropDown {
 			/*
 			 * @see org.eclipse.swt.events.ControlAdapter#controlResized(org.eclipse.swt.events.ControlEvent)
 			 */
+			@Override
 			public void controlResized(ControlEvent e) {
 				if (isResizingProgrammatically)
 					return;

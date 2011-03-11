@@ -69,6 +69,7 @@ public class StringBuilderGenerator extends AbstractToStringGenerator {
 		}
 	}
 
+	@Override
 	protected void initialize() {
 		super.initialize();
 		fBuilderVariableName= createNameSuggestion(getContext().is50orHigher() ? "builder" : "buffer", NamingConventions.VK_LOCAL); //$NON-NLS-1$ //$NON-NLS-2$
@@ -84,6 +85,7 @@ public class StringBuilderGenerator extends AbstractToStringGenerator {
 		toStringMethod.getBody().statements().add(vStatement);
 	}
 
+	@Override
 	protected void complete() throws CoreException {
 		flushBuffer(null);
 		super.complete();
@@ -101,6 +103,7 @@ public class StringBuilderGenerator extends AbstractToStringGenerator {
 		}
 	}
 
+	@Override
 	protected void addMemberCheckNull(Object member, boolean addSeparator) {
 		IfStatement ifStatement= fAst.newIfStatement();
 		ifStatement.setExpression(createInfixExpression(createMemberAccessExpression(member, true, true), Operator.NOT_EQUALS, fAst.newNullLiteral()));
@@ -122,6 +125,7 @@ public class StringBuilderGenerator extends AbstractToStringGenerator {
 		toStringMethod.getBody().statements().add(ifStatement);
 	}
 
+	@Override
 	protected void addElement(Object element) {
 		addElement(element, toStringMethod.getBody());
 	}

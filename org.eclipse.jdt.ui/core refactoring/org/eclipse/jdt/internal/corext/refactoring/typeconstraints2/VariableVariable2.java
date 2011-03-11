@@ -46,6 +46,7 @@ public final class VariableVariable2 extends ConstraintVariable2 implements ISou
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return fKey.hashCode();
 	}
@@ -53,6 +54,7 @@ public final class VariableVariable2 extends ConstraintVariable2 implements ISou
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object other) {
 		if (this == other)
 			return true;

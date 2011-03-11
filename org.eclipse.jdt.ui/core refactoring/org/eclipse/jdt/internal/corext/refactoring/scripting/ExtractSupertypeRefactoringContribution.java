@@ -35,16 +35,19 @@ public final class ExtractSupertypeRefactoringContribution extends JavaUIRefacto
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		ExtractSupertypeProcessor processor= new ExtractSupertypeProcessor(arguments, status);
 		return new ProcessorBasedRefactoring(processor);
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return RefactoringSignatureDescriptorFactory.createExtractSuperclassDescriptor();
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createExtractSuperclassDescriptor(project, description, comment, arguments, flags);
 	}

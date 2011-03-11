@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,6 +76,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(checkEnabled(selection));
@@ -90,7 +91,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 	private static boolean checkEnabled(IStructuredSelection selection) throws JavaModelException {
 		if (selection.isEmpty())
 			return false;
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			if (! canBeAddedToBuildPath(iter.next()))
 				return false;
 		}
@@ -115,6 +116,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			final IFile[] files= getJARFiles(selection);
@@ -156,8 +158,8 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 	}
 
 	private static IFile[] getJARFiles(IStructuredSelection selection) throws JavaModelException {
-		ArrayList list= new ArrayList();
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		ArrayList<IFile> list= new ArrayList<IFile>();
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IAdaptable) {
 				IFile file= getCandidate((IAdaptable) element);
@@ -166,7 +168,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 				}
 			}
 		}
-		return (IFile[]) list.toArray(new IFile[list.size()]);
+		return list.toArray(new IFile[list.size()]);
 	}
 }
 

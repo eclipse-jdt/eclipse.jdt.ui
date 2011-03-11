@@ -79,33 +79,33 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		return res;
 	}
 
-	private static String packOrderList(List orderList) {
+	private static String packOrderList(List<String> orderList) {
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < orderList.size(); i++) {
-			buf.append((String) orderList.get(i));
+			buf.append(orderList.get(i));
 			buf.append(';');
 		}
 		return buf.toString();
 	}
 
-	private class TypeFilterAdapter implements IListAdapter, IDialogFieldListener {
+	private class TypeFilterAdapter implements IListAdapter<String>, IDialogFieldListener {
 
-		private boolean canEdit(ListDialogField field) {
+		private boolean canEdit(ListDialogField<String> field) {
 			return field.getSelectedElements().size() == 1;
 		}
 
-        public void customButtonPressed(ListDialogField field, int index) {
+        public void customButtonPressed(ListDialogField<String> field, int index) {
         	doButtonPressed(index);
         }
 
-        public void selectionChanged(ListDialogField field) {
+        public void selectionChanged(ListDialogField<String> field) {
 			fFilterListField.enableButton(IDX_EDIT, canEdit(field));
         }
 
         public void dialogFieldChanged(DialogField field) {
         }
 
-        public void doubleClicked(ListDialogField field) {
+        public void doubleClicked(ListDialogField<String> field) {
         	if (canEdit(field)) {
 				doButtonPressed(IDX_EDIT);
         	}
@@ -119,7 +119,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 	private static final int IDX_SELECT= 5;
 	private static final int IDX_DESELECT= 6;
 
-	private CheckedListDialogField fFilterListField;
+	private CheckedListDialogField<String> fFilterListField;
 	private SelectionButtonDialogField fHideForbiddenField;
 	private SelectionButtonDialogField fHideDiscouragedField;
 
@@ -140,7 +140,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 
 		TypeFilterAdapter adapter= new TypeFilterAdapter();
 
-		fFilterListField= new CheckedListDialogField(adapter, buttonLabels, new LabelProvider());
+		fFilterListField= new CheckedListDialogField<String>(adapter, buttonLabels, new LabelProvider());
 		fFilterListField.setDialogFieldListener(adapter);
 		fFilterListField.setLabelText(PreferencesMessages.TypeFilterPreferencePage_list_label);
 		fFilterListField.setCheckAllButtonIndex(IDX_SELECT);
@@ -161,11 +161,13 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 	/*
 	 * @see PreferencePage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.TYPE_FILTER_PREFERENCE_PAGE);
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -192,7 +194,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		spacer.setLayoutData(gd);
 		
 		String label= PreferencesMessages.TypeFilterPreferencePage_restricted_link;
-		Map targetInfo= new java.util.HashMap(2);
+		Map<String, String> targetInfo= new java.util.HashMap<String, String>(2);
 		targetInfo.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_KEY,	JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE);
 		targetInfo.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
 		createPreferencePageLink(composite, label, targetInfo);
@@ -204,11 +206,12 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		return composite;
 	}
 
-	private void createPreferencePageLink(Composite composite, String label, final Map targetInfo) {
+	private void createPreferencePageLink(Composite composite, String label, final Map<String, String> targetInfo) {
 		final Link link= new Link(composite, SWT.NONE);
 		link.setText(label);
 		link.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, true, false, 2, 1));
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, targetInfo);
 			}
@@ -221,7 +224,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		String enabled= fromDefault ? store.getDefaultString(PREF_FILTER_ENABLED) : store.getString(PREF_FILTER_ENABLED);
 		String disabled= fromDefault ? store.getDefaultString(PREF_FILTER_DISABLED) : store.getString(PREF_FILTER_DISABLED);
 
-		ArrayList res= new ArrayList();
+		ArrayList<String> res= new ArrayList<String>();
 
 		String[] enabledEntries= unpackOrderList(enabled);
 		for (int i= 0; i < enabledEntries.length; i++) {
@@ -248,10 +251,10 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 
 	private void doButtonPressed(int index) {
 		if (index == IDX_ADD) { // add new
-			List existing= fFilterListField.getElements();
+			List<String> existing= fFilterListField.getElements();
 			TypeFilterInputDialog dialog= new TypeFilterInputDialog(getShell(), existing);
 			if (dialog.open() == Window.OK) {
-				Object res= dialog.getResult();
+				String res= (String) dialog.getResult();
 				fFilterListField.addElement(res);
 				fFilterListField.setChecked(res, true);
 			}
@@ -265,19 +268,19 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 			}
 
 		} else if (index == IDX_EDIT) { // edit
-			List selected= fFilterListField.getSelectedElements();
+			List<String> selected= fFilterListField.getSelectedElements();
 			if (selected.isEmpty()) {
 				return;
 			}
-			String editedEntry= (String) selected.get(0);
+			String editedEntry= selected.get(0);
 
-			List existing= fFilterListField.getElements();
+			List<String> existing= fFilterListField.getElements();
 			existing.remove(editedEntry);
 
 			TypeFilterInputDialog dialog= new TypeFilterInputDialog(getShell(), existing);
 			dialog.setInitialString(editedEntry);
 			if (dialog.open() == Window.OK) {
-				fFilterListField.replaceElement(editedEntry, dialog.getResult());
+				fFilterListField.replaceElement(editedEntry, (String) dialog.getResult());
 			}
 		}
 	}
@@ -308,7 +311,8 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
     /*
      * @see PreferencePage#performDefaults()
      */
-    protected void performDefaults() {
+    @Override
+	protected void performDefaults() {
     	initialize(true);
 
 		super.performDefaults();
@@ -318,18 +322,19 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
     /*
      * @see org.eclipse.jface.preference.IPreferencePage#performOk()
      */
-    public boolean performOk() {
+    @Override
+	public boolean performOk() {
   		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 
-  		List checked= fFilterListField.getCheckedElements();
-  		List unchecked= fFilterListField.getElements();
+  		List<String> checked= fFilterListField.getCheckedElements();
+  		List<String> unchecked= fFilterListField.getElements();
   		unchecked.removeAll(checked);
 
   		prefs.setValue(PREF_FILTER_ENABLED, packOrderList(checked));
   		prefs.setValue(PREF_FILTER_DISABLED, packOrderList(unchecked));
 		JavaPlugin.flushInstanceScope();
 
-		Hashtable coreOptions= JavaCore.getOptions();
+		Hashtable<String, String> coreOptions= JavaCore.getOptions();
 		String hideForbidden= fHideForbiddenField.isSelected() ? JavaCore.ENABLED : JavaCore.DISABLED;
 		coreOptions.put(JavaCore.CODEASSIST_FORBIDDEN_REFERENCE_CHECK, hideForbidden);
 		String hideDiscouraged= fHideDiscouragedField.isSelected() ? JavaCore.ENABLED : JavaCore.DISABLED;

@@ -261,7 +261,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	private final static String STORE_HISTORY= "HISTORY"; //$NON-NLS-1$
 	private final static String STORE_HISTORY_SIZE= "HISTORY_SIZE"; //$NON-NLS-1$
 
-	private final List fPreviousSearchPatterns;
+	private final List<SearchPatternData> fPreviousSearchPatterns;
 
 	private SearchPatternData fInitialData;
 	private IJavaElement fJavaElement;
@@ -285,7 +285,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	 *
 	 */
 	public JavaSearchPage() {
-		fPreviousSearchPatterns= new ArrayList();
+		fPreviousSearchPatterns= new ArrayList<SearchPatternData>();
 	}
 
 
@@ -413,7 +413,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		int patternCount= fPreviousSearchPatterns.size();
 		String [] patterns= new String[patternCount];
 		for (int i= 0; i < patternCount; i++)
-			patterns[i]= ((SearchPatternData) fPreviousSearchPatterns.get(i)).getPattern();
+			patterns[i]= fPreviousSearchPatterns.get(i).getPattern();
 		return patterns;
 	}
 
@@ -445,8 +445,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 
 
 	private SearchPatternData findInPrevious(String pattern) {
-		for (Iterator iter= fPreviousSearchPatterns.iterator(); iter.hasNext();) {
-			SearchPatternData element= (SearchPatternData) iter.next();
+		for (Iterator<SearchPatternData> iter= fPreviousSearchPatterns.iterator(); iter.hasNext();) {
+			SearchPatternData element= iter.next();
 			if (pattern.equals(element.getPattern())) {
 				return element;
 			}
@@ -484,6 +484,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	/*
 	 * Implements method from IDialogPage
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		if (visible && fPattern != null) {
 			if (fFirstTime) {
@@ -543,6 +544,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		//createParticipants(result);
 
 		SelectionAdapter javaElementInitializer= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				if (getSearchFor() == fInitialData.getSearchFor())
 					fJavaElement= fInitialData.getJavaElement();
@@ -603,6 +605,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		fPattern= new Combo(result, SWT.SINGLE | SWT.BORDER);
 		SWTUtil.setDefaultVisibleItemCount(fPattern);
 		fPattern.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handlePatternSelected();
 				updateOKStatus();
@@ -624,6 +627,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		fCaseSensitive= new Button(result, SWT.CHECK);
 		fCaseSensitive.setText(SearchMessages.SearchPage_expression_caseSensitive);
 		fCaseSensitive.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fIsCaseSensitive= fCaseSensitive.getSelection();
 			}
@@ -653,6 +657,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
+	@Override
 	public void dispose() {
 		writeConfiguration();
 		super.dispose();
@@ -675,7 +680,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		if (selectionIndex < 0 || selectionIndex >= fPreviousSearchPatterns.size())
 			return;
 
-		SearchPatternData initialData= (SearchPatternData) fPreviousSearchPatterns.get(selectionIndex);
+		SearchPatternData initialData= fPreviousSearchPatterns.get(selectionIndex);
 
 		setSearchFor(initialData.getSearchFor());
 		setLimitTo(initialData.getSearchFor(), initialData.getLimitTo());
@@ -737,7 +742,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		fMatchLocationsLink= null;
 
 
-		ArrayList buttons= new ArrayList();
+		ArrayList<Button> buttons= new ArrayList<Button>();
 		buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_allOccurrences, ALL_OCCURRENCES, limitTo == ALL_OCCURRENCES));
 		buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_declarations, DECLARATIONS, limitTo == DECLARATIONS));
 
@@ -759,9 +764,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			buttons.add(createMethodLocationRadio(limitTo == SPECIFIC_REFERENCES));
 		}
 
-		fLimitTo= (Button[]) buttons.toArray(new Button[buttons.size()]);
+		fLimitTo= buttons.toArray(new Button[buttons.size()]);
 
 		SelectionAdapter listener= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				performLimitToSelectionChanged((Button) e.widget);
 			}
@@ -790,9 +796,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		fMatchLocationsLink= new Link(specificComposite, SWT.NONE);
 		fMatchLocationsLink.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		fMatchLocationsLink.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				performConfigureMatchLocation();
 			}
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				performConfigureMatchLocation();
 			}
@@ -852,6 +860,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		};
 
 		SelectionAdapter listener= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				updateOKStatus();
 			}
@@ -1037,7 +1046,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 
 	private SearchPatternData getDefaultInitValues() {
 		if (!fPreviousSearchPatterns.isEmpty()) {
-			return (SearchPatternData) fPreviousSearchPatterns.get(0);
+			return fPreviousSearchPatterns.get(0);
 		}
 
 		return new SearchPatternData(TYPE, REFERENCES, 0, fIsCaseSensitive, "", null, getLastIncludeMask()); //$NON-NLS-1$
@@ -1123,7 +1132,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		s.put(STORE_HISTORY_SIZE, historySize);
 		for (int i= 0; i < historySize; i++) {
 			IDialogSettings histSettings= s.addNewSection(STORE_HISTORY + i);
-			SearchPatternData data= ((SearchPatternData) fPreviousSearchPatterns.get(i));
+			SearchPatternData data= fPreviousSearchPatterns.get(i);
 			data.store(histSettings);
 		}
 	}

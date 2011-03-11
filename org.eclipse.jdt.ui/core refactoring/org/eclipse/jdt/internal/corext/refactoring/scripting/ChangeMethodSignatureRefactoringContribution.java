@@ -35,16 +35,19 @@ public final class ChangeMethodSignatureRefactoringContribution extends JavaUIRe
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		ChangeSignatureProcessor processor= new ChangeSignatureProcessor(arguments, status);
 		return new ProcessorBasedRefactoring(processor);
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return RefactoringSignatureDescriptorFactory.createChangeMethodSignatureDescriptor();
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createChangeMethodSignatureDescriptor(project, description, comment, arguments, flags);
 	}

@@ -78,6 +78,7 @@ public class PropertiesFileDocumentProvider extends TextFileDocumentProvider {
 	/*
 	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createFileInfo(java.lang.Object)
 	 */
+	@Override
 	protected FileInfo createFileInfo(Object element) throws CoreException {
 		if (!isJavaPropertiesFile(element))
 			return null;
@@ -89,6 +90,7 @@ public class PropertiesFileDocumentProvider extends TextFileDocumentProvider {
 	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createSaveOperation(java.lang.Object, org.eclipse.jface.text.IDocument, boolean)
 	 * @since 3.1
 	 */
+	@Override
 	protected DocumentProviderOperation createSaveOperation(final Object element, final IDocument document, final boolean overwrite) throws CoreException {
 		if (getFileInfo(element) == null)
 			return null;

@@ -49,6 +49,7 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
 	 */
+	@Override
 	protected void addEdits(IDocument doc, TextEdit root) throws CoreException {
 		super.addEdits(doc, root);
 
@@ -77,6 +78,7 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal#getName()
 	 */
+	@Override
 	public String getName() {
 		ICompilationUnit cu= getCompilationUnit();
 		IPackageFragment parentPack= (IPackageFragment) cu.getParent();

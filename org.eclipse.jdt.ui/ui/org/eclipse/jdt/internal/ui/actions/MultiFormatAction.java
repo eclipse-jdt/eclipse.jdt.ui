@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,8 +36,9 @@ public class MultiFormatAction extends CleanUpAction {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.actions.CleanUpAction#createCleanUps(org.eclipse.jdt.core.ICompilationUnit[])
 	 */
+	@Override
 	protected ICleanUp[] getCleanUps(ICompilationUnit[] units) {
-		Map settings= new Hashtable();
+		Map<String, String> settings= new Hashtable<String, String>();
 		settings.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpOptions.TRUE);
 
 		return new ICleanUp[] {
@@ -48,6 +49,7 @@ public class MultiFormatAction extends CleanUpAction {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.actions.CleanUpAction#getActionName()
 	 */
+	@Override
 	protected String getActionName() {
 		return ActionMessages.FormatAllAction_label;
 	}

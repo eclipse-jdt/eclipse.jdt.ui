@@ -42,6 +42,7 @@ public class ExtractMethodWizard extends RefactoringWizard {
 		}
 	}
 
+	@Override
 	protected void addUserInputPages(){
 		addPage(new ExtractMethodInputPage());
 	}

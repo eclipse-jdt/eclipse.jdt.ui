@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,11 +57,11 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 
 	private ITypeBinding fException;
 	private ASTNode fStart;
-	private List fResult;
+	private List<OccurrenceLocation> fResult;
 	private String fDescription;
 
 	public ExceptionOccurrencesFinder() {
-		fResult= new ArrayList();
+		fResult= new ArrayList<OccurrenceLocation>();
 	}
 
 	public String initialize(CompilationUnit root, int offset, int length) {
@@ -112,8 +112,8 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 
 	private boolean methodThrowsException(MethodDeclaration method, Name exception) {
 		ASTMatcher matcher = new ASTMatcher();
-		for (Iterator iter = method.thrownExceptions().iterator(); iter.hasNext();) {
-			Name thrown = (Name)iter.next();
+		for (Iterator<Name> iter = method.thrownExceptions().iterator(); iter.hasNext();) {
+			Name thrown = iter.next();
 			if (exception.subtreeMatch(matcher, thrown))
 				return true;
 		}
@@ -132,7 +132,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		if (fResult.isEmpty())
 			return null;
 
-		return (OccurrenceLocation[]) fResult.toArray(new OccurrenceLocation[fResult.size()]);
+		return fResult.toArray(new OccurrenceLocation[fResult.size()]);
 	}
 
 	public int getSearchKind() {
@@ -163,10 +163,12 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return SearchMessages.ExceptionOccurrencesFinder_label_singular;
 	}
 
+	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
 		return false;
 	}
 
+	@Override
 	public boolean visit(CastExpression node) {
 		if ("java.lang.ClassCastException".equals(fException.getQualifiedName())) { //$NON-NLS-1$
 			Type type= node.getType();
@@ -175,6 +177,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return super.visit(node);
 	}
 
+	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		if (matches(node.resolveConstructorBinding())) {
 			Type type= node.getType();
@@ -183,6 +186,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return super.visit(node);
 	}
 
+	@Override
 	public boolean visit(ConstructorInvocation node) {
 		if (matches(node.resolveConstructorBinding())) {
 			// mark 'this'
@@ -191,6 +195,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return super.visit(node);
 	}
 
+	@Override
 	public boolean visit(MethodInvocation node) {
 		if (matches(node.resolveMethodBinding())) {
 			SimpleName name= node.getName();
@@ -199,6 +204,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return super.visit(node);
 	}
 
+	@Override
 	public boolean visit(SuperConstructorInvocation node) {
 		if (matches(node.resolveConstructorBinding())) {
 			// mark 'super'
@@ -207,6 +213,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return super.visit(node);
 	}
 
+	@Override
 	public boolean visit(SuperMethodInvocation node) {
 		if (matches(node.resolveMethodBinding())) {
 			SimpleName name= node.getName();
@@ -215,6 +222,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return super.visit(node);
 	}
 
+	@Override
 	public boolean visit(ThrowStatement node) {
 		if (matches(node.getExpression().resolveTypeBinding())) {
 			// mark 'throw'
@@ -223,6 +231,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return super.visit(node);
 	}
 
+	@Override
 	public boolean visit(TypeDeclarationStatement node) {
 		// don't dive into local type declarations.
 		return false;

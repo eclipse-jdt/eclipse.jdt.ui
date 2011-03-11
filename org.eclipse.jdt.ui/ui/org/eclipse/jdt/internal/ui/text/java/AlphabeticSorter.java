@@ -31,6 +31,7 @@ public final class AlphabeticSorter extends AbstractProposalSorter {
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.AbstractProposalSorter#compare(org.eclipse.jface.text.contentassist.ICompletionProposal, org.eclipse.jface.text.contentassist.ICompletionProposal)
 	 */
+	@Override
 	public int compare(ICompletionProposal p1, ICompletionProposal p2) {
 		return fComparator.compare(p1, p2);
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -81,10 +80,10 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
 public class LibrariesWorkbookPage extends BuildPathBasePage {
 
-	private final ListDialogField fClassPathList;
+	private final ListDialogField<CPListElement> fClassPathList;
 	private IJavaProject fCurrJProject;
 
-	private final TreeListDialogField fLibrariesList;
+	private final TreeListDialogField<CPListElement> fLibrariesList;
 
 	private Control fSWTControl;
 	private final IWorkbenchPreferenceContainer fPageContainer;
@@ -101,7 +100,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	private final int IDX_REPLACE= 10;
 
-	public LibrariesWorkbookPage(CheckedListDialogField classPathList, IWorkbenchPreferenceContainer pageContainer) {
+	public LibrariesWorkbookPage(CheckedListDialogField<CPListElement> classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
 		fPageContainer= pageContainer;
 		fSWTControl= null;
@@ -122,7 +121,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 		LibrariesAdapter adapter= new LibrariesAdapter();
 
-		fLibrariesList= new TreeListDialogField(adapter, buttonLabels, new CPListLabelProvider());
+		fLibrariesList= new TreeListDialogField<CPListElement>(adapter, buttonLabels, new CPListLabelProvider());
 		fLibrariesList.setDialogFieldListener(adapter);
 		fLibrariesList.setLabelText(NewWizardMessages.LibrariesWorkbookPage_libraries_label);
 
@@ -134,6 +133,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	}
 
+	@Override
 	public void init(IJavaProject jproject) {
 		fCurrJProject= jproject;
 		if (Display.getCurrent() != null) {
@@ -148,12 +148,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 
 	private void updateLibrariesList() {
-		List cpelements= fClassPathList.getElements();
-		List libelements= new ArrayList(cpelements.size());
+		List<CPListElement> cpelements= fClassPathList.getElements();
+		List<CPListElement> libelements= new ArrayList<CPListElement>(cpelements.size());
 
 		int nElements= cpelements.size();
 		for (int i= 0; i < nElements; i++) {
-			CPListElement cpe= (CPListElement)cpelements.get(i);
+			CPListElement cpe= cpelements.get(i);
 			if (isEntryKind(cpe.getEntryKind())) {
 				libelements.add(cpe);
 			}
@@ -163,6 +163,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	// -------- UI creation
 
+	@Override
 	public Control getControl(Composite parent) {
 		PixelConverter converter= new PixelConverter(parent);
 
@@ -189,28 +190,28 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 
 
-	private class LibrariesAdapter implements IDialogFieldListener, ITreeListAdapter {
+	private class LibrariesAdapter implements IDialogFieldListener, ITreeListAdapter<CPListElement> {
 
 		private final Object[] EMPTY_ARR= new Object[0];
 
 		// -------- IListAdapter --------
-		public void customButtonPressed(TreeListDialogField field, int index) {
+		public void customButtonPressed(TreeListDialogField<CPListElement> field, int index) {
 			libaryPageCustomButtonPressed(field, index);
 		}
 
-		public void selectionChanged(TreeListDialogField field) {
+		public void selectionChanged(TreeListDialogField<CPListElement> field) {
 			libaryPageSelectionChanged(field);
 		}
 
-		public void doubleClicked(TreeListDialogField field) {
+		public void doubleClicked(TreeListDialogField<CPListElement> field) {
 			libaryPageDoubleClicked(field);
 		}
 
-		public void keyPressed(TreeListDialogField field, KeyEvent event) {
+		public void keyPressed(TreeListDialogField<CPListElement> field, KeyEvent event) {
 			libaryPageKeyPressed(field, event);
 		}
 
-		public Object[] getChildren(TreeListDialogField field, Object element) {
+		public Object[] getChildren(TreeListDialogField<CPListElement> field, Object element) {
 			if (element instanceof CPListElement) {
 				return ((CPListElement) element).getChildren(false);
 			} else if (element instanceof CPListElementAttribute) {
@@ -222,14 +223,14 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			return EMPTY_ARR;
 		}
 
-		public Object getParent(TreeListDialogField field, Object element) {
+		public Object getParent(TreeListDialogField<CPListElement> field, Object element) {
 			if (element instanceof CPListElementAttribute) {
 				return ((CPListElementAttribute) element).getParent();
 			}
 			return null;
 		}
 
-		public boolean hasChildren(TreeListDialogField field, Object element) {
+		public boolean hasChildren(TreeListDialogField<CPListElement> field, Object element) {
 			return getChildren(field, element).length > 0;
 		}
 
@@ -280,8 +281,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (libentries != null) {
 			int nElementsChosen= libentries.length;
 			// remove duplicates
-			List cplist= fLibrariesList.getElements();
-			List elementsToAdd= new ArrayList(nElementsChosen);
+			List<?> cplist= fLibrariesList.getElements();
+			List<CPListElement> elementsToAdd= new ArrayList<CPListElement>(nElementsChosen);
 
 			for (int i= 0; i < nElementsChosen; i++) {
 				CPListElement curr= libentries[i];
@@ -306,15 +307,16 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#addElement(org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement)
 	 */
+	@Override
 	public void addElement(CPListElement element) {
 		fLibrariesList.addElement(element);
 		fLibrariesList.postSetSelection(new StructuredSelection(element));
 	}
 
-	private void askForAddingExclusionPatternsDialog(List newEntries) {
-		HashSet modified= new HashSet();
-		List existing= fClassPathList.getElements();
-		fixNestingConflicts((CPListElement[])newEntries.toArray(new CPListElement[newEntries.size()]), (CPListElement[])existing.toArray(new CPListElement[existing.size()]), modified);
+	private void askForAddingExclusionPatternsDialog(List<CPListElement> newEntries) {
+		HashSet<CPListElement> modified= new HashSet<CPListElement>();
+		List<CPListElement> existing= fClassPathList.getElements();
+		fixNestingConflicts(newEntries.toArray(new CPListElement[newEntries.size()]), existing.toArray(new CPListElement[existing.size()]), modified);
 		if (!modified.isEmpty()) {
 			String title= NewWizardMessages.LibrariesWorkbookPage_exclusion_added_title;
 			String message= NewWizardMessages.LibrariesWorkbookPage_exclusion_added_message;
@@ -322,17 +324,17 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 	}
 
-	protected void libaryPageDoubleClicked(TreeListDialogField field) {
-		List selection= field.getSelectedElements();
+	protected void libaryPageDoubleClicked(TreeListDialogField<CPListElement> field) {
+		List<?> selection= field.getSelectedElements();
 		if (canEdit(selection)) {
 			editEntry();
 		}
 	}
 
-	protected void libaryPageKeyPressed(TreeListDialogField field, KeyEvent event) {
+	protected void libaryPageKeyPressed(TreeListDialogField<CPListElement> field, KeyEvent event) {
 		if (field == fLibrariesList) {
 			if (event.character == SWT.DEL && event.stateMask == 0) {
-				List selection= field.getSelectedElements();
+				List<?> selection= field.getSelectedElements();
 				if (canRemove(selection)) {
 					removeEntry();
 				}
@@ -354,7 +356,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 
 	private IPackageFragmentRoot getSelectedPackageFragmentRoot() {
-		final List elements= fLibrariesList.getSelectedElements();
+		final List<Object> elements= fLibrariesList.getSelectedElements();
 		if (elements.size() == 1) {
 			final Object object= elements.get(0);
 			if (object instanceof CPListElement) {
@@ -380,8 +382,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 
 	private void removeEntry() {
-		List selElements= fLibrariesList.getSelectedElements();
-		HashMap containerEntriesToUpdate= new HashMap();
+		List<Object> selElements= fLibrariesList.getSelectedElements();
+		HashMap<CPListElement, HashSet<String>> containerEntriesToUpdate= new HashMap<CPListElement, HashSet<String>>();
 		for (int i= selElements.size() - 1; i >= 0 ; i--) {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
@@ -399,9 +401,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				selElements.remove(i);
 				if (attrib.getParent().getParentContainer() instanceof CPListElement) { // inside a container: apply changes right away
 					CPListElement containerEntry= attrib.getParent();
-					HashSet changedAttributes= (HashSet) containerEntriesToUpdate.get(containerEntry);
+					HashSet<String> changedAttributes= containerEntriesToUpdate.get(containerEntry);
 					if (changedAttributes == null) {
-						changedAttributes= new HashSet();
+						changedAttributes= new HashSet<String>();
 						containerEntriesToUpdate.put(containerEntry, changedAttributes);
 					}
 					changedAttributes.add(key); // collect the changed attributes
@@ -414,17 +416,17 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		} else {
 			fLibrariesList.removeElements(selElements);
 		}
-		for (Iterator iter= containerEntriesToUpdate.entrySet().iterator(); iter.hasNext();) {
-			Map.Entry entry= (Entry) iter.next();
-			CPListElement curr= (CPListElement) entry.getKey();
-			HashSet attribs= (HashSet) entry.getValue();
-			String[] changedAttributes= (String[]) attribs.toArray(new String[attribs.size()]);
+		for (Iterator<Map.Entry<CPListElement, HashSet<String>>> iter= containerEntriesToUpdate.entrySet().iterator(); iter.hasNext();) {
+			Map.Entry<CPListElement, HashSet<String>> entry= iter.next();
+			CPListElement curr= entry.getKey();
+			HashSet<String> attribs= entry.getValue();
+			String[] changedAttributes= attribs.toArray(new String[attribs.size()]);
 			IClasspathEntry changedEntry= curr.getClasspathEntry();
 			updateContainerEntry(changedEntry, changedAttributes, fCurrJProject, ((CPListElement) curr.getParentContainer()).getPath());
 		}
 	}
 
-	private boolean canRemove(List selElements) {
+	private boolean canRemove(List<?> selElements) {
 		if (selElements.size() == 0) {
 			return false;
 		}
@@ -466,7 +468,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	 * Method editEntry.
 	 */
 	private void editEntry() {
-		List selElements= fLibrariesList.getSelectedElements();
+		List<?> selElements= fLibrariesList.getSelectedElements();
 		if (selElements.size() != 1) {
 			return;
 		}
@@ -596,7 +598,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 
 	private void updateEnabledState() {
-		List selElements= fLibrariesList.getSelectedElements();
+		List<?> selElements= fLibrariesList.getSelectedElements();
 		fLibrariesList.enableButton(IDX_EDIT, canEdit(selElements));
 		fLibrariesList.enableButton(IDX_REMOVE, canRemove(selElements));
 		fLibrariesList.enableButton(IDX_REPLACE, getSelectedPackageFragmentRoot() != null);
@@ -610,7 +612,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		fLibrariesList.enableButton(IDX_ADDVAR, noAttributes);
 	}
 
-	private boolean canEdit(List selElements) {
+	private boolean canEdit(List<?> selElements) {
 		if (selElements.size() != 1) {
 			return false;
 		}
@@ -643,14 +645,14 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 
 	private void updateClasspathList() {
-		List projelements= fLibrariesList.getElements();
+		List<CPListElement> projelements= fLibrariesList.getElements();
 
-		List cpelements= fClassPathList.getElements();
+		List<CPListElement> cpelements= fClassPathList.getElements();
 		int nEntries= cpelements.size();
 		// backwards, as entries will be deleted
 		int lastRemovePos= nEntries;
 		for (int i= nEntries - 1; i >= 0; i--) {
-			CPListElement cpe= (CPListElement)cpelements.get(i);
+			CPListElement cpe= cpelements.get(i);
 			int kind= cpe.getEntryKind();
 			if (isEntryKind(kind)) {
 				if (!projelements.remove(cpe)) {
@@ -688,7 +690,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			IPath[] selected= BuildPathDialogAccess.chooseClassFolderEntries(getShell(), fCurrJProject.getPath(), getUsedContainers(existing));
 			if (selected != null) {
 				IWorkspaceRoot root= fCurrJProject.getProject().getWorkspace().getRoot();
-				ArrayList res= new ArrayList();
+				ArrayList<CPListElement> res= new ArrayList<CPListElement>();
 				for (int i= 0; i < selected.length; i++) {
 					IPath curr= selected[i];
 					IResource resource= root.findMember(curr);
@@ -696,7 +698,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 						res.add(newCPLibraryElement(resource));
 					}
 				}
-				return (CPListElement[]) res.toArray(new CPListElement[res.size()]);
+				return res.toArray(new CPListElement[res.size()]);
 			}
 		} else {
 			// disabled
@@ -710,7 +712,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (existing == null) {
 			IPath[] selected= BuildPathDialogAccess.chooseJAREntries(getShell(), fCurrJProject.getPath(), getUsedJARFiles(existing));
 			if (selected != null) {
-				ArrayList res= new ArrayList();
+				ArrayList<CPListElement> res= new ArrayList<CPListElement>();
 
 				for (int i= 0; i < selected.length; i++) {
 					IPath curr= selected[i];
@@ -719,7 +721,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 						res.add(newCPLibraryElement(resource));
 					}
 				}
-				return (CPListElement[]) res.toArray(new CPListElement[res.size()]);
+				return res.toArray(new CPListElement[res.size()]);
 			}
 		} else {
 			IPath configured= BuildPathDialogAccess.configureJAREntry(getShell(), existing.getPath(), getUsedJARFiles(existing));
@@ -734,7 +736,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 
 	private IPath[] getUsedContainers(CPListElement existing) {
-		ArrayList res= new ArrayList();
+		ArrayList<IPath> res= new ArrayList<IPath>();
 		if (fCurrJProject.exists()) {
 			try {
 				IPath outputLocation= fCurrJProject.getOutputLocation();
@@ -747,9 +749,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			}
 		}
 
-		List cplist= fLibrariesList.getElements();
+		List<CPListElement> cplist= fLibrariesList.getElements();
 		for (int i= 0; i < cplist.size(); i++) {
-			CPListElement elem= (CPListElement)cplist.get(i);
+			CPListElement elem= cplist.get(i);
 			if (elem.getEntryKind() == IClasspathEntry.CPE_LIBRARY && (elem != existing)) {
 				IResource resource= elem.getResource();
 				if (resource instanceof IContainer && !resource.equals(existing)) {
@@ -757,14 +759,14 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				}
 			}
 		}
-		return (IPath[]) res.toArray(new IPath[res.size()]);
+		return res.toArray(new IPath[res.size()]);
 	}
 
 	private IPath[] getUsedJARFiles(CPListElement existing) {
-		List res= new ArrayList();
-		List cplist= fLibrariesList.getElements();
+		List<IPath> res= new ArrayList<IPath>();
+		List<CPListElement> cplist= fLibrariesList.getElements();
 		for (int i= 0; i < cplist.size(); i++) {
-			CPListElement elem= (CPListElement)cplist.get(i);
+			CPListElement elem= cplist.get(i);
 			if (elem.getEntryKind() == IClasspathEntry.CPE_LIBRARY && (elem != existing)) {
 				IResource resource= elem.getResource();
 				if (resource instanceof IFile) {
@@ -772,7 +774,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				}
 			}
 		}
-		return (IPath[]) res.toArray(new IPath[res.size()]);
+		return res.toArray(new IPath[res.size()]);
 	}
 
 	private CPListElement newCPLibraryElement(IResource res) {
@@ -783,11 +785,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (existing == null) {
 			IPath[] selected= BuildPathDialogAccess.chooseExternalJAREntries(getShell());
 			if (selected != null) {
-				ArrayList res= new ArrayList();
+				ArrayList<CPListElement> res= new ArrayList<CPListElement>();
 				for (int i= 0; i < selected.length; i++) {
 					res.add(new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, selected[i], null));
 				}
-				return (CPListElement[]) res.toArray(new CPListElement[res.size()]);
+				return res.toArray(new CPListElement[res.size()]);
 			}
 		} else {
 			IPath path;
@@ -808,11 +810,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (existing == null) {
 			IPath[] selected= BuildPathDialogAccess.chooseExternalClassFolderEntries(getShell());
 			if (selected != null) {
-				ArrayList res= new ArrayList();
+				ArrayList<CPListElement> res= new ArrayList<CPListElement>();
 				for (int i= 0; i < selected.length; i++) {
 					res.add(new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, selected[i], null));
 				}
-				return (CPListElement[]) res.toArray(new CPListElement[res.size()]);
+				return res.toArray(new CPListElement[res.size()]);
 			}
 		} else {
 			IPath configured= BuildPathDialogAccess.configureExternalClassFolderEntries(getShell(), existing.getPath());
@@ -824,20 +826,20 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 
 	private CPListElement[] openVariableSelectionDialog(CPListElement existing) {
-		List existingElements= fLibrariesList.getElements();
-		ArrayList existingPaths= new ArrayList(existingElements.size());
+		List<CPListElement> existingElements= fLibrariesList.getElements();
+		ArrayList<IPath> existingPaths= new ArrayList<IPath>(existingElements.size());
 		for (int i= 0; i < existingElements.size(); i++) {
-			CPListElement elem= (CPListElement) existingElements.get(i);
+			CPListElement elem= existingElements.get(i);
 			if (elem.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
 				existingPaths.add(elem.getPath());
 			}
 		}
-		IPath[] existingPathsArray= (IPath[]) existingPaths.toArray(new IPath[existingPaths.size()]);
+		IPath[] existingPathsArray= existingPaths.toArray(new IPath[existingPaths.size()]);
 
 		if (existing == null) {
 			IPath[] paths= BuildPathDialogAccess.chooseVariableEntries(getShell(), existingPathsArray);
 			if (paths != null) {
-				ArrayList result= new ArrayList();
+				ArrayList<CPListElement> result= new ArrayList<CPListElement>();
 				for (int i = 0; i < paths.length; i++) {
 					IPath path= paths[i];
 					CPListElement elem= createCPVariableElement(path);
@@ -845,7 +847,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 						result.add(elem);
 					}
 				}
-				return (CPListElement[]) result.toArray(new CPListElement[result.size()]);
+				return result.toArray(new CPListElement[result.size()]);
 			}
 		} else {
 			IPath path= BuildPathDialogAccess.configureVariableEntry(getShell(), existing.getPath(), existingPathsArray);
@@ -887,7 +889,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private IClasspathEntry[] getRawClasspath() {
 		IClasspathEntry[] currEntries= new IClasspathEntry[fClassPathList.getSize()];
 		for (int i= 0; i < currEntries.length; i++) {
-			CPListElement curr= (CPListElement) fClassPathList.getElement(i);
+			CPListElement curr= fClassPathList.getElement(i);
 			currEntries[i]= curr.getClasspathEntry();
 		}
 		return currEntries;
@@ -896,6 +898,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#isEntryKind(int)
 	 */
+	@Override
 	public boolean isEntryKind(int kind) {
 		return kind == IClasspathEntry.CPE_LIBRARY || kind == IClasspathEntry.CPE_VARIABLE || kind == IClasspathEntry.CPE_CONTAINER;
 	}
@@ -903,14 +906,16 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	/*
 	 * @see BuildPathBasePage#getSelection
 	 */
-	public List getSelection() {
+	@Override
+	public List<?> getSelection() {
 		return fLibrariesList.getSelectedElements();
 	}
 
 	/*
 	 * @see BuildPathBasePage#setSelection
 	 */
-	public void setSelection(List selElements, boolean expand) {
+	@Override
+	public void setSelection(List<?> selElements, boolean expand) {
 		fLibrariesList.selectElements(new StructuredSelection(selElements));
 		if (expand) {
 			for (int i= 0; i < selElements.size(); i++) {
@@ -922,7 +927,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	/**
      * {@inheritDoc}
      */
-    public void setFocus() {
+    @Override
+	public void setFocus() {
     	fLibrariesList.setFocus();
     }
 

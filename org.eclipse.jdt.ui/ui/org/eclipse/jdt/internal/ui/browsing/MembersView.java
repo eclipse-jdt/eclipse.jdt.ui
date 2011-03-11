@@ -69,6 +69,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getAdapter(java.lang.Class)
 	 */
+	@Override
 	public Object getAdapter(Class key) {
 		if (key == IShowInTargetList.class) {
 			return new IShowInTargetList() {
@@ -87,6 +88,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	 * @return the label provider
 	 * @see org.eclipse.jface.viewers.ILabelProvider
 	 */
+	@Override
 	protected JavaUILabelProvider createLabelProvider() {
 		return new AppearanceAwareLabelProvider(
 						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_APP_TYPE_SIGNATURE | JavaElementLabels.ALL_CATEGORY,
@@ -99,10 +101,12 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	 *
 	 * @return	the string used as ID for the Help context
 	 */
+	@Override
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.MEMBERS_VIEW;
 	}
 
+	@Override
 	protected String getLinkToEditorKey() {
 		return PreferenceConstants.LINK_BROWSING_MEMBERS_TO_EDITOR;
 	}
@@ -110,12 +114,14 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createViewer(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected StructuredViewer createViewer(Composite parent) {
 		ProblemTreeViewer viewer= new ProblemTreeViewer(parent, SWT.MULTI);
 		fMemberFilterActionGroup= new MemberFilterActionGroup(viewer, JavaUI.ID_MEMBERS_VIEW);
 		return viewer;
 	}
 
+	@Override
 	protected void fillToolBar(IToolBarManager tbm) {
 		tbm.add(new LexicalSortingAction(getViewer(), JavaUI.ID_MEMBERS_VIEW, getDropSupport()));
 		fMemberFilterActionGroup.contributeToToolBar(tbm);
@@ -126,6 +132,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#fillActionBars(org.eclipse.ui.IActionBars)
 	 * @since 3.2
 	 */
+	@Override
 	protected void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		fCategoryFilterActionGroup= new CategoryFilterActionGroup(getViewer(), getViewSite().getId(), getCategoryFilterActionGroupInput());
@@ -136,6 +143,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#setInput(java.lang.Object)
 	 * @since 3.2
 	 */
+	@Override
 	protected void setInput(Object input) {
 		super.setInput(input);
 		if (fCategoryFilterActionGroup != null)
@@ -156,6 +164,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid input
 	 */
+	@Override
 	protected boolean isValidInput(Object element) {
 		if (element instanceof IType) {
 			IType type= (IType)element;
@@ -171,6 +180,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid element
 	 */
+	@Override
 	protected boolean isValidElement(Object element) {
 		if (element instanceof IMember)
 			return super.isValidElement(((IMember)element).getDeclaringType());
@@ -199,6 +209,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	 * @param je	the Java element which has the focus
 	 * @return the element to select
 	 */
+	@Override
 	protected IJavaElement findElementToSelect(IJavaElement je) {
 		if (je == null)
 			return null;
@@ -237,6 +248,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	 * @param 	je 	the Java element for which to search the closest input
 	 * @return	the closest Java element used as input for this part, or <code>null</code>
 	 */
+	@Override
 	protected IJavaElement findInputForJavaElement(IJavaElement je) {
 		if (je == null || !je.exists() || (je.getJavaProject() != null && !je.getJavaProject().isOnClasspath(je)))
 			return null;
@@ -273,11 +285,13 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	/*
 	 * Implements method from IViewPart.
 	 */
+	@Override
 	public void saveState(IMemento memento) {
 		super.saveState(memento);
 		fMemberFilterActionGroup.saveState(memento);
 	}
 
+	@Override
 	protected void restoreState(IMemento memento) {
 		super.restoreState(memento);
 		fMemberFilterActionGroup.restoreState(memento);
@@ -286,6 +300,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
  		getViewer().getControl().setRedraw(true);
 	}
 
+	@Override
 	protected void hookViewerListeners() {
 		super.hookViewerListeners();
 		getViewer().addDoubleClickListener(new IDoubleClickListener() {
@@ -308,6 +323,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 		return false;
 	}
 
+	@Override
 	protected void restoreSelection() {
 		IEditorPart editor= getViewSite().getPage().getActiveEditor();
 		if (editor != null)
@@ -326,6 +342,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	/*
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#dispose()
 	 */
+	@Override
 	public void dispose() {
 		if (fMemberFilterActionGroup != null) {
 			fMemberFilterActionGroup.dispose();

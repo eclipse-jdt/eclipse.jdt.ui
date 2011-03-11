@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Scrollable;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
@@ -140,6 +141,7 @@ public abstract class OptionsConfigurationBlock {
 		/* (non-Javadoc)
 		 * @see java.lang.Object#toString()
 		 */
+		@Override
 		public String toString() {
 			return fQualifier + '/' + fKey;
 		}
@@ -154,17 +156,19 @@ public abstract class OptionsConfigurationBlock {
 	 * Key that is only managed locally and not part of preference store.
 	 */
 	private static class LocalKey extends Key {
-		private final HashMap fValues;
+		private final HashMap<IScopeContext, String> fValues;
 
 		private LocalKey(String key) {
 			super("local", key); //$NON-NLS-1$
-			fValues= new HashMap();
+			fValues= new HashMap<IScopeContext, String>();
 		}
 
+		@Override
 		public String getStoredValue(IScopeContext context, IWorkingCopyManager manager) {
-			return (String) fValues.get(context);
+			return fValues.get(context);
 		}
 
+		@Override
 		public void setStoredValue(IScopeContext context, String value, IWorkingCopyManager manager) {
 			if (value != null) {
 				fValues.put(context, value);
@@ -276,7 +280,7 @@ public abstract class OptionsConfigurationBlock {
 		/**
 		 * List of children nodes.
 		 */
-		private List fChildren;
+		private List<PreferenceTreeNode> fChildren;
 
 		/**
 		 * Constructs a new instance of PreferenceTreeNode according to the parameters.
@@ -317,7 +321,7 @@ public abstract class OptionsConfigurationBlock {
 			return fControlType;
 		}
 
-		public List getChildren() {
+		public List<PreferenceTreeNode> getChildren() {
 			return fChildren;
 		}
 
@@ -335,14 +339,14 @@ public abstract class OptionsConfigurationBlock {
 				return;
 			if (fChildren != null) {
 				for (int i= 0; i < fChildren.size(); i++) {
-					((PreferenceTreeNode)fChildren.get(i)).setVisible(visible, recursive);
+					fChildren.get(i).setVisible(visible, recursive);
 				}
 			}
 		}
 
 		public PreferenceTreeNode addChild(String label, Key key, int controlType, boolean showAllChildren) {
 			if (fChildren == null) {
-				fChildren= new ArrayList();
+				fChildren= new ArrayList<PreferenceTreeNode>();
 			}
 			PreferenceTreeNode n= new PreferenceTreeNode(label, key, controlType, showAllChildren);
 			fChildren.add(n);
@@ -469,6 +473,7 @@ public abstract class OptionsConfigurationBlock {
 		private void createScrolledArea() {
 			fScrolledPageContent= new ScrolledPageContent(fParentComposite);
 			fScrolledPageContent.addControlListener(new ControlAdapter() {
+				@Override
 				public void controlResized(ControlEvent e) {
 					fScrolledPageContent.getVerticalBar().setVisible(true);
 				}
@@ -561,14 +566,14 @@ public abstract class OptionsConfigurationBlock {
 				}
 			}
 			//check children
-			List children= node.getChildren();
+			List<PreferenceTreeNode> children= node.getChildren();
 			if (children != null) {
 				for (int i= 0; i < children.size(); i++) {
-					visible|= filter(((PreferenceTreeNode)children.get(i)), labelMatcher, valueMatcher);
+					visible|= filter(children.get(i), labelMatcher, valueMatcher);
 				}
 				if (node.isShowAllChildren()) {
 					for (int i= 0; i < children.size(); i++) {
-						((PreferenceTreeNode)children.get(i)).setVisible(visible, false);
+						children.get(i).setVisible(visible, false);
 					}
 				}
 			}
@@ -640,7 +645,7 @@ public abstract class OptionsConfigurationBlock {
 				boolean visible= node.isVisible();
 				setVisible(control, visible);
 				if (control instanceof Combo || control instanceof Text) {
-					Label label= (Label)(fConfigBlock.fLabels.get(control));
+					Label label= (fConfigBlock.fLabels.get(control));
 					setVisible(label, visible);
 				}
 				if (control instanceof ExpandableComposite) {
@@ -649,16 +654,17 @@ public abstract class OptionsConfigurationBlock {
 			}
 
 			//update children
-			List children= node.getChildren();
+			List<PreferenceTreeNode> children= node.getChildren();
 			if (children != null) {
 				for (int i= 0; i < children.size(); i++) {
-					updateUI((PreferenceTreeNode)children.get(i));
+					updateUI(children.get(i));
 				}
 			}
 		}
 
 		private WorkbenchJob doCreateRefreshJob() {
 			return new WorkbenchJob(PreferencesMessages.OptionsConfigurationBlock_RefreshFilter) {
+				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
 					updateUI(fRoot);
 					fParentComposite.layout(true, true); //relayout
@@ -681,11 +687,11 @@ public abstract class OptionsConfigurationBlock {
 
 	private static final String SETTINGS_EXPANDED= "expanded"; //$NON-NLS-1$
 
-	protected final ArrayList fCheckBoxes;
-	protected final ArrayList fComboBoxes;
-	protected final ArrayList fTextBoxes;
-	protected final HashMap fLabels;
-	protected final ArrayList fExpandableComposites;
+	protected final ArrayList<Button> fCheckBoxes;
+	protected final ArrayList<Combo> fComboBoxes;
+	protected final ArrayList<Text> fTextBoxes;
+	protected final HashMap<Scrollable, Label> fLabels;
+	protected final ArrayList<ExpandableComposite> fExpandableComposites;
 
 	private SelectionListener fSelectionListener;
 	private ModifyListener fTextModifyListener;
@@ -701,7 +707,7 @@ public abstract class OptionsConfigurationBlock {
 	private final IWorkingCopyManager fManager;
 	private final IWorkbenchPreferenceContainer fContainer;
 
-	private Map fDisabledProjectSettings; // null when project specific settings are turned off
+	private Map<Key, String> fDisabledProjectSettings; // null when project specific settings are turned off
 
 	private int fRebuildCount; /// used to prevent multiple dialogs that ask for a rebuild
 
@@ -732,7 +738,7 @@ public abstract class OptionsConfigurationBlock {
 		if (fProject == null || hasProjectSpecificOptions(fProject)) {
 			fDisabledProjectSettings= null;
 		} else {
-			fDisabledProjectSettings= new IdentityHashMap();
+			fDisabledProjectSettings= new IdentityHashMap<Key, String>();
 			for (int i= 0; i < allKeys.length; i++) {
 				Key curr= allKeys[i];
 				fDisabledProjectSettings.put(curr, curr.getStoredValue(fLookupOrder, false, fManager));
@@ -741,11 +747,11 @@ public abstract class OptionsConfigurationBlock {
 
 		settingsUpdated();
 
-		fCheckBoxes= new ArrayList();
-		fComboBoxes= new ArrayList();
-		fTextBoxes= new ArrayList(2);
-		fLabels= new HashMap();
-		fExpandableComposites= new ArrayList();
+		fCheckBoxes= new ArrayList<Button>();
+		fComboBoxes= new ArrayList<Combo>();
+		fTextBoxes= new ArrayList<Text>(2);
+		fLabels= new HashMap<Scrollable, Label>();
+		fExpandableComposites= new ArrayList<ExpandableComposite>();
 
 		fRebuildCount= getRebuildCount();
 	}
@@ -815,7 +821,7 @@ public abstract class OptionsConfigurationBlock {
 				ExpandableComposite expandable= getParentExpandableComposite(control);
 				if (expandable != null) {
 					for (int i= 0; i < fExpandableComposites.size(); i++) {
-						ExpandableComposite curr= (ExpandableComposite) fExpandableComposites.get(i);
+						ExpandableComposite curr= fExpandableComposites.get(i);
 						curr.setExpanded(curr == expandable);
 					}
 					expandedStateChanged(expandable);
@@ -895,6 +901,7 @@ public abstract class OptionsConfigurationBlock {
 		checkBox.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
 		checkBox.addSelectionListener(getSelectionListener());
 		checkBox.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			@Override
 			public void getName(AccessibleEvent e) {
 				e.result = LegacyActionTools.removeMnemonics(label.replaceAll("</?[aA][^>]*>", "")); //$NON-NLS-1$ //$NON-NLS-2$
 			}
@@ -912,6 +919,7 @@ public abstract class OptionsConfigurationBlock {
 		// toggle checkbox when user clicks unlinked text in link:
 		final boolean[] linkSelected= { false };
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				linkSelected[0]= true;
 				if (listener != null) {
@@ -920,9 +928,11 @@ public abstract class OptionsConfigurationBlock {
 			}
 		});
 		link.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseDown(MouseEvent e) {
 				linkSelected[0]= false;
 			}
+			@Override
 			public void mouseUp(MouseEvent e) {
 				if (!linkSelected[0]) {
 					checkBox.setSelection(!checkBox.getSelection());
@@ -1087,6 +1097,7 @@ public abstract class OptionsConfigurationBlock {
 		excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
 		excomposite.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, nColumns, 1));
 		excomposite.addExpansionListener(new ExpansionAdapter() {
+			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
 				expandedStateChanged((ExpandableComposite) e.getSource());
 			}
@@ -1105,7 +1116,7 @@ public abstract class OptionsConfigurationBlock {
 
 	protected void restoreSectionExpansionStates(IDialogSettings settings) {
 		for (int i= 0; i < fExpandableComposites.size(); i++) {
-			ExpandableComposite excomposite= (ExpandableComposite) fExpandableComposites.get(i);
+			ExpandableComposite excomposite= fExpandableComposites.get(i);
 			if (settings == null) {
 				excomposite.setExpanded(i == 0); // only expand the first node by default
 			} else {
@@ -1116,7 +1127,7 @@ public abstract class OptionsConfigurationBlock {
 
 	protected void storeSectionExpansionStates(IDialogSettings settings) {
 		for (int i= 0; i < fExpandableComposites.size(); i++) {
-			ExpandableComposite curr= (ExpandableComposite) fExpandableComposites.get(i);
+			ExpandableComposite curr= fExpandableComposites.get(i);
 			settings.put(SETTINGS_EXPANDED + String.valueOf(i), curr.isExpanded());
 		}
 	}
@@ -1185,7 +1196,7 @@ public abstract class OptionsConfigurationBlock {
 	 */
 	protected String getValue(Key key) {
 		if (fDisabledProjectSettings != null) {
-			return (String) fDisabledProjectSettings.get(key);
+			return fDisabledProjectSettings.get(key);
 		}
 		return key.getStoredValue(fLookupOrder, false, fManager);
 	}
@@ -1210,7 +1221,7 @@ public abstract class OptionsConfigurationBlock {
 	 */
 	protected String setValue(Key key, String value) {
 		if (fDisabledProjectSettings != null) {
-			return (String) fDisabledProjectSettings.put(key, value);
+			return fDisabledProjectSettings.put(key, value);
 		}
 		String oldValue= getValue(key);
 		key.setStoredValue(fLookupOrder[0], value, fManager);
@@ -1294,7 +1305,7 @@ public abstract class OptionsConfigurationBlock {
 		return res;
 	}
 
-	private boolean getChanges(IScopeContext currContext, List changedSettings) {
+	private boolean getChanges(IScopeContext currContext, List<Key> changedSettings) {
 		boolean completeSettings= fProject != null && fDisabledProjectSettings == null; // complete when project settings are enabled
 		boolean needsBuild= false;
 		for (int i= 0; i < fAllKeys.length; i++) {
@@ -1324,14 +1335,14 @@ public abstract class OptionsConfigurationBlock {
 			if (enable) {
 				for (int i= 0; i < fAllKeys.length; i++) {
 					Key curr= fAllKeys[i];
-					String val= (String) fDisabledProjectSettings.get(curr);
+					String val= fDisabledProjectSettings.get(curr);
 					curr.setStoredValue(fLookupOrder[0], val, fManager);
 				}
 				fDisabledProjectSettings= null;
 				updateControls();
 				validateSettings(null, null, null);
 			} else {
-				fDisabledProjectSettings= new IdentityHashMap();
+				fDisabledProjectSettings= new IdentityHashMap<Key, String>();
 				for (int i= 0; i < fAllKeys.length; i++) {
 					Key curr= fAllKeys[i];
 					String oldSetting= curr.getStoredValue(fLookupOrder, false, fManager);
@@ -1359,7 +1370,7 @@ public abstract class OptionsConfigurationBlock {
 		IScopeContext currContext= fLookupOrder[0];
 
 
-		List /* <Key>*/ changedOptions= new ArrayList();
+		List<Key> changedOptions= new ArrayList<Key>();
 		boolean needsBuild= getChanges(currContext, changedOptions);
 		if (changedOptions.isEmpty()) {
 			return true;
@@ -1442,13 +1453,13 @@ public abstract class OptionsConfigurationBlock {
 	 */
 	protected void updateControls() {
 		for (int i= fCheckBoxes.size() - 1; i >= 0; i--) {
-			updateCheckBox((Button) fCheckBoxes.get(i));
+			updateCheckBox(fCheckBoxes.get(i));
 		}
 		for (int i= fComboBoxes.size() - 1; i >= 0; i--) {
-			updateCombo((Combo) fComboBoxes.get(i));
+			updateCombo(fComboBoxes.get(i));
 		}
 		for (int i= fTextBoxes.size() - 1; i >= 0; i--) {
-			updateText((Text) fTextBoxes.get(i));
+			updateText(fTextBoxes.get(i));
 		}
 	}
 
@@ -1477,7 +1488,7 @@ public abstract class OptionsConfigurationBlock {
 
 	protected ExpandableComposite getExpandableComposite(Key key) {
 		for (int i= fExpandableComposites.size() - 1; i >= 0; i--) {
-			ExpandableComposite curr= (ExpandableComposite)fExpandableComposites.get(i);
+			ExpandableComposite curr= fExpandableComposites.get(i);
 			Key data= (Key)curr.getData();
 			if (key.equals(data)) {
 				return curr;
@@ -1488,7 +1499,7 @@ public abstract class OptionsConfigurationBlock {
 
 	protected Button getCheckBox(Key key) {
 		for (int i= fCheckBoxes.size() - 1; i >= 0; i--) {
-			Button curr= (Button) fCheckBoxes.get(i);
+			Button curr= fCheckBoxes.get(i);
 			ControlData data= (ControlData) curr.getData();
 			if (key.equals(data.getKey())) {
 				return curr;
@@ -1502,7 +1513,7 @@ public abstract class OptionsConfigurationBlock {
 			return null;
 		
 		for (int i= fCheckBoxes.size() - 1; i >= 0; i--) {
-			Button curr= (Button) fCheckBoxes.get(i);
+			Button curr= fCheckBoxes.get(i);
 			ControlData data= (ControlData) curr.getData();
 			if (key.equals(data.getKey()) && data instanceof LinkControlData) {
 				return ((LinkControlData)data).getLink();
@@ -1513,7 +1524,7 @@ public abstract class OptionsConfigurationBlock {
 	
 	protected Combo getComboBox(Key key) {
 		for (int i= fComboBoxes.size() - 1; i >= 0; i--) {
-			Combo curr= (Combo) fComboBoxes.get(i);
+			Combo curr= fComboBoxes.get(i);
 			ControlData data= (ControlData) curr.getData();
 			if (key.equals(data.getKey())) {
 				return curr;
@@ -1524,7 +1535,7 @@ public abstract class OptionsConfigurationBlock {
 
 	protected Text getTextControl(Key key) {
 		for (int i= fTextBoxes.size() - 1; i >= 0; i--) {
-			Text curr= (Text) fTextBoxes.get(i);
+			Text curr= fTextBoxes.get(i);
 			Key data= (Key)curr.getData();
 			if (key.equals(data)) {
 				return curr;
@@ -1551,7 +1562,7 @@ public abstract class OptionsConfigurationBlock {
 
 	protected void setComboEnabled(Key key, boolean enabled) {
 		Combo combo= getComboBox(key);
-		Label label= (Label) fLabels.get(combo);
+		Label label= fLabels.get(combo);
 		combo.setEnabled(enabled);
 		label.setEnabled(enabled);
 	}

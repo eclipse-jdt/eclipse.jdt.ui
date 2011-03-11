@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -53,6 +54,7 @@ public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
 		fSenderBinding= binding;
 	}
 
+	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fInvocationNode);
 		ASTNode typeDecl= astRoot.findDeclaringNode(fSenderBinding);
@@ -71,7 +73,7 @@ public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
 			AnnotationTypeMemberDeclaration newStub= getStub(rewrite, (AnnotationTypeDeclaration) newTypeDecl);
 
 			ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
-			List members= (List) newTypeDecl.getStructuralProperty(property);
+			List<? extends ASTNode> members= (List<? extends ASTNode>) newTypeDecl.getStructuralProperty(property);
 			int insertIndex= members.size();
 
 			ListRewrite listRewriter= rewrite.getListRewrite(newTypeDecl, property);
@@ -122,7 +124,7 @@ public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
 	}
 
 	private int evaluateModifiers(AnnotationTypeDeclaration targetTypeDecl) {
-		List methodDecls= targetTypeDecl.bodyDeclarations();
+		List<BodyDeclaration> methodDecls= targetTypeDecl.bodyDeclarations();
 		for (int i= 0; i < methodDecls.size(); i++) {
 			Object curr= methodDecls.get(i);
 			if (curr instanceof AnnotationTypeMemberDeclaration) {

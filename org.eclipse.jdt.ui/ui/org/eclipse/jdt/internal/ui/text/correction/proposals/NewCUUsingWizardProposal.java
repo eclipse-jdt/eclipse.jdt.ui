@@ -211,6 +211,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 	}
 
 
+	@Override
 	public void apply(IDocument document) {
 		StructuredSelection selection= new StructuredSelection(fCompilationUnit);
 		NewElementWizard wizard= createWizard(selection);
@@ -334,7 +335,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 				if (type.isClass() && (fTypeKind == K_CLASS)) {
 					page.setSuperClass(type.getQualifiedName(), true);
 				} else if (type.isInterface()) {
-					List superInterfaces= new ArrayList();
+					List<String> superInterfaces= new ArrayList<String>();
 					superInterfaces.add(type.getQualifiedName());
 					page.setSuperInterfaces(superInterfaces, true);
 				}
@@ -380,6 +381,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
 	 * @since 3.5
 	 */
+	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 		StringBuffer buf= new StringBuffer();
 		switch (fTypeKind) {

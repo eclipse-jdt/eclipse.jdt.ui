@@ -39,6 +39,7 @@ public class JavaFieldWithCastedReceiverCompletionProposal extends JavaCompletio
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isPrefix(java.lang.String, java.lang.String)
 	 */
+	@Override
 	protected boolean isPrefix(String prefix, String string) {
 		if (prefix != null)
 			prefix= prefix.substring(fProposal.getReceiverEnd() - fProposal.getReceiverStart() + 1);

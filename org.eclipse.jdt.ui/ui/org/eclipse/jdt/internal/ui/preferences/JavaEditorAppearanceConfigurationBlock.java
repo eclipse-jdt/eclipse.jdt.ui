@@ -42,6 +42,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore.OverlayKey;
 import org.eclipse.jdt.internal.ui.text.java.hover.SourceViewerInformationControl;
 
 
@@ -76,7 +77,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 
-		ArrayList overlayKeys= new ArrayList();
+		ArrayList<OverlayKey> overlayKeys= new ArrayList<OverlayKey>();
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MATCHING_BRACKETS));
@@ -132,6 +133,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		Link link= new Link(contents, SWT.NONE);
 		link.setText(text);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if ("org.eclipse.ui.preferencePages.GeneralTextEditor".equals(e.text)) //$NON-NLS-1$
 					PreferencesUtil.createPreferenceDialogOn(shell, e.text, null, null);
@@ -341,6 +343,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		gd.horizontalIndent= indent;
 		link.setLayoutData(gd);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, null);
 			}
@@ -373,6 +376,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#initialize()
 	 */
+	@Override
 	public void initialize() {
 		super.initialize();
 		initializeDefaultColors();
@@ -409,6 +413,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#performDefaults()
 	 */
+	@Override
 	public void performDefaults() {
 		super.performDefaults();
 		initializeDefaultColors();

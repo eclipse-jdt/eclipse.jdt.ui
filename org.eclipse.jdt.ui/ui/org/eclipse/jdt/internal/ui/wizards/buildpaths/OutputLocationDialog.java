@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,7 +77,7 @@ public class OutputLocationDialog extends StatusDialog {
 	private final boolean fAllowInvalidClasspath;
 	private CPJavaProject fCPJavaProject;
 
-	public OutputLocationDialog(Shell parent, CPListElement entryToEdit, List classPathList, IPath defaultOutputFolder, boolean allowInvalidClasspath) {
+	public OutputLocationDialog(Shell parent, CPListElement entryToEdit, List<CPListElement> classPathList, IPath defaultOutputFolder, boolean allowInvalidClasspath) {
 		super(parent);
 		fEntryToEdit= entryToEdit;
 		fAllowInvalidClasspath= allowInvalidClasspath;
@@ -114,6 +114,7 @@ public class OutputLocationDialog extends StatusDialog {
 		}
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
 
@@ -208,6 +209,7 @@ public class OutputLocationDialog extends StatusDialog {
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.OUTPUT_LOCATION_DIALOG);
@@ -217,9 +219,9 @@ public class OutputLocationDialog extends StatusDialog {
 
 	private IContainer chooseOutputLocation() {
 		IWorkspaceRoot root= fCurrProject.getWorkspace().getRoot();
-		final Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
+		final Class<?>[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
 		IProject[] allProjects= root.getProjects();
-		ArrayList rejectedElements= new ArrayList(allProjects.length);
+		ArrayList<IProject> rejectedElements= new ArrayList<IProject>(allProjects.length);
 		for (int i= 0; i < allProjects.length; i++) {
 			if (!allProjects[i].equals(fCurrProject)) {
 				rejectedElements.add(allProjects[i]);

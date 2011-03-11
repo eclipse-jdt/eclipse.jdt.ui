@@ -45,6 +45,7 @@ public class DeclaringTypeVariable extends ConstraintVariable{
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return "Decl(" + Bindings.asString(fMemberBinding) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}

@@ -37,6 +37,7 @@ public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	protected void addEdits(IDocument doc, TextEdit rootEdit) throws CoreException {
 		super.addEdits(doc, rootEdit);
 

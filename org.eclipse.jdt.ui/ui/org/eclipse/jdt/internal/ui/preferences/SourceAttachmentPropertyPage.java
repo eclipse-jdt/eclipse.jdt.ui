@@ -71,6 +71,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.SOURCE_ATTACHMENT_PROPERTY_PAGE);
@@ -79,6 +80,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	/*
 	 * @see PreferencePage#createContents
 	 */
+	@Override
 	protected Control createContents(Composite composite) {
 		initializeDialogUnits(composite);
 		Control result= createPageContent(composite);
@@ -168,6 +170,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	/*
 	 * @see IPreferencePage#performOk
 	 */
+	@Override
 	public boolean performOk() {
 		if (fSourceAttachmentBlock != null) {
 			try {
@@ -194,6 +197,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
+	@Override
 	protected void performDefaults() {
 		if (fSourceAttachmentBlock != null) {
 			fSourceAttachmentBlock.setDefaults();

@@ -32,6 +32,7 @@ public class IntroduceIndirectionWizard extends RefactoringWizard {
 	/**
 	 * @see RefactoringWizard#addUserInputPages
 	 */
+	@Override
 	protected void addUserInputPages() {
 		IntroduceIndirectionInputPage page= new IntroduceIndirectionInputPage("IntroduceIndirectionInputPage"); //$NON-NLS-1$
 		addPage(page);

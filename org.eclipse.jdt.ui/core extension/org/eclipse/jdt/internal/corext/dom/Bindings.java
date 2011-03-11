@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -173,7 +173,7 @@ public class Bindings {
 	}
 
 	public static String getTypeQualifiedName(ITypeBinding type) {
-		List result= new ArrayList(5);
+		List<String> result= new ArrayList<String>(5);
 		createName(type, false, result);
 
 		StringBuffer buffer= new StringBuffer();
@@ -181,7 +181,7 @@ public class Bindings {
 			if (i > 0) {
 				buffer.append('.');
 			}
-			buffer.append(((String) result.get(i)));
+			buffer.append(result.get(i));
 		}
 		return buffer.toString();
 	}
@@ -226,7 +226,7 @@ public class Bindings {
 	}
 
 
-	private static void createName(ITypeBinding type, boolean includePackage, List list) {
+	private static void createName(ITypeBinding type, boolean includePackage, List<String> list) {
 		ITypeBinding baseType= type;
 		if (type.isArray()) {
 			baseType= type.getElementType();
@@ -251,15 +251,15 @@ public class Bindings {
 
 
 	public static String[] getNameComponents(ITypeBinding type) {
-		List result= new ArrayList(5);
+		List<String> result= new ArrayList<String>(5);
 		createName(type, false, result);
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	public static String[] getAllNameComponents(ITypeBinding type) {
-		List result= new ArrayList(5);
+		List<String> result= new ArrayList<String>(5);
 		createName(type, true, result);
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	public static ITypeBinding getTopLevelType(ITypeBinding type) {
@@ -534,13 +534,13 @@ public class Bindings {
 	 * @return all super types (excluding <code>type</code>)
 	 */
 	public static ITypeBinding[] getAllSuperTypes(ITypeBinding type) {
-		Set result= new HashSet();
+		Set<ITypeBinding> result= new HashSet<ITypeBinding>();
 		collectSuperTypes(type, result);
 		result.remove(type);
-		return (ITypeBinding[]) result.toArray(new ITypeBinding[result.size()]);
+		return result.toArray(new ITypeBinding[result.size()]);
 	}
 
-	private static void collectSuperTypes(ITypeBinding curr, Set collection) {
+	private static void collectSuperTypes(ITypeBinding curr, Set<ITypeBinding> collection) {
 		if (collection.add(curr)) {
 			ITypeBinding[] interfaces= curr.getInterfaces();
 			for (int i= 0; i < interfaces.length; i++) {
@@ -671,8 +671,8 @@ public class Bindings {
 			//Compare type parameter bounds:
 			for (int i= 0; i < m1TypeParams.length; i++) {
 				// loop over m1TypeParams, which is either empty, or equally long as m2TypeParams
-				Set m1Bounds= getTypeBoundsForSubsignature(m1TypeParams[i]);
-				Set m2Bounds= getTypeBoundsForSubsignature(m2TypeParams[i]);
+				Set<ITypeBinding> m1Bounds= getTypeBoundsForSubsignature(m1TypeParams[i]);
+				Set<ITypeBinding> m2Bounds= getTypeBoundsForSubsignature(m2TypeParams[i]);
 				if (! m1Bounds.equals(m2Bounds))
 					return false;
 			}
@@ -728,13 +728,13 @@ public class Bindings {
 		return false;
 	}
 
-	private static Set getTypeBoundsForSubsignature(ITypeBinding typeParameter) {
+	private static Set<ITypeBinding> getTypeBoundsForSubsignature(ITypeBinding typeParameter) {
 		ITypeBinding[] typeBounds= typeParameter.getTypeBounds();
 		int count= typeBounds.length;
 		if (count == 0)
-			return Collections.EMPTY_SET;
+			return Collections.emptySet();
 
-		Set result= new HashSet(typeBounds.length);
+		Set<ITypeBinding> result= new HashSet<ITypeBinding>(typeBounds.length);
 		for (int i= 0; i < typeBounds.length; i++) {
 			ITypeBinding bound= typeBounds[i];
 			if ("java.lang.Object".equals(typeBounds[0].getQualifiedName())) //$NON-NLS-1$
@@ -838,7 +838,14 @@ public class Bindings {
 
 	/**
 	 * Returns <code>true</code> if the given type is a super type of a candidate.
-	 * <code>true</code> is returned if the two type bindings are identical (TODO)
+	 * <code>true</code> is returned if the two type bindings are identical.
+	 * 
+	 * <p><b>Warning:</b> With the addition of generics, this method is valid in less
+	 * cases than before. Consider using {@link TypeRules#canAssign(ITypeBinding, ITypeBinding)}
+	 * if you're dealing with types of variables. The classical notion of supertypes
+	 * only makes sense if you really need to walk the type hierarchy but don't need to play
+	 * the assignment rules.</p>
+	 * 
 	 * @param possibleSuperType the type to inspect
 	 * @param type the type whose super types are looked at
 	 * @return <code>true</code> iff <code>possibleSuperType</code> is

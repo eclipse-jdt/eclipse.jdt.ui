@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 
 public class SelectionUtil {
 
-	public static List toList(ISelection selection) {
+	public static List<?> toList(ISelection selection) {
 		if (selection instanceof IStructuredSelection)
 			return ((IStructuredSelection) selection).toList();
 		return null;
@@ -81,7 +81,7 @@ public class SelectionUtil {
 		}
 
 		// get all the view and editor parts
-		List parts= new ArrayList();
+		List<IWorkbenchPart> parts= new ArrayList<IWorkbenchPart>();
 		IWorkbenchPartReference refs[]= page.getViewReferences();
 		for (int i= 0; i < refs.length; i++) {
 			IWorkbenchPart part= refs[i].getPart(false);
@@ -97,9 +97,9 @@ public class SelectionUtil {
 		}
 
 		final ISelection selection= new StructuredSelection(resources);
-		Iterator itr= parts.iterator();
+		Iterator<IWorkbenchPart> itr= parts.iterator();
 		while (itr.hasNext()) {
-			IWorkbenchPart part= (IWorkbenchPart) itr.next();
+			IWorkbenchPart part= itr.next();
 
 			// get the part's ISetSelectionTarget implementation
 			ISetSelectionTarget target= null;

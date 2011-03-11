@@ -31,7 +31,8 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
     	super();
     }
 
-	protected AbstractCleanUp[] createPreviewCleanUps(Map values) {
+	@Override
+	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] {
         		new ControlStatementsCleanUp(values),
         		new ConvertLoopCleanUp(values),
@@ -40,7 +41,8 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
         };
     }
 
-    protected void doCreatePreferences(Composite composite, int numColumns) {
+    @Override
+	protected void doCreatePreferences(Composite composite, int numColumns) {
 
     	Group controlGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_ControlStatments);
 

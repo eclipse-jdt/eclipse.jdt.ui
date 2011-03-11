@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 
@@ -85,7 +86,7 @@ public final class JDTRefactoringDescriptorComment {
 	private final String fProject;
 
 	/** The settings list */
-	private final List fSettings= new ArrayList(6);
+	private final List<String> fSettings= new ArrayList<String>(6);
 
 	/**
 	 * Creates a new JDT refactoring descriptor comment.
@@ -144,8 +145,8 @@ public final class JDTRefactoringDescriptorComment {
 			buffer.append(LINE_DELIMITER);
 			buffer.append(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptorComment_original_project, BasicElementLabels.getResourceName(fProject)));
 		}
-		for (final Iterator iterator= fSettings.iterator(); iterator.hasNext();) {
-			final String setting= (String) iterator.next();
+		for (final Iterator<String> iterator= fSettings.iterator(); iterator.hasNext();) {
+			final String setting= iterator.next();
 			buffer.append(LINE_DELIMITER);
 			buffer.append(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_inferred_setting_pattern, setting));
 		}
@@ -215,7 +216,7 @@ public final class JDTRefactoringDescriptorComment {
 				if (destination != null)
 					fSettings.add(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptorComment_destination_pattern, JavaElementLabels.getTextLabel(destination, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 			}
-			final List list= new ArrayList();
+			final List<IAdaptable> list= new ArrayList<IAdaptable>();
 			list.addAll(Arrays.asList(policy.getJavaElements()));
 			list.addAll(Arrays.asList(policy.getResources()));
 			final Object[] elements= list.toArray();

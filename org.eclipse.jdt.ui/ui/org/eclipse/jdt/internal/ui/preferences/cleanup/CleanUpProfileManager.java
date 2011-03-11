@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,12 +28,12 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 public class CleanUpProfileManager extends ProfileManager {
 
 	public static KeySet[] KEY_SETS= {
-		new KeySet(JavaUI.ID_PLUGIN, new ArrayList(JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getKeys()))
+		new KeySet(JavaUI.ID_PLUGIN, new ArrayList<String>(JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getKeys()))
 	};
 
 	private final PreferencesAccess fPreferencesAccess;
 
-	public CleanUpProfileManager(List profiles, IScopeContext context, PreferencesAccess preferencesAccess, IProfileVersioner profileVersioner) {
+	public CleanUpProfileManager(List<Profile> profiles, IScopeContext context, PreferencesAccess preferencesAccess, IProfileVersioner profileVersioner) {
 	    super(profiles, context, preferencesAccess, profileVersioner, KEY_SETS, CleanUpConstants.CLEANUP_PROFILE, CleanUpConstants.CLEANUP_SETTINGS_VERSION_KEY);
 		fPreferencesAccess= preferencesAccess;
     }
@@ -41,14 +41,16 @@ public class CleanUpProfileManager extends ProfileManager {
 	/* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.preferences.cleanup.ProfileManager#getDefaultProfile()
      */
-    public Profile getDefaultProfile() {
+    @Override
+	public Profile getDefaultProfile() {
     	return getProfile(CleanUpConstants.DEFAULT_PROFILE);
     }
 
     /**
      * {@inheritDoc}
      */
-    protected void updateProfilesWithName(String oldName, Profile newProfile, boolean applySettings) {
+    @Override
+	protected void updateProfilesWithName(String oldName, Profile newProfile, boolean applySettings) {
         super.updateProfilesWithName(oldName, newProfile, applySettings);
 
         IEclipsePreferences node= fPreferencesAccess.getInstanceScope().getNode(JavaUI.ID_PLUGIN);

@@ -34,6 +34,7 @@ public class NewSearchResultCollector extends SearchRequestor {
 		fIgnorePotentials= ignorePotentials;
 	}
 
+	@Override
 	public void acceptSearchMatch(SearchMatch match) throws CoreException {
 		IJavaElement enclosingElement= (IJavaElement) match.getElement();
 		if (enclosingElement != null) {
@@ -63,15 +64,19 @@ public class NewSearchResultCollector extends SearchRequestor {
 		}
 	}
 
+	@Override
 	public void beginReporting() {
 	}
 
+	@Override
 	public void endReporting() {
 	}
 
+	@Override
 	public void enterParticipant(SearchParticipant participant) {
 	}
 
+	@Override
 	public void exitParticipant(SearchParticipant participant) {
 	}
 

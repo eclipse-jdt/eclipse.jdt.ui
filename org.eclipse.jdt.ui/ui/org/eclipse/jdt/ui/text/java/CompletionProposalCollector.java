@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.CollectionsUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -106,9 +107,9 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	private final CompletionProposalLabelProvider fLabelProvider= new CompletionProposalLabelProvider();
 	private final ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
 
-	private final List fJavaProposals= new ArrayList();
-	private final List fKeywords= new ArrayList();
-	private final Set fSuggestedMethodNames= new HashSet();
+	private final List<IJavaCompletionProposal> fJavaProposals= new ArrayList<IJavaCompletionProposal>();
+	private final List<IJavaCompletionProposal> fKeywords= new ArrayList<IJavaCompletionProposal>();
+	private final Set<String> fSuggestedMethodNames= new HashSet<String>();
 
 	private final ICompilationUnit fCompilationUnit;
 	private final IJavaProject fJavaProject;
@@ -190,6 +191,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.CompletionRequestor#setIgnored(int, boolean)
 	 */
+	@Override
 	public void setIgnored(int completionProposalKind, boolean ignore) {
 		super.setIgnored(completionProposalKind, ignore);
 		if (completionProposalKind == CompletionProposal.METHOD_DECLARATION && !ignore) {
@@ -235,6 +237,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * instead.
 	 * </p>
 	 */
+	@Override
 	public void accept(CompletionProposal proposal) {
 		long start= DEBUG ? System.currentTimeMillis() : 0;
 		try {
@@ -268,6 +271,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * </p>
 	 * @see #getContext()
 	 */
+	@Override
 	public void acceptContext(CompletionContext context) {
 		fContext= context;
 		fLabelProvider.setContext(context);
@@ -278,6 +282,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 *
 	 * Subclasses may extend, but must call the super implementation.
 	 */
+	@Override
 	public void beginReporting() {
 		if (DEBUG) {
 			fStartTime= System.currentTimeMillis();
@@ -295,6 +300,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 *
 	 * Subclasses may extend, but must call the super implementation.
 	 */
+	@Override
 	public void completionFailure(IProblem problem) {
 		fLastProblem= problem;
 	}
@@ -304,6 +310,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 *
 	 * Subclasses may extend, but must call the super implementation.
 	 */
+	@Override
 	public void endReporting() {
 		if (DEBUG) {
 			long total= System.currentTimeMillis() - fStartTime;
@@ -332,7 +339,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * @return the unsorted list of received proposals
 	 */
 	public final IJavaCompletionProposal[] getJavaCompletionProposals() {
-		return (IJavaCompletionProposal[]) fJavaProposals.toArray(new IJavaCompletionProposal[fJavaProposals.size()]);
+		return CollectionsUtil.toArray(fJavaProposals, IJavaCompletionProposal.class);
 	}
 
 	/**
@@ -341,7 +348,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * @return the unsorted list of received keyword proposals
 	 */
 	public final IJavaCompletionProposal[] getKeywordCompletionProposals() {
-		return (JavaCompletionProposal[]) fKeywords.toArray(new JavaCompletionProposal[fKeywords.size()]);
+		return CollectionsUtil.toArray(fKeywords, IJavaCompletionProposal.class);
 	}
 
 	/**

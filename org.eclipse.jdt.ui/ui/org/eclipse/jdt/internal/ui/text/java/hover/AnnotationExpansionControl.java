@@ -221,6 +221,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		/*
 		 * @see org.eclipse.swt.events.MouseListener#mouseDoubleClick(org.eclipse.swt.events.MouseEvent)
 		 */
+		@Override
 		public void mouseDoubleClick(MouseEvent e) {
 			Item item= (Item) ((Widget) e.getSource()).getData();
 			if (e.button == 1 && item.fAnnotation == fInput.fAnnotations[0] && fInput.fDoubleClickListener != null) {
@@ -245,6 +246,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		 *
 		 * @see org.eclipse.swt.events.MouseListener#mouseDown(org.eclipse.swt.events.MouseEvent)
 		 */
+		@Override
 		public void mouseDown(MouseEvent e) {
 			Item item= (Item) ((Widget) e.getSource()).getData();
 			// TODO for now, to make double click work: disable single click on the first item
@@ -397,6 +399,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		/*
 		 * @see org.eclipse.jface.text.AbstractInformationControlManager#computeInformation()
 		 */
+		@Override
 		protected void computeInformation() {
 			if (fSelection != null) {
 				Rectangle subjectArea= fSelection.canvas.getBounds();
@@ -479,6 +482,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		fComposite.setLayoutData(data);
 		fComposite.addMouseTrackListener(new MouseTrackAdapter() {
 
+			@Override
 			public void mouseExit(MouseEvent e) {
 				if (fComposite == null)
 						return;
@@ -755,13 +759,13 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 
 		StyleRange[] ranges= text.getStyleRanges(region.getOffset(), region.getLength());
 
-		List undoRanges= new ArrayList(ranges.length);
+		List<StyleRange> undoRanges= new ArrayList<StyleRange>(ranges.length);
 		for (int i= 0; i < ranges.length; i++) {
-			undoRanges.add(ranges[i].clone());
+			undoRanges.add((StyleRange)ranges[i].clone());
 		}
 
 		int offset= region.getOffset();
-		StyleRange current= undoRanges.size() > 0 ? (StyleRange) undoRanges.get(0) : null;
+		StyleRange current= undoRanges.size() > 0 ? undoRanges.get(0) : null;
 		int curStart= current != null ? current.start : region.getOffset() + region.getLength();
 		int curEnd= current != null ? current.start + current.length : -1;
 		int index= 0;
@@ -779,7 +783,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 			index++;
 			if (index < undoRanges.size()) {
 				offset= curEnd;
-				current= (StyleRange) undoRanges.get(index);
+				current= undoRanges.get(index);
 				curStart= current.start;
 				curEnd= current.start + current.length;
 			} else if (index == undoRanges.size()) {
@@ -793,20 +797,20 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		}
 
 		// create modified styles (with background)
-		List shadedRanges= new ArrayList(undoRanges.size());
-		for (Iterator it= undoRanges.iterator(); it.hasNext(); ) {
-			StyleRange range= (StyleRange) ((StyleRange) it.next()).clone();
+		List<StyleRange> shadedRanges= new ArrayList<StyleRange>(undoRanges.size());
+		for (Iterator<StyleRange> it= undoRanges.iterator(); it.hasNext(); ) {
+			StyleRange range= (StyleRange) it.next().clone();
 			shadedRanges.add(range);
 			range.background= getHighlightColor(disp);
 		}
 
 		// set the ranges one by one
-		for (Iterator iter= shadedRanges.iterator(); iter.hasNext(); ) {
-			text.setStyleRange((StyleRange) iter.next());
+		for (Iterator<StyleRange> iter= shadedRanges.iterator(); iter.hasNext(); ) {
+			text.setStyleRange(iter.next());
 
 		}
 
-		return (StyleRange[]) undoRanges.toArray(undoRanges.toArray(new StyleRange[0]));
+		return undoRanges.toArray(undoRanges.toArray(new StyleRange[0]));
 	}
 
 	private void resetViewerBackground(StyleRange[] oldRanges) {

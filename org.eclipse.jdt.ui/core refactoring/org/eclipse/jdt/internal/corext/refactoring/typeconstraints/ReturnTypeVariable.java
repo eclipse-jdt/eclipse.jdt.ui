@@ -40,6 +40,7 @@ public class ReturnTypeVariable extends ConstraintVariable{
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return "[" + Bindings.asString(fMethodBinding) + "]_returnType"; //$NON-NLS-1$ //$NON-NLS-2$
 	}

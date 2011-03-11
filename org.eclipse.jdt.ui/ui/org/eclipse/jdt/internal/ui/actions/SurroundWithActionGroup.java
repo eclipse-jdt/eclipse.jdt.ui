@@ -40,6 +40,7 @@ public class SurroundWithActionGroup extends ActionGroup {
 		fSurroundWithTryCatchAction= createSurroundWithTryCatchAction(fEditor);
 	}
 
+	@Override
 	public void fillActionBars(IActionBars actionBar) {
 		actionBar.setGlobalActionHandler(JdtActionConstants.SURROUND_WITH_TRY_CATCH, fSurroundWithTryCatchAction);
 	}
@@ -48,6 +49,7 @@ public class SurroundWithActionGroup extends ActionGroup {
 	 * The Menu to show when right click on the editor
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		ISelectionProvider selectionProvider= fEditor.getSelectionProvider();
 		if (selectionProvider == null)

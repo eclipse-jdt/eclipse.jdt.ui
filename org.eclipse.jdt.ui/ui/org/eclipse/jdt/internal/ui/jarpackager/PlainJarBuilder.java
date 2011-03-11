@@ -55,6 +55,7 @@ public class PlainJarBuilder extends JarBuilder {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void open(JarPackageData jarPackage, Shell displayShell, MultiStatus statusMsg) throws CoreException {
 		super.open(jarPackage, displayShell, statusMsg);
 		fJarPackage= jarPackage;

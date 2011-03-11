@@ -34,10 +34,10 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 
 	private static ColoredViewersManager fgInstance= new ColoredViewersManager();
 
-	private Set fManagedLabelProviders;
+	private Set<ColoringLabelProvider> fManagedLabelProviders;
 
 	public ColoredViewersManager() {
-		fManagedLabelProviders= new HashSet();
+		fManagedLabelProviders= new HashSet<ColoringLabelProvider>();
 	}
 
 	public void installColoredLabels(ColoringLabelProvider labelProvider) {
@@ -82,8 +82,8 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 	}
 
 	protected final void updateAllViewers() {
-		for (Iterator iterator= fManagedLabelProviders.iterator(); iterator.hasNext();) {
-			ColoringLabelProvider lp= (ColoringLabelProvider) iterator.next();
+		for (Iterator<ColoringLabelProvider> iterator= fManagedLabelProviders.iterator(); iterator.hasNext();) {
+			ColoringLabelProvider lp= iterator.next();
 			lp.update();
 		}
 	}

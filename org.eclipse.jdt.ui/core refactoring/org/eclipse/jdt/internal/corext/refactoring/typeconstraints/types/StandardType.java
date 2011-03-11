@@ -23,30 +23,37 @@ public final class StandardType extends HierarchyType {
 		super(environment);
 	}
 
+	@Override
 	public int getKind() {
 		return STANDARD_TYPE;
 	}
 
+	@Override
 	public boolean isJavaLangObject() {
 		return OBJECT_KEY.equals(getBindingKey());
 	}
 
+	@Override
 	public boolean isJavaLangCloneable() {
 		return CLONEABLE_KEY.equals(getBindingKey());
 	}
 
+	@Override
 	public boolean isJavaIoSerializable() {
 		return SERIALIZABLE_KEY.equals(getBindingKey());
 	}
 
+	@Override
 	public boolean doEquals(TType type) {
 		return getJavaElementType().equals(((StandardType)type).getJavaElementType());
 	}
 
+	@Override
 	public int hashCode() {
 		return getJavaElementType().hashCode();
 	}
 
+	@Override
 	protected boolean doCanAssignTo(TType lhs) {
 		switch (lhs.getKind()) {
 			case NULL_TYPE: return false;
@@ -78,10 +85,12 @@ public final class StandardType extends HierarchyType {
 		return source != null && source.canAssignTo(type);
 	}
 
+	@Override
 	public String getName() {
 		return getJavaElementType().getElementName();
 	}
 
+	@Override
 	protected String getPlainPrettySignature() {
 		return getJavaElementType().getFullyQualifiedName('.');
 	}

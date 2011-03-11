@@ -68,11 +68,13 @@ public class LocalVariableIndex extends ASTVisitor {
 		return counter.fTopIndex;
 	}
 
+	@Override
 	public boolean visit(SingleVariableDeclaration node) {
 		handleVariableBinding(node.resolveBinding());
 		return true;
 	}
 
+	@Override
 	public boolean visit(VariableDeclarationFragment node) {
 		handleVariableBinding(node.resolveBinding());
 		return true;

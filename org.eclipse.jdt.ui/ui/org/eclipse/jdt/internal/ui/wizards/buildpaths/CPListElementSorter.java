@@ -35,6 +35,7 @@ public class CPListElementSorter extends ViewerComparator {
 	/*
 	 * @see ViewerSorter#category(Object)
 	 */
+	@Override
 	public int category(Object obj) {
 		if (obj instanceof CPListElement) {
 			CPListElement element= (CPListElement) obj;
@@ -64,6 +65,7 @@ public class CPListElementSorter extends ViewerComparator {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ViewerSorter#compare(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
+	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
 
         int cat1 = category(e1);

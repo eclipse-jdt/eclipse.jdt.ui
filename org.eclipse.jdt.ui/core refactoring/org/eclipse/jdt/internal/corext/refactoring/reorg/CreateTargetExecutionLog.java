@@ -21,7 +21,7 @@ import java.util.Map;
  */
 public final class CreateTargetExecutionLog {
 
-	private Map fCreations= new LinkedHashMap(2);
+	private Map<Object, Object> fCreations= new LinkedHashMap<Object, Object>(2);
 
 	/**
 	 * Returns the element which got created for the given selection.

@@ -50,6 +50,7 @@ class GotoTypeAction extends Action {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_TYPE_ACTION);
 	}
 
+	@Override
 	public void run() {
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		SelectionDialog dialog= null;

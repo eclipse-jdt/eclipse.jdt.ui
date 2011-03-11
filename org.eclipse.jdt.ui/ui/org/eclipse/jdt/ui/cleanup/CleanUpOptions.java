@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
  */
 public class CleanUpOptions {
 
-	private final Map fOptions;
+	private final Map<String, String> fOptions;
 
 	/**
 	 * True value
@@ -46,7 +46,7 @@ public class CleanUpOptions {
 	 * @param options map that maps clean ups keys (<code>String</code>) to a non-<code>null</code>
 	 *            string value
 	 */
-	protected CleanUpOptions(Map options) {
+	protected CleanUpOptions(Map<String, String> options) {
 		fOptions= options;
 	}
 
@@ -54,7 +54,7 @@ public class CleanUpOptions {
 	 * Creates a new instance.
 	 */
 	public CleanUpOptions() {
-		fOptions= new Hashtable();
+		fOptions= new Hashtable<String, String>();
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class CleanUpOptions {
 	 */
 	public String getValue(String key) {
 		Assert.isLegal(key != null);
-		String value= (String)fOptions.get(key);
+		String value= fOptions.get(key);
 		Assert.isLegal(value != null);
 		return value;
 	}
@@ -105,7 +105,7 @@ public class CleanUpOptions {
 	 * 
 	 * @return an unmodifiable set of all keys
 	 */
-	public Set getKeys() {
+	public Set<String> getKeys() {
 		return Collections.unmodifiableSet(fOptions.keySet());
 	}
 }

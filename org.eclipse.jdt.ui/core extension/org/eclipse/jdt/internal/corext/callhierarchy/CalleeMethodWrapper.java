@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,16 +22,13 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 class CalleeMethodWrapper extends MethodWrapper {
-    private Comparator fMethodWrapperComparator = new MethodWrapperComparator();
+    private Comparator<MethodWrapper> fMethodWrapperComparator = new MethodWrapperComparator();
 
-    private static class MethodWrapperComparator implements Comparator {
+    private static class MethodWrapperComparator implements Comparator<MethodWrapper> {
         /* (non-Javadoc)
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
-        public int compare(Object o1, Object o2) {
-            MethodWrapper m1 = (MethodWrapper) o1;
-            MethodWrapper m2 = (MethodWrapper) o2;
-
+        public int compare(MethodWrapper m1, MethodWrapper m2) {
             CallLocation callLocation1 = m1.getMethodCall().getFirstCallLocation();
             CallLocation callLocation2 = m2.getMethodCall().getFirstCallLocation();
 
@@ -54,7 +51,8 @@ class CalleeMethodWrapper extends MethodWrapper {
 	/* Returns the calls sorted after the call location
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#getCalls()
      */
-    public MethodWrapper[] getCalls(IProgressMonitor progressMonitor) {
+    @Override
+	public MethodWrapper[] getCalls(IProgressMonitor progressMonitor) {
         MethodWrapper[] result = super.getCalls(progressMonitor);
         Arrays.sort(result, fMethodWrapperComparator);
 
@@ -64,21 +62,24 @@ class CalleeMethodWrapper extends MethodWrapper {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#getTaskName()
      */
-    protected String getTaskName() {
+    @Override
+	protected String getTaskName() {
         return CallHierarchyMessages.CalleeMethodWrapper_taskname;
     }
 
 	/*
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#createMethodWrapper(org.eclipse.jdt.internal.corext.callhierarchy.MethodCall)
      */
-    protected MethodWrapper createMethodWrapper(MethodCall methodCall) {
+    @Override
+	protected MethodWrapper createMethodWrapper(MethodCall methodCall) {
         return new CalleeMethodWrapper(this, methodCall);
     }
 
     /*
      * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#canHaveChildren()
      */
-    public boolean canHaveChildren() {
+    @Override
+	public boolean canHaveChildren() {
     	return true;
     }
 
@@ -86,7 +87,8 @@ class CalleeMethodWrapper extends MethodWrapper {
      * Find callees called from the current method.
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#findChildren(org.eclipse.core.runtime.IProgressMonitor)
      */
-    protected Map findChildren(IProgressMonitor progressMonitor) {
+    @Override
+	protected Map<String, MethodCall> findChildren(IProgressMonitor progressMonitor) {
     	IMember member= getMember();
 		if (member.exists()) {
 			CompilationUnit cu= CallHierarchy.getCompilationUnitNode(member, true);
@@ -101,6 +103,6 @@ class CalleeMethodWrapper extends MethodWrapper {
 				return visitor.getCallees();
 			}
 		}
-        return new HashMap(0);
+        return new HashMap<String, MethodCall>(0);
     }
 }

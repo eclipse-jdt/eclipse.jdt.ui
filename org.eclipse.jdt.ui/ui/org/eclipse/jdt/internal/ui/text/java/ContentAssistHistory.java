@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,8 +22,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -91,15 +91,15 @@ public final class ContentAssistHistory {
 				rootElement.setAttribute(ATTRIBUTE_MAX_RHS, Integer.toString(history.fMaxRHS));
 				document.appendChild(rootElement);
 
-				for (Iterator leftHandSides= history.fLHSCache.keySet().iterator(); leftHandSides.hasNext();) {
-					String lhs= (String) leftHandSides.next();
+				for (Iterator<String> leftHandSides= history.fLHSCache.keySet().iterator(); leftHandSides.hasNext();) {
+					String lhs= leftHandSides.next();
 					Element lhsElement= document.createElement(NODE_LHS);
 					lhsElement.setAttribute(ATTRIBUTE_NAME, lhs);
 					rootElement.appendChild(lhsElement);
 
-					Set rightHandSides= (Set) history.fLHSCache.get(lhs);
-					for (Iterator rhsIterator= rightHandSides.iterator(); rhsIterator.hasNext();) {
-						String rhs= (String) rhsIterator.next();
+					MRUSet<String> rightHandSides= history.fLHSCache.get(lhs);
+					for (Iterator<String> rhsIterator= rightHandSides.iterator(); rhsIterator.hasNext();) {
+						String rhs= rhsIterator.next();
 						Element rhsElement= document.createElement(NODE_RHS);
 						rhsElement.setAttribute(ATTRIBUTE_NAME, rhs);
 						lhsElement.appendChild(rhsElement);
@@ -151,7 +151,7 @@ public final class ContentAssistHistory {
 					if (lhsElement.getNodeName().equalsIgnoreCase(NODE_LHS)) {
 						String lhs= lhsElement.getAttribute(ATTRIBUTE_NAME);
 						if (lhs != null) {
-							Set cache= history.getCache(lhs);
+							Set<String> cache= history.getCache(lhs);
 							NodeList children= lhsElement.getChildNodes();
 							int nRHS= children.getLength();
 							for (int j= 0; j < nRHS; j++) {
@@ -197,7 +197,7 @@ public final class ContentAssistHistory {
 	 *
 	 * @since 3.2
 	 */
-	private static final class MRUMap extends LinkedHashMap {
+	private static final class MRUMap<K, V> extends LinkedHashMap<K, V> {
 		private static final long serialVersionUID= 1L;
 		private final int fMaxSize;
 
@@ -214,8 +214,9 @@ public final class ContentAssistHistory {
 		/*
 		 * @see java.util.HashMap#put(java.lang.Object, java.lang.Object)
 		 */
-		public Object put(Object key, Object value) {
-			Object object= remove(key);
+		@Override
+		public V put(K key, V value) {
+			V object= remove(key);
 			super.put(key, value);
 			return object;
 		}
@@ -223,7 +224,8 @@ public final class ContentAssistHistory {
 		/*
 		 * @see java.util.LinkedHashMap#removeEldestEntry(java.util.Map.Entry)
 		 */
-		protected boolean removeEldestEntry(Entry eldest) {
+		@Override
+		protected boolean removeEldestEntry(Entry<K, V> eldest) {
 			return size() > fMaxSize;
 		}
 	}
@@ -234,7 +236,7 @@ public final class ContentAssistHistory {
 	 *
 	 * @since 3.2
 	 */
-	private static final class MRUSet extends LinkedHashSet {
+	private static final class MRUSet<E> extends LinkedHashSet<E> {
 		private static final long serialVersionUID= 1L;
 		private final int fMaxSize;
 
@@ -251,7 +253,8 @@ public final class ContentAssistHistory {
 		/*
 		 * @see java.util.HashSet#add(java.lang.Object)
 		 */
-		public boolean add(Object o) {
+		@Override
+		public boolean add(E o) {
 			if (remove(o)) {
 				super.add(o);
 				return false;
@@ -271,10 +274,10 @@ public final class ContentAssistHistory {
 	 * @since 3.2
 	 */
 	public static final class RHSHistory {
-		private final LinkedHashMap fHistory;
-		private List fList;
+		private final LinkedHashMap<String, Integer> fHistory;
+		private List<String> fList;
 
-		RHSHistory(LinkedHashMap history) {
+		RHSHistory(LinkedHashMap<String, Integer> history) {
 			fHistory= history;
 		}
 
@@ -288,7 +291,7 @@ public final class ContentAssistHistory {
 		public float getRank(String type) {
 			if (fHistory == null)
 				return 0.0F;
-			Integer integer= (Integer) fHistory.get(type);
+			Integer integer= fHistory.get(type);
 			return integer == null ? 0.0F : integer.floatValue() / fHistory.size();
 		}
 
@@ -305,14 +308,13 @@ public final class ContentAssistHistory {
 		 * Returns the list of remembered types ordered by recency. The first element is the
 		 * <i>least</i>, the last element the <i>most</i> recently remembered type.
 		 *
-		 * @return the list of remembered types as fully qualified type names (element type:
-		 *         {@link String})
+		 * @return the list of remembered types as fully qualified type names
 		 */
-		public List getTypes() {
+		public List<String> getTypes() {
 			if (fHistory == null)
-				return Collections.EMPTY_LIST;
+				return Collections.emptyList();
 			if (fList == null) {
-				fList= Collections.unmodifiableList(new ArrayList(fHistory.keySet()));
+				fList= Collections.unmodifiableList(new ArrayList<String>(fHistory.keySet()));
 			}
 			return fList;
 		}
@@ -322,9 +324,9 @@ public final class ContentAssistHistory {
 	private static final int DEFAULT_TRACKED_LHS= 100;
 	private static final int DEFAULT_TRACKED_RHS= 10;
 
-	private static final Set UNCACHEABLE;
+	private static final Set<String> UNCACHEABLE;
 	static {
-		Set uncacheable= new HashSet();
+		Set<String> uncacheable= new HashSet<String>();
 		uncacheable.add("java.lang.Object"); //$NON-NLS-1$
 		uncacheable.add("java.lang.Comparable"); //$NON-NLS-1$
 		uncacheable.add("java.io.Serializable"); //$NON-NLS-1$
@@ -332,7 +334,7 @@ public final class ContentAssistHistory {
 		UNCACHEABLE= Collections.unmodifiableSet(uncacheable);
 	}
 
-	private final LinkedHashMap/*<IType, MRUSet<IType>>*/ fLHSCache;
+	private final LinkedHashMap<String, MRUSet<String>> fLHSCache;
 	private final int fMaxLHS;
 	private final int fMaxRHS;
 
@@ -347,7 +349,7 @@ public final class ContentAssistHistory {
 		Assert.isLegal(maxRHS > 0);
 		fMaxLHS= maxLHS;
 		fMaxRHS= maxRHS;
-		fLHSCache= new MRUMap(fMaxLHS);
+		fLHSCache= new MRUMap<String, MRUSet<String>>(fMaxLHS);
 	}
 
 	/**
@@ -395,13 +397,13 @@ public final class ContentAssistHistory {
 	 * @return the right hand side history for the given type
 	 */
 	public RHSHistory getHistory(String lhs) {
-		MRUSet rhsCache= (MRUSet) fLHSCache.get(lhs);
+		MRUSet<String> rhsCache= fLHSCache.get(lhs);
 		if (rhsCache != null) {
 			int count= rhsCache.size();
-			LinkedHashMap history= new LinkedHashMap((int) (count / 0.75));
+			LinkedHashMap<String, Integer> history= new LinkedHashMap<String, Integer>((int) (count / 0.75));
 			int rank= 1;
-			for (Iterator it= rhsCache.iterator(); it.hasNext(); rank++) {
-				String type= (String) it.next();
+			for (Iterator<String> it= rhsCache.iterator(); it.hasNext(); rank++) {
+				String type= it.next();
 				history.put(type, new Integer(rank));
 			}
 			return new RHSHistory(history);
@@ -415,11 +417,11 @@ public final class ContentAssistHistory {
 	 *
 	 * @return the set of remembered right hand sides ordered by least recent selection
 	 */
-	public Map getEntireHistory() {
-		HashMap map= new HashMap((int) (fLHSCache.size() / 0.75));
-		for (Iterator it= fLHSCache.entrySet().iterator(); it.hasNext();) {
-			Entry entry= (Entry) it.next();
-			String lhs= (String) entry.getKey();
+	public Map<String, RHSHistory> getEntireHistory() {
+		HashMap<String, RHSHistory> map= new HashMap<String, RHSHistory>((int) (fLHSCache.size() / 0.75));
+		for ( Iterator<Entry<String, MRUSet<String>>> it= fLHSCache.entrySet().iterator(); it.hasNext();) {
+			Entry<String, MRUSet<String>> entry= it.next();
+			String lhs= entry.getKey();
 			map.put(lhs, getHistory(lhs));
 		}
 		return Collections.unmodifiableMap(map);
@@ -439,10 +441,10 @@ public final class ContentAssistHistory {
 		return !type.isInterface() && !Flags.isAbstract(type.getFlags());
 	}
 
-	private Set getCache(String lhs) {
-		MRUSet rhsCache= (MRUSet) fLHSCache.get(lhs);
+	private Set<String> getCache(String lhs) {
+		MRUSet<String> rhsCache= fLHSCache.get(lhs);
 		if (rhsCache == null) {
-			rhsCache= new MRUSet(fMaxRHS);
+			rhsCache= new MRUSet<String>(fMaxRHS);
 			fLHSCache.put(lhs, rhsCache);
 		}
 

@@ -105,6 +105,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	/*
 	 * @see IBaseLabelProvider#dispose()
 	 */
+	@Override
 	public void dispose() {
 		PreferenceConstants.getPreferenceStore().removePropertyChangeListener(this);
 		PlatformUI.getWorkbench().getEditorRegistry().removePropertyListener(this);
@@ -114,6 +115,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	/*
 	 * @see JavaUILabelProvider#evaluateImageFlags()
 	 */
+	@Override
 	protected int evaluateImageFlags(Object element) {
 		return getImageFlags() & fImageFlagMask;
 	}
@@ -121,6 +123,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	/*
 	 * @see JavaUILabelProvider#evaluateTextFlags()
 	 */
+	@Override
 	protected long evaluateTextFlags(Object element) {
 		return getTextFlags() & fTextFlagMask;
 	}

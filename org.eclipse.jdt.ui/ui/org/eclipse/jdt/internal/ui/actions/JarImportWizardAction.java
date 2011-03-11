@@ -54,6 +54,7 @@ public class JarImportWizardAction extends Action implements IObjectActionDelega
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void run() {
 		run(this);
 	}

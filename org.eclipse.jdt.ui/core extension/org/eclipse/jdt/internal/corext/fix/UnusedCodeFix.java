@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,6 +64,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -83,22 +84,25 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 
 	private static class SideEffectFinder extends ASTVisitor {
 
-		private final ArrayList fSideEffectNodes;
+		private final ArrayList<Expression> fSideEffectNodes;
 
-		public SideEffectFinder(ArrayList res) {
+		public SideEffectFinder(ArrayList<Expression> res) {
 			fSideEffectNodes= res;
 		}
 
+		@Override
 		public boolean visit(Assignment node) {
 			fSideEffectNodes.add(node);
 			return false;
 		}
 
+		@Override
 		public boolean visit(PostfixExpression node) {
 			fSideEffectNodes.add(node);
 			return false;
 		}
 
+		@Override
 		public boolean visit(PrefixExpression node) {
 			Object operator= node.getOperator();
 			if (operator == PrefixExpression.Operator.INCREMENT || operator == PrefixExpression.Operator.DECREMENT) {
@@ -107,16 +111,19 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			return false;
 		}
 
+		@Override
 		public boolean visit(MethodInvocation node) {
 			fSideEffectNodes.add(node);
 			return false;
 		}
 
+		@Override
 		public boolean visit(ClassInstanceCreation node) {
 			fSideEffectNodes.add(node);
 			return false;
 		}
 
+		@Override
 		public boolean visit(SuperMethodInvocation node) {
 			fSideEffectNodes.add(node);
 			return false;
@@ -134,6 +141,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ImportDeclaration node= fImportDeclaration;
 			TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveImport_description, cuRewrite);
@@ -157,6 +165,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			for (int i= 0; i < fUnusedNames.length; i++) {
 				removeUnusedName(cuRewrite, fUnusedNames[i]);
@@ -263,7 +272,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			} else if (nameParentType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 				VariableDeclarationFragment frag= (VariableDeclarationFragment) parent;
 				ASTNode varDecl= frag.getParent();
-				List fragments;
+				List<VariableDeclarationFragment> fragments;
 				if (varDecl instanceof VariableDeclarationExpression) {
 					fragments= ((VariableDeclarationExpression) varDecl).fragments();
 				} else if (varDecl instanceof FieldDeclaration) {
@@ -345,11 +354,11 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 				statementRewrite.insertAfter(newInitializer, originalStatement, group);
 
 				VariableDeclarationStatement newDeclaration= null;
-				List fragments= originalStatement.fragments();
+				List<VariableDeclarationFragment> fragments= originalStatement.fragments();
 				int fragIndex= fragments.indexOf(frag);
-				ListIterator fragmentIterator= fragments.listIterator(fragIndex+1);
+				ListIterator<VariableDeclarationFragment> fragmentIterator= fragments.listIterator(fragIndex+1);
 				while (fragmentIterator.hasNext()) {
-					VariableDeclarationFragment currentFragment= (VariableDeclarationFragment) fragmentIterator.next();
+					VariableDeclarationFragment currentFragment= fragmentIterator.next();
 					VariableDeclarationFragment movedFragment= (VariableDeclarationFragment) rewrite.createMoveTarget(currentFragment);
 					if (newDeclaration == null) {
 						newDeclaration= rewrite.getAST().newVariableDeclarationStatement(movedFragment);
@@ -370,7 +379,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		private void removeVariableWithInitializer(ASTRewrite rewrite, ASTNode initializerNode, ASTNode statementNode, TextEditGroup group) {
 			boolean performRemove= fForceRemove;
 			if (!performRemove) {
-				ArrayList sideEffectNodes= new ArrayList();
+				ArrayList<Expression> sideEffectNodes= new ArrayList<Expression>();
 				initializerNode.accept(new SideEffectFinder(sideEffectNodes));
 				performRemove= sideEffectNodes.isEmpty();
 			}
@@ -393,6 +402,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			}
 		}
 
+		@Override
 		public String getAdditionalInfo() {
 			StringBuffer sb=new StringBuffer();
 			if (fRemovedAssignmentsCount == 1) {
@@ -425,6 +435,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 
 			TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveCast_description, cuRewrite);
@@ -435,32 +446,33 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			Expression expression= cast.getExpression();
 			ASTNode placeholder= rewrite.createCopyTarget(expression);
 
-			if (ASTNodes.needsParentheses(expression)) {
+			if (NecessaryParenthesesChecker.needsParentheses(expression, cast.getParent(), cast.getLocationInParent())) {
 				rewrite.replace(fCast, placeholder, group);
 			} else {
-				rewrite.replace(fSelectedNode, placeholder, group);
+				rewrite.replace(fCast.getParent() instanceof ParenthesizedExpression ? fCast.getParent() : fSelectedNode, placeholder, group);
 			}
 		}
 	}
 
 	private static class RemoveAllCastOperation extends CompilationUnitRewriteOperation {
 
-		private final HashSet fUnnecessaryCasts;
+		private final HashSet<CastExpression> fUnnecessaryCasts;
 
-		public RemoveAllCastOperation(HashSet unnecessaryCasts) {
+		public RemoveAllCastOperation(HashSet<CastExpression> unnecessaryCasts) {
 			fUnnecessaryCasts= unnecessaryCasts;
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
 			TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveCast_description, cuRewrite);
 
 			while (fUnnecessaryCasts.size() > 0) {
-				CastExpression castExpression= (CastExpression)fUnnecessaryCasts.iterator().next();
+				CastExpression castExpression= fUnnecessaryCasts.iterator().next();
 				fUnnecessaryCasts.remove(castExpression);
 				CastExpression down= castExpression;
 				while (fUnnecessaryCasts.contains(down.getExpression())) {
@@ -468,7 +480,8 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 					fUnnecessaryCasts.remove(down);
 				}
 
-				ASTNode move= rewrite.createMoveTarget(down.getExpression());
+				Expression expression= down.getExpression();
+				ASTNode move= rewrite.createMoveTarget(expression);
 
 				CastExpression top= castExpression;
 				while (fUnnecessaryCasts.contains(top.getParent())) {
@@ -476,7 +489,11 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 					fUnnecessaryCasts.remove(top);
 				}
 
-				rewrite.replace(top, move, group);
+				ASTNode toReplace= top;
+				if (top.getParent() instanceof ParenthesizedExpression && !NecessaryParenthesesChecker.needsParentheses(expression, top.getParent(), top.getLocationInParent())) {
+					toReplace= top.getParent();
+				}
+				rewrite.replace(toReplace, move, group);
 			}
 		}
 	}
@@ -487,7 +504,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			if (node != null) {
 				String label= FixMessages.UnusedCodeFix_RemoveImport_description;
 				RemoveImportOperation operation= new RemoveImportOperation(node);
-				Map options= new Hashtable();
+				Map<String, String> options= new Hashtable<String, String>();
 				options.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
 				return new UnusedCodeFix(label, compilationUnit, new CompilationUnitRewriteOperation[] {operation}, options);
 			}
@@ -575,9 +592,9 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			boolean removeUnusedImports,
 			boolean removeUnusedCast) {
 
-		List/*<CompilationUnitRewriteOperation>*/ result= new ArrayList();
-		Hashtable/*<ASTNode, List>*/ variableDeclarations= new Hashtable();
-		HashSet/*/CastExpression>*/ unnecessaryCasts= new HashSet();
+		List<CompilationUnitRewriteOperation> result= new ArrayList<CompilationUnitRewriteOperation>();
+		Hashtable<ASTNode, List<SimpleName>> variableDeclarations= new Hashtable<ASTNode, List<SimpleName>>();
+		HashSet<CastExpression> unnecessaryCasts= new HashSet<CastExpression>();
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= problems[i];
 			int id= problem.getProblemId();
@@ -612,9 +629,9 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 						if (parent != null) {
 							ASTNode varDecl= parent.getParent();
 							if (!variableDeclarations.containsKey(varDecl)) {
-								variableDeclarations.put(varDecl, new ArrayList());
+								variableDeclarations.put(varDecl, new ArrayList<SimpleName>());
 							}
-							((List)variableDeclarations.get(varDecl)).add(name);
+							variableDeclarations.get(varDecl).add(name);
 						} else {
 							result.add(new RemoveUnusedMemberOperation(new SimpleName[] {name}, false));
 						}
@@ -631,14 +648,14 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 				}
 
 				if (curr instanceof CastExpression) {
-					unnecessaryCasts.add(curr);
+					unnecessaryCasts.add((CastExpression) curr);
 				}
 			}
 		}
-		for (Iterator iter= variableDeclarations.keySet().iterator(); iter.hasNext();) {
-			ASTNode node= (ASTNode)iter.next();
-			List names= (List)variableDeclarations.get(node);
-			result.add(new RemoveUnusedMemberOperation((SimpleName[])names.toArray(new SimpleName[names.size()]), false));
+		for (Iterator<ASTNode> iter= variableDeclarations.keySet().iterator(); iter.hasNext();) {
+			ASTNode node= iter.next();
+			List<SimpleName> names= variableDeclarations.get(node);
+			result.add(new RemoveUnusedMemberOperation(names.toArray(new SimpleName[names.size()]), false));
 		}
 		if (unnecessaryCasts.size() > 0)
 			result.add(new RemoveAllCastOperation(unnecessaryCasts));
@@ -646,7 +663,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		if (result.size() == 0)
 			return null;
 
-		return new UnusedCodeFix(FixMessages.UnusedCodeFix_change_name, compilationUnit, (CompilationUnitRewriteOperation[])result.toArray(new CompilationUnitRewriteOperation[result.size()]));
+		return new UnusedCodeFix(FixMessages.UnusedCodeFix_change_name, compilationUnit, result.toArray(new CompilationUnitRewriteOperation[result.size()]));
 	}
 
 	private static boolean isFormalParameterInEnhancedForStatement(SimpleName name) {
@@ -688,7 +705,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			return false;
 		}
 
-		ArrayList sideEffects= new ArrayList();
+		ArrayList<Expression> sideEffects= new ArrayList<Expression>();
 		node.accept(new SideEffectFinder(sideEffects));
 		return sideEffects.size() > 0;
 	}
@@ -727,8 +744,8 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
-	private static Map getCleanUpOptions(IBinding binding, boolean removeAll) {
-		Map result= new Hashtable();
+	private static Map<String, String> getCleanUpOptions(IBinding binding, boolean removeAll) {
+		Map<String, String> result= new Hashtable<String, String>();
 
 		result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, CleanUpOptions.TRUE);
 		switch (binding.getKind()) {
@@ -765,13 +782,13 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		return null;
 	}
 
-	private final Map fCleanUpOptions;
+	private final Map<String, String> fCleanUpOptions;
 
 	private UnusedCodeFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations) {
 		this(name, compilationUnit, fixRewriteOperations, null);
 	}
 
-	private UnusedCodeFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations, Map options) {
+	private UnusedCodeFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations, Map<String, String> options) {
 		super(name, compilationUnit, fixRewriteOperations);
 		fCleanUpOptions= options;
 	}

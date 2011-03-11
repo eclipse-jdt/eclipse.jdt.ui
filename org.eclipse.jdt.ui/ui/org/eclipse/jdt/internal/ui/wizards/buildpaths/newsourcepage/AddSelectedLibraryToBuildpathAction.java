@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,6 +73,7 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getDetailedDescription() {
 		if (!isEnabled())
 			return null;
@@ -95,15 +96,16 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void run() {
 		try {
-			final IFile[] files= (IFile[])getSelectedElements().toArray(new IFile[getSelectedElements().size()]);
+			final IFile[] files= getSelectedElements().toArray(new IFile[getSelectedElements().size()]);
 
 			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 				        IJavaProject project= JavaCore.create(files[0].getProject());
-				        List result= addLibraryEntries(files, project, monitor);
+				        List<IJavaElement> result= addLibraryEntries(files, project, monitor);
 						selectAndReveal(new StructuredSelection(result));
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
@@ -121,8 +123,8 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 		}
 	}
 
-	private List addLibraryEntries(IFile[] resources, IJavaProject project, IProgressMonitor monitor) throws CoreException {
-		List addedEntries= new ArrayList();
+	private List<IJavaElement> addLibraryEntries(IFile[] resources, IJavaProject project, IProgressMonitor monitor) throws CoreException {
+		List<CPListElement> addedEntries= new ArrayList<CPListElement>();
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4);
 			for (int i= 0; i < resources.length; i++) {
@@ -131,15 +133,15 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 			}
 			monitor.worked(1);
 
-			List existingEntries= ClasspathModifier.getExistingEntries(project);
+			List<CPListElement> existingEntries= ClasspathModifier.getExistingEntries(project);
 			ClasspathModifier.setNewEntry(existingEntries, addedEntries, project, new SubProgressMonitor(monitor, 1));
 			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 1));
 
         	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
-        	delta.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
+        	delta.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));
         	informListeners(delta);
 
-			List result= new ArrayList(addedEntries.size());
+			List<IJavaElement> result= new ArrayList<IJavaElement>(addedEntries.size());
 			for (int i= 0; i < resources.length; i++) {
 				IResource res= resources[i];
 				IJavaElement elem= project.getPackageFragmentRoot(res);
@@ -155,12 +157,13 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 		}
 	}
 
+	@Override
 	protected boolean canHandle(IStructuredSelection elements) {
 		if (elements.size() == 0)
 			return false;
 
 		try {
-			for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 				Object element= iter.next();
 				if (element instanceof IFile) {
 					IFile file= (IFile)element;

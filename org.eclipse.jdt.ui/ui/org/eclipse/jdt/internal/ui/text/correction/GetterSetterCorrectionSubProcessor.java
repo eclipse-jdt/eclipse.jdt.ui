@@ -149,10 +149,12 @@ public class GetterSetterCorrectionSubProcessor {
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
 		 * @since 3.5
 		 */
+		@Override
 		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 			return CorrectionMessages.GetterSetterCorrectionSubProcessor_additional_info;
 		}
 
+		@Override
 		public void apply(IDocument document) {
 			try {
 				final SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(fField);
@@ -199,7 +201,7 @@ public class GetterSetterCorrectionSubProcessor {
 	 * @param resultingCollections the resulting proposals
 	 * @return <code>true</code> if the quick assist is applicable at this offset
 	 */
-	public static boolean addGetterSetterProposal(IInvocationContext context, ASTNode coveringNode, IProblemLocation[] locations, ArrayList resultingCollections) {
+	public static boolean addGetterSetterProposal(IInvocationContext context, ASTNode coveringNode, IProblemLocation[] locations, ArrayList<ICommandAccess> resultingCollections) {
 		if (locations != null) {
 			for (int i= 0; i < locations.length; i++) {
 				int problemId= locations[i].getProblemId();
@@ -212,11 +214,11 @@ public class GetterSetterCorrectionSubProcessor {
 		return addGetterSetterProposal(context, coveringNode, resultingCollections, 7);
 	}
 
-	public static void addGetterSetterProposal(IInvocationContext context, IProblemLocation location, Collection proposals, int relevance) {
+	public static void addGetterSetterProposal(IInvocationContext context, IProblemLocation location, Collection<ICommandAccess> proposals, int relevance) {
 		addGetterSetterProposal(context, location.getCoveringNode(context.getASTRoot()), proposals, relevance);
 	}
 
-	private static boolean addGetterSetterProposal(IInvocationContext context, ASTNode coveringNode, Collection proposals, int relevance) {
+	private static boolean addGetterSetterProposal(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> proposals, int relevance) {
 		if (!(coveringNode instanceof SimpleName)) {
 			return false;
 		}

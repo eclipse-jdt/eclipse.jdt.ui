@@ -35,6 +35,7 @@ public class JavadocAttributeConfiguration extends ClasspathAttributeConfigurati
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#getImageDescriptor(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
 	 */
+	@Override
 	public ImageDescriptor getImageDescriptor(ClasspathAttributeAccess attribute) {
 		return JavaPluginImages.DESC_OBJS_JAVADOC_LOCATION_ATTRIB;
 	}
@@ -42,6 +43,7 @@ public class JavadocAttributeConfiguration extends ClasspathAttributeConfigurati
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#getNameLabel(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
 	 */
+	@Override
 	public String getNameLabel(ClasspathAttributeAccess attribute) {
 		return NewWizardMessages.CPListLabelProvider_javadoc_location_label;
 	}
@@ -49,6 +51,7 @@ public class JavadocAttributeConfiguration extends ClasspathAttributeConfigurati
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#getValueLabel(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
 	 */
+	@Override
 	public String getValueLabel(ClasspathAttributeAccess access) {
 		String arg= null;
 		String str= access.getClasspathAttribute().getValue();
@@ -79,6 +82,7 @@ public class JavadocAttributeConfiguration extends ClasspathAttributeConfigurati
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#performEdit(org.eclipse.swt.widgets.Shell, org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
 	 */
+	@Override
 	public IClasspathAttribute performEdit(Shell shell, ClasspathAttributeAccess attribute) {
 		String initialLocation= attribute.getClasspathAttribute().getValue();
 		String elementName= attribute.getParentClasspassEntry().getPath().lastSegment();
@@ -99,6 +103,7 @@ public class JavadocAttributeConfiguration extends ClasspathAttributeConfigurati
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#performRemove(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
 	 */
+	@Override
 	public IClasspathAttribute performRemove(ClasspathAttributeAccess attribute) {
 		return JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, null);
 	}
@@ -106,6 +111,7 @@ public class JavadocAttributeConfiguration extends ClasspathAttributeConfigurati
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#canEdit(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
 	 */
+	@Override
 	public boolean canEdit(ClasspathAttributeAccess attribute) {
 		return true;
 	}
@@ -113,6 +119,7 @@ public class JavadocAttributeConfiguration extends ClasspathAttributeConfigurati
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#canRemove(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
 	 */
+	@Override
 	public boolean canRemove(ClasspathAttributeAccess attribute) {
 		return attribute.getClasspathAttribute().getValue() != null;
 	}

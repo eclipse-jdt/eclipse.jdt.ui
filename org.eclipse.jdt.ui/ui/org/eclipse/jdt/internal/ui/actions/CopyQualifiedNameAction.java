@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -118,10 +118,12 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canEnable(selection.toArray()));
 	}
 
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		//Must not create an AST
 	}
@@ -176,6 +178,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
+	@Override
 	public void run() {
 
 		try {
@@ -192,9 +195,11 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 				Object element= elements[0];
 				String qualifiedName= getQualifiedName(element);
 				IResource resource= null;
-				if (element instanceof IJavaElement)
-					resource= ((IJavaElement)element).getCorrespondingResource();
-				else if (element instanceof IResource)
+				if (element instanceof IJavaElement) {
+					IJavaElement je= ((IJavaElement)element);
+					if (je.exists())
+						resource= je.getCorrespondingResource();
+				} else if (element instanceof IResource)
 					resource= (IResource)element;
 
 				if (resource != null) {
@@ -274,8 +279,8 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		if (!(selection instanceof IStructuredSelection))
 			return null;
 
-		List result= new ArrayList();
-		for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
+		List<Object> result= new ArrayList<Object>();
+		for (Iterator<?> iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (isValidElement(element))
 				result.add(element);

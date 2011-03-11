@@ -71,6 +71,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getOffset()
 	 */
+	@Override
 	public int getOffset() {
 		return fSpellEvent.getBegin();
 	}
@@ -78,6 +79,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getLength()
 	 */
+	@Override
 	public int getLength() {
 		return fSpellEvent.getEnd() - fSpellEvent.getBegin() + 1;
 	}
@@ -85,6 +87,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getMessage()
 	 */
+	@Override
 	public String getMessage() {
 		if (isSentenceStart() && isDictionaryMatch())
 			return Messages.format(JavaUIMessages.Spelling_error_case_label, new String[] { fSpellEvent.getWord() });
@@ -95,6 +98,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getProposals()
 	 */
+	@Override
 	public ICompletionProposal[] getProposals() {
 		return getProposals(null);
 	}
@@ -103,6 +107,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getProposals(org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext)
 	 * @since 3.4
 	 */
+	@Override
 	public ICompletionProposal[] getProposals(IQuickAssistInvocationContext context) {
 		String[] arguments= getArguments();
 		if (arguments == null)
@@ -113,7 +118,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 
 		final int threshold= PreferenceConstants.getPreferenceStore().getInt(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD);
 		int size= 0;
-		List proposals= null;
+		List<RankedWordProposal> proposals= null;
 
 		RankedWordProposal proposal= null;
 		IJavaCompletionProposal[] result= null;
@@ -143,7 +148,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 								.getLocale()) };
 			else {
 
-				proposals= new ArrayList(checker.getProposals(arguments[0],
+				proposals= new ArrayList<RankedWordProposal>(checker.getProposals(arguments[0],
 						sentence));
 				size= proposals.size();
 
@@ -160,7 +165,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 
 				for (index= 0; index < size; index++) {
 
-					proposal= (RankedWordProposal) proposals.get(index);
+					proposal= proposals.get(index);
 					result[index]= new WordCorrectionProposal(proposal
 							.getText(), arguments, getOffset(), getLength(),
 							context, proposal.getRank());

@@ -151,6 +151,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 	/*
 	 * @see org.eclipse.ui.texteditor.TextEditorAction#setEditor(org.eclipse.ui.texteditor.ITextEditor)
 	 */
+	@Override
 	public void setEditor(ITextEditor editor) {
 		Assert.isTrue(editor instanceof CompilationUnitEditor);
 		super.setEditor(editor);
@@ -295,6 +296,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 	/*
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
+	@Override
 	public void runWithEvent(Event event) {
 
 		// get involved objects
@@ -470,6 +472,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 	/*
 	 * @see org.eclipse.ui.texteditor.IUpdate#update()
 	 */
+	@Override
 	public void update() {
 		super.update();
 

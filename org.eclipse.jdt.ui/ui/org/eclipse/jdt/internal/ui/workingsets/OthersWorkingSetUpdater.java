@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -41,6 +42,8 @@ import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.util.CollectionsUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -89,9 +92,9 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 			if (fWorkingSet == null)
 				return; // not yet initialized
 
-			processJavaDelta(new ArrayList(Arrays.asList(fWorkingSet.getElements())), event.getDelta());
+			processJavaDelta(new ArrayList<IAdaptable>(Arrays.asList(fWorkingSet.getElements())), event.getDelta());
 		}
-		private void processJavaDelta(List elements, IJavaElementDelta delta) {
+		private void processJavaDelta(List<IAdaptable> elements, IJavaElementDelta delta) {
 			IJavaElement jElement= delta.getElement();
 			int type= jElement.getElementType();
 			if (type == IJavaElement.JAVA_PROJECT) {
@@ -101,12 +104,12 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 				if (kind == IJavaElementDelta.CHANGED) {
 					if (index != -1 && (flags & IJavaElementDelta.F_CLOSED) != 0) {
 						elements.set(index, ((IJavaProject)jElement).getProject());
-						fWorkingSet.setElements((IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
+						fWorkingSet.setElements(elements.toArray(new IAdaptable[elements.size()]));
 					} else if ((flags & IJavaElementDelta.F_OPENED) != 0) {
 						index= elements.indexOf(((IJavaProject)jElement).getProject());
 						if (index != -1) {
 							elements.set(index, jElement);
-							fWorkingSet.setElements((IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
+							fWorkingSet.setElements(elements.toArray(new IAdaptable[elements.size()]));
 						}
 					}
 				}
@@ -174,8 +177,8 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 
 		IWorkingSet[] activeWorkingSets= fWorkingSetModel.getActiveWorkingSets();
 
-		List result= new ArrayList();
-		Set projects= new HashSet();
+		List<IAdaptable> result= new ArrayList<IAdaptable>();
+		Set<IResource> projects= new HashSet<IResource>();
 		for (int i= 0; i < activeWorkingSets.length; i++) {
 			if (activeWorkingSets[i] == fWorkingSet) continue;
 			IAdaptable[] elements= activeWorkingSets[i].getElements();
@@ -197,11 +200,11 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 			Object[] rProjects= model.getNonJavaResources();
 			for (int i= 0; i < rProjects.length; i++) {
 				if (!projects.contains(rProjects[i]))
-					result.add(rProjects[i]);
+					result.add((IProject) rProjects[i]);
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		fWorkingSet.setElements((IAdaptable[])result.toArray(new IAdaptable[result.size()]));
+		fWorkingSet.setElements(CollectionsUtil.toArray(result, IAdaptable.class));
 	}
 }

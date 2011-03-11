@@ -67,6 +67,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 	/*
 	 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
 	 */
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof LogicalPackage) {
 			LogicalPackage cp= (LogicalPackage) element;
@@ -107,6 +108,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 	/*
 	 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
 	 */
+	@Override
 	public String getText(Object element) {
 		if (element instanceof IPackageFragment)
 			return getText((IPackageFragment)element);
@@ -119,6 +121,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getRichTextLabel(java.lang.Object)
 	 */
+	@Override
 	public StyledString getStyledText(Object element) {
 		if (element instanceof IPackageFragment || element instanceof LogicalPackage)
 			return new StyledString(getText(element));

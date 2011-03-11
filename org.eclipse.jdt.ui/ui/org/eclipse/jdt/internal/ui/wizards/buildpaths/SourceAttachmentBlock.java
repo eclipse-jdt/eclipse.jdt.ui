@@ -509,7 +509,7 @@ public class SourceAttachmentBlock {
 	private IPath chooseInternal() {
 		String initSelection= fFileNameField.getText();
 
-		ViewerFilter filter= new ArchiveFileFilter((List) null, false, false);
+		ViewerFilter filter= new ArchiveFileFilter((List<IResource>) null, false, false);
 
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();

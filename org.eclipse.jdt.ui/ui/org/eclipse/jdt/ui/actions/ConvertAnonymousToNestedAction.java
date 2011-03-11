@@ -84,6 +84,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isConvertAnonymousAvailable(selection));
@@ -97,6 +98,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		IType type= getElement(selection);
 		if (type == null)
@@ -131,6 +133,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		run(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
 	}
@@ -138,6 +141,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 	}
@@ -148,6 +152,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isConvertAnonymousAvailable(selection));

@@ -25,14 +25,14 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 
 	private SingleVariableDeclaration fDeclaration;
 	private int fAccessMode;
-	private List fReferences;
+	private List<SimpleName> fReferences;
 	private int fOperatorPrecedence;
 
 	public ParameterData(SingleVariableDeclaration decl) {
 		super();
 		fDeclaration= decl;
 		fAccessMode= FlowInfo.UNUSED;
-		fReferences= new ArrayList(2);
+		fReferences= new ArrayList<SimpleName>(2);
 		fOperatorPrecedence= -1;
 	}
 
@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 		fReferences.add(node);
 	}
 
-	public List references() {
+	public List<SimpleName> references() {
 		return fReferences;
 	}
 

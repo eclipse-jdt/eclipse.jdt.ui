@@ -62,7 +62,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 
 	private Combo fIntermediaryTypeName;
 	private static final int INTERMEDIARY_TYPE_COUNT= 10;
-	private static List fgIntermediaryTypes= new ArrayList(INTERMEDIARY_TYPE_COUNT);
+	private static List<String> fgIntermediaryTypes= new ArrayList<String>(INTERMEDIARY_TYPE_COUNT);
 
 	/**
 	 * Constructor for IntroduceIndirectionInputPage.
@@ -82,7 +82,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 	private Combo createIntermediaryTypeCombo(Composite composite) {
 		final Combo textCombo= new Combo(composite, SWT.SINGLE | SWT.BORDER);
 		textCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		textCombo.setItems((String[]) fgIntermediaryTypes.toArray(new String[fgIntermediaryTypes.size()]));
+		textCombo.setItems(fgIntermediaryTypes.toArray(new String[fgIntermediaryTypes.size()]));
 		textCombo.setVisibleItemCount(INTERMEDIARY_TYPE_COUNT);
 
 		JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(false, false, true);
@@ -147,6 +147,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		});
 
 		enableReferencesCheckBox.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				getIntroduceIndirectionRefactoring().setEnableUpdateReferences(enableReferencesCheckBox.getSelection());
 			}
@@ -159,6 +160,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		});
 
 		browseTypes.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				IType intermediaryType= chooseIntermediaryClass();
 
@@ -223,11 +225,13 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		}
 	}
 
+	@Override
 	protected boolean performFinish() {
 		storeIntermediaryTypeName();
 		return super.performFinish();
 	}
 
+	@Override
 	public IWizardPage getNextPage() {
 		storeIntermediaryTypeName();
 		return super.getNextPage();

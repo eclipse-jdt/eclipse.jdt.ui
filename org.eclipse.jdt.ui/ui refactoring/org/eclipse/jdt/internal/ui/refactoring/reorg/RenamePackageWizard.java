@@ -40,8 +40,10 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 			IJavaHelpContextIds.RENAME_PACKAGE_WIZARD_PAGE);
 	}
 
+	@Override
 	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
 		return new RenamePackageInputWizardPage(message, IJavaHelpContextIds.RENAME_PACKAGE_WIZARD_PAGE, initialSetting) {
+			@Override
 			protected RefactoringStatus validateTextField(String text) {
 				return validateNewName(text);
 			}
@@ -55,6 +57,7 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 			super(message, contextHelpId, true, initialValue);
 		}
 
+		@Override
 		protected void addAdditionalOptions(Composite composite, RowLayouter layouter) {
 			fRenameSubpackages= new Button(composite, SWT.CHECK);
 			fRenameSubpackages.setText(RefactoringMessages.RenamePackageWizard_rename_subpackages);
@@ -63,6 +66,7 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 			getRenamePackageProcessor().setRenameSubpackages(subpackagesSelection);
 			fRenameSubpackages.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fRenameSubpackages.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					getRenamePackageProcessor().setRenameSubpackages(fRenameSubpackages.getSelection());
 
@@ -79,6 +83,7 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 			layouter.perform(separator);
 		}
 
+		@Override
 		public void dispose() {
 			if (saveSettings() && fRenameSubpackages.isEnabled())
 				saveBooleanSetting(RenameRefactoringWizard.PACKAGE_RENAME_SUBPACKAGES, fRenameSubpackages);

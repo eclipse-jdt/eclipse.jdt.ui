@@ -57,7 +57,8 @@ public class CleanUpModifyDialog extends ModifyDialog {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void addPages(final Map values) {
+	@Override
+	protected void addPages(final Map<String, String> values) {
 		CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
 
 		fPages= new ICleanUpConfigurationUI[descriptors.length];
@@ -76,6 +77,7 @@ public class CleanUpModifyDialog extends ModifyDialog {
 		}
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite control= (Composite)super.createDialogArea(parent);
 
@@ -87,6 +89,7 @@ public class CleanUpModifyDialog extends ModifyDialog {
 		return control;
 	}
 
+	@Override
 	public void updateStatus(IStatus status) {
 		int count= 0;
 		for (int i= 0; i < fPages.length; i++) {
@@ -99,6 +102,7 @@ public class CleanUpModifyDialog extends ModifyDialog {
 		}
 	}
 
+	@Override
 	public void valuesModified() {
 		super.valuesModified();
 		updateCountLabel();
@@ -118,6 +122,7 @@ public class CleanUpModifyDialog extends ModifyDialog {
 	 * {@inheritDoc}
 	 * @since 3.5
 	 */
+	@Override
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.CLEAN_UP_PREFERENCE_PAGE;
 	}

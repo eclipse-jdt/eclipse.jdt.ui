@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,7 +48,7 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 	protected final URI fOutputURI;
 
 	/** The list of packages to create stubs for */
-	protected final List fPackages;
+	protected final List<IPackageFragment> fPackages;
 
 	/**
 	 * Creates a new abstract code creation operation.
@@ -58,7 +58,7 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 	 * @param packages
 	 *            the list of packages to create code for
 	 */
-	protected AbstractCodeCreationOperation(final URI uri, final List packages) {
+	protected AbstractCodeCreationOperation(final URI uri, final List<IPackageFragment> packages) {
 		Assert.isNotNull(uri);
 		Assert.isNotNull(packages);
 		fOutputURI= uri;
@@ -145,8 +145,8 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 		monitor.beginTask(getOperationLabel(), 100 * fPackages.size());
 		try {
 			final StringBuffer buffer= new StringBuffer(128);
-			for (final Iterator iterator= fPackages.iterator(); iterator.hasNext();) {
-				final IPackageFragment fragment= (IPackageFragment) iterator.next();
+			for (final Iterator<IPackageFragment> iterator= fPackages.iterator(); iterator.hasNext();) {
+				final IPackageFragment fragment= iterator.next();
 				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 100);
 				final IClassFile[] files= fragment.getClassFiles();
 				final int size= files.length;

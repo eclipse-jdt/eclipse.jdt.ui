@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,10 +52,10 @@ public class NewSourceFolderDialog extends StatusDialog {
 	private StatusInfo fContainerFieldStatus;
 
 	private IContainer fFolder;
-	private List fExistingFolders;
+	private List<IContainer> fExistingFolders;
 	private IProject fCurrProject;
 
-	public NewSourceFolderDialog(Shell parent, String title, IProject project, List existingFolders, CPListElement entryToEdit) {
+	public NewSourceFolderDialog(Shell parent, String title, IProject project, List<IContainer> existingFolders, CPListElement entryToEdit) {
 		super(parent);
 		setTitle(title);
 
@@ -97,6 +97,7 @@ public class NewSourceFolderDialog extends StatusDialog {
 		fContainerDialogField.setLabelText(message);
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
 
@@ -191,6 +192,7 @@ public class NewSourceFolderDialog extends StatusDialog {
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.NEW_CONTAINER_DIALOG);

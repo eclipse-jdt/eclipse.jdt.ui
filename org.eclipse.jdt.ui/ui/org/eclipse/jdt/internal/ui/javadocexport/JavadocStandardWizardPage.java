@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -94,12 +94,12 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	private Button fStyleSheetBrowseButton;
 	private Button fStyleSheetButton;
 
-	private CheckedListDialogField fListDialogField;
+	private CheckedListDialogField<JavadocLinkRef> fListDialogField;
 
 	private StatusInfo fStyleSheetStatus;
 	private StatusInfo fLinkRefStatus;
 
-	private ArrayList fButtonsList;
+	private ArrayList<FlaggedButton> fButtonsList;
 	private JavadocTreeWizardPage fFirstPage;
 
 
@@ -109,7 +109,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		setDescription(JavadocExportMessages.JavadocStandardWizardPage_description);
 
 		fStore= store;
-		fButtonsList= new ArrayList();
+		fButtonsList= new ArrayList<FlaggedButton>();
 		fStyleSheetStatus= new StatusInfo();
 		fLinkRefStatus= new StatusInfo();
 	}
@@ -210,6 +210,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 
 		//Listeners
 		fStyleSheetButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fStyleSheetText, fStyleSheetBrowseButton }) {
+			@Override
 			public void validate() {
 				doValidation(STYLESHEETSTATUS);
 			}
@@ -222,6 +223,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		});
 
 		fStyleSheetBrowseButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				handleFileBrowseButtonPressed(fStyleSheetText, new String[] { "*.css" }, JavadocExportMessages.JavadocSpecificsWizardPage_stylesheetbrowsedialog_title);  //$NON-NLS-1$
 			}
@@ -242,7 +244,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 
 		ListAdapter adapter= new ListAdapter();
 
-		fListDialogField= new CheckedListDialogField(adapter, buttonlabels, labelProvider);
+		fListDialogField= new CheckedListDialogField<JavadocLinkRef>(adapter, buttonlabels, labelProvider);
 		fListDialogField.setDialogFieldListener(adapter);
 		fListDialogField.setCheckAllButtonIndex(0);
 		fListDialogField.setUncheckAllButtonIndex(1);
@@ -256,12 +258,12 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		fListDialogField.enableButton(2, false);
 	}
 
-	private List getCheckedReferences(JavadocLinkRef[] referencesClasses) {
-		List checkedElements= new ArrayList();
+	private List<JavadocLinkRef> getCheckedReferences(JavadocLinkRef[] referencesClasses) {
+		List<JavadocLinkRef> checkedElements= new ArrayList<JavadocLinkRef>();
 
 		String hrefs[]= fStore.getHRefs();
 		if (hrefs.length > 0) {
-			HashSet set= new HashSet();
+			HashSet<String> set= new HashSet<String>();
 			for (int i= 0; i < hrefs.length; i++) {
 				set.add(hrefs[i]);
 			}
@@ -284,7 +286,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	 * @return all IJavaProjects and IPaths that will be on the classpath
 	 */
 	private JavadocLinkRef[] getReferencedElements(IJavaProject[] checkedProjects) {
-		HashSet result= new HashSet();
+		HashSet<JavadocLinkRef> result= new HashSet<JavadocLinkRef>();
 		for (int i= 0; i < checkedProjects.length; i++) {
 			IJavaProject project= checkedProjects[i];
 			try {
@@ -294,10 +296,10 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 				// ignore
 			}
 		}
-		return (JavadocLinkRef[]) result.toArray(new JavadocLinkRef[result.size()]);
+		return result.toArray(new JavadocLinkRef[result.size()]);
 	}
 
-	private void collectReferencedElements(IJavaProject project, HashSet result) throws CoreException {
+	private void collectReferencedElements(IJavaProject project, HashSet<JavadocLinkRef> result) throws CoreException {
 		IRuntimeClasspathEntry[] unresolved = JavaRuntime.computeUnresolvedRuntimeClasspath(project);
 		for (int i= 0; i < unresolved.length; i++) {
 			IRuntimeClasspathEntry curr= unresolved[i];
@@ -345,9 +347,9 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 				break;
 			case LINK_REFERENCES:
 				fLinkRefStatus= new StatusInfo();
-				List list= fListDialogField.getCheckedElements();
+				List<JavadocLinkRef> list= fListDialogField.getCheckedElements();
 				for (int i= 0; i < list.size(); i++) {
-					JavadocLinkRef curr= (JavadocLinkRef) list.get(i);
+					JavadocLinkRef curr= list.get(i);
 					URL url= curr.getURL();
 					if (url == null) {
 						fLinkRefStatus.setWarning(JavadocExportMessages.JavadocStandardWizardPage_nolinkref_error);
@@ -397,20 +399,21 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	}
 
 	private String[] getHRefs() {
-		HashSet res= new HashSet();
-		List checked= fListDialogField.getCheckedElements();
-		for (Iterator iterator= checked.iterator(); iterator.hasNext();) {
-			JavadocLinkRef element= (JavadocLinkRef) iterator.next();
+		HashSet<String> res= new HashSet<String>();
+		List<JavadocLinkRef> checked= fListDialogField.getCheckedElements();
+		for (Iterator<JavadocLinkRef> iterator= checked.iterator(); iterator.hasNext();) {
+			JavadocLinkRef element= iterator.next();
 			URL url= element.getURL();
 			if (url != null) {
 				res.add(url.toExternalForm());
 			}
 		}
-		return (String[]) res.toArray(new String[res.size()]);
+		return res.toArray(new String[res.size()]);
 	}
 
 	//get the links
 
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
@@ -431,7 +434,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		JavadocLinkRef[] res= getReferencedElements(checkedProjects);
 		fListDialogField.setElements(Arrays.asList(res));
 
-		List checked= getCheckedReferences(res);
+		List<JavadocLinkRef> checked= getCheckedReferences(res);
 		fListDialogField.setCheckedElements(checked);
 	}
 
@@ -471,12 +474,12 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 
 	} //end class FlaggesButton
 
-	private class ListAdapter implements IListAdapter, IDialogFieldListener {
+	private class ListAdapter implements IListAdapter<JavadocLinkRef>, IDialogFieldListener {
 
 		/**
 		 * @see IListAdapter#customButtonPressed(ListDialogField, int)
 		 */
-		public void customButtonPressed(ListDialogField field, int index) {
+		public void customButtonPressed(ListDialogField<JavadocLinkRef> field, int index) {
 			if (index == 2)
 				doEditButtonPressed();
 		}
@@ -484,8 +487,8 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		/**
 		 * @see IListAdapter#selectionChanged(ListDialogField)
 		 */
-		public void selectionChanged(ListDialogField field) {
-			List selection= fListDialogField.getSelectedElements();
+		public void selectionChanged(ListDialogField<JavadocLinkRef> field) {
+			List<JavadocLinkRef> selection= fListDialogField.getSelectedElements();
 			if (selection.size() != 1) {
 				fListDialogField.enableButton(2, false);
 			} else {
@@ -493,7 +496,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			}
 		}
 
-		public void doubleClicked(ListDialogField field) {
+		public void doubleClicked(ListDialogField<JavadocLinkRef> field) {
 			doEditButtonPressed();
 		}
 
@@ -508,11 +511,11 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	 */
 	private void doEditButtonPressed() {
 
-		List selected= fListDialogField.getSelectedElements();
+		List<JavadocLinkRef> selected= fListDialogField.getSelectedElements();
 		if (selected.isEmpty()) {
 			return;
 		}
-		JavadocLinkRef obj= (JavadocLinkRef) selected.get(0);
+		JavadocLinkRef obj= selected.get(0);
 		if (obj != null) {
 			JavadocPropertyDialog jdialog= new JavadocPropertyDialog(getShell(), obj);
 			if (jdialog.open() == Window.OK) {
@@ -536,6 +539,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, this, initialLocation, selection.isProjectRef());
 		}
 
+		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
 			Control inner= fJavadocConfigurationBlock.createContents(composite);
@@ -552,6 +556,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		/**
 		 * @see Dialog#okPressed()
 		 */
+		@Override
 		protected void okPressed() {
 			try {
 				IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
@@ -578,6 +583,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		/*
 		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 		 */
+		@Override
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.JAVADOC_PROPERTY_DIALOG);

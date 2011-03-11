@@ -47,6 +47,7 @@ public class JavaSelectMarkerRulerAction2 extends SelectAnnotationRulerAction {
 	/*
 	 * @see org.eclipse.ui.texteditor.IVerticalRulerListener#annotationDefaultSelected(org.eclipse.ui.texteditor.VerticalRulerEvent)
 	 */
+	@Override
 	public void annotationDefaultSelected(VerticalRulerEvent event) {
 		Annotation annotation= event.getSelectedAnnotation();
 		IAnnotationModel model= getAnnotationModel();

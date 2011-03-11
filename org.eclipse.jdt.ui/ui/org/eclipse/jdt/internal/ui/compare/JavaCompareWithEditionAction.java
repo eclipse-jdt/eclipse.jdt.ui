@@ -18,6 +18,7 @@ public class JavaCompareWithEditionAction extends JavaHistoryAction {
 	public JavaCompareWithEditionAction() {
 	}
 
+	@Override
 	protected JavaHistoryActionImpl createDelegate() {
 		return new JavaCompareWithEditionActionImpl();
 	}

@@ -50,7 +50,7 @@ public class DefaultSpellingEngine implements ISpellingEngine {
 	private static final IContentType PROPERTIES_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaProperties"); //$NON-NLS-1$
 
 	/** Available spelling engines by content type */
-	private Map fEngines= new HashMap();
+	private Map<IContentType, SpellingEngine> fEngines= new HashMap<IContentType, SpellingEngine>();
 
 	/**
 	 * Initialize concrete engines.
@@ -88,7 +88,7 @@ public class DefaultSpellingEngine implements ISpellingEngine {
 			return null;
 
 		if (fEngines.containsKey(contentType))
-			return (ISpellingEngine) fEngines.get(contentType);
+			return fEngines.get(contentType);
 
 		return getEngine(contentType.getBaseType());
 	}

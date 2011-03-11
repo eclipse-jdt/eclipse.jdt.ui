@@ -50,6 +50,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		super(proposal, context);
 	}
 
+	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 		if (trigger == ' ' || trigger == '(')
 			trigger= '\0';
@@ -63,6 +64,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		return hasArgumentList() && hasParameters();
 	}
 
+	@Override
 	public int getPrefixCompletionStart(IDocument document, int completionOffset) {
 		if (fProposal.getKind() == CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER) {
 			return fProposal.getTokenStart();
@@ -71,6 +73,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		return super.getPrefixCompletionStart(document, completionOffset);
 	}
 	
+	@Override
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		if (hasArgumentList() || fProposal.getKind() == CompletionProposal.CONSTRUCTOR_INVOCATION) {
 			String completion= String.valueOf(fProposal.getName());
@@ -83,6 +86,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		return super.getPrefixCompletionText(document, completionOffset);
 	}
 
+	@Override
 	protected IContextInformation computeContextInformation() {
 		// no context information for METHOD_NAME_REF proposals (e.g. for static imports)
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=94654
@@ -96,6 +100,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		return super.computeContextInformation();
 	}
 
+	@Override
 	protected char[] computeTriggerCharacters() {
 		if (fProposal.getKind() == CompletionProposal.METHOD_NAME_REFERENCE)
 			return METHOD_NAME_TRIGGERS;
@@ -146,6 +151,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	 *
 	 * @return the formatter settings
 	 */
+	@Override
 	protected final FormatterPrefs getFormatterPrefs() {
 		if (fFormatterPrefs == null)
 			fFormatterPrefs= new FormatterPrefs(fInvocationContext.getProject());
@@ -155,6 +161,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeReplacementString()
 	 */
+	@Override
 	protected String computeReplacementString() {
 		if (!hasArgumentList())
 			return super.computeReplacementString();
@@ -213,6 +220,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		buffer.append(LPAREN);
 	}
 
+	@Override
 	protected ProposalInfo computeProposalInfo() {
 		IJavaProject project= fInvocationContext.getProject();
 		if (project != null)
@@ -223,6 +231,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeSortString()
 	 */
+	@Override
 	protected String computeSortString() {
 		/*
 		 * Lexicographical sort order:
@@ -247,6 +256,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isOffsetValid(int)
 	 * @since 3.5
 	 */
+	@Override
 	protected boolean isOffsetValid(int offset) {
 		if (fProposal.getKind() != CompletionProposal.CONSTRUCTOR_INVOCATION)
 			return super.isOffsetValid(offset);
@@ -257,6 +267,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
 	 */
+	@Override
 	protected boolean isValidPrefix(String prefix) {
 		if (super.isValidPrefix(prefix))
 			return true;
@@ -286,6 +297,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isPrefix(java.lang.String, java.lang.String)
 	 * @since 3.4
 	 */
+	@Override
 	protected boolean isPrefix(String prefix, String string) {
 		if (fProposal.getKind() == CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER && prefix != null)
 			prefix= prefix.substring(fProposal.getReceiverEnd() - fProposal.getReceiverStart() + 1);
@@ -296,6 +308,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getPrefix(org.eclipse.jface.text.IDocument, int)
 	 * @since 3.5
 	 */
+	@Override
 	protected String getPrefix(IDocument document, int offset) {
 		if (fProposal.getKind() != CompletionProposal.CONSTRUCTOR_INVOCATION)
 			return super.getPrefix(document, offset);

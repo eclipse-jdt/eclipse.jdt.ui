@@ -16,14 +16,17 @@ public final class SuperWildcardType extends WildcardType {
 		super(environment);
 	}
 
+	@Override
 	public TType getErasure() {
 		return getEnvironment().getJavaLangObject();
 	}
 
+	@Override
 	public int getKind() {
 		return SUPER_WILDCARD_TYPE;
 	}
 
+	@Override
 	protected boolean doCanAssignTo(TType lhs) {
 		switch(lhs.getKind()) {
 			case STANDARD_TYPE:
@@ -44,6 +47,7 @@ public final class SuperWildcardType extends WildcardType {
 		}
 	}
 
+	@Override
 	protected boolean checkTypeArgument(TType rhs) {
 		switch(rhs.getKind()) {
 			case ARRAY_TYPE:
@@ -70,6 +74,7 @@ public final class SuperWildcardType extends WildcardType {
 		}
 	}
 
+	@Override
 	protected boolean checkAssignmentBound(TType rhs) {
 		// ? super Number is a set of all super types of number including
 		// Number. So I can only assign objects which are a subtype of
@@ -77,10 +82,12 @@ public final class SuperWildcardType extends WildcardType {
 		return rhs.canAssignTo(getBound());
 	}
 
+	@Override
 	public String getName() {
 		return internalGetName("super"); //$NON-NLS-1$
 	}
 
+	@Override
 	protected String getPlainPrettySignature() {
 		return internalGetPrettySignature("super"); //$NON-NLS-1$
 	}

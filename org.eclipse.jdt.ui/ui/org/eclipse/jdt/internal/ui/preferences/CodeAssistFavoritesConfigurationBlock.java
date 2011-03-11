@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -94,10 +94,10 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 		}
 
 		private StringButtonDialogField fNameDialogField;
-		private List fExistingEntries;
+		private List<String> fExistingEntries;
 		private final boolean fIsEditingMember;
 
-		public FavoriteStaticMemberInputDialog(Shell parent, List existingEntries, boolean isMember, boolean isNew) {
+		public FavoriteStaticMemberInputDialog(Shell parent, List<String> existingEntries, boolean isMember, boolean isNew) {
 			super(parent);
 			fIsEditingMember= isMember;
 			fExistingEntries= existingEntries;
@@ -125,6 +125,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 		 * @since 3.4
 		 */
+		@Override
 		protected boolean isResizable() {
 			return true;
 		}
@@ -144,6 +145,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			return val;
 		}
 
+		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
 			initializeDialogUnits(parent);
@@ -213,7 +215,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 
 		private boolean doesExist(String name) {
 			for (int i= 0; i < fExistingEntries.size(); i++) {
-				String entry= (String) fExistingEntries.get(i);
+				String entry= fExistingEntries.get(i);
 				if (name.equals(entry)) {
 					return true;
 				}
@@ -225,6 +227,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 		/*
 		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 		 */
+		@Override
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);
@@ -243,28 +246,30 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			CLASS_ICON= JavaElementImageProvider.getDecoratedImage(JavaPluginImages.DESC_OBJS_CLASS, 0, JavaElementImageProvider.SMALL_SIZE);
 		}
 
+		@Override
 		public Image getImage(Object element) {
 			return ((String)element).endsWith(WILDCARD) ? CLASS_ICON : MEMBER_ICON;
 		}
 
+		@Override
 		public String getText(Object element) {
 			return BasicElementLabels.getJavaElementName((String) element);
 		}
 	}
 
 
-	private class ListAdapter implements IListAdapter, IDialogFieldListener {
+	private class ListAdapter implements IListAdapter<String>, IDialogFieldListener {
 
-		private boolean canEdit(ListDialogField field) {
-			List selected= field.getSelectedElements();
+		private boolean canEdit(ListDialogField<String> field) {
+			List<String> selected= field.getSelectedElements();
 			return selected.size() == 1;
 		}
 
-        public void customButtonPressed(ListDialogField field, int index) {
+        public void customButtonPressed(ListDialogField<String> field, int index) {
         	doButtonPressed(index);
         }
 
-        public void selectionChanged(ListDialogField field) {
+        public void selectionChanged(ListDialogField<String> field) {
 			fList.enableButton(IDX_EDIT, canEdit(field));
         }
 
@@ -272,7 +277,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
         	doDialogFieldChanged(field);
         }
 
-        public void doubleClicked(ListDialogField field) {
+        public void doubleClicked(ListDialogField<String> field) {
         	if (canEdit(field)) {
 				doButtonPressed(IDX_EDIT);
         	}
@@ -289,7 +294,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 	private static final int IDX_EDIT= 2;
 	private static final int IDX_REMOVE= 3;
 
-	private ListDialogField fList;
+	private ListDialogField<String> fList;
 
 
 	private static Key[] getAllKeys() {
@@ -303,6 +308,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 		super(statusListener, null, getAllKeys(), workbenchcontainer);
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		scrolled.setExpandHorizontal(true);
@@ -338,7 +344,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 
 		ListAdapter adapter= new ListAdapter();
 
-		fList= new ListDialogField(adapter, buttonLabels, new ListLabelProvider());
+		fList= new ListDialogField<String>(adapter, buttonLabels, new ListLabelProvider());
 		fList.setDialogFieldListener(adapter);
 		fList.setLabelText(PreferencesMessages.CodeAssistStaticMembersConfigurationBlock_description);
 		fList.setRemoveButtonIndex(IDX_REMOVE);
@@ -361,15 +367,18 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 		fList.setElements(Arrays.asList(getFavoriteStaticMembersPreference()));
  	}
 
-    public void performDefaults() {
+    @Override
+	public void performDefaults() {
 		super.performDefaults();
 		initializeFields();
 	}
 
+	@Override
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		return null;
 	}
 
+	@Override
 	protected void validateSettings(Key key, String oldValue, String newValue) {
 		// no validation
 	}
@@ -377,28 +386,28 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 	protected void setControlEnabled(Key key, boolean enabled) {
 		Control control= getControl(key);
 		control.setEnabled(enabled);
-		Label label= (Label) fLabels.get(control);
+		Label label= fLabels.get(control);
 		if (label != null)
 			label.setEnabled(enabled);
 	}
 
 	private Control getControl(Key key) {
 		for (int i= fComboBoxes.size() - 1; i >= 0; i--) {
-			Control curr= (Control) fComboBoxes.get(i);
+			Control curr= fComboBoxes.get(i);
 			ControlData data= (ControlData) curr.getData();
 			if (key.equals(data.getKey())) {
 				return curr;
 			}
 		}
 		for (int i= fCheckBoxes.size() - 1; i >= 0; i--) {
-			Control curr= (Control) fCheckBoxes.get(i);
+			Control curr= fCheckBoxes.get(i);
 			ControlData data= (ControlData) curr.getData();
 			if (key.equals(data.getKey())) {
 				return curr;
 			}
 		}
 		for (int i= fTextBoxes.size() - 1; i >= 0; i--) {
-			Control curr= (Control) fTextBoxes.get(i);
+			Control curr= fTextBoxes.get(i);
 			Key currKey= (Key) curr.getData();
 			if (key.equals(currKey)) {
 				return curr;
@@ -409,19 +418,19 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 
 	private void doButtonPressed(int index) {
 		if (index == IDX_NEW_TYPE || index == IDX_NEW_MEMBER) { // add new
-			List existing= fList.getElements();
+			List<String> existing= fList.getElements();
 			FavoriteStaticMemberInputDialog dialog= new FavoriteStaticMemberInputDialog(getShell(), existing, index == IDX_NEW_MEMBER, true);
 			if (dialog.open() == Window.OK) {
 				fList.addElement(dialog.getResult());
 			}
 		} else if (index == IDX_EDIT) { // edit
-			List selected= fList.getSelectedElements();
+			List<String> selected= fList.getSelectedElements();
 			if (selected.isEmpty())
 				return;
 
-			String editedEntry= (String)selected.get(0);
+			String editedEntry= selected.get(0);
 
-			List existing= fList.getElements();
+			List<String> existing= fList.getElements();
 			existing.remove(editedEntry);
 			boolean isType= editedEntry.endsWith(WILDCARD);
 			FavoriteStaticMemberInputDialog dialog= new FavoriteStaticMemberInputDialog(getShell(), existing, !isType, false);
@@ -453,11 +462,11 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 		return str.split(";"); //$NON-NLS-1$
 	}
 
-	private static String serializeFavorites(List favorites) {
+	private static String serializeFavorites(List<String> favorites) {
 		int size= favorites.size();
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < size; i++) {
-			buf.append((String)favorites.get(i));
+			buf.append(favorites.get(i));
 			if (i < size -1)
 				buf.append(';');
 		}

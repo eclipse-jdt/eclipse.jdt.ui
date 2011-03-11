@@ -39,6 +39,7 @@ class GotoInputAction extends Action {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_INPUT_ACTION);
 	}
 
+	@Override
 	public void run() {
 		IJavaElement inputElement= fInfoView.getInput();
 		new OpenAction(fInfoView.getViewSite()).run(new Object[] { inputElement });

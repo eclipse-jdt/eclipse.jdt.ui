@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -62,7 +64,7 @@ final class CompletionProposalComputerDescriptor {
 	/** The extension schema name of the partition child elements. */
 	private static final String PARTITION= "partition"; //$NON-NLS-1$
 	/** Set of Java partition types. */
-	private static final Set PARTITION_SET;
+	private static final Set<String> PARTITION_SET;
 	/** The name of the performance event used to trace extensions. */
 	private static final String PERFORMANCE_EVENT= JavaPlugin.getPluginId() + "/perf/content_assist/extensions"; //$NON-NLS-1$
 	/**
@@ -85,7 +87,7 @@ final class CompletionProposalComputerDescriptor {
 	private static final String SESSION_ENDED= "sessionEnded()"; //$NON-NLS-1$
 
 	static {
-		Set partitions= new HashSet();
+		Set<String> partitions= new HashSet<String>();
 		partitions.add(IDocument.DEFAULT_CONTENT_TYPE);
 		partitions.add(IJavaPartitions.JAVA_DOC);
 		partitions.add(IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
@@ -105,7 +107,7 @@ final class CompletionProposalComputerDescriptor {
 	/** The activate attribute value. */
 	private final boolean fActivate;
 	/** The partition of the extension (element type: {@link String}). */
-	private final Set fPartitions;
+	private final Set<String> fPartitions;
 	/** The configuration element of this extension. */
 	private final IConfigurationElement fElement;
 	/** The registry we are registered with. */
@@ -140,7 +142,7 @@ final class CompletionProposalComputerDescriptor {
 	 * @throws InvalidRegistryObjectException if this extension is no longer valid
 	 * @throws CoreException if the extension contains invalid values
 	 */
-	CompletionProposalComputerDescriptor(IConfigurationElement element, CompletionProposalComputerRegistry registry, List categories) throws InvalidRegistryObjectException, CoreException {
+	CompletionProposalComputerDescriptor(IConfigurationElement element, CompletionProposalComputerRegistry registry, List<CompletionProposalCategory> categories) throws InvalidRegistryObjectException, CoreException {
 		Assert.isLegal(registry != null);
 		Assert.isLegal(element != null);
 
@@ -156,7 +158,7 @@ final class CompletionProposalComputerDescriptor {
 		else
 			fName= name;
 
-		Set partitions= new HashSet();
+		Set<String> partitions= new HashSet<String>();
 		IConfigurationElement[] children= element.getChildren(PARTITION);
 		if (children.length == 0) {
 			fPartitions= PARTITION_SET; // add to all partition types if no partition is configured
@@ -179,8 +181,8 @@ final class CompletionProposalComputerDescriptor {
 		if (categoryId == null)
 			categoryId= DEFAULT_CATEGORY_ID;
 		CompletionProposalCategory category= null;
-		for (Iterator it= categories.iterator(); it.hasNext();) {
-			CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
+		for (Iterator<CompletionProposalCategory> it= categories.iterator(); it.hasNext();) {
+			CompletionProposalCategory cat= it.next();
 			if (cat.getId().equals(categoryId)) {
 				category= cat;
 				break;
@@ -235,7 +237,7 @@ final class CompletionProposalComputerDescriptor {
 	 *
 	 * @return the set of partition types (element type: {@link String})
 	 */
-	public Set getPartitions() {
+	public Set<String> getPartitions() {
 		return fPartitions;
 	}
 
@@ -301,19 +303,19 @@ final class CompletionProposalComputerDescriptor {
 	 * @return the list of computed completion proposals (element type:
 	 *         {@link org.eclipse.jface.text.contentassist.ICompletionProposal})
 	 */
-	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (!isEnabled())
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 
 		IStatus status;
 		try {
 			IJavaCompletionProposalComputer computer= getComputer(true);
 			if (computer == null) // not active yet
-				return Collections.EMPTY_LIST;
+				return Collections.emptyList();
 
 			try {
 				PerformanceStats stats= startMeter(context, computer);
-				List proposals= computer.computeCompletionProposals(context, monitor);
+				List<ICompletionProposal> proposals= computer.computeCompletionProposals(context, monitor);
 				stopMeter(stats, COMPUTE_COMPLETION_PROPOSALS);
 
 				if (proposals != null) {
@@ -336,7 +338,7 @@ final class CompletionProposalComputerDescriptor {
 
 		fRegistry.informUser(this, status);
 
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 	/**
@@ -349,18 +351,18 @@ final class CompletionProposalComputerDescriptor {
 	 * @return the list of computed context information objects (element type:
 	 *         {@link org.eclipse.jface.text.contentassist.IContextInformation})
 	 */
-	public List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List<IContextInformation> computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (!isEnabled())
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 
 		IStatus status;
 		try {
 			IJavaCompletionProposalComputer computer= getComputer(true);
 			if (computer == null) // not active yet
-				return Collections.EMPTY_LIST;
+				return Collections.emptyList();
 
 			PerformanceStats stats= startMeter(context, computer);
-			List proposals= computer.computeContextInformation(context, monitor);
+			List<IContextInformation> proposals= computer.computeContextInformation(context, monitor);
 			stopMeter(stats, COMPUTE_CONTEXT_INFORMATION);
 
 			if (proposals != null) {
@@ -381,7 +383,7 @@ final class CompletionProposalComputerDescriptor {
 
 		fRegistry.informUser(this, status);
 
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 

@@ -59,6 +59,7 @@ public class FindImplementorsAction extends FindAction {
 		super(editor);
 	}
 
+	@Override
 	void init() {
 		setText(SearchMessages.Search_FindImplementorsAction_label);
 		setToolTipText(SearchMessages.Search_FindImplementorsAction_tooltip);
@@ -66,10 +67,12 @@ public class FindImplementorsAction extends FindAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_WORKSPACE_ACTION);
 	}
 
-	Class[] getValidTypes() {
+	@Override
+	Class<?>[] getValidTypes() {
 		return new Class[] { ICompilationUnit.class, IType.class};
 	}
 
+	@Override
 	boolean canOperateOn(IJavaElement element) {
 		if (!super.canOperateOn(element))
 			return false;
@@ -84,10 +87,12 @@ public class FindImplementorsAction extends FindAction {
 		return false;
 	}
 
+	@Override
 	int getLimitTo() {
 		return IJavaSearchConstants.IMPLEMENTORS;
 	}
 
+	@Override
 	String getOperationUnavailableMessage() {
 		return SearchMessages.JavaElementAction_operationUnavailable_interface;
 	}

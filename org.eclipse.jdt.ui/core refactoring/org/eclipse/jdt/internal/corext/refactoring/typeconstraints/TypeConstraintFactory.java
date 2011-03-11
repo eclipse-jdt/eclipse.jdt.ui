@@ -19,8 +19,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public class TypeConstraintFactory implements ITypeConstraintFactory {
 
-	private Map/*<ConstraintVariable, Map<ConstraintVariable, Map<ConstraintOperator, SimpleTypeConstraint>>*/ fSimpleConstraints= new HashMap();
-	private Map/*<ConstraintVariable, Map<String, CompositeOrTypeConstraint>>*/ fOrConstraints= new HashMap();
+	private Map<ConstraintVariable, Map<ConstraintVariable, Map<ConstraintOperator, SimpleTypeConstraint>>> fSimpleConstraints= new HashMap<ConstraintVariable, Map<ConstraintVariable, Map<ConstraintOperator, SimpleTypeConstraint>>>();
+	private Map<ConstraintVariable, Map<String, CompositeOrTypeConstraint>> fOrConstraints= new HashMap<ConstraintVariable, Map<String, CompositeOrTypeConstraint>>();
 
 	protected static final boolean PRINT_STATS= false;
 	protected int fNrCreated= 0;
@@ -30,31 +30,31 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 	// Only to be called by the createXXXConstraint() methods
 	private SimpleTypeConstraint createSimpleTypeConstraint(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator operator) {
 		if (fSimpleConstraints.containsKey(v1)){
-			Map m2= (Map)fSimpleConstraints.get(v1);
+			Map<ConstraintVariable, Map<ConstraintOperator, SimpleTypeConstraint>> m2= fSimpleConstraints.get(v1);
 			if (m2.containsKey(v2)){
-				Map m3= (Map)m2.get(v2);
+				Map<ConstraintOperator, SimpleTypeConstraint> m3= m2.get(v2);
 				if (m3.containsKey(operator)){
 					if (PRINT_STATS) fNrRetrieved++;
 					if (PRINT_STATS) dumpStats();
-					return (SimpleTypeConstraint)m3.get(operator);
+					return m3.get(operator);
 				} else {
 					return storeConstraint(v1, v2, operator, m3);
 				}
 			} else {
-				Map m3= new HashMap();
+				Map<ConstraintOperator, SimpleTypeConstraint> m3= new HashMap<ConstraintOperator, SimpleTypeConstraint>();
 				m2.put(v2, m3);
 				return storeConstraint(v1, v2, operator, m3);
 			}
 		} else {
-			Map m2= new HashMap();
+			Map<ConstraintVariable, Map<ConstraintOperator, SimpleTypeConstraint>> m2= new HashMap<ConstraintVariable, Map<ConstraintOperator, SimpleTypeConstraint>>();
 			fSimpleConstraints.put(v1, m2);
-			Map m3= new HashMap();
+			Map<ConstraintOperator, SimpleTypeConstraint> m3= new HashMap<ConstraintOperator, SimpleTypeConstraint>();
 			m2.put(v2, m3);
 			return storeConstraint(v1, v2, operator, m3);
 		}
 	}
 
-	private SimpleTypeConstraint storeConstraint(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator operator, Map m3) {
+	private SimpleTypeConstraint storeConstraint(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator operator, Map<ConstraintOperator, SimpleTypeConstraint> m3) {
 		SimpleTypeConstraint constraint= new SimpleTypeConstraint(v1, v2, operator);
 		m3.put(operator, constraint);
 		if (PRINT_STATS) fNrCreated++;
@@ -117,11 +117,11 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 		}
 
 		if (fOrConstraints.containsKey(left)){
-			Map m2= (Map)fOrConstraints.get(left);
+			Map<String, CompositeOrTypeConstraint> m2= fOrConstraints.get(left);
 			if (m2.containsKey(bounds)){
 				if (PRINT_STATS) fNrRetrieved++;
 				if (PRINT_STATS) dumpStats();
-				return (CompositeOrTypeConstraint)m2.get(bounds);
+				return m2.get(bounds);
 			} else {
 				CompositeOrTypeConstraint constraint= new CompositeOrTypeConstraint(constraints);
 				m2.put(bounds, constraint);
@@ -130,7 +130,7 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 				return constraint;
 			}
 		} else {
-			Map m2= new HashMap();
+			Map<String, CompositeOrTypeConstraint> m2= new HashMap<String, CompositeOrTypeConstraint>();
 			fOrConstraints.put(left, m2);
 			CompositeOrTypeConstraint constraint= new CompositeOrTypeConstraint(constraints);
 			m2.put(bounds, constraint);

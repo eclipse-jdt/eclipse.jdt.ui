@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,6 +76,7 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getDetailedDescription() {
 		if (!isEnabled())
 			return null;
@@ -97,6 +98,7 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void run() {
         final IJavaProject project;
         Object object= getSelectedElements().get(0);
@@ -110,7 +112,7 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
-				        List result= exclude(getSelectedElements(), project, monitor);
+				        List<IResource> result= exclude(getSelectedElements(), project, monitor);
 				        selectAndReveal(new StructuredSelection(result));
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
@@ -128,14 +130,14 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 		}
 	}
 
-	private List exclude(List javaElements, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	private List<IResource> exclude(List<?> javaElements, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Excluding, javaElements.size() + 4);
 
-			List existingEntries= ClasspathModifier.getExistingEntries(project);
-			List resources= new ArrayList();
+			List<CPListElement> existingEntries= ClasspathModifier.getExistingEntries(project);
+			List<IResource> resources= new ArrayList<IResource>();
 			for (int i= 0; i < javaElements.size(); i++) {
 				IJavaElement javaElement= (IJavaElement) javaElements.get(i);
 				IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
@@ -150,7 +152,7 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 4));
 
         	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
-        	delta.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
+        	delta.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));
         	informListeners(delta);
 
 			return resources;
@@ -159,11 +161,12 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 		}
 	}
 
+	@Override
 	protected boolean canHandle(IStructuredSelection elements) {
         if (elements.size() == 0)
             return false;
 
-        for (Iterator iter= elements.iterator(); iter.hasNext();) {
+        for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IPackageFragment) {
 				IPackageFragment fragment= (IPackageFragment)element;

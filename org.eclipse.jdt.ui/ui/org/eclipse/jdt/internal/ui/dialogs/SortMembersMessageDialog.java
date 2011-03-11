@@ -69,6 +69,7 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
@@ -77,6 +78,7 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 		Link link= new Link(composite, SWT.WRAP | SWT.RIGHT);
 		link.setText(DialogsMessages.SortMembersMessageDialog_description);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				openMembersSortOrderPage();
 			}
@@ -100,6 +102,7 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 	/*
 	 * @see org.eclipse.jface.dialogs.IconAndMessageDialog#createContents(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		Control contents= super.createContents(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.SORT_MEMBERS_DIALOG);
@@ -109,6 +112,7 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IconAndMessageDialog#createMessageArea(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createMessageArea(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -169,6 +173,7 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.window.Window#open()
 	 */
+	@Override
 	public int open() {
 		if (isDialogEnabled(OPTIONAL_ID)) {
 			int res= super.open();
@@ -184,6 +189,7 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#close()
 	 */
+	@Override
 	public boolean close() {
 		fDialogSettings.put(DIALOG_SETTINGS_SORT_ALL, fSortAllRadio.isSelected());
 		return super.close();

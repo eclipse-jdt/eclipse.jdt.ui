@@ -30,7 +30,8 @@ public class HelpAction extends Action {
         setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Help_tooltip);
     }
 
-    public void run() {
+    @Override
+	public void run() {
         PlatformUI.getWorkbench().getHelpSystem().displayHelpResource(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Help_link);
     }
 }

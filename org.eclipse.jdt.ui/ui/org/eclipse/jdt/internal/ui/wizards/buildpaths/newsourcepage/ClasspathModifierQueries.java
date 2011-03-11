@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,7 @@ public class ClasspathModifierQueries {
      */
     public static abstract class OutputFolderValidator {
         protected IClasspathEntry[] fEntries;
-        protected List fElements;
+        protected List<?> fElements;
 
         /**
          * Create a output folder validator.
@@ -68,7 +68,7 @@ public class ClasspathModifierQueries {
          * @param project the Java project
          * @throws JavaModelException
          */
-        public OutputFolderValidator(List newElements, IJavaProject project) throws JavaModelException {
+        public OutputFolderValidator(List<?> newElements, IJavaProject project) throws JavaModelException {
             fEntries= project.getRawClasspath();
             fElements= newElements;
         }
@@ -368,7 +368,8 @@ public class ClasspathModifierQueries {
 			protected IPath fOutputLocation;
 			protected boolean fRemoveProject;
 
-            public boolean doQuery(final boolean editingOutputFolder,  final OutputFolderValidator validator, final IJavaProject project) throws JavaModelException {
+            @Override
+			public boolean doQuery(final boolean editingOutputFolder,  final OutputFolderValidator validator, final IJavaProject project) throws JavaModelException {
                 final boolean[] result= { false };
                 fRemoveProject= false;
                 fOutputLocation= project.getOutputLocation();
@@ -408,11 +409,13 @@ public class ClasspathModifierQueries {
                 return result[0];
             }
 
-            public IPath getOutputLocation() {
+            @Override
+			public IPath getOutputLocation() {
                 return fOutputLocation;
             }
 
-            public boolean removeProjectFromClasspath() {
+            @Override
+			public boolean removeProjectFromClasspath() {
                 return fRemoveProject;
             }
 

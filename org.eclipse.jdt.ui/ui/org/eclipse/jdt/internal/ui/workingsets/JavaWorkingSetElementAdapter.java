@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.JavaCore;
 public class JavaWorkingSetElementAdapter implements IWorkingSetElementAdapter {
 
 	public IAdaptable[] adaptElements(IWorkingSet ws, IAdaptable[] elements) {
-		ArrayList result= new ArrayList(elements.length);
+		ArrayList<Object> result= new ArrayList<Object>(elements.length);
 
 		for (int i= 0; i < elements.length; i++) {
 			IAdaptable curr= elements[i];
@@ -49,7 +49,7 @@ public class JavaWorkingSetElementAdapter implements IWorkingSetElementAdapter {
 				} // ignore all others
 			}
 		}
-		return (IAdaptable[]) result.toArray(new IAdaptable[result.size()]);
+		return result.toArray(new IAdaptable[result.size()]);
 	}
 
 	private Object adaptFromResource(IResource resource) {

@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -120,6 +121,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		/*
 		 * @see StructuredViewer#mapElement(Object, Widget)
 		 */
+		@Override
 		protected void mapElement(Object element, Widget item) {
 			super.mapElement(element, item);
 			if (item instanceof Item) {
@@ -130,6 +132,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		/*
 		 * @see StructuredViewer#unmapElement(Object, Widget)
 		 */
+		@Override
 		protected void unmapElement(Object element, Widget item) {
 			if (item instanceof Item) {
 				fResourceToItemsMapper.removeFromMap(element, (Item) item);
@@ -140,6 +143,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		/*
 		 * @see StructuredViewer#unmapAllElements()
 		 */
+		@Override
 		protected void unmapAllElements() {
 			fResourceToItemsMapper.clearMap();
 			super.unmapAllElements();
@@ -148,6 +152,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		/*
 		 * @see org.eclipse.jface.viewers.StructuredViewer#handleLabelProviderChanged(org.eclipse.jface.viewers.LabelProviderChangedEvent)
 		 */
+		@Override
 		protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
 			if (event instanceof ProblemsLabelChangedEvent) {
 				ProblemsLabelChangedEvent e= (ProblemsLabelChangedEvent) event;
@@ -158,7 +163,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 			Object[] changed= event.getElements();
 			if (changed != null && !fResourceToItemsMapper.isEmpty()) {
-				ArrayList others= new ArrayList(changed.length);
+				ArrayList<Object> others= new ArrayList<Object>(changed.length);
 				for (int i= 0; i < changed.length; i++) {
 					Object curr= changed[i];
 					if (curr instanceof IResource) {
@@ -189,11 +194,13 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbViewer#configureDropDownViewer(org.eclipse.jface.viewers.TreeViewer, java.lang.Object)
 		 */
+		@Override
 		public void configureDropDownViewer(TreeViewer viewer, Object input) {
 			viewer.setContentProvider(createDropDownContentProvider());
 			viewer.setLabelProvider(createDropDownLabelProvider());
 			viewer.setComparator(new JavaElementComparator());
 			viewer.addFilter(new ViewerFilter() {
+				@Override
 				public boolean select(Viewer viewer1, Object parentElement, Object element) {
 					if (element instanceof IMember) {
 						if (((IMember) element).getElementName().startsWith("<")) { //$NON-NLS-1$
@@ -259,7 +266,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			} else if (inputElement instanceof IPackageFragmentRoot) {
 				Object[] fragments= fParent.getChildren(inputElement);
 
-				ArrayList packages= new ArrayList();
+				ArrayList<Object> packages= new ArrayList<Object>();
 				for (int i= 0; i < fragments.length; i++) {
 					Object object= fragments[i];
 					if (object instanceof IPackageFragment) {
@@ -299,7 +306,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			} catch (JavaModelException e) {
 				return fParent.getChildren(model);
 			}
-			ArrayList result= new ArrayList(javaProjects.length + nonJavaResources.length);
+			ArrayList<IAdaptable> result= new ArrayList<IAdaptable>(javaProjects.length + nonJavaResources.length);
 			for (int i= 0; i < nonJavaResources.length; i++) {
 				IProject project= (IProject)nonJavaResources[i];
 				if (project.isAccessible())
@@ -359,7 +366,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		}
 
 		private Object[] getPackageContent(IPackageFragment pack) {
-			ArrayList result= new ArrayList();
+			ArrayList<Object> result= new ArrayList<Object>();
 			try {
 				ICompilationUnit[] units= pack.getCompilationUnits();
 				for (int i= 0; i < units.length; i++) {
@@ -536,6 +543,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#activateBreadcrumb()
 	 */
+	@Override
 	protected void activateBreadcrumb() {
 		fEditorSelection= getJavaEditor().getSelectionProvider().getSelection();
 		IEditorSite editorSite= getJavaEditor().getEditorSite();
@@ -547,6 +555,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#deactivateBreadcrumb()
 	 */
+	@Override
 	protected void deactivateBreadcrumb() {
 		IEditorSite editorSite= getJavaEditor().getEditorSite();
 		editorSite.getKeyBindingService().setScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" }); //$NON-NLS-1$
@@ -558,6 +567,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#createViewer(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected BreadcrumbViewer createViewer(Composite composite) {
 		fViewer= new ProblemBreadcrumbViewer(composite, SWT.HORIZONTAL);
 
@@ -599,17 +609,19 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	 */
 	private static JavaEditorBreadcrumbContentProvider createDropDownContentProvider() {
 		StandardJavaElementContentProvider parentContentProvider= new StandardJavaElementContentProvider(true) {
+			@Override
 			public Object[] getChildren(Object element) {
 				if (element instanceof PackageFragmentRootContainer)
 					return getContainerPackageFragmentRoots((PackageFragmentRootContainer)element);
 				return super.getChildren(element);
 			}
 
+			@Override
 			protected Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
 				if (!project.getProject().isOpen())
 					return NO_CHILDREN;
 
-				List result= new ArrayList();
+				List<Object> result= new ArrayList<Object>();
 
 				IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 				for (int i= 0; i < roots.length; i++) {
@@ -657,6 +669,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				return container.getChildren();
 			}
 
+			@Override
 			protected Object internalGetParent(Object element) {
 				if (element instanceof IPackageFragmentRoot) {
 					// since we insert logical package containers we have to fix
@@ -703,6 +716,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			 * org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider#getText(java.lang.Object
 			 * )
 			 */
+			@Override
 			public String getText(Object element) {
 				if (element instanceof IPackageFragmentRoot) {
 					IPackageFragmentRoot root= (IPackageFragmentRoot) element;
@@ -717,6 +731,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			/*
 			 * @see org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider#getStyledText(java.lang.Object)
 			 */
+			@Override
 			protected StyledString getStyledText(Object element) {
 				return new StyledString(getText(element));
 			}
@@ -738,6 +753,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#dispose()
 	 */
+	@Override
 	public void dispose() {
 		super.dispose();
 
@@ -751,6 +767,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#createContextMenuActionGroup(org.eclipse.jface.viewers.ISelectionProvider)
 	 */
+	@Override
 	protected ActionGroup createContextMenuActionGroup(ISelectionProvider selectionProvider) {
 		return new JavaEditorBreadcrumbActionGroup(getJavaEditor(), selectionProvider);
 	}
@@ -758,6 +775,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#setInput(java.lang.Object)
 	 */
+	@Override
 	public void setInput(Object element) {
 		if (element == null) {
 			element= getCurrentInput();
@@ -776,6 +794,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#getCurrentInput()
 	 */
+	@Override
 	protected Object getCurrentInput() {
 		try {
 			ITypeRoot input= SelectionConverter.getInput(getJavaEditor());
@@ -836,6 +855,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#open(java.lang.Object)
 	 */
+	@Override
 	protected boolean open(Object element) {
 		if (element instanceof IFile)
 			return openInNewEditor(element);
@@ -865,6 +885,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#reveal(java.lang.Object)
 	 */
+	@Override
 	protected boolean reveal(Object element) {
 		if (!(element instanceof IJavaElement))
 			return false;

@@ -92,6 +92,7 @@ public class ParameterGuesser {
 		/*
 		 * @see Object#toString()
 		 */
+		@Override
 		public String toString() {
 
 			StringBuffer buffer= new StringBuffer();
@@ -108,7 +109,7 @@ public class ParameterGuesser {
 
 	private static final char[] NO_TRIGGERS= new char[0];
 
-	private final Set fAlreadyMatchedNames;
+	private final Set<String> fAlreadyMatchedNames;
 	private final IJavaElement fEnclosingElement;
 
 	/**
@@ -118,16 +119,16 @@ public class ParameterGuesser {
 	 */
 	public ParameterGuesser(IJavaElement enclosingElement) {
 		fEnclosingElement= enclosingElement;
-		fAlreadyMatchedNames= new HashSet();
+		fAlreadyMatchedNames= new HashSet<String>();
 	}
 
-	private List /*Variable*/ evaluateVisibleMatches(String expectedType, IJavaElement[] suggestions) throws JavaModelException {
+	private List<Variable> evaluateVisibleMatches(String expectedType, IJavaElement[] suggestions) throws JavaModelException {
 		IType currentType= null;
 		if (fEnclosingElement != null) {
 			currentType= (IType) fEnclosingElement.getAncestor(IJavaElement.TYPE);
 		}
 
-		ArrayList res= new ArrayList();
+		ArrayList<Variable> res= new ArrayList<Variable>();
 		for (int i= 0; i < suggestions.length; i++) {
 			Variable variable= createVariable(suggestions[i], currentType, expectedType, i);
 			if (variable != null) {
@@ -293,14 +294,14 @@ public class ParameterGuesser {
 	 * @throws JavaModelException if it fails
 	 */
 	public ICompletionProposal[] parameterProposals(String expectedType, String paramName, Position pos, IJavaElement[] suggestions, boolean fillBestGuess) throws JavaModelException {
-		List typeMatches= evaluateVisibleMatches(expectedType, suggestions);
+		List<Variable> typeMatches= evaluateVisibleMatches(expectedType, suggestions);
 		orderMatches(typeMatches, paramName);
 
 		boolean hasVarWithParamName= false;
 		ICompletionProposal[] ret= new ICompletionProposal[typeMatches.size()];
 		int i= 0; int replacementLength= 0;
-		for (Iterator it= typeMatches.iterator(); it.hasNext();) {
-			Variable v= (Variable)it.next();
+		for (Iterator<Variable> it= typeMatches.iterator(); it.hasNext();) {
+			Variable v= it.next();
 			if (i == 0) {
 				fAlreadyMatchedNames.add(v.name);
 				replacementLength= v.name.length();
@@ -311,7 +312,7 @@ public class ParameterGuesser {
 
 			final char[] triggers= new char[v.triggerChars.length + 1];
 			System.arraycopy(v.triggerChars, 0, triggers, 0, v.triggerChars.length);
-			triggers[triggers.length - 1]= ';';
+			triggers[triggers.length - 1]= ',';
 
 			ret[i++]= new PositionBasedCompletionProposal(v.name, pos, replacementLength, getImage(v.descriptor), displayString, null, null, triggers);
 		}
@@ -319,23 +320,20 @@ public class ParameterGuesser {
 			// insert a proposal with the argument name
 			ICompletionProposal[] extended= new ICompletionProposal[ret.length + 1];
 			System.arraycopy(ret, 0, extended, 1, ret.length);
-			extended[0]= new PositionBasedCompletionProposal(paramName, pos, replacementLength, null, paramName, null, null, NO_TRIGGERS);
+			extended[0]= new PositionBasedCompletionProposal(paramName, pos, replacementLength, null, paramName, null, null, new char[] {','});
 			return extended;
 		}
 		return ret;
 	}
 
-	private static class MatchComparator implements Comparator {
+	private static class MatchComparator implements Comparator<Variable> {
 
 		private String fParamName;
 
 		MatchComparator(String paramName) {
 			fParamName= paramName;
 		}
-		public int compare(Object o1, Object o2) {
-			Variable one= (Variable)o1;
-			Variable two= (Variable)o2;
-
+		public int compare(Variable one, Variable two) {
 			return score(two) - score(one);
 		}
 
@@ -385,7 +383,7 @@ public class ParameterGuesser {
 	 * @param typeMatches the list of type matches
 	 * @param paramName the parameter name
 	 */
-	private static void orderMatches(List typeMatches, String paramName) {
+	private static void orderMatches(List<Variable> typeMatches, String paramName) {
 		if (typeMatches != null) Collections.sort(typeMatches, new MatchComparator(paramName));
 	}
 

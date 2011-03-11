@@ -126,6 +126,7 @@ public class NewNameQueries implements INewNameQueries {
 					/* (non-Javadoc)
 					 * @see org.eclipse.jface.dialogs.InputDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 					 */
+					@Override
 					protected Control createDialogArea(Composite parent) {
 						Control area= super.createDialogArea(parent);
 						TextFieldNavigationHandler.install(getText());

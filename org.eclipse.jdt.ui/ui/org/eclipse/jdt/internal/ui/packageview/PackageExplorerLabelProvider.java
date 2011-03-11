@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 
 	private PackageExplorerContentProvider fContentProvider;
-	private Map fWorkingSetImages;
+	private Map<ImageDescriptor, Image> fWorkingSetImages;
 
 	private boolean fIsFlatLayout;
 	private PackageExplorerProblemsDecorator fProblemDecorator;
@@ -62,6 +62,7 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
+	@Override
 	public StyledString getStyledText(Object element) {
 		String text= getSpecificText(element);
 		if (text != null) {
@@ -85,6 +86,7 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 		return null;
 	}
 
+	@Override
 	public String getText(Object element) {
 		String text= getSpecificText(element);
 		if (text != null) {
@@ -117,6 +119,7 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 		return fragment.getElementName();
 	}
 
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof IWorkingSet) {
 			ImageDescriptor image= ((IWorkingSet)element).getImageDescriptor();
@@ -124,10 +127,10 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 				return null;
 			}
 			if (fWorkingSetImages == null) {
-				fWorkingSetImages= new HashMap();
+				fWorkingSetImages= new HashMap<ImageDescriptor, Image>();
 			}
 
-			Image result= (Image) fWorkingSetImages.get(image);
+			Image result= fWorkingSetImages.get(image);
 			if (result == null) {
 				result= image.createImage();
 				fWorkingSetImages.put(image, result);
@@ -142,10 +145,11 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 		fProblemDecorator.setIsFlatLayout(state);
 	}
 
+	@Override
 	public void dispose() {
 		if (fWorkingSetImages != null) {
-			for (Iterator iter= fWorkingSetImages.values().iterator(); iter.hasNext();) {
-				((Image)iter.next()).dispose();
+			for (Iterator<Image> iter= fWorkingSetImages.values().iterator(); iter.hasNext();) {
+				iter.next().dispose();
 			}
 		}
 		super.dispose();

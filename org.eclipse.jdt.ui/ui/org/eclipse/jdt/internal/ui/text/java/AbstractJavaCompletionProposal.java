@@ -1139,6 +1139,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	/*
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return getDisplayString();
 	}

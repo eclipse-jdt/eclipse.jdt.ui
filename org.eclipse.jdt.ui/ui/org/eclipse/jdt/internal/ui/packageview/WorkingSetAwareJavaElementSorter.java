@@ -18,6 +18,7 @@ import org.eclipse.jdt.ui.JavaElementComparator;
 
 public class WorkingSetAwareJavaElementSorter extends JavaElementComparator {
 
+	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		if (e1 instanceof IWorkingSet || e2 instanceof IWorkingSet)
 			return 0;

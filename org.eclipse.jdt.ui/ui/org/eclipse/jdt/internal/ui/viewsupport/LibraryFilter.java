@@ -29,6 +29,7 @@ public class LibraryFilter extends ViewerFilter {
 	 * @param element the element to test
 	 * @return Returns true if element should be included in filtered set
 	 */
+	@Override
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IPackageFragmentRoot)
 			return !((IPackageFragmentRoot)element).isArchive();

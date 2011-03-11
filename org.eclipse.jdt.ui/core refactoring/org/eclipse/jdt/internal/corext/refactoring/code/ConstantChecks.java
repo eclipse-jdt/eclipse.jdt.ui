@@ -51,22 +51,27 @@ class ConstantChecks {
 			super(ex);
 		}
 
+		@Override
 		public boolean visit(SuperFieldAccess node) {
 			fResult= false;
 			return false;
 		}
+		@Override
 		public boolean visit(SuperMethodInvocation node) {
 			fResult= false;
 			return false;
 		}
+		@Override
 		public boolean visit(ThisExpression node) {
 			fResult= false;
 			return false;
 		}
+		@Override
 		public boolean visit(FieldAccess node) {
 			fResult= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
 			return false;
 		}
+		@Override
 		public boolean visit(MethodInvocation node) {
 			if(node.getExpression() == null) {
 				visitName(node.getName());
@@ -76,9 +81,11 @@ class ConstantChecks {
 
 			return false;
 		}
+		@Override
 		public boolean visit(QualifiedName node) {
 			return visitName(node);
 		}
+		@Override
 		public boolean visit(SimpleName node) {
 			return visitName(node);
 		}
@@ -128,22 +135,27 @@ class ConstantChecks {
 			super(ex);
 		}
 
+		@Override
 		public boolean visit(SuperFieldAccess node) {
 			fResult= false;
 			return false;
 		}
+		@Override
 		public boolean visit(SuperMethodInvocation node) {
 			fResult= false;
 			return false;
 		}
+		@Override
 		public boolean visit(ThisExpression node) {
 			fResult= false;
 			return false;
 		}
 
+		@Override
 		public boolean visit(QualifiedName node) {
 			return visitName(node);
 		}
+		@Override
 		public boolean visit(SimpleName node) {
 			return visitName(node);
 		}

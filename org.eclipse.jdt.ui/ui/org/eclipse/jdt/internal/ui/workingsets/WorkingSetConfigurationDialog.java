@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.ui.workingsets;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -45,14 +46,12 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 
@@ -69,31 +68,34 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 	private static class WorkingSetLabelProvider extends LabelProvider {
-		private Map fIcons;
+		private Map<ImageDescriptor, Image> fIcons;
 		public WorkingSetLabelProvider() {
-			fIcons= new Hashtable();
+			fIcons= new Hashtable<ImageDescriptor, Image>();
 		}
+		@Override
 		public void dispose() {
-			Iterator iterator= fIcons.values().iterator();
+			Iterator<Image> iterator= fIcons.values().iterator();
 			while (iterator.hasNext()) {
-				Image icon= (Image)iterator.next();
+				Image icon= iterator.next();
 				icon.dispose();
 			}
 			super.dispose();
 		}
+		@Override
 		public Image getImage(Object object) {
 			Assert.isTrue(object instanceof IWorkingSet);
 			IWorkingSet workingSet= (IWorkingSet)object;
 			ImageDescriptor imageDescriptor= workingSet.getImageDescriptor();
 			if (imageDescriptor == null)
 				return null;
-			Image icon= (Image)fIcons.get(imageDescriptor);
+			Image icon= fIcons.get(imageDescriptor);
 			if (icon == null) {
 				icon= imageDescriptor.createImage();
 				fIcons.put(imageDescriptor, icon);
 			}
 			return icon;
 		}
+		@Override
 		public String getText(Object object) {
 			Assert.isTrue(object instanceof IWorkingSet);
 			IWorkingSet workingSet= (IWorkingSet)object;
@@ -101,15 +103,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		}
 	}
 
-
-	private class Filter extends ViewerFilter {
-
-		public boolean select(Viewer viewer, Object parentElement, Object element) {
-			return WorkingSetModel.isSupportedAsTopLevelElement((IWorkingSet)element);
-		}
-	}
-
-	private List fAllWorkingSets;
+	private List<IWorkingSet> fAllWorkingSets;
 	private CheckboxTableViewer fTableViewer;
 
 	private Button fNewButton;
@@ -128,10 +122,10 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	private Button fSortWorkingSet;
 
 	private IWorkingSet[] fResult;
-	private List fAddedWorkingSets;
-	private List fRemovedWorkingSets;
-	private Map fEditedWorkingSets;
-	private List fRemovedMRUWorkingSets;
+	private List<IWorkingSet> fAddedWorkingSets;
+	private List<IWorkingSet> fRemovedWorkingSets;
+	private Map<IWorkingSet, IWorkingSet> fEditedWorkingSets;
+	private List<IWorkingSet> fRemovedMRUWorkingSets;
 
 	private int nextButtonId= IDialogConstants.CLIENT_ID + 1;
 
@@ -147,17 +141,15 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 * 
 	 * @since 3.5
 	 */
-	private Comparator fComparator;
+	private WorkingSetComparator fComparator;
 
 	public WorkingSetConfigurationDialog(Shell parentShell, IWorkingSet[] allWorkingSets, boolean isSortingEnabled) {
 		super(parentShell);
 		setTitle(WorkingSetMessages.WorkingSetConfigurationDialog_title);
 		setMessage(WorkingSetMessages.WorkingSetConfigurationDialog_message);
-		fAllWorkingSets= new ArrayList(allWorkingSets.length);
-		Filter filter= new Filter();
+		fAllWorkingSets= new ArrayList<IWorkingSet>(allWorkingSets.length);
 		for (int i= 0; i < allWorkingSets.length; i++) {
-			if (filter.select(null, null, allWorkingSets[i]))
-				fAllWorkingSets.add(allWorkingSets[i]);
+			fAllWorkingSets.add(allWorkingSets[i]);
 		}
 		fIsSortingEnabled= isSortingEnabled;
 	}
@@ -165,6 +157,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.WORKING_SET_CONFIGURATION_DIALOG);
@@ -192,6 +185,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		Control control= super.createContents(parent);
 		setInitialSelection();
@@ -202,6 +196,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
 
@@ -222,6 +217,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 				 * @see ViewerComparator#compare(Viewer, Object, Object)
 				 * @since 3.5
 				 */
+				@Override
 				public int compare(Viewer viewer, Object e1, Object e2) {
 					return getComparator().compare(e1, e2);
 				}
@@ -245,17 +241,8 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		data.widthHint= convertWidthInCharsToPixels(50);
 		fTableViewer.getTable().setLayoutData(data);
 
-		fTableViewer.addFilter(new Filter());
 		fTableViewer.setLabelProvider(new WorkingSetLabelProvider());
-		fTableViewer.setContentProvider(new IStructuredContentProvider() {
-			public Object[] getElements(Object element) {
-				return ((List)element).toArray();
-			}
-			public void dispose() {
-			}
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			}
-		});
+		fTableViewer.setContentProvider(new ArrayContentProvider());
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				handleSelectionChanged();
@@ -281,6 +268,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		fNewButton= createButton(buttonComposite, nextButtonId++,
 			WorkingSetMessages.WorkingSetConfigurationDialog_new_label, false);
 		fNewButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				createWorkingSet();
 			}
@@ -289,6 +277,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		fEditButton= createButton(buttonComposite, nextButtonId++,
 			WorkingSetMessages.WorkingSetConfigurationDialog_edit_label, false);
 		fEditButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				editSelectedWorkingSet();
 			}
@@ -297,6 +286,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		fRemoveButton= createButton(buttonComposite, nextButtonId++,
 			WorkingSetMessages.WorkingSetConfigurationDialog_remove_label, false);
 		fRemoveButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				removeSelectedWorkingSets();
 			}
@@ -315,6 +305,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		fUpButton.setText(WorkingSetMessages.WorkingSetConfigurationDialog_up_label);
 		setButtonLayoutData(fUpButton);
 		fUpButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				moveUp(((IStructuredSelection)fTableViewer.getSelection()).toList());
 			}
@@ -324,6 +315,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		fDownButton.setText(WorkingSetMessages.WorkingSetConfigurationDialog_down_label);
 		setButtonLayoutData(fDownButton);
 		fDownButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				moveDown(((IStructuredSelection)fTableViewer.getSelection()).toList());
 			}
@@ -333,6 +325,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		fSelectAll.setText(WorkingSetMessages.WorkingSetConfigurationDialog_selectAll_label);
 		setButtonLayoutData(fSelectAll);
 		fSelectAll.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				selectAll();
 			}
@@ -342,6 +335,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		fDeselectAll.setText(WorkingSetMessages.WorkingSetConfigurationDialog_deselectAll_label);
 		setButtonLayoutData(fDeselectAll);
 		fDeselectAll.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				deselectAll();
 			}
@@ -358,6 +352,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		fSortWorkingSet.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, true, false));
 		fSortWorkingSet.setSelection(fIsSortingEnabled);
 		fSortWorkingSet.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fIsSortingEnabled= fSortWorkingSet.getSelection();
 				updateButtonAvailability();
@@ -367,6 +362,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 						 * @see ViewerComparator#compare(Viewer, Object, Object)
 						 * @since 3.5
 						 */
+						@Override
 						public int compare(Viewer viewer, Object e1, Object e2) {
 							return getComparator().compare(e1, e2);
 						}
@@ -381,14 +377,19 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void okPressed() {
-		List newResult= getResultWorkingSets();
-		fResult= (IWorkingSet[])newResult.toArray(new IWorkingSet[newResult.size()]);
+		List<IWorkingSet> newResult= getResultWorkingSets();
+		fResult= newResult.toArray(new IWorkingSet[newResult.size()]);
+		if (fIsSortingEnabled) {
+			Collections.sort(fAllWorkingSets, new WorkingSetComparator(true));
+		}
 		setResult(newResult);
 		super.okPressed();
 	}
 
-	private List getResultWorkingSets() {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private List<IWorkingSet> getResultWorkingSets() {
 		Object[] checked= fTableViewer.getCheckedElements();
 		return new ArrayList(Arrays.asList(checked));
 	}
@@ -396,6 +397,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void cancelPressed() {
 		restoreAddedWorkingSets();
 		restoreChangedWorkingSets();
@@ -404,7 +406,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	}
 
 	private void setInitialSelection() {
-		List selections= getInitialElementSelections();
+		List<Object[]> selections= getInitialElementSelections();
 		if (!selections.isEmpty()) {
 			fTableViewer.setCheckedElements(selections.toArray());
 		}
@@ -418,8 +420,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		dialog.create();
 		if (dialog.open() == Window.OK) {
 			IWorkingSet workingSet= wizard.getSelection();
-			Filter filter= new Filter();
-			if (filter.select(null, null, workingSet)) {
+			if (WorkingSetModel.isSupportedAsTopLevelElement(workingSet)) {
 				fAllWorkingSets.add(workingSet);
 				fTableViewer.add(workingSet);
 				fTableViewer.setSelection(new StructuredSelection(workingSet), true);
@@ -435,7 +436,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		IWorkingSet editWorkingSet= (IWorkingSet)((IStructuredSelection)fTableViewer.getSelection()).getFirstElement();
 		IWorkingSetEditWizard wizard= manager.createWorkingSetEditWizard(editWorkingSet);
 		WizardDialog dialog= new WizardDialog(getShell(), wizard);
-		IWorkingSet originalWorkingSet= (IWorkingSet)fEditedWorkingSets.get(editWorkingSet);
+		IWorkingSet originalWorkingSet= fEditedWorkingSets.get(editWorkingSet);
 		boolean firstEdit= originalWorkingSet == null;
 
 		// save the original working set values for restoration when selection
@@ -474,11 +475,12 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 *
 	 * @see org.eclipse.jface.dialogs.Dialog#open()
 	 */
+	@Override
 	public int open() {
-		fAddedWorkingSets= new ArrayList();
-		fRemovedWorkingSets= new ArrayList();
-		fEditedWorkingSets= new HashMap();
-		fRemovedMRUWorkingSets= new ArrayList();
+		fAddedWorkingSets= new ArrayList<IWorkingSet>();
+		fRemovedWorkingSets= new ArrayList<IWorkingSet>();
+		fEditedWorkingSets= new HashMap<IWorkingSet, IWorkingSet>();
+		fRemovedMRUWorkingSets= new ArrayList<IWorkingSet>();
 		return super.open();
 	}
 
@@ -489,7 +491,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		ISelection selection= fTableViewer.getSelection();
 		if (selection instanceof IStructuredSelection) {
 			IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
-			Iterator iter= ((IStructuredSelection)selection).iterator();
+			Iterator<?> iter= ((IStructuredSelection)selection).iterator();
 			while (iter.hasNext()) {
 				IWorkingSet workingSet= (IWorkingSet)iter.next();
 				if (fAddedWorkingSets.contains(workingSet)) {
@@ -516,10 +518,10 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 */
 	private void restoreAddedWorkingSets() {
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
-		Iterator iterator= fAddedWorkingSets.iterator();
+		Iterator<IWorkingSet> iterator= fAddedWorkingSets.iterator();
 
 		while (iterator.hasNext()) {
-			manager.removeWorkingSet(((IWorkingSet)iterator.next()));
+			manager.removeWorkingSet(iterator.next());
 		}
 	}
 
@@ -527,11 +529,11 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 * Rolls back changes to working sets.
 	 */
 	private void restoreChangedWorkingSets() {
-		Iterator iterator= fEditedWorkingSets.keySet().iterator();
+		Iterator<IWorkingSet> iterator= fEditedWorkingSets.keySet().iterator();
 
 		while (iterator.hasNext()) {
-			IWorkingSet editedWorkingSet= (IWorkingSet)iterator.next();
-			IWorkingSet originalWorkingSet= (IWorkingSet)fEditedWorkingSets.get(editedWorkingSet);
+			IWorkingSet editedWorkingSet= iterator.next();
+			IWorkingSet originalWorkingSet= fEditedWorkingSets.get(editedWorkingSet);
 
 			if (editedWorkingSet.getName().equals(originalWorkingSet.getName()) == false) {
 				editedWorkingSet.setName(originalWorkingSet.getName());
@@ -547,14 +549,14 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 */
 	private void restoreRemovedWorkingSets() {
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
-		Iterator iterator= fRemovedWorkingSets.iterator();
+		Iterator<IWorkingSet> iterator= fRemovedWorkingSets.iterator();
 
 		while (iterator.hasNext()) {
-			manager.addWorkingSet(((IWorkingSet)iterator.next()));
+			manager.addWorkingSet(iterator.next());
 		}
 		iterator= fRemovedMRUWorkingSets.iterator();
 		while (iterator.hasNext()) {
-			manager.addRecentWorkingSet(((IWorkingSet)iterator.next()));
+			manager.addRecentWorkingSet(iterator.next());
 		}
 	}
 
@@ -577,40 +579,40 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	}
 
 	private boolean areAllGlobalWorkingSets(IStructuredSelection selection) {
-		Set globals= new HashSet(Arrays.asList(PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets()));
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		Set<IWorkingSet> globals= new HashSet<IWorkingSet>(Arrays.asList(PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets()));
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			if (!globals.contains(iter.next()))
 				return false;
 		}
 		return true;
 	}
 
-	private void moveUp(List toMoveUp) {
+	private void moveUp(List<IWorkingSet> toMoveUp) {
 		if (toMoveUp.size() > 0) {
 			setElements(moveUp(fAllWorkingSets, toMoveUp));
 			fTableViewer.reveal(toMoveUp.get(0));
 		}
 	}
 
-	private void moveDown(List toMoveDown) {
+	private void moveDown(List<IWorkingSet> toMoveDown) {
 		if (toMoveDown.size() > 0) {
 			setElements(reverse(moveUp(reverse(fAllWorkingSets), toMoveDown)));
 			fTableViewer.reveal(toMoveDown.get(toMoveDown.size() - 1));
 		}
 	}
 
-	private void setElements(List elements) {
+	private void setElements(List<IWorkingSet> elements) {
 		fAllWorkingSets= elements;
 		fTableViewer.setInput(fAllWorkingSets);
 		updateButtonAvailability();
 	}
 
-	private List moveUp(List elements, List move) {
+	private List<IWorkingSet> moveUp(List<IWorkingSet> elements, List<IWorkingSet> move) {
 		int nElements= elements.size();
-		List res= new ArrayList(nElements);
-		Object floating= null;
+		List<IWorkingSet> res= new ArrayList<IWorkingSet>(nElements);
+		IWorkingSet floating= null;
 		for (int i= 0; i < nElements; i++) {
-			Object curr= elements.get(i);
+			IWorkingSet curr= elements.get(i);
 			if (move.contains(curr)) {
 				res.add(curr);
 			} else {
@@ -626,8 +628,8 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		return res;
 	}
 
-	private List reverse(List p) {
-		List reverse= new ArrayList(p.size());
+	private List<IWorkingSet> reverse(List<IWorkingSet> p) {
+		List<IWorkingSet> reverse= new ArrayList<IWorkingSet>(p.size());
 		for (int i= p.size() - 1; i >= 0; i--) {
 			reverse.add(p.get(i));
 		}
@@ -675,7 +677,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 * @return the list of newly added working sets
 	 * @since 3.5
 	 */
-	public List getNewlyAddedWorkingSets() {
+	public List<IWorkingSet> getNewlyAddedWorkingSets() {
 		return fAddedWorkingSets;
 		
 	}
@@ -696,10 +698,20 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 * @return the working set comparator
 	 * @since 3.5
 	 */
-	private Comparator getComparator() {
+	private WorkingSetComparator getComparator() {
 		if (fComparator == null) {
 			fComparator= new WorkingSetComparator(true);
 		}
 		return fComparator;
+	}
+
+	/**
+	 * Returns all the working sets.
+	 * 
+	 * @return all the working sets
+	 * @since 3.7
+	 */
+	public IWorkingSet[] getAllWorkingSets() {
+		return fAllWorkingSets.toArray(new IWorkingSet[fAllWorkingSets.size()]);
 	}
 }

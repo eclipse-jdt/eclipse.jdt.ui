@@ -38,7 +38,7 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.code_formatting"; //$NON-NLS-1$
 
-	private Map fValues;
+	private Map<String, String> fValues;
 	private CleanUpPreview fPreview;
 
 	public CodeFormatingTabPage() {
@@ -48,12 +48,14 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setWorkingValues(Map workingValues) {
+	@Override
+	public void setWorkingValues(Map<String, String> workingValues) {
 		super.setWorkingValues(workingValues);
 		fValues= workingValues;
 	}
 
-	protected AbstractCleanUp[] createPreviewCleanUps(Map values) {
+	@Override
+	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] {
 				new ImportsCleanUp(values),
 				new CodeFormatCleanUp(values),
@@ -61,6 +63,7 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 		};
 	}
 
+	@Override
 	protected JavaPreview doCreateJavaPreview(Composite parent) {
 		fPreview= (CleanUpPreview)super.doCreateJavaPreview(parent);
 		fPreview.showInvisibleCharacters(true);
@@ -69,6 +72,7 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 		return fPreview;
 	}
 
+	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 
 		Group group= createGroup(numColumns, composite, CleanUpMessages.CodeFormatingTabPage_GroupName_Formatter);

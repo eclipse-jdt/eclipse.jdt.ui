@@ -51,6 +51,7 @@ public class ShowSearchInDialogAction extends Action {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
+	@Override
 	public void run() {
 		SearchInDialog dialog= getSearchInDialog();
 		if (dialog.open() == Window.OK && dialog.isIncludeMaskChanged()) {

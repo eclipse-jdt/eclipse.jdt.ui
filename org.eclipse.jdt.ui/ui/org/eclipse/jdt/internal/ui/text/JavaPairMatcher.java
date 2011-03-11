@@ -38,6 +38,7 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 	}
 
 	/* @see ICharacterPairMatcher#match(IDocument, int) */
+	@Override
 	public IRegion match(IDocument document, int offset) {
 		try {
 			return performMatch(document, offset);

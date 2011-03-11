@@ -36,10 +36,12 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements INa
 	private String fNewElementName;
 	private RenameModifications fRenameModifications;
 
+	@Override
 	public final RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
 		return fRenameModifications.loadParticipants(status, this, getAffectedProjectNatures(), shared);
 	}
 
+	@Override
 	public final RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
 		IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();

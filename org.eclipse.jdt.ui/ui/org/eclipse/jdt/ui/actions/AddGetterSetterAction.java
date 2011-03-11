@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -177,6 +177,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(canEnable(selection));
@@ -191,6 +192,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			IField[] selectedFields= getSelectedFields(selection);
@@ -291,7 +293,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 		ILabelProvider lp= new AddGetterSetterLabelProvider();
 		resetNumEntries();
-		Map entries= createGetterSetterMapping(type);
+		Map<IField, GetterSetterEntry[]> entries= createGetterSetterMapping(type);
 		if (entries.isEmpty()) {
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGettSetterAction_typeContainsNoFields_message);
 			notifyResult(false);
@@ -312,7 +314,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			dialog.setInitialSelections(preselected);
 			dialog.setExpandedElements(preselected);
 		}
-		final Set keySet= new LinkedHashSet(entries.keySet());
+		final Set<IField> keySet= new LinkedHashSet<IField>(entries.keySet());
 		int dialogResult= dialog.open();
 		if (dialogResult == Window.OK) {
 			Object[] result= dialog.getResult();
@@ -350,9 +352,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 		public IStatus validate(Object[] selection) {
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38478
-			HashSet map= null;
+			HashSet<Object> map= null;
 			if ((selection != null) && (selection.length > 1)) {
-				map= new HashSet(selection.length);
+				map= new HashSet<Object>(selection.length);
 			}
 
 			int selectedCount= 0;
@@ -414,8 +416,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 
 	// returns a list of fields with setter entries checked
-	private static IField[] getSetterFields(Object[] result, Set set) {
-		List list= new ArrayList(0);
+	private static IField[] getSetterFields(Object[] result, Set<IField> set) {
+		List<IField> list= new ArrayList<IField>(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		for (int i= 0; i < result.length; i++) {
@@ -428,12 +430,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			}
 		}
 		list= reorderFields(list, set);
-		return (IField[]) list.toArray(new IField[list.size()]);
+		return list.toArray(new IField[list.size()]);
 	}
 
 	// returns a list of fields with getter entries checked
-	private static IField[] getGetterFields(Object[] result, Set set) {
-		List list= new ArrayList(0);
+	private static IField[] getGetterFields(Object[] result, Set<IField> set) {
+		List<IField> list= new ArrayList<IField>(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		for (int i= 0; i < result.length; i++) {
@@ -446,12 +448,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			}
 		}
 		list= reorderFields(list, set);
-		return (IField[]) list.toArray(new IField[list.size()]);
+		return list.toArray(new IField[list.size()]);
 	}
 
 	// returns a list of fields with only getter entries checked
-	private static IField[] getGetterOnlyFields(Object[] result, Set set) {
-		List list= new ArrayList(0);
+	private static IField[] getGetterOnlyFields(Object[] result, Set<IField> set) {
+		List<IField> list= new ArrayList<IField>(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		boolean getterSet= false;
@@ -471,12 +473,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				getterSet= false;
 		}
 		list= reorderFields(list, set);
-		return (IField[]) list.toArray(new IField[list.size()]);
+		return list.toArray(new IField[list.size()]);
 	}
 
 	// returns a list of fields with only setter entries checked
-	private static IField[] getSetterOnlyFields(Object[] result, Set set) {
-		List list= new ArrayList(0);
+	private static IField[] getSetterOnlyFields(Object[] result, Set<IField> set) {
+		List<IField> list= new ArrayList<IField>(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		boolean getterSet= false;
@@ -495,12 +497,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				getterSet= false;
 		}
 		list= reorderFields(list, set);
-		return (IField[]) list.toArray(new IField[list.size()]);
+		return list.toArray(new IField[list.size()]);
 	}
 
 	// returns a list of fields with both entries checked
-	private static IField[] getGetterSetterFields(Object[] result, Set set) {
-		List list= new ArrayList(0);
+	private static IField[] getGetterSetterFields(Object[] result, Set<IField> set) {
+		List<IField> list= new ArrayList<IField>(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		boolean getterSet= false;
@@ -519,13 +521,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				getterSet= false;
 		}
 		list= reorderFields(list, set);
-		return (IField[]) list.toArray(new IField[list.size()]);
+		return list.toArray(new IField[list.size()]);
 	}
 
-	private static List reorderFields(List collection, Set set) {
-		final List list= new ArrayList(collection.size());
-		for (final Iterator iterator= set.iterator(); iterator.hasNext();) {
-			final IField field= (IField) iterator.next();
+	private static List<IField> reorderFields(List<IField> collection, Set<IField> set) {
+		final List<IField> list= new ArrayList<IField>(collection.size());
+		for (final Iterator<IField> iterator= set.iterator(); iterator.hasNext();) {
+			final IField field= iterator.next();
 			if (collection.contains(field))
 				list.add(field);
 		}
@@ -552,12 +554,14 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		try {
 			if (!ActionUtil.isProcessable(fEditor)) {
@@ -678,7 +682,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 * not valid.
 	 */
 	private IField[] getSelectedFields(IStructuredSelection selection) {
-		List elements= selection.toList();
+		List<?> elements= selection.toList();
 		int nElements= elements.size();
 		if (nElements > 0) {
 			IField[] res= new IField[nElements];
@@ -725,6 +729,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		/*
 		 * @see ILabelProvider#getText(Object)
 		 */
+		@Override
 		public String getText(Object element) {
 			if (element instanceof GetterSetterEntry) {
 				GetterSetterEntry entry= (GetterSetterEntry) element;
@@ -744,6 +749,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		/*
 		 * @see ILabelProvider#getImage(Object)
 		 */
+		@Override
 		public Image getImage(Object element) {
 			if (element instanceof GetterSetterEntry) {
 				int flags= 0;
@@ -767,14 +773,14 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 * @throws JavaModelException if the type does not exist or if an exception occurs while
 	 *             accessing its corresponding resource
 	 */
-	private Map createGetterSetterMapping(IType type) throws JavaModelException {
+	private Map<IField, GetterSetterEntry[]> createGetterSetterMapping(IType type) throws JavaModelException {
 		IField[] fields= type.getFields();
-		Map result= new LinkedHashMap();
+		Map<IField, GetterSetterEntry[]> result= new LinkedHashMap<IField, GetterSetterEntry[]>();
 		for (int i= 0; i < fields.length; i++) {
 			IField field= fields[i];
 			int flags= field.getFlags();
 			if (!Flags.isEnum(flags)) {
-				List l= new ArrayList(2);
+				List<GetterSetterEntry> l= new ArrayList<GetterSetterEntry>(2);
 				if (GetterSetterUtil.getGetter(field) == null) {
 					l.add(new GetterSetterEntry(field, true, Flags.isFinal(flags)));
 					incNumEntries();
@@ -796,9 +802,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 		private static final Object[] EMPTY= new Object[0];
 
-		private Map fGetterSetterEntries;
+		private Map<IField, GetterSetterEntry[]> fGetterSetterEntries;
 
-		public AddGetterSetterContentProvider(Map entries) {
+		public AddGetterSetterContentProvider(Map<IField, GetterSetterEntry[]> entries) {
 			fGetterSetterEntries= entries;
 		}
 
@@ -813,7 +819,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		 */
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof IField)
-				return (Object[]) fGetterSetterEntries.get(parentElement);
+				return fGetterSetterEntries.get(parentElement);
 			return EMPTY;
 		}
 
@@ -859,6 +865,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			fContentProvider= contentProvider;
 		}
 
+		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			if (element instanceof GetterSetterEntry) {
 				GetterSetterEntry getterSetterEntry= (GetterSetterEntry) element;
@@ -894,13 +901,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		private boolean fSortOrder;
 		private boolean fAllowSettersForFinals;
 
-		private ArrayList fPreviousSelectedFinals;
+		private ArrayList<GetterSetterEntry> fPreviousSelectedFinals;
 
 
 		public GetterSetterTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, AddGetterSetterContentProvider contentProvider, CompilationUnitEditor editor, IType type) throws JavaModelException {
 			super(parent, labelProvider, contentProvider, editor, type, false);
 			fContentProvider= contentProvider;
-			fPreviousSelectedFinals= new ArrayList();
+			fPreviousSelectedFinals= new ArrayList<GetterSetterEntry>();
 
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
@@ -941,7 +948,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				fSettings.put(ALLOW_SETTERS_FOR_FINALS, allowSettersForFinals);
 				CheckboxTreeViewer treeViewer= getTreeViewer();
 				if (treeViewer != null) {
-					ArrayList newChecked= new ArrayList();
+					ArrayList<GetterSetterEntry> newChecked= new ArrayList<GetterSetterEntry>();
 					if (allowSettersForFinals) {
 						newChecked.addAll(fPreviousSelectedFinals);
 					}
@@ -971,6 +978,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		/* (non-Javadoc)
 		 * @see org.eclipse.ui.dialogs.CheckedTreeSelectionDialog#createTreeViewer(org.eclipse.swt.widgets.Composite)
 		 */
+		@Override
 		protected CheckboxTreeViewer createTreeViewer(Composite parent) {
 			CheckboxTreeViewer treeViewer= super.createTreeViewer(parent);
 			if (!fAllowSettersForFinals) {
@@ -979,6 +987,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			return treeViewer;
 		}
 
+		@Override
 		protected void configureShell(Shell shell) {
 			super.configureShell(shell);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.ADD_GETTER_SETTER_SELECTION_DIALOG);
@@ -989,6 +998,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			createButton(buttonComposite, SELECT_SETTERS_ID, ActionMessages.GetterSetterTreeSelectionDialog_select_setters, false);
 		}
 
+		@Override
 		protected void buttonPressed(int buttonId) {
 			super.buttonPressed(buttonId);
 			switch (buttonId) {
@@ -1005,6 +1015,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			}
 		}
 
+		@Override
 		protected Composite createInsertPositionCombo(Composite composite) {
 			Button addRemoveFinalCheckbox= addAllowSettersForFinalslCheckbox(composite);
 			addRemoveFinalCheckbox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -1051,6 +1062,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			combo.setLayoutData(gd);
 			combo.addSelectionListener(new SelectionAdapter() {
 
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					setSortOrder(combo.getSelectionIndex() == methodIndex);
 				}
@@ -1060,7 +1072,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 		private Object[] getGetterSetterElements(boolean isGetter) {
 			Object[] allFields= fContentProvider.getElements(null);
-			Set result= new HashSet();
+			Set<GetterSetterEntry> result= new HashSet<GetterSetterEntry>();
 			for (int i= 0; i < allFields.length; i++) {
 				IField field= (IField) allFields[i];
 				GetterSetterEntry[] entries= getEntries(field);
@@ -1074,10 +1086,11 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 
 		private GetterSetterEntry[] getEntries(IField field) {
-			List result= Arrays.asList(fContentProvider.getChildren(field));
-			return (GetterSetterEntry[]) result.toArray(new GetterSetterEntry[result.size()]);
+			List<Object> result= Arrays.asList(fContentProvider.getChildren(field));
+			return result.toArray(new GetterSetterEntry[result.size()]);
 		}
 
+		@Override
 		protected Composite createSelectionButtons(Composite composite) {
 			Composite buttonComposite= super.createSelectionButtons(composite);
 
@@ -1096,10 +1109,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
 		 */
+		@Override
 		protected Control createLinkControl(Composite composite) {
 			Link link= new Link(composite, SWT.WRAP);
 			link.setText(ActionMessages.AddGetterSetterAction_template_link_description);
 			link.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					openCodeTempatePage(CodeTemplateContextType.GETTERCOMMENT_ID);
 				}

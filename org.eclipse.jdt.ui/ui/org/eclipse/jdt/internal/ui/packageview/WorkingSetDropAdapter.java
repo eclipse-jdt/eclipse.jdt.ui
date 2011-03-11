@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,7 +51,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 
 	private IStructuredSelection fSelection;
 	private Object[] fElementsToAdds;
-	private Set fCurrentElements;
+	private Set<IAdaptable> fCurrentElements;
 	private IWorkingSet fWorkingSet;
 
 	private int fLocation;
@@ -99,6 +99,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean validateDrop(Object target, int operation, TransferData transferType) {
 		return determineOperation(target, operation, transferType, DND.DROP_MOVE | DND.DROP_LINK | DND.DROP_COPY) != DND.DROP_NONE;
 	}
@@ -106,6 +107,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected int determineOperation(Object target, int operation, TransferData transferType, int operations) {
 		switch(operation) {
 			case DND.DROP_DEFAULT:
@@ -143,18 +145,18 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 			if (isOthersWorkingSet(fWorkingSet) && operation == DND.DROP_COPY)
 				return DND.DROP_NONE;
 
-			List realJavaElements= new ArrayList();
-			List realResource= new ArrayList();
+			List<IJavaElement> realJavaElements= new ArrayList<IJavaElement>();
+			List<IResource> realResource= new ArrayList<IResource>();
 			ReorgUtils.splitIntoJavaElementsAndResources(fElementsToAdds, realJavaElements, realResource);
 			if (fElementsToAdds.length != realJavaElements.size() + realResource.size())
 				return DND.DROP_NONE;
-			for (Iterator iter= realJavaElements.iterator(); iter.hasNext();) {
-				IJavaElement element= (IJavaElement)iter.next();
+			for (Iterator<IJavaElement> iter= realJavaElements.iterator(); iter.hasNext();) {
+				IJavaElement element= iter.next();
 				if (ReorgUtils.containsElementOrParent(fCurrentElements, element))
 					return DND.DROP_NONE;
 			}
-			for (Iterator iter= realResource.iterator(); iter.hasNext();) {
-				IResource element= (IResource)iter.next();
+			for (Iterator<IResource> iter= realResource.iterator(); iter.hasNext();) {
+				IResource element= iter.next();
 				if (ReorgUtils.containsElementOrParent(fCurrentElements, element))
 					return DND.DROP_NONE;
 			}
@@ -197,7 +199,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		fWorkingSet= (IWorkingSet)target;
 		fSelection= (IStructuredSelection)s;
 		fElementsToAdds= fSelection.toArray();
-		fCurrentElements= new HashSet(Arrays.asList(fWorkingSet.getElements()));
+		fCurrentElements= new HashSet<IAdaptable>(Arrays.asList(fWorkingSet.getElements()));
 	}
 
 	private boolean isWorkingSetSelection() {
@@ -211,6 +213,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean performDrop(Object data) {
 		if (isWorkingSetSelection()) {
 			performWorkingSetReordering();
@@ -222,25 +225,33 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 
 	private void performWorkingSetReordering() {
 		WorkingSetModel model= fPackageExplorer.getWorkingSetModel();
-		List activeWorkingSets= new ArrayList(Arrays.asList(model.getActiveWorkingSets()));
-		int index= activeWorkingSets.indexOf(fWorkingSet);
+		List<IWorkingSet> allWorkingSets= new ArrayList<IWorkingSet>(Arrays.asList(model.getAllWorkingSets()));
+		int index= allWorkingSets.indexOf(fWorkingSet);
 		if (index != -1) {
 			if (getCurrentLocation() == LOCATION_AFTER)
 				index++;
-			List result= new ArrayList(activeWorkingSets.size());
-			List selected= new ArrayList(Arrays.asList(fElementsToAdds));
-			for (int i= 0; i < activeWorkingSets.size(); i++) {
+			List<IWorkingSet> result= new ArrayList<IWorkingSet>(allWorkingSets.size());
+			@SuppressWarnings("unchecked") // isWorkingSetSelection() ensures that all elements are IWorkingSets
+			List<IWorkingSet> selected= new ArrayList<IWorkingSet>((List<IWorkingSet>) (List<?>) Arrays.asList(fElementsToAdds));
+			List<IWorkingSet> activeWorkingSets= new ArrayList<IWorkingSet>(Arrays.asList(model.getActiveWorkingSets()));
+			List<IWorkingSet> active= new ArrayList<IWorkingSet>(activeWorkingSets.size());
+			for (int i= 0; i < allWorkingSets.size(); i++) {
 				if (i == index) {
 					result.addAll(selected);
+					active.addAll(selected);
 				}
-				Object element= activeWorkingSets.get(i);
+				IWorkingSet element= allWorkingSets.get(i);
 				if (!selected.contains(element)) {
 					result.add(element);
+					if (activeWorkingSets.contains(element))
+						active.add(element);
 				}
 			}
-			if (index == activeWorkingSets.size())
+			if (index == allWorkingSets.size()) {
 				result.addAll(selected);
-			model.setActiveWorkingSets((IWorkingSet[])result.toArray(new IWorkingSet[result.size()]));
+				active.addAll(selected);
+			}
+			model.setWorkingSets(result.toArray(new IWorkingSet[result.size()]), model.isSortingEnabled(), active.toArray(new IWorkingSet[active.size()]));
 		}
 	}
 
@@ -248,31 +259,31 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		// only move if target isn't the other working set. If this is the case
 		// the move will happenn automatically by refreshing the other working set
 		if (!isOthersWorkingSet(fWorkingSet)) {
-			List elements= new ArrayList(Arrays.asList(fWorkingSet.getElements()));
+			List<Object> elements= new ArrayList<Object>(Arrays.asList(fWorkingSet.getElements()));
 			elements.addAll(Arrays.asList(fElementsToAdds));
-			fWorkingSet.setElements((IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
+			fWorkingSet.setElements(elements.toArray(new IAdaptable[elements.size()]));
 		}
 		if (eventDetail == DND.DROP_MOVE) {
 			ITreeSelection treeSelection= (ITreeSelection)fSelection;
-			Map workingSets= groupByWorkingSets(treeSelection.getPaths());
-			for (Iterator iter= workingSets.keySet().iterator(); iter.hasNext();) {
-				IWorkingSet ws= (IWorkingSet)iter.next();
-				List toRemove= (List)workingSets.get(ws);
-				List currentElements= new ArrayList(Arrays.asList(ws.getElements()));
+			Map<IWorkingSet, List<Object>> workingSets= groupByWorkingSets(treeSelection.getPaths());
+			for (Iterator<IWorkingSet> iter= workingSets.keySet().iterator(); iter.hasNext();) {
+				IWorkingSet ws= iter.next();
+				List<Object> toRemove= workingSets.get(ws);
+				List<IAdaptable> currentElements= new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
 				currentElements.removeAll(toRemove);
-				ws.setElements((IAdaptable[])currentElements.toArray(new IAdaptable[currentElements.size()]));
+				ws.setElements(currentElements.toArray(new IAdaptable[currentElements.size()]));
 			}
 		}
 	}
 
-	private Map/*<List<IWorkingSet>>*/ groupByWorkingSets(TreePath[] paths) {
-		Map result= new HashMap();
+	private Map<IWorkingSet, List<Object>> groupByWorkingSets(TreePath[] paths) {
+		Map<IWorkingSet, List<Object>> result= new HashMap<IWorkingSet, List<Object>>();
 		for (int i= 0; i < paths.length; i++) {
 			TreePath path= paths[i];
 			IWorkingSet ws= (IWorkingSet)path.getSegment(0);
-			List l= (List)result.get(ws);
+			List<Object> l= result.get(ws);
 			if (l == null) {
-				l= new ArrayList();
+				l= new ArrayList<Object>();
 				result.put(ws, l);
 			}
 			l.add(path.getSegment(1));
@@ -301,6 +312,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected int getCurrentLocation() {
 		if (fLocation == -1)
 			return super.getCurrentLocation();

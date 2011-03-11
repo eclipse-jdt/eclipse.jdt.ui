@@ -409,6 +409,7 @@ public class ReorgQueries implements IReorgQueries {
 			fYesToAllNoToAll= includeYesToAllNoToAll;
 		}
 
+		@Override
 		protected Label createMessageArea(Composite composite) {
 			Label label= new Label(composite, SWT.WRAP);
 			label.setText(getMessage());
@@ -419,12 +420,14 @@ public class ReorgQueries implements IReorgQueries {
 			return label;
 		}
 
+		@Override
 		protected void buttonPressed(int buttonId) {
 			super.buttonPressed(buttonId);
 			setReturnCode(buttonId);
 			close();
 		}
 
+		@Override
 		protected void createButtonsForButtonBar(Composite parent) {
 			createButton(parent, IDialogConstants.YES_ID, IDialogConstants.YES_LABEL, true);
 			if (fYesToAllNoToAll)

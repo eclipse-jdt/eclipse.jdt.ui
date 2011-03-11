@@ -48,14 +48,14 @@ public class TodoTaskInputDialog extends StatusDialog {
 	private StringDialogField fNameDialogField;
 	private ComboDialogField fPriorityDialogField;
 
-	private List fExistingNames;
+	private List<String> fExistingNames;
 
-	public TodoTaskInputDialog(Shell parent, TodoTask task, List existingEntries) {
+	public TodoTaskInputDialog(Shell parent, TodoTask task, List<TodoTask> existingEntries) {
 		super(parent);
 
-		fExistingNames= new ArrayList(existingEntries.size());
+		fExistingNames= new ArrayList<String>(existingEntries.size());
 		for (int i= 0; i < existingEntries.size(); i++) {
-			TodoTask curr= (TodoTask) existingEntries.get(i);
+			TodoTask curr= existingEntries.get(i);
 			if (!curr.equals(task)) {
 				fExistingNames.add(curr.name);
 			}
@@ -114,6 +114,7 @@ public class TodoTaskInputDialog extends StatusDialog {
 		return task;
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
 
@@ -159,6 +160,7 @@ public class TodoTaskInputDialog extends StatusDialog {
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.TODO_TASK_INPUT_DIALOG);

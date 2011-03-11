@@ -56,6 +56,7 @@ public class OpenAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.text.ITextSelection)
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}
@@ -68,6 +69,7 @@ public class OpenAction extends SelectionDispatchAction {
 		return fEditor.getEditorInput() instanceof IFileEditorInput;
 	}
 
+	@Override
 	public void run(ITextSelection selection) {
 
 		if (!checkEnabled(selection))

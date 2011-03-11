@@ -44,6 +44,7 @@ public class ShowQualifiedTypeNamesAction extends Action {
 	/*
 	 * @see Action#actionPerformed
 	 */
+	@Override
 	public void run() {
 		BusyIndicator.showWhile(fView.getSite().getShell().getDisplay(), new Runnable() {
 			public void run() {

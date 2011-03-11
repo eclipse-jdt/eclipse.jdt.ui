@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,6 +74,7 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getDetailedDescription() {
 		if (!isEnabled())
 			return null;
@@ -96,6 +97,7 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void run() {
 		IResource resource= (IResource)getSelectedElements().get(0);
 		final IJavaProject project= JavaCore.create(resource.getProject());
@@ -104,7 +106,7 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
-						List result= unExclude(getSelectedElements(), project, monitor);
+						List<?> result= unExclude(getSelectedElements(), project, monitor);
 						selectAndReveal(new StructuredSelection(result));
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
@@ -122,13 +124,13 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 		}
 	}
 
-	protected List unExclude(List elements, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	protected List<?> unExclude(List<?> elements, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Including, 2 * elements.size());
 
-			List entries= ClasspathModifier.getExistingEntries(project);
+			List<CPListElement> entries= ClasspathModifier.getExistingEntries(project);
 			for (int i= 0; i < elements.size(); i++) {
 				IResource resource= (IResource) elements.get(i);
 				IPackageFragmentRoot root= ClasspathModifier.getFragmentRoot(resource, project, new SubProgressMonitor(monitor, 1));
@@ -141,22 +143,23 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 			ClasspathModifier.commitClassPath(entries, project, new SubProgressMonitor(monitor, 4));
 
         	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
-        	delta.setNewEntries((CPListElement[])entries.toArray(new CPListElement[entries.size()]));
+        	delta.setNewEntries(entries.toArray(new CPListElement[entries.size()]));
         	informListeners(delta);
 
-			List resultElements= ClasspathModifier.getCorrespondingElements(elements, project);
+			List<?> resultElements= ClasspathModifier.getCorrespondingElements(elements, project);
 			return resultElements;
 		} finally {
 			monitor.done();
 		}
 	}
 
+	@Override
 	protected boolean canHandle(IStructuredSelection elements) {
 		if (elements.size() == 0)
 			return false;
 
 		try {
-			for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 				Object element= iter.next();
 				if (element instanceof IResource) {
 					IResource resource= (IResource)element;

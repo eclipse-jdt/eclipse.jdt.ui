@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,7 @@ import org.eclipse.jdt.ui.JavaUI;
  *
  * since 2.0
  */
-public class FilterDescriptor implements Comparable, IPluginContribution {
+public class FilterDescriptor implements Comparable<FilterDescriptor>, IPluginContribution {
 
 	private static String PATTERN_FILTER_ID_PREFIX= "_patternFilterId_"; //$NON-NLS-1$
 
@@ -90,7 +90,7 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 	 */
 	public static FilterDescriptor[] getFilterDescriptors(String targetId) {
 		FilterDescriptor[] filterDescs= FilterDescriptor.getFilterDescriptors();
-		List result= new ArrayList(filterDescs.length);
+		List<FilterDescriptor> result= new ArrayList<FilterDescriptor>(filterDescs.length);
 		for (int i= 0; i < filterDescs.length; i++) {
 			String tid= filterDescs[i].getTargetId();
 			if (WorkbenchActivityHelper.filterItem(filterDescs[i]))
@@ -98,7 +98,7 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 			if (tid == null || tid.equals(targetId))
 				result.add(filterDescs[i]);
 		}
-		return (FilterDescriptor[])result.toArray(new FilterDescriptor[result.size()]);
+		return result.toArray(new FilterDescriptor[result.size()]);
 	}
 
 	/**
@@ -241,14 +241,11 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 		return strVal == null || Boolean.valueOf(strVal).booleanValue();
 	}
 
-	/*
-	 * Implements a method from IComparable
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
-	public int compareTo(Object o) {
-		if (o instanceof FilterDescriptor)
-			return Collator.getInstance().compare(getName(), ((FilterDescriptor)o).getName());
-		else
-			return Integer.MIN_VALUE;
+	public int compareTo(FilterDescriptor o) {
+		return Collator.getInstance().compare(getName(), o.getName());
 	}
 
 	//---- initialization ---------------------------------------------------
@@ -259,8 +256,8 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 	 * @return new filter descriptors
 	 */
 	private static FilterDescriptor[] createFilterDescriptors(IConfigurationElement[] elements) {
-		List result= new ArrayList(5);
-		Set descIds= new HashSet(5);
+		List<FilterDescriptor> result= new ArrayList<FilterDescriptor>(5);
+		Set<String> descIds= new HashSet<String>(5);
 		for (int i= 0; i < elements.length; i++) {
 			final IConfigurationElement element= elements[i];
 			if (FILTER_TAG.equals(element.getName())) {
@@ -278,7 +275,7 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 				}
 			}
 		}
-		return (FilterDescriptor[])result.toArray(new FilterDescriptor[result.size()]);
+		return result.toArray(new FilterDescriptor[result.size()]);
 	}
 
 	public String getLocalId() {

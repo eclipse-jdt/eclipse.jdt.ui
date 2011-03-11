@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,12 +30,12 @@ import org.eclipse.jface.action.Separator;
 
 import org.eclipse.ui.IWorkbenchActionConstants;
 
-/*package*/ class HistoryDropDownAction extends Action {
+/*package*/ class HistoryDropDownAction<E> extends Action {
 
 	private class HistoryAction extends Action {
-		private final Object fElement;
+		private final E fElement;
 
-		public HistoryAction(Object element, int accelerator) {
+		public HistoryAction(E element, int accelerator) {
 	        super("", AS_RADIO_BUTTON); //$NON-NLS-1$
 			Assert.isNotNull(element);
 			fElement= element;
@@ -50,6 +50,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 			setImageDescriptor(fHistory.getImageDescriptor(element));
 		}
 
+		@Override
 		public void run() {
 			if (isChecked())
 				fHistory.setActiveEntry(fElement);
@@ -70,12 +71,12 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 			manager.setRemoveAllWhenShown(true);
 			manager.addMenuListener(new IMenuListener() {
 				public void menuAboutToShow(IMenuManager manager2) {
-					List entries= fHistory.getHistoryEntries();
+					List<E> entries= fHistory.getHistoryEntries();
 					boolean checkOthers= addEntryMenuItems(manager2, entries);
 
 					manager2.add(new Separator());
 
-					Action others= new HistoryListAction(fHistory);
+					Action others= new HistoryListAction<E>(fHistory);
 					others.setChecked(checkOthers);
 					manager2.add(others);
 
@@ -89,7 +90,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 					fHistory.addMenuEntries(manager);
 				}
 
-				private boolean addEntryMenuItems(IMenuManager manager2, List entries) {
+				private boolean addEntryMenuItems(IMenuManager manager2, List<E> entries) {
 					if (entries.isEmpty()) {
 						return false;
 					}
@@ -97,7 +98,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 					boolean checkOthers= true;
 					int min= Math.min(entries.size(), RESULTS_IN_DROP_DOWN);
 					for (int i= 0; i < min; i++) {
-						Object entry= entries.get(i);
+						E entry= entries.get(i);
 						HistoryAction action= new HistoryAction(entry, i + 1);
 						boolean check= entry.equals(fHistory.getCurrentEntry());
 						action.setChecked(check);
@@ -114,6 +115,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 			//workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=129973
 			final Display display= parent.getDisplay();
 			fMenu.addMenuListener(new MenuAdapter() {
+				@Override
 				public void menuHidden(final MenuEvent e) {
 					display.asyncExec(new Runnable() {
 						public void run() {
@@ -141,17 +143,18 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 
 	public static final int RESULTS_IN_DROP_DOWN= 10;
 
-	private ViewHistory fHistory;
+	private ViewHistory<E> fHistory;
 	private Menu fMenu;
 
-	public HistoryDropDownAction(ViewHistory history) {
+	public HistoryDropDownAction(ViewHistory<E> history) {
 		fHistory= history;
 		fMenu= null;
 		setMenuCreator(new HistoryMenuCreator());
 		fHistory.configureHistoryDropDownAction(this);
 	}
 
+	@Override
 	public void run() {
-		new HistoryListAction(fHistory).run();
+		new HistoryListAction<E>(fHistory).run();
 	}
 }

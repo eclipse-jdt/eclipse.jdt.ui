@@ -89,26 +89,32 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 		status.merge(initializeStatus);
 	}
 
+	@Override
 	public String getIdentifier() {
 		return IRefactoringProcessorIds.RENAME_COMPILATION_UNIT_PROCESSOR;
 	}
 
+	@Override
 	public boolean isApplicable() {
 		return RefactoringAvailabilityTester.isRenameAvailable(fCu);
 	}
 
+	@Override
 	public String getProcessorName() {
 		return RefactoringCoreMessages.RenameCompilationUnitRefactoring_name;
 	}
 
+	@Override
 	protected String[] getAffectedProjectNatures() throws CoreException {
 		return JavaProcessors.computeAffectedNatures(fCu);
 	}
 
+	@Override
 	public Object[] getElements() {
 		return new Object[] {fCu};
 	}
 
+	@Override
 	protected RenameModifications computeRenameModifications() {
 		RenameModifications result= new RenameModifications();
 		result.rename(fCu, new RenameArguments(getNewElementName(), getUpdateReferences()));
@@ -122,6 +128,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 		return result;
 	}
 
+	@Override
 	protected IFile[] getChangedFiles() throws CoreException {
 		if (!fWillRenameType) {
 			IFile file= ResourceUtil.getFile(fCu);
@@ -131,6 +138,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 		return new IFile[0];
 	}
 
+	@Override
 	public int getSaveMode() {
 		return RefactoringSaveHelper.SAVE_REFACTORING;
 	}
@@ -157,6 +165,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 		return result;
 	}
 
+	@Override
 	public void setNewElementName(String newName) {
 		super.setNewElementName(newName);
 		if (fWillRenameType)
@@ -287,6 +296,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 
 	// --- preconditions ----------------------------------
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		if (fRenameTypeProcessor != null && ! fCu.isStructureKnown()){
 			fRenameTypeProcessor= null;
@@ -306,6 +316,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 		return new RefactoringStatus();
 	}
 
+	@Override
 	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try{
 			if (fWillRenameType && (!fCu.isStructureKnown())){
@@ -375,6 +386,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 		return fileName.substring(0, fileName.lastIndexOf(".")); //$NON-NLS-1$
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		// renaming the file is taken care of in renameTypeRefactoring
 		if (fWillRenameType)
@@ -423,6 +435,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
 		if (fWillRenameType)
 			return fRenameTypeProcessor.postCreateChange(participantChanges, pm);

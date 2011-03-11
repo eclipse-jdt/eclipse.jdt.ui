@@ -135,6 +135,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 			}
 		});
 		protectCtorCB.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean	isChecked = protectCtorCB.getSelection();
 
@@ -156,6 +157,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 			}
 		});
 		browseTypes.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				IType factoryType= chooseFactoryClass();
 

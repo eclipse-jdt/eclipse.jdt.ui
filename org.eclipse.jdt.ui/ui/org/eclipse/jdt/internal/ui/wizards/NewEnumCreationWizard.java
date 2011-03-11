@@ -44,6 +44,7 @@ public class NewEnumCreationWizard extends NewElementWizard {
 	/*
 	 * @see Wizard#addPages
 	 */
+	@Override
 	public void addPages() {
 		super.addPages();
 		if (fPage == null) {
@@ -56,6 +57,7 @@ public class NewEnumCreationWizard extends NewElementWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#canRunForked()
 	 */
+	@Override
 	protected boolean canRunForked() {
 		return !fPage.isEnclosingTypeSelected();
 	}
@@ -63,6 +65,7 @@ public class NewEnumCreationWizard extends NewElementWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 	    fPage.createType(monitor); // use the full progress monitor
 	}
@@ -70,6 +73,7 @@ public class NewEnumCreationWizard extends NewElementWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
 	 */
+	@Override
 	public boolean performFinish() {
 		warnAboutTypeCommentDeprecation();
 		boolean res= super.performFinish();
@@ -88,6 +92,7 @@ public class NewEnumCreationWizard extends NewElementWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getCreatedElement()
 	 */
+	@Override
 	public IJavaElement getCreatedElement() {
 		return fPage.getCreatedType();
 	}

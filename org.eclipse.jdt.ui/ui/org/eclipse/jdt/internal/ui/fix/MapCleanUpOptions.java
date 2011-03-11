@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 
 public class MapCleanUpOptions extends CleanUpOptions {
 
-	private final Map fOptions;
+	private final Map<String, String> fOptions;
 
 	/**
 	 * Create new CleanUpOptions instance. <code>options</code>
@@ -31,19 +31,19 @@ public class MapCleanUpOptions extends CleanUpOptions {
 	 * @param options map from String to String
 	 * @see CleanUpConstants
 	 */
-	public MapCleanUpOptions(Map options) {
+	public MapCleanUpOptions(Map<String, String> options) {
 		super(options);
 		fOptions= options;
 	}
 
 	public MapCleanUpOptions() {
-		this(new Hashtable());
+		this(new Hashtable<String, String>());
 	}
 
 	/**
 	 * @return all options as map, modifying the map modifies this object
 	 */
-	public Map getMap() {
+	public Map<String, String> getMap() {
 		return fOptions;
 	}
 
@@ -54,9 +54,9 @@ public class MapCleanUpOptions extends CleanUpOptions {
 		if (options instanceof MapCleanUpOptions) {
 			fOptions.putAll(((MapCleanUpOptions)options).getMap());
 		} else {
-			Set keys= options.getKeys();
-			for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
-				String key= (String) iterator.next();
+			Set<String> keys= options.getKeys();
+			for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
+				String key= iterator.next();
 				fOptions.put(key, options.getValue(key));
 			}
 		}

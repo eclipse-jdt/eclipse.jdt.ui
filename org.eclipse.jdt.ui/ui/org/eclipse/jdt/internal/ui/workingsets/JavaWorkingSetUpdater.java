@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,20 +42,20 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 	public static final String ID= IWorkingSetIDs.JAVA;
 	
 
-	private List fWorkingSets;
+	private List<IWorkingSet> fWorkingSets;
 
 	private static class WorkingSetDelta {
 		private IWorkingSet fWorkingSet;
-		private List fElements;
+		private List<IAdaptable> fElements;
 		private boolean fChanged;
 		public WorkingSetDelta(IWorkingSet workingSet) {
 			fWorkingSet= workingSet;
-			fElements= new ArrayList(Arrays.asList(workingSet.getElements()));
+			fElements= new ArrayList<IAdaptable>(Arrays.asList(workingSet.getElements()));
 		}
 		public int indexOf(Object element) {
 			return fElements.indexOf(element);
 		}
-		public void set(int index, Object element) {
+		public void set(int index, IAdaptable element) {
 			fElements.set(index, element);
 			fChanged= true;
 		}
@@ -66,13 +66,13 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 		}
 		public void process() {
 			if (fChanged) {
-				fWorkingSet.setElements((IAdaptable[])fElements.toArray(new IAdaptable[fElements.size()]));
+				fWorkingSet.setElements(fElements.toArray(new IAdaptable[fElements.size()]));
 			}
 		}
 	}
 
 	public JavaWorkingSetUpdater() {
-		fWorkingSets= new ArrayList();
+		fWorkingSets= new ArrayList<IWorkingSet>();
 		JavaCore.addElementChangedListener(this);
 	}
 
@@ -122,7 +122,7 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 	public void elementChanged(ElementChangedEvent event) {
 		IWorkingSet[] workingSets;
 		synchronized(fWorkingSets) {
-			workingSets= (IWorkingSet[])fWorkingSets.toArray(new IWorkingSet[fWorkingSets.size()]);
+			workingSets= fWorkingSets.toArray(new IWorkingSet[fWorkingSets.size()]);
 		}
 		for (int w= 0; w < workingSets.length; w++) {
 			WorkingSetDelta workingSetDelta= new WorkingSetDelta(workingSets[w]);
@@ -210,10 +210,10 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 	}
 
 	private void checkElementExistence(IWorkingSet workingSet) {
-		List elements= new ArrayList(Arrays.asList(workingSet.getElements()));
+		List<IAdaptable> elements= new ArrayList<IAdaptable>(Arrays.asList(workingSet.getElements()));
 		boolean changed= false;
-		for (Iterator iter= elements.iterator(); iter.hasNext();) {
-			IAdaptable element= (IAdaptable)iter.next();
+		for (Iterator<IAdaptable> iter= elements.iterator(); iter.hasNext();) {
+			IAdaptable element= iter.next();
 			boolean remove= false;
 			if (element instanceof IJavaElement) {
 				IJavaElement jElement= (IJavaElement)element;
@@ -245,7 +245,7 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 			}
 		}
 		if (changed) {
-			workingSet.setElements((IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
+			workingSet.setElements(elements.toArray(new IAdaptable[elements.size()]));
 		}
 	}
 }

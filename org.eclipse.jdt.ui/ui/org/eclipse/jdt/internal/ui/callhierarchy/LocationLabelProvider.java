@@ -32,11 +32,13 @@ class LocationLabelProvider extends LabelProvider implements ITableLabelProvider
     /* (non-Javadoc)
      * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
      */
-    public String getText(Object element) {
+    @Override
+	public String getText(Object element) {
         return getColumnText(element, COLUMN_INFO);
     }
 
-    public Image getImage(Object element) {
+    @Override
+	public Image getImage(Object element) {
         return getColumnImage(element, COLUMN_ICON);
     }
 

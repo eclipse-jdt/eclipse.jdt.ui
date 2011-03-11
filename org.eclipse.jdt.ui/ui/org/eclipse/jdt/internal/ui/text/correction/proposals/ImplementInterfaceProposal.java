@@ -54,6 +54,7 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
 		setDisplayName(Messages.format(CorrectionMessages.ImplementInterfaceProposal_name, args));
 	}
 
+	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		ASTNode boundNode= fAstRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;

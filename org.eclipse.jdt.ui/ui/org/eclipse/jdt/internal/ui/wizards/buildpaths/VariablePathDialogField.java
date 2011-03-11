@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,6 +55,7 @@ public class VariablePathDialogField extends StringButtonDialogField {
 			fVariableBlock= new VariableBlock(false, variableSelection);
 		}
 
+		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
 			Control control= fVariableBlock.createContents(composite);
@@ -74,18 +75,20 @@ public class VariablePathDialogField extends StringButtonDialogField {
 		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 		 * @since 3.4
 		 */
+		@Override
 		protected boolean isResizable() {
 			return true;
 		}
 
+		@Override
 		protected void okPressed() {
 			fVariableBlock.performOk();
 			super.okPressed();
 		}
 
 		public String getSelectedVariable() {
-			List elements= fVariableBlock.getSelectedElements();
-			return ((CPVariableElement) elements.get(0)).getName();
+			List<CPVariableElement> elements= fVariableBlock.getSelectedElements();
+			return elements.get(0).getName();
 		}
 
 		/*
@@ -101,7 +104,7 @@ public class VariablePathDialogField extends StringButtonDialogField {
 		 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
 		 */
 		public void selectionChanged(SelectionChangedEvent event) {
-			List elements= fVariableBlock.getSelectedElements();
+			List<CPVariableElement> elements= fVariableBlock.getSelectedElements();
 			StatusInfo status= new StatusInfo();
 			if (elements.size() != 1) {
 				status.setError(""); //$NON-NLS-1$
@@ -111,6 +114,7 @@ public class VariablePathDialogField extends StringButtonDialogField {
 		/*
 		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 		 */
+		@Override
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.CHOOSE_VARIABLE_DIALOG);
@@ -130,6 +134,7 @@ public class VariablePathDialogField extends StringButtonDialogField {
 
 	// ------- layout helpers
 
+	@Override
 	public Control[] doFillIntoGrid(Composite parent, int nColumns) {
 		assertEnoughColumns(nColumns);
 
@@ -144,6 +149,7 @@ public class VariablePathDialogField extends StringButtonDialogField {
 		return new Control[] { label, text, variableButton, browseButton };
 	}
 
+	@Override
 	public int getNumberOfControls() {
 		return 4;
 	}
@@ -210,6 +216,7 @@ public class VariablePathDialogField extends StringButtonDialogField {
 		}
 	}
 
+	@Override
 	protected void updateEnableState() {
 		super.updateEnableState();
 		if (isOkToUse(fBrowseVariableButton)) {

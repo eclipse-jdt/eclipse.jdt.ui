@@ -234,6 +234,7 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getImage
 	 */
+	@Override
 	public Image getImage(Object element) {
 		Image result= fImageLabelProvider.getImageLabel(element, fImageFlags);
 		if (result != null) {
@@ -249,6 +250,7 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getText
 	 */
+	@Override
 	public String getText(Object element) {
 		return JavaElementLabels.getTextLabel(element, fTextFlags);
 	}
@@ -270,6 +272,7 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 	/* (non-Javadoc)
 	 * @see IBaseLabelProvider#dispose
 	 */
+	@Override
 	public void dispose() {
 		fStorageLabelProvider.dispose();
 		fImageLabelProvider.dispose();

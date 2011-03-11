@@ -34,21 +34,21 @@ public class CommentsTabPage extends FormatterTabPage {
 
 	private static abstract class Controller implements Observer {
 
-		private final Collection fMasters;
-		private final Collection fSlaves;
+		private final Collection<CheckboxPreference> fMasters;
+		private final Collection<Object> fSlaves;
 
-		public Controller(Collection masters, Collection slaves) {
+		public Controller(Collection<CheckboxPreference> masters, Collection<Object> slaves) {
 			fMasters= masters;
 			fSlaves= slaves;
-			for (final Iterator iter= fMasters.iterator(); iter.hasNext();) {
-				((CheckboxPreference)iter.next()).addObserver(this);
+			for (final Iterator<CheckboxPreference> iter= fMasters.iterator(); iter.hasNext();) {
+				iter.next().addObserver(this);
 			}
 		}
 
 		public void update(Observable o, Object arg) {
 			boolean enabled= areSlavesEnabled();
 
-			for (final Iterator iter= fSlaves.iterator(); iter.hasNext();) {
+			for (final Iterator<Object> iter= fSlaves.iterator(); iter.hasNext();) {
 				final Object obj= iter.next();
 				if (obj instanceof Preference) {
 					((Preference)obj).setEnabled(enabled);
@@ -58,7 +58,7 @@ public class CommentsTabPage extends FormatterTabPage {
 			}
 		}
 
-		public Collection getMasters() {
+		public Collection<CheckboxPreference> getMasters() {
 			return fMasters;
 		}
 
@@ -67,7 +67,7 @@ public class CommentsTabPage extends FormatterTabPage {
 
 	private final static class OrController extends Controller {
 
-		public OrController(Collection masters, Collection slaves) {
+		public OrController(Collection<CheckboxPreference> masters, Collection<Object> slaves) {
 			super(masters, slaves);
 			update(null, null);
 		}
@@ -75,9 +75,10 @@ public class CommentsTabPage extends FormatterTabPage {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		protected boolean areSlavesEnabled() {
-			for (final Iterator iter= getMasters().iterator(); iter.hasNext();) {
-				if (((CheckboxPreference)iter.next()).getChecked())
+			for (final Iterator<CheckboxPreference> iter= getMasters().iterator(); iter.hasNext();) {
+				if (iter.next().getChecked())
 					return true;
 			}
 			return false;
@@ -130,10 +131,11 @@ public class CommentsTabPage extends FormatterTabPage {
 
 	private CompilationUnitPreview fPreview;
 
-	public CommentsTabPage(ModifyDialog modifyDialog, Map workingValues) {
+	public CommentsTabPage(ModifyDialog modifyDialog, Map<String, String> workingValues) {
 		super(modifyDialog, workingValues);
 	}
 
+	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 		final int indent= fPixelConverter.convertWidthInCharsToPixels(4);
 
@@ -175,24 +177,25 @@ public class CommentsTabPage extends FormatterTabPage {
 		final NumberPreference lineWidth= createNumberPref(widthGroup, numColumns, FormatterMessages.CommentsTabPage_line_width, DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH, 0, 9999);
 
 
-		ArrayList lineFirstColumnMasters= new ArrayList();
+		ArrayList<CheckboxPreference> lineFirstColumnMasters= new ArrayList<CheckboxPreference>();
 		lineFirstColumnMasters.add(singleLineComments);
 
-		ArrayList lineFirstColumnSlaves= new ArrayList();
+		ArrayList<Object> lineFirstColumnSlaves= new ArrayList<Object>();
 		lineFirstColumnSlaves.add(singleLineCommentsOnFirstColumn);
 
 		new Controller(lineFirstColumnMasters, lineFirstColumnSlaves) {
+			@Override
 			protected boolean areSlavesEnabled() {
 				return singleLineComments.getChecked();
             }
 		}.update(null, null);
 
 
-		ArrayList javaDocMaster= new ArrayList();
+		ArrayList<CheckboxPreference> javaDocMaster= new ArrayList<CheckboxPreference>();
 		javaDocMaster.add(javadoc);
 		javaDocMaster.add(header);
 
-		ArrayList javaDocSlaves= new ArrayList();
+		ArrayList<Object> javaDocSlaves= new ArrayList<Object>();
 		javaDocSlaves.add(settingsGroup);
 		javaDocSlaves.add(html);
 		javaDocSlaves.add(code);
@@ -205,26 +208,27 @@ public class CommentsTabPage extends FormatterTabPage {
 		new OrController(javaDocMaster, javaDocSlaves);
 
 
-		ArrayList indentMasters= new ArrayList();
+		ArrayList<CheckboxPreference> indentMasters= new ArrayList<CheckboxPreference>();
 		indentMasters.add(javadoc);
 		indentMasters.add(header);
 		indentMasters.add(indentJavadoc);
 
-		ArrayList indentSlaves= new ArrayList();
+		ArrayList<Object> indentSlaves= new ArrayList<Object>();
 		indentSlaves.add(indentDesc);
 
 		new Controller(indentMasters, indentSlaves) {
+			@Override
 			protected boolean areSlavesEnabled() {
 				return (javadoc.getChecked() || header.getChecked()) && indentJavadoc.getChecked();
             }
 		}.update(null, null);
 
 
-		ArrayList blockMasters= new ArrayList();
+		ArrayList<CheckboxPreference> blockMasters= new ArrayList<CheckboxPreference>();
 		blockMasters.add(blockComment);
 		blockMasters.add(header);
 
-		ArrayList blockSlaves= new ArrayList();
+		ArrayList<Object> blockSlaves= new ArrayList<Object>();
 		blockSlaves.add(blockSettingsGroup);
 		blockSlaves.add(nlBoundariesBlock);
 		blockSlaves.add(blankLinesBlock);
@@ -232,19 +236,20 @@ public class CommentsTabPage extends FormatterTabPage {
 		new OrController(blockMasters, blockSlaves);
 
 
-		ArrayList lineWidthMasters= new ArrayList();
+		ArrayList<CheckboxPreference> lineWidthMasters= new ArrayList<CheckboxPreference>();
 		lineWidthMasters.add(javadoc);
 		lineWidthMasters.add(blockComment);
 		lineWidthMasters.add(singleLineComments);
 		lineWidthMasters.add(header);
 
-		ArrayList lineWidthSlaves= new ArrayList();
+		ArrayList<Object> lineWidthSlaves= new ArrayList<Object>();
 		lineWidthSlaves.add(widthGroup);
 		lineWidthSlaves.add(lineWidth);
 
 		new OrController(lineWidthMasters, lineWidthSlaves);
 	}
 
+	@Override
 	protected void initializePage() {
 		fPreview.setPreviewText(PREVIEW);
 	}
@@ -252,7 +257,8 @@ public class CommentsTabPage extends FormatterTabPage {
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
      */
-    protected JavaPreview doCreateJavaPreview(Composite parent) {
+    @Override
+	protected JavaPreview doCreateJavaPreview(Composite parent) {
         fPreview= new CompilationUnitPreview(fWorkingValues, parent);
         return fPreview;
     }
@@ -260,7 +266,8 @@ public class CommentsTabPage extends FormatterTabPage {
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doUpdatePreview()
      */
-    protected void doUpdatePreview() {
+    @Override
+	protected void doUpdatePreview() {
     	super.doUpdatePreview();
         fPreview.update();
     }

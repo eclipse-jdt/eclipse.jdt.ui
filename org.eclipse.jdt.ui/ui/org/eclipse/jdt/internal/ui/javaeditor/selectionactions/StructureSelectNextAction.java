@@ -37,6 +37,7 @@ public class StructureSelectNextAction extends StructureSelectionAction{
 			lastCoveringNode.accept(analyzer);
 			return analyzer.fNextNode;
 		}
+		@Override
 		protected boolean visitNode(ASTNode node) {
 			int start= node.getStartPosition();
 			int end= start + node.getLength();
@@ -65,6 +66,7 @@ public class StructureSelectNextAction extends StructureSelectionAction{
 	/* non java doc
 	 * @see StructureSelectionAction#internalGetNewSelectionRange(ISourceRange, ICompilationUnit, SelectionAnalyzer)
 	 */
+	@Override
 	ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ISourceReference sr, SelectionAnalyzer selAnalyzer) throws JavaModelException{
 		if (oldSourceRange.getLength() == 0 && selAnalyzer.getLastCoveringNode() != null) {
 			ASTNode previousNode= NextNodeAnalyzer.perform(oldSourceRange.getOffset(), selAnalyzer.getLastCoveringNode());

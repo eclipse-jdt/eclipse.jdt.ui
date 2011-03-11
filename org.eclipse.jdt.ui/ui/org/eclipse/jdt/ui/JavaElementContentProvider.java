@@ -56,6 +56,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 	/* (non-Javadoc)
 	 * Method declared on IContentProvider.
 	 */
+	@Override
 	public void dispose() {
 		super.dispose();
 		JavaCore.removeElementChangedListener(this);
@@ -64,6 +65,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 	/* (non-Javadoc)
 	 * Method declared on IContentProvider.
 	 */
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		super.inputChanged(viewer, oldInput, newInput);
 		fViewer= (TreeViewer)viewer;

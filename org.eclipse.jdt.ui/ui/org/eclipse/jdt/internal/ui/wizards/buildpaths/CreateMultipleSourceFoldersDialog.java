@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,6 +66,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public Object getParent(Object element) {
 			Object object= fNonExistingFolders.get(element);
 			if (object != null)
@@ -77,11 +78,12 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public Object[] getChildren(Object element) {
-			List result= new ArrayList();
+			List<Object> result= new ArrayList<Object>();
 			//all keys with value element
-			Set keys= fNonExistingFolders.keySet();
-			for (Iterator iter= keys.iterator(); iter.hasNext();) {
+			Set<IFolder> keys= fNonExistingFolders.keySet();
+			for (Iterator<IFolder> iter= keys.iterator(); iter.hasNext();) {
 				Object key= iter.next();
 				if (fNonExistingFolders.get(key).equals(element)) {
 					result.add(key);
@@ -101,20 +103,20 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 	private final IJavaProject fJavaProject;
 	private final CPListElement[] fExistingElements;
 	private String fOutputLocation;
-	private final HashSet fRemovedElements;
-	private final HashSet fModifiedElements;
-	private final HashSet fInsertedElements;
-	private final Hashtable fNonExistingFolders;
+	private final HashSet<CPListElement> fRemovedElements;
+	private final HashSet<CPListElement> fModifiedElements;
+	private final HashSet<CPListElement> fInsertedElements;
+	private final Hashtable<IFolder, IContainer> fNonExistingFolders;
 
 	public CreateMultipleSourceFoldersDialog(final IJavaProject javaProject, final CPListElement[] existingElements, final String outputLocation, Shell shell) {
 		super(shell);
 		fJavaProject= javaProject;
 		fExistingElements= existingElements;
 		fOutputLocation= outputLocation;
-		fRemovedElements= new HashSet();
-		fModifiedElements= new HashSet();
-		fInsertedElements= new HashSet();
-		fNonExistingFolders= new Hashtable();
+		fRemovedElements= new HashSet<CPListElement>();
+		fModifiedElements= new HashSet<CPListElement>();
+		fInsertedElements= new HashSet<CPListElement>();
+		fNonExistingFolders= new Hashtable<IFolder, IContainer>();
 
 		for (int i= 0; i < existingElements.length; i++) {
 			CPListElement cur= existingElements[i];
@@ -124,12 +126,13 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		}
 	}
 
+	@Override
 	public int open() {
-		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
-		List existingContainers= getExistingContainers(fExistingElements);
+		Class<?>[] acceptedClasses= new Class<?>[] { IProject.class, IFolder.class };
+		List<IResource> existingContainers= getExistingContainers(fExistingElements);
 
 		IProject[] allProjects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		ArrayList rejectedElements= new ArrayList(allProjects.length);
+		ArrayList<IProject> rejectedElements= new ArrayList<IProject>(allProjects.length);
 		IProject currProject= fJavaProject.getProject();
 		for (int i= 0; i < allProjects.length; i++) {
 			if (!allProjects[i].equals(currProject)) {
@@ -141,6 +144,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 			/* (non-Javadoc)
 			 * @see org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 			 */
+			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				if (element instanceof IFolder && ((IFolder)element).isVirtual()) {
 					return false;
@@ -157,17 +161,20 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 
 
 		MultipleFolderSelectionDialog dialog= new MultipleFolderSelectionDialog(getShell(), lp, cp) {
+			@Override
 			protected Control createDialogArea(Composite parent) {
 				Control result= super.createDialogArea(parent);
 				PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.BP_CHOOSE_EXISTING_FOLDER_TO_MAKE_SOURCE_FOLDER);
 				return result;
 			}
 
+			@Override
 			protected Object createFolder(final IContainer container) {
 				final Object[] result= new Object[1];
 				final CPListElement newElement= new CPListElement(fJavaProject, IClasspathEntry.CPE_SOURCE);
 				final AddSourceFolderWizard wizard= newSourceFolderWizard(newElement, fExistingElements, fOutputLocation, container);
 				AbstractOpenWizardAction action= new AbstractOpenWizardAction() {
+					@Override
 					protected INewWizard createWizard() throws CoreException {
 						return wizard;
 					}
@@ -205,15 +212,15 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 				CPListElement existingElement= fExistingElements[0];
 				if (existingElement.getResource() instanceof IProject) {
 					if (!removeProjectFromBP(existingElement)) {
-						ArrayList added= new ArrayList(fInsertedElements);
-						HashSet updatedEclusionPatterns= new HashSet();
+						ArrayList<CPListElement> added= new ArrayList<CPListElement>(fInsertedElements);
+						HashSet<CPListElement> updatedEclusionPatterns= new HashSet<CPListElement>();
 						addExlusionPatterns(added, updatedEclusionPatterns);
 						fModifiedElements.addAll(updatedEclusionPatterns);
 					}
 				}
 			} else {
-				ArrayList added= new ArrayList(fInsertedElements);
-				HashSet updatedEclusionPatterns= new HashSet();
+				ArrayList<CPListElement> added= new ArrayList<CPListElement>(fInsertedElements);
+				HashSet<CPListElement> updatedEclusionPatterns= new HashSet<CPListElement>();
 				addExlusionPatterns(added, updatedEclusionPatterns);
 				fModifiedElements.addAll(updatedEclusionPatterns);
 			}
@@ -223,16 +230,16 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		}
 	}
 
-	public List getInsertedElements() {
-		return new ArrayList(fInsertedElements);
+	public List<CPListElement> getInsertedElements() {
+		return new ArrayList<CPListElement>(fInsertedElements);
 	}
 
-	public List getRemovedElements() {
-		return new ArrayList(fRemovedElements);
+	public List<CPListElement> getRemovedElements() {
+		return new ArrayList<CPListElement>(fRemovedElements);
 	}
 
-	public List getModifiedElements() {
-		return new ArrayList(fModifiedElements);
+	public List<CPListElement> getModifiedElements() {
+		return new ArrayList<CPListElement>(fModifiedElements);
 	}
 
 	public IPath getOutputLocation() {
@@ -268,8 +275,8 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		return false;
 	}
 
-	private void addExlusionPatterns(List newEntries, Set modifiedEntries) {
-		BuildPathBasePage.fixNestingConflicts((CPListElement[])newEntries.toArray(new CPListElement[newEntries.size()]), fExistingElements, modifiedEntries);
+	private void addExlusionPatterns(List<CPListElement> newEntries, Set<CPListElement> modifiedEntries) {
+		BuildPathBasePage.fixNestingConflicts(newEntries.toArray(new CPListElement[newEntries.size()]), fExistingElements, modifiedEntries);
 		if (!modifiedEntries.isEmpty()) {
 			String title= NewWizardMessages.SourceContainerWorkbookPage_exclusion_added_title;
 			String message= NewWizardMessages.SourceContainerWorkbookPage_exclusion_added_message;
@@ -283,17 +290,17 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		return wizard;
 	}
 
-	private List getExistingContainers(CPListElement[] existingElements) {
-		List res= new ArrayList();
+	private List<IResource> getExistingContainers(CPListElement[] existingElements) {
+		List<IResource> res= new ArrayList<IResource>();
 		for (int i= 0; i < existingElements.length; i++) {
 			IResource resource= existingElements[i].getResource();
 			if (resource instanceof IContainer) {
 				res.add(resource);
 			}
 		}
-		Set keys= fNonExistingFolders.keySet();
-		for (Iterator iter= keys.iterator(); iter.hasNext();) {
-			IFolder folder= (IFolder)iter.next();
+		Set<IFolder> keys= fNonExistingFolders.keySet();
+		for (Iterator<IFolder> iter= keys.iterator(); iter.hasNext();) {
+			IFolder folder= iter.next();
 			res.add(folder);
 		}
 		return res;

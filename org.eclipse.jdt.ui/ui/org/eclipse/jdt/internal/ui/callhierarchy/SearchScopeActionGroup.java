@@ -80,6 +80,7 @@ class SearchScopeActionGroup extends ActionGroup {
 		return null;
 	}
 
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		fillContextMenu(actionBars.getMenuManager());
@@ -116,7 +117,7 @@ class SearchScopeActionGroup extends ActionGroup {
 		if (workingSetNames == null) {
 			return null;
 		}
-		Set workingSets= new HashSet(2);
+		Set<IWorkingSet> workingSets= new HashSet<IWorkingSet>(2);
 		for (int j= 0; j < workingSetNames.length; j++) {
 			IWorkingSet workingSet= getWorkingSetManager().getWorkingSet(workingSetNames[j]);
 			if (workingSet != null) {
@@ -124,7 +125,7 @@ class SearchScopeActionGroup extends ActionGroup {
 			}
 		}
 
-		return (IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()]);
+		return workingSets.toArray(new IWorkingSet[workingSets.size()]);
 	}
 
 	/**
@@ -177,6 +178,7 @@ class SearchScopeActionGroup extends ActionGroup {
 		javaSearchMM.setVisible(!javaSearchMM.isEmpty());
 	}
 
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		MenuManager javaSearchMM = new MenuManager(CallHierarchyMessages.SearchScopeActionGroup_searchScope,
 				IContextMenuConstants.GROUP_SEARCH);
@@ -196,14 +198,14 @@ class SearchScopeActionGroup extends ActionGroup {
 	}
 
 	private Action[] getActions() {
-		List actions = new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 4);
+		List<Action> actions = new ArrayList<Action>(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 4);
 		addAction(actions, fSearchScopeWorkspaceAction);
 		addAction(actions, fSearchScopeProjectAction);
 		addAction(actions, fSelectWorkingSetAction);
 
-		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
+		Iterator<IWorkingSet[]> iter= SearchUtil.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
-			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
+			IWorkingSet[] workingSets= iter.next();
 			String description = SearchUtil.toString(workingSets);
 			SearchScopeWorkingSetAction workingSetAction = new SearchScopeWorkingSetAction(this, workingSets, description);
 
@@ -214,7 +216,7 @@ class SearchScopeActionGroup extends ActionGroup {
 			actions.add(workingSetAction);
 		}
 
-		Action[] result = (Action[]) actions.toArray(new Action[actions.size()]);
+		Action[] result = actions.toArray(new Action[actions.size()]);
 
 		ensureExactlyOneCheckedAction(result);
 		return result;
@@ -245,7 +247,7 @@ class SearchScopeActionGroup extends ActionGroup {
 		return checked;
 	}
 
-	private void addAction(List actions, Action action) {
+	private void addAction(List<Action> actions, Action action) {
 		if (action == fSelectedAction) {
 			action.setChecked(true);
 		} else {
@@ -336,7 +338,7 @@ class SearchScopeActionGroup extends ActionGroup {
 	 */
 	private boolean isSelectedWorkingSet(IWorkingSet[] workingSets) {
 		if (fSelectedWorkingSetNames != null && fSelectedWorkingSetNames.length == workingSets.length) {
-			Set workingSetNames= new HashSet(workingSets.length);
+			Set<String> workingSetNames= new HashSet<String>(workingSets.length);
 			for (int i = 0; i < workingSets.length; i++) {
 				workingSetNames.add(workingSets[i].getName());
 			}

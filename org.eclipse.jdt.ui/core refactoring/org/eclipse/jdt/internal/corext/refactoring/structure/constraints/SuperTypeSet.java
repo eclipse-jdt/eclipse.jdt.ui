@@ -48,6 +48,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see java.lang.Object#toString()
 		 */
+		@Override
 		public final String toString() {
 			return "EMPTY"; //$NON-NLS-1$
 		}
@@ -133,6 +134,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see java.lang.Object#toString()
 		 */
+		@Override
 		public final String toString() {
 			return fType.getPrettySignature();
 		}
@@ -207,6 +209,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see java.lang.Object#toString()
 		 */
+		@Override
 		public final String toString() {
 			return "[" + fSubType.getPrettySignature() + ", " + fSuperType.getPrettySignature() + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
@@ -239,6 +242,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see java.lang.Object#toString()
 		 */
+		@Override
 		public final String toString() {
 			return "UNIVERSE"; //$NON-NLS-1$
 		}

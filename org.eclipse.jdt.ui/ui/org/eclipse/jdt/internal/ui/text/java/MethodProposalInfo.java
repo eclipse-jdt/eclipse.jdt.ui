@@ -55,6 +55,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * @return the resolved member or <code>null</code> if none is found
 	 * @throws JavaModelException if accessing the java model fails
 	 */
+	@Override
 	protected IMember resolveMember() throws JavaModelException {
 		char[] declarationSignature= fProposal.getDeclarationSignature();
 		String typeName= SignatureUtil.stripSignatureToFQN(String.valueOf(declarationSignature));
@@ -88,7 +89,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * @throws JavaModelException if accessing the Java model fails
 	 */
 	private IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IType type) throws JavaModelException {
-		Map typeVariables= computeTypeVariables(type);
+		Map<String, char[]> typeVariables= computeTypeVariables(type);
 		return findMethod(name, paramTypes, isConstructor, type.getMethods(), typeVariables);
 	}
 
@@ -110,8 +111,8 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * @return a map from type variables to concrete type signatures
 	 * @throws JavaModelException if accessing the java model fails
 	 */
-	private Map computeTypeVariables(IType type) throws JavaModelException {
-		Map map= new HashMap();
+	private Map<String, char[]> computeTypeVariables(IType type) throws JavaModelException {
+		Map<String, char[]> map= new HashMap<String, char[]>();
 		char[] declarationSignature= fProposal.getDeclarationSignature();
 		if (declarationSignature == null) // array methods don't contain a declaration signature
 			return map;
@@ -146,7 +147,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * @return The found method or <code>null</code>, if nothing found
 	 * @throws JavaModelException if the method does not exist or if an exception occurs while accessing its corresponding resource
 	 */
-	private IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IMethod[] methods, Map typeVariables) throws JavaModelException {
+	private IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IMethod[] methods, Map<String, char[]> typeVariables) throws JavaModelException {
 		for (int i= methods.length - 1; i >= 0; i--) {
 			if (isSameMethodSignature(name, paramTypes, isConstructor, methods[i], typeVariables)) {
 				return methods[i];
@@ -170,7 +171,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 *         parameter types and constructor state.
 	 * @throws JavaModelException if the method does not exist or if an exception occurs while accessing its corresponding resource
 	 */
-	private boolean isSameMethodSignature(String name, String[] paramTypes, boolean isConstructor, IMethod method, Map typeVariables) throws JavaModelException {
+	private boolean isSameMethodSignature(String name, String[] paramTypes, boolean isConstructor, IMethod method, Map<String, char[]> typeVariables) throws JavaModelException {
 		if (isConstructor || name.equals(method.getElementName())) {
 			if (isConstructor == method.isConstructor()) {
 				String[] otherParams= method.getParameterTypes(); // types may be type variables
@@ -203,12 +204,12 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * @param typeVariables the Map&lt;SimpleName, VariableName>
 	 * @return the simple erased name for signature
 	 */
-	private String computeSimpleTypeName(String signature, Map typeVariables) {
+	private String computeSimpleTypeName(String signature, Map<String, char[]> typeVariables) {
 		// method equality uses erased types
 		String erasure= Signature.getTypeErasure(signature);
 		erasure= erasure.replaceAll("/", ".");  //$NON-NLS-1$//$NON-NLS-2$
 		String simpleName= Signature.getSimpleName(Signature.toString(erasure));
-		char[] typeVar= (char[]) typeVariables.get(simpleName);
+		char[] typeVar= typeVariables.get(simpleName);
 		if (typeVar != null)
 			simpleName= String.valueOf(Signature.getSignatureSimpleName(typeVar));
 		return simpleName;

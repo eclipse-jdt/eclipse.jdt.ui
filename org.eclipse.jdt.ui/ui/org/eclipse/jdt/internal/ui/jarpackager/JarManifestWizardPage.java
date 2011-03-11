@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,6 +60,7 @@ import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -270,6 +271,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		fNewManifestFileBrowseButton.setText(JarPackagerMessages.JarManifestWizardPage_newManifestFileBrowseButton_text);
 		fNewManifestFileBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		fNewManifestFileBrowseButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleNewManifestFileBrowseButtonPressed();
 			}
@@ -301,6 +303,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		fManifestFileBrowseButton.setText(JarPackagerMessages.JarManifestWizardPage_manifestFileBrowse_text);
 		fManifestFileBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		fManifestFileBrowseButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleManifestFileBrowseButtonPressed();
 			}
@@ -341,6 +344,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		fUnSealedPackagesDetailsButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		fUnSealedPackagesDetailsButton.setText(JarPackagerMessages.JarManifestWizardPage_unsealPackagesButton_text);
 		fUnSealedPackagesDetailsButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleUnSealPackagesDetailsButtonPressed();
 			}
@@ -364,6 +368,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		fSealedPackagesDetailsButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		fSealedPackagesDetailsButton.setText(JarPackagerMessages.JarManifestWizardPage_sealedPackagesDetailsButton_text);
 		fSealedPackagesDetailsButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleSealPackagesDetailsButtonPressed();
 			}
@@ -391,6 +396,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 			/*
 			 * @see KeyListener#keyReleased(KeyEvent)
 			 */
+			@Override
 			public void keyReleased(KeyEvent e) {
 				fJarPackage.setManifestMainClass(findMainMethodByName(fMainClassText.getText()));
 				update();
@@ -402,6 +408,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		fMainClassBrowseButton.setText(JarPackagerMessages.JarManifestWizardPage_mainClassBrowseButton_text);
 		fMainClassBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		fMainClassBrowseButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleMainClassBrowseButtonPressed();
 			}
@@ -451,12 +458,12 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 
 	private IType findMainMethodByName(String name) {
 		if (fMainTypes == null) {
-			List resources= JarPackagerUtil.asResources(fJarPackage.getElements());
+			List<IResource> resources= JarPackagerUtil.asResources(fJarPackage.getElements());
 			if (resources == null) {
 				setErrorMessage(JarPackagerMessages.JarManifestWizardPage_error_noResourceSelected);
 				return null;
 			}
-			IJavaSearchScope searchScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope((IResource[])resources.toArray(new IResource[resources.size()]), true);
+			IJavaSearchScope searchScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(resources.toArray(new IResource[resources.size()]), true);
 			MainMethodSearchEngine engine= new MainMethodSearchEngine();
 			try {
 				fMainTypes= engine.searchMainMethods(getContainer(), searchScope, 0);
@@ -474,12 +481,12 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	}
 
 	protected void handleMainClassBrowseButtonPressed() {
-		List resources= JarPackagerUtil.asResources(fJarPackage.getElements());
+		List<IResource> resources= JarPackagerUtil.asResources(fJarPackage.getElements());
 		if (resources == null) {
 			setErrorMessage(JarPackagerMessages.JarManifestWizardPage_error_noResourceSelected);
 			return;
 		}
-		IJavaSearchScope searchScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope((IResource[])resources.toArray(new IResource[resources.size()]), true);
+		IJavaSearchScope searchScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(resources.toArray(new IResource[resources.size()]), true);
 		SelectionDialog dialog= JavaUI.createMainTypeDialog(getContainer().getShell(), getContainer(), searchScope, 0, false, ""); //$NON-NLS-1$
 		dialog.setTitle(JarPackagerMessages.JarManifestWizardPage_mainTypeSelectionDialog_title);
 		dialog.setMessage(JarPackagerMessages.JarManifestWizardPage_mainTypeSelectionDialog_message);
@@ -575,6 +582,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	/*
 	 * Implements method from IJarPackageWizardPage
 	 */
+	@Override
 	public boolean isPageComplete() {
 		boolean isPageComplete= true;
 		setMessage(null);
@@ -621,7 +629,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 				return false;
 			}
 		}
-		Set selectedPackages= getPackagesForSelectedResources();
+		Set<IJavaElement> selectedPackages= getPackagesForSelectedResources();
 		if (fJarPackage.isJarSealed()
 				&& !selectedPackages.containsAll(Arrays.asList(fJarPackage.getPackagesToUnseal()))) {
 			setErrorMessage(JarPackagerMessages.JarManifestWizardPage_error_unsealedPackagesNotInSelection);
@@ -644,6 +652,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	/*
 	 * Implements method from IWizardPage.
 	 */
+	@Override
 	public void setPreviousPage(IWizardPage page) {
 		super.setPreviousPage(page);
 		fMainTypes= null;
@@ -881,9 +890,9 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	 * @param packageFragments the package fragments
 	 * @return a new selection dialog
 	 */
-	protected SelectionDialog createPackageDialog(Set packageFragments) {
-		List packages= new ArrayList(packageFragments.size());
-		for (Iterator iter= packageFragments.iterator(); iter.hasNext();) {
+	protected SelectionDialog createPackageDialog(Set<IJavaElement> packageFragments) {
+		List<IPackageFragment> packages= new ArrayList<IPackageFragment>(packageFragments.size());
+		for (Iterator<IJavaElement> iter= packageFragments.iterator(); iter.hasNext();) {
 			IPackageFragment fragment= (IPackageFragment)iter.next();
 			boolean containsJavaElements= false;
 			int kind;
@@ -898,6 +907,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 				packages.add(fragment);
 		}
 		StandardJavaElementContentProvider cp= new StandardJavaElementContentProvider() {
+			@Override
 			public boolean hasChildren(Object element) {
 				// prevent the + from being shown in front of packages
 				return !(element instanceof IPackageFragment) && super.hasChildren(element);
@@ -935,7 +945,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	 */
 	protected IPackageFragment[] getPackagesFromDialog(SelectionDialog dialog) {
 		if (dialog.getReturnCode() == Window.OK && dialog.getResult().length > 0)
-			return (IPackageFragment[])Arrays.asList(dialog.getResult()).toArray(new IPackageFragment[dialog.getResult().length]);
+			return Arrays.asList(dialog.getResult()).toArray(new IPackageFragment[dialog.getResult().length]);
 		else
 			return new IPackageFragment[0];
 	}
@@ -977,8 +987,8 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	 * Returns the minimal set of packages which contain all the selected Java resources.
 	 * @return	the Set of IPackageFragments which contain all the selected resources
 	 */
-	private Set getPackagesForSelectedResources() {
-		Set packages= new HashSet();
+	private Set<IJavaElement> getPackagesForSelectedResources() {
+		Set<IJavaElement> packages= new HashSet<IJavaElement>();
 		int n= fJarPackage.getElements().length;
 		for (int i= 0; i < n; i++) {
 			Object element= fJarPackage.getElements()[i];

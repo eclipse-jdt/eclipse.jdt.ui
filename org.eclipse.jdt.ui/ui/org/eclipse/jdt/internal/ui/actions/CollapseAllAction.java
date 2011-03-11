@@ -39,6 +39,7 @@ public class CollapseAllAction extends Action {
 		fViewer= viewer;
 	}
 
+	@Override
 	public void run() {
 		try {
 			fViewer.getControl().setRedraw(false);

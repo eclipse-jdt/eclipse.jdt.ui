@@ -53,6 +53,7 @@ public class TempAssignmentFinder extends ASTVisitor{
 
 	//-- visit methods
 
+	@Override
 	public boolean visit(Assignment assignment) {
 		if (! isAssignmentToTemp(assignment))
 			return true;
@@ -61,6 +62,7 @@ public class TempAssignmentFinder extends ASTVisitor{
 		return false;
 	}
 
+	@Override
 	public boolean visit(PostfixExpression postfixExpression) {
 		if (postfixExpression.getOperand() == null)
 			return true;
@@ -74,6 +76,7 @@ public class TempAssignmentFinder extends ASTVisitor{
 		return false;
 	}
 
+	@Override
 	public boolean visit(PrefixExpression prefixExpression) {
 		if (prefixExpression.getOperand() == null)
 			return true;

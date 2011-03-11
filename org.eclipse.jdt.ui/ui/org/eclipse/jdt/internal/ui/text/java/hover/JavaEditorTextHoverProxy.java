@@ -41,6 +41,7 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 	/*
 	 * @see IJavaEditorTextHover#setEditor(IEditorPart)
 	 */
+	@Override
 	public void setEditor(IEditorPart editor) {
 		super.setEditor(editor);
 
@@ -55,6 +56,7 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 	/*
 	 * @see ITextHover#getHoverRegion(ITextViewer, int)
 	 */
+	@Override
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
 		if (ensureHoverCreated())
 			return fHover.getHoverRegion(textViewer, offset);
@@ -76,6 +78,7 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 	 * @see org.eclipse.jface.text.ITextHoverExtension2#getHoverInfo2(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 * @since 3.4
 	 */
+	@Override
 	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
 		if (ensureHoverCreated()) {
 			if (fHover instanceof ITextHoverExtension2)
@@ -108,6 +111,7 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 	 * @see org.eclipse.jface.text.ITextHoverExtension#getHoverControlCreator()
 	 * @since 3.0
 	 */
+	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		if (ensureHoverCreated() && (fHover instanceof ITextHoverExtension))
 			return ((ITextHoverExtension)fHover).getHoverControlCreator();
@@ -118,6 +122,7 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 	/*
 	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 */
+	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		if (ensureHoverCreated()) {
 			if (fHover instanceof IInformationProviderExtension2) // this is wrong, but left here for backwards compatibility

@@ -24,6 +24,7 @@ public class JavaNoTypeCompletionProposalComputer extends JavaCompletionProposal
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer#createCollector(org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
 	 */
+	@Override
 	protected CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context) {
 		CompletionProposalCollector collector= super.createCollector(context);
 		collector.setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, false);
@@ -45,6 +46,7 @@ public class JavaNoTypeCompletionProposalComputer extends JavaCompletionProposal
 		return collector;
 	}
 
+	@Override
 	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
 		return guessMethodContextInformationPosition(context);
 	}

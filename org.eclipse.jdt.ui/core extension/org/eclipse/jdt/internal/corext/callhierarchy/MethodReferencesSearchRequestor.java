@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,14 +26,15 @@ class MethodReferencesSearchRequestor extends SearchRequestor {
         fSearchResults = new CallSearchResultCollector();
     }
 
-    public Map getCallers() {
+    public Map<String, MethodCall> getCallers() {
         return fSearchResults.getCallers();
     }
 
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)
      */
-    public void acceptSearchMatch(SearchMatch match) {
+    @Override
+	public void acceptSearchMatch(SearchMatch match) {
         if (fRequireExactMatch && (match.getAccuracy() != SearchMatch.A_ACCURATE)) {
             return;
         }

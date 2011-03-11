@@ -39,6 +39,7 @@ public class SortingLabelProvider extends SearchLabelProvider {
 		fCurrentOrder= SHOW_ELEMENT_CONTAINER;
 	}
 
+	@Override
 	public Image getImage(Object element) {
 		Image image= null;
 		if (element instanceof IJavaElement || element instanceof IResource)
@@ -48,6 +49,7 @@ public class SortingLabelProvider extends SearchLabelProvider {
 		return getParticipantImage(element);
 	}
 
+	@Override
 	public final String getText(Object element) {
 		if (element instanceof IImportDeclaration)
 			element= ((IImportDeclaration)element).getParent().getParent();
@@ -66,6 +68,7 @@ public class SortingLabelProvider extends SearchLabelProvider {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
+	@Override
 	public StyledString getStyledText(Object element) {
 		if (element instanceof IImportDeclaration)
 			element= ((IImportDeclaration)element).getParent().getParent();

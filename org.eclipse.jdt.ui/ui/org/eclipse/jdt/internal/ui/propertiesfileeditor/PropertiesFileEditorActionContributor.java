@@ -34,6 +34,7 @@ public class PropertiesFileEditorActionContributor extends TextEditorActionContr
 	/*
 	 * @see EditorActionBarContributor#setActiveEditor(IEditorPart)
 	 */
+	@Override
 	public void setActiveEditor(IEditorPart part) {
 		super.setActiveEditor(part);
 
@@ -53,6 +54,7 @@ public class PropertiesFileEditorActionContributor extends TextEditorActionContr
 	/*
 	 * @see IEditorActionBarContributor#dispose()
 	 */
+	@Override
 	public void dispose() {
 		setActiveEditor(null);
 		super.dispose();

@@ -98,14 +98,16 @@ public class CallHierarchyImageDescriptor extends CompositeImageDescriptor {
     /* (non-Javadoc)
      * Method declared in CompositeImageDescriptor
      */
-    protected Point getSize() {
+    @Override
+	protected Point getSize() {
         return fSize;
     }
 
     /* (non-Javadoc)
      * Method declared on Object.
      */
-    public boolean equals(Object object) {
+    @Override
+	public boolean equals(Object object) {
         if (object == null || !CallHierarchyImageDescriptor.class.equals(object.getClass()))
             return false;
 
@@ -116,14 +118,16 @@ public class CallHierarchyImageDescriptor extends CompositeImageDescriptor {
     /* (non-Javadoc)
      * Method declared on Object.
      */
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return fBaseImage.hashCode() | fFlags | fSize.hashCode();
     }
 
     /* (non-Javadoc)
      * Method declared in CompositeImageDescriptor
      */
-    protected void drawCompositeImage(int width, int height) {
+    @Override
+	protected void drawCompositeImage(int width, int height) {
         ImageData bg= getImageData(fBaseImage);
 
         drawImage(bg, 0, 0);

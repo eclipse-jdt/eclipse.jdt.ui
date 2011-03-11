@@ -56,6 +56,7 @@ public class ImportActionGroup extends ActionGroup {
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new Separator(GROUP_IMPORT));
 		menu.appendToGroup(GROUP_IMPORT, fImportAction);
@@ -66,6 +67,7 @@ public class ImportActionGroup extends ActionGroup {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void dispose() {
 		fImportAction.dispose();
 		fExportAction.dispose();

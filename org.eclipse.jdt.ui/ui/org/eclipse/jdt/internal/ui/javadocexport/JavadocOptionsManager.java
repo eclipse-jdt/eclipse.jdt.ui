@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -161,7 +161,7 @@ public class JavadocOptionsManager {
 
 	private static final String JAVADOC_COMMAND_HISTORY= "javadoc_command_history"; //$NON-NLS-1$
 
-	public JavadocOptionsManager(IFile xmlJavadocFile, IDialogSettings dialogSettings, List currSelection) {
+	public JavadocOptionsManager(IFile xmlJavadocFile, IDialogSettings dialogSettings, List<?> currSelection) {
 		fXmlfile= xmlJavadocFile;
 		fWizardStatus= new StatusInfo();
 
@@ -226,7 +226,7 @@ public class JavadocOptionsManager {
 	}
 
 
-	private void loadFromDialogStore(IDialogSettings settings, List sel) {
+	private void loadFromDialogStore(IDialogSettings settings, List<?> sel) {
 		fInitialElements= getInitialElementsFromSelection(sel);
 
 		IJavaProject project= getSingleProjectFromInitialSelection();
@@ -312,7 +312,7 @@ public class JavadocOptionsManager {
 
 
 	//loads defaults for wizard (nothing is stored)
-	private void loadDefaults(List sel) {
+	private void loadDefaults(List<?> sel) {
 		fInitialElements= getInitialElementsFromSelection(sel);
 
 		IJavaProject project= getSingleProjectFromInitialSelection();
@@ -481,7 +481,7 @@ public class JavadocOptionsManager {
 		}
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 
-		ArrayList res= new ArrayList();
+		ArrayList<IContainer> res= new ArrayList<IContainer>();
 
 		String[] strings= sourcePaths.split(File.pathSeparator);
 		for (int i= 0; i < strings.length; i++) {
@@ -494,11 +494,11 @@ public class JavadocOptionsManager {
 			}
 
 		}
-		return (IContainer[]) res.toArray(new IContainer[res.size()]);
+		return res.toArray(new IContainer[res.size()]);
 	}
 
 	private IJavaElement[] getSelectedElementsFromAnt(Element element) {
-		List res= new ArrayList();
+		List<IJavaElement> res= new ArrayList<IJavaElement>();
 
 		// get all the packages listed in the ANT file
 		String packagenames= element.getAttribute(PACKAGENAMES);
@@ -544,7 +544,7 @@ public class JavadocOptionsManager {
 				}
 			}
 		}
-		return (IJavaElement[]) res.toArray(new IJavaElement[res.size()]);
+		return res.toArray(new IJavaElement[res.size()]);
 	}
 
 	/**
@@ -696,7 +696,7 @@ public class JavadocOptionsManager {
 	}
 
 
-	public IStatus getArgumentArray(List vmArgs, List toolArgs) {
+	public IStatus getArgumentArray(List<String> vmArgs, List<String> toolArgs) {
 		MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, JavadocExportMessages.JavadocOptionsManager_status_title, null);
 
 		//bug 38692
@@ -815,12 +815,12 @@ public class JavadocOptionsManager {
 		return status;
 	}
 
-	private void addProxyOptions(List vmOptions) {
+	private void addProxyOptions(List<String> vmOptions) {
 		// bug 74132
 		String hostPrefix= "-J-Dhttp.proxyHost="; //$NON-NLS-1$
 		String portPrefix= "-J-Dhttp.proxyPort="; //$NON-NLS-1$
 		for (int i= 0; i < vmOptions.size(); i++) {
-			String curr= (String) vmOptions.get(i);
+			String curr= vmOptions.get(i);
 			if (curr.startsWith(hostPrefix) || curr.startsWith(portPrefix)) {
 				return;
 			}
@@ -1037,8 +1037,8 @@ public class JavadocOptionsManager {
 		return fSource;
 	}
 
-	private IJavaElement[] getInitialElementsFromSelection(List candidates) {
-		ArrayList res= new ArrayList();
+	private IJavaElement[] getInitialElementsFromSelection(List<?> candidates) {
+		ArrayList<IJavaElement> res= new ArrayList<IJavaElement>();
 		for (int i= 0; i < candidates.size(); i++) {
 			try {
 				IJavaElement elem= getSelectableJavaElement(candidates.get(i));
@@ -1049,7 +1049,7 @@ public class JavadocOptionsManager {
 				// ignore this
 			}
 		}
-		return (IJavaElement[]) res.toArray(new IJavaElement[res.size()]);
+		return res.toArray(new IJavaElement[res.size()]);
 	}
 
 	private IJavaElement getSelectableJavaElement(Object obj) throws JavaModelException {

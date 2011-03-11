@@ -20,18 +20,19 @@ import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
 public abstract class AbstractCleanUpTabPage extends CleanUpTabPage {
 
 	private AbstractCleanUp[] fPreviewCleanUps;
-	private Map fValues;
+	private Map<String, String> fValues;
 
 	public AbstractCleanUpTabPage() {
 		super();
 	}
 
-	protected abstract AbstractCleanUp[] createPreviewCleanUps(Map values);
+	protected abstract AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values);
 
 	/* 
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage#setWorkingValues(java.util.Map)
 	 */
-	public void setWorkingValues(Map workingValues) {
+	@Override
+	public void setWorkingValues(Map<String, String> workingValues) {
 		super.setWorkingValues(workingValues);
 		fValues= workingValues;
 		setOptions(new MapCleanUpOptions(workingValues));

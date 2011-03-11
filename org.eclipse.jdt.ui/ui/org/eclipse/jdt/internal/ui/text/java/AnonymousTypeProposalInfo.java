@@ -42,6 +42,7 @@ public final class AnonymousTypeProposalInfo extends MemberProposalInfo {
 	 * @return the resolved member or <code>null</code> if none is found
 	 * @throws JavaModelException if accessing the java model fails
 	 */
+	@Override
 	protected IMember resolveMember() throws JavaModelException {
 		char[] signature= fProposal.getDeclarationSignature();
 		String typeName= SignatureUtil.stripSignatureToFQN(String.valueOf(signature));

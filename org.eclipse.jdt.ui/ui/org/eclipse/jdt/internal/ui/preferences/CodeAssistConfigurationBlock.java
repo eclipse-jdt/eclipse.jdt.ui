@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -104,6 +104,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		super(statusListener, null, getAllKeys(), workbenchcontainer);
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		scrolled.setExpandHorizontal(true);
@@ -161,6 +162,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.JavaEditorPreferencePage_suggestStaticImports;
 		Button slave= addCheckBoxWithLink(composite, label, PREF_CODEASSIST_SUGGEST_STATIC_IMPORTS, enabledDisabled, 20, SWT.DEFAULT, new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				openStaticImportFavoritesPage();
 			}
@@ -184,6 +186,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 
 
 		SelectionListener completionSelectionListener= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean state= fInsertBestGuessRadioButton.getSelection();
 				setValue(PREF_CODEASSIST_GUESS_METHOD_ARGUMENTS, state);
@@ -224,6 +227,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	protected static void createSelectionDependency(final Button master, final Control slave) {
 		master.addSelectionListener(new SelectionAdapter() {
 			
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				deepSetEnabled(slave, master.getSelection());
 			}
@@ -270,10 +274,11 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		addCheckBox(composite, label, PREF_CODEASSIST_DEPRECATION_CHECK, enabledDisabled, 0);
 	}
 
-	private void createPreferencePageLink(Composite composite, String label, final Map targetInfo) {
+	private void createPreferencePageLink(Composite composite, String label, final Map<String, String> targetInfo) {
 		final Link link= new Link(composite, SWT.NONE);
 		link.setText(label);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, targetInfo);
 			}
@@ -285,19 +290,20 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.JavaEditorPreferencePage_enableAutoActivation;
 		final Button autoactivation= addCheckBox(composite, label, PREF_CODEASSIST_AUTOACTIVATION, trueFalse, 0);
 		autoactivation.addSelectionListener(new SelectionAdapter(){
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				updateAutoactivationControls();
 			}
 		});
 
 		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationDelay;
-		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_DELAY, 4, 0);
+		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_DELAY, 4, 20);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationTriggersForJava;
-		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 100, 4, 0);
+		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 100, 4, 20);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationTriggersForJavaDoc;
-		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 100, 4, 0);
+		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 100, 4, 20);
 	}
 
 
@@ -310,7 +316,9 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 
 		Label labelControl= new Label(parent, SWT.NONE);
 		labelControl.setText(label);
-		labelControl.setLayoutData(new GridData());
+		GridData data= new GridData();
+		data.horizontalIndent= indent;
+		labelControl.setLayoutData(data);
 
 		Text textBox= new Text(parent, SWT.BORDER | SWT.SINGLE);
 		textBox.setData(key);
@@ -324,14 +332,13 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		}
 		textBox.addModifyListener(getTextModifyListener());
 
-		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		if (modelTextLimit != 0)
 			textBox.setTextLimit(modelTextLimit);
 
 		if (fieldTextLimit != 0)
 			data.widthHint= pixelConverter.convertWidthInCharsToPixels(fieldTextLimit + 1);
 
-		data.horizontalIndent= indent;
 		data.horizontalSpan= 2;
 		textBox.setLayoutData(data);
 
@@ -350,6 +357,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		completionComposite.setLayout(ccgl);
 
 		SelectionListener completionSelectionListener= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean insert= fCompletionInsertsRadioButton.getSelection();
 				setValue(PREF_CODEASSIST_INSERT_COMPLETION, insert);
@@ -401,11 +409,13 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
     }
 
 
+	@Override
 	public void performDefaults() {
 		super.performDefaults();
 		initializeFields();
 	}
 
+	@Override
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		return null;
 	}
@@ -435,6 +445,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		return status;
 	}
 
+	@Override
 	protected void validateSettings(Key key, String oldValue, String newValue) {
 		if (key == null || PREF_CODEASSIST_AUTOACTIVATION_DELAY.equals(key))
 			fContext.statusChanged(validatePositiveNumber(getValue(PREF_CODEASSIST_AUTOACTIVATION_DELAY)));
@@ -443,28 +454,28 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	protected void setControlEnabled(Key key, boolean enabled) {
 		Control control= getControl(key);
 		control.setEnabled(enabled);
-		Label label= (Label) fLabels.get(control);
+		Label label= fLabels.get(control);
 		if (label != null)
 			label.setEnabled(enabled);
 	}
 
 	private Control getControl(Key key) {
 		for (int i= fComboBoxes.size() - 1; i >= 0; i--) {
-			Control curr= (Control) fComboBoxes.get(i);
+			Control curr= fComboBoxes.get(i);
 			ControlData data= (ControlData) curr.getData();
 			if (key.equals(data.getKey())) {
 				return curr;
 			}
 		}
 		for (int i= fCheckBoxes.size() - 1; i >= 0; i--) {
-			Control curr= (Control) fCheckBoxes.get(i);
+			Control curr= fCheckBoxes.get(i);
 			ControlData data= (ControlData) curr.getData();
 			if (key.equals(data.getKey())) {
 				return curr;
 			}
 		}
 		for (int i= fTextBoxes.size() - 1; i >= 0; i--) {
-			Control curr= (Control) fTextBoxes.get(i);
+			Control curr= fTextBoxes.get(i);
 			Key currKey= (Key) curr.getData();
 			if (key.equals(currKey)) {
 				return curr;

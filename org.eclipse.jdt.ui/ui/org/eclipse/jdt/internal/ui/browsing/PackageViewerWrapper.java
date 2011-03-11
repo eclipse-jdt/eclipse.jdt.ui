@@ -119,6 +119,7 @@ class PackageViewerWrapper extends StructuredViewer {
 		}
 	}
 
+	@Override
 	public void setSelection(ISelection selection, boolean reveal) {
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection sel= (IStructuredSelection) selection;
@@ -146,177 +147,218 @@ class PackageViewerWrapper extends StructuredViewer {
 			fViewer.setSelection(selection, reveal);
 	}
 
+	@Override
 	public void addPostSelectionChangedListener(ISelectionChangedListener listener) {
 		fPostSelectionChangedListenerList.add(listener);
 		fViewer.addPostSelectionChangedListener(listener);
 	}
 
+	@Override
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 		fSelectionChangedListenerList.add(listener);
 		fViewer.addSelectionChangedListener(listener);
 	}
 
+	@Override
 	public void addDoubleClickListener(IDoubleClickListener listener) {
 		fViewer.addDoubleClickListener(listener);
 		fListenerList.add(listener);
 	}
 
+	@Override
 	public void addOpenListener(IOpenListener listener) {
 		fViewer.addOpenListener(listener);
 		fListenerList.add(listener);
 	}
 
+	@Override
 	public void addHelpListener(HelpListener listener) {
 		fViewer.addHelpListener(listener);
 		fListenerList.add(listener);
 	}
 
+	@Override
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 		fViewer.removeSelectionChangedListener(listener);
 		fSelectionChangedListenerList.remove(listener);
 	}
 
+	@Override
 	public void removePostSelectionChangedListener(ISelectionChangedListener listener) {
 		fViewer.removePostSelectionChangedListener(listener);
 		fPostSelectionChangedListenerList.remove(listener);
 	}
 
+	@Override
 	public void removeHelpListener(HelpListener listener) {
 		fListenerList.remove(listener);
 		fViewer.removeHelpListener(listener);
 	}
 
+	@Override
 	public void removeDoubleClickListener(IDoubleClickListener listener) {
 		fViewer.removeDoubleClickListener(listener);
 		fListenerList.remove(listener);
 	}
 
+	@Override
 	public void removeOpenListener(IOpenListener listener) {
 		fViewer.removeOpenListener(listener);
 		fListenerList.remove(listener);
 	}
 
 	// --------- simply delegate to wrapped viewer ---------
+	@Override
 	public Control getControl() {
 		return fViewer.getControl();
 	}
 
+	@Override
 	public void addFilter(ViewerFilter filter) {
 		fViewer.addFilter(filter);
 	}
 
+	@Override
 	public void setFilters(ViewerFilter[] filters) {
 		fViewer.setFilters(filters);
 	}
 
+	@Override
 	public ViewerFilter[] getFilters() {
 		return fViewer.getFilters();
 	}
 
+	@Override
 	public void refresh() {
 		fViewer.refresh();
 	}
 
+	@Override
 	public void removeFilter(ViewerFilter filter) {
 		fViewer.removeFilter(filter);
 	}
 
+	@Override
 	public ISelection getSelection() {
 		return fViewer.getSelection();
 	}
 
+	@Override
 	public void refresh(boolean updateLabels) {
 		fViewer.refresh(updateLabels);
 	}
 
+	@Override
 	public void refresh(Object element, boolean updateLabels) {
 		fViewer.refresh(element, updateLabels);
 	}
 
+	@Override
 	public void refresh(Object element) {
 		fViewer.refresh(element);
 	}
 
+	@Override
 	public void resetFilters() {
 		fViewer.resetFilters();
 	}
 
+	@Override
 	public void reveal(Object element) {
 		fViewer.reveal(element);
 	}
 
+	@Override
 	public void setContentProvider(IContentProvider contentProvider) {
 		fViewer.setContentProvider(contentProvider);
 	}
 
+	@Override
 	public void setSorter(ViewerSorter sorter) {
 		fViewer.setSorter(sorter);
 	}
 
+	@Override
 	public void setComparator(ViewerComparator comparator) {
 		fViewer.setComparator(comparator);
 	}
 
+	@Override
 	public void setUseHashlookup(boolean enable) {
 		fViewer.setUseHashlookup(enable);
 	}
 
+	@Override
 	public Widget testFindItem(Object element) {
 		return fViewer.testFindItem(element);
 	}
 
+	@Override
 	public void update(Object element, String[] properties) {
 		fViewer.update(element, properties);
 	}
 
+	@Override
 	public void update(Object[] elements, String[] properties) {
 		fViewer.update(elements, properties);
 	}
 
+	@Override
 	public IContentProvider getContentProvider() {
 		return fViewer.getContentProvider();
 	}
 
+	@Override
 	public Object getInput() {
 		return fViewer.getInput();
 	}
 
+	@Override
 	public IBaseLabelProvider getLabelProvider() {
 		return fViewer.getLabelProvider();
 	}
 
+	@Override
 	public void setLabelProvider(IBaseLabelProvider labelProvider) {
 		fViewer.setLabelProvider(labelProvider);
 	}
 
+	@Override
 	public Object getData(String key) {
 		return fViewer.getData(key);
 	}
 
+	@Override
 	public Item scrollDown(int x, int y) {
 		return fViewer.scrollDown(x, y);
 	}
 
+	@Override
 	public Item scrollUp(int x, int y) {
 		return fViewer.scrollUp(x, y);
 	}
 
+	@Override
 	public void setData(String key, Object value) {
 		fViewer.setData(key, value);
 	}
 
+	@Override
 	public void setSelection(ISelection selection) {
 		fViewer.setSelection(selection);
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		return fViewer.equals(obj);
 	}
 
+	@Override
 	public int hashCode() {
 		return fViewer.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return fViewer.toString();
 	}
@@ -326,54 +368,67 @@ class PackageViewerWrapper extends StructuredViewer {
 	}
 
 	// need to provide implementation for abstract methods
+	@Override
 	protected Widget doFindInputItem(Object element) {
 		return ((IPackagesViewViewer) fViewer).doFindInputItem(element);
 	}
 
+	@Override
 	protected Widget doFindItem(Object element) {
 		return ((IPackagesViewViewer)fViewer).doFindItem(element);
 	}
 
+	@Override
 	protected void doUpdateItem(Widget item, Object element, boolean fullMap) {
 		((IPackagesViewViewer)fViewer).doUpdateItem(item, element, fullMap);
 	}
 
+	@Override
 	protected List getSelectionFromWidget() {
 		return ((IPackagesViewViewer)fViewer).getSelectionFromWidget();
 	}
 
+	@Override
 	protected void internalRefresh(Object element) {
 		((IPackagesViewViewer)fViewer).internalRefresh(element);
 	}
 
+	@Override
 	protected void setSelectionToWidget(List l, boolean reveal) {
 		((IPackagesViewViewer) fViewer).setSelectionToWidget(l, reveal);
 	}
 
+	@Override
 	public ViewerComparator getComparator() {
 		return fViewer.getComparator();
 	}
 
+	@Override
 	public IElementComparer getComparer() {
 		return fViewer.getComparer();
 	}
 
+	@Override
 	public ViewerSorter getSorter() {
 		return fViewer.getSorter();
 	}
 
+	@Override
 	public void setComparer(IElementComparer comparer) {
 		fViewer.setComparer(comparer);
 	}
 
+	@Override
 	public void addDragSupport(int operations, Transfer[] transferTypes, DragSourceListener listener) {
 		fViewer.addDragSupport(operations, transferTypes, listener);
 	}
 
+	@Override
 	public void addDropSupport(int operations, Transfer[] transferTypes, DropTargetListener listener) {
 		fViewer.addDropSupport(operations, transferTypes, listener);
 	}
 
+	@Override
 	public Widget[] testFindItems(Object element) {
 		return fViewer.testFindItems(element);
 	}

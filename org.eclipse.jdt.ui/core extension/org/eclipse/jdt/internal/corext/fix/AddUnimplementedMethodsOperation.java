@@ -65,6 +65,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 		IMethodBinding[] unimplementedMethods= getUnimplementedMethods(fTypeNode);
 		if (unimplementedMethods.length == 0)
@@ -111,6 +112,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getAdditionalInfo() {
 		if (fTypeNode instanceof EnumDeclaration)
 			return CorrectionMessages.UnimplementedMethodsCorrectionProposal_enum_info;

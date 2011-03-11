@@ -58,6 +58,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */
+	@Override
 	protected void addUserInputPages(){
 		addPage(new IntroduceParameterInputPage(getIntroduceParameterRefactoring().guessParameterNames()));
 	}
@@ -108,12 +109,14 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 				fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(refactoring));
 				refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
 				fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
 					}
 				});
 				fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
 				fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
 					}
@@ -147,6 +150,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			return cp;
 		}
 
+		@Override
 		public void dispose() {
 			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
 			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);

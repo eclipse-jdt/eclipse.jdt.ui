@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 public class EditorInputTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
 
 	private ISelectionProvider fProvider;
-	private ArrayList/*<EditorInputData>*/fEditorInputDatas;
+	private ArrayList<EditorInputData> fEditorInputDatas;
 
 	public EditorInputTransferDragAdapter(ISelectionProvider provider) {
 		Assert.isNotNull(provider);
@@ -56,13 +56,14 @@ public class EditorInputTransferDragAdapter extends DragSourceAdapter implements
 	/*
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragStart
 	 */
+	@Override
 	public void dragStart(DragSourceEvent event) {
-		fEditorInputDatas= new ArrayList();
+		fEditorInputDatas= new ArrayList<EditorInputData>();
 
 		ISelection selection= fProvider.getSelection();
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) selection;
-			for (Iterator iter= structuredSelection.iterator(); iter.hasNext();) {
+			for (Iterator<?> iter= structuredSelection.iterator(); iter.hasNext();) {
 				Object element= iter.next();
 				IEditorInput editorInput= EditorUtility.getEditorInput(element);
 				if (editorInput != null && editorInput.getPersistable() != null) {
@@ -87,6 +88,7 @@ public class EditorInputTransferDragAdapter extends DragSourceAdapter implements
 	/*
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragSetData
 	 */
+	@Override
 	public void dragSetData(DragSourceEvent event) {
 		if (EditorInputTransfer.getInstance().isSupportedType(event.dataType) && fEditorInputDatas.size() > 0) {
 			event.data= fEditorInputDatas.toArray(new EditorInputData[fEditorInputDatas.size()]);
@@ -97,6 +99,7 @@ public class EditorInputTransferDragAdapter extends DragSourceAdapter implements
 	/*
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragFinished
 	 */
+	@Override
 	public void dragFinished(DragSourceEvent event) {
 		fEditorInputDatas= null;
 		Assert.isTrue(event.detail != DND.DROP_MOVE);

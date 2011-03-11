@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceView
  */
 public class PropertiesFileMergeViewer extends TextMergeViewer {
 
-	private List fSourceViewerConfigurations;
+	private List<SourceViewerConfiguration> fSourceViewerConfigurations;
 
 	private IPropertyChangeListener fPreferenceChangeListener;
 
@@ -63,16 +63,17 @@ public class PropertiesFileMergeViewer extends TextMergeViewer {
 	/*
 	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#configureTextViewer(org.eclipse.jface.text.TextViewer)
 	 */
+	@Override
 	protected void configureTextViewer(TextViewer textViewer) {
 		if (!(textViewer instanceof SourceViewer))
 			return;
 
 		if (fPreferenceStore == null) {
-			fSourceViewerConfigurations= new ArrayList(3);
+			fSourceViewerConfigurations= new ArrayList<SourceViewerConfiguration>(3);
 			fPreferenceStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
 			fPreferenceChangeListener= new IPropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent event) {
-					Iterator iter= fSourceViewerConfigurations.iterator();
+					Iterator<SourceViewerConfiguration> iter= fSourceViewerConfigurations.iterator();
 					while (iter.hasNext())
 						((PropertiesFileSourceViewerConfiguration)iter.next()).handlePropertyChangeEvent(event);
 					invalidateTextPresentation();
@@ -91,6 +92,7 @@ public class PropertiesFileMergeViewer extends TextMergeViewer {
 	/*
 	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#getDocumentPartitioner()
 	 */
+	@Override
 	protected IDocumentPartitioner getDocumentPartitioner() {
 		return new FastPartitioner(new PropertiesFilePartitionScanner(), IPropertiesFilePartitions.PARTITIONS);
 	}
@@ -99,6 +101,7 @@ public class PropertiesFileMergeViewer extends TextMergeViewer {
 	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#getDocumentPartitioning()
 	 * @since 3.3
 	 */
+	@Override
 	protected String getDocumentPartitioning() {
 		return IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING;
 	}
@@ -106,6 +109,7 @@ public class PropertiesFileMergeViewer extends TextMergeViewer {
 	/*
 	 * @see org.eclipse.compare.contentmergeviewer.ContentMergeViewer#getTitle()
 	 */
+	@Override
 	public String getTitle() {
 		return CompareMessages.PropertiesFileMergeViewer_title;
 	}
@@ -114,6 +118,7 @@ public class PropertiesFileMergeViewer extends TextMergeViewer {
 	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#handleDispose(org.eclipse.swt.events.DisposeEvent)
 	 * @since 3.5
 	 */
+	@Override
 	protected void handleDispose(DisposeEvent event) {
 		if (fPreferenceStore != null) {
 			fPreferenceStore.removePropertyChangeListener(fPreferenceChangeListener);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isUniverse()
 	 */
+	@Override
 	public boolean isUniverse() {
 		return fUpperBound.equals(getJavaLangObject());
 	}
@@ -40,6 +41,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
 	 */
+	@Override
 	public TypeSet makeClone() {
 		return this; // new SubTypesOfSingleton(fUpperBound);
 	}
@@ -47,6 +49,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#subTypes()
 	 */
+	@Override
 	public TypeSet subTypes() {
 		return this; // makeClone();
 	}
@@ -54,6 +57,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#intersectedWith(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
 	 */
+	@Override
 	public TypeSet specialCasesIntersectedWith(TypeSet other) {
 		if (other.isSingleton() && other.anyMember().equals(fUpperBound))
 			return other;		// xsect(subTypes(A),A) = A
@@ -90,6 +94,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isEmpty()
 	 */
+	@Override
 	public boolean isEmpty() {
 		return false;
 	}
@@ -97,6 +102,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#upperBound()
 	 */
+	@Override
 	public TypeSet upperBound() {
 		return new SingletonTypeSet(fUpperBound, getTypeSetEnvironment());
 	}
@@ -104,6 +110,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#lowerBound()
 	 */
+	@Override
 	public TypeSet lowerBound() {
 		EnumeratedTypeSet e= enumerate();
 		return e.lowerBound();
@@ -112,6 +119,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueLowerBound()
 	 */
+	@Override
 	public boolean hasUniqueLowerBound() {
 //		TypeSet lowerBound= lowerBound();
 
@@ -122,6 +130,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueUpperBound()
 	 */
+	@Override
 	public boolean hasUniqueUpperBound() {
 		return true;
 	}
@@ -129,6 +138,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueLowerBound()
 	 */
+	@Override
 	public TType uniqueLowerBound() {
 		TypeSet lowerBound= lowerBound();
 
@@ -138,6 +148,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueUpperBound()
 	 */
+	@Override
 	public TType uniqueUpperBound() {
 		return fUpperBound;
 	}
@@ -145,6 +156,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(org.eclipse.jdt.core.TType)
 	 */
+	@Override
 	public boolean contains(TType t) {
 		if (t.equals(fUpperBound))
 			return true;
@@ -154,6 +166,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#containsAll(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
 	 */
+	@Override
 	public boolean containsAll(TypeSet other) {
 		if (isUniverse())
 			return true;
@@ -168,16 +181,16 @@ public class SubTypesOfSingleton extends TypeSet {
 			SubTypesSet otherSub= (SubTypesSet) other;
 			TypeSet otherUpperBounds= otherSub.upperBound();
 
-			for(Iterator iter= otherUpperBounds.iterator(); iter.hasNext(); ) {
-				TType t= (TType) iter.next();
+			for(Iterator<TType> iter= otherUpperBounds.iterator(); iter.hasNext(); ) {
+				TType t= iter.next();
 				if (! TTypes.canAssignTo(t, fUpperBound))
 					return false;
 			}
 			return true;
 		}
 		// For now, no more tricks up my sleeve; get an iterator
-		for(Iterator iter= other.iterator(); iter.hasNext(); ) {
-			TType t= (TType) iter.next();
+		for(Iterator<TType> iter= other.iterator(); iter.hasNext(); ) {
+			TType t= iter.next();
 
 			if (! TTypes.canAssignTo(t, fUpperBound))
 				return false;
@@ -188,7 +201,8 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#iterator()
 	 */
-	public Iterator iterator() {
+	@Override
+	public Iterator<TType> iterator() {
 		return enumerate().iterator();
 //		return new Iterator() {
 //			// First type returned is fUpperBound, then each of the subtypes, in turn
@@ -225,6 +239,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isSingleton()
 	 */
+	@Override
 	public boolean isSingleton() {
 		return getElementTypeOf(fUpperBound).getSubTypes().length == 0;
 	}
@@ -232,6 +247,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#anyMember()
 	 */
+	@Override
 	public TType anyMember() {
 		return fUpperBound;
 	}
@@ -241,6 +257,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#enumerate()
 	 */
+	@Override
 	public EnumeratedTypeSet enumerate() {
 		if (fEnumCache == null) {
 			if (fUpperBound instanceof ArrayType) {
@@ -255,6 +272,7 @@ public class SubTypesOfSingleton extends TypeSet {
 		return fEnumCache;
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof SubTypesOfSingleton))
 			return false;
@@ -263,10 +281,12 @@ public class SubTypesOfSingleton extends TypeSet {
 		return other.fUpperBound.equals(fUpperBound);
 	}
 	
+	@Override
 	public int hashCode() {
 		return fUpperBound.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return "<" + fID + ": subTypes(" + fUpperBound.getPrettySignature() + ")>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}

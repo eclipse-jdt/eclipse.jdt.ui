@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,14 +38,14 @@ public class FlowContext {
 	private boolean fLoopReentranceMode;
 	private Enum fComputeMode;
 	private IVariableBinding[] fLocals;
-	private List fExceptionStack;
+	private List<List<CatchClause>> fExceptionStack;
 
-	private static final List EMPTY_CATCH_CLAUSE= new ArrayList(0);
+	private static final List<CatchClause> EMPTY_CATCH_CLAUSE= new ArrayList<CatchClause>(0);
 
 	public FlowContext(int start, int length) {
 		fStart= start;
 		fLength= length;
-		fExceptionStack= new ArrayList(3);
+		fExceptionStack= new ArrayList<List<CatchClause>>(3);
 	}
 
 	public void setConsiderAccessMode(boolean b) {
@@ -117,7 +117,7 @@ public class FlowContext {
 	//---- Exception handling --------------------------------------------------------
 
 	void pushExcptions(TryStatement node) {
-		List catchClauses= node.catchClauses();
+		List<CatchClause> catchClauses= node.catchClauses();
 		if (catchClauses == null)
 			catchClauses= EMPTY_CATCH_CLAUSE;
 		fExceptionStack.add(catchClauses);
@@ -129,9 +129,9 @@ public class FlowContext {
 	}
 
 	boolean isExceptionCaught(ITypeBinding excpetionType) {
-		for (Iterator exceptions= fExceptionStack.iterator(); exceptions.hasNext(); ) {
-			for (Iterator catchClauses= ((List)exceptions.next()).iterator(); catchClauses.hasNext(); ) {
-				SingleVariableDeclaration catchedException= ((CatchClause)catchClauses.next()).getException();
+		for (Iterator<List<CatchClause>> exceptions= fExceptionStack.iterator(); exceptions.hasNext(); ) {
+			for (Iterator<CatchClause> catchClauses= exceptions.next().iterator(); catchClauses.hasNext(); ) {
+				SingleVariableDeclaration catchedException= catchClauses.next().getException();
 				IVariableBinding binding= catchedException.resolveBinding();
 				if (binding == null)
 					continue;

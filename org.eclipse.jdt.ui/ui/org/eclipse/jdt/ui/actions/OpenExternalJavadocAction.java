@@ -84,6 +84,7 @@ public class OpenExternalJavadocAction extends OpenAttachedJavadocAction {
 	 * No Javadoc since the method isn't meant to be public but is
 	 * since the beginning
 	 */
+	@Override
 	public void run(IJavaElement element) {
 		super.run(element);
 	}
@@ -91,6 +92,7 @@ public class OpenExternalJavadocAction extends OpenAttachedJavadocAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.OpenAttachedJavadocAction#forceExternalBrowser()
 	 */
+	@Override
 	boolean forceExternalBrowser() {
 		return true;
 	}

@@ -151,6 +151,7 @@ class CallHierarchyViewer extends TreeViewer {
 	 * 
 	 * @since 3.7
 	 */
+	@Override
 	protected Object[] getSortedChildren(Object parentElementOrTreePath) {
 		Object[] sortedChildren= super.getSortedChildren(parentElementOrTreePath);
 		if (parentElementOrTreePath instanceof CallerMethodWrapper) {
@@ -168,6 +169,7 @@ class CallHierarchyViewer extends TreeViewer {
 	 * 
 	 * @since 3.7
 	 */
+	@Override
 	protected void handleTreeExpand(TreeEvent event) {
 		super.handleTreeExpand(event);
 		expandConstructorNode();

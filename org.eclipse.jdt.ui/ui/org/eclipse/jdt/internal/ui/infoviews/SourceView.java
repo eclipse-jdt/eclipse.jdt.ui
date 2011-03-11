@@ -146,6 +146,7 @@ public class SourceView extends AbstractInfoView {
 		/**
 		 * Selects all in the viewer.
 		 */
+		@Override
 		public void run() {
 			fTextViewer.doOperation(ITextOperationTarget.SELECT_ALL);
 		}
@@ -175,6 +176,7 @@ public class SourceView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#internalCreatePartControl(Composite)
 	 */
+	@Override
 	protected void internalCreatePartControl(Composite parent) {
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		fViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, store);
@@ -193,6 +195,7 @@ public class SourceView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#internalCreatePartControl(Composite)
 	 */
+	@Override
 	protected void createActions() {
 		super.createActions();
 		fSelectAllAction= new SelectAllAction(fViewer);
@@ -203,6 +206,7 @@ public class SourceView extends AbstractInfoView {
 			/*
 			 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#getSelection()
 			 */
+			@Override
 			public ISelection getSelection() {
 				return convertToJavaElementSelection(fViewer.getSelection());
 			}
@@ -210,6 +214,7 @@ public class SourceView extends AbstractInfoView {
 			/*
 			 * @see org.eclipse.jdt.ui.actions.OpenAction#run(IStructuredSelection)
 			 */
+			@Override
 			public void run(IStructuredSelection selection) {
 				if (selection.isEmpty()) {
 					getShell().getDisplay().beep();
@@ -221,6 +226,7 @@ public class SourceView extends AbstractInfoView {
 			/*
 			 * @see org.eclipse.jdt.ui.actions.OpenAction#getElementToOpen(Object)
 			 */
+			@Override
 			public Object getElementToOpen(Object object) throws JavaModelException {
 				if (object instanceof IJavaElement)
 					fLastOpenedElement= (IJavaElement)object;
@@ -232,6 +238,7 @@ public class SourceView extends AbstractInfoView {
 			/*
 			 * @see org.eclipse.jdt.ui.actions.OpenAction#run(Object[])
 			 */
+			@Override
 			public void run(Object[] elements) {
 				stopListeningForSelectionChanges();
 				super.run(elements);
@@ -245,6 +252,7 @@ public class SourceView extends AbstractInfoView {
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getSelectAllAction()
 	 * @since 3.0
 	 */
+	@Override
 	protected IAction getSelectAllAction() {
 		return fSelectAllAction;
 	}
@@ -252,6 +260,7 @@ public class SourceView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#fillActionBars(IActionBars)
 	 */
+	@Override
 	protected void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN, fOpen);
@@ -261,6 +270,7 @@ public class SourceView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#getControl()
 	 */
+	@Override
 	protected Control getControl() {
 		return fViewer.getControl();
 	}
@@ -268,6 +278,7 @@ public class SourceView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#menuAboutToShow(IMenuManager)
 	 */
+	@Override
 	public void menuAboutToShow(IMenuManager menu) {
 		super.menuAboutToShow(menu);
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpen);
@@ -276,6 +287,7 @@ public class SourceView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#setForeground(Color)
 	 */
+	@Override
 	protected void setForeground(Color color) {
 		fViewer.getTextWidget().setForeground(color);
 	}
@@ -283,6 +295,7 @@ public class SourceView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#setBackground(Color)
 	 */
+	@Override
 	protected void setBackground(Color color) {
 		fViewer.getTextWidget().setBackground(color);
 	}
@@ -291,6 +304,7 @@ public class SourceView extends AbstractInfoView {
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getBackgroundColorKey()
 	 * @since 3.2
 	 */
+	@Override
 	protected String getBackgroundColorKey() {
 		return "org.eclipse.jdt.ui.DeclarationView.backgroundColor";		 //$NON-NLS-1$
 	}
@@ -360,6 +374,7 @@ public class SourceView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#internalDispose()
 	 */
+	@Override
 	protected void internalDispose() {
 		fViewer= null;
 		fViewerConfiguration= null;
@@ -370,6 +385,7 @@ public class SourceView extends AbstractInfoView {
 	/*
 	 * @see org.eclipse.ui.part.WorkbenchPart#setFocus()
 	 */
+	@Override
 	public void setFocus() {
 		fViewer.getTextWidget().setFocus();
 	}
@@ -377,6 +393,7 @@ public class SourceView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#computeInput(Object)
 	 */
+	@Override
 	protected Object computeInput(Object input) {
 
 		if (fViewer == null || !(input instanceof ISourceReference))
@@ -428,6 +445,7 @@ public class SourceView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#doSetInput(Object)
 	 */
+	@Override
 	protected void doSetInput(Object input) {
 		if (input instanceof IDocument)
 			fViewer.setInput(input);
@@ -519,6 +537,7 @@ public class SourceView extends AbstractInfoView {
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getHelpContextId()
 	 * @since 3.1
 	 */
+	@Override
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.SOURCE_VIEW;
 	}

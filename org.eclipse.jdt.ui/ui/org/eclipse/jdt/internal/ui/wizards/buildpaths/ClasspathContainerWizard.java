@@ -89,6 +89,7 @@ public class ClasspathContainerWizard extends Wizard {
 	/* (non-Javadoc)
 	 * @see IWizard#performFinish()
 	 */
+	@Override
 	public boolean performFinish() {
 		if (fContainerPage != null) {
 			if (fContainerPage.finish()) {
@@ -107,6 +108,7 @@ public class ClasspathContainerWizard extends Wizard {
 	/* (non-Javadoc)
 	 * @see IWizard#addPages()
 	 */
+	@Override
 	public void addPages() {
 		if (fPageDesc != null) {
 			fContainerPage= getContainerPage(fPageDesc);
@@ -162,6 +164,7 @@ public class ClasspathContainerWizard extends Wizard {
 	/* (non-Javadoc)
 	 * @see IWizard#getNextPage(IWizardPage)
 	 */
+	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
 		if (page == fSelectionWizardPage) {
 
@@ -192,6 +195,7 @@ public class ClasspathContainerWizard extends Wizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.Wizard#dispose()
 	 */
+	@Override
 	public void dispose() {
 		if (fSelectionWizardPage != null) {
 			ClasspathContainerDescriptor[] descriptors= fSelectionWizardPage.getContainers();
@@ -205,6 +209,7 @@ public class ClasspathContainerWizard extends Wizard {
 	/* (non-Javadoc)
 	 * @see IWizard#canFinish()
 	 */
+	@Override
 	public boolean canFinish() {
 		if (fSelectionWizardPage != null) {
 			if (!fContainerPage.isPageComplete()) {

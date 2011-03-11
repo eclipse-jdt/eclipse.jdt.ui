@@ -65,6 +65,7 @@ class HistoryAction extends Action {
 	/*
 	 * @see Action#run()
 	 */
+	@Override
 	public void run() {
 		fView.gotoHistoryEntry(fMembers);
 	}

@@ -24,6 +24,7 @@ public class GroupAction extends Action {
 		fGrouping= grouping;
 	}
 
+	@Override
 	public void run() {
 		fPage.setGrouping(fGrouping);
 	}

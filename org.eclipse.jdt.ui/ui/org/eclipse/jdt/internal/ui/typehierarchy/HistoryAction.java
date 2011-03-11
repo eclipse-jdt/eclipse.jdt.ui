@@ -59,6 +59,7 @@ public class HistoryAction extends Action {
 	/*
 	 * @see Action#run()
 	 */
+	@Override
 	public void run() {
 		fViewPart.gotoHistoryEntry(fElements);
 	}

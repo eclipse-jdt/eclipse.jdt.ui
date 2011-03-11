@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,6 +90,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getDetailedDescription() {
 		if (!isEnabled())
 			return null;
@@ -113,6 +114,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void run() {
 
 		try {
@@ -174,7 +176,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 				final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						try {
-							List result= addToClasspath(getSelectedElements(), project, newDefaultOutputLocation.makeAbsolute(), removeProjectFromClasspath, removeOldClassFiles, monitor);
+							List<IJavaElement> result= addToClasspath(getSelectedElements(), project, newDefaultOutputLocation.makeAbsolute(), removeProjectFromClasspath, removeOldClassFiles, monitor);
 							selectAndReveal(new StructuredSelection(result));
 						} catch (CoreException e) {
 							throw new InvocationTargetException(e);
@@ -195,7 +197,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 		}
 	}
 
-	private List addToClasspath(List elements, IJavaProject project, IPath outputLocation, boolean removeProjectFromClasspath, boolean removeOldClassFiles, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+	private List<IJavaElement> addToClasspath(List<?> elements, IJavaProject project, IPath outputLocation, boolean removeProjectFromClasspath, boolean removeOldClassFiles, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		if (!project.getProject().hasNature(JavaCore.NATURE_ID)) {
 			StatusInfo rootStatus= new StatusInfo();
 			rootStatus.setError(NewWizardMessages.ClasspathModifier_Error_NoNatures);
@@ -222,14 +224,14 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 				monitor.worked(1);
 			}
 
-			List existingEntries= ClasspathModifier.getExistingEntries(project);
+			List<CPListElement> existingEntries= ClasspathModifier.getExistingEntries(project);
 			if (removeProjectFromClasspath) {
 				ClasspathModifier.removeFromClasspath(project, existingEntries, new SubProgressMonitor(monitor, 1));
 			} else {
 				monitor.worked(1);
 			}
 
-			List newEntries= new ArrayList();
+			List<CPListElement> newEntries= new ArrayList<CPListElement>();
 			for (int i= 0; i < elements.size(); i++) {
 				Object element= elements.get(i);
 				CPListElement entry;
@@ -240,19 +242,19 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 				newEntries.add(entry);
 			}
 
-			Set modifiedSourceEntries= new HashSet();
-			BuildPathBasePage.fixNestingConflicts((CPListElement[])newEntries.toArray(new CPListElement[newEntries.size()]), (CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]), modifiedSourceEntries);
+			Set<CPListElement> modifiedSourceEntries= new HashSet<CPListElement>();
+			BuildPathBasePage.fixNestingConflicts(newEntries.toArray(new CPListElement[newEntries.size()]), existingEntries.toArray(new CPListElement[existingEntries.size()]), modifiedSourceEntries);
 
 			ClasspathModifier.setNewEntry(existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
 
 			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 1));
 
-        	delta.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
+        	delta.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));
         	informListeners(delta);
 
-			List result= new ArrayList();
+			List<IJavaElement> result= new ArrayList<IJavaElement>();
 			for (int i= 0; i < newEntries.size(); i++) {
-				IClasspathEntry entry= ((CPListElement) newEntries.get(i)).getClasspathEntry();
+				IClasspathEntry entry= newEntries.get(i).getClasspathEntry();
 				IJavaElement root;
 				if (entry.getPath().equals(project.getPath()))
 					root= project;
@@ -269,11 +271,12 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 		}
 	}
 
+	@Override
 	protected boolean canHandle(IStructuredSelection elements) {
 		if (elements.size() == 0)
 			return false;
 		try {
-			for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 				Object element= iter.next();
 				if (element instanceof IJavaProject) {
 					if (ClasspathModifier.isSourceFolder((IJavaProject)element))

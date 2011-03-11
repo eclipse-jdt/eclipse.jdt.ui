@@ -102,6 +102,7 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 	/*
 	 * @see EditorActionBarContributor#contributeToMenu(IMenuManager)
 	 */
+	@Override
 	public void contributeToMenu(IMenuManager menu) {
 
 		super.contributeToMenu(menu);
@@ -115,17 +116,17 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 			editMenu.insertAfter(ITextEditorActionConstants.GROUP_ASSIST, caMenu);
 
 			caMenu.add(fRetargetContentAssist);
-			Collection descriptors= CompletionProposalComputerRegistry.getDefault().getProposalCategories();
-			List specificAssistActions= new ArrayList(descriptors.size());
-			for (Iterator it= descriptors.iterator(); it.hasNext();) {
-				final CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
+			Collection<CompletionProposalCategory> descriptors= CompletionProposalComputerRegistry.getDefault().getProposalCategories();
+			List<IAction> specificAssistActions= new ArrayList<IAction>(descriptors.size());
+			for (Iterator<CompletionProposalCategory> it= descriptors.iterator(); it.hasNext();) {
+				final CompletionProposalCategory cat= it.next();
 				if (cat.hasComputers()) {
 					IAction caAction= new SpecificContentAssistAction(cat);
 					caMenu.add(caAction);
 					specificAssistActions.add(caAction);
 				}
 			}
-			fSpecificAssistActions= (SpecificContentAssistAction[]) specificAssistActions.toArray(new SpecificContentAssistAction[specificAssistActions.size()]);
+			fSpecificAssistActions= specificAssistActions.toArray(new SpecificContentAssistAction[specificAssistActions.size()]);
 			if (fSpecificAssistActions.length > 0) {
 				fContentAssistMenuListener= new MenuListener(caMenu);
 				caMenu.addMenuListener(fContentAssistMenuListener);
@@ -140,6 +141,7 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 	/*
 	 * @see IEditorActionBarContributor#setActiveEditor(IEditorPart)
 	 */
+	@Override
 	public void setActiveEditor(IEditorPart part) {
 		super.setActiveEditor(part);
 
@@ -175,6 +177,7 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 	/*
 	 * @see IEditorActionBarContributor#init(IActionBars, IWorkbenchPage)
 	 */
+	@Override
 	public void init(IActionBars bars, IWorkbenchPage page) {
 		super.init(bars, page);
 		// register actions that have a dynamic editor.
@@ -185,6 +188,7 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.BasicJavaEditorActionContributor#dispose()
 	 * @since 3.1
 	 */
+	@Override
 	public void dispose() {
 		if (fRetargetContentAssist != null) {
 			fRetargetContentAssist.dispose();

@@ -46,6 +46,7 @@ public final class PullUpWizard extends RefactoringWizard {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void addUserInputPages() {
 		final PullUpMethodPage page= new PullUpMethodPage(fProcessor);
 		addPage(new PullUpMemberPage(PullUpWizard.PAGE_NAME, page, fProcessor));

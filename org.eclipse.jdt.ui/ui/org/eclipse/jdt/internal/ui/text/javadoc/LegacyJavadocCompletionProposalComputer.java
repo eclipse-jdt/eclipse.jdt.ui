@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -76,14 +77,14 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List<IContextInformation> computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
 
 			ICompilationUnit cu= javaContext.getCompilationUnit();
 			int offset= javaContext.getInvocationOffset();
 
-			ArrayList result= new ArrayList();
+			ArrayList<IContextInformation> result= new ArrayList<IContextInformation>();
 
 			IJavadocCompletionProcessor[] processors= getContributedProcessors();
 			String error= null;
@@ -101,13 +102,13 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 			fErrorMessage= error;
 			return result;
 		}
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (context instanceof JavadocContentAssistInvocationContext) {
 			JavadocContentAssistInvocationContext javaContext= (JavadocContentAssistInvocationContext) context;
 
@@ -120,7 +121,7 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 				length= selection.y;
 			}
 
-			ArrayList result= new ArrayList();
+			ArrayList<ICompletionProposal> result= new ArrayList<ICompletionProposal>();
 
 			IJavadocCompletionProcessor[] processors= getContributedProcessors();
 			for (int i= 0; i < processors.length; i++) {
@@ -134,7 +135,7 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 			}
 			return result;
 		}
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 

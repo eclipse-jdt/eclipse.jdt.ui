@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,8 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.buildpath.IBuildpathModifierListener;
 
@@ -69,7 +71,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         	context= PlatformUI.getWorkbench().getProgressService();
 
         fAddFolderToBuildpathAction= new AddFolderToBuildpathAction(context, fDialogPackageExplorer) {
-        	public void run() {
+        	@Override
+			public void run() {
         		page.commitDefaultOutputFolder();
         	    super.run();
         	}
@@ -77,7 +80,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
 		fDialogPackageExplorer.addSelectionChangedListener(fAddFolderToBuildpathAction);
 
 		fRemoveFromBuildpathAction= new RemoveFromBuildpathAction(context, fDialogPackageExplorer) {
-        	public void run() {
+        	@Override
+			public void run() {
         		page.commitDefaultOutputFolder();
         	    super.run();
         	}
@@ -85,7 +89,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
 		fDialogPackageExplorer.addSelectionChangedListener(fRemoveFromBuildpathAction);
 
 		fExcludeFromBuildpathAction= new ExcludeFromBuildpathAction(context, fDialogPackageExplorer) {
-        	public void run() {
+        	@Override
+			public void run() {
         		page.commitDefaultOutputFolder();
         	    super.run();
         	}
@@ -93,7 +98,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
 		fDialogPackageExplorer.addSelectionChangedListener(fExcludeFromBuildpathAction);
 
 		fIncludeToBuildpathAction= new IncludeToBuildpathAction(context, fDialogPackageExplorer) {
-        	public void run() {
+        	@Override
+			public void run() {
         		page.commitDefaultOutputFolder();
         	    super.run();
         	}
@@ -101,7 +107,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
 		fDialogPackageExplorer.addSelectionChangedListener(fIncludeToBuildpathAction);
 
 			fEditFilterAction= new EditFilterAction(context, fDialogPackageExplorer) {
-	        	public void run() {
+	        	@Override
+				public void run() {
 	        		page.commitDefaultOutputFolder();
 	        	    super.run();
 	        	}
@@ -109,7 +116,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
 			fDialogPackageExplorer.addSelectionChangedListener(fEditFilterAction);
 
 	        fEditOutputFolderAction= new EditOutputFolderAction(context, fDialogPackageExplorer) {
-	        	public void run() {
+	        	@Override
+				public void run() {
 	        		page.commitDefaultOutputFolder();
 	        	    super.run();
 	        	}
@@ -122,7 +130,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
 		fDialogPackageExplorer.addPostSelectionChangedListener(fDropDownAction);
 
         fCreateLinkedSourceFolderAction= new CreateLinkedSourceFolderAction2(provider, context, fDialogPackageExplorer) {
-        	public void run() {
+        	@Override
+			public void run() {
         		page.commitDefaultOutputFolder();
         	    super.run();
         	}
@@ -130,8 +139,9 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         	/**
         	 * {@inheritDoc}
         	 */
-        	protected List getSelectedElements() {
-        		ArrayList result= new ArrayList();
+        	@Override
+			protected List<IJavaProject> getSelectedElements() {
+        		ArrayList<IJavaProject> result= new ArrayList<IJavaProject>();
         		result.add(page.getJavaProject());
         		return result;
         	}
@@ -139,13 +149,15 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         	/**
         	 * {@inheritDoc}
         	 */
-        	protected boolean canHandle(IStructuredSelection selection) {
+        	@Override
+			protected boolean canHandle(IStructuredSelection selection) {
         		return true;
         	}
         };
 
         fCreateSourceFolderAction= new CreateSourceFolderAction2(provider, context, fDialogPackageExplorer) {
-        	public void run() {
+        	@Override
+			public void run() {
         		page.commitDefaultOutputFolder();
         	    super.run();
         	}
@@ -153,8 +165,9 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         	/**
         	 * {@inheritDoc}
         	 */
-        	protected List getSelectedElements() {
-        		ArrayList result= new ArrayList();
+        	@Override
+			protected List<IJavaProject> getSelectedElements() {
+        		ArrayList<IJavaProject> result= new ArrayList<IJavaProject>();
         		result.add(page.getJavaProject());
         		return result;
         	}
@@ -162,7 +175,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         	/**
         	 * {@inheritDoc}
         	 */
-        	protected boolean canHandle(IStructuredSelection selection) {
+        	@Override
+			protected boolean canHandle(IStructuredSelection selection) {
         		return true;
         	}
         };
@@ -181,7 +195,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.actions.CompositeActionGroup#dispose()
      */
-    public void dispose() {
+    @Override
+	public void dispose() {
         super.dispose();
 
         fDialogPackageExplorer.removeSelectionChangedListener(fAddFolderToBuildpathAction);
@@ -265,7 +280,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      *
      * @param menu the menu to be filled up with actions
      */
-    public void fillContextMenu(IMenuManager menu) {
+    @Override
+	public void fillContextMenu(IMenuManager menu) {
 
     	if (fAddFolderToBuildpathAction.isEnabled())
     		menu.add(fAddFolderToBuildpathAction);
@@ -295,7 +311,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     }
 
 	public BuildpathModifierAction[] getHintTextGroupActions() {
-		List result= new ArrayList();
+		List<BuildpathModifierAction> result= new ArrayList<BuildpathModifierAction>();
 
     	if (fCreateSourceFolderAction.isEnabled())
     		result.add(fCreateSourceFolderAction);
@@ -321,7 +337,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     	if (fRemoveFromBuildpathAction.isEnabled())
     		result.add(fRemoveFromBuildpathAction);
 
-	    return (BuildpathModifierAction[])result.toArray(new BuildpathModifierAction[result.size()]);
+	    return result.toArray(new BuildpathModifierAction[result.size()]);
     }
 
 	public EditOutputFolderAction getEditOutputFolderAction() {

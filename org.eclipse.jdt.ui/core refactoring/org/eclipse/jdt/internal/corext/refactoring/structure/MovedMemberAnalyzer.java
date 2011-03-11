@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 	//---- types and fields --------------------------
 
+	@Override
 	public boolean visit(SimpleName node) {
 		if (node.isDeclaration() || isProcessed(node))
 			return super.visit(node);
@@ -64,6 +65,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 		return super.visit(node);
 	}
 
+	@Override
 	public boolean visit(QualifiedName node) {
 		IBinding binding= node.resolveBinding();
 		if (isSourceAccess(binding)) {
@@ -84,6 +86,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 		return super.visit(node);
 	}
 
+	@Override
 	public boolean visit(FieldAccess node) {
 		IBinding binding= node.resolveFieldBinding();
 		if (isSourceAccess(binding)) {
@@ -102,6 +105,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 	//---- method invocations ----------------------------------
 
+	@Override
 	public boolean visit(MethodInvocation node) {
 		IBinding binding= node.resolveMethodBinding();
 		if (isSourceAccess(binding)) {
@@ -122,6 +126,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 	//---- javadoc references ----------------------------------
 
+	@Override
 	public boolean visit(MemberRef node) {
 		IBinding binding= node.resolveBinding();
 		if (isSourceAccess(binding)) {
@@ -140,6 +145,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 		return super.visit(node);
 	}
 
+	@Override
 	public boolean visit(MethodRef node) {
 		IBinding binding= node.resolveBinding();
 		if (isSourceAccess(binding)) {

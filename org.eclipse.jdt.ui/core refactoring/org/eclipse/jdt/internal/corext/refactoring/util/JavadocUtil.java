@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,9 +67,9 @@ public class JavadocUtil {
 			return false;
 		if (methodDeclaration.parameters().size() == 0)
 			return true;
-		List tags= javadoc.tags();
-		for (Iterator iter= tags.iterator(); iter.hasNext();) {
-			TagElement element= (TagElement) iter.next();
+		List<TagElement> tags= javadoc.tags();
+		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext();) {
+			TagElement element= iter.next();
 			if (TagElement.TAG_PARAM.equals(element.getTagName()))
 				return true;
 		}
@@ -91,9 +91,9 @@ public class JavadocUtil {
 			return;
 
 		ListRewrite tagsRewrite= astRewrite.getListRewrite(methodDeclaration.getJavadoc(), Javadoc.TAGS_PROPERTY);
-		HashSet leadingNames= new HashSet();
-		for (Iterator iter= methodDeclaration.parameters().iterator(); iter.hasNext();) {
-			SingleVariableDeclaration curr= (SingleVariableDeclaration) iter.next();
+		HashSet<String> leadingNames= new HashSet<String>();
+		for (Iterator<SingleVariableDeclaration> iter= methodDeclaration.parameters().iterator(); iter.hasNext();) {
+			SingleVariableDeclaration curr= iter.next();
 			leadingNames.add(curr.getName().getIdentifier());
 		}
 		TagElement parameterTag= createParamTag(parameterName, astRewrite.getAST(), javaProject);

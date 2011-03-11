@@ -510,6 +510,7 @@ public class BindingLabelProvider extends LabelProvider {
 	/*
 	 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
 	 */
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof IBinding) {
 			ImageDescriptor baseImage= getBindingImageDescriptor((IBinding) element, fImageFlags);
@@ -529,6 +530,7 @@ public class BindingLabelProvider extends LabelProvider {
 	/*
 	 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
 	 */
+	@Override
 	public String getText(Object element) {
 		if (element instanceof IBinding) {
 			return getBindingLabel((IBinding) element, fTextFlags);

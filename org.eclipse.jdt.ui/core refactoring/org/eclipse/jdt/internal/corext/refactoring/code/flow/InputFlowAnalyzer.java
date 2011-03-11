@@ -44,9 +44,11 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			fSelection= selection;
 			fLoopNode= loopNode;
 		}
+		@Override
 		protected boolean traverseNode(ASTNode node) {
 			return true; // end <= fSelection.end || fSelection.enclosedBy(start, end);
 		}
+		@Override
 		protected boolean createReturnFlowInfo(ReturnStatement node) {
 			// Make sure that the whole return statement is selected or located before the selection.
 			return node.getStartPosition() + node.getLength() <= fSelection.getExclusiveEnd();
@@ -62,6 +64,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 				fFlowContext.setLoopReentranceMode(false);
 			}
 		}
+		@Override
 		public void endVisit(DoStatement node) {
 			if (skipNode(node))
 				return;
@@ -71,6 +74,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			// No need to merge the condition. It was already considered by the InputFlowAnalyzer.
 			info.removeLabel(null);
 		}
+		@Override
 		public void endVisit(EnhancedForStatement node) {
 			if (skipNode(node))
 				return;
@@ -92,6 +96,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			}
 			forInfo.removeLabel(null);
 		}
+		@Override
 		public void endVisit(ForStatement node) {
 			if (skipNode(node))
 				return;
@@ -142,31 +147,37 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 		return getFlowInfo(node);
 	}
 
+	@Override
 	protected boolean traverseNode(ASTNode node) {
 		return node.getStartPosition() + node.getLength() > fSelection.getInclusiveEnd();
 	}
 
+	@Override
 	protected boolean createReturnFlowInfo(ReturnStatement node) {
 		// Make sure that the whole return statement is located after the selection. There can be cases like
 		// return i + [x + 10] * 10; In this case we must not create a return info node.
 		return node.getStartPosition() >= fSelection.getInclusiveEnd();
 	}
 
+	@Override
 	public boolean visit(DoStatement node) {
 		createLoopReentranceVisitor(node);
 		return super.visit(node);
 	}
 
+	@Override
 	public boolean visit(EnhancedForStatement node) {
 		createLoopReentranceVisitor(node);
 		return super.visit(node);
 	}
 
+	@Override
 	public boolean visit(ForStatement node) {
 		createLoopReentranceVisitor(node);
 		return super.visit(node);
 	}
 
+	@Override
 	public boolean visit(WhileStatement node) {
 		createLoopReentranceVisitor(node);
 		return super.visit(node);
@@ -177,6 +188,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			fLoopReentranceVisitor= new LoopReentranceVisitor(fFlowContext, fSelection, node);
 	}
 
+	@Override
 	public void endVisit(ConditionalExpression node) {
 		if (skipNode(node))
 			return;
@@ -192,11 +204,13 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 		}
 	}
 
+	@Override
 	public void endVisit(DoStatement node) {
 		super.endVisit(node);
 		handleLoopReentrance(node);
 	}
 
+	@Override
 	public void endVisit(IfStatement node) {
 		if (skipNode(node))
 			return;
@@ -212,16 +226,19 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 		}
 	}
 
+	@Override
 	public void endVisit(EnhancedForStatement node) {
 		super.endVisit(node);
 		handleLoopReentrance(node);
 	}
 
+	@Override
 	public void endVisit(ForStatement node) {
 		super.endVisit(node);
 		handleLoopReentrance(node);
 	}
 
+	@Override
 	public void endVisit(SwitchStatement node) {
 		if (skipNode(node))
 			return;
@@ -241,6 +258,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 		super.endVisit(node, data);
 	}
 
+	@Override
 	public void endVisit(WhileStatement node) {
 		super.endVisit(node);
 		handleLoopReentrance(node);

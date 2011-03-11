@@ -42,6 +42,7 @@ class ExpandWithConstructorsDialog extends TrayDialog {
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
@@ -49,6 +50,7 @@ class ExpandWithConstructorsDialog extends TrayDialog {
 	/*
 	 * @see org.eclipse.jface.dialogs.StatusDialog#configureShell(org.eclipse.swt.widgets.Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setText(CallHierarchyMessages.ExpandWithConstructorsDialog_title);
@@ -58,6 +60,7 @@ class ExpandWithConstructorsDialog extends TrayDialog {
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createDialogArea(Composite composite) {
 		fConfigurationBlock= new ExpandWithConstructorsConfigurationBlock(new IStatusChangeListener() {
 			public void statusChanged(IStatus status) {
@@ -76,6 +79,7 @@ class ExpandWithConstructorsDialog extends TrayDialog {
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
 	 */
+	@Override
 	protected void okPressed() {
 		fConfigurationBlock.performOk();
 		super.okPressed();

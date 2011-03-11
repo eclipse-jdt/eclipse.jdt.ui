@@ -67,10 +67,12 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 		super(editor);
 	}
 
-	Class[] getValidTypes() {
+	@Override
+	Class<?>[] getValidTypes() {
 		return new Class[] { IField.class, IMethod.class, ILocalVariable.class, ITypeParameter.class };
 	}
 
+	@Override
 	void init() {
 		setText(SearchMessages.Search_FindHierarchyDeclarationsAction_label);
 		setToolTipText(SearchMessages.Search_FindHierarchyDeclarationsAction_tooltip);
@@ -78,6 +80,7 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_HIERARCHY_ACTION);
 	}
 
+	@Override
 	QuerySpecification createQuery(IJavaElement element) throws JavaModelException, InterruptedException {
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 

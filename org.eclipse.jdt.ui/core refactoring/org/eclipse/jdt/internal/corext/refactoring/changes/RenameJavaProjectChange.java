@@ -53,14 +53,17 @@ public final class RenameJavaProjectChange extends AbstractJavaElementRenameChan
 		return JavaCore.newProjectEntry(createNewPath(), oldEntry.getAccessRules(), oldEntry.combineAccessRules(), oldEntry.getExtraAttributes(), oldEntry.isExported());
 	}
 
+	@Override
 	protected IPath createNewPath() {
 		return getResourcePath().removeLastSegments(1).append(getNewName());
 	}
 
+	@Override
 	protected Change createUndoChange(long stampToRestore) throws JavaModelException {
 		return new RenameJavaProjectChange(createNewPath(), getNewName(), getOldName(), stampToRestore, fUpdateReferences);
 	}
 
+	@Override
 	protected void doRename(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(getName(), 2);
@@ -81,6 +84,7 @@ public final class RenameJavaProjectChange extends AbstractJavaElementRenameChan
 		return (IJavaProject) getModifiedElement();
 	}
 
+	@Override
 	public String getName() {
 		String[] keys= new String[] { BasicElementLabels.getJavaElementName(getOldName()), BasicElementLabels.getJavaElementName(getNewName())};
 		return Messages.format(RefactoringCoreMessages.RenameJavaProjectChange_rename, keys);

@@ -52,7 +52,7 @@ public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 	public static final String BUILDER_ID= "org.eclipse.jdt.ui.fat_jar_rsrc_url_builder"; //$NON-NLS-1$
 	public static final String JAR_RSRC_LOADER_ZIP= "jar-in-jar-loader.zip"; //$NON-NLS-1$
 	
-	private Set jarNames;
+	private Set<String> jarNames;
 	private JarPackageData fJarPackage;
 
 	/**
@@ -66,6 +66,7 @@ public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 	 * we do not need to merge any manifests here.
 	 * @return false
 	 */
+	@Override
 	public boolean isMergeManifests() {
 		return false;
 	}
@@ -74,6 +75,7 @@ public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 	 * we do not need to remove signers here.
 	 * @return false
 	 */
+	@Override
 	public boolean isRemoveSigners() {
 		return false;
 	}
@@ -81,6 +83,7 @@ public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getManifestClasspath() {
 		return "."; //$NON-NLS-1$
 	}
@@ -95,10 +98,11 @@ public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void open(JarPackageData jarPackage, Shell displayShell, MultiStatus status) throws CoreException {
 		super.open(jarPackage, displayShell, status);
 		fJarPackage= jarPackage;
-		jarNames= new HashSet();
+		jarNames= new HashSet<String>();
 		try {
 			writeRsrcUrlClasses();
 		} catch (IOException e) {

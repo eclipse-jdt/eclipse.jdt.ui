@@ -224,6 +224,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	/*
 	 * @see IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public final void createPartControl(Composite parent) {
 		internalCreatePartControl(parent);
 		inititalizeColors();
@@ -524,6 +525,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	/*
 	 * @see IWorkbenchPart#dispose()
 	 */
+	@Override
 	public final void dispose() {
 		// cancel possible running computation
 		fComputeCount++;
@@ -602,6 +604,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		fComputeProgressMonitor= computeProgressMonitor;
 
 		Thread thread= new Thread("Info view input computer") { //$NON-NLS-1$
+			@Override
 			public void run() {
 				if (currentCount != fComputeCount)
 					return;

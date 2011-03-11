@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isUniverse()
 	 */
+	@Override
 	public boolean isUniverse() {
 		return fLHS.isUniverse() && fRHS.isUniverse();
 	}
@@ -49,6 +50,7 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
 	 */
+	@Override
 	public TypeSet makeClone() {
 		return this; //new TypeSetIntersection(fLHS.makeClone(), fRHS.makeClone());
 	}
@@ -56,6 +58,7 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isEmpty()
 	 */
+	@Override
 	public boolean isEmpty() {
 		if (fLHS.isEmpty() || fRHS.isEmpty())
 			return true;
@@ -91,6 +94,7 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(TType)
 	 */
+	@Override
 	public boolean contains(TType t) {
 		return fLHS.contains(t) && fRHS.contains(t);
 	}
@@ -98,6 +102,7 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#containsAll(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
 	 */
+	@Override
 	public boolean containsAll(TypeSet s) {
 		return fLHS.containsAll(s) && fRHS.containsAll(s);
 	}
@@ -105,6 +110,7 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#subTypes()
 	 */
+	@Override
 	public TypeSet subTypes() {
 		if (isUniverse() || contains(getJavaLangObject()))
 			return getTypeSetEnvironment().getUniverseTypeSet();
@@ -118,6 +124,7 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#superTypes()
 	 */
+	@Override
 	public TypeSet superTypes() {
 		// super(xsect(super(a),super(b))) == xsect(super(a),super(b))
 		if ((fLHS instanceof SuperTypesSet || fLHS instanceof SuperTypesOfSingleton) &&
@@ -129,6 +136,7 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#upperBound()
 	 */
+	@Override
 	public TypeSet upperBound() {
 		if (fLHS.contains(getJavaLangObject()) && fRHS.contains(getJavaLangObject()))
 			return new SingletonTypeSet(getTypeSetEnvironment().getJavaLangObject(), getTypeSetEnvironment());
@@ -145,6 +153,7 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#lowerBound()
 	 */
+	@Override
 	public TypeSet lowerBound() {
 		if (fLHS.hasUniqueLowerBound() && fRHS.hasUniqueLowerBound()) {
 			TType lhsBound= fLHS.uniqueLowerBound();
@@ -166,6 +175,7 @@ public class TypeSetIntersection extends TypeSet {
 		return xsect.lowerBound();
 	}
 
+	@Override
 	protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
 		if (s2.equals(fLHS)) // xsect(s2,xsect(s2,?)) = xsect(s2,?)
 			return this;
@@ -195,12 +205,13 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isSingleton()
 	 */
+	@Override
 	public boolean isSingleton() {
 		if (fEnumCache != null) return fEnumCache.isSingleton();
 
 		int count= 0;
-		for(Iterator lhsIter= fLHS.iterator(); lhsIter.hasNext(); ) {
-			TType t= (TType) lhsIter.next();
+		for(Iterator<TType> lhsIter= fLHS.iterator(); lhsIter.hasNext(); ) {
+			TType t= lhsIter.next();
 			if (fRHS.contains(t))
 				count++;
 			if (count > 1)
@@ -212,11 +223,12 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#anyMember()
 	 */
+	@Override
 	public TType anyMember() {
 		if (fEnumCache != null) return fEnumCache.anyMember();
 
-		for(Iterator lhsIter= fLHS.iterator(); lhsIter.hasNext(); ) {
-			TType t= (TType) lhsIter.next();
+		for(Iterator<TType> lhsIter= fLHS.iterator(); lhsIter.hasNext(); ) {
+			TType t= lhsIter.next();
 			if (fRHS.contains(t))
 				return t;
 		}
@@ -226,7 +238,8 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#iterator()
 	 */
-	public Iterator iterator() {
+	@Override
+	public Iterator<TType> iterator() {
 		return enumerate().iterator();
 
 //		return new Iterator() {
@@ -264,6 +277,7 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object o) {
 		if (o instanceof TypeSetIntersection) {
 			TypeSetIntersection other= (TypeSetIntersection) o;
@@ -272,10 +286,12 @@ public class TypeSetIntersection extends TypeSet {
 			return false;
 	}
 
+	@Override
 	public int hashCode() {
 		return fLHS.hashCode() * 37 + fRHS.hashCode();
 	}
 	
+	@Override
 	public String toString() {
 		return "<" + fID + ": intersect(" + fLHS + "," + fRHS + ")>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
@@ -283,6 +299,7 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueLowerBound()
 	 */
+	@Override
 	public boolean hasUniqueLowerBound() {
 		return false;
 	}
@@ -290,6 +307,7 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueUpperBound()
 	 */
+	@Override
 	public boolean hasUniqueUpperBound() {
 		return false;
 	}
@@ -297,6 +315,7 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueLowerBound()
 	 */
+	@Override
 	public TType uniqueLowerBound() {
 		return null;
 	}
@@ -304,6 +323,7 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueUpperBound()
 	 */
+	@Override
 	public TType uniqueUpperBound() {
 		return null;
 	}
@@ -313,6 +333,7 @@ public class TypeSetIntersection extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#enumerate()
 	 */
+	@Override
 	public EnumeratedTypeSet enumerate() {
 		if (fEnumCache == null) {
 			EnumeratedTypeSet lhsSet= fLHS.enumerate();

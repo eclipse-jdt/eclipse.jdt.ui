@@ -55,7 +55,8 @@ class ToggleCallModeAction extends Action {
     /*
      * @see Action#actionPerformed
      */
-    public void run() {
+    @Override
+	public void run() {
         fView.setCallMode(fMode); // will toggle the checked state
     }
 

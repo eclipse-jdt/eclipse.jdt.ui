@@ -51,10 +51,12 @@ class CopyToClipboardAction extends SelectionDispatchAction{
 		update(getSelection());
 	}
 
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(selection != null && selection.getLength() > 0);
 	}
 
+	@Override
 	public void run(ITextSelection selection) {
 		fClipboard= new Clipboard(getShell().getDisplay());
 		try {

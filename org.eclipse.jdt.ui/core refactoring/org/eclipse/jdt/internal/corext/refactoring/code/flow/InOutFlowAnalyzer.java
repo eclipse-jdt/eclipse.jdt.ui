@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,41 +43,48 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 		return result;
 	}
 
+	@Override
 	protected boolean traverseNode(ASTNode node) {
 		// we are only traversing the selected nodes.
 		return true;
 	}
 
+	@Override
 	protected boolean createReturnFlowInfo(ReturnStatement node) {
 		// we are only traversing selected nodes.
 		return true;
 	}
 
+	@Override
 	public void endVisit(Block node) {
 		super.endVisit(node);
 		clearAccessMode(accessFlowInfo(node), node.statements());
 	}
 
+	@Override
 	public void endVisit(CatchClause node) {
 		super.endVisit(node);
 		clearAccessMode(accessFlowInfo(node), node.getException());
 	}
 
+	@Override
 	public void endVisit(EnhancedForStatement node) {
 		super.endVisit(node);
 		clearAccessMode(accessFlowInfo(node), node.getParameter());
 	}
 
+	@Override
 	public void endVisit(ForStatement node) {
 		super.endVisit(node);
 		clearAccessMode(accessFlowInfo(node), node.initializers());
 	}
 
+	@Override
 	public void endVisit(MethodDeclaration node) {
 		super.endVisit(node);
 		FlowInfo info= accessFlowInfo(node);
-		for (Iterator iter= node.parameters().iterator(); iter.hasNext();) {
-			clearAccessMode(info, (SingleVariableDeclaration)iter.next());
+		for (Iterator<SingleVariableDeclaration> iter= node.parameters().iterator(); iter.hasNext();) {
+			clearAccessMode(info, iter.next());
 		}
 	}
 
@@ -87,12 +94,12 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 			info.clearAccessMode(binding, fFlowContext);
 	}
 
-	private void clearAccessMode(FlowInfo info, List nodes) {
+	private void clearAccessMode(FlowInfo info, List<? extends ASTNode> nodes) {
 		if (nodes== null || nodes.isEmpty() || info == null)
 			return;
-		for (Iterator iter= nodes.iterator(); iter.hasNext(); ) {
+		for (Iterator<? extends ASTNode> iter= nodes.iterator(); iter.hasNext(); ) {
 			Object node= iter.next();
-			Iterator fragments= null;
+			Iterator<VariableDeclarationFragment> fragments= null;
 			if (node instanceof VariableDeclarationStatement) {
 				fragments= ((VariableDeclarationStatement)node).fragments().iterator();
 			} else if (node instanceof VariableDeclarationExpression) {
@@ -100,7 +107,7 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 			}
 			if (fragments != null) {
 				while (fragments.hasNext()) {
-					clearAccessMode(info, (VariableDeclarationFragment)fragments.next());
+					clearAccessMode(info, fragments.next());
 				}
 			}
 		}

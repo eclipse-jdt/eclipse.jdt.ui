@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,6 +91,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
+import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -130,7 +131,7 @@ public class CallInliner {
 	private FlowInfo fFlowInfo;
 	private CodeScopeBuilder.Scope fInvocationScope;
 	private boolean fFieldInitializer;
-	private List fLocals;
+	private List<VariableDeclarationStatement> fLocals;
 	private CallContext fContext;
 
 	private class InlineEvaluator extends HierarchicalASTVisitor {
@@ -146,6 +147,7 @@ public class CallInliner {
 			fResult= result;
 			return false;
 		}
+		@Override
 		public boolean visit(Expression node) {
 			int accessMode= fFormalArgument.getSimplifiedAccessMode();
 			if (accessMode == FlowInfo.WRITE)
@@ -156,6 +158,7 @@ public class CallInliner {
 				return setResult(true);
 			return setResult(fFormalArgument.getNumberOfAccesses() <= 1);
 		}
+		@Override
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
 			if (binding instanceof IVariableBinding) {
@@ -170,12 +173,15 @@ public class CallInliner {
 			}
 			return setResult(false);
 		}
+		@Override
 		public boolean visit(FieldAccess node) {
 			return visit(node.getName());
 		}
+		@Override
 		public boolean visit(SuperFieldAccess node) {
 			return visit(node.getName());
 		}
+		@Override
 		public boolean visit(ThisExpression node) {
 			int accessMode= fFormalArgument.getSimplifiedAccessMode();
 			if (accessMode == FlowInfo.READ || accessMode == FlowInfo.UNUSED)
@@ -235,7 +241,7 @@ public class CallInliner {
 		fBuffer= RefactoringFileBuffers.acquire(fCUnit);
 		fSourceProvider= provider;
 		fImportRewrite= StubUtility.createImportRewrite(targetAstRoot, true);
-		fLocals= new ArrayList(3);
+		fLocals= new ArrayList<VariableDeclarationStatement>(3);
 		fRewrite= ASTRewrite.create(targetAstRoot.getAST());
 		fRewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 		fTypeEnvironment= new TypeEnvironment();
@@ -273,7 +279,7 @@ public class CallInliner {
 	public RefactoringStatus initialize(ASTNode invocation, int severity) {
 		RefactoringStatus result= new RefactoringStatus();
 		fInvocation= invocation;
-		fLocals= new ArrayList(3);
+		fLocals= new ArrayList<VariableDeclarationStatement>(3);
 
 		checkMethodDeclaration(result, severity);
 		if (result.getSeverity() >= severity)
@@ -495,14 +501,14 @@ public class CallInliner {
 	}
 
 	private void computeRealArguments() {
-		List arguments= Invocations.getArguments(fInvocation);
-		Set canNotInline= crossCheckArguments(arguments);
+		List<Expression> arguments= Invocations.getArguments(fInvocation);
+		Set<Expression> canNotInline= crossCheckArguments(arguments);
 		boolean needsVarargBoxing= needsVarargBoxing(arguments);
 		int varargIndex= fSourceProvider.getVarargIndex();
 		AST ast= fInvocation.getAST();
 		Expression[] realArguments= new Expression[needsVarargBoxing ? varargIndex + 1 : arguments.size()];
 		for (int i= 0; i < (needsVarargBoxing ? varargIndex : arguments.size()); i++) {
-			Expression expression= (Expression)arguments.get(i);
+			Expression expression= arguments.get(i);
 			ParameterData parameter= fSourceProvider.getParameterData(i);
 			if (canInline(expression, parameter) && !canNotInline.contains(expression)) {
 				realArguments[i]= expression;
@@ -523,7 +529,7 @@ public class CallInliner {
 			fragment.setName(ast.newSimpleName(name));
 			ArrayInitializer initializer= ast.newArrayInitializer();
 			for (int i= varargIndex; i < arguments.size(); i++) {
-				initializer.expressions().add(fRewrite.createCopyTarget((ASTNode)arguments.get(i)));
+				initializer.expressions().add(fRewrite.createCopyTarget(arguments.get(i)));
 			}
 			fragment.setInitializer(initializer);
 			VariableDeclarationStatement decl= ast.newVariableDeclarationStatement(fragment);
@@ -534,7 +540,7 @@ public class CallInliner {
 		fContext.arguments= realArguments;
 	}
 
-	private boolean needsVarargBoxing(List arguments) {
+	private boolean needsVarargBoxing(List<Expression> arguments) {
 		if (!fSourceProvider.isVarargs())
 			return false;
 		/*
@@ -548,7 +554,7 @@ public class CallInliner {
 		// parameter is array type
 		// one arg
 		if (index == arguments.size() - 1) {
-			ITypeBinding argument= ((Expression)arguments.get(index)).resolveTypeBinding();
+			ITypeBinding argument= arguments.get(index).resolveTypeBinding();
 			if (argument == null)
 				return false;
 			ITypeBinding parameter= fSourceProvider.getParameterData(index).getTypeBinding();
@@ -594,8 +600,8 @@ public class CallInliner {
 	private void addNewLocals(TextEditGroup textEditGroup) {
 		if (fLocals.isEmpty())
 			return;
-		for (Iterator iter= fLocals.iterator(); iter.hasNext();) {
-			ASTNode element= (ASTNode)iter.next();
+		for (Iterator<VariableDeclarationStatement> iter= fLocals.iterator(); iter.hasNext();) {
+			ASTNode element= iter.next();
 			fListRewrite.insertAt(element, fInsertionIndex++, textEditGroup);
 		}
 	}
@@ -637,16 +643,27 @@ public class CallInliner {
 				node= fRewrite.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION);
 
 				// fixes bug #24941
-				if(needsExplicitCast(status)) {
+				if (needsExplicitCast(status)) {
 					AST ast= node.getAST();
 					CastExpression castExpression= ast.newCastExpression();
 					Type returnType= fImportRewrite.addImport(fSourceProvider.getReturnType(), ast);
 					castExpression.setType(returnType);
+
+					if (NecessaryParenthesesChecker.needsParentheses(fSourceProvider.getReturnExpressions().get(0), castExpression, CastExpression.EXPRESSION_PROPERTY)) {
+						ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
+						parenthesized.setExpression((Expression)node);
+						node= parenthesized;
+					}
+
 					castExpression.setExpression((Expression)node);
 					node= castExpression;
-				}
 
-				if (needsParenthesis()) {
+					if (NecessaryParenthesesChecker.needsParentheses(castExpression, fTargetNode.getParent(), fTargetNode.getLocationInParent())) {
+						ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
+						parenthesized.setExpression((Expression)node);
+						node= parenthesized;
+					}
+				} else if (fSourceProvider.needsReturnedExpressionParenthesis(fTargetNode.getParent(), fTargetNode.getLocationInParent())) {
 					ParenthesizedExpression pExp= fTargetNode.getAST().newParenthesizedExpression();
 					pExp.setExpression((Expression)node);
 					node= pExp;
@@ -679,10 +696,16 @@ public class CallInliner {
 		// returned expression then we don't need an explicit cast.
 		if (fSourceProvider.returnTypeMatchesReturnExpressions())
 				return false;
-		ASTNode parent= fTargetNode.getParent();
-		int nodeType= parent.getNodeType();
-		if (nodeType == ASTNode.METHOD_INVOCATION) {
-			MethodInvocation methodInvocation= (MethodInvocation)parent;
+
+		List<Expression> returnExprs= fSourceProvider.getReturnExpressions();
+		// it is inferred that only methods consisting of a single
+		// return statement can be inlined as parameters in other
+		// method invocations
+		if (returnExprs.size() != 1)
+			return false;
+
+		if (fTargetNode.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+			MethodInvocation methodInvocation= (MethodInvocation)fTargetNode.getParent();
 			if(methodInvocation.getExpression() == fTargetNode)
 				return false;
 			IMethodBinding method= methodInvocation.resolveMethodBinding();
@@ -693,45 +716,26 @@ public class CallInliner {
 			}
 			ITypeBinding[] parameters= method.getParameterTypes();
 			int argumentIndex= methodInvocation.arguments().indexOf(fInvocation);
-			List returnExprs= fSourceProvider.getReturnExpressions();
-			// it is inferred that only methods consisting of a single
-			// return statement can be inlined as parameters in other
-			// method invocations
-			if (returnExprs.size() != 1)
-				return false;
-			parameters[argumentIndex]= ((Expression)returnExprs.get(0)).resolveTypeBinding();
+
+			parameters[argumentIndex]= returnExprs.get(0).resolveTypeBinding();
 
 			ITypeBinding type= ASTNodes.getReceiverTypeBinding(methodInvocation);
 			TypeBindingVisitor visitor= new AmbiguousMethodAnalyzer(
 				fTypeEnvironment, method, fTypeEnvironment.create(parameters));
 			if(!visitor.visit(type)) {
 				return true;
-			}
-			else if(type.isInterface()) {
+			} else if (type.isInterface()) {
 				return !Bindings.visitInterfaces(type, visitor);
-			}
-			else if(Modifier.isAbstract(type.getModifiers())) {
+			} else if (Modifier.isAbstract(type.getModifiers())) {
 				return !Bindings.visitHierarchy(type, visitor);
-			}
-			else {
+			} else {
 				// it is not needed to visit interfaces if receiver is a concrete class
 				return !Bindings.visitSuperclasses(type, visitor);
 			}
+		} else {
+			ITypeBinding explicitCast= ASTNodes.getExplicitCast(returnExprs.get(0), (Expression)fTargetNode);
+			return explicitCast != null;
 		}
-		return false;
-	}
-
-	private boolean needsParenthesis() {
-		if (!fSourceProvider.needsReturnedExpressionParenthesis())
-			return false;
-		ASTNode parent= fTargetNode.getParent();
-		int type= parent.getNodeType();
-		return
-			type == ASTNode.METHOD_INVOCATION ||
-			(parent instanceof Expression && type != ASTNode.ASSIGNMENT) ||
-			(fSourceProvider.returnsConditionalExpression() &&
-				type == ASTNode.VARIABLE_DECLARATION_FRAGMENT &&
-				((VariableDeclarationFragment)parent).getInitializer() == fTargetNode);
 	}
 
 	private VariableDeclarationStatement createLocalDeclaration(ITypeBinding type, String name, Expression initializer) {
@@ -755,12 +759,13 @@ public class CallInliner {
      * @param arguments the arguments
      * @return all arguments that cannot be inlined
      */
-	private Set crossCheckArguments(List arguments) {
-		final Set assigned= new HashSet();
-		final Set result= new HashSet();
-		for (Iterator iter= arguments.iterator(); iter.hasNext();) {
-			final Expression expression= (Expression) iter.next();
+	private Set<Expression> crossCheckArguments(List<Expression> arguments) {
+		final Set<IBinding> assigned= new HashSet<IBinding>();
+		final Set<Expression> result= new HashSet<Expression>();
+		for (Iterator<Expression> iter= arguments.iterator(); iter.hasNext();) {
+			final Expression expression= iter.next();
 			expression.accept(new ASTVisitor() {
+				@Override
 				public boolean visit(Assignment node) {
 					Expression lhs= node.getLeftHandSide();
 					if (lhs instanceof Name) {
@@ -774,10 +779,11 @@ public class CallInliner {
 				}
 			});
 		}
-		for (Iterator iter= arguments.iterator(); iter.hasNext();) {
-			final Expression expression= (Expression) iter.next();
+		for (Iterator<Expression> iter= arguments.iterator(); iter.hasNext();) {
+			final Expression expression= iter.next();
 			if (!result.contains(expression)) {
 				expression.accept(new HierarchicalASTVisitor() {
+					@Override
 					public boolean visit(Name node) {
 						IBinding binding= node.resolveBinding();
 						if (binding != null && assigned.contains(binding))

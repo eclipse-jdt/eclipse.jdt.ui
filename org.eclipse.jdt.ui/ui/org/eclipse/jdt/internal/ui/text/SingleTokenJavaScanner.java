@@ -16,6 +16,8 @@ import java.util.List;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jface.text.rules.IRule;
+
 import org.eclipse.jdt.ui.text.IColorManager;
 
 
@@ -36,6 +38,7 @@ public final class SingleTokenJavaScanner extends AbstractJavaScanner{
 	/*
 	 * @see AbstractJavaScanner#getTokenProperties()
 	 */
+	@Override
 	protected String[] getTokenProperties() {
 		return fProperty;
 	}
@@ -43,7 +46,8 @@ public final class SingleTokenJavaScanner extends AbstractJavaScanner{
 	/*
 	 * @see AbstractJavaScanner#createRules()
 	 */
-	protected List createRules() {
+	@Override
+	protected List<IRule> createRules() {
 		setDefaultReturnToken(getToken(fProperty[0]));
 		return null;
 	}

@@ -171,6 +171,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		/*
 		 * @see org.eclipse.jface.text.Position#setLength(int)
 		 */
+		@Override
 		public void setLength(int length) {
 			synchronized (fLock) {
 				super.setLength(length);
@@ -180,6 +181,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		/*
 		 * @see org.eclipse.jface.text.Position#setOffset(int)
 		 */
+		@Override
 		public void setOffset(int offset) {
 			synchronized (fLock) {
 				super.setOffset(offset);
@@ -189,6 +191,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		/*
 		 * @see org.eclipse.jface.text.Position#delete()
 		 */
+		@Override
 		public void delete() {
 			synchronized (fLock) {
 				super.delete();
@@ -198,6 +201,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		/*
 		 * @see org.eclipse.jface.text.Position#undelete()
 		 */
+		@Override
 		public void undelete() {
 			synchronized (fLock) {
 				super.undelete();
@@ -242,6 +246,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		/*
 		 * @see org.eclipse.jface.text.Region#equals(java.lang.Object)
 		 */
+		@Override
 		public boolean equals(Object o) {
 			return super.equals(o) && o instanceof HighlightedRange && fKey.equals(((HighlightedRange)o).getKey());
 		}
@@ -249,6 +254,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		/*
 		 * @see org.eclipse.jface.text.Region#hashCode()
 		 */
+		@Override
 		public int hashCode() {
 			return super.hashCode() | fKey.hashCode();
 		}
@@ -343,7 +349,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 * @return the hard-coded positions
 	 */
 	private HighlightedPosition[] createHardcodedPositions() {
-		List positions= new ArrayList();
+		List<HighlightedPosition> positions= new ArrayList<HighlightedPosition>();
 		for (int i= 0; i < fHardcodedRanges.length; i++) {
 			HighlightedRange range= null;
 			Highlighting hl= null;
@@ -358,7 +364,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			if (range != null)
 				positions.add(fPresenter.createHighlightedPosition(range.getOffset(), range.getLength(), hl));
 		}
-		return (HighlightedPosition[]) positions.toArray(new HighlightedPosition[positions.size()]);
+		return positions.toArray(new HighlightedPosition[positions.size()]);
 	}
 
 	/**

@@ -29,14 +29,14 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class QualifiedNameSearchResult {
 
-	private Map fChanges;
+	private Map<IFile, TextChange> fChanges;
 
 	public QualifiedNameSearchResult() {
-		fChanges= new HashMap();
+		fChanges= new HashMap<IFile, TextChange>();
 	}
 
 	public TextChange getChange(IFile file) {
-		TextChange result= (TextChange)fChanges.get(file);
+		TextChange result= fChanges.get(file);
 		if (result == null) {
 			result= new TextFileChange(file.getName(), file);
 			fChanges.put(file, result);
@@ -45,24 +45,24 @@ public class QualifiedNameSearchResult {
 	}
 
 	public TextChange[] getAllChanges() {
-		Collection values= fChanges.values();
-		return (TextChange[])values.toArray(new TextChange[values.size()]);
+		Collection<TextChange> values= fChanges.values();
+		return values.toArray(new TextChange[values.size()]);
 	}
 
 	public IFile[] getAllFiles() {
-		Set keys= fChanges.keySet();
-		return (IFile[])keys.toArray(new IFile[keys.size()]);
+		Set<IFile> keys= fChanges.keySet();
+		return keys.toArray(new IFile[keys.size()]);
 	}
 
 	public Change getSingleChange(IFile[] alreadyTouchedFiles) {
-		Collection values= fChanges.values();
+		Collection<TextChange> values= fChanges.values();
 		if (values.size() == 0)
 			return null;
 
 		CompositeChange result= new CompositeChange(RefactoringCoreMessages.QualifiedNameSearchResult_change_name);
 		result.markAsSynthetic();
-		List files= Arrays.asList(alreadyTouchedFiles);
-		for (Iterator iter= values.iterator(); iter.hasNext();) {
+		List<IFile> files= Arrays.asList(alreadyTouchedFiles);
+		for (Iterator<TextChange> iter= values.iterator(); iter.hasNext();) {
 			TextFileChange change= (TextFileChange)iter.next();
 			if (!files.contains(change.getFile())) {
 				result.add(change);

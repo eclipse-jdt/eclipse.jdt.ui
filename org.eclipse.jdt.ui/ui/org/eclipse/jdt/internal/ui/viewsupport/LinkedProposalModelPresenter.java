@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,10 +33,10 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
+import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.ProposalPosition;
-import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 
 import org.eclipse.ui.IEditorPart;
 
@@ -60,15 +60,15 @@ public class LinkedProposalModelPresenter {
 	public LinkedProposalModelPresenter() {
 	}
 
-	public void enterLinkedMode(ITextViewer viewer, IEditorPart editor, LinkedProposalModel linkedProposalModel) throws BadLocationException {
+	public void enterLinkedMode(ITextViewer viewer, IEditorPart editor, boolean switchedEditor, LinkedProposalModel linkedProposalModel) throws BadLocationException {
 		IDocument document= viewer.getDocument();
 
 		LinkedModeModel model= new LinkedModeModel();
 		boolean added= false;
 
-		Iterator iterator= linkedProposalModel.getPositionGroupIterator();
+		Iterator<LinkedProposalPositionGroup> iterator= linkedProposalModel.getPositionGroupIterator();
 		while (iterator.hasNext()) {
-			LinkedProposalPositionGroup curr= (LinkedProposalPositionGroup) iterator.next();
+			LinkedProposalPositionGroup curr= iterator.next();
 
 			LinkedPositionGroup group= new LinkedPositionGroup();
 
@@ -111,7 +111,7 @@ public class LinkedProposalModelPresenter {
 			LinkedProposalPositionGroup.PositionInformation endPosition= linkedProposalModel.getEndPosition();
 			if (endPosition != null && endPosition.getOffset() != -1) {
 				ui.setExitPosition(viewer, endPosition.getOffset() + endPosition.getLength(), 0, Integer.MAX_VALUE);
-			} else {
+			} else if (! switchedEditor) {
 				int cursorPosition= viewer.getSelectedRange().x;
 				if (cursorPosition != 0) {
 					ui.setExitPosition(viewer, cursorPosition, 0, Integer.MAX_VALUE);

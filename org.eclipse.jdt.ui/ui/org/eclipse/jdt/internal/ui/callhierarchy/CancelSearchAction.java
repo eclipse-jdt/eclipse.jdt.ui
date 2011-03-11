@@ -34,6 +34,7 @@ public class CancelSearchAction extends Action {
         PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_CANCEL_SEARCH_ACTION);
 }
 
+	@Override
 	public void run() {
 		fView.cancelJobs();
 	}

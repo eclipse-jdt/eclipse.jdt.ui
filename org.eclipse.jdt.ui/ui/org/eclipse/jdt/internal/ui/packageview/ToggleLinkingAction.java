@@ -37,6 +37,7 @@ public class ToggleLinkingAction extends AbstractToggleLinkingAction {
 	/**
 	 * Runs the action.
 	 */
+	@Override
 	public void run() {
 		fPackageExplorerPart.setLinkingEnabled(isChecked());
 	}

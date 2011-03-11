@@ -36,6 +36,7 @@ class SearchScopeWorkingSetAction extends SearchScopeAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getSearchScope(int)
 	 */
+	@Override
 	public IJavaSearchScope getSearchScope(int includeMask) {
 		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(fWorkingSets, includeMask);
 	}
@@ -50,6 +51,7 @@ class SearchScopeWorkingSetAction extends SearchScopeAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeActionGroup.SearchScopeAction#getSearchScopeType()
 	 */
+	@Override
 	public int getSearchScopeType() {
 		return SearchScopeActionGroup.SEARCH_SCOPE_TYPE_WORKING_SET;
 	}
@@ -57,6 +59,7 @@ class SearchScopeWorkingSetAction extends SearchScopeAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
 	 */
+	@Override
 	public String getFullDescription(int includeMask) {
 		return JavaSearchScopeFactory.getInstance().getWorkingSetScopeDescription(fWorkingSets, includeMask);
 	}

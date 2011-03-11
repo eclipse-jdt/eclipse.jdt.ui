@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,6 +74,7 @@ public class EditFilterAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getDetailedDescription() {
 		if (!isEnabled())
 			return null;
@@ -85,6 +86,7 @@ public class EditFilterAction extends BuildpathModifierAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
+	@Override
 	public void run() {
 		Shell shell= getShell();
 
@@ -100,8 +102,8 @@ public class EditFilterAction extends BuildpathModifierAction {
 			if (res == Window.OK) {
 				BuildpathDelta delta= new BuildpathDelta(getToolTipText());
 
-				ArrayList newEntries= wizard.getExistingEntries();
-				delta.setNewEntries((CPListElement[])newEntries.toArray(new CPListElement[newEntries.size()]));
+				ArrayList<CPListElement> newEntries= wizard.getExistingEntries();
+				delta.setNewEntries(newEntries.toArray(new CPListElement[newEntries.size()]));
 
 				IResource resource= wizard.getCreatedElement().getCorrespondingResource();
 				delta.addCreatedResource(resource);
@@ -155,6 +157,7 @@ public class EditFilterAction extends BuildpathModifierAction {
 		return null;
 	}
 
+	@Override
 	protected boolean canHandle(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return false;

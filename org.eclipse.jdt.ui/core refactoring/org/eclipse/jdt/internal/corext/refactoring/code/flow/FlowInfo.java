@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -88,9 +88,9 @@ public abstract class FlowInfo {
 
 	protected int fReturnKind;
 	protected int[] fAccessModes;
-	protected Set fBranches;
-	protected Set fExceptions;
-	protected Set fTypeVariables;
+	protected Set<String> fBranches;
+	protected Set<ITypeBinding> fExceptions;
+	protected Set<ITypeBinding> fTypeVariables;
 
 	protected FlowInfo() {
 		this(UNDEFINED);
@@ -169,7 +169,7 @@ public abstract class FlowInfo {
 		return fBranches != null && !fBranches.isEmpty();
 	}
 
-	protected Set getBranches() {
+	protected Set<String> getBranches() {
 		return fBranches;
 	}
 
@@ -193,7 +193,7 @@ public abstract class FlowInfo {
 	public ITypeBinding[] getExceptions() {
 		if (fExceptions == null)
 			return new ITypeBinding[0];
-		return (ITypeBinding[]) fExceptions.toArray(new ITypeBinding[fExceptions.size()]);
+		return fExceptions.toArray(new ITypeBinding[fExceptions.size()]);
 	}
 
 	protected boolean hasUncaughtException() {
@@ -202,7 +202,7 @@ public abstract class FlowInfo {
 
 	protected void addException(ITypeBinding type) {
 		if (fExceptions == null)
-			fExceptions= new HashSet(2);
+			fExceptions= new HashSet<ITypeBinding>(2);
 		fExceptions.add(type);
 	}
 
@@ -210,11 +210,11 @@ public abstract class FlowInfo {
 		if (fExceptions == null)
 			return;
 
-		List catchClauses= node.catchClauses();
+		List<CatchClause> catchClauses= node.catchClauses();
 		if (catchClauses.isEmpty())
 			return;
 		// Make sure we have a copy since we are modifying the fExceptions list
-		ITypeBinding[] exceptions= (ITypeBinding[]) fExceptions.toArray(new ITypeBinding[fExceptions.size()]);
+		ITypeBinding[] exceptions= fExceptions.toArray(new ITypeBinding[fExceptions.size()]);
 		for (int i= 0; i < exceptions.length; i++) {
 			handleException(catchClauses, exceptions[i]);
 		}
@@ -222,9 +222,9 @@ public abstract class FlowInfo {
 			fExceptions= null;
 	}
 
-	private void handleException(List catchClauses, ITypeBinding type) {
-		for (Iterator iter= catchClauses.iterator(); iter.hasNext();) {
-			IVariableBinding binding= ((CatchClause)iter.next()).getException().resolveBinding();
+	private void handleException(List<CatchClause> catchClauses, ITypeBinding type) {
+		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext();) {
+			IVariableBinding binding= iter.next().getException().resolveBinding();
 			if (binding == null)
 				continue;
 			ITypeBinding catchedType= binding.getType();
@@ -243,12 +243,12 @@ public abstract class FlowInfo {
 	public ITypeBinding[] getTypeVariables() {
 		if (fTypeVariables == null)
 			return new ITypeBinding[0];
-		return (ITypeBinding[])fTypeVariables.toArray(new ITypeBinding[fTypeVariables.size()]);
+		return fTypeVariables.toArray(new ITypeBinding[fTypeVariables.size()]);
 	}
 
 	protected void addTypeVariable(ITypeBinding typeParameter) {
 		if (fTypeVariables == null)
-			fTypeVariables= new HashSet();
+			fTypeVariables= new HashSet<ITypeBinding>();
 		fTypeVariables.add(typeParameter);
 	}
 
@@ -285,12 +285,12 @@ public abstract class FlowInfo {
 		fExceptions= mergeSets(fExceptions, otherInfo.fExceptions);
 	}
 
-	private static Set mergeSets(Set thisSet, Set otherSet) {
+	private static <T> Set<T> mergeSets(Set<T> thisSet, Set<T> otherSet) {
 		if (otherSet != null) {
 			if (thisSet == null) {
 				thisSet= otherSet;
 			} else {
-				Iterator iter= otherSet.iterator();
+				Iterator<T> iter= otherSet.iterator();
 				while (iter.hasNext()) {
 					thisSet.add(iter.next());
 				}
@@ -311,7 +311,7 @@ public abstract class FlowInfo {
 	 * @return an array of local variable bindings conforming to the given type.
 	 */
 	public IVariableBinding[] get(FlowContext context, int mode) {
-		List result= new ArrayList();
+		List<IVariableBinding> result= new ArrayList<IVariableBinding>();
 		int[] locals= getAccessModes();
 		if (locals == null)
 			return EMPTY_ARRAY;
@@ -320,7 +320,7 @@ public abstract class FlowInfo {
 			if ((accessMode & mode) != 0)
 				result.add(context.getLocalFromIndex(i));
 		}
-		return (IVariableBinding[])result.toArray(new IVariableBinding[result.size()]);
+		return result.toArray(new IVariableBinding[result.size()]);
 	}
 
 	/**

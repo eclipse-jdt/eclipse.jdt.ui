@@ -78,6 +78,7 @@ public class TempDeclarationFinder {
 		}
 
 		//overridden
+		@Override
 		public boolean visitNode(ASTNode node) {
 			if (node instanceof VariableDeclaration)
 				return visitVariableDeclaration((VariableDeclaration)node);
@@ -115,6 +116,7 @@ public class TempDeclarationFinder {
 		}
 
 		//overridden
+		@Override
 		public ASTNode[] getSelectedNodes() {
 			if (fNode != null)
 				return new ASTNode[] { fNode };

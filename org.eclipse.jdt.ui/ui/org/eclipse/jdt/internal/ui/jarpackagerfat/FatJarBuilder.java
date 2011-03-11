@@ -50,6 +50,7 @@ public abstract class FatJarBuilder extends JarBuilder implements IJarBuilderExt
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void open(JarPackageData jarPackage, Shell displayShell, MultiStatus status) throws CoreException {
 		super.open(jarPackage, displayShell, status);
 		fJarPackage= jarPackage;

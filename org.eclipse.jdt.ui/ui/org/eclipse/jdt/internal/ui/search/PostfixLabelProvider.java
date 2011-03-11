@@ -31,6 +31,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 		fContentProvider= new LevelTreeContentProvider.FastJavaElementProvider();
 	}
 
+	@Override
 	public Image getImage(Object element) {
 		Image image= super.getImage(element);
 		if (image != null)
@@ -38,6 +39,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 		return getParticipantImage(element);
 	}
 
+	@Override
 	public String getText(Object element) {
 		String labelWithCounts= getLabelWithCounts(element, internalGetText(element));
 		return labelWithCounts + getQualification(element);
@@ -60,6 +62,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 		return res.toString();
 	}
 
+	@Override
 	protected boolean hasChildren(Object element) {
 		ITreeContentProvider contentProvider= (ITreeContentProvider) fPage.getViewer().getContentProvider();
 		return contentProvider.hasChildren(element);
@@ -96,6 +99,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
+	@Override
 	public StyledString getStyledText(Object element) {
 		StyledString styledString= getColoredLabelWithCounts(element, internalGetStyledText(element));
 		styledString.append(getQualification(element), StyledString.QUALIFIER_STYLER);

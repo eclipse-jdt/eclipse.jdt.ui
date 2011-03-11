@@ -61,6 +61,7 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled((fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null));
 	}
@@ -71,6 +72,7 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		setEnabled(RefactoringAvailabilityTester.isExtractConstantAvailable(selection));
 	}
@@ -78,6 +80,7 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;

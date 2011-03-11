@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -44,7 +45,7 @@ public class StubCreationOperation extends AbstractCodeCreationOperation {
 	 * @param packages
 	 *            the list of packages to create stubs for
 	 */
-	public StubCreationOperation(final URI uri, final List packages) {
+	public StubCreationOperation(final URI uri, final List<IPackageFragment> packages) {
 		this(uri, packages, false);
 	}
 
@@ -59,7 +60,7 @@ public class StubCreationOperation extends AbstractCodeCreationOperation {
 	 *            <code>true</code> to generate stubs for private and package
 	 *            visible members as well, <code>false</code> otherwise
 	 */
-	public StubCreationOperation(final URI uri, final List packages, final boolean stub) {
+	public StubCreationOperation(final URI uri, final List<IPackageFragment> packages, final boolean stub) {
 		super(uri, packages);
 		fStubInvisible= stub;
 	}
@@ -67,6 +68,7 @@ public class StubCreationOperation extends AbstractCodeCreationOperation {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected String getOperationLabel() {
 		return RefactoringCoreMessages.StubCreationOperation_creating_type_stubs;
 	}
@@ -83,6 +85,7 @@ public class StubCreationOperation extends AbstractCodeCreationOperation {
 	 * @throws CoreException
 	 *             if an error occurs
 	 */
+	@Override
 	protected void run(final IClassFile file, final IFileStore parent, final IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, 2);

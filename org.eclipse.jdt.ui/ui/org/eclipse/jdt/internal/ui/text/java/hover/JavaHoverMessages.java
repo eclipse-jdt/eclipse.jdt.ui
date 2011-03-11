@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,6 +48,7 @@ final class JavaHoverMessages extends NLS {
 	public static String NoBreakpointAnnotation_addBreakpoint;
 
 	public static String NLSStringHover_NLSStringHover_missingKeyWarning;
+	public static String NLSStringHover_NLSStringHover_PropertiesFileCouldNotBeReadWarning;
 	public static String NLSStringHover_NLSStringHover_PropertiesFileNotDetectedWarning;
 	public static String NLSStringHover_open_in_properties_file;
 	public static String ProblemHover_action_configureProblemSeverity;

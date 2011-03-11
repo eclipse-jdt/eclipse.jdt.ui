@@ -42,6 +42,7 @@ public class NewJavaWorkingSetWizard extends Wizard implements INewWizard {
 	/*
 	 * @see Wizard#addPages
 	 */
+	@Override
 	public void addPages() {
 		super.addPages();
 		if (fPage == null) {
@@ -54,6 +55,7 @@ public class NewJavaWorkingSetWizard extends Wizard implements INewWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
 	 */
+	@Override
 	public boolean performFinish() {
 		fPage.finish();
 

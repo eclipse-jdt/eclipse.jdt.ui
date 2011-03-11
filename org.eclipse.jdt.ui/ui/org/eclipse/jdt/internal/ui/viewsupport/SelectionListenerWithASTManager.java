@@ -146,6 +146,7 @@ public class SelectionListenerWithASTManager {
 
 
 			fCurrentJob= new Job(JavaUIMessages.SelectionListenerWithASTManager_job_title) {
+				@Override
 				public IStatus run(IProgressMonitor monitor) {
 					if (monitor == null) {
 						monitor= new NullProgressMonitor();
@@ -189,10 +190,10 @@ public class SelectionListenerWithASTManager {
 	}
 
 
-	private Map fListenerGroups;
+	private Map<ITextEditor, PartListenerGroup> fListenerGroups;
 
 	private SelectionListenerWithASTManager() {
-		fListenerGroups= new HashMap();
+		fListenerGroups= new HashMap<ITextEditor, PartListenerGroup>();
 	}
 
 	/**
@@ -202,7 +203,7 @@ public class SelectionListenerWithASTManager {
 	 */
 	public void addListener(ITextEditor part, ISelectionListenerWithAST listener) {
 		synchronized (this) {
-			PartListenerGroup partListener= (PartListenerGroup) fListenerGroups.get(part);
+			PartListenerGroup partListener= fListenerGroups.get(part);
 			if (partListener == null) {
 				partListener= new PartListenerGroup(part);
 				fListenerGroups.put(part, partListener);
@@ -218,7 +219,7 @@ public class SelectionListenerWithASTManager {
 	 */
 	public void removeListener(ITextEditor part, ISelectionListenerWithAST listener) {
 		synchronized (this) {
-			PartListenerGroup partListener= (PartListenerGroup) fListenerGroups.get(part);
+			PartListenerGroup partListener= fListenerGroups.get(part);
 			if (partListener != null) {
 				partListener.uninstall(listener);
 				if (partListener.isEmpty()) {

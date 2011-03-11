@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 	private int fKind;
 	private String fName;
 
-	private HashSet fResult;
+	private HashSet<SimilarElement> fResult;
 
 	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, Name name, int kind) throws JavaModelException {
 		int pos= name.getStartPosition();
@@ -96,7 +96,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 	private static ICompilationUnit createPreparedCU(ICompilationUnit cu, Javadoc comment, int wordStart) throws JavaModelException {
 		int startpos= comment.getStartPosition();
 		boolean isTopLevel= comment.getParent().getParent() instanceof CompilationUnit;
-		char[] content= (char[]) cu.getBuffer().getCharacters().clone();
+		char[] content= cu.getBuffer().getCharacters().clone();
 		if (isTopLevel && (wordStart + 6 < content.length)) {
 			content[startpos++]= 'i'; content[startpos++]= 'm'; content[startpos++]= 'p';
 			content[startpos++]= 'o'; content[startpos++]= 'r'; content[startpos++]= 't';
@@ -128,7 +128,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 		fName= name;
 		fKind= kind;
 
-		fResult= new HashSet();
+		fResult= new HashSet<SimilarElement>();
 		// nArguments and preferredType not yet used
 	}
 
@@ -140,7 +140,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 		try {
 			cu.codeComplete(pos, this);
 			processKeywords();
-			return (SimilarElement[]) fResult.toArray(new SimilarElement[fResult.size()]);
+			return fResult.toArray(new SimilarElement[fResult.size()]);
 		} finally {
 			fResult.clear();
 		}
@@ -204,6 +204,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.CompletionRequestor#accept(org.eclipse.jdt.core.CompletionProposal)
 	 */
+	@Override
 	public void accept(CompletionProposal proposal) {
 		if (proposal.getKind() == CompletionProposal.TYPE_REF) {
 			addType(proposal.getSignature(), proposal.getFlags(), proposal.getRelevance());

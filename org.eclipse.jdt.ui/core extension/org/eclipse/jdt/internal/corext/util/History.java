@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,23 +71,24 @@ public abstract class History {
 		return new JavaUIException(JavaUIStatus.createError(IStatus.ERROR, message, t));
 	}
 
-	private final Map fHistory;
-	private final Hashtable fPositions;
+	private final Map<Object, Object> fHistory;
+	private final Hashtable<Object, Integer> fPositions;
 	private final String fFileName;
 	private final String fRootNodeName;
 	private final String fInfoNodeName;
 
 	public History(String fileName, String rootNodeName, String infoNodeName) {
-		fHistory= new LinkedHashMap(80, 0.75f, true) {
+		fHistory= new LinkedHashMap<Object, Object>(80, 0.75f, true) {
 			private static final long serialVersionUID= 1L;
-			protected boolean removeEldestEntry(Map.Entry eldest) {
+			@Override
+			protected boolean removeEldestEntry(Map.Entry<Object, Object> eldest) {
 				return size() > MAX_HISTORY_SIZE;
 			}
 		};
 		fFileName= fileName;
 		fRootNodeName= rootNodeName;
 		fInfoNodeName= infoNodeName;
-		fPositions= new Hashtable(MAX_HISTORY_SIZE);
+		fPositions= new Hashtable<Object, Integer>(MAX_HISTORY_SIZE);
 	}
 
 	public History(String fileName) {
@@ -136,7 +137,7 @@ public abstract class History {
 		if (!containsKey(key))
 			return 0.0f;
 
-		int pos= ((Integer)fPositions.get(key)).intValue() + 1;
+		int pos= fPositions.get(key).intValue() + 1;
 
 		//containsKey(key) implies fHistory.size()>0
 		return (float)pos / (float)fHistory.size();
@@ -154,7 +155,7 @@ public abstract class History {
 		if (!containsKey(key))
 			return -1;
 
-		return ((Integer)fPositions.get(key)).intValue();
+		return fPositions.get(key).intValue();
 	}
 
 	public synchronized void load() {
@@ -206,11 +207,11 @@ public abstract class History {
 		}
 	}
 
-	protected Set getKeys() {
+	protected Set<Object> getKeys() {
 		return fHistory.keySet();
 	}
 
-	protected Collection getValues() {
+	protected Collection<Object> getValues() {
 		return fHistory.values();
 	}
 
@@ -240,9 +241,9 @@ public abstract class History {
 
 	private void rebuildPositions() {
 		fPositions.clear();
-		Collection values= fHistory.values();
+		Collection<Object> values= fHistory.values();
 		int pos=0;
-		for (Iterator iter= values.iterator(); iter.hasNext();) {
+		for (Iterator<Object> iter= values.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			fPositions.put(getKey(element), new Integer(pos));
 			pos++;
@@ -293,7 +294,7 @@ public abstract class History {
 			Element rootElement = document.createElement(fRootNodeName);
 			document.appendChild(rootElement);
 
-			Iterator values= getValues().iterator();
+			Iterator<Object> values= getValues().iterator();
 			while (values.hasNext()) {
 				Object object= values.next();
 				Element element= document.createElement(fInfoNodeName);

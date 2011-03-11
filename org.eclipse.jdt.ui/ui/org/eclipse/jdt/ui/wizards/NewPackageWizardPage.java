@@ -162,6 +162,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	/**
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
@@ -205,6 +206,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	/*
 	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#handleFieldChanged(String)
 	 */
+	@Override
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 		if (fieldName == CONTAINER) {

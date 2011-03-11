@@ -88,6 +88,7 @@ public class NewAnnotationWizardPage extends NewTypeWizardPage {
 	/*
 	 * @see NewContainerWizardPage#handleFieldChanged
 	 */
+	@Override
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 
@@ -132,6 +133,7 @@ public class NewAnnotationWizardPage extends NewTypeWizardPage {
 	/*
 	 * @see WizardPage#becomesVisible
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {

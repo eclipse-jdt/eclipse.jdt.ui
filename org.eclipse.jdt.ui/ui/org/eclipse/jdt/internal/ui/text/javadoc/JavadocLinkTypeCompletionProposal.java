@@ -35,6 +35,7 @@ public final class JavadocLinkTypeCompletionProposal extends LazyJavaTypeComplet
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal#computeReplacementString()
 	 */
+	@Override
 	protected String computeReplacementString() {
 		String typeReplacement= super.computeReplacementString();
 		// XXX: respect the auto-close preference, but do so consistently with method completions
@@ -48,6 +49,7 @@ public final class JavadocLinkTypeCompletionProposal extends LazyJavaTypeComplet
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal#apply(org.eclipse.jface.text.IDocument, char, int)
 	 */
+	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 		// convert . to #
 		if (trigger == '.')

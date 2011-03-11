@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -114,9 +114,11 @@ public class JavadocContentAccess2 {
 	 */
 	private static abstract class InheritDocVisitor {
 		public static final Object STOP_BRANCH= new Object() {
+			@Override
 			public String toString() { return "STOP_BRANCH"; } //$NON-NLS-1$
 		};
 		public static final Object CONTINUE= new Object() {
+			@Override
 			public String toString() { return "CONTINUE"; } //$NON-NLS-1$
 		};
 
@@ -148,7 +150,7 @@ public class JavadocContentAccess2 {
 		 * @throws JavaModelException unexpected problem
 		 */
 		public Object visitInheritDoc(IType currentType, ITypeHierarchy typeHierarchy) throws JavaModelException {
-			ArrayList visited= new ArrayList();
+			ArrayList<IType> visited= new ArrayList<IType>();
 			visited.add(currentType);
 			Object result= visitInheritDocInterfaces(visited, currentType, typeHierarchy);
 			if (result != InheritDocVisitor.CONTINUE)
@@ -188,8 +190,8 @@ public class JavadocContentAccess2 {
 		 * @return the result, or {@link #CONTINUE} if no result has been found
 		 * @throws JavaModelException unexpected problem
 		 */
-		private Object visitInheritDocInterfaces(ArrayList visited, IType currentType, ITypeHierarchy typeHierarchy) throws JavaModelException {
-			ArrayList toVisitChildren= new ArrayList();
+		private Object visitInheritDocInterfaces(ArrayList<IType> visited, IType currentType, ITypeHierarchy typeHierarchy) throws JavaModelException {
+			ArrayList<IType> toVisitChildren= new ArrayList<IType>();
 			IType[] superInterfaces= typeHierarchy.getSuperInterfaces(currentType);
 			for (int i= 0; i < superInterfaces.length; i++) {
 				IType superInterface= superInterfaces[i];
@@ -205,8 +207,8 @@ public class JavadocContentAccess2 {
 					return result;
 				}
 			}
-			for (Iterator iter= toVisitChildren.iterator(); iter.hasNext(); ) {
-				IType child= (IType) iter.next();
+			for (Iterator<IType> iter= toVisitChildren.iterator(); iter.hasNext(); ) {
+				IType child= iter.next();
 				Object result= visitInheritDocInterfaces(visited, child, typeHierarchy);
 				if (result != InheritDocVisitor.CONTINUE)
 					return result;
@@ -217,15 +219,19 @@ public class JavadocContentAccess2 {
 
 	private static class JavadocLookup {
 		private static final JavadocLookup NONE= new JavadocLookup(null) {
+			@Override
 			public CharSequence getInheritedMainDescription(IMethod method) {
 				return null;
 			}
+			@Override
 			public CharSequence getInheritedParamDescription(IMethod method, int i) {
 				return null;
 			}
+			@Override
 			public CharSequence getInheritedReturnDescription(IMethod method) {
 				return null;
 			}
+			@Override
 			public CharSequence getInheritedExceptionDescription(IMethod method, String name) {
 				return null;
 			}
@@ -243,7 +249,7 @@ public class JavadocContentAccess2 {
 		}
 
 		private final IType fStartingType;
-		private final HashMap fContentAccesses;
+		private final HashMap<IMethod, JavadocContentAccess2> fContentAccesses;
 
 		private ITypeHierarchy fTypeHierarchy;
 		private MethodOverrideTester fOverrideTester;
@@ -251,7 +257,7 @@ public class JavadocContentAccess2 {
 
 		private JavadocLookup(IType startingType) {
 			fStartingType= startingType;
-			fContentAccesses= new HashMap();
+			fContentAccesses= new HashMap<IMethod, JavadocContentAccess2>();
 		}
 
 		/**
@@ -321,6 +327,7 @@ public class JavadocContentAccess2 {
 		private CharSequence getInheritedDescription(final IMethod method, final DescriptionGetter descriptionGetter) {
 			try {
 				return (CharSequence) new InheritDocVisitor() {
+					@Override
 					public Object visit(IType currType) throws JavaModelException {
 						IMethod overridden= getOverrideTester().findOverriddenMethodInType(currType, method);
 						if (overridden == null)
@@ -416,7 +423,7 @@ public class JavadocContentAccess2 {
 	private StringBuffer fMainDescription;
 	private StringBuffer fReturnDescription;
 	private StringBuffer[] fParamDescriptions;
-	private HashMap/*<String, StringBuffer>*/ fExceptionDescriptions;
+	private HashMap<String, StringBuffer> fExceptionDescriptions;
 
 	private JavadocContentAccess2(IMethod method, Javadoc javadoc, String source, JavadocLookup lookup) {
 		fMember= method;
@@ -477,9 +484,10 @@ public class JavadocContentAccess2 {
 		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
 		final MethodOverrideTester tester= SuperTypeHierarchyCache.getMethodOverrideTester(type);
 
-		final ArrayList superInterfaceMethods= new ArrayList();
+		final ArrayList<IMethod> superInterfaceMethods= new ArrayList<IMethod>();
 		final IMethod[] superClassMethod= { null };
 		new InheritDocVisitor() {
+			@Override
 			public Object visit(IType currType) throws JavaModelException {
 				IMethod overridden= tester.findOverriddenMethodInType(currType, method);
 				if (overridden == null)
@@ -504,8 +512,8 @@ public class JavadocContentAccess2 {
 			buf.append("<b>"); //$NON-NLS-1$
 			buf.append(JavaDocMessages.JavaDoc2HTMLTextReader_specified_by_section);
 			buf.append("</b> "); //$NON-NLS-1$
-			for (Iterator iter= superInterfaceMethods.iterator(); iter.hasNext(); ) {
-				IMethod overridden= (IMethod) iter.next();
+			for (Iterator<IMethod> iter= superInterfaceMethods.iterator(); iter.hasNext(); ) {
+				IMethod overridden= iter.next();
 				buf.append(createMethodInTypeLinks(overridden));
 				if (iter.hasNext())
 					buf.append(JavaElementLabels.COMMA_STRING);
@@ -575,7 +583,7 @@ public class JavadocContentAccess2 {
 
 		IJavaProject javaProject= member.getJavaProject();
 		parser.setProject(javaProject);
-		Map options= javaProject.getOptions(true);
+		Map<String, String> options= javaProject.getOptions(true);
 		options.put(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, JavaCore.ENABLED); // workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=212207
 		parser.setCompilerOptions(options);
 
@@ -585,10 +593,10 @@ public class JavadocContentAccess2 {
 		CompilationUnit root= (CompilationUnit) parser.createAST(null);
 		if (root == null)
 			return null;
-		List types= root.types();
+		List<AbstractTypeDeclaration> types= root.types();
 		if (types.size() != 1)
 			return null;
-		AbstractTypeDeclaration type= (AbstractTypeDeclaration) types.get(0);
+		AbstractTypeDeclaration type= types.get(0);
 		return type.getJavadoc();
 	}
 
@@ -660,6 +668,7 @@ public class JavadocContentAccess2 {
 		final MethodOverrideTester tester= SuperTypeHierarchyCache.getMethodOverrideTester(type);
 
 		return (String) new InheritDocVisitor() {
+			@Override
 			public Object visit(IType currType) throws JavaModelException {
 				IMethod overridden= tester.findOverriddenMethodInType(currType, method);
 				if (overridden == null)
@@ -682,30 +691,30 @@ public class JavadocContentAccess2 {
 		fLiteralContent= 0;
 
 		// After first loop, non-null entries in the following two lists are missing and need to be inherited:
-		List parameterNames= initParameterNames();
-		List exceptionNames= initExceptionNames();
+		List<String> parameterNames= initParameterNames();
+		List<String> exceptionNames= initExceptionNames();
 
 		TagElement deprecatedTag= null;
 		TagElement start= null;
-		List/*<TagElement>*/ parameters= new ArrayList();
+		List<TagElement> parameters= new ArrayList<TagElement>();
 		TagElement returnTag= null;
-		List/*<TagElement>*/ exceptions= new ArrayList();
-		List/*<TagElement>*/ versions= new ArrayList();
-		List/*<TagElement>*/ authors= new ArrayList();
-		List/*<TagElement>*/ sees= new ArrayList();
-		List/*<TagElement>*/ since= new ArrayList();
-		List/*<TagElement>*/ rest= new ArrayList();
+		List<TagElement> exceptions= new ArrayList<TagElement>();
+		List<TagElement> versions= new ArrayList<TagElement>();
+		List<TagElement> authors= new ArrayList<TagElement>();
+		List<TagElement> sees= new ArrayList<TagElement>();
+		List<TagElement> since= new ArrayList<TagElement>();
+		List<TagElement> rest= new ArrayList<TagElement>();
 
-		List/*<TagElement>*/ tags= fJavadoc.tags();
-		for (Iterator iter= tags.iterator(); iter.hasNext(); ) {
-			TagElement tag= (TagElement) iter.next();
+		List<TagElement> tags= fJavadoc.tags();
+		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
+			TagElement tag= iter.next();
 			String tagName= tag.getTagName();
 			if (tagName == null) {
 				start= tag;
 
 			} else if (TagElement.TAG_PARAM.equals(tagName)) {
 				parameters.add(tag);
-				List fragments= tag.fragments();
+				List<? extends ASTNode> fragments= tag.fragments();
 				if (fragments.size() > 0) {
 					Object first= fragments.get(0);
 					if (first instanceof SimpleName) {
@@ -723,7 +732,7 @@ public class JavadocContentAccess2 {
 
 			} else if (TagElement.TAG_EXCEPTION.equals(tagName) || TagElement.TAG_THROWS.equals(tagName)) {
 				exceptions.add(tag);
-				List fragments= tag.fragments();
+				List<? extends ASTNode> fragments= tag.fragments();
 				if (fragments.size() > 0) {
 					Object first= fragments.get(0);
 					if (first instanceof Name) {
@@ -821,22 +830,22 @@ public class JavadocContentAccess2 {
 		}
 	}
 
-	private List initParameterNames() {
+	private List<String> initParameterNames() {
 		if (fMethod != null) {
 			try {
-				return new ArrayList(Arrays.asList(fMethod.getParameterNames()));
+				return new ArrayList<String>(Arrays.asList(fMethod.getParameterNames()));
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}
 		}
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
-	private List initExceptionNames() {
+	private List<String> initExceptionNames() {
 		if (fMethod != null) {
 			try {
 				String[] exceptionTypes= fMethod.getExceptionTypes();
-				ArrayList exceptionNames= new ArrayList();
+				ArrayList<String> exceptionNames= new ArrayList<String>();
 				for (int i= 0; i < exceptionTypes.length; i++) {
 					exceptionNames.add(Signature.getSimpleName(Signature.toString(exceptionTypes[i])));
 				}
@@ -845,7 +854,7 @@ public class JavadocContentAccess2 {
 				JavaPlugin.log(e);
 			}
 		}
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 	private boolean needsReturnTag() {
@@ -859,10 +868,10 @@ public class JavadocContentAccess2 {
 		}
 	}
 
-	private boolean inheritParameterDescriptions(List parameterNames, CharSequence[] parameterDescriptions) {
+	private boolean inheritParameterDescriptions(List<String> parameterNames, CharSequence[] parameterDescriptions) {
 		boolean hasInheritedParameters= false;
 		for (int i= 0; i < parameterNames.size(); i++) {
-			String name= (String) parameterNames.get(i);
+			String name= parameterNames.get(i);
 			if (name != null) {
 				parameterDescriptions[i]= fJavadocLookup.getInheritedParamDescription(fMethod, i);
 				if (parameterDescriptions[i] != null)
@@ -872,10 +881,10 @@ public class JavadocContentAccess2 {
 		return hasInheritedParameters;
 	}
 
-	private boolean inheritExceptionDescriptions(List exceptionNames, CharSequence[] exceptionDescriptions) {
+	private boolean inheritExceptionDescriptions(List<String> exceptionNames, CharSequence[] exceptionDescriptions) {
 		boolean hasInheritedExceptions= false;
 		for (int i= 0; i < exceptionNames.size(); i++) {
-			String name= (String) exceptionNames.get(i);
+			String name= exceptionNames.get(i);
 			if (name != null) {
 				exceptionDescriptions[i]= fJavadocLookup.getInheritedExceptionDescription(fMethod, name);
 				if (exceptionDescriptions[i] != null)
@@ -891,9 +900,9 @@ public class JavadocContentAccess2 {
 			fBuf= fMainDescription;
 			fLiteralContent= 0;
 
-			List tags= fJavadoc.tags();
-			for (Iterator iter= tags.iterator(); iter.hasNext(); ) {
-				TagElement tag= (TagElement) iter.next();
+			List<TagElement> tags= fJavadoc.tags();
+			for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
+				TagElement tag= iter.next();
 				String tagName= tag.getTagName();
 				if (tagName == null) {
 					handleContentElements(tag.fragments());
@@ -912,9 +921,9 @@ public class JavadocContentAccess2 {
 			fBuf= fReturnDescription;
 			fLiteralContent= 0;
 
-			List tags= fJavadoc.tags();
-			for (Iterator iter= tags.iterator(); iter.hasNext(); ) {
-				TagElement tag= (TagElement) iter.next();
+			List<TagElement> tags= fJavadoc.tags();
+			for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
+				TagElement tag= iter.next();
 				String tagName= tag.getTagName();
 				if (TagElement.TAG_RETURN.equals(tagName)) {
 					handleContentElements(tag.fragments());
@@ -945,12 +954,12 @@ public class JavadocContentAccess2 {
 			fLiteralContent= 0;
 
 			String paramName= parameterNames[paramIndex];
-			List tags= fJavadoc.tags();
-			for (Iterator iter= tags.iterator(); iter.hasNext(); ) {
-				TagElement tag= (TagElement) iter.next();
+			List<TagElement> tags= fJavadoc.tags();
+			for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
+				TagElement tag= iter.next();
 				String tagName= tag.getTagName();
 				if (TagElement.TAG_PARAM.equals(tagName)) {
-					List fragments= tag.fragments();
+					List<? extends ASTNode> fragments= tag.fragments();
 					if (fragments.size() > 0) {
 						Object first= fragments.get(0);
 						if (first instanceof SimpleName) {
@@ -973,9 +982,9 @@ public class JavadocContentAccess2 {
 	CharSequence getExceptionDescription(String simpleName) {
 		if (fMethod != null) {
 			if (fExceptionDescriptions == null) {
-				fExceptionDescriptions= new HashMap();
+				fExceptionDescriptions= new HashMap<String, StringBuffer>();
 			} else {
-				StringBuffer description= (StringBuffer) fExceptionDescriptions.get(simpleName);
+				StringBuffer description= fExceptionDescriptions.get(simpleName);
 				if (description != null) {
 					return description.length() > 0 ? description : null;
 				}
@@ -986,12 +995,12 @@ public class JavadocContentAccess2 {
 			fBuf= description;
 			fLiteralContent= 0;
 
-			List tags= fJavadoc.tags();
-			for (Iterator iter= tags.iterator(); iter.hasNext(); ) {
-				TagElement tag= (TagElement) iter.next();
+			List<TagElement> tags= fJavadoc.tags();
+			for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
+				TagElement tag= iter.next();
 				String tagName= tag.getTagName();
 				if (TagElement.TAG_THROWS.equals(tagName) || TagElement.TAG_EXCEPTION.equals(tagName)) {
-					List fragments= tag.fragments();
+					List<? extends ASTNode> fragments= tag.fragments();
 					if (fragments.size() > 0) {
 						Object first= fragments.get(0);
 						if (first instanceof Name) {
@@ -1013,14 +1022,14 @@ public class JavadocContentAccess2 {
 	}
 
 		
-	private void handleContentElements(List nodes) {
+	private void handleContentElements(List<? extends ASTNode> nodes) {
 		handleContentElements(nodes, false);
 	}
 	
-	private void handleContentElements(List nodes, boolean skipLeadingWhitespace) {
+	private void handleContentElements(List<? extends ASTNode> nodes, boolean skipLeadingWhitespace) {
 		ASTNode previousNode= null;
-		for (Iterator iter= nodes.iterator(); iter.hasNext(); ) {
-			ASTNode child= (ASTNode) iter.next();
+		for (Iterator<? extends ASTNode> iter= nodes.iterator(); iter.hasNext(); ) {
+			ASTNode child= iter.next();
 			if (previousNode != null) {
 				int previousEnd= previousNode.getStartPosition() + previousNode.getLength();
 				int childStart= child.getStartPosition();
@@ -1143,7 +1152,7 @@ public class JavadocContentAccess2 {
 
 	private boolean handleValueTag(TagElement node) {
 		
-		List fragments= node.fragments();
+		List<? extends ASTNode> fragments= node.fragments();
 		try {
 			if (fragments.isEmpty()) {
 				if (fMember instanceof IField && JdtFlags.isStatic(fMember) && JdtFlags.isFinal(fMember)) {
@@ -1293,7 +1302,7 @@ public class JavadocContentAccess2 {
 				return handleInherited(inherited);
 
 			} else if (TagElement.TAG_PARAM.equals(blockTagName)) {
-				List fragments= blockTag.fragments();
+				List<? extends ASTNode> fragments= blockTag.fragments();
 				if (fragments.size() > 0) {
 					Object first= fragments.get(0);
 					if (first instanceof SimpleName) {
@@ -1313,7 +1322,7 @@ public class JavadocContentAccess2 {
 				return handleInherited(inherited);
 
 			} else if (TagElement.TAG_THROWS.equals(blockTagName) || TagElement.TAG_EXCEPTION.equals(blockTagName)) {
-				List fragments= blockTag.fragments();
+				List<? extends ASTNode> fragments= blockTag.fragments();
 				if (fragments.size() > 0) {
 					Object first= fragments.get(0);
 					if (first instanceof Name) {
@@ -1337,14 +1346,14 @@ public class JavadocContentAccess2 {
 		return true;
 	}
 
-	private void handleBlockTags(String title, List tags) {
+	private void handleBlockTags(String title, List<TagElement> tags) {
 		if (tags.isEmpty())
 			return;
 
 		handleBlockTagTitle(title);
 
-		for (Iterator iter= tags.iterator(); iter.hasNext(); ) {
-			TagElement tag= (TagElement) iter.next();
+		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
+			TagElement tag= iter.next();
 			fBuf.append(BlOCK_TAG_ENTRY_START);
 			if (TagElement.TAG_SEE.equals(tag.getTagName())) {
 				handleSeeTag(tag);
@@ -1368,9 +1377,9 @@ public class JavadocContentAccess2 {
 		fBuf.append(BlOCK_TAG_ENTRY_END);
 	}
 
-	private void handleBlockTags(List tags) {
-		for (Iterator iter= tags.iterator(); iter.hasNext(); ) {
-			TagElement tag= (TagElement) iter.next();
+	private void handleBlockTags(List<TagElement> tags) {
+		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
+			TagElement tag= iter.next();
 			handleBlockTagTitle(tag.getTagName());
 			fBuf.append(BlOCK_TAG_ENTRY_START);
 			handleContentElements(tag.fragments());
@@ -1388,21 +1397,21 @@ public class JavadocContentAccess2 {
 		handleLink(tag.fragments());
 	}
 
-	private void handleExceptionTags(List tags, List exceptionNames, CharSequence[] exceptionDescriptions) {
+	private void handleExceptionTags(List<TagElement> tags, List<String> exceptionNames, CharSequence[] exceptionDescriptions) {
 		if (tags.size() == 0 && containsOnlyNull(exceptionNames))
 			return;
 
 		handleBlockTagTitle(JavaDocMessages.JavaDoc2HTMLTextReader_throws_section);
 
-		for (Iterator iter= tags.iterator(); iter.hasNext(); ) {
-			TagElement tag= (TagElement) iter.next();
+		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
+			TagElement tag= iter.next();
 			fBuf.append(BlOCK_TAG_ENTRY_START);
 			handleThrowsTag(tag);
 			fBuf.append(BlOCK_TAG_ENTRY_END);
 		}
 		for (int i= 0; i < exceptionDescriptions.length; i++) {
 			CharSequence description= exceptionDescriptions[i];
-			String name= (String) exceptionNames.get(i);
+			String name= exceptionNames.get(i);
 			if (name != null) {
 				fBuf.append(BlOCK_TAG_ENTRY_START);
 				handleLink(Collections.singletonList(fJavadoc.getAST().newSimpleName(name)));
@@ -1416,7 +1425,7 @@ public class JavadocContentAccess2 {
 	}
 
 	private void handleThrowsTag(TagElement tag) {
-		List fragments= tag.fragments();
+		List<? extends ASTNode> fragments= tag.fragments();
 		int size= fragments.size();
 		if (size > 0) {
 			handleLink(fragments.subList(0, 1));
@@ -1427,21 +1436,21 @@ public class JavadocContentAccess2 {
 		}
 	}
 
-	private void handleParameterTags(List tags, List parameterNames, CharSequence[] parameterDescriptions) {
+	private void handleParameterTags(List<TagElement> tags, List<String> parameterNames, CharSequence[] parameterDescriptions) {
 		if (tags.size() == 0 && containsOnlyNull(parameterNames))
 			return;
 
 		handleBlockTagTitle(JavaDocMessages.JavaDoc2HTMLTextReader_parameters_section);
 
-		for (Iterator iter= tags.iterator(); iter.hasNext(); ) {
-			TagElement tag= (TagElement) iter.next();
+		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
+			TagElement tag= iter.next();
 			fBuf.append(BlOCK_TAG_ENTRY_START);
 			handleParamTag(tag);
 			fBuf.append(BlOCK_TAG_ENTRY_END);
 		}
 		for (int i= 0; i < parameterDescriptions.length; i++) {
 			CharSequence description= parameterDescriptions[i];
-			String name= (String) parameterNames.get(i);
+			String name= parameterNames.get(i);
 			if (name != null) {
 				fBuf.append(BlOCK_TAG_ENTRY_START);
 				fBuf.append(PARAM_NAME_START);
@@ -1455,7 +1464,7 @@ public class JavadocContentAccess2 {
 	}
 
 	private void handleParamTag(TagElement tag) {
-		List fragments= tag.fragments();
+		List<? extends ASTNode> fragments= tag.fragments();
 		int i= 0;
 		int size= fragments.size();
 		if (size > 0) {
@@ -1494,7 +1503,7 @@ public class JavadocContentAccess2 {
 		}
 	}
 
-	private void handleLink(List fragments) {
+	private void handleLink(List<? extends ASTNode> fragments) {
 		//TODO: Javadoc shortens type names to minimal length according to context
 		int fs= fragments.size();
 		if (fs > 0) {
@@ -1516,12 +1525,12 @@ public class JavadocContentAccess2 {
 				Name qualifier= methodRef.getQualifier();
 				refTypeName= qualifier == null ? "" : qualifier.getFullyQualifiedName(); //$NON-NLS-1$
 				refMemberName= methodRef.getName().getIdentifier();
-				List params= methodRef.parameters();
+				List<MethodRefParameter> params= methodRef.parameters();
 				int ps= params.size();
 				refMethodParamTypes= new String[ps];
 				refMethodParamNames= new String[ps];
 				for (int i= 0; i < ps; i++) {
-					MethodRefParameter param= (MethodRefParameter) params.get(i);
+					MethodRefParameter param= params.get(i);
 					refMethodParamTypes[i]= ASTNodes.asString(param.getType());
 					SimpleName paramName= param.getName();
 					if (paramName != null)
@@ -1580,8 +1589,8 @@ public class JavadocContentAccess2 {
 		return textElement.getText().trim().length() == 0;
 	}
 
-	private boolean containsOnlyNull(List parameterNames) {
-		for (Iterator iter= parameterNames.iterator(); iter.hasNext(); ) {
+	private boolean containsOnlyNull(List<String> parameterNames) {
+		for (Iterator<String> iter= parameterNames.iterator(); iter.hasNext(); ) {
 			if (iter.next() != null)
 				return false;
 		}

@@ -56,7 +56,7 @@ public class ToStringTemplateParser {
 
 	protected String[] ending;
 
-	protected Map descriptions;
+	protected Map<String, String> descriptions;
 
 	/** The variable that inserts the name of the object's class **/
 	public final static String OBJECT_NAME_VARIABLE= "${object.className}"; //$NON-NLS-1$
@@ -154,7 +154,7 @@ public class ToStringTemplateParser {
 		String[] emptyArray= new String[0];
 		int beginningEnd= firstOccuranceOf(template, getMemberRelatedVariables());
 		if (beginningEnd >= 0) {
-			beginning= (String[])extractElements(template.substring(0, beginningEnd), getObjectRelatedVariables()).toArray(emptyArray);
+			beginning= extractElements(template.substring(0, beginningEnd), getObjectRelatedVariables()).toArray(emptyArray);
 		} else {
 			beginningEnd= 0;
 			beginning= emptyArray;
@@ -163,17 +163,17 @@ public class ToStringTemplateParser {
 		if (endingStart == -1)
 			endingStart= template.length();
 
-		ArrayList bodyList= extractElements(template.substring(beginningEnd, endingStart), getObjectAndMemberRelatedVariables());
+		ArrayList<String> bodyList= extractElements(template.substring(beginningEnd, endingStart), getObjectAndMemberRelatedVariables());
 
 		try {
-			separator= (String)bodyList.get(bodyList.size() - 1);
+			separator= bodyList.get(bodyList.size() - 1);
 			bodyList.remove(bodyList.size() - 1);
 		} catch (Exception e) {
 			separator= ""; //$NON-NLS-1$
 		}
 
-		body= (String[])bodyList.toArray(emptyArray);
-		ending= (String[])extractElements(template.substring(endingStart + ToStringTemplateParser.OTHER_MEMBERS_VARIABLE.length()), getObjectRelatedVariables()).toArray(emptyArray);
+		body= bodyList.toArray(emptyArray);
+		ending= extractElements(template.substring(endingStart + ToStringTemplateParser.OTHER_MEMBERS_VARIABLE.length()), getObjectRelatedVariables()).toArray(emptyArray);
 
 	}
 
@@ -187,8 +187,8 @@ public class ToStringTemplateParser {
 		return result;
 	}
 
-	protected ArrayList extractElements(String template, String[] wantedVariables) {
-		ArrayList result= new ArrayList();
+	protected ArrayList<String> extractElements(String template, String[] wantedVariables) {
+		ArrayList<String> result= new ArrayList<String>();
 		while (true) {
 			if (template.length() == 0)
 				break;
@@ -230,9 +230,9 @@ public class ToStringTemplateParser {
 		return separator;
 	}
 
-	public Map getVariableDescriptions() {
+	public Map<String, String> getVariableDescriptions() {
 		if (descriptions == null) {
-			descriptions= new HashMap();
+			descriptions= new HashMap<String, String>();
 			for (int i= 0; i < ToStringTemplateParser.VARIABLES.length; i++)
 				descriptions.put(ToStringTemplateParser.VARIABLES[i], ToStringTemplateParser.VARIABLE_DESCRIPTIONS[i]);
 		}

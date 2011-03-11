@@ -86,6 +86,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	/**
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		IJavaElement elem= getJavaElement();
 		try {
@@ -151,6 +152,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	/*
 	 * @see PreferencePage#createContents(Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		if (!fIsValidElement || fIsReadOnly) {
 			Composite inner= new Composite(parent, SWT.NONE);
@@ -224,6 +226,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
+	@Override
 	protected void performDefaults() {
 		if (fJavadocConfigurationBlock != null) {
 			fJavadocConfigurationBlock.performDefaults();
@@ -234,6 +237,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	/**
 	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
+	@Override
 	public boolean performOk() {
 		if (fJavadocConfigurationBlock != null) {
 			URL javadocLocation= fJavadocConfigurationBlock.getJavadocLocation();

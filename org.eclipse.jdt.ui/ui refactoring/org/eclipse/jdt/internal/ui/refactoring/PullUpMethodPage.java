@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -95,7 +95,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 	private static class PullUpFilter extends ViewerFilter {
 
-		private static boolean anySubtypeCanBeShown(final IType type, final Map typeToMemberArray, final ITypeHierarchy hierarchy) {
+		private static boolean anySubtypeCanBeShown(final IType type, final Map<IType, IMember[]> typeToMemberArray, final ITypeHierarchy hierarchy) {
 			final IType[] subTypes= hierarchy.getSubtypes(type);
 			for (int i= 0; i < subTypes.length; i++) {
 				if (canBeShown(subTypes[i], typeToMemberArray, hierarchy))
@@ -104,14 +104,14 @@ public class PullUpMethodPage extends UserInputWizardPage {
 			return false;
 		}
 
-		private static boolean canBeShown(final IType type, final Map typeToMemberArray, final ITypeHierarchy hierarchy) {
+		private static boolean canBeShown(final IType type, final Map<IType, IMember[]> typeToMemberArray, final ITypeHierarchy hierarchy) {
 			if (typeToMemberArray.containsKey(type))
 				return true;
 			return anySubtypeCanBeShown(type, typeToMemberArray, hierarchy);
 		}
 
-		private static Set computeShowableSubtypesOfMainType(final ITypeHierarchy hierarchy, final Map typeToMemberArray) {
-			final Set result= new HashSet();
+		private static Set<IType> computeShowableSubtypesOfMainType(final ITypeHierarchy hierarchy, final Map<IType, IMember[]> typeToMemberArray) {
+			final Set<IType> result= new HashSet<IType>();
 			final IType[] subtypes= hierarchy.getAllSubtypes(hierarchy.getType());
 			for (int i= 0; i < subtypes.length; i++) {
 				final IType subtype= subtypes[i];
@@ -121,21 +121,22 @@ public class PullUpMethodPage extends UserInputWizardPage {
 			return result;
 		}
 
-		private static Set computeTypesToShow(final ITypeHierarchy hierarchy, final Map typeToMemberArray) {
-			final Set typesToShow= new HashSet();
+		private static Set<IType> computeTypesToShow(final ITypeHierarchy hierarchy, final Map<IType, IMember[]> typeToMemberArray) {
+			final Set<IType> typesToShow= new HashSet<IType>();
 			typesToShow.add(hierarchy.getType());
 			typesToShow.addAll(computeShowableSubtypesOfMainType(hierarchy, typeToMemberArray));
 			return typesToShow;
 		}
 
-		private final Set fTypesToShow;
+		private final Set<IType> fTypesToShow;
 
 		public PullUpFilter(final ITypeHierarchy hierarchy, final IMember[] members) {
 			// IType -> IMember[]
-			final Map map= PullUpMethodPage.createTypeToMemberArrayMapping(members);
+			final Map<IType, IMember[]> map= PullUpMethodPage.createTypeToMemberArrayMapping(members);
 			fTypesToShow= computeTypesToShow(hierarchy, map);
 		}
 
+		@Override
 		public boolean select(final Viewer viewer, final Object parentElement, final Object element) {
 			if (element instanceof IMethod)
 				return true;
@@ -149,7 +150,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 		private ITypeHierarchy fHierarchy;
 
-		private Map fTypeToMemberArray; // IType -> IMember[]
+		private Map<IType, IMember[]> fTypeToMemberArray; // IType -> IMember[]
 
 		public PullUpHierarchyContentProvider(final IType declaringType, final IMember[] members) {
 			fDeclaringType= declaringType;
@@ -177,7 +178,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 		private IMember[] getMembers(final IType type) {
 			if (fTypeToMemberArray.containsKey(type))
-				return (IMember[]) (fTypeToMemberArray.get(type));
+				return (fTypeToMemberArray.get(type));
 			else
 				return new IMember[0];
 		}
@@ -198,7 +199,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		}
 
 		private Object[] getSubclassesAndMembers(final IType type) {
-			final Set set= new HashSet();
+			final Set<IMember> set= new HashSet<IMember>();
 			set.addAll(Arrays.asList(getSubclasses(type)));
 			set.addAll(Arrays.asList(getMembers(type)));
 			return set.toArray();
@@ -220,28 +221,28 @@ public class PullUpMethodPage extends UserInputWizardPage {
 	private static final String PAGE_NAME= "PullUpMethodPage"; //$NON-NLS-1$
 
 	// IType -> IMember[]
-	private static Map createTypeToMemberArrayMapping(final IMember[] members) {
-		final Map typeToMemberSet= createTypeToMemberSetMapping(members);
+	private static Map<IType, IMember[]> createTypeToMemberArrayMapping(final IMember[] members) {
+		final Map<IType, HashSet<IMember>> typeToMemberSet= createTypeToMemberSetMapping(members);
 
-		final Map typeToMemberArray= new HashMap();
-		for (final Iterator iter= typeToMemberSet.keySet().iterator(); iter.hasNext();) {
-			final IType type= (IType) iter.next();
-			final Set memberSet= (Set) typeToMemberSet.get(type);
-			final IMember[] memberArray= (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
+		final Map<IType, IMember[]> typeToMemberArray= new HashMap<IType, IMember[]>();
+		for (final Iterator<IType> iter= typeToMemberSet.keySet().iterator(); iter.hasNext();) {
+			final IType type= iter.next();
+			final Set<IMember> memberSet= typeToMemberSet.get(type);
+			final IMember[] memberArray= memberSet.toArray(new IMember[memberSet.size()]);
 			typeToMemberArray.put(type, memberArray);
 		}
 		return typeToMemberArray;
 	}
 
 	// IType -> Set of IMember
-	private static Map createTypeToMemberSetMapping(final IMember[] members) {
-		final Map typeToMemberSet= new HashMap();
+	private static Map<IType, HashSet<IMember>> createTypeToMemberSetMapping(final IMember[] members) {
+		final Map<IType, HashSet<IMember>> typeToMemberSet= new HashMap<IType, HashSet<IMember>>();
 		for (int i= 0; i < members.length; i++) {
 			final IMember member= members[i];
 			final IType type= member.getDeclaringType();
 			if (!typeToMemberSet.containsKey(type))
-				typeToMemberSet.put(type, new HashSet());
-			((Set) typeToMemberSet.get(type)).add(member);
+				typeToMemberSet.put(type, new HashSet<IMember>());
+			typeToMemberSet.get(type).add(member);
 		}
 		return typeToMemberSet;
 	}
@@ -305,6 +306,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(final SelectionEvent e) {
 				checkPulledUp();
 				updateSelectionLabel();
@@ -421,12 +423,12 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 	private IMethod[] getCheckedMethods() {
 		final Object[] checked= fTreeViewer.getCheckedElements();
-		final List members= new ArrayList(checked.length);
+		final List<IMethod> members= new ArrayList<IMethod>(checked.length);
 		for (int i= 0; i < checked.length; i++) {
 			if (checked[i] instanceof IMethod)
-				members.add(checked[i]);
+				members.add((IMethod) checked[i]);
 		}
-		return (IMethod[]) members.toArray(new IMethod[members.size()]);
+		return members.toArray(new IMethod[members.size()]);
 	}
 
 	private ISourceReference getFirstSelectedSourceReference(final SelectionChangedEvent event) {
@@ -442,6 +444,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		return (ISourceReference) first;
 	}
 
+	@Override
 	public IWizardPage getNextPage() {
 		initializeRefactoring();
 		return super.getNextPage();
@@ -498,6 +501,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		}
 	}
 
+	@Override
 	protected boolean performFinish() {
 		initializeRefactoring();
 		return super.performFinish();
@@ -536,6 +540,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		fSourceViewer.setDocument(document);
 	}
 
+	@Override
 	public void setVisible(final boolean visible) {
 		if (visible && fChangedSettings) {
 			fChangedSettings= false;

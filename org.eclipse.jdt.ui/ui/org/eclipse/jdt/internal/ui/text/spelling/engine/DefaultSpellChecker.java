@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -124,12 +124,12 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 * The dictionaries to use for spell checking. Synchronized to avoid
 	 * concurrent modifications.
 	 */
-	private final Set fDictionaries= Collections.synchronizedSet(new HashSet());
+	private final Set<ISpellDictionary> fDictionaries= Collections.synchronizedSet(new HashSet<ISpellDictionary>());
 
 	/**
 	 * The words to be ignored. Synchronized to avoid concurrent modifications.
 	 */
-	private final Set fIgnored= Collections.synchronizedSet(new HashSet());
+	private final Set<String> fIgnored= Collections.synchronizedSet(new HashSet<String>());
 
 	/**
 	 * The preference store. Assumes the <code>IPreferenceStore</code>
@@ -172,15 +172,15 @@ public class DefaultSpellChecker implements ISpellChecker {
 		// synchronizing might not be needed here since acceptWords is
 		// a read-only access and only called in the same thread as
 		// the modifying methods add/checkWord (?)
-		Set copy;
+		Set<ISpellDictionary> copy;
 		synchronized (fDictionaries) {
-			copy= new HashSet(fDictionaries);
+			copy= new HashSet<ISpellDictionary>(fDictionaries);
 		}
 
 		ISpellDictionary dictionary= null;
-		for (final Iterator iterator= copy.iterator(); iterator.hasNext();) {
+		for (final Iterator<ISpellDictionary> iterator= copy.iterator(); iterator.hasNext();) {
 
-			dictionary= (ISpellDictionary)iterator.next();
+			dictionary= iterator.next();
 			if (dictionary.acceptsWords())
 				return true;
 		}
@@ -192,14 +192,14 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 */
 	public void addWord(final String word) {
 		// synchronizing is necessary as this is a write access
-		Set copy;
+		Set<ISpellDictionary> copy;
 		synchronized (fDictionaries) {
-			copy= new HashSet(fDictionaries);
+			copy= new HashSet<ISpellDictionary>(fDictionaries);
 		}
 
 		final String addable= word.toLowerCase();
-		for (final Iterator iterator= copy.iterator(); iterator.hasNext();) {
-			ISpellDictionary dictionary= (ISpellDictionary)iterator.next();
+		for (final Iterator<ISpellDictionary> iterator= copy.iterator(); iterator.hasNext();) {
+			ISpellDictionary dictionary= iterator.next();
 			if (dictionary.acceptsWords())
 				dictionary.addWord(addable);
 		}
@@ -230,9 +230,9 @@ public class DefaultSpellChecker implements ISpellChecker {
 
 		iterator.setIgnoreSingleLetters(ignoreSingleLetters);
 
-		Iterator iter= fDictionaries.iterator();
+		Iterator<ISpellDictionary> iter= fDictionaries.iterator();
 		while (iter.hasNext())
-			((ISpellDictionary)iter.next()).setStripNonLetters(ignoreNonLetters);
+			iter.next().setStripNonLetters(ignoreNonLetters);
 
 		String word= null;
 		boolean starts= false;
@@ -240,7 +240,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 
 		while (problemCount <= problemsThreshold && iterator.hasNext()) {
 
-			word= (String)iterator.next();
+			word= iterator.next();
 			if (word != null) {
 
 				// synchronizing is necessary as this is called inside the reconciler
@@ -274,22 +274,22 @@ public class DefaultSpellChecker implements ISpellChecker {
 	/*
 	 * @see org.eclipse.spelling.done.ISpellChecker#getProposals(java.lang.String,boolean)
 	 */
-	public Set getProposals(final String word, final boolean sentence) {
+	public Set<RankedWordProposal> getProposals(final String word, final boolean sentence) {
 
 		// synchronizing might not be needed here since getProposals is
 		// a read-only access and only called in the same thread as
 		// the modifing methods add/removeDictionary (?)
-		Set copy;
+		Set<ISpellDictionary> copy;
 		synchronized (fDictionaries) {
-			copy= new HashSet(fDictionaries);
+			copy= new HashSet<ISpellDictionary>(fDictionaries);
 		}
 
 		ISpellDictionary dictionary= null;
-		final HashSet proposals= new HashSet();
+		final HashSet<RankedWordProposal> proposals= new HashSet<RankedWordProposal>();
 
-		for (final Iterator iterator= copy.iterator(); iterator.hasNext();) {
+		for (final Iterator<ISpellDictionary> iterator= copy.iterator(); iterator.hasNext();) {
 
-			dictionary= (ISpellDictionary)iterator.next();
+			dictionary= iterator.next();
 			proposals.addAll(dictionary.getProposals(word, sentence));
 		}
 		return proposals;
@@ -308,18 +308,18 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 */
 	public final boolean isCorrect(final String word) {
 		// synchronizing is necessary as this is called from execute
-		Set copy;
+		Set<ISpellDictionary> copy;
 		synchronized (fDictionaries) {
-			copy= new HashSet(fDictionaries);
+			copy= new HashSet<ISpellDictionary>(fDictionaries);
 		}
 
 		if (fIgnored.contains(word.toLowerCase()))
 			return true;
 
 		ISpellDictionary dictionary= null;
-		for (final Iterator iterator= copy.iterator(); iterator.hasNext();) {
+		for (final Iterator<ISpellDictionary> iterator= copy.iterator(); iterator.hasNext();) {
 
-			dictionary= (ISpellDictionary)iterator.next();
+			dictionary= iterator.next();
 			if (dictionary.isCorrect(word))
 				return true;
 		}

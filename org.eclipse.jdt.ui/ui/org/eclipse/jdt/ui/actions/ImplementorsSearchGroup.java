@@ -156,6 +156,7 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 	/* (non-Javadoc)
 	 * Method declared on ActionGroup.
 	 */
+	@Override
 	public void fillContextMenu(IMenuManager manager) {
 		MenuManager javaSearchMM= new MenuManager(MENU_TEXT, IContextMenuConstants.GROUP_SEARCH);
 		addAction(fFindImplementorsAction, javaSearchMM);
@@ -163,9 +164,9 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 
 		javaSearchMM.add(new Separator());
 
-		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
+		Iterator<IWorkingSet[]> iter= SearchUtil.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
-			addWorkingSetAction((IWorkingSet[]) iter.next(), javaSearchMM);
+			addWorkingSetAction(iter.next(), javaSearchMM);
 		}
 		addAction(fFindImplementorsInWorkingSetAction, javaSearchMM);
 
@@ -177,6 +178,7 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 	/*
 	 * Method declared on ActionGroup.
 	 */
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		Assert.isNotNull(actionBars);
 		super.fillActionBars(actionBars);
@@ -187,6 +189,7 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 	/*
 	 * Method declared on ActionGroup.
 	 */
+	@Override
 	public void dispose() {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		if (provider != null) {

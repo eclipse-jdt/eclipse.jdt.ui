@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
@@ -35,8 +34,8 @@ public class CodeScopeBuilder extends ASTVisitor {
 		private Scope fParent;
 		private int fStart;
 		private int fLength;
-		private List fNames;
-		private List fChildren;
+		private List<String> fNames;
+		private List<Scope> fChildren;
 		private int fCursorOffset;
 		Scope(Scope parent, int start, int length) {
 			fParent= parent;
@@ -50,20 +49,20 @@ public class CodeScopeBuilder extends ASTVisitor {
 		}
 		private void addChild(Scope child) {
 			if (fChildren == null)
-				fChildren= new ArrayList(2);
+				fChildren= new ArrayList<Scope>(2);
 			fChildren.add(child);
 		}
 		private void addName(String name) {
 			if (fNames == null)
-				fNames= new ArrayList(2);
+				fNames= new ArrayList<String>(2);
 			fNames.add(name);
 		}
 		public Scope findScope(int start, int length) {
 			if (fStart <= start && start + length <= fStart + fLength) {
 				if (fChildren == null)
 					return this;
-				for (Iterator iter= fChildren.iterator(); iter.hasNext();) {
-					Scope scope= ((Scope)iter.next()).findScope(start, length);
+				for (Iterator<Scope> iter= fChildren.iterator(); iter.hasNext();) {
+					Scope scope= iter.next().findScope(start, length);
 					if (scope != null)
 						return scope;
 				}
@@ -85,8 +84,8 @@ public class CodeScopeBuilder extends ASTVisitor {
 			if (internalIsInUse(name))
 				return true;
 			if (fChildren != null) {
-				for (Iterator iter= fChildren.iterator(); iter.hasNext();) {
-					Scope child= (Scope) iter.next();
+				for (Iterator<Scope> iter= fChildren.iterator(); iter.hasNext();) {
+					Scope child= iter.next();
 					if (fCursorOffset < child.fStart && child.isInUseDown(name)) {
 						return true;
 					}
@@ -107,8 +106,8 @@ public class CodeScopeBuilder extends ASTVisitor {
 				return true;
 			if (fChildren == null)
 				return false;
-			for (Iterator iter= fChildren.iterator(); iter.hasNext();) {
-				Scope scope= (Scope) iter.next();
+			for (Iterator<Scope> iter= fChildren.iterator(); iter.hasNext();) {
+				Scope scope= iter.next();
 				if (scope.isInUseDown(name))
 					return true;
 			}
@@ -119,7 +118,7 @@ public class CodeScopeBuilder extends ASTVisitor {
 	private IBinding fIgnoreBinding;
 	private Selection fIgnoreRange;
 	private Scope fScope;
-	private List fScopes;
+	private List<Scope> fScopes;
 
 	public static Scope perform(BodyDeclaration node, IBinding ignore) {
 		CodeScopeBuilder collector= new CodeScopeBuilder(node, ignore);
@@ -135,16 +134,17 @@ public class CodeScopeBuilder extends ASTVisitor {
 
 	private CodeScopeBuilder(ASTNode node, IBinding ignore) {
 		fScope= new Scope(null, node.getStartPosition(), node.getLength());
-		fScopes= new ArrayList();
+		fScopes= new ArrayList<Scope>();
 		fIgnoreBinding= ignore;
 	}
 
 	private CodeScopeBuilder(ASTNode node, Selection ignore) {
 		fScope= new Scope(null, node.getStartPosition(), node.getLength());
-		fScopes= new ArrayList();
+		fScopes= new ArrayList<Scope>();
 		fIgnoreRange= ignore;
 	}
 
+	@Override
 	public boolean visit(CatchClause node) {
 		// open a new scope for the exception declaration.
 		fScopes.add(fScope);
@@ -152,10 +152,12 @@ public class CodeScopeBuilder extends ASTVisitor {
 		return true;
 	}
 
+	@Override
 	public void endVisit(CatchClause node) {
-		fScope= (Scope)fScopes.remove(fScopes.size() - 1);
+		fScope= fScopes.remove(fScopes.size() - 1);
 	}
 
+	@Override
 	public boolean visit(SimpleName node) {
 		if (fIgnoreBinding != null && Bindings.equals(fIgnoreBinding, node.resolveBinding()))
 			return false;
@@ -165,12 +167,14 @@ public class CodeScopeBuilder extends ASTVisitor {
 		return false;
 	}
 
+	@Override
 	public boolean visit(QualifiedName node) {
 		// only consider the left most identifier.
 		node.getQualifier().accept(this);
 		return false;
 	}
 
+	@Override
 	public boolean visit(MethodInvocation node) {
 		Expression receiver= node.getExpression();
 		if (receiver == null) {
@@ -184,41 +188,42 @@ public class CodeScopeBuilder extends ASTVisitor {
 		return false;
 	}
 
+	@Override
 	public boolean visit(TypeDeclarationStatement node) {
-		if (node.getAST().apiLevel() == AST.JLS2) {
-			fScope.addName(node.getTypeDeclaration().getName().getIdentifier());
-		} else {
-			fScope.addName(node.getDeclaration().getName().getIdentifier());
-		}
+		fScope.addName(node.getDeclaration().getName().getIdentifier());
 		return false;
 	}
 
+	@Override
 	public boolean visit(Block node) {
 		fScopes.add(fScope);
 		fScope= new Scope(fScope, node.getStartPosition(), node.getLength());
 		return true;
 	}
 
+	@Override
 	public void endVisit(Block node) {
-		fScope= (Scope)fScopes.remove(fScopes.size() - 1);
+		fScope= fScopes.remove(fScopes.size() - 1);
 	}
 
+	@Override
 	public boolean visit(ForStatement node) {
 		fScopes.add(fScope);
 		fScope= new Scope(fScope, node.getStartPosition(), node.getLength());
 		return true;
 	}
 
+	@Override
 	public void endVisit(ForStatement node) {
-		fScope= (Scope)fScopes.remove(fScopes.size() - 1);
+		fScope= fScopes.remove(fScopes.size() - 1);
 	}
 
-	private void accept(List list) {
+	private void accept(List<Expression> list) {
 		int size;
 		if (list == null || (size= list.size()) == 0)
 			return;
 		for (int i= 0; i < size; i++) {
-			((ASTNode)list.get(i)).accept(this);
+			list.get(i).accept(this);
 		}
 	}
 }

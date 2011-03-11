@@ -67,6 +67,7 @@ public class ToggleViewAction extends Action {
 	/*
 	 * @see Action#actionPerformed
 	 */
+	@Override
 	public void run() {
 		fViewPart.setHierarchyMode(fViewerIndex);
 	}

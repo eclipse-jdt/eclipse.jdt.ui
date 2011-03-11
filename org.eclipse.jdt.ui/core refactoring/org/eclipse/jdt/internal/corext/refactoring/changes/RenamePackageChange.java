@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,7 +50,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		return new Path(packageName.replace('.', IPath.SEPARATOR));
 	}
 
-	private Map fCompilationUnitStamps;
+	private Map<IResource, Long> fCompilationUnitStamps;
 
 	private final boolean fRenameSubpackages;
 
@@ -59,7 +59,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		Assert.isTrue(!pack.isReadOnly(), "package must not be read only"); //$NON-NLS-1$
 	}
 
-	private RenamePackageChange(IPath resourcePath, String oldName, String newName, long stampToRestore, Map compilationUnitStamps, boolean renameSubpackages) {
+	private RenamePackageChange(IPath resourcePath, String oldName, String newName, long stampToRestore, Map<IResource, Long> compilationUnitStamps, boolean renameSubpackages) {
 		super(resourcePath, oldName, newName, stampToRestore);
 		fCompilationUnitStamps= compilationUnitStamps;
 		fRenameSubpackages= renameSubpackages;
@@ -67,7 +67,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		setValidationMethod(VALIDATE_NOT_DIRTY);
 	}
 
-	private void addStamps(Map stamps, ICompilationUnit[] units) {
+	private void addStamps(Map<IResource, Long> stamps, ICompilationUnit[] units) {
 		for (int i= 0; i < units.length; i++) {
 			IResource resource= units[i].getResource();
 			long stamp= IResource.NULL_STAMP;
@@ -77,6 +77,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		}
 	}
 
+	@Override
 	protected IPath createNewPath() {
 		IPackageFragment oldPackage= getPackage();
 		IPath oldPackageName= createPath(oldPackage.getElementName());
@@ -90,11 +91,12 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		return oldPackage.getPath().removeLastSegments(oldPackagePath.segmentCount()).append(newPackagePath);
 	}
 
+	@Override
 	protected Change createUndoChange(long stampToRestore) throws CoreException {
 		IPackageFragment pack= getPackage();
 		if (pack == null)
 			return new NullChange();
-		Map stamps= new HashMap();
+		Map<IResource, Long> stamps= new HashMap<IResource, Long>();
 		if (!fRenameSubpackages) {
 			addStamps(stamps, pack.getCompilationUnits());
 		} else {
@@ -109,6 +111,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		// not merge the source package into an existing target.
 	}
 
+	@Override
 	protected void doRename(IProgressMonitor pm) throws CoreException {
 		IPackageFragment pack= getPackage();
 		if (pack == null)
@@ -119,10 +122,10 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 
 		} else {
 			IPackageFragment[] allPackages= JavaElementUtil.getPackageAndSubpackages(pack);
-			Arrays.sort(allPackages, new Comparator() {
-				public int compare(Object o1, Object o2) {
-					String p1= ((IPackageFragment) o1).getElementName();
-					String p2= ((IPackageFragment) o2).getElementName();
+			Arrays.sort(allPackages, new Comparator<IPackageFragment>() {
+				public int compare(IPackageFragment o1, IPackageFragment o2) {
+					String p1= o1.getElementName();
+					String p2= o2.getElementName();
 					return p1.compareTo(p2);
 				}
 			});
@@ -141,6 +144,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		}
 	}
 
+	@Override
 	public String getName() {
 		String msg= fRenameSubpackages ? RefactoringCoreMessages.RenamePackageChange_name_with_subpackages : RefactoringCoreMessages.RenamePackageChange_name;
 		String[] keys= { BasicElementLabels.getJavaElementName(getOldName()), BasicElementLabels.getJavaElementName(getNewName())};
@@ -155,6 +159,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		return (IPackageFragment) getModifiedElement();
 	}
 
+	@Override
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		RefactoringStatus result;
@@ -212,7 +217,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 				for (int i= 0; i < units.length; i++) {
 					IResource resource= units[i].getResource();
 					if (resource != null) {
-						Long stamp= (Long) fCompilationUnitStamps.get(resource);
+						Long stamp= fCompilationUnitStamps.get(resource);
 						if (stamp != null) {
 							resource.revertModificationStamp(stamp.longValue());
 						}

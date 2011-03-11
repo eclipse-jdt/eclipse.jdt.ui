@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,6 +71,7 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}
@@ -78,7 +79,7 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 	private static boolean checkEnabled(IStructuredSelection selection) {
 		if (selection.isEmpty())
 			return false;
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			if (! canRemove(iter.next()))
 				return false;
 		}
@@ -88,6 +89,7 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
+	@Override
 	public void run(final IStructuredSelection selection) {
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
@@ -114,13 +116,13 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 	}
 
 	private static IPackageFragmentRoot[] getRootsToRemove(IStructuredSelection selection){
-		List result= new ArrayList(selection.size());
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		List<Object> result= new ArrayList<Object>(selection.size());
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (canRemove(element))
 				result.add(element);
 		}
-		return (IPackageFragmentRoot[]) result.toArray(new IPackageFragmentRoot[result.size()]);
+		return result.toArray(new IPackageFragmentRoot[result.size()]);
 	}
 
 	private static boolean canRemove(Object element){

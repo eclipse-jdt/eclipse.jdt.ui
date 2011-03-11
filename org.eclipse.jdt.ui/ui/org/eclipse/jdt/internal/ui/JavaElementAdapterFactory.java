@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
  */
 public class JavaElementAdapterFactory implements IAdapterFactory, IContributorResourceAdapter2 {
 
-	private static Class[] ADAPTER_LIST= new Class[] {
+	private static Class<?>[] ADAPTER_LIST= new Class[] {
 		IPropertySource.class,
 		IResource.class,
 		IWorkbenchAdapter.class,
@@ -189,9 +189,9 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		addClassToAdapterList(ISearchPageScoreComputer.class);
 	}
 
-	private static void addClassToAdapterList(Class clazz) {
+	private static void addClassToAdapterList(Class<?> clazz) {
 		int oldSize= ADAPTER_LIST.length;
-		Class[] oldProperties= ADAPTER_LIST;
+		Class<?>[] oldProperties= ADAPTER_LIST;
 		ADAPTER_LIST= new Class[oldSize + 1];
 		System.arraycopy(oldProperties, 0, ADAPTER_LIST, 0, oldSize);
 		ADAPTER_LIST[oldSize]= clazz;

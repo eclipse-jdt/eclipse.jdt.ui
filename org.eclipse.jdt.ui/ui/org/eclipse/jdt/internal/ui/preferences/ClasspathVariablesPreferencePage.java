@@ -60,6 +60,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CP_VARIABLES_PREFERENCE_PAGE);
@@ -68,6 +69,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	/*
 	 * @see PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		Control result= fVariableBlock.createContents(parent);
 		Dialog.applyDialogFont(result);
@@ -83,6 +85,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
+	@Override
 	protected void performDefaults() {
 		// not used (constructor calls noDefaultAndApplyButton())
 //		fVariableBlock.performDefaults();
@@ -92,6 +95,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	/*
 	 * @see PreferencePage#performOk()
 	 */
+	@Override
 	public boolean performOk() {
 		JavaPlugin.flushInstanceScope();
 		return fVariableBlock.performOk();
@@ -100,6 +104,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		// check if the stored settings have changed
 		if (visible) {
@@ -138,9 +143,10 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
 	 */
+	@Override
 	public void applyData(Object data) {
 		if (data instanceof Map && fVariableBlock != null) {
-			Object id= ((Map) data).get(DATA_SELECT_VARIABLE);
+			Object id= ((Map<?, ?>) data).get(DATA_SELECT_VARIABLE);
 			if (id instanceof String) {
 				fVariableBlock.setSelection((String) id);
 			}

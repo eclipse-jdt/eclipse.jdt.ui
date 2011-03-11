@@ -47,6 +47,7 @@ public abstract class JDTQuickMenuCreator extends QuickMenuCreator {
 		fEditor= editor;
 	}
 
+	@Override
 	protected Point computeMenuLocation(StyledText text) {
 		if (fEditor == null || text != fEditor.getViewer().getTextWidget())
 			return super.computeMenuLocation(text);

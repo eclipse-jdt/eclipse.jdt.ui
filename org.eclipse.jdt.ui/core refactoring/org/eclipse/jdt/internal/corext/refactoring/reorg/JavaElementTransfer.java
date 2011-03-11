@@ -50,6 +50,7 @@ public class JavaElementTransfer extends ByteArrayTransfer {
 	/* (non-Javadoc)
 	 * Method declared on Transfer.
 	 */
+	@Override
 	protected int[] getTypeIds() {
 		return new int[] { TYPEID };
 	}
@@ -58,6 +59,7 @@ public class JavaElementTransfer extends ByteArrayTransfer {
 	 *
 	 * @return the list of type names
 	 */
+	@Override
 	protected String[] getTypeNames() {
 		return new String[] { TYPE_NAME };
 	}
@@ -65,6 +67,7 @@ public class JavaElementTransfer extends ByteArrayTransfer {
 	/* (non-Javadoc)
 	 * @see org.eclipse.swt.dnd.Transfer#javaToNative(java.lang.Object, org.eclipse.swt.dnd.TransferData)
 	 */
+	@Override
 	protected void javaToNative(Object data, TransferData transferData) {
 		if (!(data instanceof IJavaElement[]))
 			return;
@@ -102,6 +105,7 @@ public class JavaElementTransfer extends ByteArrayTransfer {
 	/* (non-Javadoc)
 	 * @see org.eclipse.swt.dnd.Transfer#nativeToJava(org.eclipse.swt.dnd.TransferData)
 	 */
+	@Override
 	protected Object nativeToJava(TransferData transferData) {
 		/*
 		 * The element serialization format is:

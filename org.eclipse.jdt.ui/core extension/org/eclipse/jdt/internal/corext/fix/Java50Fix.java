@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,6 +91,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			AST ast= cuRewrite.getRoot().getAST();
 			ListRewrite listRewrite= cuRewrite.getASTRewrite().getListRewrite(fBodyDeclaration, fBodyDeclaration.getModifiersProperty());
@@ -112,6 +113,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel positionGroups) throws CoreException {
 			InferTypeArgumentsTCModel model= new InferTypeArgumentsTCModel();
 			InferTypeArgumentsConstraintCreator creator= new InferTypeArgumentsConstraintCreator(model, true);
@@ -123,27 +125,25 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 			InferTypeArgumentsUpdate update= solver.solveConstraints(new NullProgressMonitor());
 			solver= null; //free caches
 
-			ASTNode[] nodes= InferTypeArgumentsRefactoring.inferArguments(fTypes, update, model, cuRewrite);
+			ParameterizedType[] nodes= InferTypeArgumentsRefactoring.inferArguments(fTypes, update, model, cuRewrite);
 			if (nodes.length == 0)
 				return;
 
 			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 			for (int i= 0; i < nodes.length; i++) {
-				if (nodes[i] instanceof ParameterizedType) {
-					ParameterizedType type= (ParameterizedType)nodes[0];
-					List args= (List)type.getStructuralProperty(ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
-					int j= 0;
-					for (Iterator iter= args.iterator(); iter.hasNext();) {
-						LinkedProposalPositionGroup group= new LinkedProposalPositionGroup("G" + i + "_" + j); //$NON-NLS-1$ //$NON-NLS-2$
-						Type argType= (Type)iter.next();
-						if (!positionGroups.hasLinkedPositions()) {
-							group.addPosition(astRewrite.track(argType), true);
-						} else {
-							group.addPosition(astRewrite.track(argType), false);
-						}
-						positionGroups.addPositionGroup(group);
-						j++;
+				ParameterizedType type= nodes[i];
+				List<Type> args= (List<Type>) type.getStructuralProperty(ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
+				int j= 0;
+				for (Iterator<Type> iter= args.iterator(); iter.hasNext();) {
+					LinkedProposalPositionGroup group= new LinkedProposalPositionGroup("G" + i + "_" + j); //$NON-NLS-1$ //$NON-NLS-2$
+					Type argType= iter.next();
+					if (!positionGroups.hasLinkedPositions()) {
+						group.addPosition(astRewrite.track(argType), true);
+					} else {
+						group.addPosition(astRewrite.track(argType), false);
 					}
+					positionGroups.addPositionGroup(group);
+					j++;
 				}
 			}
 			positionGroups.setEndPosition(astRewrite.track(nodes[0]));
@@ -199,12 +199,12 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 	}
 
 	public static Java50Fix createRawTypeReferenceFix(CompilationUnit compilationUnit, IProblemLocation problem) {
-		List operations= new ArrayList();
+		List<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
 		SimpleType node= createRawTypeReferenceOperations(compilationUnit, new IProblemLocation[] {problem}, operations);
 		if (operations.size() == 0)
 			return null;
 
-		return new Java50Fix(Messages.format(FixMessages.Java50Fix_AddTypeArguments_description,  BasicElementLabels.getJavaElementName(node.getName().getFullyQualifiedName())), compilationUnit, (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
+		return new Java50Fix(Messages.format(FixMessages.Java50Fix_AddTypeArguments_description,  BasicElementLabels.getJavaElementName(node.getName().getFullyQualifiedName())), compilationUnit, operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
 	}
 
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
@@ -220,7 +220,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		if (!addOverrideAnnotation && !addDeprecatedAnnotation && !rawTypeReference)
 			return null;
 
-		List/*<CompilationUnitRewriteOperation>*/ operations= new ArrayList();
+		List<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
 
 		IProblem[] problems= compilationUnit.getProblems();
 		IProblemLocation[] locations= new IProblemLocation[problems.length];
@@ -247,7 +247,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 			fixName= FixMessages.Java50Fix_add_annotations_change_name;
 		}
 
-		CompilationUnitRewriteOperation[] operationsArray= (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
+		CompilationUnitRewriteOperation[] operationsArray= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
 		return new Java50Fix(fixName, compilationUnit, operationsArray);
 	}
 
@@ -264,7 +264,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		if (!addOverrideAnnotation && !addDeprecatedAnnotation && !rawTypeReferences)
 			return null;
 
-		List/*<CompilationUnitRewriteOperation>*/ operations= new ArrayList();
+		List<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
 
 		if (addOverrideAnnotation)
 			createAddOverrideAnnotationOperations(compilationUnit, addOverrideInterfaceAnnotation, problems, operations);
@@ -279,11 +279,11 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		if (operations.size() == 0)
 			return null;
 
-		CompilationUnitRewriteOperation[] operationsArray= (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
+		CompilationUnitRewriteOperation[] operationsArray= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
 		return new Java50Fix(FixMessages.Java50Fix_add_annotations_change_name, compilationUnit, operationsArray);
 	}
 
-	private static void createAddDeprecatedAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List result) {
+	private static void createAddDeprecatedAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
 
@@ -302,7 +302,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
-	private static void createAddOverrideAnnotationOperations(CompilationUnit compilationUnit, boolean addOverrideInterfaceAnnotation, IProblemLocation[] locations, List result) {
+	private static void createAddOverrideAnnotationOperations(CompilationUnit compilationUnit, boolean addOverrideInterfaceAnnotation, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
 			int problemId= problem.getProblemId();
@@ -324,32 +324,32 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
-	private static SimpleType createRawTypeReferenceOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List operations) {
+	private static SimpleType createRawTypeReferenceOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> operations) {
 		if (hasFatalError(compilationUnit))
 			return null;
 
-		List/*<SimpleType>*/ result= new ArrayList();
+		List<SimpleType> result= new ArrayList<SimpleType>();
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
 
 			if (isRawTypeReferenceProblem(problem.getProblemId())) {
 				ASTNode node= problem.getCoveredNode(compilationUnit);
 				if (node instanceof ClassInstanceCreation) {
-					ASTNode rawReference= (ASTNode)node.getStructuralProperty(ClassInstanceCreation.TYPE_PROPERTY);
+					Type rawReference= (Type)node.getStructuralProperty(ClassInstanceCreation.TYPE_PROPERTY);
 					if (isRawTypeReference(rawReference)) {
-						result.add(rawReference);
+						result.add((SimpleType) rawReference);
 					}
 				} else if (node instanceof SimpleName) {
 					ASTNode rawReference= node.getParent();
 					if (isRawTypeReference(rawReference)) {
 						ASTNode parent= rawReference.getParent();
 						if (!(parent instanceof ArrayType || parent instanceof ParameterizedType))
-							result.add(rawReference);
+							result.add((SimpleType) rawReference);
 					}
 				} else if (node instanceof MethodInvocation) {
 					MethodInvocation invocation= (MethodInvocation)node;
 
-					ASTNode rawReference= getRawReference(invocation, compilationUnit);
+					SimpleType rawReference= getRawReference(invocation, compilationUnit);
 					if (rawReference != null) {
 						result.add(rawReference);
 					}
@@ -360,7 +360,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		if (result.size() == 0)
 			return null;
 
-		SimpleType[] types= (SimpleType[])result.toArray(new SimpleType[result.size()]);
+		SimpleType[] types= result.toArray(new SimpleType[result.size()]);
 		operations.add(new AddTypeParametersOperation(types));
 		return types[0];
 	}
@@ -405,10 +405,10 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		return id == IProblem.UnsafeTypeConversion || id == IProblem.RawTypeReference || id == IProblem.UnsafeRawMethodInvocation;
 	}
 
-	private static ASTNode getRawReference(MethodInvocation invocation, CompilationUnit compilationUnit) {
+	private static SimpleType getRawReference(MethodInvocation invocation, CompilationUnit compilationUnit) {
 		Name name1= (Name)invocation.getStructuralProperty(MethodInvocation.NAME_PROPERTY);
 		if (name1 instanceof SimpleName) {
-			ASTNode rawReference= getRawReference((SimpleName)name1, compilationUnit);
+			SimpleType rawReference= getRawReference((SimpleName)name1, compilationUnit);
 			if (rawReference != null) {
 				return rawReference;
 			}
@@ -416,7 +416,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 
 		Expression expr= (Expression)invocation.getStructuralProperty(MethodInvocation.EXPRESSION_PROPERTY);
 		if (expr instanceof SimpleName) {
-			ASTNode rawReference= getRawReference((SimpleName)expr, compilationUnit);
+			SimpleType rawReference= getRawReference((SimpleName)expr, compilationUnit);
 			if (rawReference != null) {
 				return rawReference;
 			}
@@ -424,20 +424,20 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 			Name name= (Name)expr;
 			while (name instanceof QualifiedName) {
 				SimpleName simpleName= (SimpleName)name.getStructuralProperty(QualifiedName.NAME_PROPERTY);
-				ASTNode rawReference= getRawReference(simpleName, compilationUnit);
+				SimpleType rawReference= getRawReference(simpleName, compilationUnit);
 				if (rawReference != null) {
 					return rawReference;
 				}
 				name= (Name)name.getStructuralProperty(QualifiedName.QUALIFIER_PROPERTY);
 			}
 			if (name instanceof SimpleName) {
-				ASTNode rawReference= getRawReference((SimpleName)name, compilationUnit);
+				SimpleType rawReference= getRawReference((SimpleName)name, compilationUnit);
 				if (rawReference != null) {
 					return rawReference;
 				}
 			}
 		} else if (expr instanceof MethodInvocation) {
-			ASTNode rawReference= getRawReference((MethodInvocation)expr, compilationUnit);
+			SimpleType rawReference= getRawReference((MethodInvocation)expr, compilationUnit);
 			if (rawReference != null) {
 				return rawReference;
 			}
@@ -445,7 +445,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		return null;
 	}
 
-	private static ASTNode getRawReference(SimpleName name, CompilationUnit compilationUnit) {
+	private static SimpleType getRawReference(SimpleName name, CompilationUnit compilationUnit) {
 		SimpleName[] names= LinkedNodeFinder.findByNode(compilationUnit, name);
 		for (int j= 0; j < names.length; j++) {
 			if (names[j].getParent() instanceof VariableDeclarationFragment) {
@@ -454,23 +454,23 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 					VariableDeclarationStatement statement= (VariableDeclarationStatement)fragment.getParent();
 					ASTNode result= (ASTNode)statement.getStructuralProperty(VariableDeclarationStatement.TYPE_PROPERTY);
 					if (isRawTypeReference(result))
-						return result;
+						return (SimpleType) result;
 				} else if (fragment.getParent() instanceof FieldDeclaration) {
 					FieldDeclaration declaration= (FieldDeclaration)fragment.getParent();
 					ASTNode result= (ASTNode)declaration.getStructuralProperty(FieldDeclaration.TYPE_PROPERTY);
 					if (isRawTypeReference(result))
-						return result;
+						return (SimpleType) result;
 				}
 			} else if (names[j].getParent() instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration declaration= (SingleVariableDeclaration)names[j].getParent();
 				ASTNode result= (ASTNode)declaration.getStructuralProperty(SingleVariableDeclaration.TYPE_PROPERTY);
 				if (isRawTypeReference(result))
-					return result;
+					return (SimpleType) result;
 			} else if (names[j].getParent() instanceof MethodDeclaration) {
 				MethodDeclaration methodDecl= (MethodDeclaration)names[j].getParent();
 				ASTNode result= (ASTNode)methodDecl.getStructuralProperty(MethodDeclaration.RETURN_TYPE2_PROPERTY);
 				if (isRawTypeReference(result))
-					return result;
+					return (SimpleType) result;
 			}
 		}
 		return null;

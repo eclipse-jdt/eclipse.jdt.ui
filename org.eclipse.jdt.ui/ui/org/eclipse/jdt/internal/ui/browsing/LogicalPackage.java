@@ -27,13 +27,13 @@ import org.eclipse.jdt.core.JavaModelException;
  */
 public class LogicalPackage extends PlatformObject {
 
-	private Set fPackages;
+	private Set<IPackageFragment> fPackages;
 	private String fName;
 	private IJavaProject fJavaProject;
 
 	public LogicalPackage(IPackageFragment fragment){
 		Assert.isNotNull(fragment);
-		fPackages= new HashSet();
+		fPackages= new HashSet<IPackageFragment>();
 		fJavaProject= fragment.getJavaProject();
 		Assert.isNotNull(fJavaProject);
 		add(fragment);
@@ -45,7 +45,7 @@ public class LogicalPackage extends PlatformObject {
 	}
 
 	public IPackageFragment[] getFragments(){
-		return (IPackageFragment[]) fPackages.toArray(new IPackageFragment[fPackages.size()]);
+		return fPackages.toArray(new IPackageFragment[fPackages.size()]);
 	}
 
 	public void add(IPackageFragment fragment){
@@ -90,8 +90,8 @@ public class LogicalPackage extends PlatformObject {
 	}
 
 	public boolean hasSubpackages() throws JavaModelException {
-		for (Iterator iter= fPackages.iterator(); iter.hasNext();) {
-			IPackageFragment pack= (IPackageFragment) iter.next();
+		for (Iterator<IPackageFragment> iter= fPackages.iterator(); iter.hasNext();) {
+			IPackageFragment pack= iter.next();
 			if (pack.hasSubpackages()) {
 				return true;
 			}
@@ -103,6 +103,7 @@ public class LogicalPackage extends PlatformObject {
 		return fName.length() == 0;
 	}
 
+	@Override
 	public boolean equals(Object o){
 		if (!(o instanceof LogicalPackage))
 			return false;
@@ -129,6 +130,7 @@ public class LogicalPackage extends PlatformObject {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		IPackageFragment[] fragments= getFragments();
 		return fJavaProject.hashCode() + getHash(fragments, fragments.length-1);

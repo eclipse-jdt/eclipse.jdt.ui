@@ -31,6 +31,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
 
 
@@ -51,8 +52,9 @@ public class FormatterProfileStore extends ProfileStore {
 	/**
 	 * {@inheritDoc}
 	 */
-	public List readProfiles(IScopeContext scope) throws CoreException {
-	    List profiles= super.readProfiles(scope);
+	@Override
+	public List<Profile> readProfiles(IScopeContext scope) throws CoreException {
+	    List<Profile> profiles= super.readProfiles(scope);
 	    if (profiles == null) {
 			profiles= readOldForCompatibility(scope);
 		}
@@ -64,7 +66,7 @@ public class FormatterProfileStore extends ProfileStore {
 	 * as collection.
 	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
 	 */
-	private List readOldForCompatibility(IScopeContext instanceScope) {
+	private List<Profile> readOldForCompatibility(IScopeContext instanceScope) {
 
 		// in 3.0 M9 and less the profiles were stored in a file in the plugin's meta data
 		final String STORE_FILE= "code_formatter_profiles.xml"; //$NON-NLS-1$
@@ -77,7 +79,7 @@ public class FormatterProfileStore extends ProfileStore {
 			// note that it's wrong to use a file reader when XML declares UTF-8: Kept for compatibility
 			final FileReader reader= new FileReader(file);
 			try {
-				List res= readProfilesFromStream(new InputSource(reader));
+				List<Profile> res= readProfilesFromStream(new InputSource(reader));
 				if (res != null) {
 					for (int i= 0; i < res.size(); i++) {
 						fProfileVersioner.update((CustomProfile) res.get(i));
@@ -109,9 +111,9 @@ public class FormatterProfileStore extends ProfileStore {
 			return; // is up to date
 		}
 		try {
-			List profiles= (new FormatterProfileStore(profileVersioner)).readProfiles(instanceScope);
+			List<Profile> profiles= (new FormatterProfileStore(profileVersioner)).readProfiles(instanceScope);
 			if (profiles == null) {
-				profiles= new ArrayList();
+				profiles= new ArrayList<Profile>();
 			}
 			ProfileManager manager= new FormatterProfileManager(profiles, instanceScope, access, profileVersioner);
 			if (manager.getSelected() instanceof CustomProfile) {

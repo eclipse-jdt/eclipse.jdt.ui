@@ -96,7 +96,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 
 	private static class ProjectProfileLableProvider extends LabelProvider implements ITableLabelProvider {
 
-		private Hashtable fProfileIdsTable;
+		private Hashtable<String, Profile> fProfileIdsTable;
 
 		/**
 		 * {@inheritDoc}
@@ -130,31 +130,30 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			return null;
 		}
 
-		private Hashtable loadProfiles() {
-    		List list= CleanUpPreferenceUtil.loadProfiles(InstanceScope.INSTANCE);
-
-    		Hashtable profileIdsTable= new Hashtable();
-    		for (Iterator iterator= list.iterator(); iterator.hasNext();) {
-	            Profile profile= (Profile)iterator.next();
+		private Hashtable<String, Profile> loadProfiles() {
+    		List<Profile> list= CleanUpPreferenceUtil.loadProfiles(InstanceScope.INSTANCE);
+    		Hashtable<String, Profile> profileIdsTable= new Hashtable<String, Profile>();
+    		for (Iterator<Profile> iterator= list.iterator(); iterator.hasNext();) {
+	            Profile profile= iterator.next();
 	            profileIdsTable.put(profile.getID(), profile);
             }
 
     		return profileIdsTable;
         }
 
-		private String getProjectProfileName(final IJavaProject project, Hashtable profileIdsTable, String workbenchProfileId) {
+		private String getProjectProfileName(final IJavaProject project, Hashtable<String, Profile> profileIdsTable, String workbenchProfileId) {
 			ProjectScope projectScope= new ProjectScope(project.getProject());
 	        IEclipsePreferences node= projectScope.getNode(JavaUI.ID_PLUGIN);
 	        String id= node.get(CleanUpConstants.CLEANUP_PROFILE, null);
 			if (id == null) {
-	        	Profile profile= (Profile)profileIdsTable.get(workbenchProfileId);
+	        	Profile profile= profileIdsTable.get(workbenchProfileId);
 		        if (profile != null) {
 		        	return profile.getName();
 		        } else {
 		        	return MultiFixMessages.CleanUpRefactoringWizard_unknownProfile_Name;
 		        }
 	        } else {
-		        Profile profile= (Profile)profileIdsTable.get(id);
+		        Profile profile= profileIdsTable.get(id);
 		        if (profile != null) {
 		        	return profile.getName();
 		        } else {
@@ -174,11 +173,12 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 
 			private static final String CLEAN_UP_SELECTION_PREFERENCE_KEY= "clean_up_selection_dialog"; //$NON-NLS-1$
 
-			private WizardCleanUpSelectionDialog(Shell parent, Map settings) {
+			private WizardCleanUpSelectionDialog(Shell parent, Map<String, String> settings) {
 				super(parent, settings, MultiFixMessages.CleanUpRefactoringWizard_CustomCleanUpsDialog_title);
 			}
 
-			protected NamedCleanUpTabPage[] createTabPages(Map workingValues) {
+			@Override
+			protected NamedCleanUpTabPage[] createTabPages(Map<String, String> workingValues) {
 				CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
 
 				NamedCleanUpTabPage[] result= new NamedCleanUpTabPage[descriptors.length];
@@ -197,20 +197,23 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				return result;
 			}
 
+			@Override
 			protected String getPreferenceKeyPrefix() {
 				return CLEAN_UP_SELECTION_PREFERENCE_KEY;
 			}
 
+			@Override
 			protected String getSelectionCountMessage(int selectionCount, int size) {
 				return Messages.format(MultiFixMessages.CleanUpRefactoringWizard_XofYCleanUpsSelected_message, new Object[] {new Integer(selectionCount), new Integer(size)});
 			}
 
+			@Override
 			protected String getEmptySelectionMessage() {
 				return MultiFixMessages.CleanUpRefactoringWizard_EmptySelection_message;
 			}
 		}
 
-		private static final class ProfileTableAdapter implements IListAdapter {
+		private static final class ProfileTableAdapter implements IListAdapter<IJavaProject> {
 	        private final ProjectProfileLableProvider fProvider;
 			private final Shell fShell;
 
@@ -219,24 +222,24 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				fShell= shell;
 	        }
 
-	        public void customButtonPressed(ListDialogField field, int index) {
+	        public void customButtonPressed(ListDialogField<IJavaProject> field, int index) {
 	        	openPropertyDialog(field);
 	        }
 
-	        public void doubleClicked(ListDialogField field) {
+	        public void doubleClicked(ListDialogField<IJavaProject> field) {
 				openPropertyDialog(field);
 	        }
 
-	        private void openPropertyDialog(ListDialogField field) {
-	            IJavaProject project= (IJavaProject)field.getSelectedElements().get(0);
+	        private void openPropertyDialog(ListDialogField<IJavaProject> field) {
+	            IJavaProject project= field.getSelectedElements().get(0);
 	        	PreferencesUtil.createPropertyDialogOn(fShell, project, CleanUpPreferencePage.PROP_ID, null, null).open();
-	        	List selectedElements= field.getSelectedElements();
+	        	List<?> selectedElements= field.getSelectedElements();
 	        	fProvider.reset();
 	        	field.refresh();
 	        	field.selectElements(new StructuredSelection(selectedElements));
             }
 
-	        public void selectionChanged(ListDialogField field) {
+	        public void selectionChanged(ListDialogField<IJavaProject> field) {
 	        	if (field.getSelectedElements().size() != 1) {
 	        		field.enableButton(0, false);
 	        	} else {
@@ -248,7 +251,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		private static final String ENCODING= "UTF-8"; //$NON-NLS-1$
 
 		private final CleanUpRefactoring fCleanUpRefactoring;
-		private Map fCustomSettings;
+		private Map<String, String> fCustomSettings;
 		private SelectionButtonDialogField fUseCustomField;
 
 		private ControlEnableState fEnableState;
@@ -286,14 +289,15 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			useProfile.doFillIntoGrid(composite, 2);
 
 			ProjectProfileLableProvider tableLabelProvider= new ProjectProfileLableProvider();
-			IListAdapter listAdapter= new ProfileTableAdapter(tableLabelProvider, getShell());
+			IListAdapter<IJavaProject> listAdapter= new ProfileTableAdapter(tableLabelProvider, getShell());
 			String[] buttons= new String[] {
 				MultiFixMessages.CleanUpRefactoringWizard_Configure_Button
 			};
-			final ListDialogField settingsField= new ListDialogField(listAdapter, buttons, tableLabelProvider) {
+			final ListDialogField<IJavaProject> settingsField= new ListDialogField<IJavaProject>(listAdapter, buttons, tableLabelProvider) {
 				/**
 				 * {@inheritDoc}
 				 */
+				@Override
 				protected int getListStyle() {
 					return super.getListStyle() | SWT.SINGLE;
 				}
@@ -365,8 +369,9 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				/**
 				 * {@inheritDoc}
 				 */
+				@Override
 				public void widgetSelected(SelectionEvent e) {
-					Hashtable workingValues= new Hashtable(fCustomSettings);
+					Hashtable<String, String> workingValues= new Hashtable<String, String>(fCustomSettings);
 					CleanUpSelectionDialog dialog= new WizardCleanUpSelectionDialog(getShell(), workingValues);
 					if (dialog.open() == Window.OK) {
 						fCustomSettings= workingValues;
@@ -394,6 +399,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				/**
 				 * {@inheritDoc}
 				 */
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					PreferencesUtil.createPreferenceDialogOn(composite.getShell(), CleanUpPreferencePage.PREF_ID, null, null).open();
 				}
@@ -404,7 +410,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			Dialog.applyDialogFont(composite);
         }
 
-		private void updateEnableState(boolean isCustom, final ListDialogField settingsField, Button configureCustom, BulletListBlock bulletListBlock) {
+		private void updateEnableState(boolean isCustom, final ListDialogField<IJavaProject> settingsField, Button configureCustom, BulletListBlock bulletListBlock) {
 			settingsField.getListControl(null).setEnabled(!isCustom);
 			if (isCustom) {
 				fEnableState= ControlEnableState.disable(settingsField.getButtonBox(null));
@@ -436,12 +442,14 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 	    	bulletListBlock.setText(buf.toString());
         }
 
-        protected boolean performFinish() {
+        @Override
+		protected boolean performFinish() {
 			initializeRefactoring();
 			storeSettings();
 			return super.performFinish();
 		}
 
+		@Override
 		public IWizardPage getNextPage() {
 			initializeRefactoring();
 			storeSettings();
@@ -477,12 +485,12 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
             }
         }
 
-		public String encodeSettings(Map settings) throws CoreException {
+		public String encodeSettings(Map<String, String> settings) throws CoreException {
 			ByteArrayOutputStream stream= new ByteArrayOutputStream(2000);
 			try {
 				CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
 				CustomProfile profile= new ProfileManager.CustomProfile("custom", settings, versioner.getCurrentVersion(), versioner.getProfileKind()); //$NON-NLS-1$
-				ArrayList profiles= new ArrayList();
+				ArrayList<Profile> profiles= new ArrayList<Profile>();
 				profiles.add(profile);
 				ProfileStore.writeProfilesToStream(profiles, stream, ENCODING, versioner);
 				try {
@@ -495,7 +503,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			}
 		}
 
-		public Map decodeSettings(String settings) throws CoreException {
+		public Map<String, String> decodeSettings(String settings) throws CoreException {
 			byte[] bytes;
 			try {
 				bytes= settings.getBytes(ENCODING);
@@ -504,7 +512,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			}
 			InputStream is= new ByteArrayInputStream(bytes);
 			try {
-				List res= ProfileStore.readProfilesFromStream(new InputSource(is));
+				List<Profile> res= ProfileStore.readProfilesFromStream(new InputSource(is));
 				if (res == null || res.size() == 0)
 					return JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getMap();
 
@@ -537,6 +545,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ltk.ui.refactoring.RefactoringWizard#addUserInputPages()
 	 */
+	@Override
 	protected void addUserInputPages() {
 		addPage(new CleanUpConfigurationPage((CleanUpRefactoring)getRefactoring()));
 	}

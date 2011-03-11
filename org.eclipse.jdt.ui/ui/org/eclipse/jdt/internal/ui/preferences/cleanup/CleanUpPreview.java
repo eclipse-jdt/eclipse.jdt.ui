@@ -60,6 +60,7 @@ public class CleanUpPreview extends JavaPreview {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void doFormatPreview() {
 		format(fPage.getPreview());
 	}
@@ -108,7 +109,8 @@ public class CleanUpPreview extends JavaPreview {
 		}
 	}
 
-    public void setWorkingValues(Map workingValues) {
+    @Override
+	public void setWorkingValues(Map<String, String> workingValues) {
     	//Don't change the formatter settings
     }
 

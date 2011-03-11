@@ -34,16 +34,19 @@ public final class RenameLocalVariableRefactoringContribution extends JavaUIRefa
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		RenameLocalVariableProcessor processor= new RenameLocalVariableProcessor(arguments, status);
 		return new RenameRefactoring(processor);
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_LOCAL_VARIABLE);
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(id, project, description, comment, arguments, flags);
 	}

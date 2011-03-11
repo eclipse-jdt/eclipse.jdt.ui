@@ -187,6 +187,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		return null;
 	}
 
+	@Override
 	public String getName() {
 		return RefactoringCoreMessages.InlineMethodRefactoring_name;
 	}
@@ -244,6 +245,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		return fTargetProvider.checkActivation();
 	}
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		if (fSourceProvider == null && Invocations.isInvocation(fInitialNode)) {
@@ -256,6 +258,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		return result;
 	}
 
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 20); //$NON-NLS-1$
 		fChangeManager= new TextChangeManager();
@@ -350,6 +353,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		return result;
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		if (fDeleteSource && fCurrentMode == Mode.INLINE_ALL) {
 			TextChange change= fChangeManager.get((ICompilationUnit) fSourceProvider.getTypeRoot());
@@ -369,7 +373,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			}
 			change.addTextEditGroup(description);
 		}
-		final Map arguments= new HashMap();
+		final Map<String, String> arguments= new HashMap<String, String>();
 		String project= null;
 		IJavaProject javaProject= fInitialTypeRoot.getJavaProject();
 		if (javaProject != null)
@@ -431,7 +435,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 
 	private IFile[] getFilesToBeModified(ICompilationUnit[] units) {
-		List result= new ArrayList(units.length + 1);
+		List<IFile> result= new ArrayList<IFile>(units.length + 1);
 		IFile file;
 		for (int i= 0; i < units.length; i++) {
 			file= getFile(units[i]);
@@ -443,7 +447,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			if (file != null && !result.contains(file))
 				result.add(file);
 		}
-		return (IFile[])result.toArray(new IFile[result.size()]);
+		return result.toArray(new IFile[result.size()]);
 	}
 
 	private IFile getFile(ICompilationUnit unit) {
@@ -514,12 +518,12 @@ public class InlineMethodRefactoring extends Refactoring {
 		for (int i= 0; i < invocations.length; i++) {
 			removeNestedCalls(status, unit, parents, invocations, i);
 		}
-		List result= new ArrayList();
+		List<ASTNode> result= new ArrayList<ASTNode>();
 		for (int i= 0; i < invocations.length; i++) {
 			if (invocations[i] != null)
 				result.add(invocations[i]);
 		}
-		return (ASTNode[])result.toArray(new ASTNode[result.size()]);
+		return result.toArray(new ASTNode[result.size()]);
 	}
 
 	private void removeNestedCalls(RefactoringStatus status, ICompilationUnit unit, ASTNode[] parents, ASTNode[] invocations, int index) {

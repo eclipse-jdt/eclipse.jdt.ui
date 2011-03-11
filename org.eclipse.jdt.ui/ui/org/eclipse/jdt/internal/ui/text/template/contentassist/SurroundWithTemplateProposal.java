@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
@@ -74,12 +75,14 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 			fCurrentProject= context.getCompilationUnit().getJavaProject();
 		}
 
-		protected List getVariableDeclarationReadsInside(Statement[] selectedNodes, int maxVariableId) {
+		@Override
+		protected List<VariableDeclaration> getVariableDeclarationReadsInside(Statement[] selectedNodes, int maxVariableId) {
 			if (isNewContext())
 				return super.getVariableDeclarationReadsInside(selectedNodes, maxVariableId);
-			return new ArrayList();
+			return new ArrayList<VariableDeclaration>();
 		}
 
+		@Override
 		protected boolean isNewContext() {
 
 			final String templateVariableRegEx= "\\$\\{[^\\}]*\\}"; //$NON-NLS-1$
@@ -110,6 +113,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 
 			final int lineSelectionPosition= insertionPosition;
 			root.accept(new GenericVisitor() {
+				@Override
 				public void endVisit(Block node) {
 					super.endVisit(node);
 					if (fTemplateNode == null && node.getStartPosition() <= lineSelectionPosition && node.getLength() + node.getStartPosition() >= lineSelectionPosition) {
@@ -191,6 +195,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
 	 */
+	@Override
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 		try {
 			setRedraw(viewer, false);
@@ -225,6 +230,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		}
     }
 
+	@Override
 	public Point getSelection(IDocument document) {
 		if (fSelectedRegion != null) {
 			return new Point(fSelectedRegion.getOffset(), fSelectedRegion.getLength());
@@ -239,7 +245,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		AssistContext invocationContext= new AssistContext(fCompilationUnit, fContext.getStart(), fContext.getEnd() - fContext.getStart());
 
 		SurroundWithTemplate surroundWith= new SurroundWithTemplate(invocationContext, fSelectedStatements, fTemplate);
-		Map options= fCompilationUnit.getJavaProject().getOptions(true);
+		Map<String, String> options= fCompilationUnit.getJavaProject().getOptions(true);
 
 		surroundWith.getRewrite().rewriteAST(document, options).apply(document);
 
@@ -268,6 +274,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 		return false;
 	}

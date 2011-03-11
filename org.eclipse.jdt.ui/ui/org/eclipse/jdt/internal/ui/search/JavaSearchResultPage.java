@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -97,6 +97,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			fLabelProvider= labelProvider;
 		}
 
+		@Override
 		public int category(Object element) {
 			if (element instanceof IJavaElement || element instanceof IResource)
 				return 1;
@@ -104,7 +105,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		}
 
 
-	    public int compare(Viewer viewer, Object e1, Object e2) {
+	    @Override
+		public int compare(Viewer viewer, Object e1, Object e2) {
 	        int cat1 = category(e1);
 	        int cat2 = category(e2);
 
@@ -185,11 +187,13 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		JavaPluginImages.setLocalImageDescriptors(fGroupTypeAction, "type_mode.gif"); //$NON-NLS-1$
 	}
 
+	@Override
 	public void setViewPart(ISearchResultViewPart part) {
 		super.setViewPart(part);
 		fActionGroup= new NewSearchViewActionGroup(part);
 	}
 
+	@Override
 	public void showMatch(Match match, int offset, int length, boolean activate) throws PartInitException {
 		IEditorPart editor= fEditorOpener.openMatch(match);
 
@@ -215,7 +219,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	private void showWithMarker(IEditorPart editor, IFile file, int offset, int length) throws PartInitException {
 		try {
 			IMarker marker= file.createMarker(NewSearchUI.SEARCH_MARKER);
-			HashMap attributes= new HashMap(4);
+			HashMap<String, Integer> attributes= new HashMap<String, Integer>(4);
 			attributes.put(IMarker.CHAR_START, new Integer(offset));
 			attributes.put(IMarker.CHAR_END, new Integer(offset + length));
 			marker.setAttributes(attributes);
@@ -234,6 +238,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		return fCopyQualifiedNameAction;
 	}
 
+	@Override
 	protected void fillContextMenu(IMenuManager mgr) {
 		super.fillContextMenu(mgr);
 		addSortActions(mgr);
@@ -259,6 +264,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		mgr.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, sortMenu);
 	}
 
+	@Override
 	protected void fillToolbar(IToolBarManager tbm) {
 		super.fillToolbar(tbm);
 
@@ -290,16 +296,19 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	}
 
 
+	@Override
 	public void dispose() {
 		fActionGroup.dispose();
 		super.dispose();
 	}
 
+	@Override
 	protected void elementsChanged(Object[] objects) {
 		if (fContentProvider != null)
 			fContentProvider.elementsChanged(objects);
 	}
 
+	@Override
 	protected void clear() {
 		if (fContentProvider != null)
 			fContentProvider.clear();
@@ -316,6 +325,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		viewer.addDragSupport(ops, transfers, dragAdapter);
 	}
 
+	@Override
 	protected void configureTableViewer(TableViewer viewer) {
 		viewer.setUseHashlookup(true);
 		fSortingLabelProvider= new SortingLabelProvider(this);
@@ -327,6 +337,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		addDragAdapters(viewer);
 	}
 
+	@Override
 	protected void configureTreeViewer(TreeViewer viewer) {
 		PostfixLabelProvider postfixLabelProvider= new PostfixLabelProvider(this);
 		viewer.setUseHashlookup(true);
@@ -337,10 +348,12 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		addDragAdapters(viewer);
 	}
 
+	@Override
 	protected TreeViewer createTreeViewer(Composite parent) {
 		return new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 	}
 
+	@Override
 	protected TableViewer createTableViewer(Composite parent) {
 		return new ProblemTableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 	}
@@ -357,12 +370,14 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		}
 	}
 
+	@Override
 	public void init(IPageSite site) {
 		super.init(site);
 		IMenuManager menuManager = site.getActionBars().getMenuManager();
 		menuManager.insertBefore(IContextMenuConstants.GROUP_PROPERTIES, new Separator(GROUP_FILTERING));
 		fActionGroup.fillActionBars(site.getActionBars());
 		menuManager.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, new Action(SearchMessages.JavaSearchResultPage_preferences_label) {
+			@Override
 			public void run() {
 				String pageId= "org.eclipse.search.preferences.SearchPreferencePage"; //$NON-NLS-1$
 				PreferencesUtil.createPreferenceDialogOn(JavaPlugin.getActiveWorkbenchShell(), pageId, null, null).open();
@@ -386,6 +401,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		getViewPart().updateLabel();
 	}
 
+	@Override
 	protected StructuredViewer getViewer() {
 		// override so that it's visible in the package.
 		return super.getViewer();
@@ -394,6 +410,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	/* (non-Javadoc)
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#restoreState(org.eclipse.ui.IMemento)
 	 */
+	@Override
 	public void restoreState(IMemento memento) {
 		super.restoreState(memento);
 
@@ -438,6 +455,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	/* (non-Javadoc)
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#saveState(org.eclipse.ui.IMemento)
 	 */
+	@Override
 	public void saveState(IMemento memento) {
 		super.saveState(memento);
 		memento.putInteger(KEY_GROUPING, fCurrentGrouping);
@@ -458,6 +476,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		return false;
 	}
 
+	@Override
 	public String getLabel() {
 		String label= super.getLabel();
 		AbstractTextSearchResult input= getInput();
@@ -536,6 +555,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		return null;
 	}
 
+	@Override
 	protected void handleOpen(OpenEvent event) {
 		Object firstElement= ((IStructuredSelection)event.getSelection()).getFirstElement();
 		if (firstElement instanceof ICompilationUnit ||
@@ -553,6 +573,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		super.handleOpen(event);
 	}
 
+	@Override
 	public void setElementLimit(Integer elementLimit) {
 		super.setElementLimit(elementLimit);
 		int limit= elementLimit.intValue();

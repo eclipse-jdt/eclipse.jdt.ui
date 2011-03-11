@@ -53,6 +53,7 @@ public class LocaleSensitiveSpellDictionary extends AbstractSpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#getURL()
 	 */
+	@Override
 	protected final URL getURL() throws MalformedURLException {
 		return new URL(fLocation, fLocale.toString() + ".dictionary");  //$NON-NLS-1$
 	}
@@ -61,6 +62,7 @@ public class LocaleSensitiveSpellDictionary extends AbstractSpellDictionary {
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#getInitialSize()
 	 * @since 3.6
 	 */
+	@Override
 	protected int getInitialSize() {
 		return 32 * 1024;
 	}

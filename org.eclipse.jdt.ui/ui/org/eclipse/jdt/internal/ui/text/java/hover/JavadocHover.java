@@ -135,6 +135,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			update();
 		}
 
+		@Override
 		public void run() {
 			BrowserInformationControlInput previous= (BrowserInformationControlInput) fInfoControl.getInput().getPrevious();
 			if (previous != null) {
@@ -174,6 +175,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			update();
 		}
 
+		@Override
 		public void run() {
 			BrowserInformationControlInput next= (BrowserInformationControlInput) fInfoControl.getInput().getNext();
 			if (next != null) {
@@ -211,6 +213,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
+		@Override
 		public void run() {
 			JavadocBrowserInformationControlInput infoInput= (JavadocBrowserInformationControlInput) fInfoControl.getInput(); //TODO: check cast
 			fInfoControl.notifyDelayedInputChange(null);
@@ -241,6 +244,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
+		@Override
 		public void run() {
 			JavadocBrowserInformationControlInput infoInput= (JavadocBrowserInformationControlInput) fInfoControl.getInput(); //TODO: check cast
 			fInfoControl.notifyDelayedInputChange(null);
@@ -280,6 +284,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
+		@Override
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			if (BrowserInformationControl.isAvailable(parent)) {
 				ToolBarManager tbm= new ToolBarManager(SWT.FLAT);
@@ -376,6 +381,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
+		@Override
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			String tooltipAffordanceString= fAdditionalInfoAffordance ? JavaPlugin.getAdditionalInfoAffordanceString() : EditorsUI.getTooltipAffordanceString();
 			if (BrowserInformationControl.isAvailable(parent)) {
@@ -384,6 +390,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					/*
 					 * @see org.eclipse.jface.text.IInformationControlExtension5#getInformationPresenterControlCreator()
 					 */
+					@Override
 					public IInformationControlCreator getInformationPresenterControlCreator() {
 						return fInformationPresenterControlCreator;
 					}
@@ -398,6 +405,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#canReuse(org.eclipse.jface.text.IInformationControl)
 		 */
+		@Override
 		public boolean canReuse(IInformationControl control) {
 			if (!super.canReuse(control))
 				return false;
@@ -441,6 +449,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 * @since 3.1
 	 */
+	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		if (fPresenterControlCreator == null)
 			fPresenterControlCreator= new PresenterControlCreator(getSite());
@@ -464,6 +473,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @see ITextHoverExtension#getHoverControlCreator()
 	 * @since 3.2
 	 */
+	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		if (fHoverControlCreator == null)
 			fHoverControlCreator= new HoverControlCreator(getInformationPresenterControlCreator());
@@ -543,6 +553,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	/*
 	 * @see org.eclipse.jface.text.ITextHoverExtension2#getHoverInfo2(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 */
+	@Override
 	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
 		return internalGetHoverInfo(textViewer, hoverRegion);
 	}

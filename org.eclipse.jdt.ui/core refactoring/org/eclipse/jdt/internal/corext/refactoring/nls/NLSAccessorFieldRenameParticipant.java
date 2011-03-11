@@ -68,6 +68,7 @@ public class NLSAccessorFieldRenameParticipant extends RenameParticipant {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getName() {
 		return NLSMessages.NLSAccessorFieldRenameParticipant_participantName;
 	}
@@ -75,6 +76,7 @@ public class NLSAccessorFieldRenameParticipant extends RenameParticipant {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) throws OperationCanceledException {
 		if (pm == null)
 			pm= new NullProgressMonitor();
@@ -146,6 +148,7 @@ public class NLSAccessorFieldRenameParticipant extends RenameParticipant {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		return fChange;
 	}
@@ -153,6 +156,7 @@ public class NLSAccessorFieldRenameParticipant extends RenameParticipant {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected boolean initialize(Object element) {
 		fField= (IField) element;
 		return true;
@@ -161,6 +165,7 @@ public class NLSAccessorFieldRenameParticipant extends RenameParticipant {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean initialize(RefactoringProcessor processor, Object element, RefactoringArguments arguments) {
 		fNewName= ((RenameArguments) arguments).getNewName();
 

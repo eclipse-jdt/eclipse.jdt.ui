@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,7 +48,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
@@ -75,6 +74,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -85,6 +85,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
+import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.refactoring.code.SourceAnalyzer.NameData;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -104,7 +105,7 @@ public class SourceProvider {
 	private SourceAnalyzer fAnalyzer;
 	private boolean fMustEvalReturnedExpression;
 	private boolean fReturnValueNeedsLocalVariable;
-	private List fReturnExpressions;
+	private List<Expression> fReturnExpressions;
 	private IDocument fSource;
 
 	private static final int EXPRESSION_MODE= 1;
@@ -114,6 +115,7 @@ public class SourceProvider {
 
 
 	private class ReturnAnalyzer extends ASTVisitor {
+		@Override
 		public boolean visit(ReturnStatement node) {
 			Expression expression= node.getExpression();
 			if (!(ASTNodes.isLiteral(expression) || expression instanceof Name)) {
@@ -131,15 +133,15 @@ public class SourceProvider {
 		super();
 		fTypeRoot= typeRoot;
 		fDeclaration= declaration;
-		List parameters= fDeclaration.parameters();
-		for (Iterator iter= parameters.iterator(); iter.hasNext();) {
-			SingleVariableDeclaration element= (SingleVariableDeclaration)iter.next();
+		List<SingleVariableDeclaration> parameters= fDeclaration.parameters();
+		for (Iterator<SingleVariableDeclaration> iter= parameters.iterator(); iter.hasNext();) {
+			SingleVariableDeclaration element= iter.next();
 			ParameterData data= new ParameterData(element);
 			element.setProperty(ParameterData.PROPERTY, data);
 		}
 		fAnalyzer= new SourceAnalyzer(fTypeRoot, fDeclaration);
 		fReturnValueNeedsLocalVariable= true;
-		fReturnExpressions= new ArrayList();
+		fReturnExpressions= new ArrayList<Expression>();
 	}
 
 	/**
@@ -182,6 +184,7 @@ public class SourceProvider {
 		public boolean getResult() {
 			return fResult;
 		}
+		@Override
 		public boolean visit(SimpleName node) {
 			if(!fResult) {
 				fResult= Bindings.equals(fBinding, node.resolveBinding());
@@ -230,25 +233,25 @@ public class SourceProvider {
 	}
 
 	public boolean isSimpleFunction() {
-		List statements= fDeclaration.getBody().statements();
+		List<Statement> statements= fDeclaration.getBody().statements();
 		if (statements.size() != 1)
 			return false;
 		return statements.get(0) instanceof ReturnStatement;
 	}
 
 	public boolean isLastStatementReturn() {
-		List statements= fDeclaration.getBody().statements();
+		List<Statement> statements= fDeclaration.getBody().statements();
 		if (statements.size() == 0)
 			return false;
 		return statements.get(statements.size() - 1) instanceof ReturnStatement;
 	}
 
 	public boolean isDangligIf() {
-		List statements= fDeclaration.getBody().statements();
+		List<Statement> statements= fDeclaration.getBody().statements();
 		if (statements.size() != 1)
 			return false;
 
-		ASTNode p= (ASTNode) statements.get(0);
+		ASTNode p= statements.get(0);
 
 		while (true) {
 			if (p instanceof IfStatement) {
@@ -291,14 +294,14 @@ public class SourceProvider {
 		return fDeclaration.resolveBinding().getReturnType();
 	}
 
-	public List getReturnExpressions() {
+	public List<Expression> getReturnExpressions() {
 		return fReturnExpressions;
 	}
 
 	public boolean returnTypeMatchesReturnExpressions() {
 		ITypeBinding returnType= getReturnType();
-		for (Iterator iter= fReturnExpressions.iterator(); iter.hasNext();) {
-			Expression expression= (Expression)iter.next();
+		for (Iterator<Expression> iter= fReturnExpressions.iterator(); iter.hasNext();) {
+			Expression expression= iter.next();
 			if (!Bindings.equals(returnType, expression.resolveTypeBinding()))
 				return false;
 		}
@@ -314,10 +317,10 @@ public class SourceProvider {
 		return fTypeRoot;
 	}
 
-	public boolean needsReturnedExpressionParenthesis() {
+	public boolean needsReturnedExpressionParenthesis(ASTNode parent, StructuralPropertyDescriptor locationInParent) {
 		ASTNode last= getLastStatement();
 		if (last instanceof ReturnStatement) {
-			return ASTNodes.needsParentheses(((ReturnStatement)last).getExpression());
+			return NecessaryParenthesesChecker.needsParentheses(((ReturnStatement)last).getExpression(), parent, locationInParent);
 		}
 		return false;
 	}
@@ -358,7 +361,7 @@ public class SourceProvider {
 		updateTypeVariables(rewriter, context);
 		updateMethodTypeVariable(rewriter, context);
 
-		List ranges= null;
+		List<IRegion> ranges= null;
 		if (hasReturnValue()) {
 			if (context.callMode == ASTNode.RETURN_STATEMENT) {
 				ranges= getStatementRanges();
@@ -378,14 +381,14 @@ public class SourceProvider {
 		int size= ranges.size();
 		RangeMarker[] markers= new RangeMarker[size];
 		for (int i= 0; i < markers.length; i++) {
-			IRegion range= (IRegion)ranges.get(i);
+			IRegion range= ranges.get(i);
 			markers[i]= new RangeMarker(range.getOffset(), range.getLength());
 		}
 		int split;
 		if (size <= 1) {
 			split= Integer.MAX_VALUE;
 		} else {
-			IRegion region= (IRegion)ranges.get(0);
+			IRegion region= ranges.get(0);
 			split= region.getOffset() + region.getLength();
 		}
 		TextEdit[] edits= dummy.removeChildren();
@@ -413,16 +416,6 @@ public class SourceProvider {
 		return new String[] {};
 	}
 
-	private boolean argumentNeedsParenthesis(Expression expression, ParameterData param) {
-		if (expression instanceof CastExpression || expression instanceof ArrayCreation)
-			return true;
-		int argPrecedence= OperatorPrecedence.getExpressionPrecedence(expression);
-		int paramPrecedence= param.getOperatorPrecedence();
-		if (argPrecedence != Integer.MAX_VALUE && paramPrecedence != Integer.MAX_VALUE)
-			return argPrecedence <= paramPrecedence;
-		return false;
-	}
-
 	private Expression createParenthesizedExpression(Expression newExpression, AST ast) {
 		ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
 		parenthesized.setExpression(newExpression);
@@ -447,22 +440,23 @@ public class SourceProvider {
 					}
 				}
 				ParameterData parameter= getParameterData(i);
-				List references= parameter.references();
-				for (Iterator iter= references.iterator(); iter.hasNext();) {
-					ASTNode element= (ASTNode)iter.next();
+				List<SimpleName> references= parameter.references();
+				for (Iterator<SimpleName> iter= references.iterator(); iter.hasNext();) {
+					ASTNode element= iter.next();
 					Expression newExpression= (Expression)rewriter.createStringPlaceholder(expressionString, expression.getNodeType());
 					AST ast= rewriter.getAST();
 					ITypeBinding explicitCast= ASTNodes.getExplicitCast(expression, (Expression)element);
 					if (explicitCast != null) {
 						CastExpression cast= ast.newCastExpression();
-						if (ASTNodes.substituteMustBeParenthesized(newExpression, cast)) {
+						if (NecessaryParenthesesChecker.needsParentheses(expression, cast, CastExpression.EXPRESSION_PROPERTY)) {
 							newExpression= createParenthesizedExpression(newExpression, ast);
 						}
 						cast.setExpression(newExpression);
 						ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(expression, importRewrite);
 						cast.setType(importRewrite.addImport(explicitCast, ast, importRewriteContext));
-						newExpression= createParenthesizedExpression(cast, ast);
-					} else if (argumentNeedsParenthesis(expression, parameter)) {
+						expression= newExpression= cast;
+					}
+					if (NecessaryParenthesesChecker.needsParentheses(expression, element.getParent(), element.getLocationInParent())) {
 						newExpression= createParenthesizedExpression(newExpression, ast);
 					}
 					rewriter.replace(element, newExpression, null);
@@ -474,14 +468,14 @@ public class SourceProvider {
 	}
 
 	private void makeNamesUnique(ASTRewrite rewriter, CodeScopeBuilder.Scope scope) {
-		Collection usedCalleeNames= fAnalyzer.getUsedNames();
-		for (Iterator iter= usedCalleeNames.iterator(); iter.hasNext();) {
-			SourceAnalyzer.NameData nd= (SourceAnalyzer.NameData) iter.next();
+		Collection<NameData> usedCalleeNames= fAnalyzer.getUsedNames();
+		for (Iterator<NameData> iter= usedCalleeNames.iterator(); iter.hasNext();) {
+			SourceAnalyzer.NameData nd= iter.next();
 			if (scope.isInUse(nd.getName())) {
 				String newName= scope.createName(nd.getName(), true);
-				List references= nd.references();
-				for (Iterator refs= references.iterator(); refs.hasNext();) {
-					SimpleName element= (SimpleName) refs.next();
+				List<SimpleName> references= nd.references();
+				for (Iterator<SimpleName> refs= references.iterator(); refs.hasNext();) {
+					SimpleName element= refs.next();
 					ASTNode newNode= rewriter.createStringPlaceholder(newName, ASTNode.METHOD_INVOCATION);
 					rewriter.replace(element, newNode, null);
 				}
@@ -492,9 +486,9 @@ public class SourceProvider {
 	private void updateImplicitReceivers(ASTRewrite rewriter, CallContext context) {
 		if (context.receiver == null)
 			return;
-		List implicitReceivers= fAnalyzer.getImplicitReceivers();
-		for (Iterator iter= implicitReceivers.iterator(); iter.hasNext();) {
-			ASTNode node= (ASTNode)iter.next();
+		List<Expression> implicitReceivers= fAnalyzer.getImplicitReceivers();
+		for (Iterator<Expression> iter= implicitReceivers.iterator(); iter.hasNext();) {
+			ASTNode node= iter.next();
 			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, context.importer);
 			if (node instanceof MethodInvocation) {
 				final MethodInvocation inv= (MethodInvocation)node;
@@ -525,8 +519,8 @@ public class SourceProvider {
 
 	private void updateTypeReferences(ASTRewrite rewriter, CallContext context) {
 		ImportRewrite importer= context.importer;
-		for (Iterator iter= fAnalyzer.getTypesToImport().iterator(); iter.hasNext();) {
-			Name element= (Name)iter.next();
+		for (Iterator<SimpleName> iter= fAnalyzer.getTypesToImport().iterator(); iter.hasNext();) {
+			Name element= iter.next();
 			ITypeBinding binding= ASTNodes.getTypeBinding(element);
 			if (binding != null && !binding.isLocal()) {
 				// We have collected names not types. So we have to import
@@ -546,8 +540,8 @@ public class SourceProvider {
 
 	private void updateStaticReferences(ASTRewrite rewriter, CallContext context) {
 		ImportRewrite importer= context.importer;
-		for (Iterator iter= fAnalyzer.getStaticsToImport().iterator(); iter.hasNext();) {
-			Name element= (Name)iter.next();
+		for (Iterator<SimpleName> iter= fAnalyzer.getStaticsToImport().iterator(); iter.hasNext();) {
+			Name element= iter.next();
 			IBinding binding= element.resolveBinding();
 			if (binding != null) {
 				String s= importer.addStaticImport(binding);
@@ -601,32 +595,32 @@ public class SourceProvider {
 		rewriteReferences(rewriter, method.getTypeArguments(), fAnalyzer.getMethodTypeParameterReferences());
 	}
 
-	private void rewriteReferences(ASTRewrite rewriter, ITypeBinding[] typeArguments, List typeParameterReferences) {
+	private void rewriteReferences(ASTRewrite rewriter, ITypeBinding[] typeArguments, List<NameData> typeParameterReferences) {
 		if (typeArguments.length == 0)
 			return;
 		Assert.isTrue(typeArguments.length == typeParameterReferences.size());
 		for (int i= 0; i < typeArguments.length; i++) {
-			SourceAnalyzer.NameData refData= (NameData)typeParameterReferences.get(i);
-			List references= refData.references();
+			SourceAnalyzer.NameData refData= typeParameterReferences.get(i);
+			List<SimpleName> references= refData.references();
 			String newName= typeArguments[i].getName();
-			for (Iterator iter= references.iterator(); iter.hasNext();) {
-				SimpleName name= (SimpleName)iter.next();
+			for (Iterator<SimpleName> iter= references.iterator(); iter.hasNext();) {
+				SimpleName name= iter.next();
 				rewriter.replace(name, rewriter.createStringPlaceholder(newName, ASTNode.SIMPLE_NAME), null);
 			}
 		}
 	}
 
 	private ASTNode getLastStatement() {
-		List statements= fDeclaration.getBody().statements();
+		List<Statement> statements= fDeclaration.getBody().statements();
 		if (statements.isEmpty())
 			return null;
-		return (ASTNode)statements.get(statements.size() - 1);
+		return statements.get(statements.size() - 1);
 	}
 
-	private List getReturnStatementRanges() {
+	private List<IRegion> getReturnStatementRanges() {
 		fMarkerMode= RETURN_STATEMENT_MODE;
-		List result= new ArrayList(1);
-		List statements= fDeclaration.getBody().statements();
+		List<IRegion> result= new ArrayList<IRegion>(1);
+		List<Statement> statements= fDeclaration.getBody().statements();
 		int size= statements.size();
 		if (size <= 1)
 			return result;
@@ -634,10 +628,10 @@ public class SourceProvider {
 		return result;
 	}
 
-	private List getStatementRanges() {
+	private List<IRegion> getStatementRanges() {
 		fMarkerMode= STATEMENT_MODE;
-		List result= new ArrayList(1);
-		List statements= fDeclaration.getBody().statements();
+		List<IRegion> result= new ArrayList<IRegion>(1);
+		List<Statement> statements= fDeclaration.getBody().statements();
 		int size= statements.size();
 		if (size == 0)
 			return result;
@@ -645,10 +639,10 @@ public class SourceProvider {
 		return result;
 	}
 
-	private List getExpressionRanges() {
+	private List<IRegion> getExpressionRanges() {
 		fMarkerMode= EXPRESSION_MODE;
-		List result= new ArrayList(2);
-		List statements= fDeclaration.getBody().statements();
+		List<IRegion> result= new ArrayList<IRegion>(2);
+		List<Statement> statements= fDeclaration.getBody().statements();
 		ReturnStatement rs= null;
 		int size= statements.size();
 		ASTNode node;
@@ -656,7 +650,7 @@ public class SourceProvider {
 			case 0:
 				return result;
 			case 1:
-				node= (ASTNode)statements.get(0);
+				node= statements.get(0);
 				if (node.getNodeType() == ASTNode.RETURN_STATEMENT) {
 					rs= (ReturnStatement)node;
 				} else {
@@ -664,7 +658,7 @@ public class SourceProvider {
 				}
 				break;
 			default: {
-				node= (ASTNode)statements.get(size - 1);
+				node= statements.get(size - 1);
 				if (node.getNodeType() == ASTNode.RETURN_STATEMENT) {
 					result.add(createRange(statements, size - 2));
 					rs= (ReturnStatement)node;
@@ -681,9 +675,9 @@ public class SourceProvider {
 		return result;
 	}
 
-	private IRegion createRange(List statements, int end) {
-		ASTNode first= (ASTNode)statements.get(0);
-		ASTNode last= (ASTNode)statements.get(end);
+	private IRegion createRange(List<Statement> statements, int end) {
+		ASTNode first= statements.get(0);
+		ASTNode last= statements.get(end);
 		return createRange(first, last);
 	}
 
@@ -719,11 +713,11 @@ public class SourceProvider {
 	}
 
 	private boolean isSingleControlStatementWithoutBlock() {
-		List statements= fDeclaration.getBody().statements();
+		List<Statement> statements= fDeclaration.getBody().statements();
 		int size= statements.size();
 		if (size != 1)
 			return false;
-		Statement statement= (Statement) statements.get(size - 1);
+		Statement statement= statements.get(size - 1);
 		int nodeType= statement.getNodeType();
 		if (nodeType == ASTNode.IF_STATEMENT) {
 			IfStatement ifStatement= (IfStatement) statement;

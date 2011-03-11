@@ -27,6 +27,7 @@ public class InlineMethodWizard extends RefactoringWizard {
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 	}
 
+	@Override
 	protected void addUserInputPages(){
 		addPage(new InlineMethodInputPage());
 	}

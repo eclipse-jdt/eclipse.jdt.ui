@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -113,10 +113,12 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 			STATIC_CLASS_ICON= JavaElementImageProvider.getDecoratedImage(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
 		}
 
+		@Override
 		public Image getImage(Object element) {
 			return ((ImportOrderEntry) element).isStatic ? STATIC_CLASS_ICON : PCK_ICON;
 		}
 
+		@Override
 		public String getText(Object element) {
 			ImportOrderEntry entry= (ImportOrderEntry) element;
 			String name= entry.name;
@@ -130,18 +132,18 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		}
 	}
 
-	private class ImportOrganizeAdapter implements IListAdapter, IDialogFieldListener {
+	private class ImportOrganizeAdapter implements IListAdapter<ImportOrderEntry>, IDialogFieldListener {
 
-		private boolean canEdit(ListDialogField field) {
-			List selected= field.getSelectedElements();
+		private boolean canEdit(ListDialogField<ImportOrderEntry> field) {
+			List<ImportOrderEntry> selected= field.getSelectedElements();
 			return selected.size() == 1;
 		}
 
-        public void customButtonPressed(ListDialogField field, int index) {
+        public void customButtonPressed(ListDialogField<ImportOrderEntry> field, int index) {
         	doButtonPressed(index);
         }
 
-        public void selectionChanged(ListDialogField field) {
+        public void selectionChanged(ListDialogField<ImportOrderEntry> field) {
 			fOrderListField.enableButton(IDX_EDIT, canEdit(field));
         }
 
@@ -149,7 +151,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
         	doDialogFieldChanged(field);
         }
 
-        public void doubleClicked(ListDialogField field) {
+        public void doubleClicked(ListDialogField<ImportOrderEntry> field) {
         	if (canEdit(field)) {
 				doButtonPressed(IDX_EDIT);
         	}
@@ -163,7 +165,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	private static final int IDX_UP= 5;
 	private static final int IDX_DOWN= 6;
 
-	private ListDialogField fOrderListField;
+	private ListDialogField<ImportOrderEntry> fOrderListField;
 	private StringDialogField fThresholdField;
 	private StringDialogField fStaticThresholdField;
 	private SelectionButtonDialogField fIgnoreLowerCaseTypesField;
@@ -187,7 +189,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 
 		ImportOrganizeAdapter adapter= new ImportOrganizeAdapter();
 
-		fOrderListField= new ListDialogField(adapter, buttonLabels, new ImportOrganizeLabelProvider());
+		fOrderListField= new ListDialogField<ImportOrderEntry>(adapter, buttonLabels, new ImportOrganizeLabelProvider());
 		fOrderListField.setDialogFieldListener(adapter);
 		fOrderListField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_order_label);
 		fOrderListField.setUpButtonIndex(IDX_UP);
@@ -219,6 +221,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		updateControls();
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		setShell(parent.getShell());
 
@@ -277,10 +280,10 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 
 	private void doButtonPressed(int index) {
 		if (index == IDX_ADD || index == IDX_ADD_STATIC) { // add new
-			List existing= fOrderListField.getElements();
+			List<ImportOrderEntry> existing= fOrderListField.getElements();
 			ImportOrganizeInputDialog dialog= new ImportOrganizeInputDialog(getShell(), existing, index == IDX_ADD_STATIC);
 			if (dialog.open() == Window.OK) {
-				List selectedElements= fOrderListField.getSelectedElements();
+				List<ImportOrderEntry> selectedElements= fOrderListField.getSelectedElements();
 				if (selectedElements.size() == 1) {
 					int insertionIndex= fOrderListField.getIndexOfElement(selectedElements.get(0)) + 1;
 					fOrderListField.addElement(dialog.getResult(), insertionIndex);
@@ -289,13 +292,13 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 				}
 			}
 		} else if (index == IDX_EDIT) { // edit
-			List selected= fOrderListField.getSelectedElements();
+			List<ImportOrderEntry> selected= fOrderListField.getSelectedElements();
 			if (selected.isEmpty()) {
 				return;
 			}
-			ImportOrderEntry editedEntry= (ImportOrderEntry) selected.get(0);
+			ImportOrderEntry editedEntry= selected.get(0);
 
-			List existing= fOrderListField.getElements();
+			List<ImportOrderEntry> existing= fOrderListField.getElements();
 			existing.remove(editedEntry);
 
 			ImportOrganizeInputDialog dialog= new ImportOrganizeInputDialog(getShell(), existing, editedEntry.isStatic);
@@ -311,8 +314,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	 * The import order file is a property file. The keys are
 	 * "0", "1" ... last entry. The values must be valid package names.
 	 */
-	private List loadFromProperties(Properties properties) {
-		ArrayList res= new ArrayList();
+	private List<ImportOrderEntry> loadFromProperties(Properties properties) {
+		ArrayList<ImportOrderEntry> res= new ArrayList<ImportOrderEntry>();
 		int nEntries= properties.size();
 		for (int i= 0 ; i < nEntries; i++) {
 			String curr= properties.getProperty(String.valueOf(i));
@@ -330,7 +333,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		return res;
 	}
 
-	private List loadImportOrder() {
+	private List<ImportOrderEntry> loadImportOrder() {
 		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 
 		FileDialog dialog= new FileDialog(getShell(), SWT.OPEN);
@@ -349,7 +352,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 			try {
 				fis= new FileInputStream(fileName);
 				properties.load(fis);
-				List res= loadFromProperties(properties);
+				List<ImportOrderEntry> res= loadFromProperties(properties);
 				if (res != null) {
 					return res;
 				}
@@ -367,7 +370,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		return null;
 	}
 
-	private void saveImportOrder(List elements) {
+	private void saveImportOrder(List<ImportOrderEntry> elements) {
 		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 
 		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
@@ -384,7 +387,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 
 			Properties properties= new Properties();
 			for (int i= 0; i < elements.size(); i++) {
-				ImportOrderEntry entry= (ImportOrderEntry) elements.get(i);
+				ImportOrderEntry entry= elements.get(i);
 				properties.setProperty(String.valueOf(i), entry.serialize());
 			}
 			FileOutputStream fos= null;
@@ -411,6 +414,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String, java.lang.String)
 	 */
+	@Override
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		// no validation
 	}
@@ -418,6 +422,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateControls()
 	 */
+	@Override
 	protected void updateControls() {
 		ImportOrderEntry[] importOrder= getImportOrderPreference();
 		int threshold= getImportNumberThreshold(PREF_ONDEMANDTHRESHOLD);
@@ -449,7 +454,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		} else if (field == fIgnoreLowerCaseTypesField) {
 	  		setValue(PREF_IGNORELOWERCASE, fIgnoreLowerCaseTypesField.isSelected());
 		} else if (field == fImportButton) {
-			List order= loadImportOrder();
+			List<ImportOrderEntry> order= loadImportOrder();
 			if (order != null) {
 				fOrderListField.setElements(order);
 			}
@@ -462,12 +467,13 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#getFullBuildDialogStrings(boolean)
 	 */
+	@Override
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		return null; // no build required
 	}
 
 	private static ImportOrderEntry[] unpackOrderList(String str) {
-		ArrayList res= new ArrayList();
+		ArrayList<ImportOrderEntry> res= new ArrayList<ImportOrderEntry>();
 		int start= 0;
 		do {
 			int end= str.indexOf(';', start);
@@ -478,13 +484,13 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 			start= end + 1;
 		} while (start < str.length());
 
-		return (ImportOrderEntry[]) res.toArray(new ImportOrderEntry[res.size()]);
+		return res.toArray(new ImportOrderEntry[res.size()]);
 	}
 
-	private static String packOrderList(List orderList) {
+	private static String packOrderList(List<ImportOrderEntry> orderList) {
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < orderList.size(); i++) {
-			ImportOrderEntry entry= (ImportOrderEntry) orderList.get(i);
+			ImportOrderEntry entry= orderList.get(i);
 			buf.append(entry.serialize());
 			buf.append(';');
 		}

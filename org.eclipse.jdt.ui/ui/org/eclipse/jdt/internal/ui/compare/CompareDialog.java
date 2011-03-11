@@ -40,12 +40,14 @@ class CompareDialog extends ResizableDialog {
 			super(parent, style, false);
 		}
 
+		@Override
 		protected Viewer getViewer(Viewer oldViewer, Object input) {
 			if (input instanceof ICompareInput)
 				return CompareUI.findContentViewer(oldViewer, (ICompareInput)input, this, fCompareConfiguration);
 			return null;
 		}
 
+		@Override
 		public void setImage(Image image) {
 			// don't show icon
 		}
@@ -83,6 +85,7 @@ class CompareDialog extends ResizableDialog {
 	 /* (non Javadoc)
  	 * Creates SWT control tree.
  	 */
+	@Override
 	protected synchronized Control createDialogArea(Composite parent2) {
 
 		Composite parent= (Composite) super.createDialogArea(parent2);
@@ -103,6 +106,7 @@ class CompareDialog extends ResizableDialog {
 	/* (non-Javadoc)
 	 * Method declared on Dialog.
 	 */
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		String buttonLabel= JavaCompareUtilities.getString(fBundle, "buttonLabel", IDialogConstants.OK_LABEL); //$NON-NLS-1$
 		createButton(parent, IDialogConstants.CANCEL_ID, buttonLabel, false);
@@ -111,6 +115,7 @@ class CompareDialog extends ResizableDialog {
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.COMPARE_DIALOG);

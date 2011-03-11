@@ -27,13 +27,13 @@ public class ResourceUtil {
 	}
 
 	public static IFile[] getFiles(ICompilationUnit[] cus) {
-		List files= new ArrayList(cus.length);
+		List<IResource> files= new ArrayList<IResource>(cus.length);
 		for (int i= 0; i < cus.length; i++) {
 			IResource resource= cus[i].getResource();
 			if (resource != null && resource.getType() == IResource.FILE)
 				files.add(resource);
 		}
-		return (IFile[]) files.toArray(new IFile[files.size()]);
+		return files.toArray(new IFile[files.size()]);
 	}
 
 	public static IFile getFile(ICompilationUnit cu) {

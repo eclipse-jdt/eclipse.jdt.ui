@@ -50,11 +50,13 @@ public abstract class ResizableDialog extends TrayDialog {
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
 
 
+	@Override
 	protected Point getInitialSize() {
 
 		int width= 0;
@@ -115,6 +117,7 @@ public abstract class ResizableDialog extends TrayDialog {
 		return new Point(width, height);
 	}
 
+	@Override
 	protected Point getInitialLocation(Point initialSize) {
 		Point loc= super.getInitialLocation(initialSize);
 
@@ -134,6 +137,7 @@ public abstract class ResizableDialog extends TrayDialog {
 		return loc;
 	}
 
+	@Override
 	public boolean close() {
 		boolean closed= super.close();
 		if (closed && fNewBounds != null)

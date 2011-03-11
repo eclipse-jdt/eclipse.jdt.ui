@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,7 +48,7 @@ public final class ImportRewriteUtil {
 	 * @param staticImports the map of name nodes to strings (element type: Map <Name, String>).
 	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
 	 */
-	public static void addImports(final CompilationUnitRewrite rewrite, ImportRewriteContext context, final ASTNode node, final Map typeImports, final Map staticImports, final boolean declarations) {
+	public static void addImports(final CompilationUnitRewrite rewrite, ImportRewriteContext context, final ASTNode node, final Map<Name, String> typeImports, final Map<Name, String> staticImports, final boolean declarations) {
 		addImports(rewrite, context, node, typeImports, staticImports, null, declarations);
 	}
 
@@ -63,13 +63,13 @@ public final class ImportRewriteUtil {
 	 * @param excludeBindings the set of bindings to exclude (element type: Set <IBinding>).
 	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
 	 */
-	public static void addImports(final CompilationUnitRewrite rewrite, ImportRewriteContext context, final ASTNode node, final Map typeImports, final Map staticImports, final Collection excludeBindings, final boolean declarations) {
+	public static void addImports(final CompilationUnitRewrite rewrite, ImportRewriteContext context, final ASTNode node, final Map<Name, String> typeImports, final Map<Name, String> staticImports, final Collection<IBinding> excludeBindings, final boolean declarations) {
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(node);
 		Assert.isNotNull(typeImports);
 		Assert.isNotNull(staticImports);
-		final Set types= new HashSet();
-		final Set members= new HashSet();
+		final Set<SimpleName> types= new HashSet<SimpleName>();
+		final Set<SimpleName> members= new HashSet<SimpleName>();
 
 		ImportReferencesCollector.collect(node, rewrite.getCu().getJavaProject(), null, declarations, types, members);
 
@@ -77,8 +77,8 @@ public final class ImportRewriteUtil {
 		final ImportRemover remover= rewrite.getImportRemover();
 		Name name= null;
 		IBinding binding= null;
-		for (final Iterator iterator= types.iterator(); iterator.hasNext();) {
-			name= (Name) iterator.next();
+		for (final Iterator<SimpleName> iterator= types.iterator(); iterator.hasNext();) {
+			name= iterator.next();
 			binding= name.resolveBinding();
 			if (binding instanceof ITypeBinding) {
 				final ITypeBinding type= (ITypeBinding) binding;
@@ -88,8 +88,8 @@ public final class ImportRewriteUtil {
 				}
 			}
 		}
-		for (final Iterator iterator= members.iterator(); iterator.hasNext();) {
-			name= (Name) iterator.next();
+		for (final Iterator<SimpleName> iterator= members.iterator(); iterator.hasNext();) {
+			name= iterator.next();
 			binding= name.resolveBinding();
 			if (binding instanceof IVariableBinding) {
 				final IVariableBinding variable= (IVariableBinding) binding;
@@ -118,7 +118,7 @@ public final class ImportRewriteUtil {
 	 * @param staticBindings the set of bindings (element type: Set <IBinding>).
 	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
 	 */
-	public static void collectImports(final IJavaProject project, final ASTNode node, final Collection typeBindings, final Collection staticBindings, final boolean declarations) {
+	public static void collectImports(final IJavaProject project, final ASTNode node, final Collection<ITypeBinding> typeBindings, final Collection<IBinding> staticBindings, final boolean declarations) {
 		collectImports(project, node, typeBindings, staticBindings, null, declarations);
 	}
 
@@ -132,20 +132,20 @@ public final class ImportRewriteUtil {
 	 * @param excludeBindings the set of bindings to exclude (element type: Set <IBinding>).
 	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
 	 */
-	public static void collectImports(final IJavaProject project, final ASTNode node, final Collection typeBindings, final Collection staticBindings, final Collection excludeBindings, final boolean declarations) {
+	public static void collectImports(final IJavaProject project, final ASTNode node, final Collection<ITypeBinding> typeBindings, final Collection<IBinding> staticBindings, final Collection<IBinding> excludeBindings, final boolean declarations) {
 		Assert.isNotNull(project);
 		Assert.isNotNull(node);
 		Assert.isNotNull(typeBindings);
 		Assert.isNotNull(staticBindings);
-		final Set types= new HashSet();
-		final Set members= new HashSet();
+		final Set<SimpleName> types= new HashSet<SimpleName>();
+		final Set<SimpleName> members= new HashSet<SimpleName>();
 
 		ImportReferencesCollector.collect(node, project, null, declarations, types, members);
 
 		Name name= null;
 		IBinding binding= null;
-		for (final Iterator iterator= types.iterator(); iterator.hasNext();) {
-			name= (Name) iterator.next();
+		for (final Iterator<SimpleName> iterator= types.iterator(); iterator.hasNext();) {
+			name= iterator.next();
 			binding= name.resolveBinding();
 			if (binding instanceof ITypeBinding) {
 				final ITypeBinding type= (ITypeBinding) binding;
@@ -153,8 +153,8 @@ public final class ImportRewriteUtil {
 					typeBindings.add(type);
 			}
 		}
-		for (final Iterator iterator= members.iterator(); iterator.hasNext();) {
-			name= (Name) iterator.next();
+		for (final Iterator<SimpleName> iterator= members.iterator(); iterator.hasNext();) {
+			name= iterator.next();
 			binding= name.resolveBinding();
 			if (binding != null && (excludeBindings == null || !excludeBindings.contains(binding)))
 				staticBindings.add(binding);

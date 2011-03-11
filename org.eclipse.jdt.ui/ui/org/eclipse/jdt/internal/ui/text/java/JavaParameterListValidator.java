@@ -300,7 +300,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 	private int[] computeCommaPositions(String code) {
 		final int length= code.length();
 	    int pos= 0;
-		List positions= new ArrayList();
+		List<Integer> positions= new ArrayList<Integer>();
 		positions.add(new Integer(-1));
 		while (pos < length && pos != -1) {
 			char ch= code.charAt(pos);
@@ -324,7 +324,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 
 		int[] fields= new int[positions.size()];
 		for (int i= 0; i < fields.length; i++)
-	        fields[i]= ((Integer) positions.get(i)).intValue();
+	        fields[i]= positions.get(i).intValue();
 	    return fields;
     }
 

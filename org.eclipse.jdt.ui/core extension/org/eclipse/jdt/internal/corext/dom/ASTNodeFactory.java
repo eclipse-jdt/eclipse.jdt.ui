@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,10 +16,13 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -29,7 +32,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 
 public class ASTNodeFactory {
 
@@ -48,6 +50,7 @@ public class ASTNodeFactory {
 			super(true);
 		}
 
+		@Override
 		protected boolean visitNode(ASTNode node) {
 			node.setSourceRange(-1, 0);
 			return true;
@@ -81,7 +84,7 @@ public class ASTNodeFactory {
 		ASTParser p= ASTParser.newParser(ast.apiLevel());
 		p.setSource(buffer.toString().toCharArray());
 		CompilationUnit root= (CompilationUnit) p.createAST(null);
-		List list= root.types();
+		List<AbstractTypeDeclaration> list= root.types();
 		TypeDeclaration typeDecl= (TypeDeclaration) list.get(0);
 		MethodDeclaration methodDecl= typeDecl.getMethods()[0];
 		TypeParameter tp= (TypeParameter) methodDecl.typeParameters().get(0);
@@ -98,7 +101,7 @@ public class ASTNodeFactory {
 		ASTParser p= ASTParser.newParser(ast.apiLevel());
 		p.setSource(buffer.toString().toCharArray());
 		CompilationUnit root= (CompilationUnit) p.createAST(null);
-		List list= root.types();
+		List<AbstractTypeDeclaration> list= root.types();
 		TypeDeclaration typeDecl= (TypeDeclaration) list.get(0);
 		MethodDeclaration methodDecl= typeDecl.getMethods()[0];
 		ASTNode type= methodDecl.getReturnType2();
@@ -178,7 +181,7 @@ public class ASTNodeFactory {
 	 * @param modifiers The modifier flags describing the modifier nodes to create.
 	 * @return Returns a list of nodes of type {@link Modifier}.
 	 */
-	public static List newModifiers(AST ast, int modifiers) {
+	public static List<Modifier> newModifiers(AST ast, int modifiers) {
 		return ast.newModifiers(modifiers);
 	}
 
@@ -190,8 +193,8 @@ public class ASTNodeFactory {
 	 * to use {@link ASTNode#copySubtrees(AST, List)}.
 	 * @return Returns a list of nodes of type {@link Modifier}.
 	 */
-	public static List newModifiers(AST ast, List modifierNodes) {
-		List res= new ArrayList(modifierNodes.size());
+	public static List<Modifier> newModifiers(AST ast, List<? extends IExtendedModifier> modifierNodes) {
+		List<Modifier> res= new ArrayList<Modifier>(modifierNodes.size());
 		for (int i= 0; i < modifierNodes.size(); i++) {
 			Object curr= modifierNodes.get(i);
 			if (curr instanceof Modifier) {
@@ -201,14 +204,14 @@ public class ASTNodeFactory {
 		return res;
 	}
 
-	public static Expression newInfixExpression(AST ast, Operator operator, ArrayList/*<Expression>*/ operands) {
+	public static Expression newInfixExpression(AST ast, Operator operator, ArrayList<Expression> operands) {
 		if (operands.size() == 1)
-			return (Expression) operands.get(0);
+			return operands.get(0);
 
 		InfixExpression result= ast.newInfixExpression();
 		result.setOperator(operator);
-		result.setLeftOperand((Expression) operands.get(0));
-		result.setRightOperand((Expression) operands.get(1));
+		result.setLeftOperand(operands.get(0));
+		result.setRightOperand(operands.get(1));
 		result.extendedOperands().addAll(operands.subList(2, operands.size()));
 		return result;
 	}

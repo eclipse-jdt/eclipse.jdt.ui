@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,23 +32,24 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 
 	private final static class ControlStatementFinder extends GenericVisitor {
 
-		private final List/*<CompilationUnitRewriteOperation>*/fResult;
-		private final Hashtable fUsedNames;
+		private final List<ConvertLoopOperation> fResult;
+		private final Hashtable<ForStatement, String> fUsedNames;
 		private final boolean fFindForLoopsToConvert;
 		private final boolean fConvertIterableForLoops;
 		private final boolean fMakeFinal;
 
-		public ControlStatementFinder(boolean findForLoopsToConvert, boolean convertIterableForLoops, boolean makeFinal, List resultingCollection) {
+		public ControlStatementFinder(boolean findForLoopsToConvert, boolean convertIterableForLoops, boolean makeFinal, List<ConvertLoopOperation> resultingCollection) {
 			fFindForLoopsToConvert= findForLoopsToConvert;
 			fConvertIterableForLoops= convertIterableForLoops;
 			fMakeFinal= makeFinal;
 			fResult= resultingCollection;
-			fUsedNames= new Hashtable();
+			fUsedNames= new Hashtable<ForStatement, String>();
 		}
 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.ForStatement)
 		 */
+		@Override
 		public boolean visit(ForStatement node) {
 			if (fFindForLoopsToConvert || fConvertIterableForLoops) {
 				ForStatement current= node;
@@ -78,8 +79,8 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 
 		private ConvertLoopOperation getConvertOperation(ForStatement node) {
 
-			Collection usedNamesCollection= fUsedNames.values();
-			String[] usedNames= (String[])usedNamesCollection.toArray(new String[usedNamesCollection.size()]);
+			Collection<String> usedNamesCollection= fUsedNames.values();
+			String[] usedNames= usedNamesCollection.toArray(new String[usedNamesCollection.size()]);
 			ConvertLoopOperation convertForLoopOperation= new ConvertForLoopOperation(node, usedNames, fMakeFinal);
 			if (convertForLoopOperation.satisfiesPreconditions().isOK()) {
 				if (fFindForLoopsToConvert) {
@@ -100,6 +101,7 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#endVisit(org.eclipse.jdt.core.dom.ForStatement)
 		 */
+		@Override
 		public void endVisit(ForStatement node) {
 			if (fFindForLoopsToConvert || fConvertIterableForLoops) {
 				fUsedNames.remove(node);
@@ -116,14 +118,14 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 		if (!convertForLoops && !convertIterableForLoops)
 			return null;
 
-		List operations= new ArrayList();
+		List<ConvertLoopOperation> operations= new ArrayList<ConvertLoopOperation>();
 		ControlStatementFinder finder= new ControlStatementFinder(convertForLoops, convertIterableForLoops, makeFinal, operations);
 		compilationUnit.accept(finder);
 
 		if (operations.isEmpty())
 			return null;
 
-		CompilationUnitRewriteOperation[] ops= (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
+		CompilationUnitRewriteOperation[] ops= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
 		return new ConvertLoopFix(FixMessages.ControlStatementsFix_change_name, compilationUnit, ops, null);
 	}
 
@@ -154,6 +156,7 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IStatus getStatus() {
 		return fStatus;
 	}

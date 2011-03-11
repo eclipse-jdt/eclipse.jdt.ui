@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,10 +43,12 @@ public abstract class HierarchyType extends TType {
 		}
 	}
 
+	@Override
 	public TType getSuperclass() {
 		return fSuperclass;
 	}
 
+	@Override
 	public TType[] getInterfaces() {
 		return fInterfaces;
 	}
@@ -57,9 +59,9 @@ public abstract class HierarchyType extends TType {
 
 	public boolean isSubType(HierarchyType other) {
 		if (getEnvironment() == other.getEnvironment()) {
-			Map cache= getEnvironment().getSubTypeCache();
+			Map<TypeTuple, Boolean> cache= getEnvironment().getSubTypeCache();
 			TypeTuple key= new TypeTuple(this, other);
-			Boolean value= (Boolean)cache.get(key);
+			Boolean value= cache.get(key);
 			if (value != null)
 				return value.booleanValue();
 			boolean isSub= doIsSubType(other);

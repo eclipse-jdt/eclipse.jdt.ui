@@ -180,6 +180,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	/*
 	 * @see org.eclipse.jdt.core.compiler.CategorizedProblem#getCategoryID()
 	 */
+	@Override
 	public int getCategoryID() {
 		return CAT_JAVADOC;
 	}
@@ -187,6 +188,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	/*
 	 * @see org.eclipse.jdt.core.compiler.CategorizedProblem#getMarkerType()
 	 */
+	@Override
 	public String getMarkerType() {
 		return MARKER_TYPE;
 	}

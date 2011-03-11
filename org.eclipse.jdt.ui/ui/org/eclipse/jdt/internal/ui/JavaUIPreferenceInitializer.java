@@ -29,6 +29,7 @@ public class JavaUIPreferenceInitializer extends AbstractPreferenceInitializer {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
 	 */
+	@Override
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = PreferenceConstants.getPreferenceStore();
 

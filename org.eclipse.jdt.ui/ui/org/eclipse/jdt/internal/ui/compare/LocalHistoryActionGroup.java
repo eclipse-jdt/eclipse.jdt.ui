@@ -62,6 +62,7 @@ public class LocalHistoryActionGroup extends ActionGroup {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(fAddFrom, IJavaHelpContextIds.ADD_FROM_HISTORY_ACTION);
 	}
 
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 		IMenuManager localMenu= new MenuManager(CompareMessages.LocalHistoryActionGroup_menu_local_history);

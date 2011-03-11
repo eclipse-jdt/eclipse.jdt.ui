@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,7 +68,7 @@ public class AccessorClassModifier {
 	private ASTRewrite fASTRewrite;
 	private ListRewrite fListRewrite;
 	private ICompilationUnit fCU;
-	private List fFields;
+	private List<FieldDeclaration> fFields;
 
 	private AccessorClassModifier(ICompilationUnit cu) throws CoreException {
 
@@ -81,11 +81,12 @@ public class AccessorClassModifier {
 		AbstractTypeDeclaration parent= null;
 		if (fRoot.types().size() > 0) {
 			parent= (AbstractTypeDeclaration)fRoot.types().get(0);
-			fFields= new ArrayList();
+			fFields= new ArrayList<FieldDeclaration>();
 			parent.accept(new GenericVisitor() {
 				/**
 				 * {@inheritDoc}
 				 */
+				@Override
 				public boolean visit(FieldDeclaration node) {
 					int modifiers= node.getModifiers();
 					if (!Modifier.isPublic(modifiers))
@@ -94,11 +95,11 @@ public class AccessorClassModifier {
 					if (!Modifier.isStatic(modifiers))
 						return false;
 
-					List fragments= node.fragments();
+					List<VariableDeclarationFragment> fragments= node.fragments();
 					if (fragments.size() != 1)
 						return false;
 
-					VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(0);
+					VariableDeclarationFragment fragment= fragments.get(0);
 					if (fragment.getInitializer() != null)
 						return false;
 
@@ -138,8 +139,8 @@ public class AccessorClassModifier {
 
 	public static Change create(ICompilationUnit cu, NLSSubstitution[] substitutions) throws CoreException {
 
-		Map newKeyToSubstMap= NLSPropertyFileModifier.getNewKeyToSubstitutionMap(substitutions);
-		Map oldKeyToSubstMap= NLSPropertyFileModifier.getOldKeyToSubstitutionMap(substitutions);
+		Map<String, NLSSubstitution> newKeyToSubstMap= NLSPropertyFileModifier.getNewKeyToSubstitutionMap(substitutions);
+		Map<String, NLSSubstitution> oldKeyToSubstMap= NLSPropertyFileModifier.getOldKeyToSubstitutionMap(substitutions);
 
 		AccessorClassModifier sourceModification= new AccessorClassModifier(cu);
 
@@ -214,6 +215,7 @@ public class AccessorClassModifier {
 		try {
 			astRoot.accept(new ASTVisitor() {
 
+				@Override
 				public boolean visit(VariableDeclarationFragment node) {
 					if (name.equals(node.getName().getFullyQualifiedName())) {
 						result[0]= node.getParent();
@@ -248,31 +250,31 @@ public class AccessorClassModifier {
 			fListRewrite.insertLast(fieldDeclaration, editGroup);
 			fFields.add(fieldDeclaration);
 		} else {
-			ArrayList identifiers= new ArrayList();
-			for (Iterator iterator= fFields.iterator(); iterator.hasNext();) {
-				FieldDeclaration field= (FieldDeclaration) iterator.next();
+			ArrayList<String> identifiers= new ArrayList<String>();
+			for (Iterator<FieldDeclaration> iterator= fFields.iterator(); iterator.hasNext();) {
+				FieldDeclaration field= iterator.next();
 				VariableDeclarationFragment fragment= (VariableDeclarationFragment) field.fragments().get(0);
 				identifiers.add(fragment.getName().getIdentifier());
 			}
 
 			int insertionPosition= NLSUtil.getInsertionPosition(key, identifiers);
 			if (insertionPosition < 0) {
-				fListRewrite.insertBefore(fieldDeclaration, (ASTNode) fFields.get(0), editGroup);
+				fListRewrite.insertBefore(fieldDeclaration, fFields.get(0), editGroup);
 				fFields.add(0, fieldDeclaration);
 			} else {
 				if (identifiers.size() == insertionPosition + 1) {
-					fListRewrite.insertAfter(fieldDeclaration, (ASTNode) fFields.get(insertionPosition), editGroup);
+					fListRewrite.insertAfter(fieldDeclaration, fFields.get(insertionPosition), editGroup);
 				} else {
-					String beforeKey= (String) identifiers.get(insertionPosition);
-					String afterKey= (String) identifiers.get(insertionPosition + 1);
+					String beforeKey= identifiers.get(insertionPosition);
+					String afterKey= identifiers.get(insertionPosition + 1);
 					int distBefore= NLSUtil.invertDistance(key, beforeKey);
 					int distAfter= NLSUtil.invertDistance(key, afterKey);
 					if (distBefore > distAfter) {
-						fListRewrite.insertAfter(fieldDeclaration, (ASTNode) fFields.get(insertionPosition), editGroup);
+						fListRewrite.insertAfter(fieldDeclaration, fFields.get(insertionPosition), editGroup);
 					} else if (distBefore == distAfter && Collator.getInstance().compare(beforeKey, afterKey) < 0) {
-						fListRewrite.insertAfter(fieldDeclaration, (ASTNode) fFields.get(insertionPosition), editGroup);
+						fListRewrite.insertAfter(fieldDeclaration, fFields.get(insertionPosition), editGroup);
 					} else {
-						fListRewrite.insertBefore(fieldDeclaration, (ASTNode) fFields.get(insertionPosition + 1), editGroup);
+						fListRewrite.insertBefore(fieldDeclaration, fFields.get(insertionPosition + 1), editGroup);
 					}
 				}
 				fFields.add(insertionPosition + 1, fieldDeclaration);

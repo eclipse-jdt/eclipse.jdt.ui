@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 public class JavadocLinkDialogLabelProvider extends LabelProvider {
 
+	@Override
 	public String getText(Object element) {
 		if (element instanceof JavadocLinkRef) {
 			JavadocLinkRef ref= (JavadocLinkRef) element;
@@ -48,6 +49,7 @@ public class JavadocLinkDialogLabelProvider extends LabelProvider {
 		return super.getText(element);
 	}
 
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof JavadocLinkRef) {
 			JavadocLinkRef ref= (JavadocLinkRef) element;

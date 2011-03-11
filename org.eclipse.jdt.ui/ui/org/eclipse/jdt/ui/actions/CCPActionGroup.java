@@ -182,6 +182,7 @@ public class CCPActionGroup extends ActionGroup {
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		if (fDeleteAction != null)
@@ -197,6 +198,7 @@ public class CCPActionGroup extends ActionGroup {
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 		for (int i= 0; i < fActions.length; i++) {
@@ -210,6 +212,7 @@ public class CCPActionGroup extends ActionGroup {
 	/*
 	 * @see ActionGroup#dispose()
 	 */
+	@Override
 	public void dispose() {
 		super.dispose();
 		deregisterActionsAsSelectionChangeListeners();

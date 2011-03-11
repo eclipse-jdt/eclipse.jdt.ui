@@ -44,6 +44,7 @@ class GotoPackageAction extends Action {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_PACKAGE_ACTION);
 	}
 
+	@Override
 	public void run() {
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		SelectionDialog dialog= createAllPackagesDialog(shell);

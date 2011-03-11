@@ -63,6 +63,7 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getDetailedDescription() {
 		return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_ResetAllOutputFolders;
 	}
@@ -70,6 +71,7 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void run() {
 		final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -92,13 +94,13 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
         }
 	}
 
-	private List resetOutputFolders(IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	private List<Object> resetOutputFolders(IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
 			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ResetOutputFolder, roots.length + 10);
-			List entries= new ArrayList();
+			List<CPListElementAttribute> entries= new ArrayList<CPListElementAttribute>();
 			for (int i= 0; i < roots.length; i++) {
 				monitor.worked(1);
 				IPackageFragmentRoot root= roots[i];
@@ -115,13 +117,13 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 		}
 	}
 
-	private List reset(List selection, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	private List<Object> reset(List<CPListElementAttribute> selection, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 	    if (monitor == null)
         	monitor= new NullProgressMonitor();
         try {
         	monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Resetting, selection.size());
-        	List entries= ClasspathModifier.getExistingEntries(project);
-        	List result= new ArrayList();
+        	List<CPListElement> entries= ClasspathModifier.getExistingEntries(project);
+        	List<Object> result= new ArrayList<Object>();
         	for (int i= 0; i < selection.size(); i++) {
         		Object element= selection.get(i);
         		if (element instanceof IJavaElement) {
@@ -145,7 +147,7 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
         	ClasspathModifier.commitClassPath(entries, project, null);
 
         	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
-        	delta.setNewEntries((CPListElement[])entries.toArray(new CPListElement[entries.size()]));
+        	delta.setNewEntries(entries.toArray(new CPListElement[entries.size()]));
         	informListeners(delta);
 
         	return result;
@@ -154,6 +156,7 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
         }
     }
 
+	@Override
 	protected boolean canHandle(IStructuredSelection elements) {
 		return true;
 	}

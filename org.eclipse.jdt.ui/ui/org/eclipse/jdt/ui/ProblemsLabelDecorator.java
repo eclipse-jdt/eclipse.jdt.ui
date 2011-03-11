@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -292,9 +292,9 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 
 	private int getErrorTicksFromAnnotationModel(IAnnotationModel model, ISourceReference sourceElement) throws CoreException {
 		int info= 0;
-		Iterator iter= model.getAnnotationIterator();
+		Iterator<Annotation> iter= model.getAnnotationIterator();
 		while ((info != ERRORTICK_ERROR) && iter.hasNext()) {
-			Annotation annot= (Annotation) iter.next();
+			Annotation annot= iter.next();
 			IMarker marker= isAnnotationInRange(model, annot, sourceElement);
 			if (marker != null) {
 				int priority= marker.getAttribute(IMarker.SEVERITY, -1);

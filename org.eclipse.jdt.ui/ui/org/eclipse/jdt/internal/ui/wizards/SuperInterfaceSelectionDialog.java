@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 	private static final int ADD_ID= IDialogConstants.CLIENT_ID + 1;
 
 	private NewTypeWizardPage fTypeWizardPage;
-	private List fOldContent;
+	private List<String> fOldContent;
 
 	/**
 	 * Creates new instance of SuperInterfaceSelectionDialog
@@ -82,6 +82,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.dialogs.SelectionDialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, ADD_ID, NewWizardMessages.SuperInterfaceSelectionDialog_addButton_label, true);
 		super.createButtonsForButtonBar(parent);
@@ -90,6 +91,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#getDialogBoundsSettings()
 	 */
+	@Override
 	protected IDialogSettings getDialogBoundsSettings() {
 		return JavaPlugin.getDefault().getDialogSettingsSection("DialogBounds_SuperInterfaceSelectionDialog"); //$NON-NLS-1$
 	}
@@ -97,6 +99,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.dialogs.SelectionStatusDialog#updateButtonsEnableState(org.eclipse.core.runtime.IStatus)
 	 */
+	@Override
 	protected void updateButtonsEnableState(IStatus status) {
 		super.updateButtonsEnableState(status);
 		Button addButton= getButton(ADD_ID);
@@ -107,6 +110,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.window.Window#handleShellCloseEvent()
 	 */
+	@Override
 	protected void handleShellCloseEvent() {
 		super.handleShellCloseEvent();
 		// Handle the closing of the shell by selecting the close icon
@@ -116,6 +120,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#cancelPressed()
 	 */
+	@Override
 	protected void cancelPressed() {
 		fTypeWizardPage.setSuperInterfaces(fOldContent, true);
 		super.cancelPressed();
@@ -124,6 +129,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
+	@Override
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == ADD_ID) {
 			addSelectedInterfaces();
@@ -135,6 +141,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.dialogs.SelectionStatusDialog#okPressed()
 	 */
+	@Override
 	protected void okPressed() {
 		addSelectedInterfaces();
 		super.okPressed();
@@ -147,7 +154,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 		StructuredSelection selection= getSelectedItems();
 		if (selection == null)
 			return;
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object obj= iter.next();
 			if (obj instanceof TypeNameMatch) {
 				accessedHistoryItem(obj);
@@ -175,6 +182,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 	/*(non-Javadoc)
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#handleDoubleClick()
 	 */
+	@Override
 	protected void handleDoubleClick() {
 		buttonPressed(ADD_ID);
 	}
@@ -182,6 +190,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#handleSelected(org.eclipse.jface.viewers.StructuredSelection)
 	 */
+	@Override
 	protected void handleSelected(StructuredSelection selection) {
 		super.handleSelected(selection);
 
@@ -206,6 +215,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2#configureShell(org.eclipse.swt.widgets.Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.SUPER_INTERFACE_SELECTION_DIALOG);

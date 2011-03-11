@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,6 +74,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		public ByteArrayWrapper(byte[] byteArray) {
 			this.byteArray= byteArray;
 		}
+		@Override
 		public int hashCode() {
 			final int prime= 31;
 			int result= 1;
@@ -81,6 +82,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			return result;
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
@@ -121,7 +123,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	private IPhoneticDistanceAlgorithm fDistanceAlgorithm= new DefaultPhoneticDistanceAlgorithm();
 
 	/** The mapping from phonetic hashes to word lists */
-	private final Map fHashBuckets= new HashMap(getInitialSize(), LOAD_FACTOR);
+	private final Map<ByteArrayWrapper, Object> fHashBuckets= new HashMap<ByteArrayWrapper, Object>(getInitialSize(), LOAD_FACTOR);
 
 	/** The phonetic hash provider */
 	private IPhoneticHashProvider fHashProvider= new DefaultPhoneticHashProvider();
@@ -181,17 +183,17 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 *                   Array of close hashes to find the matches
 	 * @return Set of ranked words with bounded distance to the specified word
 	 */
-	protected final Set getCandidates(final String word, final boolean sentence, final ArrayList hashs) {
+	protected final Set<RankedWordProposal> getCandidates(final String word, final boolean sentence, final ArrayList<String> hashs) {
 
 		int distance= 0;
 		String hash= null;
 
 		final StringBuffer buffer= new StringBuffer(BUFFER_CAPACITY);
-		final HashSet result= new HashSet(BUCKET_CAPACITY * hashs.size());
+		final HashSet<RankedWordProposal> result= new HashSet<RankedWordProposal>(BUCKET_CAPACITY * hashs.size());
 
 		for (int index= 0; index < hashs.size(); index++) {
 
-			hash= (String)hashs.get(index);
+			hash= hashs.get(index);
 
 			final Object candidates= getCandidates(hash);
 			if (candidates == null)
@@ -215,13 +217,14 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 				continue;
 			}
 
-			final ArrayList candidateList= (ArrayList)candidates;
+			@SuppressWarnings("unchecked")
+			final ArrayList<byte[]> candidateList= (ArrayList<byte[]>)candidates;
 			int candidateSize= Math.min(500, candidateList.size()); // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=195357
 			for (int offset= 0; offset < candidateSize; offset++) {
 
 				String candidate;
 				try {
-					candidate= new String((byte[])candidateList.get(offset), UTF_8);
+					candidate= new String(candidateList.get(offset), UTF_8);
 				} catch (UnsupportedEncodingException e) {
 					JavaPlugin.log(e);
 					return result;
@@ -256,7 +259,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 *                   Set of ranked words with smallest possible distance to the
 	 *                   specified word
 	 */
-	protected final void getCandidates(final String word, final boolean sentence, final Set result) {
+	protected final void getCandidates(final String word, final boolean sentence, final Set<RankedWordProposal> result) {
 
 		int distance= 0;
 		int minimum= Integer.MAX_VALUE;
@@ -282,13 +285,14 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			return;
 		}
 
-		final ArrayList candidateList= (ArrayList)candidates;
-		final ArrayList matches= new ArrayList(candidateList.size());
+		@SuppressWarnings("unchecked")
+		final ArrayList<byte[]> candidateList= (ArrayList<byte[]>)candidates;
+		final ArrayList<RankedWordProposal> matches= new ArrayList<RankedWordProposal>(candidateList.size());
 
 		for (int index= 0; index < candidateList.size(); index++) {
 			String candidate;
 			try {
-				candidate= new String((byte[])candidateList.get(index), UTF_8);
+				candidate= new String(candidateList.get(index), UTF_8);
 			} catch (UnsupportedEncodingException e) {
 				JavaPlugin.log(e);
 				return;
@@ -345,7 +349,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#getProposals(java.lang.String,boolean)
 	 */
-	public Set getProposals(final String word, final boolean sentence) {
+	public Set<RankedWordProposal> getProposals(final String word, final boolean sentence) {
 
 		try {
 
@@ -364,10 +368,10 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		final String hash= fHashProvider.getHash(word);
 		final char[] mutators= fHashProvider.getMutators();
 
-		final ArrayList neighborhood= new ArrayList((word.length() + 1) * (mutators.length + 2));
+		final ArrayList<String> neighborhood= new ArrayList<String>((word.length() + 1) * (mutators.length + 2));
 		neighborhood.add(hash);
 
-		final Set candidates= getCandidates(word, sentence, neighborhood);
+		final Set<RankedWordProposal> candidates= getCandidates(word, sentence, neighborhood);
 		neighborhood.clear();
 
 		char previous= 0;
@@ -445,7 +449,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		}
 
 		neighborhood.remove(hash);
-		final Set matches= getCandidates(word, sentence, neighborhood);
+		final Set<RankedWordProposal> matches= getCandidates(word, sentence, neighborhood);
 
 		if (matches.size() == 0 && candidates.size() == 0)
 			getCandidates(word, sentence, candidates);
@@ -488,9 +492,11 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		if (bucket == null) {
 			fHashBuckets.put(hashBytes, wordBytes);
 		} else if (bucket instanceof ArrayList) {
-			((ArrayList)bucket).add(wordBytes);
+			@SuppressWarnings("unchecked")
+			ArrayList<byte[]> bucketList= (ArrayList<byte[]>)bucket;
+			bucketList.add(wordBytes);
 		} else {
-			ArrayList list= new ArrayList(BUCKET_CAPACITY);
+			ArrayList<Object> list= new ArrayList<Object>(BUCKET_CAPACITY);
 			list.add(bucket);
 			list.add(wordBytes);
 			fHashBuckets.put(hashBytes, list);
@@ -531,7 +537,8 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 				return true;
 			return false;
 		}
-		final ArrayList candidateList= (ArrayList)candidates;
+		@SuppressWarnings("unchecked")
+		final ArrayList<byte[]> candidateList= (ArrayList<byte[]>)candidates;
 		byte[] wordBytes;
 		byte[] lowercaseWordBytes;
 		try {
@@ -542,7 +549,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			return false;
 		}
 		for (int index= 0; index < candidateList.size(); index++) {
-			byte[] candidate= (byte[])candidateList.get(index);
+			byte[] candidate= candidateList.get(index);
 			if (Arrays.equals(candidate, wordBytes) || Arrays.equals(candidate, lowercaseWordBytes)) {
 				return true;
 			}
@@ -678,11 +685,11 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 * @since 3.3.
 	 */
 	private void compact() {
-		Iterator iter= fHashBuckets.values().iterator();
+		Iterator<Object> iter= fHashBuckets.values().iterator();
 		while (iter.hasNext()) {
 			Object element= iter.next();
 			if (element instanceof ArrayList)
-				((ArrayList)element).trimToSize();
+				((ArrayList<?>)element).trimToSize();
 		}
 	}
 

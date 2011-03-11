@@ -64,6 +64,7 @@ public final class MoveInstanceMethodAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isMoveMethodAvailable(selection));
@@ -75,6 +76,7 @@ public final class MoveInstanceMethodAction extends SelectionDispatchAction {
 		}
 	}
 
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
     }
@@ -82,6 +84,7 @@ public final class MoveInstanceMethodAction extends SelectionDispatchAction {
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isMoveMethodAvailable(selection));
@@ -102,6 +105,7 @@ public final class MoveInstanceMethodAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			Assert.isTrue(RefactoringAvailabilityTester.isMoveMethodAvailable(selection));
@@ -118,6 +122,7 @@ public final class MoveInstanceMethodAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		try {
 			run(selection, SelectionConverter.getInputAsCompilationUnit(fEditor));

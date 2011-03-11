@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,7 +62,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 
 	private Label fPageInfoLabel;
 	private String fPageInfoMessage= JavaUIMessages.MultiElementListSelectionDialog_pageInfoMessage;
-	private Comparator fComparator;
+	private Comparator<?> fComparator;
 
 	/**
 	 * Constructs a multi-page list selection dialog.
@@ -98,8 +98,9 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	/*
 	 * @see Window#open()
 	 */
+	@Override
 	public int open() {
-		List selection= getInitialElementSelections();
+		List<Object[]> selection= getInitialElementSelections();
 		if (selection == null || selection.size() != fNumberOfPages) {
 			setInitialSelections(new Object[fNumberOfPages]);
 			selection= getInitialElementSelections();
@@ -113,6 +114,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(Composite)
 	 */
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite contents= (Composite) super.createDialogArea(parent);
 
@@ -130,6 +132,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(Composite)
 	 */
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		fBackButton= createButton(parent, IDialogConstants.BACK_ID, IDialogConstants.BACK_LABEL, false);
 		
@@ -147,6 +150,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 * @see org.eclipse.jface.dialogs.Dialog#initializeBounds()
 	 * @since 3.5.1
 	 */
+	@Override
 	protected void initializeBounds() {
 		super.initializeBounds();
 		fNextButton.getShell().setDefaultButton(fNextButton);
@@ -155,6 +159,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	/*
 	 * @see org.eclipse.ui.dialogs.SelectionDialog#createMessageArea(Composite)
 	 */
+	@Override
 	protected Label createMessageArea(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 
@@ -183,6 +188,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	/*
 	 * @see org.eclipse.ui.dialogs.SelectionStatusDialog#computeResult()
 	 */
+	@Override
 	protected void computeResult() {
 		setResult(fCurrentPage, getSelectedElements());
 	}
@@ -190,6 +196,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
+	@Override
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.BACK_ID) {
 			turnPage(false);
@@ -203,6 +210,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	/**
 	 * @see AbstractElementListSelectionDialog#handleDefaultSelected()
 	 */
+	@Override
 	protected void handleDefaultSelected() {
 		if (validateCurrentSelection()) {
 			if (fCurrentPage == fNumberOfPages - 1) {
@@ -216,6 +224,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	/**
 	 * @see AbstractElementListSelectionDialog#updateButtonsEnableState(IStatus)
 	 */
+	@Override
 	protected void updateButtonsEnableState(IStatus status) {
 		boolean isOK= !status.matches(IStatus.ERROR);
 		fPages[fCurrentPage].okState= isOK;
@@ -249,7 +258,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 
 		// store selection
 		Object[] selectedElements= getSelectedElements();
-		List list= getInitialElementSelections();
+		List<Object[]> list= getInitialElementSelections();
 		list.set(fCurrentPage, selectedElements);
 
 		// store result
@@ -302,7 +311,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	}
 
 	private void initializeResult(int length) {
-		List result= new ArrayList(length);
+		List<Object> result= new ArrayList<Object>(length);
 		for (int i= 0; i != length; i++)
 			result.add(null);
 
@@ -323,7 +332,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 *
 	 * @param comparator the comparator to use, not null.
 	 */
-	public void setComparator(Comparator comparator) {
+	public void setComparator(Comparator<?> comparator) {
 		fComparator= comparator;
 		if (fFilteredList != null)
 			fFilteredList.setComparator(fComparator);
@@ -332,6 +341,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected FilteredList createFilteredList(Composite parent) {
 		FilteredList filteredList= super.createFilteredList(parent);
 		if (fComparator != null) {

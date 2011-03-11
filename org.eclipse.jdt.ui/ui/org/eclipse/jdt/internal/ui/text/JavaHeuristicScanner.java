@@ -60,6 +60,7 @@ public final class JavaHeuristicScanner implements Symbols {
 	private static final char LANGLE= '<';
 	private static final char RANGLE= '>';
 	private static final char PLUS= '+';
+	private static final char AT= '@';
 
 	/**
 	 * Specifies the stop condition, upon which the <code>scanXXX</code> methods will decide whether
@@ -96,6 +97,7 @@ public final class JavaHeuristicScanner implements Symbols {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char)
 		 */
+		@Override
 		public boolean stop(char ch, int position, boolean forward) {
 			return !Character.isWhitespace(ch);
 		}
@@ -110,6 +112,7 @@ public final class JavaHeuristicScanner implements Symbols {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char)
 		 */
+		@Override
 		public boolean stop(char ch, int position, boolean forward) {
 			return super.stop(ch, position, true) && isDefaultPartition(position);
 		}
@@ -117,6 +120,7 @@ public final class JavaHeuristicScanner implements Symbols {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#nextPosition(int, boolean)
 		 */
+		@Override
 		public int nextPosition(int position, boolean forward) {
 			ITypedRegion partition= getPartition(position);
 			if (fPartition.equals(partition.getType()))
@@ -142,6 +146,7 @@ public final class JavaHeuristicScanner implements Symbols {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char)
 		 */
+		@Override
 		public boolean stop(char ch, int position, boolean forward) {
 			return !Character.isJavaIdentifierPart(ch);
 		}
@@ -156,6 +161,7 @@ public final class JavaHeuristicScanner implements Symbols {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char)
 		 */
+		@Override
 		public boolean stop(char ch, int position, boolean forward) {
 			return super.stop(ch, position, true) || !isDefaultPartition(position);
 		}
@@ -163,6 +169,7 @@ public final class JavaHeuristicScanner implements Symbols {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#nextPosition(int, boolean)
 		 */
+		@Override
 		public int nextPosition(int position, boolean forward) {
 			ITypedRegion partition= getPartition(position);
 			if (fPartition.equals(partition.getType()))
@@ -209,6 +216,7 @@ public final class JavaHeuristicScanner implements Symbols {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char, int)
 		 */
+		@Override
 		public boolean stop(char ch, int position, boolean forward) {
 			return Arrays.binarySearch(fChars, ch) >= 0 && isDefaultPartition(position);
 		}
@@ -216,6 +224,7 @@ public final class JavaHeuristicScanner implements Symbols {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#nextPosition(int, boolean)
 		 */
+		@Override
 		public int nextPosition(int position, boolean forward) {
 			ITypedRegion partition= getPartition(position);
 			if (fPartition.equals(partition.getType()))
@@ -336,6 +345,8 @@ public final class JavaHeuristicScanner implements Symbols {
 				return TokenGREATERTHAN;
 			case PLUS:
 				return TokenPLUS;
+			case AT:
+				return TokenAT;
 		}
 
 		// else
@@ -410,6 +421,8 @@ public final class JavaHeuristicScanner implements Symbols {
 				return TokenGREATERTHAN;
 			case PLUS:
 				return TokenPLUS;
+			case AT:
+				return TokenAT;
 		}
 
 		// else

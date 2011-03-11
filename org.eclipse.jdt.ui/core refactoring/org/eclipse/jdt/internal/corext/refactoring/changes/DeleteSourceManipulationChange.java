@@ -62,6 +62,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	/*
 	 * @see IChange#getName()
 	 */
+	@Override
 	public String getName() {
 		IJavaElement javaElement= getJavaElement(getSourceManipulation());
 		return Messages.format(RefactoringCoreMessages.DeleteSourceManipulationChange_0, JavaElementLabels.getElementLabel(javaElement, JavaElementLabels.ALL_DEFAULT));
@@ -70,6 +71,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	/*
 	 * @see IChange#getModifiedLanguageElement()
 	 */
+	@Override
 	public Object getModifiedElement() {
 		return JavaCore.create(fHandle);
 	}
@@ -77,6 +79,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
 	 */
+	@Override
 	protected IResource getModifiedResource() {
 		IJavaElement elem= JavaCore.create(fHandle);
 		if (elem != null) {
@@ -88,6 +91,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	/*
 	 * @see DeleteChange#doDelete(IProgressMonitor)
 	 */
+	@Override
 	protected Change doDelete(IProgressMonitor pm) throws CoreException {
 		ISourceManipulation element= getSourceManipulation();
 		// we have to save dirty compilation units before deleting them. Otherwise

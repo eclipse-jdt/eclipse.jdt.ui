@@ -283,7 +283,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			return NO_CHILDREN;
 
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-		List list= new ArrayList(roots.length);
+		List<Object> list= new ArrayList<Object>(roots.length);
 		// filter out package fragments that correspond to projects and
 		// replace them with the package fragments directly
 		for (int i= 0; i < roots.length; i++) {
@@ -345,7 +345,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		if (javaProject == null || !javaProject.exists())
 			return members;
 		boolean isFolderOnClasspath = javaProject.isOnClasspath(folder);
-		List nonJavaResources= new ArrayList();
+		List<IResource> nonJavaResources= new ArrayList<IResource>();
 		// Can be on classpath but as a member of non-java resource folder
 		for (int i= 0; i < members.length; i++) {
 			IResource member= members[i];

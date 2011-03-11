@@ -61,10 +61,12 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_TYPE_ACTION);
 	}
 
+	@Override
 	public void run() {
 		runWithEvent(null);
 	}
 
+	@Override
 	public void runWithEvent(Event e) {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		if (! doCreateProjectFirstOnEmptyWorkspace(parent)) {

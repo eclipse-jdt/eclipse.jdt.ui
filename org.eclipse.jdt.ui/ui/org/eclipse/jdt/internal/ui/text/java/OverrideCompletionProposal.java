@@ -84,6 +84,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getPrefixCompletionText(org.eclipse.jface.text.IDocument,int)
 	 */
+	@Override
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		return fMethodName;
 	}
@@ -118,6 +119,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 	/*
 	 * @see JavaTypeCompletionProposal#updateReplacementString(IDocument,char,int,ImportRewrite)
 	 */
+	@Override
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportRewrite importRewrite) throws CoreException, BadLocationException {
 		Document recoveredDocument= new Document();
 		CompilationUnit unit= getRecoveredAST(document, offset, recoveredDocument);
@@ -127,6 +129,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 		} else {
 			importRewrite= StubUtility.createImportRewrite(unit, true); // create a dummy import rewriter to have one
 			context= new ImportRewriteContext() { // forces that all imports are fully qualified
+				@Override
 				public int findInContext(String qualifier, String name, int kind) {
 					return RES_NAME_CONFLICT;
 				}

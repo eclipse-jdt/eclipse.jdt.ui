@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,7 +65,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		public void selectionChanged(SelectionChangedEvent event) {
 			IStructuredSelection selection= (IStructuredSelection) getTreeViewer().getSelection();
 
-			List selectedList= selection.toList();
+			List<?> selectedList= selection.toList();
 			GenerateConstructorUsingFieldsContentProvider cp= (GenerateConstructorUsingFieldsContentProvider) getContentProvider();
 
 			fButtonControls[GenerateConstructorUsingFieldsSelectionDialog.UP_INDEX].setEnabled(cp.canMoveUp(selectedList));
@@ -142,6 +142,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		combo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		combo.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fSuperIndex= combo.getSelectionIndex();
 				// Disable omit super checkbox unless default constructor
@@ -153,6 +154,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		return composite;
 	}
 
+	@Override
 	protected void buttonPressed(int buttonId) {
 		super.buttonPressed(buttonId);
 		switch (buttonId) {
@@ -171,11 +173,13 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		}
 	}
 
+	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.GENERATE_CONSTRUCTOR_USING_FIELDS_SELECTION_DIALOG);
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -242,6 +246,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		return composite;
 	}
 
+	@Override
 	protected Composite createInsertPositionCombo(Composite composite) {
 		Composite entryComposite= super.createInsertPositionCombo(composite);
 		addVisibilityAndModifiersChoices(entryComposite);
@@ -251,10 +256,12 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 	/*
 	 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createLinkControl(Composite composite) {
 		Link link= new Link(composite, SWT.WRAP);
 		link.setText(ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_template_link_message);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				openCodeTempatePage(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID);
 			}
@@ -304,6 +311,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		return omitSuperComposite;
 	}
 
+	@Override
 	protected Composite createSelectionButtons(Composite composite) {
 		Composite buttonComposite= super.createSelectionButtons(composite);
 
@@ -332,6 +340,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		fButtonsEnabled[GenerateConstructorUsingFieldsSelectionDialog.DOWN_INDEX]= defaultState;
 	}
 
+	@Override
 	protected Composite createVisibilityControlAndModifiers(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
 		int[] visibilities= availableVisibilities;
 		try {
@@ -343,10 +352,10 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		return createVisibilityControl(parent, visibilityChangeListener, visibilities, correctVisibility);
 	}
 
-	List getElementList() {
+	List<?> getElementList() {
 		IStructuredSelection selection= (IStructuredSelection) getTreeViewer().getSelection();
-		List elements= selection.toList();
-		ArrayList elementList= new ArrayList();
+		List<?> elements= selection.toList();
+		ArrayList<Object> elementList= new ArrayList<Object>();
 
 		for (int i= 0; i < elements.size(); i++) {
 			elementList.add(elements.get(i));

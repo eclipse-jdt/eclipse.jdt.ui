@@ -60,6 +60,7 @@ public abstract class AbstractConfigurationBlockPreferencePage extends Preferenc
 	/*
 	 * @see PreferencePage#createControl(Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), getHelpId());
@@ -68,6 +69,7 @@ public abstract class AbstractConfigurationBlockPreferencePage extends Preferenc
 	/*
 	 * @see PreferencePage#createContents(Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 
 		fOverlayStore.load();
@@ -88,6 +90,7 @@ public abstract class AbstractConfigurationBlockPreferencePage extends Preferenc
     /*
 	 * @see PreferencePage#performOk()
 	 */
+	@Override
 	public boolean performOk() {
 
 		fConfigurationBlock.performOk();
@@ -102,6 +105,7 @@ public abstract class AbstractConfigurationBlockPreferencePage extends Preferenc
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
+	@Override
 	public void performDefaults() {
 
 		fOverlayStore.loadDefaults();
@@ -113,6 +117,7 @@ public abstract class AbstractConfigurationBlockPreferencePage extends Preferenc
 	/*
 	 * @see DialogPage#dispose()
 	 */
+	@Override
 	public void dispose() {
 
 		fConfigurationBlock.dispose();

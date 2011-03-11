@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,37 +82,37 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
 public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
-	private class CodeTemplateAdapter extends ViewerComparator implements ITreeListAdapter, IDialogFieldListener {
+	private class CodeTemplateAdapter extends ViewerComparator implements ITreeListAdapter<String>, IDialogFieldListener {
 
 		private final Object[] NO_CHILDREN= new Object[0];
 
-		public void customButtonPressed(TreeListDialogField field, int index) {
+		public void customButtonPressed(TreeListDialogField<String> field, int index) {
 			doButtonPressed(index, field.getSelectedElements());
 		}
 
-		public void selectionChanged(TreeListDialogField field) {
-			List selected= field.getSelectedElements();
+		public void selectionChanged(TreeListDialogField<String> field) {
+			List<Object> selected= field.getSelectedElements();
 			field.enableButton(IDX_EDIT, canEdit(selected));
 			field.enableButton(IDX_EXPORT, !selected.isEmpty());
 
 			updateSourceViewerInput(selected);
 		}
 
-		public void doubleClicked(TreeListDialogField field) {
-			List selected= field.getSelectedElements();
+		public void doubleClicked(TreeListDialogField<String> field) {
+			List<Object> selected= field.getSelectedElements();
 			if (canEdit(selected)) {
 				doButtonPressed(IDX_EDIT, selected);
 			}
 		}
 
-		public Object[] getChildren(TreeListDialogField field, Object element) {
+		public Object[] getChildren(TreeListDialogField<String> field, Object element) {
 			if (element == COMMENT_NODE || element == CODE_NODE) {
 				return getTemplateOfCategory(element == COMMENT_NODE);
 			}
 			return NO_CHILDREN;
 		}
 
-		public Object getParent(TreeListDialogField field, Object element) {
+		public Object getParent(TreeListDialogField<String> field, Object element) {
 			if (element instanceof TemplatePersistenceData) {
 				TemplatePersistenceData data= (TemplatePersistenceData) element;
 				if (data.getTemplate().getName().endsWith(CodeTemplateContextType.COMMENT_SUFFIX)) {
@@ -123,7 +123,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			return null;
 		}
 
-		public boolean hasChildren(TreeListDialogField field, Object element) {
+		public boolean hasChildren(TreeListDialogField<String> field, Object element) {
 			return (element == COMMENT_NODE || element == CODE_NODE);
 		}
 
@@ -133,12 +133,13 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			}
 		}
 
-		public void keyPressed(TreeListDialogField field, KeyEvent event) {
+		public void keyPressed(TreeListDialogField<String> field, KeyEvent event) {
 		}
 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.ViewerSorter#category(java.lang.Object)
 		 */
+		@Override
 		public int category(Object element) {
 			if (element == COMMENT_NODE) {
 				return 1;
@@ -197,6 +198,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
 		 */
+		@Override
 		public Image getImage(Object element) {
 			return null;
 
@@ -205,6 +207,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
 		 */
+		@Override
 		public String getText(Object element) {
 			if (element == COMMENT_NODE || element == CODE_NODE) {
 				return (String) element;
@@ -267,10 +270,10 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	private final static int IDX_EXPORT= 3;
 	private final static int IDX_EXPORTALL= 4;
 
-	protected final static Object COMMENT_NODE= PreferencesMessages.CodeTemplateBlock_templates_comment_node;
-	protected final static Object CODE_NODE= PreferencesMessages.CodeTemplateBlock_templates_code_node;
+	protected final static String COMMENT_NODE= PreferencesMessages.CodeTemplateBlock_templates_comment_node;
+	protected final static String CODE_NODE= PreferencesMessages.CodeTemplateBlock_templates_code_node;
 
-	private TreeListDialogField fCodeTemplateTree;
+	private TreeListDialogField<String> fCodeTemplateTree;
 	private SelectionButtonDialogField fGenerateComments;
 
 	protected ProjectTemplateStore fTemplateStore;
@@ -302,7 +305,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.CodeTemplateBlock_templates_exportall_button
 
 		};
-		fCodeTemplateTree= new TreeListDialogField(adapter, buttonLabels, new CodeTemplateLabelProvider());
+		fCodeTemplateTree= new TreeListDialogField<String>(adapter, buttonLabels, new CodeTemplateLabelProvider());
 		fCodeTemplateTree.setDialogFieldListener(adapter);
 		fCodeTemplateTree.setLabelText(PreferencesMessages.CodeTemplateBlock_templates_label);
 		fCodeTemplateTree.setViewerComparator(adapter);
@@ -326,6 +329,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		fCodeTemplateTree.postSetSelection(new StructuredSelection(element));
 	}
 
+	@Override
 	public boolean hasProjectSpecificOptions(IProject project) {
 		if (super.hasProjectSpecificOptions(project))
 			return true;
@@ -340,11 +344,13 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#useProjectSpecificSettings(boolean)
 	 * @since 3.5
 	 */
+	@Override
 	public void useProjectSpecificSettings(boolean enable) {
 		fCodeTemplateTree.setEnabled(enable); // need to set because super implementation only updates controls
 		super.useProjectSpecificSettings(enable);
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		fPixelConverter=  new PixelConverter(parent);
 
@@ -373,6 +379,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateControls()
 	 */
+	@Override
 	protected void updateControls() {
 		fGenerateComments.setSelection(getBooleanValue(PREF_GENERATE_COMMENTS));
 	}
@@ -415,7 +422,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	}
 
 	protected TemplatePersistenceData[] getTemplateOfCategory(boolean isComment) {
-		ArrayList res=  new ArrayList();
+		ArrayList<TemplatePersistenceData> res=  new ArrayList<TemplatePersistenceData>();
 		TemplatePersistenceData[] templates= fTemplateStore.getTemplateData();
 		for (int i= 0; i < templates.length; i++) {
 			TemplatePersistenceData curr= templates[i];
@@ -423,14 +430,14 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 				res.add(curr);
 			}
 		}
-		return (TemplatePersistenceData[]) res.toArray(new TemplatePersistenceData[res.size()]);
+		return res.toArray(new TemplatePersistenceData[res.size()]);
 	}
 
-	protected static boolean canEdit(List selected) {
+	protected static boolean canEdit(List<Object> selected) {
 		return selected.size() == 1 && (selected.get(0) instanceof TemplatePersistenceData);
 	}
 
-	protected void updateSourceViewerInput(List selection) {
+	protected void updateSourceViewerInput(List<Object> selection) {
 		if (fPatternViewer == null || fPatternViewer.getTextWidget().isDisposed()) {
 			return;
 		}
@@ -445,7 +452,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		}
 	}
 
-	protected void doButtonPressed(int buttonIndex, List selected) {
+	protected void doButtonPressed(int buttonIndex, List<Object> selected) {
 		if (buttonIndex == IDX_EDIT) {
 			edit((TemplatePersistenceData) selected.get(0));
 		} else if (buttonIndex == IDX_EXPORT) {
@@ -521,8 +528,8 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		export(fTemplateStore.getTemplateData());
 	}
 
-	private void export(List selected) {
-		Set datas= new HashSet();
+	private void export(List<Object> selected) {
+		Set<Object> datas= new HashSet<Object>();
 		for (int i= 0; i < selected.size(); i++) {
 			Object curr= selected.get(i);
 			if (curr instanceof TemplatePersistenceData) {
@@ -532,7 +539,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 				datas.addAll(Arrays.asList(cat));
 			}
 		}
-		export((TemplatePersistenceData[]) datas.toArray(new TemplatePersistenceData[datas.size()]));
+		export(datas.toArray(new TemplatePersistenceData[datas.size()]));
 	}
 
 	private void export(TemplatePersistenceData[] templates) {
@@ -590,6 +597,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			Messages.format(PreferencesMessages.CodeTemplateBlock_export_exists_message, BasicElementLabels.getPathLabel(file)));
 	}
 
+	@Override
 	public void performDefaults() {
 		fTemplateStore.restoreDefaults();
 
@@ -644,6 +652,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		MessageDialog.openError(getShell(), title, message);
 	}
 
+	@Override
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		return null;
 	}
@@ -651,6 +660,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String, java.lang.String)
 	 */
+	@Override
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		// no validation here
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.jface.action.IAction;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
@@ -25,10 +26,21 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.BreakStatement;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
+import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
+import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 
@@ -53,7 +65,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 
 		int offset= region.getOffset();
 
-		IJavaElement input= EditorUtility.getEditorInputJavaElement(textEditor, false);
+		ITypeRoot input= EditorUtility.getEditorInputJavaElement(textEditor, false);
 		if (input == null)
 			return null;
 
@@ -63,8 +75,15 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 			if (wordRegion == null || wordRegion.getLength() == 0)
 				return null;
 
-			IJavaElement[] elements= null;
-			elements= ((ICodeAssist) input).codeSelect(wordRegion.getOffset(), wordRegion.getLength());
+			if (isInheritDoc(document, wordRegion) && getClass() != JavaElementHyperlinkDetector.class)
+				return null;
+			
+			if (findBreakOrContinueTarget(input, region) != null) {
+				IHyperlink link= createHyperlink(wordRegion, (SelectionDispatchAction)openAction, null, false, null);
+				return link != null ? new IHyperlink[] { link } : null;
+			}
+
+			IJavaElement[] elements= ((ICodeAssist) input).codeSelect(wordRegion.getOffset(), wordRegion.getLength());
 			elements= selectOpenableElements(elements);
 			if (elements.length == 0)
 				return null;
@@ -92,11 +111,28 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 	}
 
 	/**
+	 * Returns whether the word is "inheritDoc".
+	 * 
+	 * @param document the document
+	 * @param wordRegion the word region
+	 * @return <code>true</code> iff the word is "inheritDoc"
+	 * @since 3.7
+	 */
+	private static boolean isInheritDoc(IDocument document, IRegion wordRegion) {
+		try {
+			String word= document.get(wordRegion.getOffset(), wordRegion.getLength());
+			return "inheritDoc".equals(word); //$NON-NLS-1$
+		} catch (BadLocationException e) {
+			return false;
+		}
+	}
+
+	/**
 	 * Creates a java element hyperlink.
 	 * 
 	 * @param wordRegion the region of the link
 	 * @param openAction the action to use to open the java elements
-	 * @param element the java element to open
+	 * @param element the java element to open or <code>null</code> if its a break or continue target
 	 * @param qualify <code>true</code> if the hyperlink text should show a qualified name for
 	 *            element
 	 * @param editor the active java editor
@@ -117,7 +153,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 	 * @since 3.4
 	 */
 	private IJavaElement[] selectOpenableElements(IJavaElement[] elements) {
-		List result= new ArrayList(elements.length);
+		List<IJavaElement> result= new ArrayList<IJavaElement>(elements.length);
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement element= elements[i];
 			switch (element.getElementType()) {
@@ -132,6 +168,47 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 					break;
 			}
 		}
-		return (IJavaElement[]) result.toArray(new IJavaElement[result.size()]);
+		return result.toArray(new IJavaElement[result.size()]);
 	}
+
+	/**
+	 * Finds the target for break or continue node.
+	 * 
+	 * @param input the editor input
+	 * @param region the region
+	 * @return the break or continue target location or <code>null</code> if none
+	 * @since 3.7
+	 */
+	public static OccurrenceLocation findBreakOrContinueTarget(ITypeRoot input, IRegion region) {
+		CompilationUnit astRoot= SharedASTProvider.getAST(input, SharedASTProvider.WAIT_NO, null);
+		if (astRoot == null)
+			return null;
+
+		ASTNode node= NodeFinder.perform(astRoot, region.getOffset(), region.getLength());
+		ASTNode breakOrContinueNode= null;
+		boolean labelSelected= false;
+		if (node instanceof SimpleName) {
+			SimpleName simpleName= (SimpleName) node;
+			StructuralPropertyDescriptor location= simpleName.getLocationInParent();
+			if (location == ContinueStatement.LABEL_PROPERTY || location == BreakStatement.LABEL_PROPERTY) {
+				breakOrContinueNode= simpleName.getParent();
+				labelSelected= true;
+			}
+		} else if (node instanceof ContinueStatement || node instanceof BreakStatement)
+			breakOrContinueNode= node;
+
+		if (breakOrContinueNode == null)
+			return null;
+
+		BreakContinueTargetFinder finder= new BreakContinueTargetFinder();
+		if (finder.initialize(astRoot, breakOrContinueNode) == null) {
+			OccurrenceLocation[] locations= finder.getOccurrences();
+			if (locations != null) {
+				if (breakOrContinueNode instanceof BreakStatement && !labelSelected)
+					return locations[locations.length - 1]; // points to the end of target statement
+				return locations[0]; // points to the beginning of target statement
+			}
+		}
+		return null;
+	}	
 }

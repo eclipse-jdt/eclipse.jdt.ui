@@ -64,6 +64,7 @@ public class PropertiesFileEditor extends TextEditor {
 	 * @see org.eclipse.ui.editors.text.TextEditor#initializeEditor()
 	 * @since 3.4
 	 */
+	@Override
 	protected void initializeEditor() {
 		setDocumentProvider(JavaPlugin.getDefault().getPropertiesFileDocumentProvider());
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
@@ -90,6 +91,7 @@ public class PropertiesFileEditor extends TextEditor {
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#initializeKeyBindingScopes()
 	 * @since 3.4
 	 */
+	@Override
 	protected void initializeKeyBindingScopes() {
 		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.propertiesEditorScope" });  //$NON-NLS-1$
 	}
@@ -97,6 +99,7 @@ public class PropertiesFileEditor extends TextEditor {
 	/*
 	 * @see org.eclipse.ui.editors.text.TextEditor#createActions()
 	 */
+	@Override
 	protected void createActions() {
 		super.createActions();
 
@@ -129,6 +132,7 @@ public class PropertiesFileEditor extends TextEditor {
 	/*
 	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
 	 */
+	@Override
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
 
 		try {
@@ -147,6 +151,7 @@ public class PropertiesFileEditor extends TextEditor {
 	/*
 	 * @see AbstractTextEditor#affectsTextPresentation(PropertyChangeEvent)
 	 */
+	@Override
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
 		return ((PropertiesFileSourceViewerConfiguration)getSourceViewerConfiguration()).affectsTextPresentation(event) || super.affectsTextPresentation(event);
 	}
@@ -155,6 +160,7 @@ public class PropertiesFileEditor extends TextEditor {
 	/*
 	 * @see org.eclipse.ui.editors.text.TextEditor#getAdapter(java.lang.Class)
 	 */
+	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter == IShowInTargetList.class) {
 			return new IShowInTargetList() {
@@ -171,6 +177,7 @@ public class PropertiesFileEditor extends TextEditor {
 	 * @see org.eclipse.ui.part.WorkbenchPart#getOrientation()
 	 * @since 3.2
 	 */
+	@Override
 	public int getOrientation() {
 		return SWT.LEFT_TO_RIGHT;	// properties editors are always left to right by default (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=110986)
 	}
@@ -178,6 +185,7 @@ public class PropertiesFileEditor extends TextEditor {
 	/*
 	 * @see org.eclipse.ui.texteditor.StatusTextEditor#updateStatusField(java.lang.String)
 	 */
+	@Override
 	protected void updateStatusField(String category) {
 		super.updateStatusField(category);
 		if (getEditorSite() != null) {
@@ -197,6 +205,7 @@ public class PropertiesFileEditor extends TextEditor {
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#collectContextMenuPreferencePages()
 	 * @since 3.1
 	 */
+	@Override
 	protected String[] collectContextMenuPreferencePages() {
 		String[] ids= super.collectContextMenuPreferencePages();
 		String[] more= new String[ids.length + 1];
@@ -209,6 +218,7 @@ public class PropertiesFileEditor extends TextEditor {
 	 * @see org.eclipse.ui.editors.text.TextEditor#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
 	 * @since 3.4
 	 */
+	@Override
 	protected void editorContextMenuAboutToShow(IMenuManager menu) {
 		super.editorContextMenuAboutToShow(menu);
 
@@ -219,6 +229,7 @@ public class PropertiesFileEditor extends TextEditor {
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#isTabsToSpacesConversionEnabled()
 	 * @since 3.7
 	 */
+	@Override
 	protected boolean isTabsToSpacesConversionEnabled() {
 		// Can't use our own preference store because JDT disables this functionality in its preferences.
 		return EditorsUI.getPreferenceStore().getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SPACES_FOR_TABS);
@@ -228,6 +239,7 @@ public class PropertiesFileEditor extends TextEditor {
 	 * @see org.eclipse.ui.editors.text.TextEditor#dispose()
 	 * @since 3.7
 	 */
+	@Override
 	public void dispose() {
 		EditorsUI.getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
 		super.dispose();

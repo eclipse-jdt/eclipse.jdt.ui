@@ -147,10 +147,12 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 		return fQuery;
 	}
 
+	@Override
 	public IFileMatchAdapter getFileMatchAdapter() {
 		return this;
 	}
 
+	@Override
 	public IEditorMatchAdapter getEditorMatchAdapter() {
 		return this;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,14 +98,14 @@ public class ASTBatchParser {
 				if (units.length <= MAX_AT_ONCE) {
 					createParser(units[0].getJavaProject()).createASTs(units, bindingKeys, requestor, new SubProgressMonitor(monitor, units.length));
 				} else {
-					List list= Arrays.asList(units);
+					List<ICompilationUnit> list= Arrays.asList(units);
 					int end= 0;
 					int cursor= 0;
 					while (cursor < units.length) {
 						end= Math.min(end + MAX_AT_ONCE, units.length);
-						List toParse= list.subList(cursor, end);
+						List<ICompilationUnit> toParse= list.subList(cursor, end);
 
-						createParser(units[0].getJavaProject()).createASTs((ICompilationUnit[]) toParse.toArray(new ICompilationUnit[toParse.size()]), bindingKeys, requestor,
+						createParser(units[0].getJavaProject()).createASTs(toParse.toArray(new ICompilationUnit[toParse.size()]), bindingKeys, requestor,
 								new SubProgressMonitor(monitor, toParse.size()));
 						cursor= end;
 					}
@@ -138,25 +138,25 @@ public class ASTBatchParser {
 		if (hasOnlyOneProject(units))
 			return new ICompilationUnit[][] { units };
 
-		Hashtable projectTable= new Hashtable();
+		Hashtable<IJavaProject, ArrayList<ICompilationUnit>> projectTable= new Hashtable<IJavaProject, ArrayList<ICompilationUnit>>();
 
 		for (int i= 0; i < units.length; i++) {
 			ICompilationUnit unit= units[i];
-			ArrayList list= (ArrayList) projectTable.get(unit.getJavaProject());
+			ArrayList<ICompilationUnit> list= projectTable.get(unit.getJavaProject());
 			if (list == null) {
-				list= new ArrayList();
+				list= new ArrayList<ICompilationUnit>();
 				projectTable.put(unit.getJavaProject(), list);
 			}
 			list.add(unit);
 		}
 
-		Collection values= projectTable.values();
+		Collection<ArrayList<ICompilationUnit>> values= projectTable.values();
 
 		ICompilationUnit[][] result= new ICompilationUnit[values.size()][];
 		int i= 0;
-		for (Iterator iterator= values.iterator(); iterator.hasNext();) {
-			ArrayList cus= (ArrayList) iterator.next();
-			result[i]= (ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]);
+		for (Iterator<ArrayList<ICompilationUnit>> iterator= values.iterator(); iterator.hasNext();) {
+			ArrayList<ICompilationUnit> cus= iterator.next();
+			result[i]= cus.toArray(new ICompilationUnit[cus.size()]);
 			i++;
 		}
 

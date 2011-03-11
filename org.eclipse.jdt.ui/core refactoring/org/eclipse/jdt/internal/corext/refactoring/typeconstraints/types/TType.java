@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,18 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 
+/**
+ * TTypes are lightweight fully-resolved type objects that stand for {@link ITypeBinding}s.
+ * TTypes can answer basic questions about the relationship between types.
+ * 
+ * They do not hold references to their corresponding {@link ITypeBinding}s, and they
+ * don't carry any information about members of a type.
+ * 
+ * @see TypeEnvironment
+ * @see TType#canAssignTo(TType)
+ * @see HierarchyType#isSubType(HierarchyType)
+ * @see TType#getSubTypes()
+ */
 public abstract class TType {
 
 	public static final int NULL_TYPE= 1;
@@ -455,6 +468,7 @@ public abstract class TType {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final boolean equals(Object other) {
 		if (this == other)
 			return true;
@@ -466,6 +480,7 @@ public abstract class TType {
 		return doEquals(otherType);
 	}
 
+	@Override
 	public abstract int hashCode();
 	
 	/**
@@ -502,14 +517,14 @@ public abstract class TType {
 	 * 		was not created with rememberSubtypes == true
 	 */
 	public TType[] getSubTypes() throws IllegalStateException {
-		Map subTypes= fEnvironment.getSubTypes();
+		Map<TType, ArrayList<TType>> subTypes= fEnvironment.getSubTypes();
 		if (subTypes == null)
 			throw new IllegalStateException("This TypeEnvironment does not remember subtypes"); //$NON-NLS-1$
-		List subtypes= (List) subTypes.get(this);
+		List<TType> subtypes= subTypes.get(this);
 		if (subtypes == null)
 			return EMPTY_TYPE_ARRAY;
 		else
-			return (TType[]) subtypes.toArray(new TType[subtypes.size()]);
+			return subtypes.toArray(new TType[subtypes.size()]);
 	}
 
 	/**
@@ -587,6 +602,7 @@ public abstract class TType {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String toString() {
 		return getPrettySignature();
 	}

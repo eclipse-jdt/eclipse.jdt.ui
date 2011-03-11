@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -22,16 +21,13 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
+import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 
@@ -41,12 +37,13 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 	private static final class MissingParenthesisVisitor extends ASTVisitor {
 
-		private final ArrayList fNodes;
+		private final ArrayList<ASTNode> fNodes;
 
-		private MissingParenthesisVisitor(ArrayList nodes) {
+		private MissingParenthesisVisitor(ArrayList<ASTNode> nodes) {
 			fNodes= nodes;
 		}
 
+		@Override
 		public void postVisit(ASTNode node) {
 			if (needsParentesis(node)) {
 				fNodes.add(node);
@@ -79,172 +76,16 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 	private static final class UnnecessaryParenthesisVisitor extends ASTVisitor {
 
-		private final ArrayList fNodes;
+		private final ArrayList<ParenthesizedExpression> fNodes;
 
-		private UnnecessaryParenthesisVisitor(ArrayList nodes) {
+		private UnnecessaryParenthesisVisitor(ArrayList<ParenthesizedExpression> nodes) {
 			fNodes= nodes;
 		}
 
+		@Override
 		public boolean visit(ParenthesizedExpression node) {
-			if (canRemoveParenthesis(node)) {
+			if (NecessaryParenthesesChecker.canRemoveParentheses(node)) {
 				fNodes.add(node);
-			}
-
-			return true;
-		}
-
-		/*
-		 * Can the parenthesis around node be removed?
-		 */
-		private boolean canRemoveParenthesis(ParenthesizedExpression node) {
-			ASTNode parent= node.getParent();
-			if (!(parent instanceof Expression))
-				return true;
-
-			Expression parentExpression= (Expression) parent;
-			if (parentExpression instanceof ParenthesizedExpression)
-				return true;
-
-			Expression expression= getExpression(node);
-
-			int expressionPrecedence= OperatorPrecedence.getExpressionPrecedence(expression);
-			int parentPrecedence= OperatorPrecedence.getExpressionPrecedence(parentExpression);
-
-			if (expressionPrecedence > parentPrecedence)
-				//(opEx) opParent and opEx binds more -> can safely remove
-				return true;
-
-			if (expressionPrecedence < parentPrecedence)
-				//(opEx) opParent and opEx binds less -> do not remove
-				return false;
-
-			//(opEx) opParent binds equal
-
-			if (parentExpression instanceof InfixExpression) {
-				InfixExpression parentInfix= (InfixExpression) parentExpression;
-				if (parentInfix.getLeftOperand() == node) {
-					//we have (expr op expr) op expr
-					//infix expressions are evaluated from left to right -> can safely remove
-					return true;
-				} else if (isAssociative(parentInfix)) {
-					//we have parent op (expr op expr) and op is associative
-					//left op (right) == (right) op left == right op left
-					if (expression instanceof InfixExpression) {
-						InfixExpression infixExpression= (InfixExpression) expression;
-						Operator operator= infixExpression.getOperator();
-						if (parentInfix.getOperator() != InfixExpression.Operator.TIMES)
-							return true;
-
-						if (operator == InfixExpression.Operator.TIMES)
-							// x * (y * z) == x * y * z
-							return true;
-
-						if (operator == InfixExpression.Operator.REMAINDER)
-							// x * (y % z) != x * y % z
-							return false;
-
-						//x * (y / z) == z * y / z  iff no rounding
-						ITypeBinding binding= infixExpression.resolveTypeBinding();
-						if (binding == null)
-							return false;
-
-						if (!binding.isPrimitive())
-							return false;
-
-						String name= binding.getName();
-						if (isIntegerNumber(name))
-							//rounding involved
-							return false;
-
-						return true;
-					}
-					return true;
-				} else {
-					return false;
-				}
-			} else if (parentExpression instanceof ConditionalExpression) {
-				ConditionalExpression conditionalExpression= (ConditionalExpression) parentExpression;
-				if (conditionalExpression.getElseExpression() != node)
-					return false;
-			}
-
-			return true;
-		}
-
-		private boolean isIntegerNumber(String name) {
-			return "int".equals(name) || "long".equals(name) || "byte".equals(name) || "char".equals(name) || "short".equals(name); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		}
-
-		/*
-		 * Get the expression wrapped by the parentheses
-		 * i.e. ((((expression)))) -> expression
-		 */
-		private Expression getExpression(ParenthesizedExpression node) {
-			Expression expression= node.getExpression();
-			while (expression instanceof ParenthesizedExpression) {
-				expression= ((ParenthesizedExpression) expression).getExpression();
-			}
-			return expression;
-		}
-
-		/**
-		 * Is the given expression associative?
-		 * <p>
-		 * This is true if and only if:<br>
-		 * <code>left operator (right) == (right) operator left == right operator left</code>
-		 * </p>
-		 *
-		 * @param expression the expression to inspect
-		 * @return true if expression is associative
-		 */
-		public static boolean isAssociative(InfixExpression expression) {
-			Operator operator= expression.getOperator();
-			if (operator == InfixExpression.Operator.PLUS) {
-				return isAllOperandsHaveSameType(expression);
-			}
-
-			if (operator == Operator.LESS || operator == Operator.LESS_EQUALS || operator == Operator.GREATER || operator == Operator.GREATER_EQUALS) {
-				return isAllOperandsHaveSameType(expression);
-			}
-
-			if (operator == InfixExpression.Operator.CONDITIONAL_AND)
-				return true;
-
-			if (operator == InfixExpression.Operator.CONDITIONAL_OR)
-				return true;
-
-			if (operator == InfixExpression.Operator.AND)
-				return true;
-
-			if (operator == InfixExpression.Operator.OR)
-				return true;
-
-			if (operator == InfixExpression.Operator.XOR)
-				return true;
-
-			if (operator == InfixExpression.Operator.TIMES)
-				return true;
-
-			return false;
-		}
-
-		/*
-		 * Do all operands in expression have same type
-		 */
-		private static boolean isAllOperandsHaveSameType(InfixExpression expression) {
-			ITypeBinding binding= expression.getLeftOperand().resolveTypeBinding();
-			if (binding == null)
-				return false;
-
-			ITypeBinding current= expression.getRightOperand().resolveTypeBinding();
-			if (binding != current)
-				return false;
-
-			for (Iterator iterator= expression.extendedOperands().iterator(); iterator.hasNext();) {
-				Expression operand= (Expression) iterator.next();
-				current= operand.resolveTypeBinding();
-				if (binding != current)
-					return false;
 			}
 
 			return true;
@@ -262,6 +103,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_addParanoiacParentheses_description, cuRewrite);
 
@@ -281,15 +123,16 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 	private static class RemoveParenthesisOperation extends CompilationUnitRewriteOperation {
 
-		private final HashSet/*<ParenthesizedExpression>*/ fExpressions;
+		private final HashSet<ParenthesizedExpression> fExpressions;
 
-		public RemoveParenthesisOperation(HashSet expressions) {
+		public RemoveParenthesisOperation(HashSet<ParenthesizedExpression> expressions) {
 			fExpressions= expressions;
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_removeUnnecessaryParentheses_description, cuRewrite);
 
@@ -297,7 +140,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			rewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 
 			while (fExpressions.size() > 0) {
-				ParenthesizedExpression parenthesizedExpression= (ParenthesizedExpression)fExpressions.iterator().next();
+				ParenthesizedExpression parenthesizedExpression= fExpressions.iterator().next();
 				fExpressions.remove(parenthesizedExpression);
 				ParenthesizedExpression down= parenthesizedExpression;
 				while (fExpressions.contains(down.getExpression())) {
@@ -325,7 +168,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		if (coveredNodes.length == 0)
 			return null;
 		// check sub-expressions in fully covered nodes
-		final ArrayList changedNodes = new ArrayList();
+		final ArrayList<ASTNode> changedNodes = new ArrayList<ASTNode>();
 		for (int i= 0; i < coveredNodes.length; i++) {
 			ASTNode covered = coveredNodes[i];
 			if (covered instanceof InfixExpression)
@@ -335,13 +178,13 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			return null;
 
 
-		CompilationUnitRewriteOperation op= new AddParenthesisOperation((Expression[])changedNodes.toArray(new Expression[changedNodes.size()]));
+		CompilationUnitRewriteOperation op= new AddParenthesisOperation(changedNodes.toArray(new Expression[changedNodes.size()]));
 		return new ExpressionsFix(FixMessages.ExpressionsFix_addParanoiacParentheses_description, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 	}
 
 	public static ExpressionsFix createRemoveUnnecessaryParenthesisFix(CompilationUnit compilationUnit, ASTNode[] nodes) {
 		// check sub-expressions in fully covered nodes
-		final ArrayList changedNodes= new ArrayList();
+		final ArrayList<ParenthesizedExpression> changedNodes= new ArrayList<ParenthesizedExpression>();
 		for (int i= 0; i < nodes.length; i++) {
 			ASTNode covered= nodes[i];
 			if (covered instanceof ParenthesizedExpression || covered instanceof InfixExpression)
@@ -350,7 +193,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		if (changedNodes.isEmpty())
 			return null;
 
-		HashSet expressions= new HashSet(changedNodes);
+		HashSet<ParenthesizedExpression> expressions= new HashSet<ParenthesizedExpression>(changedNodes);
 		RemoveParenthesisOperation op= new RemoveParenthesisOperation(expressions);
 		return new ExpressionsFix(FixMessages.ExpressionsFix_removeUnnecessaryParentheses_description, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 	}
@@ -360,22 +203,22 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			boolean removeUnnecessaryParenthesis) {
 
 		if (addParanoicParentesis) {
-			final ArrayList changedNodes = new ArrayList();
+			final ArrayList<ASTNode> changedNodes = new ArrayList<ASTNode>();
 			compilationUnit.accept(new MissingParenthesisVisitor(changedNodes));
 
 			if (changedNodes.isEmpty())
 				return null;
 
-			CompilationUnitRewriteOperation op= new AddParenthesisOperation((Expression[])changedNodes.toArray(new Expression[changedNodes.size()]));
+			CompilationUnitRewriteOperation op= new AddParenthesisOperation(changedNodes.toArray(new Expression[changedNodes.size()]));
 			return new ExpressionsFix(FixMessages.ExpressionsFix_add_parentheses_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 		} else if (removeUnnecessaryParenthesis) {
-			final ArrayList changedNodes = new ArrayList();
+			final ArrayList<ParenthesizedExpression> changedNodes = new ArrayList<ParenthesizedExpression>();
 			compilationUnit.accept(new UnnecessaryParenthesisVisitor(changedNodes));
 
 			if (changedNodes.isEmpty())
 				return null;
 
-			HashSet expressions= new HashSet(changedNodes);
+			HashSet<ParenthesizedExpression> expressions= new HashSet<ParenthesizedExpression>(changedNodes);
 			CompilationUnitRewriteOperation op= new RemoveParenthesisOperation(expressions);
 			return new ExpressionsFix(FixMessages.ExpressionsFix_remove_parentheses_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 		}
@@ -385,5 +228,4 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 	protected ExpressionsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
-
 }

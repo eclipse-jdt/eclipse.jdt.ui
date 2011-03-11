@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,10 +38,10 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 
 	private Selection fSelection;
 
-	private static class ExceptionComparator implements Comparator {
-		public int compare(Object o1, Object o2) {
-			int d1= getDepth((ITypeBinding)o1);
-			int d2= getDepth((ITypeBinding)o2);
+	private static class ExceptionComparator implements Comparator<ITypeBinding> {
+		public int compare(ITypeBinding o1, ITypeBinding o2) {
+			int d1= getDepth(o1);
+			int d2= getDepth(o2);
 			if (d1 < d2)
 				return 1;
 			if (d1 > d2)
@@ -66,14 +66,14 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 	public static ITypeBinding[] perform(BodyDeclaration enclosingNode, Selection selection) {
 		ExceptionAnalyzer analyzer= new ExceptionAnalyzer(selection);
 		enclosingNode.accept(analyzer);
-		List exceptions= analyzer.getCurrentExceptions();
+		List<ITypeBinding> exceptions= analyzer.getCurrentExceptions();
 		if (enclosingNode.getNodeType() == ASTNode.METHOD_DECLARATION) {
-			List thrownExceptions= ((MethodDeclaration)enclosingNode).thrownExceptions();
-			for (Iterator thrown= thrownExceptions.iterator(); thrown.hasNext();) {
-				ITypeBinding thrownException= ((Name)thrown.next()).resolveTypeBinding();
+			List<Name> thrownExceptions= ((MethodDeclaration)enclosingNode).thrownExceptions();
+			for (Iterator<Name> thrown= thrownExceptions.iterator(); thrown.hasNext();) {
+				ITypeBinding thrownException= thrown.next().resolveTypeBinding();
 				if (thrownException != null) {
-					for (Iterator excep= exceptions.iterator(); excep.hasNext();) {
-						ITypeBinding exception= (ITypeBinding) excep.next();
+					for (Iterator<ITypeBinding> excep= exceptions.iterator(); excep.hasNext();) {
+						ITypeBinding exception= excep.next();
 						if (exception.isAssignmentCompatible(thrownException))
 							excep.remove();
 					}
@@ -81,9 +81,10 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 			}
 		}
 		Collections.sort(exceptions, new ExceptionComparator());
-		return (ITypeBinding[]) exceptions.toArray(new ITypeBinding[exceptions.size()]);
+		return exceptions.toArray(new ITypeBinding[exceptions.size()]);
 	}
 
+	@Override
 	public boolean visit(ThrowStatement node) {
 		ITypeBinding exception= node.getExpression().resolveTypeBinding();
 		if (!isSelected(node) || exception == null || Bindings.isRuntimeException(exception)) // Safety net for null bindings when compiling fails.
@@ -93,30 +94,35 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 		return true;
 	}
 
+	@Override
 	public boolean visit(MethodInvocation node) {
 		if (!isSelected(node))
 			return false;
 		return handleExceptions(node.resolveMethodBinding());
 	}
 
+	@Override
 	public boolean visit(SuperMethodInvocation node) {
 		if (!isSelected(node))
 			return false;
 		return handleExceptions(node.resolveMethodBinding());
 	}
 
+	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		if (!isSelected(node))
 			return false;
 		return handleExceptions(node.resolveConstructorBinding());
 	}
 
+	@Override
 	public boolean visit(ConstructorInvocation node) {
 		if (!isSelected(node))
 			return false;
 		return handleExceptions(node.resolveConstructorBinding());
 	}
 
+	@Override
 	public boolean visit(SuperConstructorInvocation node) {
 		if (!isSelected(node))
 			return false;

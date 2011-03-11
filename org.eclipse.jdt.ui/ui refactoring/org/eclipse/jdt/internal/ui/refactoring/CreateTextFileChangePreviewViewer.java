@@ -77,6 +77,7 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 			fDescriptor= imageDescriptor;
 		}
 
+		@Override
 		public void setText(String text) {
 			super.setText(text);
 			Image current= null;

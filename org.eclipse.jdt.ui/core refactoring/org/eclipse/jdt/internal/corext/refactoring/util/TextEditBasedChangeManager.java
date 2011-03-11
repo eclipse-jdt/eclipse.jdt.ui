@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
  */
 public class TextEditBasedChangeManager {
 
-	private Map/*<ICompilationUnit, TextEditBasedChange>*/ fMap= new HashMap(10);
+	private Map<ICompilationUnit, TextEditBasedChange> fMap= new HashMap<ICompilationUnit, TextEditBasedChange>(10);
 
 	private final boolean fKeepExecutedTextEdits;
 
@@ -59,7 +59,7 @@ public class TextEditBasedChangeManager {
 	 * @return the text change associated with the given compilation unit.
 	 */
 	public TextEditBasedChange get(ICompilationUnit cu) {
-		TextEditBasedChange result= (TextEditBasedChange)fMap.get(cu);
+		TextEditBasedChange result= fMap.get(cu);
 		if (result == null) {
 			result= new CompilationUnitChange(cu.getElementName(), cu);
 			result.setKeepPreviewEdits(fKeepExecutedTextEdits);
@@ -76,7 +76,7 @@ public class TextEditBasedChangeManager {
 	 * @return the removed <tt>TextEditBasedChange</tt>.
 	 */
 	public TextEditBasedChange remove(ICompilationUnit unit) {
-		return (TextEditBasedChange)fMap.remove(unit);
+		return fMap.remove(unit);
 	}
 
 	/**
@@ -85,20 +85,20 @@ public class TextEditBasedChangeManager {
 	 * @return all text changes managed by this instance
 	 */
 	public TextEditBasedChange[] getAllChanges(){
-		Set cuSet= fMap.keySet();
-		ICompilationUnit[] cus= (ICompilationUnit[]) cuSet.toArray(new ICompilationUnit[cuSet.size()]);
+		Set<ICompilationUnit> cuSet= fMap.keySet();
+		ICompilationUnit[] cus= cuSet.toArray(new ICompilationUnit[cuSet.size()]);
 		// sort by cu name:
-		Arrays.sort(cus, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				String name1= ((ICompilationUnit) o1).getElementName();
-				String name2= ((ICompilationUnit) o2).getElementName();
+		Arrays.sort(cus, new Comparator<ICompilationUnit>() {
+			public int compare(ICompilationUnit o1, ICompilationUnit o2) {
+				String name1= o1.getElementName();
+				String name2= o2.getElementName();
 				return name1.compareTo(name2);
 			}
 		});
 
 		TextEditBasedChange[] textChanges= new TextEditBasedChange[cus.length];
 		for (int i= 0; i < cus.length; i++) {
-			textChanges[i]= (TextEditBasedChange) fMap.get(cus[i]);
+			textChanges[i]= fMap.get(cus[i]);
 		}
 		return textChanges;
 	}
@@ -109,7 +109,7 @@ public class TextEditBasedChangeManager {
 	 * @return all compilation units managed by this instance
 	 */
 	public ICompilationUnit[] getAllCompilationUnits(){
-		return (ICompilationUnit[]) fMap.keySet().toArray(new ICompilationUnit[fMap.keySet().size()]);
+		return fMap.keySet().toArray(new ICompilationUnit[fMap.keySet().size()]);
 	}
 
 	/**
