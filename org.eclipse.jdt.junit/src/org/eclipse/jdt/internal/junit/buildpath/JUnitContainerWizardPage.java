@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.IPath;
 
@@ -54,8 +55,8 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 	private IJavaProject fProject;
 	private IClasspathEntry fContainerEntryResult;
 	private Combo fVersionCombo;
-	private Label fResolvedPath;
-	private Label fResolvedSourcePath;
+	private Text fResolvedPath;
+	private Text fResolvedSourcePath;
 
 	public JUnitContainerWizardPage() {
 		super("JUnitContainerPage"); //$NON-NLS-1$
@@ -138,7 +139,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		label.setText(JUnitMessages.JUnitContainerWizardPage_resolved_label);
 		label.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 1, 1));
 
-		fResolvedPath= new Label(composite, SWT.WRAP);
+		fResolvedPath= new Text(composite, SWT.READ_ONLY | SWT.WRAP);
 		data= new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1);
 		data.widthHint= converter.convertWidthInCharsToPixels(60);
 		fResolvedPath.setFont(composite.getFont());
@@ -149,7 +150,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		label.setText(JUnitMessages.JUnitContainerWizardPage_source_location_label);
 		label.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 1, 1));
 
-		fResolvedSourcePath= new Label(composite, SWT.WRAP);
+		fResolvedSourcePath= new Text(composite,  SWT.READ_ONLY | SWT.WRAP);
 		data= new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1);
 		data.widthHint= converter.convertWidthInCharsToPixels(60);
 		fResolvedSourcePath.setFont(composite.getFont());
@@ -158,6 +159,14 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		doSelectionChanged();
 
 		setControl(composite);
+	}
+	
+	@Override
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		if (visible) {
+			fVersionCombo.setFocus();
+		}
 	}
 
 	protected void doSelectionChanged() {
