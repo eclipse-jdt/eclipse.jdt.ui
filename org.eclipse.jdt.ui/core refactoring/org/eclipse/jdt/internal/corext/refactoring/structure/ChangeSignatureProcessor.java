@@ -1617,11 +1617,15 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	private static String createDeclarationString(ParameterInfo info) {
 		String newTypeName= info.getNewTypeName();
+		int varargsIndex= newTypeName.lastIndexOf("..."); //$NON-NLS-1$
+		if (varargsIndex != -1) {
+			newTypeName= newTypeName.substring(0, varargsIndex);
+		}
 		int index= newTypeName.lastIndexOf('.');
-		if (index != -1){
+		if (index != -1) {
 			newTypeName= newTypeName.substring(index+1);
 		}
-		return newTypeName + " " + info.getNewName(); //$NON-NLS-1$
+		return newTypeName + (varargsIndex != -1 ? "..." : "") + " " + info.getNewName(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	private static final boolean BUG_89686= true; //see bug 83693: Search for References to methods/constructors: do ranges include parameter lists?
