@@ -1211,7 +1211,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 							return;
 						}
 					}
-					final IJavaElement element= emptySelection ? getElementAt(selection.x, true) : null;
+					final IJavaElement element= getElementAt(selection.x, true);
 					if (element != null && element.exists()) {
 						try {
 							final int kind= element.getElementType();
@@ -1219,18 +1219,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 								final ISourceReference reference= (ISourceReference) element;
 								final ISourceRange range= reference.getSourceRange();
-
-								if (range != null) {
+								final ISourceRange nameRange= reference.getNameRange();
+								final boolean seletionInNameRange= nameRange != null && selection.x >= nameRange.getOffset()
+										&& selection.x + selection.y <= nameRange.getOffset() + nameRange.getLength();
+								if (range != null && (emptySelection || seletionInNameRange))
 									viewer.setSelectedRange(range.getOffset(), range.getLength());
-									viewer.doOperation(ISourceViewer.FORMAT);
-								}
 							}
 						} catch (JavaModelException exception) {
 							// Should not happen
 						}
-					} else {
-						viewer.doOperation(ISourceViewer.FORMAT);
 					}
+					viewer.doOperation(ISourceViewer.FORMAT);
 				} catch (BadLocationException e) {
 					// Cannot happen
 				} finally {
