@@ -380,7 +380,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			@Override
 			public void run() {
 				String pageId= "org.eclipse.search.preferences.SearchPreferencePage"; //$NON-NLS-1$
-				PreferencesUtil.createPreferenceDialogOn(JavaPlugin.getActiveWorkbenchShell(), pageId, null, null).open();
+				String[] displayedPages= { pageId,
+						"org.eclipse.ui.editors.preferencePages.Annotations", //$NON-NLS-1$
+						"org.eclipse.ui.preferencePages.ColorsAndFonts" //$NON-NLS-1$
+				};
+				PreferencesUtil.createPreferenceDialogOn(JavaPlugin.getActiveWorkbenchShell(), pageId, displayedPages, null).open();
 			}
 		});
 	}
