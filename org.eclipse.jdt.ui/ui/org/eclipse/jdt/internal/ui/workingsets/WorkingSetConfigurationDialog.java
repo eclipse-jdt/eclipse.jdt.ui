@@ -382,7 +382,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		List<IWorkingSet> newResult= getResultWorkingSets();
 		fResult= newResult.toArray(new IWorkingSet[newResult.size()]);
 		if (fIsSortingEnabled) {
-			Collections.sort(fAllWorkingSets, new WorkingSetComparator(true));
+			Collections.sort(fAllWorkingSets, getComparator());
 		}
 		setResult(newResult);
 		super.okPressed();

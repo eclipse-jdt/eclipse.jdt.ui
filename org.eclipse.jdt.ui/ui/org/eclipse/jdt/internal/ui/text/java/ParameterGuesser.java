@@ -290,10 +290,11 @@ public class ParameterGuesser {
 	 * @param pos the position
 	 * @param suggestions the suggestions or <code>null</code>
 	 * @param fillBestGuess <code>true</code> if the best guess should be filled in
+	 * @param isLastParameter <code>true</code> iff this proposal is for the last parameter of a method
 	 * @return returns the name of the best match, or <code>null</code> if no match found
 	 * @throws JavaModelException if it fails
 	 */
-	public ICompletionProposal[] parameterProposals(String expectedType, String paramName, Position pos, IJavaElement[] suggestions, boolean fillBestGuess) throws JavaModelException {
+	public ICompletionProposal[] parameterProposals(String expectedType, String paramName, Position pos, IJavaElement[] suggestions, boolean fillBestGuess, boolean isLastParameter) throws JavaModelException {
 		List<Variable> typeMatches= evaluateVisibleMatches(expectedType, suggestions);
 		orderMatches(typeMatches, paramName);
 
@@ -310,17 +311,22 @@ public class ParameterGuesser {
 			String displayString= v.name;
 			hasVarWithParamName |= displayString.equals(paramName);
 
-			final char[] triggers= new char[v.triggerChars.length + 1];
-			System.arraycopy(v.triggerChars, 0, triggers, 0, v.triggerChars.length);
-			triggers[triggers.length - 1]= ',';
-
+			final char[] triggers;
+			if (isLastParameter) {
+				triggers= v.triggerChars;
+			} else {
+				triggers= new char[v.triggerChars.length + 1];
+				System.arraycopy(v.triggerChars, 0, triggers, 0, v.triggerChars.length);
+				triggers[triggers.length - 1]= ',';
+			}
+			
 			ret[i++]= new PositionBasedCompletionProposal(v.name, pos, replacementLength, getImage(v.descriptor), displayString, null, null, triggers);
 		}
 		if (!fillBestGuess && !hasVarWithParamName) {
 			// insert a proposal with the argument name
 			ICompletionProposal[] extended= new ICompletionProposal[ret.length + 1];
 			System.arraycopy(ret, 0, extended, 1, ret.length);
-			extended[0]= new PositionBasedCompletionProposal(paramName, pos, replacementLength, null, paramName, null, null, new char[] {','});
+			extended[0]= new PositionBasedCompletionProposal(paramName, pos, replacementLength, null, paramName, null, null, isLastParameter ? null : new char[] {','});
 			return extended;
 		}
 		return ret;
