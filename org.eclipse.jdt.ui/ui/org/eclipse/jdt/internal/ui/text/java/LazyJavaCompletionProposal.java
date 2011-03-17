@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,16 +11,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-
 import org.eclipse.osgi.util.TextProcessor;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.CompletionProposal;
@@ -471,5 +473,30 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 */
 	public void setContextInformationPosition(int contextInformationPosition) {
 		fContextInformationPosition= contextInformationPosition;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
+	 * @since 3.7
+	 */
+	@Override
+	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
+		Point selection= viewer.getSelectedRange();
+		boolean smartToggle= (stateMask & SWT.CTRL) != 0;
+		if (!(insertCompletion() ^ smartToggle) && selection.y > 0)
+			fReplacementLengthComputed= false;
+		super.apply(viewer, trigger, stateMask, offset);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#selected(org.eclipse.jface.text.ITextViewer, boolean)
+	 * @since 3.7
+	 */
+	@Override
+	public void selected(ITextViewer viewer, boolean smartToggle) {
+		Point selection= viewer.getSelectedRange();
+		if (!(insertCompletion() ^ smartToggle) && selection.y > 0)
+			fReplacementLengthComputed= false;
+		super.selected(viewer, smartToggle);
 	}
 }
