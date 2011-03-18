@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -41,6 +45,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.DisjunctiveType;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -109,6 +114,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+
 
 public class ASTFlattener extends GenericVisitor {
 
@@ -142,7 +149,7 @@ public class ASTFlattener extends GenericVisitor {
 	}
 
 	public static String asString(ASTNode node) {
-		Assert.isTrue(node.getAST().apiLevel() == AST.JLS3);
+		Assert.isTrue(node.getAST().apiLevel() == ASTProvider.SHARED_AST_LEVEL);
 
 		ASTFlattener flattener= new ASTFlattener();
 		node.accept(flattener);
@@ -520,6 +527,21 @@ public class ASTFlattener extends GenericVisitor {
 		return false;
 	}
 
+	/*
+	 * @see ASTVisitor#visit(DisjunctiveType)
+	 */
+	@Override
+	public boolean visit(DisjunctiveType node) {
+		for (Iterator<Type> it= node.types().iterator(); it.hasNext();) {
+			Type t= it.next();
+			t.accept(this);
+			if (it.hasNext()) {
+				this.fBuffer.append("|");//$NON-NLS-1$
+			}
+		}
+		return false;
+	}
+	
 	/*
 	 * @see ASTVisitor#visit(DoStatement)
 	 */
@@ -1435,6 +1457,19 @@ public class ASTFlattener extends GenericVisitor {
 	@Override
 	public boolean visit(TryStatement node) {
 		this.fBuffer.append("try ");//$NON-NLS-1$
+		if (node.getAST().apiLevel() >= AST.JLS4) {
+			if (!node.resources().isEmpty()) {
+				this.fBuffer.append("(");//$NON-NLS-1$
+				for (Iterator<VariableDeclarationExpression> it= node.resources().iterator(); it.hasNext();) {
+					VariableDeclarationExpression var= it.next();
+					var.accept(this);
+					if (it.hasNext()) {
+						this.fBuffer.append(",");//$NON-NLS-1$
+					}
+				}
+				this.fBuffer.append(") ");//$NON-NLS-1$
+			}
+		}
 		node.getBody().accept(this);
 		this.fBuffer.append(" ");//$NON-NLS-1$
 		for (Iterator<CatchClause> it= node.catchClauses().iterator(); it.hasNext();) {

@@ -98,7 +98,6 @@ import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.TryStatementWithResources;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
@@ -1078,6 +1077,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 		endVisit((Type)node);
 	}
 
+	@Override
+	public boolean visit(DisjunctiveType node) {
+		return visit((Type)node);
+	}
+
+	@Override
+	public void endVisit(DisjunctiveType node) {
+		endVisit((Type)node);
+	}
+
 //---- End Type Hierarchy ----------------------------------------
 
 	@Override
@@ -1119,24 +1128,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	public void endVisit(VariableDeclarationFragment node) {
 		endVisit((VariableDeclaration)node);
 	}
-	@Override
-	public boolean visit(DisjunctiveType node) {
-		return visit((Type)node);
-	}
 
-	@Override
-	public void endVisit(DisjunctiveType node) {
-		endVisit((Type)node);
-	}
-	@Override
-	public boolean visit(TryStatementWithResources node) {
-		return visit((Statement)node);
-	}
-
-	@Override
-	public void endVisit(TryStatementWithResources node) {
-		endVisit((Statement)node);
-	}
 //---- End VariableDeclaration Hierarchy -----------------------------
 //---- End ASTNode Hierarchy -----------------------------------------
 }
