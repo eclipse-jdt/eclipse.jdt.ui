@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -371,9 +371,19 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			if (structuredSelection.size() == 1) {
 				Object first= structuredSelection.getFirstElement();
 				if (first instanceof JavaElement) {
-					String name= ((JavaElement) first).getJavaElement().getElementName();
-					fFocusAction.setText("Fo&cus On '" + name + '\'');
-					manager.add(fFocusAction);
+					IJavaElement javaElement = ((JavaElement) first).getJavaElement();
+					if (javaElement != null) {
+						String name= javaElement.getElementName();
+						fFocusAction.setText("Fo&cus On '" + name + '\'');
+						manager.add(fFocusAction);
+					}
+				} else if (first instanceof JEResource) {
+					IResource resource= ((JEResource) first).getResource();
+					if (resource != null) {
+						String name= resource.getName();
+						fFocusAction.setText("Fo&cus On '" + name + '\'');
+						manager.add(fFocusAction);
+					}
 				}
 			}
 		}
@@ -513,7 +523,11 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		fFocusAction= new Action() {
 			@Override public void run() {
 				Object selected= ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
-				setSingleInput(((JavaElement) selected).getJavaElement());
+				if (selected instanceof JavaElement) {
+					setSingleInput(((JavaElement) selected).getJavaElement());
+				} else if (selected instanceof JEResource) {
+					setSingleInput(((JEResource) selected).getResource());
+				}
 			}
 		};
 		fFocusAction.setToolTipText("Focus on Selection");
