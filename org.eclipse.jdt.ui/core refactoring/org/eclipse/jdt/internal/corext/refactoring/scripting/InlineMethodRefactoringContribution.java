@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
@@ -40,6 +39,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * Refactoring contribution for the inline method refactoring.
@@ -100,7 +100,7 @@ public final class InlineMethodRefactoringContribution extends JavaUIRefactoring
 						unit= method.getCompilationUnit();
 					} else
 						throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { handle, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT}), null));
-					final ASTParser parser= ASTParser.newParser(AST.JLS3);
+					final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 					parser.setResolveBindings(true);
 					parser.setSource(unit);
 					node= (CompilationUnit) parser.createAST(null);

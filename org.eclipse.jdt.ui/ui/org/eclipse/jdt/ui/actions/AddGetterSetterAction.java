@@ -69,7 +69,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation;
@@ -96,6 +95,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
@@ -337,7 +337,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				setterFields= getSetterOnlyFields(result, keySet);
 				getterSetterFields= getGetterSetterFields(result, keySet);
 			}
-			generate(type, getterFields, setterFields, getterSetterFields, new RefactoringASTParser(AST.JLS3).parse(type.getCompilationUnit(), true), dialog.getElementPosition());
+			generate(type, getterFields, setterFields, getterSetterFields, new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(type.getCompilationUnit(), true), dialog.getElementPosition());
 		}
 		notifyResult(dialogResult == Window.OK);
 	}

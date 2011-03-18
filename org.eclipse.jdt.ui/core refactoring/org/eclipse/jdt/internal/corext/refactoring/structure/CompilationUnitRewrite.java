@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * A {@link CompilationUnitRewrite} holds all data structures that are typically
@@ -312,7 +313,7 @@ public class CompilationUnitRewrite {
 
 	public CompilationUnit getRoot() {
 		if (fRoot == null)
-			fRoot= new RefactoringASTParser(AST.JLS3).parse(fCu, fOwner, fResolveBindings, fStatementsRecovery, fBindingsRecovery, null);
+			fRoot= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(fCu, fOwner, fResolveBindings, fStatementsRecovery, fBindingsRecovery, null);
 		return fRoot;
 	}
 

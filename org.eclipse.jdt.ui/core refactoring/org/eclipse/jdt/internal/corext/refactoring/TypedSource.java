@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -38,6 +37,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
+
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * A tuple used to keep source of an element and its type.
@@ -163,7 +164,7 @@ public class TypedSource {
 				return source;
 		} else {
 			if (tuple.node == null) {
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 				parser.setSource(tuple.unit);
 				tuple.node= (CompilationUnit) parser.createAST(null);
 			}

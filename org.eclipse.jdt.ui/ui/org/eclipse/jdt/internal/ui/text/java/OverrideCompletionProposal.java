@@ -27,7 +27,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -54,6 +53,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class OverrideCompletionProposal extends JavaTypeCompletionProposal implements ICompletionProposalExtension4 {
@@ -107,7 +107,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 
 		recoveredDocument.set(new String(content));
 
-		final ASTParser parser= ASTParser.newParser(AST.JLS3);
+		final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setResolveBindings(true);
 		parser.setStatementsRecovery(true);
 		parser.setSource(content);

@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -39,6 +38,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 public class CallHierarchy {
@@ -284,7 +284,7 @@ public class CallHierarchy {
     	ITypeRoot typeRoot= member.getTypeRoot();
         try {
 	    	if (typeRoot.exists() && typeRoot.getBuffer() != null) {
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 				parser.setSource(typeRoot);
 				parser.setResolveBindings(resolveBindings);
 				return (CompilationUnit) parser.createAST(null);

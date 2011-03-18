@@ -36,7 +36,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
@@ -70,6 +69,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
@@ -271,7 +271,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 			monitor.setTaskName(RefactoringCoreMessages.UseSuperTypeProcessor_creating);
 			final TextEditBasedChangeManager manager= new TextEditBasedChangeManager();
 			final IJavaProject project= fSubType.getJavaProject();
-			final ASTParser parser= ASTParser.newParser(AST.JLS3);
+			final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			parser.setWorkingCopyOwner(fOwner);
 			parser.setResolveBindings(true);
 			parser.setProject(project);

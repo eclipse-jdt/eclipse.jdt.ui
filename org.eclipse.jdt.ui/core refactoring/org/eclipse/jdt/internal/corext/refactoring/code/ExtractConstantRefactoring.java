@@ -102,6 +102,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
@@ -481,7 +482,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	private void checkSource(SubProgressMonitor monitor, RefactoringStatus result) throws CoreException {
 		String newCuSource= fChange.getPreviewContent(new NullProgressMonitor());
-		CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, fCu, true, true, monitor);
+		CompilationUnit newCUNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(newCuSource, fCu, true, true, monitor);
 
 		IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCuRewrite.getRoot());
 		for (int i= 0; i < newProblems.length; i++) {

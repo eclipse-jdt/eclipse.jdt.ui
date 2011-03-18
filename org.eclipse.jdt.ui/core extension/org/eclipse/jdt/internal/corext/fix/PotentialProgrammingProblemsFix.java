@@ -38,7 +38,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -63,6 +62,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashOperation;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
@@ -110,7 +110,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 					throw new OperationCanceledException();
 
 				result= new RefactoringStatus();
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 				parser.setProject(fProject);
 				IBinding[] bindings= parser.createBindings(types, new SubProgressMonitor(monitor, 1));
 				for (int i= 0; i < bindings.length; i++) {

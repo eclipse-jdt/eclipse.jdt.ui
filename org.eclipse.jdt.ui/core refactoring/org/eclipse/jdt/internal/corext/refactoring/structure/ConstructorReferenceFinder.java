@@ -29,7 +29,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
@@ -54,6 +53,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * This class is used to find references to constructors.
@@ -104,7 +105,7 @@ class ConstructorReferenceFinder {
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
-			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(cu, false);
+			CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(cu, false);
 			SearchMatch[] allSearchResults= group.getSearchResults();
 			List<SearchMatch> realConstructorReferences= new ArrayList<SearchMatch>(Arrays.asList(allSearchResults));
 			for (int j= 0; j < allSearchResults.length; j++) {
@@ -188,7 +189,7 @@ class ConstructorReferenceFinder {
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
-			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(cu, false);
+			CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(cu, false);
 			SearchMatch[] results= group.getSearchResults();
 			for (int j= 0; j < results.length; j++) {
 				SearchMatch searchResult= results[j];
@@ -245,7 +246,7 @@ class ConstructorReferenceFinder {
 	//Collection of SearchResults
 	private static Collection<SearchMatch> getAllSuperConstructorInvocations(IType type) throws JavaModelException {
 		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
-		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(type.getCompilationUnit(), false);
+		CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(type.getCompilationUnit(), false);
 		List<SearchMatch> result= new ArrayList<SearchMatch>(constructors.length);
 		for (int i= 0; i < constructors.length; i++) {
 			ASTNode superCall= getSuperConstructorCallNode(constructors[i], cuNode);

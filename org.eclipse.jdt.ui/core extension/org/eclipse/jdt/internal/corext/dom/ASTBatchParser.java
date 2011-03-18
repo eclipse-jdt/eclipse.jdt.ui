@@ -23,10 +23,11 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.IBinding;
+
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * Creates AST from a set of compilation units. Uses the
@@ -127,7 +128,7 @@ public class ASTBatchParser {
 	 * @return an AST parser capable of creating ASTs of compilation units in project
 	 */
 	protected ASTParser createParser(IJavaProject project) {
-		ASTParser result= ASTParser.newParser(AST.JLS3);
+		ASTParser result= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		result.setResolveBindings(true);
 		result.setProject(project);
 

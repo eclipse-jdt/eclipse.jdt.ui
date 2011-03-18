@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -70,6 +69,7 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.OverrideMethodDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
@@ -156,7 +156,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 
 			workingCopy.getBuffer().setContents(workingCopyContents.toString());
 
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			parser.setResolveBindings(true);
 			parser.setStatementsRecovery(true);
 			parser.setSource(workingCopy);

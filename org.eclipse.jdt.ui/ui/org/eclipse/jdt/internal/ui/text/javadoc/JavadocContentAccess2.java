@@ -73,6 +73,7 @@ import org.eclipse.jdt.ui.JavadocContentAccess;
 import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 
@@ -579,7 +580,7 @@ public class JavadocContentAccess2 {
 		//Caveat: Javadoc nodes are not available when Javadoc processing has been disabled!
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=212207
 
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 
 		IJavaProject javaProject= member.getJavaProject();
 		parser.setProject(javaProject);
@@ -1200,7 +1201,7 @@ public class JavadocContentAccess2 {
 						Object constantValue= variableBinding.getConstantValue();
 						if (constantValue != null) {
 							if (constantValue instanceof String) {
-								StringLiteral stringLiteral= AST.newAST(AST.JLS3).newStringLiteral();
+								StringLiteral stringLiteral= AST.newAST(ASTProvider.SHARED_AST_LEVEL).newStringLiteral();
 								stringLiteral.setLiteralValue((String) constantValue);
 								text= stringLiteral.getEscapedValue();
 							} else {

@@ -55,13 +55,13 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 
 public class JavaStructureCreator extends StructureCreator {
@@ -293,7 +293,7 @@ public class JavaStructureCreator extends StructureCreator {
 				contents.getChars(0, n, buffer, 0);
 			}
 
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			if (compilerOptions != null)
 				parser.setCompilerOptions(compilerOptions);
 			parser.setSource(buffer);

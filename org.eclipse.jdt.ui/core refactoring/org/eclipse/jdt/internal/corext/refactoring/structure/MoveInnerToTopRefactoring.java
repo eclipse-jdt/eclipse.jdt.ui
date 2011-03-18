@@ -135,6 +135,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
@@ -683,7 +684,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 	private RefactoringStatus checkConstructorParameterNames() {
 		RefactoringStatus result= new RefactoringStatus();
-		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(fType.getCompilationUnit(), false);
+		CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(fType.getCompilationUnit(), false);
 		MethodDeclaration[] nodes= getConstructorDeclarationNodes(findTypeDeclaration(fType, cuNode));
 		for (int i= 0; i < nodes.length; i++) {
 			MethodDeclaration constructor= nodes[i];
@@ -1043,7 +1044,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		if (change == null)
 			change= new CompilationUnitChange("", unit); //$NON-NLS-1$
 		final String source= change.getPreviewContent(new NullProgressMonitor());
-		final ASTParser parser= ASTParser.newParser(AST.JLS3);
+		final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setProject(fType.getJavaProject());
 		parser.setResolveBindings(false);
 		parser.setSource(source.toCharArray());

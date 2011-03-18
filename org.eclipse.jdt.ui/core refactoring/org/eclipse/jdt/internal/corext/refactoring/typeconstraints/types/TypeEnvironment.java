@@ -26,11 +26,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 
 
@@ -144,7 +145,7 @@ public class TypeEnvironment {
 			mapping.put(bindingKey, type);
 			keys.add(bindingKey);
 		}
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setProject(project);
 		parser.setResolveBindings(true);
 		parser.createASTs(new ICompilationUnit[0], keys.toArray(new String[keys.size()]),
@@ -262,7 +263,7 @@ public class TypeEnvironment {
 			StandardType result= fStandardTypes.get(javaElementType);
 			if (result != null)
 				return result;
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			parser.setProject(focus);
 			IBinding[] bindings= parser.createBindings(new IJavaElement[] {javaElementType} , null);
 			return createStandardType((ITypeBinding)bindings[0]);

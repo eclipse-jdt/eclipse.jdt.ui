@@ -105,6 +105,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.infoviews.JavadocView;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
@@ -812,7 +813,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	private static String getEscapedStringLiteral(String stringValue) {
-		StringLiteral stringLiteral= AST.newAST(AST.JLS3).newStringLiteral();
+		StringLiteral stringLiteral= AST.newAST(ASTProvider.SHARED_AST_LEVEL).newStringLiteral();
 		stringLiteral.setLiteralValue(stringValue);
 		String stringConstant= stringLiteral.getEscapedValue();
 		if (stringConstant.length() > 80) {
@@ -823,7 +824,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	private static String getEscapedCharacterLiteral(char ch) {
-		CharacterLiteral characterLiteral= AST.newAST(AST.JLS3).newCharacterLiteral();
+		CharacterLiteral characterLiteral= AST.newAST(ASTProvider.SHARED_AST_LEVEL).newCharacterLiteral();
 		characterLiteral.setCharValue(ch);
 		return characterLiteral.getEscapedValue();
 	}
@@ -968,7 +969,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		ASTNode node= getHoveredASTNode(editorInputElement, hoverRegion);
 		
 		if (node == null) {
-			ASTParser p= ASTParser.newParser(AST.JLS3);
+			ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			p.setProject(element.getJavaProject());
 			try {
 				binding= p.createBindings(new IJavaElement[] { element }, null)[0];

@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
@@ -91,6 +90,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class InferTypeArgumentsRefactoring extends Refactoring {
@@ -185,7 +185,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 					final SubProgressMonitor batchMonitor= new SubProgressMonitor(projectMonitor, 1);
 					batchMonitor.subTask(RefactoringCoreMessages.InferTypeArgumentsRefactoring_calculating_dependencies);
 
-					ASTParser parser= ASTParser.newParser(AST.JLS3);
+					ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 					parser.setProject(project);
 					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 					parser.setResolveBindings(true);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,8 @@ public class CleanUpContext {
 	 * <code>false</code>. The AST is guaranteed to contain changes made by previous clean ups only
 	 * if {@link CleanUpRequirements#requiresFreshAST()} returns <code>true</code>.
 	 * </p>
+	 * <p>Clients should check the AST API level and do nothing if they are given an AST
+	 * they can't handle (see {@link org.eclipse.jdt.core.dom.AST#apiLevel()}).
 	 * 
 	 * @return an AST or <code>null</code> if none required
 	 */

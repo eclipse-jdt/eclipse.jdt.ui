@@ -124,6 +124,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
@@ -1085,7 +1086,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			}
 			JavaModelUtil.reconcile(subUnit);
 			final IJavaProject project= subUnit.getJavaProject();
-			final ASTParser parser= ASTParser.newParser(AST.JLS3);
+			final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			parser.setWorkingCopyOwner(fOwner);
 			parser.setResolveBindings(true);
 			parser.setProject(project);
