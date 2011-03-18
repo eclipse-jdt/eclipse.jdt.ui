@@ -105,6 +105,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
@@ -810,7 +811,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				collection.add(current);
 			}
 			final ITypeBinding[] extractBindings= { null};
-			final ASTParser extractParser= ASTParser.newParser(AST.JLS3);
+			final ASTParser extractParser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			extractParser.setWorkingCopyOwner(fOwner);
 			extractParser.setResolveBindings(true);
 			extractParser.setProject(project);
@@ -821,7 +822,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				if (extractDeclaration != null)
 					extractBindings[0]= extractDeclaration.resolveBinding();
 			}
-			final ASTParser parser= ASTParser.newParser(AST.JLS3);
+			final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 30);
 			try {
 				final Set<IJavaProject> keySet= projectToUnits.keySet();

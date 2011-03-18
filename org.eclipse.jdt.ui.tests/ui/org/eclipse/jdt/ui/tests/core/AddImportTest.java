@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 
 public class AddImportTest extends CoreTests {
@@ -293,7 +294,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cuT= test1.createCompilationUnit("T.java", buf.toString(), false, null);
 		
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setSource(cuT);
 		parser.setResolveBindings(true);
 		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
@@ -520,7 +521,7 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "java.util", "java.io", "java.net" };
 		int threshold= 99;
-		AST ast= AST.newAST(AST.JLS3);
+		AST ast= AST.newAST(ASTProvider.SHARED_AST_LEVEL);
 		ImportRewrite importsRewrite= newImportsRewrite(cu2, order, threshold, true);
 		{
 			IJavaElement[] elements= cu1.codeSelect(content.indexOf("IOException"), "IOException".length());
@@ -579,7 +580,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
@@ -619,7 +620,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
@@ -659,7 +660,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
@@ -712,7 +713,7 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "java.util", "java.io", "java.net" };
 		int threshold= 99;
-		AST ast= AST.newAST(AST.JLS3);
+		AST ast= AST.newAST(ASTProvider.SHARED_AST_LEVEL);
 		ImportRewrite importsRewrite= newImportsRewrite(cu2, order, threshold, true);
 		{
 			IJavaElement[] elements= cu1.codeSelect(content.indexOf("Map"), "Map".length());

@@ -35,7 +35,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -54,6 +53,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 
 public class GenerateToStringTest extends SourceTestCase {
@@ -134,7 +135,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	public void runOperation(IType type, IMember[] members, IJavaElement insertBefore) throws CoreException {
 
-		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
+		RefactoringASTParser parser= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL);
 		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
 
 		Object[] fKeys= new Object[members.length];
@@ -192,7 +193,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	}
 
 	private static CompilationUnit getCUNode(ICompilationUnit cu) throws Exception {
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setResolveBindings(true);
 		parser.setSource(cu);
 		return (CompilationUnit)parser.createAST(null);

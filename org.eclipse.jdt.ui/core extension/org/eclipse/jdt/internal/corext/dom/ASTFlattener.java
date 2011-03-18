@@ -109,6 +109,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+
 
 public class ASTFlattener extends GenericVisitor {
 
@@ -142,7 +144,7 @@ public class ASTFlattener extends GenericVisitor {
 	}
 
 	public static String asString(ASTNode node) {
-		Assert.isTrue(node.getAST().apiLevel() == AST.JLS3);
+		Assert.isTrue(node.getAST().apiLevel() == ASTProvider.SHARED_AST_LEVEL);
 
 		ASTFlattener flattener= new ASTFlattener();
 		node.accept(flattener);

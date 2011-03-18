@@ -49,7 +49,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -82,6 +81,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
@@ -415,7 +415,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			CompilationUnit methodDeclarationAstRoot;
 			ICompilationUnit methodCu= method.getCompilationUnit();
 			if (methodCu != null) {
-				methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(methodCu, true);
+				methodDeclarationAstRoot= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(methodCu, true);
 			} else {
 				IClassFile classFile= method.getClassFile();
 				if (! JavaElementUtil.isSourceAvailable(classFile)) {
@@ -423,7 +423,7 @@ public class InlineMethodRefactoring extends Refactoring {
 					status.addFatalError(Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_error_classFile, methodLabel));
 					return null;
 				}
-				methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(classFile, true);
+				methodDeclarationAstRoot= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(classFile, true);
 			}
 			ASTNode node= methodDeclarationAstRoot.findDeclaringNode(methodBinding.getMethodDeclaration().getKey());
 			if (node instanceof MethodDeclaration) {

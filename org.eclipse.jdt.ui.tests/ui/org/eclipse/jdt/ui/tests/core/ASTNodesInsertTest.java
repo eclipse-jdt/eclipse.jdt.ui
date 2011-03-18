@@ -37,6 +37,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+
 /**
   */
 public class ASTNodesInsertTest extends CoreTests {
@@ -298,7 +300,7 @@ public class ASTNodesInsertTest extends CoreTests {
 	}
 
 	private CompilationUnit createAST(ICompilationUnit compilationUnit) {
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setSource(compilationUnit);
 		parser.setResolveBindings(true);
 		return (CompilationUnit) parser.createAST(null);

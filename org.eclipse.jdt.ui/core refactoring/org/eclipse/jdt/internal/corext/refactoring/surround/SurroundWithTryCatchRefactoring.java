@@ -68,6 +68,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+
 /**
  * Surround a set of statements with a try/catch block.
  *
@@ -151,7 +153,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	 */
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		CompilationUnit rootNode= new RefactoringASTParser(AST.JLS3).parse(fCUnit, true, pm);
+		CompilationUnit rootNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(fCUnit, true, pm);
 		return checkActivationBasics(rootNode);
 	}
 

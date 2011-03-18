@@ -43,6 +43,8 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+
 public class ASTRewriteSnippet extends TestCase {
 
 	public void testASTRewriteExample() throws Exception {
@@ -84,7 +86,7 @@ public class ASTRewriteSnippet extends TestCase {
 			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 			// create an AST
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			parser.setSource(cu);
 			parser.setResolveBindings(false);
 			CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);

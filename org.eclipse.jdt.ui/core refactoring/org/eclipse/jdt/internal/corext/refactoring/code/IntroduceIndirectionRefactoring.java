@@ -115,6 +115,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
@@ -395,7 +396,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					selectionNode= getSelectedNode(fSelectionCompilationUnit, selectionCURoot, fSelectionStart, fSelectionLength);
 				} else {
 					// binary class file - no cu rewrite
-					ASTParser parser= ASTParser.newParser(AST.JLS3);
+					ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 					parser.setResolveBindings(true);
 					parser.setSource(fSelectionClassFile);
 					selectionCURoot= (CompilationUnit) parser.createAST(null);
@@ -438,7 +439,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					fTargetMethodBinding= declaration.resolveBinding().getMethodDeclaration();
 				} else {
 					// binary method - no CURewrite available (and none needed as we cannot update the method anyway)
-					ASTParser parser= ASTParser.newParser(AST.JLS3);
+					ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 					parser.setProject(fTargetMethod.getJavaProject());
 					IBinding[] bindings= parser.createBindings(new IJavaElement[] { fTargetMethod }, null);
 					fTargetMethodBinding= ((IMethodBinding) bindings[0]).getMethodDeclaration();

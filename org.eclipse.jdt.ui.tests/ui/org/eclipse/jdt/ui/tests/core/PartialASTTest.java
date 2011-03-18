@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -47,6 +46,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class PartialASTTest extends CoreTests {
 
@@ -509,7 +509,7 @@ public class PartialASTTest extends CoreTests {
 	}
 
 	private CompilationUnit getPartialCompilationUnit(ICompilationUnit cu, int offset) {
-		ASTParser p= ASTParser.newParser(AST.JLS3);
+		ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		p.setSource(cu);
 		p.setFocalPosition(offset);
 		p.setResolveBindings(true);

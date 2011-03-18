@@ -20,13 +20,14 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.dom.AST;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class InlineConstantTests extends RefactoringTest {
 	private static final Class clazz = InlineConstantTests.class;
@@ -97,7 +98,7 @@ public class InlineConstantTests extends RefactoringTest {
 		ICompilationUnit selectionCu= cus[selectionCuIndex];
 
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
-		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(AST.JLS3).parse(selectionCu, true), selection.getOffset(), selection.getLength());
+		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(selectionCu, true), selection.getOffset(), selection.getLength());
 		if (ref.checkStaticFinalConstantNameSelected().hasFatalError())
 			ref= null;
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
@@ -136,7 +137,7 @@ public class InlineConstantTests extends RefactoringTest {
 		ICompilationUnit selectionCu= cus[selectionCuIndex];
 
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
-		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(AST.JLS3).parse(selectionCu, true), selection.getOffset(), selection.getLength());
+		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(selectionCu, true), selection.getOffset(), selection.getLength());
 		if (ref.checkStaticFinalConstantNameSelected().hasFatalError())
 			ref= null;
 		if (ref == null)

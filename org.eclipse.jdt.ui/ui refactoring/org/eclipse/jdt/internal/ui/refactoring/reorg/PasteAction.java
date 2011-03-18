@@ -159,6 +159,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -366,7 +367,7 @@ public class PasteAction extends SelectionDispatchAction{
 			private final String fPackageName;
 
 			public static List<ParsedCu> parseCus(IJavaProject javaProject, String compilerCompliance, String text) {
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 				if (javaProject != null) {
 					parser.setProject(javaProject);
 				} else if (compilerCompliance != null) {
@@ -802,7 +803,7 @@ public class PasteAction extends SelectionDispatchAction{
 						try {
 							IDocument document= fileBuffer.getDocument();
 
-							ASTParser parser= ASTParser.newParser(AST.JLS3);
+							ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 							parser.setProject(cu.getJavaProject());
 							parser.setSource(document.get().toCharArray());
 							parser.setStatementsRecovery(true);
@@ -829,7 +830,7 @@ public class PasteAction extends SelectionDispatchAction{
 							cuContent= ""; //$NON-NLS-1$
 						IDocument document= new Document(cuContent);
 
-						ASTParser parser= ASTParser.newParser(AST.JLS3);
+						ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 						parser.setProject(cu.getJavaProject());
 						parser.setSource(cuContent.toCharArray());
 						parser.setStatementsRecovery(true);
@@ -1517,7 +1518,7 @@ public class PasteAction extends SelectionDispatchAction{
 
 			@Override
 			public Change createChange(IProgressMonitor pm) throws CoreException {
-				ASTParser p= ASTParser.newParser(AST.JLS3);
+				ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 				p.setSource(getDestinationCu());
 				CompilationUnit cuNode= (CompilationUnit) p.createAST(pm);
 				ASTRewrite rewrite= ASTRewrite.create(cuNode.getAST());

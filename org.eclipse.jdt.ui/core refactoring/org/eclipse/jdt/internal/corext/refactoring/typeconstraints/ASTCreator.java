@@ -12,12 +12,13 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.WorkingCopyOwner;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 
 public class ASTCreator {
@@ -35,7 +36,7 @@ public class ASTCreator {
 	}
 
 	private static CompilationUnit getCuNode(WorkingCopyOwner workingCopyOwner, ICompilationUnit cu) {
-		ASTParser p = ASTParser.newParser(AST.JLS3);
+		ASTParser p = ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		p.setSource(cu);
 		p.setResolveBindings(true);
 		p.setWorkingCopyOwner(workingCopyOwner);

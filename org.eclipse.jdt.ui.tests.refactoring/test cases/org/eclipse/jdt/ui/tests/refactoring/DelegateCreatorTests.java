@@ -24,7 +24,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -37,6 +36,8 @@ import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreat
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class DelegateCreatorTests extends RefactoringTest {
 
@@ -74,7 +75,7 @@ public class DelegateCreatorTests extends RefactoringTest {
 		if (newTypeName != null) {
 			ICompilationUnit cu2= createCUfromTestFile(getPackageP(), newTypeName);
 			IType classNew= getType(cu2, newTypeName);
-			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(cu2, true, null);
+			CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(cu2, true, null);
 			TypeDeclaration td= ASTNodeSearchUtil.getTypeDeclarationNode(classNew, cuNode);
 			destination= td.resolveBinding();
 		}
@@ -159,7 +160,7 @@ public class DelegateCreatorTests extends RefactoringTest {
 		IPackageFragment e= getRoot().createPackageFragment("e", true, null);
 		ICompilationUnit cu2= createCUfromTestFile(e, "E");
 		IType classNew= getType(cu2, "E");
-		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(cu2, true, null);
+		CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(cu2, true, null);
 		TypeDeclaration td= ASTNodeSearchUtil.getTypeDeclarationNode(classNew, cuNode);
 		ITypeBinding destination= td.resolveBinding();
 
@@ -223,7 +224,7 @@ public class DelegateCreatorTests extends RefactoringTest {
 		IPackageFragment e= getRoot().createPackageFragment("e", true, null);
 		ICompilationUnit cu2= createCUfromTestFile(e, "E");
 		IType classNew= getType(cu2, "E");
-		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(cu2, true, null);
+		CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(cu2, true, null);
 		TypeDeclaration td= ASTNodeSearchUtil.getTypeDeclarationNode(classNew, cuNode);
 		ITypeBinding destination= td.resolveBinding();
 
