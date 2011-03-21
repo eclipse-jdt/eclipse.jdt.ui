@@ -518,38 +518,25 @@ public class ASTView extends ViewPart implements IShowInSource {
 				throw new CoreException(getErrorStatus("Editor not showing a CU or class file", null)); //$NON-NLS-1$
 			}
 			fTypeRoot= typeRoot;
-			int astLevel= getInitialASTLevel(typeRoot);
 			
 			ISelection selection= editor.getSelectionProvider().getSelection();
 			if (selection instanceof ITextSelection) {
 				ITextSelection textSelection= (ITextSelection) selection;
-				fRoot= internalSetInput(typeRoot, textSelection.getOffset(), textSelection.getLength(), astLevel);
+				fRoot= internalSetInput(typeRoot, textSelection.getOffset(), textSelection.getLength());
 				fEditor= editor;
-				setASTLevel(astLevel, false);
 			}
 			installModificationListener();
 		}
 
 	}
 	
-	private int getInitialASTLevel(ITypeRoot typeRoot) {
-		String option= typeRoot.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true);
-		if (option.compareTo(JavaCore.VERSION_1_5) >= 0) {
-			if (option.compareTo(JavaCore.VERSION_1_7) >= 0) {
-				return JLS4;
-			}
-			return JLS3;
-		}
-		return fCurrentASTLevel; // use previous level
-	}
-
-	private CompilationUnit internalSetInput(ITypeRoot input, int offset, int length, int astLevel) throws CoreException {
+	private CompilationUnit internalSetInput(ITypeRoot input, int offset, int length) throws CoreException {
 		if (input.getBuffer() == null) {
 			throw new CoreException(getErrorStatus("Input has no buffer", null)); //$NON-NLS-1$
 		}
 		
 		try {
-			CompilationUnit root= createAST(input, astLevel, offset);
+			CompilationUnit root= createAST(input, offset);
 			resetView(root);
 			if (root == null) {
 				setContentDescription("AST could not be created."); //$NON-NLS-1$
@@ -591,7 +578,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fPreviousDouble= null; // avoid leaking AST
 	}
 	
-	private CompilationUnit createAST(ITypeRoot input, int astLevel, int offset) throws JavaModelException, CoreException {
+	private CompilationUnit createAST(ITypeRoot input, int offset) throws JavaModelException, CoreException {
 		long startTime;
 		long endTime;
 		CompilationUnit root;
@@ -620,7 +607,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 				if (fIgnoreMethodBodies)
 					reconcileFlags |= ICompilationUnit.IGNORE_METHOD_BODIES;
 				startTime= System.currentTimeMillis();
-				root= wc.reconcile(getCurrentASTLevel(), reconcileFlags, null, null);
+				root= wc.reconcile(fCurrentASTLevel, reconcileFlags, null, null);
 				endTime= System.currentTimeMillis();
 			} finally {
 				wc.discardWorkingCopy();
@@ -633,7 +620,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			endTime= System.currentTimeMillis();
 			
 		} else {
-			ASTParser parser= ASTParser.newParser(astLevel);
+			ASTParser parser= ASTParser.newParser(fCurrentASTLevel);
 			parser.setResolveBindings(fCreateBindings);
 			if (input instanceof ICompilationUnit) {
 				parser.setSource((ICompilationUnit) input);
@@ -670,8 +657,9 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fStatementsRecoveryAction.setEnabled(enabled);
 		fBindingsRecoveryAction.setEnabled(enabled);
 		fIgnoreMethodBodiesAction.setEnabled(enabled);
-		fASTVersionToggleActions[0].setEnabled(enabled);
-		fASTVersionToggleActions[1].setEnabled(enabled);
+		for (int i= 0; i < fASTVersionToggleActions.length; i++) {
+			fASTVersionToggleActions[i].setEnabled(enabled);
+		}
 	}
 
 	private void updateContentDescription(IJavaElement element, CompilationUnit root, long time) {
@@ -1092,7 +1080,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			length= node.getLength();
 		}
 
-		internalSetInput(fTypeRoot, offset, length, getCurrentASTLevel());
+		internalSetInput(fTypeRoot, offset, length);
 	}
 		
 	protected void setASTLevel(int level, boolean doRefresh) {
