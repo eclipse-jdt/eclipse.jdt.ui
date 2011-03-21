@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -119,6 +119,7 @@ import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 
 public class ASTView extends ViewPart implements IShowInSource {
 	
+	private static final int JLS4= AST.JLS4;
 	private static final int JLS3= AST.JLS3;
 	/** (Used to get rid of deprecation warnings in code)
 	 * @deprecated
@@ -454,11 +455,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fStatementsRecovery= !fDialogSettings.getBoolean(SETTINGS_NO_STATEMENTS_RECOVERY); // inverse so that default is use recovery
 		fBindingsRecovery= !fDialogSettings.getBoolean(SETTINGS_NO_BINDINGS_RECOVERY); // inverse so that default is use recovery
 		fIgnoreMethodBodies= fDialogSettings.getBoolean(SETTINGS_IGNORE_METHOD_BODIES);
-		fCurrentASTLevel= JLS3;
+		fCurrentASTLevel= JLS4;
 		try {
 			int level= fDialogSettings.getInt(SETTINGS_JLS);
-			if (level == JLS2 || level == JLS3) {
-				fCurrentASTLevel= level;
+			switch (level) {
+				case JLS2:
+				case JLS3:
+				case JLS4:
+					fCurrentASTLevel= level;
 			}
 		} catch (NumberFormatException e) {
 			// ignore
@@ -531,6 +535,9 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private int getInitialASTLevel(ITypeRoot typeRoot) {
 		String option= typeRoot.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true);
 		if (option.compareTo(JavaCore.VERSION_1_5) >= 0) {
+			if (option.compareTo(JavaCore.VERSION_1_7) >= 0) {
+				return JLS4;
+			}
 			return JLS3;
 		}
 		return fCurrentASTLevel; // use previous level
@@ -668,7 +675,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	}
 
 	private void updateContentDescription(IJavaElement element, CompilationUnit root, long time) {
-		String version= root.getAST().apiLevel() == JLS2 ? "AST Level 2" : "AST Level 3";  //$NON-NLS-1$//$NON-NLS-2$
+		String version= "AST Level " + root.getAST().apiLevel();
 		if (getCurrentInputKind() == ASTInputKindAction.USE_RECONCILE) {
 			version+= ", from reconciler"; //$NON-NLS-1$
 		} else if (getCurrentInputKind() == ASTInputKindAction.USE_CACHE) {
@@ -1046,7 +1053,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 			
 		fASTVersionToggleActions= new ASTLevelToggle[] {
 				new ASTLevelToggle("AST Level &2.0", JLS2), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level &3.0", JLS3) //$NON-NLS-1$
+				new ASTLevelToggle("AST Level &3.0", JLS3), //$NON-NLS-1$
+				new ASTLevelToggle("AST Level &4.0", JLS4), //$NON-NLS-1$
 		};
 		
 		fAddToTrayAction= new Action() {

@@ -93,6 +93,9 @@ public class GenericVisitor extends ASTVisitor {
 	public boolean visit(ContinueStatement node) {
 		return visitNode(node);
 	}
+	public boolean visit(DisjunctiveType node) {
+		return visitNode(node);
+	}
 	public boolean visit(DoStatement node) {
 		return visitNode(node);
 	}
@@ -408,6 +411,9 @@ public class GenericVisitor extends ASTVisitor {
 		endVisitNode(node);
 	}
 	public void endVisit(ContinueStatement node) {
+		endVisitNode(node);
+	}
+	public void endVisit(DisjunctiveType node) {
 		endVisitNode(node);
 	}
 	public void endVisit(DoStatement node) {
