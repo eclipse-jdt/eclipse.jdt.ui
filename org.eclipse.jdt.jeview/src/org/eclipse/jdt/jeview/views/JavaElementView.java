@@ -761,8 +761,24 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		fLogDeltasAction= new Action("Log Java element deltas", IAction.AS_CHECK_BOX) {
 			
 			private IElementChangedListener fListener= new IElementChangedListener() {
+				@SuppressWarnings("deprecation")
 				public void elementChanged(ElementChangedEvent event) {
-					JEViewPlugin.logMessage(event.getDelta().toString());
+					String type= "\nEvent type: ";
+					switch (event.getType()) {
+					case ElementChangedEvent.POST_CHANGE:
+						type+= "POST_CHANGE";
+						break;
+					case ElementChangedEvent.POST_RECONCILE:
+						type+= "POST_RECONCILE";
+						break;
+					case ElementChangedEvent.PRE_AUTO_BUILD:
+						type+= "PRE_AUTO_BUILD";
+						break;
+					default:
+						type+= event.getType();
+						break;
+					}
+					JEViewPlugin.logMessage(event.getDelta().toString() + type);
 				}
 			};
 			
