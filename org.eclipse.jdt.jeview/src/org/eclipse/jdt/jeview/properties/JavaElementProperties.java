@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.jeview.JEViewPlugin;
@@ -104,7 +103,6 @@ public class JavaElementProperties implements IPropertySource {
 		addAnnotationProperties();
 		addPackageFragmentProperties();
 		addPackageFragmentRootProperties();
-		addTypeParammeterProperties();
 		addParentProperties();
 		addSourceReferenceProperties();
 		addOpenableProperties();
@@ -217,24 +215,24 @@ public class JavaElementProperties implements IPropertySource {
 	}
 
 	private static void addLocalVariableProperties() {
-		addProperty(new Property(ILocalVariable.class, "nameRange") {
-			@Override public Object compute(IJavaElement element) {
-				return getSourceRangeString(((ILocalVariable) element).getNameRange());
-			}
-		});
 		addProperty(new Property(ILocalVariable.class, "typeSignature") {
 			@Override public Object compute(IJavaElement element) {
 				return ((ILocalVariable) element).getTypeSignature();
 			}
 		});
+		addProperty(new Property(ILocalVariable.class, "flags") {
+			@Override public Object compute(IJavaElement element) {
+				return getFlagsString(((ILocalVariable) element).getFlags(), element.getClass());
+			}
+		});
+		addProperty(new Property(ILocalVariable.class, "isParameter") {
+			@Override public Object compute(IJavaElement element) {
+				return ((ILocalVariable) element).isParameter();
+			}
+		});
 	}
 
 	private static void addAnnotationProperties() {
-		addProperty(new Property(IAnnotation.class, "nameRange") {
-			@Override public Object compute(IJavaElement element) throws JavaModelException {
-				return getSourceRangeString(((IAnnotation) element).getNameRange());
-			}
-		});
 		addProperty(new Property(IAnnotation.class, "occurrenceCount") {
 			@Override public Object compute(IJavaElement element) {
 				return ((IAnnotation) element).getOccurrenceCount();
@@ -243,11 +241,6 @@ public class JavaElementProperties implements IPropertySource {
 	}
 	
 	private static void addMemberProperties() {
-		addProperty(new Property(IMember.class, "nameRange") {
-			@Override public Object compute(IJavaElement element) throws JavaModelException {
-				return getSourceRangeString(((IMember) element).getNameRange());
-			}
-		});
 		addProperty(new Property(IMember.class, "javadocRange") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
 				return getSourceRangeString(((IMember) element).getJavadocRange());
@@ -469,14 +462,6 @@ public class JavaElementProperties implements IPropertySource {
 		});
 	}
 
-	private static void addTypeParammeterProperties() {
-		addProperty(new Property(ITypeParameter.class, "nameRange") {
-			@Override public Object compute(IJavaElement element) throws JavaModelException {
-				return getSourceRangeString(((ITypeParameter) element).getNameRange());
-			}
-		});
-	}
-
 	private static void addParentProperties() {
 		addProperty(new Property(IParent.class, "hasChildren") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
@@ -489,6 +474,11 @@ public class JavaElementProperties implements IPropertySource {
 		addProperty(new Property(ISourceReference.class, "sourceRange") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
 				return getSourceRangeString(((ISourceReference) element).getSourceRange());
+			}
+		});
+		addProperty(new Property(ISourceReference.class, "nameRange") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return getSourceRangeString(((ISourceReference) element).getNameRange());
 			}
 		});
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
@@ -170,6 +171,8 @@ public class JavaElement extends JEAttribute {
 		
 		if (fJavaElement instanceof ITypeParameter)
 			addTypeParameterChildren(result, (ITypeParameter) fJavaElement);
+		if (fJavaElement instanceof ILocalVariable)
+			addLocalVariableChildren(result, (ILocalVariable) fJavaElement);
 		
 		if (fJavaElement instanceof IAnnotation)
 			addAnnotationChildren(result, (IAnnotation) fJavaElement);
@@ -483,6 +486,12 @@ public class JavaElement extends JEAttribute {
 				return createStrings(this, method.getExceptionTypes());
 			}
 		});
+		result.add(new JavaElementChildrenProperty(this, "PARAMETERS") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createJavaElements(this, method.getParameters());
+			}
+		});
 		result.add(new JavaElementChildrenProperty(this, "PARAMETER NAMES") {
 			@Override
 			protected JEAttribute[] computeChildren() throws JavaModelException {
@@ -515,6 +524,7 @@ public class JavaElement extends JEAttribute {
 	}
 	
 	private void addTypeParameterChildren(ArrayList<JEAttribute> result, final ITypeParameter typeParameter) {
+		result.add(new JavaElement(this, "TYPE ROOT", typeParameter.getTypeRoot()));
 		result.add(new JavaElement(this, "DECLARING MEMBER", typeParameter.getDeclaringMember()));
 		result.add(new JavaElementChildrenProperty(this, "BOUNDS") {
 			@Override
@@ -528,6 +538,11 @@ public class JavaElement extends JEAttribute {
 				return createStrings(this, typeParameter.getBoundsSignatures());
 			}
 		});
+	}
+	
+	private void addLocalVariableChildren(ArrayList<JEAttribute> result, final ILocalVariable localVariable) {
+		result.add(new JavaElement(this, "TYPE ROOT", localVariable.getTypeRoot()));
+		result.add(new JavaElement(this, "DECLARING MEMBER", localVariable.getDeclaringMember()));
 	}
 	
 	static JavaElement[] createJavaElements(JEAttribute parent, Object[] javaElements) {
