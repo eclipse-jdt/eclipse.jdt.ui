@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * <p>Clients can make the following assumptions about the AST:
  * <dl>
  *    <li>the AST has a {@link ITypeRoot} as source: {@link CompilationUnit#getTypeRoot()} is not null.</li>
- *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS4 API level 4} or higher</li>
+ *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS3 API level 3} or higher</li>
  *    <li>the AST has bindings resolved ({@link AST#hasResolvedBindings()})</li>
  *    <li>{@link AST#hasStatementsRecovery() statement} and {@link AST#hasBindingsRecovery() bindings}
  *           recovery are enabled
