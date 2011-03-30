@@ -397,7 +397,8 @@ public class Binding extends ASTAttribute {
 	 */
 	public int hashCode() {
 		int result= fParent != null ? fParent.hashCode() : 0;
-		result+= (fBinding != null && fBinding.getKey() != null ? fBinding.getKey().hashCode() : 0);
+		result+= (fBinding != null && fBinding.getKey() != null) ? fBinding.getKey().hashCode() : 0;
+		result+= fLabel != null ? fLabel.hashCode() : 0;
 		return result;
 	}
 
