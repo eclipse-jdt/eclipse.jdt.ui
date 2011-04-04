@@ -36,7 +36,7 @@ public class JavaElementHyperlinkSuperImplementationDetector extends JavaElement
 	 */
 	@Override
 	protected IHyperlink createHyperlink(IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
-		if (element != null && element.getElementType() == IJavaElement.METHOD && SelectionConverter.canOperateOn(editor) && isOverriddenMethod((IMethod)element)) {
+		if (element.getElementType() == IJavaElement.METHOD && SelectionConverter.canOperateOn(editor) && isOverriddenMethod((IMethod)element)) {
 			return new JavaElementSuperImplementationHyperlink(wordRegion, openAction, (IMethod)element, qualify);
 		}
 		return null;
