@@ -218,11 +218,11 @@ public class Binding extends ASTAttribute {
 					res.add(Binding.createValueAttribute(this, "DEFAULT VALUE", methodBinding.getDefaultValue()));
 					
 					int parameterCount= methodBinding.getParameterTypes().length;
-					GeneralAttribute[] parametersAnnotations= new GeneralAttribute[parameterCount];
+					BindingProperty[] parametersAnnotations= new BindingProperty[parameterCount];
 					for (int i= 0; i < parameterCount; i++) {
-						parametersAnnotations[i]= new GeneralAttribute(this, "Parameter " + String.valueOf(i), methodBinding.getParameterAnnotations(i));
+						parametersAnnotations[i]= new BindingProperty(this, "Parameter " + String.valueOf(i), methodBinding.getParameterAnnotations(i), true);
 					}
-					res.add(new GeneralAttribute(this, "PARAMETER ANNOTATIONS", parametersAnnotations));
+					res.add(new BindingProperty(this, "PARAMETER ANNOTATIONS", parametersAnnotations, true));
 					break;
 					
 				case IBinding.ANNOTATION:

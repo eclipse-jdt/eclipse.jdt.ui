@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,7 @@ public class BindingProperty extends ASTAttribute {
 
 	private final String fName;
 	private final Binding fParent;
-	private final Binding[] fValues;
+	private final ASTAttribute[] fValues;
 	private final boolean fIsRelevant;
 
 	public BindingProperty(Binding parent, String name, Object value, boolean isRelevant) {
@@ -65,6 +65,16 @@ public class BindingProperty extends ASTAttribute {
 			fValues= createBindings(bindings, isRelevant);
 			fName= name + " (" + fValues.length + ')'; //$NON-NLS-1$
 		}
+		fIsRelevant= isRelevant;
+	}
+	
+	public BindingProperty(Binding parent, String name, ASTAttribute[] children, boolean isRelevant) {
+		fParent= parent;
+		if (children == null) {
+			children= new ASTAttribute[0];
+		}
+		fValues= children;
+		fName= name + " (" + fValues.length + ')'; //$NON-NLS-1$
 		fIsRelevant= isRelevant;
 	}
 	
