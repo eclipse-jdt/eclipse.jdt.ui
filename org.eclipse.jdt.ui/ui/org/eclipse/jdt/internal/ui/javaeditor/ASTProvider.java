@@ -362,7 +362,7 @@ public final class ASTProvider {
 
 		List<AbstractTypeDeclaration> types= ast.types();
 		if (types != null && types.size() > 0)
-			return types.get(0).getName().getIdentifier();
+			return types.get(0).getName().getIdentifier() + "(" + ast.hashCode() + ")"; //$NON-NLS-1$//$NON-NLS-2$
 		else
 			return "AST without any type"; //$NON-NLS-1$
 	}
@@ -462,7 +462,7 @@ public final class ASTProvider {
 				synchronized (this) {
 					if (activeElement == fActiveJavaElement && fAST != null) {
 						if (DEBUG)
-							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "...got AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "...got AST: " + toString(fAST) + " for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 						return fAST;
 					}

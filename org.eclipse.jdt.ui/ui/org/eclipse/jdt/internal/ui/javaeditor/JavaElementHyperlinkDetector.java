@@ -77,11 +77,9 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 
 			if (isInheritDoc(document, wordRegion) && getClass() != JavaElementHyperlinkDetector.class)
 				return null;
-			
-			if (findBreakOrContinueTarget(input, region) != null) {
-				IHyperlink link= createHyperlink(wordRegion, (SelectionDispatchAction)openAction, null, false, null);
-				return link != null ? new IHyperlink[] { link } : null;
-			}
+
+			if (JavaElementHyperlinkDetector.class == getClass() && findBreakOrContinueTarget(input, region) != null)
+				return new IHyperlink[] { new JavaElementHyperlink(wordRegion, (SelectionDispatchAction)openAction, null, false) };
 
 			IJavaElement[] elements= ((ICodeAssist) input).codeSelect(wordRegion.getOffset(), wordRegion.getLength());
 			elements= selectOpenableElements(elements);
@@ -132,7 +130,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 	 * 
 	 * @param wordRegion the region of the link
 	 * @param openAction the action to use to open the java elements
-	 * @param element the java element to open or <code>null</code> if its a break or continue target
+	 * @param element the java element to open
 	 * @param qualify <code>true</code> if the hyperlink text should show a qualified name for
 	 *            element
 	 * @param editor the active java editor

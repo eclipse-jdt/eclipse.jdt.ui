@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 
@@ -44,10 +45,10 @@ public class JavaElementHyperlink implements IHyperlink {
 	 * 
 	 * @param region the region of the link
 	 * @param openAction the action to use to open the java elements
-	 * @param element the java element to open or <code>null</code> if the element is a break or
-	 *            continue target
+	 * @param element the java element to open or <code>null</code> if {@link OpenAction} should be
+	 *            invoked at the given region
 	 * @param qualify <code>true</code> if the hyperlink text should show a qualified name for
-	 *            element.
+	 *            element
 	 */
 	public JavaElementHyperlink(IRegion region, SelectionDispatchAction openAction, IJavaElement element, boolean qualify) {
 		Assert.isNotNull(openAction);

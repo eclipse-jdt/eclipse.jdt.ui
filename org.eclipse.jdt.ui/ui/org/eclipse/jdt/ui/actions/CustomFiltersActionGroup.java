@@ -35,7 +35,6 @@ import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -54,6 +53,7 @@ import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.filters.CustomFiltersDialog;
+import org.eclipse.jdt.internal.ui.filters.EmptyLibraryContainerFilter;
 import org.eclipse.jdt.internal.ui.filters.FilterDescriptor;
 import org.eclipse.jdt.internal.ui.filters.FilterMessages;
 import org.eclipse.jdt.internal.ui.filters.NamePatternFilter;
@@ -280,7 +280,6 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 */
 	@Override
 	public void fillActionBars(IActionBars actionBars) {
-		fillToolBar(actionBars.getToolBarManager());
 		fillViewMenu(actionBars.getMenuManager());
 	}
 
@@ -346,6 +345,8 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	}
 
 	private boolean isSelected(Object parent, Object element, IContentProvider contentProvider, ViewerFilter filter) {
+		if (filter instanceof EmptyLibraryContainerFilter) // workaround for https://bugs.eclipse.org/341109
+			return true;
 	    if (contentProvider instanceof ITreeContentProvider) {
 	        // the element and all its parents have to be selected
 	        ITreeContentProvider provider = (ITreeContentProvider) contentProvider;
@@ -430,13 +431,6 @@ public class CustomFiltersActionGroup extends ActionGroup {
 
 	private void setUserDefinedPatternsEnabled(boolean state) {
 		fUserDefinedPatternsEnabled= state;
-	}
-
-	/**
-	 * Fills the tool bar.
-	 * @param tooBar the tool bar
-	 */
-	private void fillToolBar(IToolBarManager tooBar) {
 	}
 
 	/**
