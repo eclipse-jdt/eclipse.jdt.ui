@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -218,11 +218,11 @@ public class Binding extends ASTAttribute {
 					res.add(Binding.createValueAttribute(this, "DEFAULT VALUE", methodBinding.getDefaultValue()));
 					
 					int parameterCount= methodBinding.getParameterTypes().length;
-					GeneralAttribute[] parametersAnnotations= new GeneralAttribute[parameterCount];
+					BindingProperty[] parametersAnnotations= new BindingProperty[parameterCount];
 					for (int i= 0; i < parameterCount; i++) {
-						parametersAnnotations[i]= new GeneralAttribute(this, "Parameter " + String.valueOf(i), methodBinding.getParameterAnnotations(i));
+						parametersAnnotations[i]= new BindingProperty(this, "Parameter " + String.valueOf(i), methodBinding.getParameterAnnotations(i), true);
 					}
-					res.add(new GeneralAttribute(this, "PARAMETER ANNOTATIONS", parametersAnnotations));
+					res.add(new BindingProperty(this, "PARAMETER ANNOTATIONS", parametersAnnotations, true));
 					break;
 					
 				case IBinding.ANNOTATION:
@@ -382,6 +382,13 @@ public class Binding extends ASTAttribute {
 			return false;
 		}
 		
+		if (fLabel == null) {
+			if (other.fLabel != null)
+				return false;
+		} else if (! fLabel.equals(other.fLabel)) {
+			return false;
+		}
+		
 		return true;
 	}
 	
@@ -390,7 +397,8 @@ public class Binding extends ASTAttribute {
 	 */
 	public int hashCode() {
 		int result= fParent != null ? fParent.hashCode() : 0;
-		result+= (fBinding != null && fBinding.getKey() != null ? fBinding.getKey().hashCode() : 0);
+		result+= (fBinding != null && fBinding.getKey() != null) ? fBinding.getKey().hashCode() : 0;
+		result+= fLabel != null ? fLabel.hashCode() : 0;
 		return result;
 	}
 
