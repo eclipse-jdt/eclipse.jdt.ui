@@ -23,6 +23,9 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	 * This test tests only <= 1.5 source level tags.
 	 */
 
+	private static final boolean BUG_NO_HTML_TAG_PROPOSALS_IN_CORE_JDOC_ASSIST= true;
+	private static final boolean BUG_NO_BEST_EFFORT_IMPORTS_WITH_CORE_COMPLETION= true;
+	private static final boolean BUG_113544= true;
 	private static final Class THIS= JavadocCompletionTest.class;
 	private static final String METHOD=
 			"	public int method(int param) {\n" +
@@ -114,7 +117,7 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	}
 
 	public void testSeeMethodWithoutImport() throws Exception {
-		if (true) {
+		if (BUG_NO_BEST_EFFORT_IMPORTS_WITH_CORE_COMPLETION) {
 			System.out.println("JavadocCompletionTest.testSeeMethodWithoutImport() - no best-effort imports with Core completion");
 			return;
 		}
@@ -148,7 +151,7 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 		assertTypeJavadocProposal(" * Prefix List|", "{@link List}", " * Prefix {@link java.util.List}|");
 	}
 	public void testDirectLinkTypeNoAutoClose() throws Exception {
-		if (true) {
+		if (BUG_113544) {
 			System.out.println("not testing autoclosing behavior, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544");
 			return;
 		}
@@ -199,7 +202,7 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	}
 
 	public void testDirectLinkTypeNoAutoCloseImportsOn() throws Exception {
-		if (true) {
+		if (BUG_113544) {
 			System.out.println("not testing autoclosing behavior, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544");
 			return;
 		}
@@ -224,7 +227,7 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	}
 
 	public void testLinkMethodWithoutImport() throws Exception {
-		if (true) {
+		if (BUG_NO_BEST_EFFORT_IMPORTS_WITH_CORE_COMPLETION) {
 			System.out.println("JavadocCompletionTest.testLinkMethodWithoutImport() - no best-effort imports with Core completion");
 			return;
 		}
@@ -396,7 +399,7 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	}
 
 	public void testHTMLTags() throws Exception {
- 		if (true) {
+		if (BUG_NO_HTML_TAG_PROPOSALS_IN_CORE_JDOC_ASSIST) {
  			System.out.println("no HTML tag proposals in core jdoc assist");
  			return;
  		}

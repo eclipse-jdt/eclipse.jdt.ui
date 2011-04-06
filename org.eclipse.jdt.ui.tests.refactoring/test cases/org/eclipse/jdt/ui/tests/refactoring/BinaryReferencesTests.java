@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,6 +66,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class BinaryReferencesTests extends TestCase {
 
+	private static final boolean BUG_226660= true;
 	private static BinaryReferencesTestSetup fgTestSetup;
 
 	public BinaryReferencesTests(String name) {
@@ -263,7 +264,7 @@ public class BinaryReferencesTests extends TestCase {
 	}
 
 	public void testRenameField04() throws Exception {
-		if (true) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=226660
+		if (BUG_226660) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=226660
 			return;
 		List matches= doRenameField("source.Color", "GREEN");
 		assertContainsMatches(matches, new String[] {

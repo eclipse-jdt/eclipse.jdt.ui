@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,6 +64,7 @@ import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 
 public class DeleteTest extends RefactoringTest{
 
+	private static final boolean BUG_55221= true;
 	private static final Class clazz= DeleteTest.class;
 	private static final String REFACTORING_PATH= "Delete/";
 
@@ -634,7 +635,7 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	public void testDeleteWithinCu16() throws Exception{
-		if (true) {
+		if (BUG_55221) {
 			printTestDisabledMessage("testDeleteWithinCu16 disabled for bug#55221");
 			return;
 		}

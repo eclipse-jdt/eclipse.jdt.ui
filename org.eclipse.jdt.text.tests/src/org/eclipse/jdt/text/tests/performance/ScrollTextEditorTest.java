@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import junit.framework.TestSuite;
  */
 public class ScrollTextEditorTest extends ScrollEditorTest {
 
+	private static final boolean BUG_HOLDING_SCROLL_TESTS_DISABLED= true;
 	private static final Class THIS= ScrollTextEditorTest.class;
 
 	public static Test suite() {
@@ -76,7 +77,7 @@ public class ScrollTextEditorTest extends ScrollEditorTest {
 	 * @throws Exception
 	 */
 	public void testScrollTextEditorLineWiseSelectHoldKeys() throws Exception {
-		if (true) {
+		if (BUG_HOLDING_SCROLL_TESTS_DISABLED) {
 			System.out.println("holding scroll tests disabled");
 			return;
 		}
@@ -90,7 +91,7 @@ public class ScrollTextEditorTest extends ScrollEditorTest {
 	 * @throws Exception
 	 */
 	public void testScrollTextEditorLineWiseHoldKeys() throws Exception {
-		if (true) {
+		if (BUG_HOLDING_SCROLL_TESTS_DISABLED) {
 			System.out.println("holding scroll tests disabled");
 			return;
 		}

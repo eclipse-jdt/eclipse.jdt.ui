@@ -86,6 +86,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 
 public class RenamePackageTests extends RefactoringTest {
+	private static final boolean BUG_PACKAGE_CANT_BE_RENAMED_TO_A_PACKAGE_THAT_ALREADY_EXISTS= true;
 	private static final boolean BUG_6054= false;
 	private static final boolean BUG_54962_71267= false;
 
@@ -720,7 +721,7 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 
 	public void testHierarchical02() throws Exception {
-		if (true) {
+		if (BUG_PACKAGE_CANT_BE_RENAMED_TO_A_PACKAGE_THAT_ALREADY_EXISTS) {
 			printTestDisabledMessage("package can't be renamed to a package that already exists.");
 			return;
 		}

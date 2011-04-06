@@ -48,6 +48,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	private static final boolean BUG_83691_CORE_JAVADOC_REF= true;
 
+	private static final boolean BUG_NEED_TO_DECIDE_HOW_TO_TREAT_COMPILE_ERRORS= true;
+
 	private static final boolean RUN_CONSTRUCTOR_TEST= true;
 
 	public ChangeSignatureTests(String name) {
@@ -1196,7 +1198,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testAll44()throws Exception{
-		if (true){
+		if (BUG_NEED_TO_DECIDE_HOW_TO_TREAT_COMPILE_ERRORS) {
 			printTestDisabledMessage("need to decide how to treat compile errors");
 			return;
 		}
@@ -1217,7 +1219,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testAll45()throws Exception{
-		if (true){
+		if (BUG_NEED_TO_DECIDE_HOW_TO_TREAT_COMPILE_ERRORS) {
 			printTestDisabledMessage("need to decide how to treat compile errors");
 			return;
 		}

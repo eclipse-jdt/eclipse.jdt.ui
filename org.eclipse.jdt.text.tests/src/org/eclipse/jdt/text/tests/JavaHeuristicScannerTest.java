@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.ui.text.JavaIndenter;
  */
 public class JavaHeuristicScannerTest extends TestCase {
 
+	private static final boolean BUG_65463= true;
 	private FastPartitioner fPartitioner;
 	private Document fDocument;
 	private JavaIndenter fScanner;
@@ -810,7 +811,7 @@ public class JavaHeuristicScannerTest extends TestCase {
     }
 
 	public void testConditional1() throws Exception {
-		if (true) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
+		if (BUG_65463) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
 			return;
     	fDocument.set(
     			"		public boolean isPrime() {\n" +
@@ -823,7 +824,7 @@ public class JavaHeuristicScannerTest extends TestCase {
     }
 
 	public void testConditional2() throws Exception {
-		if (true) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
+		if (BUG_65463) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
 			return;
     	fDocument.set(
     			"		public boolean isPrime() {\n" +

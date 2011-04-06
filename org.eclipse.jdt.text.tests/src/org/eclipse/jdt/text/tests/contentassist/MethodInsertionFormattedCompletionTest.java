@@ -25,6 +25,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  * @since 3.2
  */
 public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTest {
+	private static final boolean BUG_DISABLED_DUE_TO_FORMATTER_CONTEXT_INFO_INTERATION= true;
 	private static final Class THIS= MethodInsertionFormattedCompletionTest.class;
 
 	public static Test setUpTest(Test test) {
@@ -57,7 +58,7 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 	}
 
 	public void testMethodWithParam() throws Exception {
-		if (true) {
+		if (BUG_DISABLED_DUE_TO_FORMATTER_CONTEXT_INFO_INTERATION) {
 			// FIXME
 			System.out.println("disabled due to formatter - context info interation");
 			return;
@@ -77,7 +78,7 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 	}
 
 	public void testInsertMethodWithParam() throws Exception {
-		if (true) {
+		if (BUG_DISABLED_DUE_TO_FORMATTER_CONTEXT_INFO_INTERATION) {
 			// FIXME
 			System.out.println("disabled due to formatter - context info interation");
 			return;
