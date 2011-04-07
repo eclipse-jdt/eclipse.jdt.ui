@@ -638,7 +638,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			if (binding instanceof ITypeBinding) {
 				final ITypeBinding type= (ITypeBinding) binding;
 				if (type.isClass() && type.getDeclaringClass() != null) {
-					final String name= fTargetRewrite.getImportRewrite().addImport(type);
+					final String name= fTargetRewrite.getImportRewrite().addImport(type.getTypeDeclaration());
 					if (name != null && name.length() > 0) {
 						fRewrite.replace(node, ASTNodeFactory.newName(ast, name), null);
 						return false;
@@ -655,9 +655,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			else if (binding instanceof IVariableBinding) {
 				final IVariableBinding variable= (IVariableBinding) binding;
 				final IMethodBinding method= fDeclaration.resolveBinding();
-				final ITypeBinding declaring= variable.getDeclaringClass();
+				ITypeBinding declaring= variable.getDeclaringClass();
 				if (method != null) {
 					if (Bindings.equals(method.getDeclaringClass(), declaring)) {
+						declaring= declaring.getTypeDeclaration();
 						if (JdtFlags.isStatic(variable))
 							rewrite.replace(node, ast.newQualifiedName(ASTNodeFactory.newName(ast, fTargetRewrite.getImportRewrite().addImport(declaring)), ast.newSimpleName(node.getFullyQualifiedName())), null);
 						else {
