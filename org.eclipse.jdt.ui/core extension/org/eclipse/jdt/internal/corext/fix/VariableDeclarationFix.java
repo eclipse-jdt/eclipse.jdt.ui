@@ -492,9 +492,6 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 		List<ModifierChangeOperation> ops= new ArrayList<ModifierChangeOperation>();
 		VariableDeclarationFinder visitor= new VariableDeclarationFinder(true, true, true, ops, writtenNames);
 		if (selectedNodes.length == 1) {
-			if (selectedNodes[0] instanceof SimpleName) {
-				selectedNodes[0]= selectedNodes[0].getParent();
-			}
 			selectedNodes[0].accept(visitor);
 		} else {
 			for (int i= 0; i < selectedNodes.length; i++) {
