@@ -4328,4 +4328,73 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	public void testPickOutStringProposals1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String string = \"Hello World\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("llo");
+		int length= "llo".length();
+		AssistContext context= getCorrectionContext(cu, offset, length);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String string = \"He\" + \"llo\" + \" World\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+	}
+
+	public void testPickOutStringProposals2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String string = \"Hello World\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("World");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+
+		assertProposalDoesNotExist(proposals, "Pick out selected part of String");
+
+	}
+
+	public void testPickOutStringProposals3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String string = \"Hello World\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("Hello");
+		int length= "Hello World".length();
+		AssistContext context= getCorrectionContext(cu, offset, length);
+		List proposals= collectAssists(context, false);
+
+		assertProposalDoesNotExist(proposals, "Pick out selected part of String");
+
+	}
 }
