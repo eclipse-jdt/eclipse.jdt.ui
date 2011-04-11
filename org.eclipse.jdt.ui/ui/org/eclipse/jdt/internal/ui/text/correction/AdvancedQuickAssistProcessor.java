@@ -664,9 +664,15 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getAddParenthesesForExpressionProposals(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
-		ASTNode node= coveringNode;
-		while (node != null && !(node instanceof CastExpression) && !(node instanceof InfixExpression) && !(node instanceof InstanceofExpression) && !(node instanceof ConditionalExpression)) {
-			node= node.getParent();
+		ASTNode node;
+
+		if (context.getSelectionLength() == 0) {
+			node= coveringNode;
+			while (node != null && !(node instanceof CastExpression) && !(node instanceof InfixExpression) && !(node instanceof InstanceofExpression) && !(node instanceof ConditionalExpression)) {
+				node= node.getParent();
+			}
+		} else {
+			node= context.getCoveredNode();
 		}
 
 		String label= null;

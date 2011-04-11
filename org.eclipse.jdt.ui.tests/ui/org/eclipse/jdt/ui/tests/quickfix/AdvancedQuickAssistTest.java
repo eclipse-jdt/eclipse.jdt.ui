@@ -981,6 +981,48 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	}
 
+	public void testAddParenthesesForExpression7() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=338675
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a, int b, int c) {\n");
+		buf.append("        if (a > 3 && b > 5) {\n");
+		buf.append("            a= 3;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("a >"), "a >".length());
+		List proposals= collectAssists(context, false);
+
+		assertProposalDoesNotExist(proposals, "Put '>' expression in parentheses");
+		
+	}
+
+	public void testAddParenthesesForExpression8() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=338675
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a, int b, int c) {\n");
+		buf.append("        if (a > 3 && b > 5) {\n");
+		buf.append("            a= 3;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("a >"), 1);
+		List proposals= collectAssists(context, false);
+
+		assertProposalDoesNotExist(proposals, "Put '>' expression in parentheses");
+		
+	}
+
 	public void testInverseIfCondition1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
