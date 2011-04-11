@@ -744,6 +744,10 @@ public class JavaElementLabelComposer {
 			case Signature.CAPTURE_TYPE_SIGNATURE:
 				appendTypeSignatureLabel(enclosingElement, typeSig.substring(1), flags);
 				break;
+			case Signature.INTERSECTION_TYPE_SIGNATURE:
+				String[] typeBounds= Signature.getIntersectionTypeBounds(typeSig);
+				appendTypeBoundsSignaturesLabel(enclosingElement, typeBounds, flags);
+				break;
 			default:
 				// unknown
 		}
@@ -773,6 +777,15 @@ public class JavaElementLabelComposer {
 		}
 	}
 
+	private void appendTypeBoundsSignaturesLabel(IJavaElement enclosingElement, String[] typeArgsSig, long flags) {
+		for (int i = 0; i < typeArgsSig.length; i++) {
+			if (i > 0) {
+				fBuffer.append(" | "); //$NON-NLS-1$
+			}
+			appendTypeSignatureLabel(enclosingElement, typeArgsSig[i], flags);
+		}
+	}
+	
 	/**
 	 * Appends labels for type parameters from a signature.
 	 *
