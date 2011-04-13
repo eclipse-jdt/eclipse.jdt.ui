@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+
 /**
  * Uses the {@link org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner} to
  * get the indentation level for a certain position in a document.
@@ -789,11 +790,15 @@ public final class JavaIndenter {
 						throwsClause= true;
 						break;
 					case Symbols.TokenPLUS:
-						int position= handleStringContinuation(offset);
-						if (position != JavaHeuristicScanner.NOT_FOUND) {
-							fAlign= JavaHeuristicScanner.NOT_FOUND;
-							fIndent= fPrefs.prefContinuationIndent;
-							return position;
+						if (isStringContinuation(offset)) {
+							if (isSecondLineOfStringContinuation(offset)) {
+								fAlign= JavaHeuristicScanner.NOT_FOUND;
+								fIndent= fPrefs.prefContinuationIndent;
+							} else {
+								int previousLineOffset= fDocument.getLineOffset(fDocument.getLineOfOffset(offset) - 1);
+								fAlign= fScanner.findNonWhitespaceForwardInAnyPartition(previousLineOffset, JavaHeuristicScanner.UNBOUND);
+							}
+							return fPosition;
 						}
 						break;
 				}
@@ -813,41 +818,79 @@ public final class JavaIndenter {
 	}
 
 	/**
-	 * Specifically handles the case of extra indentation for second line of string continuation.
+	 * Tells whether the given string is a continuation expression.
 	 * 
-	 * @param offset the offset for which the reference is computed
-	 * @return the reference statement relative to which <code>offset</code> should be indented, or
-	 *         {@link JavaHeuristicScanner#NOT_FOUND}
+	 * @param offset the offset for which the check is done
+	 * @return <code>true</code> if the offset is part of a string continuation, <code>false</code>
+	 *         otherwise
 	 * @since 3.7
 	 */
-	private int handleStringContinuation(int offset) {
-		int prevNonWSCharPosition= fScanner.findNonWhitespaceBackwardInAnyPartition(offset - 1, JavaHeuristicScanner.UNBOUND);
-		if (prevNonWSCharPosition != JavaHeuristicScanner.NOT_FOUND) {
-			try {
-				char c= fDocument.getChar(prevNonWSCharPosition);
-				if (c == '"' || c == '+') {
-					int initialLine= fDocument.getLineOfOffset(offset);
-					nextToken(offset);
-					while (fToken == Symbols.TokenPLUS) {
-						if ((initialLine - fLine) > 1)
-							return JavaHeuristicScanner.NOT_FOUND;
-						nextToken();
-					}
-					int lineDiff= initialLine - fLine;
-					if (lineDiff > 0) {
-						int bound= fDocument.getLineOffset(fLine) + fDocument.getLineLength(fLine) - 1;
-						int nextNonWSCharPosition= fScanner.findNonWhitespaceForwardInAnyPartition(fPosition + 1, bound);
-						if (lineDiff < 3 && fPreviousPos != offset && nextNonWSCharPosition != JavaHeuristicScanner.NOT_FOUND && fDocument.getChar(nextNonWSCharPosition) != '"')
-							return fPreviousPos;
-						else
-							return fPosition;
-					}
-				}
-			} catch (BadLocationException e) {
-				JavaPlugin.log(e);
-			}
+	private boolean isStringContinuation(int offset) {
+		int nextNonWSCharPosition= fScanner.findNonWhitespaceBackwardInAnyPartition(offset - 1, JavaHeuristicScanner.UNBOUND);
+		try {
+			if (fDocument.getChar(nextNonWSCharPosition) == '"')
+				return true;
+			else
+				return false;
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+			return false;
 		}
-		return JavaHeuristicScanner.NOT_FOUND;
+	}
+
+	/**
+	 * Checks if extra indentation for second line of string continuation is required.
+	 * 
+	 * @param offset the offset for which the check is done
+	 * @return returns <code>true</code> if extra indentation for second line of string continuation
+	 *         is required
+	 * @since 3.7
+	 */
+	private boolean isSecondLineOfStringContinuation(int offset) {
+		try {
+			int offsetLine= fDocument.getLineOfOffset(offset);
+			fPosition= offset;
+			while (true) {
+				nextToken();
+				switch (fToken) {
+				// scopes: skip them
+					case Symbols.TokenRPAREN:
+					case Symbols.TokenRBRACKET:
+					case Symbols.TokenRBRACE:
+					case Symbols.TokenGREATERTHAN:
+						skipScope();
+						break;
+
+					case Symbols.TokenPLUS:
+						if ((offsetLine - fLine) > 1) {
+							return false;
+						}
+						break;
+
+					case Symbols.TokenCOMMA:
+					case Symbols.TokenLPAREN:
+					case Symbols.TokenLBRACE:
+					case Symbols.TokenEQUAL:
+						int stringStartingOffset= fScanner.findNonWhitespaceForwardInAnyPartition(fPosition + 1, JavaHeuristicScanner.UNBOUND);
+						int stringStartingLine= fDocument.getLineOfOffset(stringStartingOffset);
+						if ((offsetLine - stringStartingLine) == 1) {
+							fPosition= stringStartingOffset;
+							return true;
+						} else {
+							return false;
+						}
+					case Symbols.TokenLBRACKET:
+					case Symbols.TokenEOF:
+						if ((offsetLine - fLine) == 1)
+							return true;
+						else
+							return false;
+				}
+			}
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+			return false;
+		}
 	}
 
 	/**
@@ -1051,6 +1094,23 @@ public final class JavaIndenter {
 			case Symbols.TokenRETURN:
 				fIndent= fPrefs.prefContinuationIndent;
 				return fPosition;
+			case Symbols.TokenPLUS:
+				if (isStringContinuation(fPosition)) {
+					try {
+						if (isSecondLineOfStringContinuation(offset)) {
+							fAlign= JavaHeuristicScanner.NOT_FOUND;
+							fIndent= fPrefs.prefContinuationIndent;
+						} else {
+							int previousLineOffset= fDocument.getLineOffset(fDocument.getLineOfOffset(offset) - 1);
+							fAlign= fScanner.findNonWhitespaceForwardInAnyPartition(previousLineOffset, JavaHeuristicScanner.UNBOUND);
+						}
+					} catch (BadLocationException e) {
+						JavaPlugin.log(e);
+					}
+					return fPosition;
+				}
+				fPosition= offset;
+				return skipToPreviousListItemOrListStart();
 			case Symbols.TokenCOMMA:
 				// inside a list of some type
 				// easy if there is already a list item before with its own indentation - we just align
