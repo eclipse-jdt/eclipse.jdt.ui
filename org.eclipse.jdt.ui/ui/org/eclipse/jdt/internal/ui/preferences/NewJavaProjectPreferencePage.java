@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-// AW
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.io.UnsupportedEncodingException;
@@ -66,9 +65,12 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 
-/*
- * The page for defaults for classpath entries in new java projects.
- * See PreferenceConstants to access or change these values through public API.
+
+/**
+ * The preference page for defaults for classpath entries in new java projects.
+ * <p>
+ * See {@link PreferenceConstants} on how to access or change these values through public API.
+ * </p>
  */
 public class NewJavaProjectPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -109,10 +111,17 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 
 	public static String decodeJRELibraryDescription(String encoded) {
 		int end= encoded.indexOf(' ');
-		if (end != -1) {
-			return decode(encoded.substring(0, end));
-		}
-		return ""; //$NON-NLS-1$
+		if (end == -1)
+			return ""; //$NON-NLS-1$
+
+		String description= encoded.substring(0, end);
+		String decodedDescription= decode(description);
+
+		// Backwards compatibility check (before 3.7 M7 the name was also encoded)
+		if (!description.equals(decodedDescription))
+			return decodedDescription;
+
+		return description;
 	}
 
 	private static String decode(String str) {
@@ -177,7 +186,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < cpentries.length; i++) {
 			IClasspathEntry entry= cpentries[i];
-			buf.append(encode(desc));
+			buf.append(desc);
 			buf.append(' ');
 			buf.append(entry.getEntryKind());
 			buf.append(' ');
