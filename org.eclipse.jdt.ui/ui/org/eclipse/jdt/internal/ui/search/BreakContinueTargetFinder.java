@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -185,8 +185,12 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 		}
 		if (fLabel == null &&  fIsBreak && isAnyInstanceOf(BREAKTARGETS, node))
 			return false;
-		if (fLabel == null && !fIsBreak && isAnyInstanceOf(CONTINUETARGETS, node))
-			return false;
+		if (fLabel == null && !fIsBreak) {
+			if (isAnyInstanceOf(CONTINUETARGETS, node))
+				return node.getParent() instanceof LabeledStatement; // for behavior consistency of continue targets: see bug 339176
+			if (node instanceof LabeledStatement)
+				return false;
+		}
 		return true;
 	}
 
