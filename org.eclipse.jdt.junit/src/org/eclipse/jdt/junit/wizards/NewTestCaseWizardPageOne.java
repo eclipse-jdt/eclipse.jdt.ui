@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import com.ibm.icu.text.UTF16;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -972,8 +974,20 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				buffer.replace(index, index + 1, OF_TAG);
 			else if (character == '?')
 				buffer.replace(index, index + 1, QUESTION_MARK_TAG);
-			else if (!Character.isJavaIdentifierPart(character))
-				buffer.deleteCharAt(index);
+			else if (!Character.isJavaIdentifierPart(character)) {
+				// Check for surrogates
+				if (!UTF16.isSurrogate(character)) {
+					/*
+					 * XXX: Here we should create the code point and test whether
+					 * it is a Java identifier part. Currently this is not possible
+					 * because java.lang.Character in 1.4 does not support surrogates
+					 * and because com.ibm.icu.lang.UCharacter.isJavaIdentifierPart(int)
+					 * is not correctly implemented.
+					 */
+					buffer.deleteCharAt(index);
+				}
+
+			}
 		}
 	}
 
