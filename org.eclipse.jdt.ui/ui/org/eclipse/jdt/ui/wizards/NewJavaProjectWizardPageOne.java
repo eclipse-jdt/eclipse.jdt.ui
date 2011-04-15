@@ -843,7 +843,12 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			String selectedCompliance= fJREGroup.getSelectedCompilerCompliance();
 			if (selectedCompliance != null) {
 				String defaultCompliance= JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
-				if (selectedCompliance.equals(defaultCompliance)) {
+				if (JavaModelUtil.HIDE_VERSION_1_7 && fJREGroup.fUseEEJRE.isSelected() && fJREGroup.fEECombo.getText().indexOf(JavaCore.VERSION_1_7) != -1) {
+					fHintText.setText(NewWizardMessages.NewJavaProjectWizardPageOne_DetectGroup_java17_message);
+					fHintText.setVisible(true);
+					fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
+					fIcon.setVisible(true);
+				} else if (selectedCompliance.equals(defaultCompliance)) {
 					fHintText.setVisible(false);
 					fIcon.setVisible(false);
 				} else {
@@ -873,6 +878,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				fHintText.setVisible(false);
 				fIcon.setVisible(false);
 			}
+
 		}
 
 		private boolean computeDetectState() {

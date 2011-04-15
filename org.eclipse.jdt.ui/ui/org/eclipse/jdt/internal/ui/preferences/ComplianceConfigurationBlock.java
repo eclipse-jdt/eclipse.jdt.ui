@@ -221,7 +221,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		super.settingsUpdated();
 	}
 
-
 	/*
 	 * @see org.eclipse.jface.preference.PreferencePage#createContents(Composite)
 	 */
@@ -254,6 +253,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	private Composite createComplianceTabContent(Composite folder) {
 
+		boolean hide_1_7= JavaModelUtil.HIDE_VERSION_1_7 &&
+				!(VERSION_1_7.equals(getValue(PREF_COMPLIANCE)) || VERSION_1_7.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)));
+
 		String[] values3456= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6, VERSION_1_7 };
 		String[] values3456Labels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_version13,
@@ -262,6 +264,10 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.ComplianceConfigurationBlock_version16,
 			PreferencesMessages.ComplianceConfigurationBlock_version17
 		};
+		if (hide_1_7) {
+			values3456= removeLast(values3456);
+			values3456Labels= removeLast(values3456Labels);
+		}
 
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
 		Composite composite= sc1.getBody();
@@ -336,6 +342,11 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.ComplianceConfigurationBlock_version16,
 			PreferencesMessages.ComplianceConfigurationBlock_version17
 		};
+		if (hide_1_7) {
+			versions= removeLast(versions);
+			versionsLabels= removeLast(versionsLabels);
+		}
+
 		boolean showJsr14= ComplianceConfigurationBlock.VERSION_JSR14.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM));
 		if (showJsr14) {
 			versions= append(versions, ComplianceConfigurationBlock.VERSION_JSR14);
@@ -435,6 +446,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		System.arraycopy(versions, 0, result, 0, versions.length);
 		result[versions.length]= version;
 		return result;
+	}
+
+	private static String[] removeLast(String[] versions) {
+		String[] reduced= new String[versions.length - 1];
+		System.arraycopy(versions, 0, reduced, 0, reduced.length);
+		return reduced;
 	}
 
 	protected final void openBuildPathPropertyPage() {
@@ -588,6 +605,19 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 						fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, args));
 					}
 					isVisible= true;
+					if (JavaModelUtil.HIDE_VERSION_1_7 && VERSION_1_7.equals(compliance)) {
+						String javaVersion= ((IVMInstall2) install).getJavaVersion();
+						if (javaVersion != null && javaVersion.startsWith(VERSION_1_7)) {
+							isVisible= false;
+						}
+					}
+				}
+			}
+			String complianceFollowsEE= getValue(INTR_COMPLIANCE_FOLLOWS_EE);
+			if (JavaModelUtil.HIDE_VERSION_1_7 && DEFAULT_CONF.equals(complianceFollowsEE)) {
+				if (getEE().getId().indexOf(JavaCore.VERSION_1_7) != -1) {
+					isVisible= true;
+					fJRE50InfoText.setText(PreferencesMessages.ComplianceConfigurationBlock_17_ee_warning);
 				}
 			}
 			fJRE50InfoText.setVisible(isVisible);
@@ -968,7 +998,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	 */
 	private static final boolean isOriginalDefaultCompliance() {
 		Hashtable<String, String> options= JavaCore.getDefaultOptions();
-		Preferences bundleDefaults= new BundleDefaultsScope().getNode(JavaCore.PLUGIN_ID);
+		Preferences bundleDefaults= BundleDefaultsScope.INSTANCE.getNode(JavaCore.PLUGIN_ID);
 
 		return equals(JavaCore.COMPILER_COMPLIANCE, bundleDefaults, options)
 				&& equals(JavaCore.COMPILER_SOURCE, bundleDefaults, options)
