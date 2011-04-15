@@ -87,6 +87,7 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
+
 public class JavaDocLocations {
 
 	private static final String JAR_PROTOCOL= "jar"; //$NON-NLS-1$
@@ -548,8 +549,10 @@ public class JavaDocLocations {
 		IPackageFragment pack= type.getPackageFragment();
 		String packPath= pack.getElementName().replace('.', '/');
 		String typePath= type.getTypeQualifiedName('.');
-		buf.append(packPath);
-		buf.append('/');
+		if (packPath.length() > 0) {
+			buf.append(packPath);
+			buf.append('/');
+		}
 		buf.append(typePath);
 		buf.append(".html"); //$NON-NLS-1$
 	}
