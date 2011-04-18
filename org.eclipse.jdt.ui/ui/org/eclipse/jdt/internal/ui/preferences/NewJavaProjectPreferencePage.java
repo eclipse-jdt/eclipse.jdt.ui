@@ -115,7 +115,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 			return ""; //$NON-NLS-1$
 
 		String decodedDescription= decode(encoded.substring(0, end));
-		return decodedDescription.length() > 0 ? decodedDescription : ""; //$NON-NLS-1$
+		return decodedDescription.length() > 0 ? decodedDescription : encoded;
 	}
 
 	private static String decode(String str) {
