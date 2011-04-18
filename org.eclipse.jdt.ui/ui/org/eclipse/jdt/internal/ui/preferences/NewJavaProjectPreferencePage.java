@@ -114,14 +114,8 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		if (end == -1)
 			return ""; //$NON-NLS-1$
 
-		String description= encoded.substring(0, end);
-		String decodedDescription= decode(description);
-
-		// Backwards compatibility check (before 3.7 M7 the name was also encoded)
-		if (!description.equals(decodedDescription))
-			return decodedDescription;
-
-		return description;
+		String decodedDescription= decode(encoded.substring(0, end));
+		return decodedDescription.length() > 0 ? decodedDescription : ""; //$NON-NLS-1$
 	}
 
 	private static String decode(String str) {
