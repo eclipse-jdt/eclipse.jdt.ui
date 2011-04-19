@@ -941,6 +941,11 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void testParameterizedType6() throws Exception {
 		performGenericTest();
 	}
+	
+	public void testParameterizedMethod() throws Exception {
+		performGenericTest();
+	}
+
 	/* *********************** Binary Tests ******************************* */
 
 	public void testBinaryInlineSingle() throws Exception { // uses classes.Target#

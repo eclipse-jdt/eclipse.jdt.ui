@@ -705,7 +705,7 @@ public class Bindings {
 		}
 	}
 
-	private static boolean containsTypeVariables(ITypeBinding type) {
+	static boolean containsTypeVariables(ITypeBinding type) {
 		if (type.isTypeVariable())
 			return true;
 		if (type.isArray())
