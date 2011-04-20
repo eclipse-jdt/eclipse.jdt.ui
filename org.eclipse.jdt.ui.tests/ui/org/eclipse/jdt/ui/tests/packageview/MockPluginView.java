@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -126,17 +125,11 @@ public class MockPluginView extends PackageExplorerPart {
 			fAddedObject= object;
 			fAddedParentObject= parentObject;
 		}
-		
-		@Override
-		public Widget[] testFindItems(Object element) {
-			return new Widget[1]; // hack for https://bugs.eclipse.org/311212
-		}
 	}
 
 	/**
-	 * Returns true if the object was refreshed.
-	 * @param c the object
-	 * @return boolean
+	 * Returns the refreshed object.
+	 * @return Object
 	 */
 	public boolean wasObjectRefreshed(Object c) {
 		return fRefreshedObjects.contains(c);
@@ -195,7 +188,7 @@ public class MockPluginView extends PackageExplorerPart {
 
 	/**
 	 * Sets the folding preference.
-	 * @param fold boolean
+	 * @param fold
 	 */
 	public void setFolding(boolean fold) {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fold);

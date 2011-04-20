@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -560,7 +560,6 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 		if (elementType == IJavaElement.PACKAGE_FRAGMENT) {
 			if ((flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN)) == IJavaElementDelta.F_CONTENT) {
-				// TODO: TODO: This should never be true for folders (F_CONTENT is only for files)
 				if (!fIsFlatLayout) {
 					Object parent = getHierarchicalPackageParent((IPackageFragment) element);
 					if (!(parent instanceof IPackageFragmentRoot)) {
@@ -718,13 +717,12 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 
 		if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
-			// the contents of an external JAR has changed
+			// the contents of an external JAR or class folder has changed
 			if ((flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0) {
 				postRefresh(element, ORIGINAL, element, runnables);
 				return false;
 			}
 			if ((flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN)) == IJavaElementDelta.F_CONTENT) {
-				// TODO: This should never be true for folders (F_CONTENT is only for files)
 				// content change, without children info (for example resource added/removed to class folder package)
 				postRefresh(internalGetParent(element), PARENT, element, runnables);
 				return true;
@@ -940,14 +938,10 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	}
 
 	protected void postRefresh(final List<Object> toRefresh, final boolean updateLabels, Collection<Runnable> runnables) {
-		final Object[] elements= toRefresh.toArray();
 		runnables.add(new Runnable() {
 			public void run() {
-				for (int i= 0; i < elements.length; i++) {
-					Object element= elements[i];
-					if (fViewer.testFindItems(element).length > 0) {
-						fViewer.refresh(element, updateLabels);
-					}
+				for (Iterator<Object> iter= toRefresh.iterator(); iter.hasNext();) {
+					fViewer.refresh(iter.next(), updateLabels);
 				}
 			}
 		});
@@ -974,9 +968,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	protected void postRemove(final Object element, Collection<Runnable> runnables) {
 		runnables.add(new Runnable() {
 			public void run() {
-				if (fViewer.testFindItems(element).length > 0) {
-					fViewer.remove(element);
-				}
+				fViewer.remove(element);
 			}
 		});
 	}
