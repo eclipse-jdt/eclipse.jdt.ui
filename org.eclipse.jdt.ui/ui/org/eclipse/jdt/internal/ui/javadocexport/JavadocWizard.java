@@ -11,14 +11,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javadocexport;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.w3c.dom.Element;
@@ -113,6 +117,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	private IFile fXmlJavadocFile;
 
 	private static final String ID_JAVADOC_PROCESS_TYPE= "org.eclipse.jdt.ui.javadocProcess"; //$NON-NLS-1$
+
+	private static final String ENCODING_ARGUMENT_PREFIX= "-J-Dfile.encoding="; //$NON-NLS-1$
 
 	public static void openJavadocWizard(JavadocWizard wizard, Shell shell, IStructuredSelection selection ) {
 		wizard.init(PlatformUI.getWorkbench(), selection);
@@ -295,7 +301,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			File file= File.createTempFile("javadoc-arguments", ".tmp");  //$NON-NLS-1$//$NON-NLS-2$
 			vmArgs.add('@' + file.getAbsolutePath());
 
-			FileWriter writer= new FileWriter(file);
+			BufferedWriter writer= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), getEncoding(vmArgs)));
 			try {
 				for (int i= 0; i < progArgs.size(); i++) {
 					String curr= progArgs.get(i);
@@ -307,7 +313,6 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			} finally {
 				writer.close();
 			}
-
 			String[] args= vmArgs.toArray(new String[vmArgs.size()]);
 			process= Runtime.getRuntime().exec(args);
 			if (process != null) {
@@ -356,6 +361,21 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			return false;
 		}
 		return false;
+
+	}
+
+	private static String getEncoding(ArrayList<String> vmArgs) {
+		Iterator<String> iter= vmArgs.iterator();
+		while (iter.hasNext()) {
+			String argument= iter.next();
+			if (argument.length() > ENCODING_ARGUMENT_PREFIX.length() && argument.startsWith(ENCODING_ARGUMENT_PREFIX)) {
+				String encoding= argument.substring(ENCODING_ARGUMENT_PREFIX.length());
+				if (Charset.isSupported(encoding))
+					return encoding;
+				break;
+			}
+		}
+		return System.getProperty("file.encoding"); //$NON-NLS-1$
 
 	}
 
