@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,4 +52,11 @@ public class ActivateJavaEditorTest extends ActivateEditorTest {
 		ITypeRoot cu= EditorUtility.getEditorInputJavaElement(editor, false);
 		SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
 	}
+
+	@Override
+	protected String getDegradationComment() {
+		return "The small regression is because of fix for <a href=\"https://bugs.eclipse.org/bugs/show_bug.cgi?id=322914\">bug 322914</a>. " +
+				"(See also <a href=\"https://bugs.eclipse.org/bugs/show_bug.cgi?id=341976\">bug 341976</a>)";
+	}
+
 }
