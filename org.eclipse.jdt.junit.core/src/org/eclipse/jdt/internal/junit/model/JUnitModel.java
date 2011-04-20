@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -380,6 +380,9 @@ public final class JUnitModel {
 			throwImportError(file, e);
 		} catch (IOException e) {
 			throwImportError(file, e);
+		} catch (IllegalArgumentException e) {
+			// Bug in parser: can throw IAE even if file is not null
+			throwImportError(file, e);
 		}
 		return null; // does not happen
 	}
@@ -417,6 +420,9 @@ public final class JUnitModel {
 				} catch (SAXException e) {
 					storeImportError(e);
 				} catch (IOException e) {
+					storeImportError(e);
+				} catch (IllegalArgumentException e) {
+					// Bug in parser: can throw IAE even if URL is not null
 					storeImportError(e);
 				}
 			}
@@ -460,6 +466,9 @@ public final class JUnitModel {
 		} catch (SAXException e) {
 			throwImportError(swapFile, e);
 		} catch (IOException e) {
+			throwImportError(swapFile, e);
+		} catch (IllegalArgumentException e) {
+			// Bug in parser: can throw IAE even if file is not null
 			throwImportError(swapFile, e);
 		}
 	}
