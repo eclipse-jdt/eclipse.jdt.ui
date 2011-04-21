@@ -387,8 +387,6 @@ public class RenamePackageTests extends RefactoringTest {
 			return oldPackageName;
 		}
 
-		/*Tests that call checkOriginalState() need to have package 'p' as it is created by default in
-		 the setup and comparing with original state without the default package would result in an error . */
 		public void checkOriginalState() throws Exception {
 			IJavaElement[] rootChildren= getRoot().getChildren();
 			ArrayList existingPacks= new ArrayList();
@@ -455,7 +453,22 @@ public class RenamePackageTests extends RefactoringTest {
 	 */
 	private void helperMultiProjects(IPackageFragmentRoot[] roots, String[][] packageNames, String newPackageName, String[][][] cuNames) throws Exception{
 		ICompilationUnit[][][] cus=new ICompilationUnit[roots.length][][];
-		IPackageFragment thisPackage= createPackagesAndCus(roots, packageNames, cuNames, cus);
+		IPackageFragment thisPackage= null;
+
+		for (int r= 0; r < roots.length; r++) {
+			IPackageFragment[] packages= new IPackageFragment[packageNames[r].length];
+			cus[r]= new ICompilationUnit[packageNames[r].length][];
+			for (int pa= 0; pa < packageNames[r].length; pa++){
+				packages[pa]= roots[r].createPackageFragment(packageNames[r][pa], true, null);
+				cus[r][pa]= new ICompilationUnit[cuNames[r][pa].length];
+				if (r == 0 && pa == 0)
+					thisPackage= packages[pa];
+				for (int typ= 0; typ < cuNames[r][pa].length; typ++){
+					cus[r][pa][typ]= createCUfromTestFile(packages[pa], cuNames[r][pa][typ],
+							roots[r].getElementName() + "/" + packageNames[r][pa].replace('.', '/') + "/");
+				}
+			}
+		}
 
 		RenameJavaElementDescriptor descriptor= createRefactoringDescriptor(thisPackage, newPackageName);
 		descriptor.setUpdateReferences(fUpdateReferences);
@@ -530,34 +543,15 @@ public class RenamePackageTests extends RefactoringTest {
 	 * @param newPackageName the new package name for packageNames[0][0]
 	 */
 	private void helperMultiRoots(String[] rootNames, String[][] packageNames, String newPackageName, String[][][] typeNames) throws Exception{
-		IPackageFragmentRoot[] roots= createMultiRoots(rootNames, new String[] { null, null });
-		helperMultiProjects(roots, packageNames, newPackageName, typeNames);
-		
-		for (int r= 0; r < roots.length; r++)
-			JavaProjectHelper.removeSourceContainer(getRoot().getJavaProject(), rootNames[r]);
-	}
-
-	/**
-	 * Creates multiple package fragment roots.
-	 * 
-	 * @param rootNames package fragment root names
-	 * @param outputLocs the output locations for each root
-	 * @return the newly created package fragment roots
-	 */
-	private IPackageFragmentRoot[] createMultiRoots(String[] rootNames, String[] outputLocs) {
 		IPackageFragmentRoot[] roots= new IPackageFragmentRoot[rootNames.length];
 		try {
-			String loc;
-			for (int r= 0; r < roots.length; r++) {
-				loc= (outputLocs == null) ? null : outputLocs[r];
-				if (rootNames[r].equals("src"))
-					JavaProjectHelper.removeSourceContainer(getRoot().getJavaProject(), "src");
-				roots[r]= JavaProjectHelper.addSourceContainer(getRoot().getJavaProject(), rootNames[r], new IPath[0], new IPath[0], loc);
-			}
+			for (int r= 0; r < roots.length; r++)
+				roots[r]= JavaProjectHelper.addSourceContainer(getRoot().getJavaProject(), rootNames[r]);
+			helperMultiProjects(roots, packageNames, newPackageName, typeNames);
 		} catch (CoreException e) {
-			e.printStackTrace();
 		}
-		return roots;
+		for (int r= 0; r < roots.length; r++)
+			JavaProjectHelper.removeSourceContainer(getRoot().getJavaProject(), rootNames[r]);
 	}
 
 	private void setFilePatterns(RenameJavaElementDescriptor descriptor) {
@@ -792,98 +786,6 @@ public class RenamePackageTests extends RefactoringTest {
 				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[1]), true),
 				new RenameArguments("your", true)
 		});
-	}
-
-	public void testHierarchical04() throws Exception {
-		fRenameSubpackages= true;
-
-		PackageRename rename= new PackageRename(new String[] { "a.b", "a", "a.b.c", "p" }, new String[][] { { "AB" }, { "A" }, { "ABC" } }, "a", true);
-		ParticipantTesting.reset();
-		rename.createAndPerform(RefactoringStatus.FATAL);
-		rename.checkOriginalState();
-	}
-
-	public void testHierarchical05() throws Exception {
-		fRenameSubpackages= true;
-
-		PackageRename rename= new PackageRename(
-				new String[] { "b.c", "b.c.d", "b", "p" }, new String[][] { { "BC" }, { "BCD" } }, "B", true);
-
-		rename.createAndPerform(RefactoringStatus.FATAL);
-		rename.checkOriginalState();
-	}
-
-	public void testHierarchical06() throws Exception {
-		fRenameSubpackages= true;
-
-		PackageRename rename= new PackageRename(new String[] { "a", "a.b", "a.b.c", "p" }, new String[][] { { "A" }, { "AB" }, { "ABC" } }, "a.B.c", true);
-		ParticipantTesting.reset();
-
-		rename.createAndPerform(RefactoringStatus.FATAL);
-		rename.checkOriginalState();
-	}
-
-	public void testHierarchical07() throws Exception {
-		fRenameSubpackages= true;
-
-		PackageRename rename= new PackageRename(new String[] { "a", "a.b", "a.b.c", "p" }, new String[][] { { "A" }, { "AB" }, { "ABC" } }, "a.b.C", true);
-		ParticipantTesting.reset();
-
-		rename.createAndPerform(RefactoringStatus.FATAL);
-		rename.checkOriginalState();
-	}
-
-	public void testHierarchical08() throws Exception {
-		fRenameSubpackages= true;
-
-		PackageRename rename= new PackageRename(new String[] { "a", "a.b", "a.b.c", "p" }, new String[][] { { "A" }, { "AB" }, { "ABC" } }, "P", true);
-		ParticipantTesting.reset();
-
-		rename.createAndPerform(RefactoringStatus.FATAL);
-		rename.checkOriginalState();
-	}
-
-	public void testHierarchical09() throws Exception {
-		fRenameSubpackages= true;
-
-		PackageRename rename= new PackageRename(new String[] { "a", "a.b", "a.b.c", "p" }, new String[][] { {}, { "B" }, { "C" }, { "D" } }, "a.b.c.D", true);
-		IPackageFragment thisPackage= rename.fPackages[0];
-
-		IFolder src= (IFolder)getRoot().getResource();
-		IFolder a= src.getFolder("a");
-		IFolder ab= a.getFolder("b");
-		IFolder abc= ab.getFolder("c");
-
-		IFolder abcD= a.getFolder("b/c/D");
-		IFolder abcDb= abcD.getFolder("b");
-		IFolder abcDbc= abcDb.getFolder("c");
-
-
-		ParticipantTesting.reset();
-
-		String[] createHandles= ParticipantTesting.createHandles(abcD, abcDb, abcDbc);
-		String[] deleteHandles= {};
-		String[] moveHandles= ParticipantTesting.createHandles(ab.getFile("B.java"), abc.getFile("C.java"));
-		String[] renameHandles= ParticipantTesting.createHandles(JavaElementUtil.getPackageAndSubpackages(thisPackage));
-
-		rename.createAndPerform(RefactoringStatus.OK);
-		rename.checkExpectedState();
-
-		ParticipantTesting.testCreate(createHandles);
-		ParticipantTesting.testDelete(deleteHandles);
-		ParticipantTesting.testMove(moveHandles, new MoveArguments[] {
-				new MoveArguments(abcDb, true),
-				new MoveArguments(abcDbc, true),
-		});
-		ParticipantTesting.testRename(renameHandles, new RenameArguments[] {
-				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[0]), true),
-				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[1]), true),
-				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[2]), true)
-
-		});
-
-		performUndo();
-		rename.checkOriginalState();
 	}
 
 	public void testHierarchicalToSubpackage() throws Exception {
@@ -1286,25 +1188,6 @@ public class RenamePackageTests extends RefactoringTest {
 		helper2(new String[]{"java.lang.reflect"}, new String[][]{{"Klass"}}, "nonjava");
 	}
 
-	public void test9() throws Exception {
-		fRenameSubpackages= true;
-
-		PackageRename rename= new PackageRename(new String[] { "A", "p" }, new String[][] { { "A" }, { "P" } }, "a", true);
-		ParticipantTesting.reset();
-
-		rename.execute();
-
-		IPackageFragment thisPackage= rename.fPackages[0];
-		List toRename= new ArrayList(Arrays.asList(JavaElementUtil.getPackageAndSubpackages(thisPackage)));
-		toRename.add(thisPackage.getResource());
-		String[] renameHandles= ParticipantTesting.createHandles(toRename.toArray());
-
-		ParticipantTesting.testRename(renameHandles, new RenameArguments[] {
-				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[0]), true),
-				new RenameArguments("a", true)
-		});
-	}
-
 	public void testToEmptyPack() throws Exception{
 		helper2(new String[]{"r.p1", "fred"}, new String[][] {{"A"}, {}}, "fred");
 	}
@@ -1558,72 +1441,6 @@ public class RenamePackageTests extends RefactoringTest {
 			JavaProjectHelper.delete(prjRef);
 			JavaProjectHelper.delete(prjOther);
 		}
-	}
-
-	public void testDifferentCaseInMultiRoots1() throws Exception {
-		IPackageFragmentRoot[] roots= createMultiRoots(new String[] { "src", "src1" }, null);
-		String[][] packageNames= new String[][] { { "p" }, { "Q" } };
-		String newPackageName= "q";
-		String[][][] cuNames= new String[][][] { { { "A" } }, { { "B" } } };
-		ICompilationUnit[][][] cus= new ICompilationUnit[roots.length][][];
-		IPackageFragment thisPackage= createPackagesAndCus(roots, packageNames, cuNames, cus);
-
-		RefactoringStatus result= performRefactoring(createRefactoringDescriptor(thisPackage, newPackageName));
-		assertEquals(RefactoringStatus.WARNING, result.getSeverity());
-	}
-
-	public void testDifferentCaseInMultiRoots2() throws Exception {
-		IPackageFragmentRoot[] roots= createMultiRoots(new String[] { "src", "src1" }, new String[] { "srcbin", null });
-		String[][] packageNames= new String[][] { { "p" }, { "Q" } };
-		String newPackageName= "q";
-		String[][][] cuNames= new String[][][] { { { "A" } }, { { "B" } } };
-		ICompilationUnit[][][] cus= new ICompilationUnit[roots.length][][];
-
-		IPackageFragment thisPackage= createPackagesAndCus(roots, packageNames, cuNames, cus);
-
-		RefactoringStatus result= performRefactoring(createRefactoringDescriptor(thisPackage, newPackageName));
-		assertEquals("preconditions were supposed to pass", null, result);
-
-		assertTrue("package not renamed", !getRoot().getPackageFragment(packageNames[0][0]).exists());
-		IPackageFragment newPackage= getRoot().getPackageFragment(newPackageName);
-		assertTrue("new package does not exist", newPackage.exists());
-	}
-
-	public void testDifferentCaseInMultiRoots3() throws Exception {
-		IPackageFragmentRoot[] roots= createMultiRoots(new String[] { "src", "src1" }, new String[] { null, "bin1" });
-		String[][] packageNames= new String[][] { { "p" }, { "Q" } };
-		String newPackageName= "q";
-		String[][][] cuNames= new String[][][] { { { "A" } }, { { "B" } } };
-		ICompilationUnit[][][] cus= new ICompilationUnit[roots.length][][];
-
-		IPackageFragment thisPackage= createPackagesAndCus(roots, packageNames, cuNames, cus);
-
-		RefactoringStatus result= performRefactoring(createRefactoringDescriptor(thisPackage, newPackageName));
-		assertEquals("preconditions were supposed to pass", null, result);
-
-		assertTrue("package not renamed", !getRoot().getPackageFragment(packageNames[0][0]).exists());
-		IPackageFragment newPackage= getRoot().getPackageFragment(newPackageName);
-		assertTrue("new package does not exist", newPackage.exists());
-	}
-
-	private IPackageFragment createPackagesAndCus(IPackageFragmentRoot[] roots, String[][] packageNames, String[][][] cuNames, ICompilationUnit[][][] cus)
-			throws JavaModelException, Exception {
-		IPackageFragment thisPackage= null;
-		for (int r= 0; r < roots.length; r++) {
-			IPackageFragment[] packages= new IPackageFragment[packageNames[r].length];
-			cus[r]= new ICompilationUnit[packageNames[r].length][];
-			for (int pa= 0; pa < packageNames[r].length; pa++) {
-				packages[pa]= roots[r].createPackageFragment(packageNames[r][pa], true, null);
-				cus[r][pa]= new ICompilationUnit[cuNames[r][pa].length];
-				if (r == 0 && pa == 0)
-					thisPackage= packages[pa];
-				for (int typ= 0; typ < cuNames[r][pa].length; typ++) {
-					cus[r][pa][typ]= createCUfromTestFile(packages[pa], cuNames[r][pa][typ],
-							roots[r].getElementName() + "/" + packageNames[r][pa].replace('.', '/') + "/");
-				}
-			}
-		}
-		return thisPackage;
 	}
 
 	public void testStatic1() throws Exception {

@@ -83,6 +83,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewPackageWizardPage_error_InvalidPackageName;
 	public static String NewPackageWizardPage_error_IsOutputFolder;
 	public static String NewPackageWizardPage_error_PackageExists;
+	public static String NewPackageWizardPage_error_PackageExistsDifferentCase;
 	public static String NewPackageWizardPage_error_EnterName;
 	public static String NewPackageWizardPage_error_PackageNotShown;
 	public static String NewPackageWizardPage_error_PackageNameFiltered;
