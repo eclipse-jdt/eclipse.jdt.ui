@@ -237,6 +237,23 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	public void testBreakFor2() throws Exception {
+		StringBuffer s= new StringBuffer();
+		s.append("class A{\n");
+		s.append("   void foo(int[] xs){\n");
+		s.append("      bar: for (int i = 0; i < xs.length; i++) {\n");
+		s.append("        baz: do{\n");
+		s.append("            break;");
+		s.append("        }while (xs != null);\n");
+		s.append("      }\n");
+		s.append("   }\n");
+		s.append("}\n");
+		int offset= s.indexOf("break") + 2; // inside 'break' 
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "baz", 1), find(s, ";", 4) };
+		checkSelection(s, offset, length, ranges);
+	}
+
 	public void testLabeledBreakIf() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -388,6 +405,23 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		int offset= s.indexOf("continue bar;") + 1+ "continue ".length();//middle of label reference
 		int length= 0;
 		OccurrenceLocation[] ranges= { find(s, "bar", 1) };
+		checkSelection(s, offset, length, ranges);
+	}
+
+	public void testContinueFor2() throws Exception {
+		StringBuffer s= new StringBuffer();
+		s.append("class A{\n");
+		s.append("   void foo(int[] xs){\n");
+		s.append("      bar: for (int i = 0; i < xs.length; i++) {\n");
+		s.append("        baz: do{\n");
+		s.append("            continue;");
+		s.append("        }while (xs != null);\n");
+		s.append("      }\n");
+		s.append("   }\n");
+		s.append("}\n");
+		int offset= s.indexOf("continue;") + 2; // inside 'continue'
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "baz", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 }
