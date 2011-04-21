@@ -40,6 +40,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.OpenResourceAction;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
 
+import org.eclipse.jdt.core.IJavaProject;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -147,6 +149,11 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	}
 
 	private static boolean isClosedProject(Object element) {
+		if (element instanceof IJavaProject) {
+			IProject project= ((IJavaProject) element).getProject();
+			return !project.isOpen();
+		}
+
 		// assume all closed project are rendered as IProject
 		return element instanceof IProject && !((IProject) element).isOpen();
 	}
