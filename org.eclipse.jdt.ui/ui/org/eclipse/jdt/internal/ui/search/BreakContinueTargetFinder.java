@@ -183,15 +183,9 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 			LabeledStatement ls= (LabeledStatement)node;
 			return ! areEqualLabels(ls.getLabel(), fLabel);
 		}
-		if (fLabel == null && fIsBreak) {
-			if (isAnyInstanceOf(BREAKTARGETS, node))
+		if (fLabel == null) {
+			if (isAnyInstanceOf(fIsBreak ? BREAKTARGETS : CONTINUETARGETS, node))
 				return node.getParent() instanceof LabeledStatement; // for behavior consistency of break targets: see bug 339176
-			if (node instanceof LabeledStatement)
-				return false;
-		}
-		if (fLabel == null && !fIsBreak) {
-			if (isAnyInstanceOf(CONTINUETARGETS, node))
-				return node.getParent() instanceof LabeledStatement; // for behavior consistency of continue targets: see bug 339176
 			if (node instanceof LabeledStatement)
 				return false;
 		}
