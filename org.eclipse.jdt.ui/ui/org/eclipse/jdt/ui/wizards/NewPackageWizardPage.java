@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
 package org.eclipse.jdt.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -19,9 +18,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-
-import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileStore;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -45,6 +41,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -272,12 +269,13 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageNameFiltered);
 						return status;
 					}
-					URI location= pack.getResource().getLocationURI();
-					if (location != null) {
-						IFileStore store= EFS.getStore(location);
-						if (store.fetchInfo().exists()) {
-							status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExistsDifferentCase);
-						}
+					//Check if package exists with different case in all source folders
+					IStatus val= Checks.checkPackageName(root, packName);
+					if (val.getSeverity() == IStatus.WARNING)
+						status.setWarning(val.getMessage());
+					else if (val.getSeverity() == IStatus.ERROR) {
+						status.setError(val.getMessage());
+						return status;
 					}
 				}
 			} catch (CoreException e) {

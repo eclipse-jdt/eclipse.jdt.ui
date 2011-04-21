@@ -110,6 +110,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
@@ -1437,9 +1438,19 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 							return status;
 						}
 					}
+					IStatus val= Checks.checkPackageName(root, packName);
+					if (val.getSeverity() == IStatus.WARNING)
+						status.setWarning(val.getMessage());
+					else if (val.getSeverity() == IStatus.ERROR) {
+						status.setError(val.getMessage());
+						return status;
+					}
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
 					// let pass
+				} catch (CoreException e) {
+					JavaPlugin.log(e);
+					return e.getStatus();
 				}
 			}
 

@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
@@ -466,7 +467,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 	public static boolean isPackageNameOkInRoot(String newName, IPackageFragmentRoot root) throws CoreException {
 		IPackageFragment pack= root.getPackageFragment(newName);
 		if (! pack.exists())
-			return true;
+			return Checks.checkPackageName(root, newName).getSeverity() == IStatus.OK;
 		else if (pack.containsJavaResources())
 			return false;
 		else if (pack.getNonJavaResources().length != 0)
@@ -475,18 +476,45 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 			return true;
 	}
 
+	/**
+	 * Gets the refactoring status with an appropriate message after checking for the validity of
+	 * the package name in the project.
+	 * 
+	 * @param newName the new name of the package fragment
+	 * @param root the parent package fragment root
+	 * @param msg the error message if package name is invalid or empty otherwise
+	 * @return a new refactoring status if package name is valid else return a refactoring status
+	 *         with an appropriate error message
+	 * @throws CoreException if the the file store corresponding to the provided URI is not found or
+	 *             if a package exists with a different case exists within the same project
+	 * @since 3.7
+	 */
+	private RefactoringStatus getStatus(String newName, IPackageFragmentRoot root, String msg) throws CoreException {
+		IPackageFragment pack= root.getPackageFragment(newName);
+		if (!pack.exists()) {
+			IStatus status= Checks.checkPackageName(root, newName);
+			if (status.getSeverity() == IStatus.WARNING)
+				return RefactoringStatus.createWarningStatus(status.getMessage());
+			else if (status.getSeverity() == IStatus.ERROR)
+				return RefactoringStatus.createFatalErrorStatus(status.getMessage());
+		}
+		return msg.length() == 0 ? new RefactoringStatus() : RefactoringStatus.createFatalErrorStatus(msg);
+	}
+
 	private RefactoringStatus checkPackageInCurrentRoot(String newName) throws CoreException {
 		if (fRenameSubpackages) {
 			String currentName= getCurrentElementName();
+			RefactoringStatus status;
 			if (isAncestorPackage(currentName, newName)) {
-				// renaming to subpackage (a -> a.b) is always OK, since all subpackages are also renamed
-				return null;
+				// renaming to subpackage (a -> a.b) is most of the times OK, since all subpackages are also renamed except
+				// when renamed to subpackage with different case (a -> a.B)
+				return checkIfNewNameOk(newName, ""); //$NON-NLS-1$
+					
 			}
 			if (! isAncestorPackage(newName, currentName)) {
 				// renaming to an unrelated package
-				if (! isPackageNameOkInRoot(newName, getPackageFragmentRoot())) {
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenamePackageRefactoring_package_exists);
-				}
+				if ((status= checkIfNewNameOk(newName, RefactoringCoreMessages.RenamePackageRefactoring_package_exists)) != null)
+					return status;
 			}
 			// renaming to superpackage (a.b -> a) or another package is OK iff
 			// 'a.b' does not contain any subpackage that would collide with another subpackage of 'a'
@@ -495,18 +523,34 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 			for (int i = 0; i < packsToRename.length; i++) {
 				IPackageFragment pack = packsToRename[i];
 				String newPack= newName + pack.getElementName().substring(currentName.length());
-				if (! isAncestorPackage(currentName, newPack) && ! isPackageNameOkInRoot(newPack, getPackageFragmentRoot())) {
-					String msg= Messages.format(RefactoringCoreMessages.RenamePackageProcessor_subpackage_collides, BasicElementLabels.getJavaElementName(newPack));
-					return RefactoringStatus.createFatalErrorStatus(msg);
-				}
+				status= checkIfNewNameOk(newPack, Messages.format(RefactoringCoreMessages.RenamePackageProcessor_subpackage_collides, BasicElementLabels.getJavaElementName(newPack)));
+				if (!isAncestorPackage(currentName, newPack) && status != null)
+					return status;
 			}
 			return null;
 
-		} else if (! isPackageNameOkInRoot(newName, getPackageFragmentRoot())) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenamePackageRefactoring_package_exists);
 		} else {
-			return null;
+			return checkIfNewNameOk(newName, RefactoringCoreMessages.RenamePackageRefactoring_package_exists);
 		}
+	}
+
+	/**
+	 * Checks if the new package name is OK and returns an appropriate status.
+	 * 
+	 * @param newName the new name
+	 * @param msg the error message
+	 * @return <code>null</code> status or a status with an appropriate message
+	 * @throws CoreException if the new package name cannot be used in the package fragment root
+	 * @since 3.7
+	 */
+	private RefactoringStatus checkIfNewNameOk(String newName, String msg) throws CoreException {
+		IPackageFragment[] subPackages= JavaElementUtil.getPackageAndSubpackages(fPackage);
+		IPackageFragment parentSubpackage= JavaElementUtil.getParentSubpackage(fPackage);
+		if (!fPackage.getElementName().equalsIgnoreCase(newName) || subPackages.length != 1 || parentSubpackage != null) {
+			if (!isPackageNameOkInRoot(newName, getPackageFragmentRoot()))
+				return getStatus(newName, getPackageFragmentRoot(), msg);
+		}
+		return null;
 	}
 
 	private boolean isAncestorPackage(String ancestor, String descendant) {
@@ -524,12 +568,19 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 
 	private RefactoringStatus checkPackageName(String newName) throws CoreException {
 		RefactoringStatus status= new RefactoringStatus();
+		RefactoringStatus nameOk= checkIfNewNameOk(newName, ""); //$NON-NLS-1$
+		if (nameOk == null)
+			return status;
+		else if (nameOk.hasFatalError())
+			return nameOk;
 		IPackageFragmentRoot[] roots= fPackage.getJavaProject().getPackageFragmentRoots();
 		Set<String> topLevelTypeNames= getTopLevelTypeNames();
 		for (int i= 0; i < roots.length; i++) {
 			IPackageFragmentRoot root= roots[i];
-			if (! isPackageNameOkInRoot(newName, root)) {
-				String rootLabel = JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT);
+			if (root.getKind() != IPackageFragmentRoot.K_SOURCE)
+				continue;
+			if (root.getPackageFragment(newName).exists()) {
+				String rootLabel= JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT);
 				String newPackageName= BasicElementLabels.getJavaElementName(getNewElementName());
 				String message= Messages.format(RefactoringCoreMessages.RenamePackageRefactoring_aleady_exists, new Object[]{ newPackageName, rootLabel});
 				status.merge(RefactoringStatus.createWarningStatus(message));

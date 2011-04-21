@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -216,6 +216,12 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String Checks_no_dot;
 
 	public static String Checks_validateEdit;
+
+	public static String Checks_package_error_IsOutputFolder;
+
+	public static String Checks_package_exists_with_different_case;
+
+	public static String Checks_containerpackage_exists_with_different_case;
 
 	public static String ClasspathChange_change_name;
 

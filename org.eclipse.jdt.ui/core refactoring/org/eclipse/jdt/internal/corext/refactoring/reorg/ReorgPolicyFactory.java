@@ -148,6 +148,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public final class ReorgPolicyFactory {
@@ -521,6 +522,44 @@ public final class ReorgPolicyFactory {
 
 		public CopyPackagesPolicy(IPackageFragment[] packageFragments) {
 			super(packageFragments);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory.PackagesReorgPolicy#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor, org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext, org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries)
+		 * @since 3.7
+		 */
+		@Override
+		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
+			try {
+				RefactoringStatus status= super.checkFinalConditions(pm, context, reorgQueries);
+				status.merge(checkForPackageNameWithDifferentCase());
+				return status;
+			} catch (JavaModelException e) {
+				throw e;
+			} catch (CoreException e) {
+				throw new JavaModelException(e);
+			}
+		}
+
+		/**
+		 * Checks if a package exists with a different case within the same project.
+		 * 
+		 * @return the refactoring status with an appropriate message
+		 * @throws CoreException if the the file store corresponding to the provided URI is not
+		 *             found or if a package exists with a different case exists within the same
+		 *             project
+		 * @since 3.7
+		 */
+		private RefactoringStatus checkForPackageNameWithDifferentCase() throws CoreException {
+			IPackageFragmentRoot root= getDestinationAsPackageFragmentRoot();
+			if (root == null)
+				return new RefactoringStatus();
+			StatusInfo status= Checks.checkPackageNames(root, getPackages());
+			if (status.getSeverity() == IStatus.WARNING)
+				return RefactoringStatus.createWarningStatus(status.getMessage());
+			else if (status.getSeverity() == IStatus.ERROR)
+				return RefactoringStatus.createFatalErrorStatus(status.getMessage());			
+			return new RefactoringStatus();
 		}
 
 		private Change createChange(IPackageFragment pack, IPackageFragmentRoot destination, NewNameProposer nameProposer, INewNameQueries copyQueries) {
@@ -1972,12 +2011,34 @@ public final class ReorgPolicyFactory {
 			try {
 				RefactoringStatus status= super.checkFinalConditions(pm, context, reorgQueries);
 				confirmMovingReadOnly(reorgQueries);
+				status.merge(checkForPackageNameWithDifferentCase());
 				return status;
 			} catch (JavaModelException e) {
 				throw e;
 			} catch (CoreException e) {
 				throw new JavaModelException(e);
 			}
+		}
+
+		/**
+		 * Checks if a package exists with a different case within the same project.
+		 * 
+		 * @return the refactoring status
+		 * @throws CoreException if the the file store corresponding to the provided URI is not
+		 *             found or if a package exists with a different case exists within the same
+		 *             project
+		 * @since 3.7
+		 */
+		private RefactoringStatus checkForPackageNameWithDifferentCase() throws CoreException {
+			IPackageFragmentRoot root= getDestinationAsPackageFragmentRoot();
+			if (root == null)
+				return new RefactoringStatus();
+			StatusInfo status= Checks.checkPackageNames(root, getPackages());
+			if (status.getSeverity() == IStatus.WARNING)
+				return RefactoringStatus.createWarningStatus(status.getMessage());
+			else if (status.getSeverity() == IStatus.ERROR)
+				return RefactoringStatus.createFatalErrorStatus(status.getMessage());
+			return new RefactoringStatus();
 		}
 
 		private void confirmMovingReadOnly(IReorgQueries reorgQueries) throws CoreException {

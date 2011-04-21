@@ -10,8 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -71,6 +76,7 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
@@ -191,6 +197,136 @@ public class Checks {
 	 */
 	public static RefactoringStatus checkPackageName(String name, IJavaElement context) {
 		return checkName(name, JavaConventionsUtil.validatePackageName(name, context));
+	}
+
+	/**
+	 * Checks if a package exists with a different case in the same project given the package name.
+	 * 
+	 * @param root the package fragment root
+	 * @param packageName the package name to check
+	 * @return a new refactoring status if the package name is valid or a refactoring status with an
+	 *         error message otherwise
+	 * @throws CoreException if the the file store corresponding to the provided URI is not found
+	 * @since 3.7
+	 */
+	public static StatusInfo checkPackageName(IPackageFragmentRoot root, String packageName) throws CoreException {
+		IPackageFragment[] packages= new IPackageFragment[] { root.getPackageFragment(packageName) };
+		return checkPackageNames(root, packages);
+	}
+	
+	/**
+	 * Checks if one or more packages exist with a different case in the same project.
+	 * 
+	 * @param root the package fragment root
+	 * @param packages the package fragments to check
+	 * @return a new refactoring status if the package name is valid or a refactoring status with an
+	 *         error message otherwise
+	 * @throws CoreException if the the file store corresponding to the provided URI is not found
+	 * @since 3.7
+	 */
+	public static StatusInfo checkPackageNames(IPackageFragmentRoot root, IPackageFragment[] packages) throws CoreException {
+		StatusInfo status= new StatusInfo();
+		IJavaProject jProject= root.getJavaProject();
+		if (jProject == null || packages == null)
+			return status;
+		IPackageFragmentRoot[] roots= jProject.getPackageFragmentRoots();
+		List<IPackageFragmentRoot> rootList= new ArrayList<IPackageFragmentRoot>(Arrays.asList(roots));
+
+		/*
+		 * Ensure the destination root is checked first. Since we only show a warning when a package with a different
+		 * case exists in a different source folder but an error if it exists in the same source folder, if in a project there exists 3 
+		 * src folders src1, src2 and src3 with the packages 'test', 'Test' and 'TEST' respectively, and 
+		 * the 'test' package is dragged/moved/copied into src3, an error should be shown since this operation is not allowed.
+		 * Same with Rename operation. Hence it helps to check the destination source folder first for any errors before checking for warnings 
+		 * by looping the other source folders.
+		 */
+		if (rootList.contains(root)) {
+			rootList.remove(root);
+			rootList.add(0, root);
+			roots= rootList.toArray(new IPackageFragmentRoot[rootList.size()]);
+		}
+		for (int i= 0; i < roots.length; i++) {
+			IPackageFragmentRoot pRoot= roots[i];
+			if (pRoot.getKind() != IPackageFragmentRoot.K_SOURCE)
+				continue;
+
+			IPath outputLocation= pRoot.getResolvedClasspathEntry().getOutputLocation();
+			IPath outLoc= root.getResolvedClasspathEntry().getOutputLocation();
+			if (outputLocation == null && outLoc != null || outputLocation != null && !outputLocation.equals(outLoc))
+				continue; // if output locations of the source folders are different do not show any warning or error
+			String str;
+			int index;
+			IPath rootPath= pRoot.getPath();
+			IPath outputPath= pRoot.getJavaProject().getOutputLocation();
+			for (int j= 0; j < packages.length; j++) {
+				if (packages[j] == null)
+					continue;
+				str= packages[j].getElementName();
+				while (str != null) {
+					IPackageFragment packg= pRoot.getPackageFragment(str);
+					if (rootPath.isPrefixOf(outputPath) && !rootPath.equals(outputPath)) {
+						// if the bin folder is inside of our root, don't allow to name a package
+						// like the bin folder
+						IPath packagePath= packg.getPath();
+						if (outputPath.isPrefixOf(packagePath)) {
+							status.setError(RefactoringCoreMessages.Checks_package_error_IsOutputFolder);
+							return status;
+						}
+					}
+					URI location= packg.getResource().getLocationURI();
+					if (location != null) {
+						IFileStore store= EFS.getStore(location);
+						if (store.fetchInfo().exists()) {
+							IPackageFragment[] fragments= findPackagesWithDifferentCase(str, pRoot);
+							if (fragments != null) {
+								String msg;
+								String elementName= fragments[0].getElementName();
+								if (!packages[j].getElementName().equals(str))
+									msg= Messages.format(RefactoringCoreMessages.Checks_containerpackage_exists_with_different_case, BasicElementLabels.getJavaElementName(elementName));
+								else
+									msg= Messages.format(RefactoringCoreMessages.Checks_package_exists_with_different_case, BasicElementLabels.getJavaElementName(elementName));
+								if (!pRoot.equals(root))
+									status.setWarning(msg);
+								else 
+									status.setError(msg);
+								return status;
+							}
+						}
+					}
+					index= str.lastIndexOf('.');
+					str= index == -1 ? null : str.substring(0, index);
+				}
+			}
+		}
+		return status;
+	}
+
+	/**
+	 * Finds packages with a different case in the given source folder.
+	 * 
+	 * @param packageName the package name to be checked
+	 * @param pRoot the package fragment root
+	 * @return the packages with a different case, if any, in the given source folder, <code>null</code> otherwise
+	 * @throws JavaModelException if this element does not exist or if an exception occurs while accessing its corresponding resource
+	 * @since 3.7
+	 */
+	public static IPackageFragment[] findPackagesWithDifferentCase(String packageName, IPackageFragmentRoot pRoot) throws JavaModelException {
+		IJavaElement[] packageFragments= pRoot.getChildren();
+		IPackageFragment[] packages= null;
+		if (packageFragments != null) {
+			for (int j= 0; j < packageFragments.length; j++) {
+				String str= packageName;
+				while (str != null) {
+					if (packageFragments[j] instanceof IPackageFragment && !packageFragments[j].getElementName().equals(str) && packageFragments[j].getElementName().equalsIgnoreCase(str)) {
+						packages= new IPackageFragment[] { (IPackageFragment)packageFragments[j] };
+						return packages;
+					}
+					int index= str.lastIndexOf('.');
+					str= index == -1 ? null : str.substring(0, index);
+				}
+			}
+		}
+		return packages;
 	}
 
 	/**
