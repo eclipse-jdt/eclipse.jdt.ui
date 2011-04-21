@@ -91,6 +91,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -329,9 +330,13 @@ public class InlineTempRefactoring extends Refactoring {
 		TextEditGroup groupDesc= cuRewrite.createGroupDescription(RefactoringCoreMessages.InlineTempRefactoring_remove_edit_name);
 		ASTNode parent= variableDeclaration.getParent();
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
+		TightSourceRangeComputer sourceRangeComputer= new TightSourceRangeComputer();
+		rewrite.setTargetSourceRangeComputer(sourceRangeComputer);
 		if (parent instanceof VariableDeclarationStatement && ((VariableDeclarationStatement) parent).fragments().size() == 1) {
+			sourceRangeComputer.addTightSourceNode(parent);
 			rewrite.remove(parent, groupDesc);
 		} else {
+			sourceRangeComputer.addTightSourceNode(variableDeclaration);
 			rewrite.remove(variableDeclaration, groupDesc);
 		}
 	}
