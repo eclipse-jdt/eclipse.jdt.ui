@@ -894,16 +894,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				Set<Object> input= new LinkedHashSet<Object>();
 				for (Iterator<?> iter = structuredSelection.iterator(); iter.hasNext();) {
 					Object item= iter.next();
-					if (item instanceof IJavaElement) {
-						input.add(item);
-					} else if (item instanceof IResource) {
-						IJavaElement je= JavaCore.create((IResource) item);
-						if (je == null) {
-							input.add(item);
-						} else {
-							input.add(je);
-						}
-					} else if (item instanceof IJarEntryResource) {
+					if (item instanceof IJavaElement || item instanceof IResource || item instanceof IJarEntryResource) {
 						input.add(item);
 					}
 				}
