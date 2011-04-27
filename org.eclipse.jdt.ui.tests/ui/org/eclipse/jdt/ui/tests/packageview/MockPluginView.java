@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -128,8 +128,10 @@ public class MockPluginView extends PackageExplorerPart {
 	}
 
 	/**
-	 * Returns the refreshed object.
-	 * @return Object
+	 * Returns whether the given object was refreshed.
+	 * 
+	 * @param c the object to test
+	 * @return <code>true</code> if the object was refreshed
 	 */
 	public boolean wasObjectRefreshed(Object c) {
 		return fRefreshedObjects.contains(c);
@@ -188,7 +190,8 @@ public class MockPluginView extends PackageExplorerPart {
 
 	/**
 	 * Sets the folding preference.
-	 * @param fold
+	 * 
+	 * @param fold <code>true</code> to enable folding, <code>false</code> otherwise
 	 */
 	public void setFolding(boolean fold) {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fold);
