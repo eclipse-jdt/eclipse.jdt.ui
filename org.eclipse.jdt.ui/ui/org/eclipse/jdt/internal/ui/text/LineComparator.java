@@ -35,8 +35,8 @@ public class LineComparator implements IRangeComparator {
 
     /**
 	 * Create a line comparator for the given document.
-	 *
-	 * @param document
+	 * 
+	 * @param document the document
 	 */
 	public LineComparator(IDocument document) {
 		fDocument= document;

@@ -105,7 +105,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewModifiers(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.AbstractMethodCorrectionProposal#addNewModifiers(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.core.dom.ASTNode, java.util.List)
 	 */
 	@Override
 	protected void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> modifiers) {
@@ -113,8 +113,8 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 		ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(getLinkedProposalModel(), rewrite, modifiers, getSenderBinding().isInterface());
 	}
 
-	/*(non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#isConstructor()
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.AbstractMethodCorrectionProposal#isConstructor()
 	 */
 	@Override
 	protected boolean isConstructor() {
@@ -124,7 +124,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getNewName(org.eclipse.jdt.core.dom.rewrite.ASTRewrite)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.AbstractMethodCorrectionProposal#getNewName(org.eclipse.jdt.core.dom.rewrite.ASTRewrite)
 	 */
 	@Override
 	protected SimpleName getNewName(ASTRewrite rewrite) {
@@ -165,7 +165,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getNewMethodType(org.eclipse.jdt.core.dom.rewrite.ASTRewrite)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.AbstractMethodCorrectionProposal#getNewMethodType(org.eclipse.jdt.core.dom.rewrite.ASTRewrite)
 	 */
 	@Override
 	protected Type getNewMethodType(ASTRewrite rewrite) throws CoreException {
@@ -217,7 +217,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewParameters(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List, java.util.List)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.AbstractMethodCorrectionProposal#addNewParameters(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List, java.util.List)
 	 */
 	@Override
 	protected void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params) throws CoreException {
@@ -274,14 +274,14 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewExceptions(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.AbstractMethodCorrectionProposal#addNewExceptions(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List)
 	 */
 	@Override
 	protected void addNewExceptions(ASTRewrite rewrite, List<Name> exceptions) throws CoreException {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewTypeParameters(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List, java.util.List)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.AbstractMethodCorrectionProposal#addNewTypeParameters(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List, java.util.List)
 	 */
 	@Override
 	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params) throws CoreException {

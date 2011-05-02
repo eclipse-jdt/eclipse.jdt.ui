@@ -471,7 +471,8 @@ public class ASTNodes {
 			return referenceType; // don't lose the unchecked conversion
 			
 		} else if (! TypeRules.canAssign(initializerType, referenceType)) {
-			return referenceType;
+			if (!Bindings.containsTypeVariables(referenceType))
+				return referenceType;
 		}
 		
 		return null;

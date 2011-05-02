@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -164,8 +164,8 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 		String delimiter= TextUtilities.getDefaultLineDelimiter(document);
 
 		IRegion line= document.getLineInformationOfOffset(offset);
-		String string= document.get(line.getOffset(), offset - line.getOffset());
-		if (string.trim().length() != 0)
+		String string= document.get(line.getOffset(), offset - line.getOffset()).trim();
+		if (string.length() != 0 && !string.equals("+")) //$NON-NLS-1$
 			indentation += String.valueOf("\t\t"); //$NON-NLS-1$
 
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();

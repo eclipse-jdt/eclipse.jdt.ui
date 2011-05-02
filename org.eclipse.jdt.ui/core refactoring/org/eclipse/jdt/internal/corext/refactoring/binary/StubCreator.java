@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,9 +19,12 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IAnnotatable;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
@@ -97,6 +100,11 @@ public class StubCreator {
 	}
 
 	protected void appendFlags(final IMember member) throws JavaModelException {
+		if (member instanceof IAnnotatable)
+			for (IAnnotation annotation : ((IAnnotatable) member).getAnnotations()) {
+				appendAnnotation(annotation);
+			}
+		
 		int flags= member.getFlags();
 		final int kind= member.getElementType();
 		if (kind == IJavaElement.TYPE) {
@@ -113,6 +121,52 @@ public class StubCreator {
 		}
 		if (flags != 0)
 			fBuffer.append(Flags.toString(flags));
+	}
+
+	private void appendAnnotation(IAnnotation annotation) throws JavaModelException {
+		fBuffer.append('@');
+		fBuffer.append(annotation.getElementName());
+		fBuffer.append('(');
+		
+		IMemberValuePair[] memberValuePairs= annotation.getMemberValuePairs();
+		for (IMemberValuePair pair : memberValuePairs) {
+			fBuffer.append(pair.getMemberName());
+			fBuffer.append('=');
+			appendAnnotationValue(pair.getValue(), pair.getValueKind());
+			fBuffer.append(',');
+		}
+		if (memberValuePairs.length > 0)
+			fBuffer.deleteCharAt(fBuffer.length() - 1);
+		
+		fBuffer.append(')').append('\n');
+	}
+
+	private void appendAnnotationValue(Object value, int valueKind) throws JavaModelException {
+		if (value instanceof Object[]) {
+			Object[] objects= (Object[]) value;
+			fBuffer.append('{');
+			for (Object object : objects) {
+				appendAnnotationValue(object, valueKind);
+				fBuffer.append(',');
+			}
+			if (objects.length > 0)
+				fBuffer.deleteCharAt(fBuffer.length() - 1);
+			fBuffer.append('}');
+			
+		} else {
+			switch (valueKind) {
+				case IMemberValuePair.K_ANNOTATION:
+					appendAnnotation((IAnnotation) value);
+					break;
+				case IMemberValuePair.K_STRING:
+					fBuffer.append('"').append(value).append('"');
+					break;
+					
+				default:
+					fBuffer.append(value);
+					break;
+			}
+		}
 	}
 
 	protected void appendMembers(final IType type, final IProgressMonitor monitor) throws JavaModelException {

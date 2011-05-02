@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,8 +54,20 @@ public class JavaWordFinder {
 
 			while (pos < length) {
 				c= document.getChar(pos);
-				if (!Character.isJavaIdentifierPart(c))
-					break;
+				if (!Character.isJavaIdentifierPart(c)) {
+					if (UTF16.isSurrogate(c)) {
+						/*
+						 * XXX: Here we should create the code point and test whether
+						 * it is a Java identifier part. Currently this is not possible
+						 * because java.lang.Character in 1.4 does not support surrogates
+						 * and because com.ibm.icu.lang.UCharacter.isJavaIdentifierPart(int)
+						 * is not correctly implemented.
+						 */
+					} else {
+						break;
+					}
+
+				}
 				++pos;
 			}
 			end= pos;
