@@ -63,7 +63,6 @@ import org.eclipse.jface.action.LegacyActionTools;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.ui.forms.events.ExpansionAdapter;
@@ -488,7 +487,6 @@ public abstract class OptionsConfigurationBlock {
 			fNoMatchFoundLabel= new Label(fScrolledPageContent.getBody(), SWT.NONE);
 			GridData gd= new GridData(SWT.BEGINNING, SWT.CENTER, true, false);
 			gd.horizontalSpan= 3;
-			gd.horizontalIndent= new PixelConverter(fScrolledPageContent).convertWidthInCharsToPixels(3);
 			fNoMatchFoundLabel.setLayoutData(gd);
 			fNoMatchFoundLabel.setFont(fScrolledPageContent.getFont());
 			fNoMatchFoundLabel.setText(PreferencesMessages.OptionsConfigurationBlock_NoOptionMatchesTheFilter);
