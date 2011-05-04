@@ -67,7 +67,7 @@ public final class JavaModelUtil {
 	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=309163
 	 * @since 3.7
 	 */
-	public static final boolean HIDE_VERSION_1_7= true;
+	public static final boolean HIDE_VERSION_1_7= Boolean.FALSE.booleanValue();
 
 	/**
 	 * Only use this suffix for creating new .java files.
