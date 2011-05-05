@@ -46,19 +46,21 @@ import org.eclipse.jdt.internal.ui.packageview.WorkingSetDropAdapter;
 import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
 
+
 public class WorkingSetDropAdapterTest extends TestCase {
 
 	private IJavaProject fProject;
 	private PackageExplorerPart fPackageExplorer;
+	private Accessor fPackageExplorerPartAccessor;
 	private WorkingSetDropAdapter fAdapter;
 
-	private Accessor fPackageExplorerPart;
 
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProject= JavaProjectHelper.createJavaProject("Test", "bin");
 		IWorkbenchPage activePage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		fPackageExplorer= (PackageExplorerPart)activePage.showView(JavaUI.ID_PACKAGES);
+		fPackageExplorerPartAccessor= new Accessor(fPackageExplorer, PackageExplorerPart.class.getName(), getClass().getClassLoader());
 		fAdapter= new WorkingSetDropAdapter(fPackageExplorer);
 	}
 
@@ -199,8 +201,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 	private void setWorkingSets(IWorkingSet[] workingSets) {
 		WorkingSetModel model= fPackageExplorer.getWorkingSetModel();
 		if (model == null) {
-			fPackageExplorerPart= new Accessor(fPackageExplorer, "org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart", getClass().getClassLoader());
-			fPackageExplorerPart.invoke("createWorkingSetModel", null);
+			fPackageExplorerPartAccessor.invoke("createWorkingSetModel", null);
 			model= fPackageExplorer.getWorkingSetModel();
 		}
 		model.setActiveWorkingSets(workingSets);
