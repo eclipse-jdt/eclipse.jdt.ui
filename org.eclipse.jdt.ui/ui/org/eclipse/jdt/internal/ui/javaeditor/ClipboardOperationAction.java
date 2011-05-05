@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +35,11 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.jface.text.IRewriteTarget;
@@ -46,6 +51,9 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.IProgressService;
+import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -74,7 +82,9 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.SharedASTProvider;
 
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
 /**
@@ -538,9 +548,8 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 	}
 
-
-	private void addImports(ICompilationUnit unit, ClipboardData data) throws CoreException {
-		ImportRewrite rewrite= StubUtility.createImportRewrite(unit, true);
+	private void addImports(final ICompilationUnit unit, ClipboardData data) throws CoreException {
+		final ImportRewrite rewrite= StubUtility.createImportRewrite(unit, true);
 		String[] imports= data.getTypeImports();
 		for (int i= 0; i < imports.length; i++) {
 			rewrite.addImport(imports[i]);
@@ -556,8 +565,34 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			rewrite.addStaticImport(qualifier, name, isField);
 		}
 
-		JavaModelUtil.applyEdit(unit, rewrite.rewriteImports(null), false, null);
+		try {
+			getProgressService().busyCursorWhile(new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					try {
+						JavaModelUtil.applyEdit(unit, rewrite.rewriteImports(monitor), false, null);
+					} catch (CoreException e) {
+						throw new InvocationTargetException(e);
+					}
+				}
+			});
+		} catch (InvocationTargetException e) {
+			Throwable cause= e.getCause();
+			if (cause instanceof CoreException)
+				throw (CoreException) cause;
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.JavaPlugin_internal_error, cause));
+		} catch (InterruptedException e) {
+			// Canceled by the user
+		}
 	}
 
+	private IProgressService getProgressService() {
+		IEditorPart editor= getTextEditor();
+		if (editor != null) {
+			IWorkbenchPartSite site= editor.getSite();
+			if (site != null)
+				return (IWorkbenchSiteProgressService) editor.getSite().getAdapter(IWorkbenchSiteProgressService.class);
+		}
+		return PlatformUI.getWorkbench().getProgressService();
+	}
 
 }
