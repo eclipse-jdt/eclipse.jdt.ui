@@ -295,7 +295,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 	public void testApplicationWithParamterGuesses() throws Exception {
 		measureApplicationWithParamterGuesses(getNullPerformanceMeter(), getWarmUpRuns());
 		PerformanceMeter performanceMeter= createPerformanceMeterForSummary("Java Editor: proposal insertion (param guessing)", Dimension.ELAPSED_PROCESS);
-		measureCompletionWithParamterNames(performanceMeter, getMeasuredRuns());
+		measureApplicationWithParamterGuesses(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
