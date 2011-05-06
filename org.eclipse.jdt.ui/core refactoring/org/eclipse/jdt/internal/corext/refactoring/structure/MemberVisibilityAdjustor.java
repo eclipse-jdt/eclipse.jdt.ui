@@ -1025,7 +1025,8 @@ public final class MemberVisibilityAdjustor {
 			} finally {
 				monitor.done();
 			}
-		} finally {			monitor.done();
+		} finally {
+			monitor.done();
 		}
 		return hierarchy;
 	}

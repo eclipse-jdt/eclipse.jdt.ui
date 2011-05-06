@@ -1504,14 +1504,4 @@ public class PackageExplorerPart extends ViewPart
 			fViewer.setComparator(new JavaElementComparator());
 		}
 	}
-
-	//---- test methods for working set mode -------------------------------
-
-	public void internalTestShowWorkingSets(IWorkingSet[] workingSets) {
-		if (fWorkingSetModel == null)
-			createWorkingSetModel();
-		fWorkingSetModel.setActiveWorkingSets(workingSets);
-		fWorkingSetModel.configured();
-		rootModeChanged(PackageExplorerPart.WORKING_SETS_AS_ROOTS);
-	}
 }
