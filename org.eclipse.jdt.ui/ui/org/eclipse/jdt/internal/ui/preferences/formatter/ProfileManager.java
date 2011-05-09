@@ -285,7 +285,7 @@ public abstract class ProfileManager extends Observable {
 		@Override
 		public Profile rename(String name, ProfileManager manager) {
 			CustomProfile profile= new CustomProfile(name.trim(), getSettings(), getVersion(), getKind());
-
+			profile.setManager(manager);
 			manager.profileReplaced(this, profile);
 			return profile;
 		}
