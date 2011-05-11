@@ -3,9 +3,6 @@ package p;
 public class Foo<E, F, G extends Comparable<E>> {
 
 	/**
-	 * @param <E>
-	 * @param <F>
-	 * @param <G>
 	 * @param foo
 	 * @param e
 	 * @param f
