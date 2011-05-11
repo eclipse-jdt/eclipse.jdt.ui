@@ -88,7 +88,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 	}
 
 	private void codeComplete(ICompilationUnit cu, int offset, CompletionProposalCollector collector) throws JavaModelException {
-		cu.codeComplete(offset, collector);
+		cu.codeComplete(offset, collector, new NullProgressMonitor());
 	}
 
 	protected void setUp() throws Exception {
@@ -1657,6 +1657,89 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		}
 	}
 
+	public void testConstructorCompletion_Bug336451() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("public class EclipseTest {\n");
+		buf.append("   private static interface InvokerIF{\n");
+		buf.append("       public <T extends ArgIF, Y> T invoke(T arg) throws RuntimeException, IndexOutOfBoundsException;\n");
+		buf.append("   }\n");
+		buf.append("   private static class Invoker implements InvokerIF{        \n");
+		buf.append("       public <T extends ArgIF, Y> T invoke(T arg){          \n");
+		buf.append("           return arg;                                       \n");
+		buf.append("       }                                                     \n");
+		buf.append("   }                                                         \n");
+		buf.append("                                                             \n");
+		buf.append("   private static interface ArgIF{                           \n");
+		buf.append("   }                                                         \n");
+		buf.append("                                                             \n");
+		buf.append("   private static interface ArgIF2<C> extends ArgIF{         \n");
+		buf.append("                                                             \n");
+		buf.append("   }                                                         \n");
+		buf.append("   private static class ArgImpl<C> implements ArgIF2<C>{     \n");
+		buf.append("       public ArgImpl() {                                    \n");
+		buf.append("           super();                                          \n");
+		buf.append("       }                                                     \n");
+		buf.append("   }                                                         \n");
+		buf.append("   public static void main(String[] args) throws Exception { \n");
+		buf.append("       InvokerIF test = new Invoker();                       \n");
+		buf.append("       test.invoke(new ArgImpl)                              \n");
+		buf.append("   }                                                         \n");
+		buf.append("}                                                             \n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("EclipseTest.java", contents, false, null);
+
+		String str= "test.invoke(new ArgImpl)";
+
+		int offset= contents.indexOf(str) + str.length() - 1;
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setAllowsRequiredProposals(CompletionProposal.CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+
+		collector.setReplacementLength(0);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("public class EclipseTest {\n");
+		buf.append("   private static interface InvokerIF{\n");
+		buf.append("       public <T extends ArgIF, Y> T invoke(T arg) throws RuntimeException, IndexOutOfBoundsException;\n");
+		buf.append("   }\n");
+		buf.append("   private static class Invoker implements InvokerIF{        \n");
+		buf.append("       public <T extends ArgIF, Y> T invoke(T arg){          \n");
+		buf.append("           return arg;                                       \n");
+		buf.append("       }                                                     \n");
+		buf.append("   }                                                         \n");
+		buf.append("                                                             \n");
+		buf.append("   private static interface ArgIF{                           \n");
+		buf.append("   }                                                         \n");
+		buf.append("                                                             \n");
+		buf.append("   private static interface ArgIF2<C> extends ArgIF{         \n");
+		buf.append("                                                             \n");
+		buf.append("   }                                                         \n");
+		buf.append("   private static class ArgImpl<C> implements ArgIF2<C>{     \n");
+		buf.append("       public ArgImpl() {                                    \n");
+		buf.append("           super();                                          \n");
+		buf.append("       }                                                     \n");
+		buf.append("   }                                                         \n");
+		buf.append("   public static void main(String[] args) throws Exception { \n");
+		buf.append("       InvokerIF test = new Invoker();                       \n");
+		buf.append("       test.invoke(new ArgImpl<C>())                              \n");
+		buf.append("   }                                                         \n");
+		buf.append("}                                                             \n");
+		assertEquals(buf.toString(), doc.get());
+	}
 
 	private static void assertNumberOf(String name, int is, int expected) {
 		assertTrue("Wrong number of " + name + ", is: " + is + ", expected: " + expected, is == expected);
