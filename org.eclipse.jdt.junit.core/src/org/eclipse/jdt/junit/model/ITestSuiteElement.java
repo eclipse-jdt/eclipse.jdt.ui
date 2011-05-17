@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,9 +24,10 @@ package org.eclipse.jdt.junit.model;
 public interface ITestSuiteElement extends ITestElementContainer {
 
 	/**
-	 * Returns the qualified type name of the suite class
-	 *
-	 * @return the qualified type name of the suite class
+	 * Returns the name of the suite. This is either the qualified type name of the
+	 * suite class, or a custom name if one has been set.
+	 * 
+	 * @return the name of the suite
 	 */
 	public String getSuiteTypeName();
 
