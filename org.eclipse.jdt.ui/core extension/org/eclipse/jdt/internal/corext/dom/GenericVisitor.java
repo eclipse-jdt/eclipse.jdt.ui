@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ContinueStatement;
-import org.eclipse.jdt.core.dom.DisjunctiveType;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -95,6 +94,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -210,10 +210,6 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public boolean visit(ContinueStatement node) {
-		return visitNode(node);
-	}
-	@Override
-	public boolean visit(DisjunctiveType node) {
 		return visitNode(node);
 	}
 	@Override
@@ -373,6 +369,10 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public boolean visit(TypeLiteral node) {
+		return visitNode(node);
+	}
+	@Override
+	public boolean visit(UnionType node) {
 		return visitNode(node);
 	}
 	@Override
