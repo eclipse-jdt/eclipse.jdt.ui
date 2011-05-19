@@ -13,8 +13,6 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.text.tests.performance.TextPerformanceTestCase.DebugSetup;
-
 
 /**
  * Depends on {@link PerformanceTestSetup}, which is currently run by
@@ -30,9 +28,9 @@ public class EventDrivenTestSuite extends TestSuite {
 	}
 
 	public EventDrivenTestSuite() {
-		addTest(new DebugSetup(ScrollJavaEditorTest.suite()));
-		addTest(new DebugSetup(ScrollTextEditorTest.suite()));
-		addTest(new DebugSetup(WhitespaceCharacterPainterTest.suite()));
+		addTest(ScrollJavaEditorTest.suite());
+		addTest(ScrollTextEditorTest.suite());
+		addTest(WhitespaceCharacterPainterTest.suite());
 		addTest(JavaIndenterTest.suite());
 		addTest(JavaNonInitialTypingTest.suite());
 		addTest(TextNonInitialTypingTest.suite());
