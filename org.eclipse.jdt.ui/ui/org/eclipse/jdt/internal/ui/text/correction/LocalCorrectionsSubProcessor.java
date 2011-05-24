@@ -49,7 +49,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
-import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -77,10 +76,8 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -107,7 +104,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
@@ -115,7 +111,6 @@ import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 import org.eclipse.jdt.internal.corext.fix.StringFix;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
-import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
@@ -124,7 +119,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.actions.GenerateHashCodeEqualsAction;
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.InferTypeArgumentsAction;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
@@ -1196,102 +1190,31 @@ public class LocalCorrectionsSubProcessor {
 		}
 
 		//Infer Generic Type Arguments... proposal
-		boolean hasInferTypeArgumentsProposal= false;
-		for (Iterator iterator= proposals.iterator(); iterator.hasNext();) {
-			Object completionProposal= iterator.next();
-			if (completionProposal instanceof ChangeCorrectionProposal) {
-				if (IJavaEditorActionDefinitionIds.INFER_TYPE_ARGUMENTS_ACTION.equals(((ChangeCorrectionProposal)completionProposal).getCommandId())) {
-					hasInferTypeArgumentsProposal= true;
-					break;
-				}
-			}
-		}
-		if (! hasInferTypeArgumentsProposal) {
-			final ICompilationUnit cu= context.getCompilationUnit();
-			ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.LocalCorrectionsSubProcessor_InferGenericTypeArguments, null, 5, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
-				public void apply(IDocument document) {
-					IEditorInput input= new FileEditorInput((IFile) cu.getResource());
-					IWorkbenchPage p= JavaPlugin.getActivePage();
-					if (p == null)
-						return;
-	
-					IEditorPart part= p.findEditor(input);
-					if (!(part instanceof JavaEditor))
-						return;
-	
-					IEditorSite site= ((JavaEditor)part).getEditorSite();
-					InferTypeArgumentsAction action= new InferTypeArgumentsAction(site);
-					action.run(new StructuredSelection(cu));
-				}
-	
-				/**
-				 * {@inheritDoc}
-				 */
-				public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-					return CorrectionMessages.LocalCorrectionsSubProcessor_InferGenericTypeArguments_description;
-				}
-			};
-			proposal.setCommandId(IJavaEditorActionDefinitionIds.INFER_TYPE_ARGUMENTS_ACTION);
-			proposals.add(proposal);
-		}
-		
-		addTypeArgumentsFromContext(context, problem, proposals);
-	}
-	
-	private static void addTypeArgumentsFromContext(IInvocationContext context, IProblemLocation problem, Collection proposals) {
-		// similar to UnresolvedElementsSubProcessor.getTypeProposals(context, problem, proposals);
-		
-		ICompilationUnit cu= context.getCompilationUnit();
+		final ICompilationUnit cu= context.getCompilationUnit();
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.LocalCorrectionsSubProcessor_InferGenericTypeArguments, null, 5, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+			public void apply(IDocument document) {
+				IEditorInput input= new FileEditorInput((IFile) cu.getResource());
+				IWorkbenchPage p= JavaPlugin.getActivePage();
+				if (p == null)
+					return;
 
-		CompilationUnit root= context.getASTRoot();
-		ASTNode selectedNode= problem.getCoveringNode(root);
-		if (selectedNode == null) {
-			return;
-		}
+				IEditorPart part= p.findEditor(input);
+				if (!(part instanceof JavaEditor))
+					return;
 
-		while (selectedNode.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
-			selectedNode= selectedNode.getParent();
-		}
+				IEditorSite site= ((JavaEditor)part).getEditorSite();
+				InferTypeArgumentsAction action= new InferTypeArgumentsAction(site);
+				action.run(new StructuredSelection(cu));
+			}
 
-		Name node= null;
-		if (selectedNode instanceof SimpleType) {
-			node= ((SimpleType) selectedNode).getName();
-		} else if (selectedNode instanceof ArrayType) {
-			Type elementType= ((ArrayType) selectedNode).getElementType();
-			if (elementType.isSimpleType()) {
-				node= ((SimpleType) elementType).getName();
-			} else {
-				return;
+			/**
+			 * {@inheritDoc}
+			 */
+			public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+				return CorrectionMessages.LocalCorrectionsSubProcessor_InferGenericTypeArguments_description;
 			}
-		} else if (selectedNode instanceof Name) {
-			node= (Name) selectedNode;
-		} else {
-			return;
-		}
-
-		// try to resolve type in context
-		ITypeBinding binding= ASTResolving.guessBindingForTypeReference(node);
-		if (binding != null) {
-			ITypeBinding simpleBinding= binding;
-			if (simpleBinding.isArray()) {
-				simpleBinding= simpleBinding.getElementType();
-			}
-			simpleBinding= simpleBinding.getTypeDeclaration();
-		
-			if (!simpleBinding.isRecovered()) {
-				if (binding.isParameterizedType() && node.getParent() instanceof SimpleType && !(node.getParent().getParent() instanceof Type)) {
-					proposals.add(UnresolvedElementsSubProcessor.createTypeRefChangeFullProposal(cu, binding, node, 3 + 2));
-				}
-			}
-		} else {
-			ASTNode normalizedNode= ASTNodes.getNormalizedNode(node);
-			if (!(normalizedNode.getParent() instanceof Type) && node.getParent() != normalizedNode) {
-				ITypeBinding normBinding= ASTResolving.guessBindingForTypeReference(normalizedNode);
-				if (normBinding != null && !normBinding.isRecovered()) {
-					proposals.add(UnresolvedElementsSubProcessor.createTypeRefChangeFullProposal(cu, normBinding, normalizedNode, 3 + 2));
-				}
-			}
-		}
+		};
+		proposals.add(proposal);
 	}
 
 	public static void addFallThroughProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
@@ -1343,30 +1266,6 @@ public class LocalCorrectionsSubProcessor {
 						String qfn= importRewrite.addImport(methodName[0]);
 						method.setExpression(ast.newName(qfn));
 						method.setName(ast.newSimpleName(methodName[1]));
-						ASTNode parent= selectedNode.getParent();
-						// add explicit type arguments if necessary:
-						if (Invocations.isInvocationWithArguments(parent)) {
-							IMethodBinding methodBinding= Invocations.resolveBinding(parent);
-							if (methodBinding != null) {
-								ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
-								int i= Invocations.getArguments(parent).indexOf(selectedNode);
-								if (parameterTypes.length >= i && parameterTypes[i].isParameterizedType()) {
-									ITypeBinding[] typeArguments= parameterTypes[i].getTypeArguments();
-									for (int j= 0; j < typeArguments.length; j++) {
-										ITypeBinding typeArgument= typeArguments[j];
-										if (! TypeRules.isJavaLangObject(typeArgument)) {
-											List typeArgumentsList= method.typeArguments();
-											for (int k= 0; k < typeArguments.length; k++) {
-												typeArgument= typeArguments[k];
-												typeArgumentsList.add(importRewrite.addImport(typeArgument, ast));
-											}
-											break;
-										}
-									}
-								}
-							}
-						}
-						
 						astRewrite.replace(selectedNode, method, null);
 
 						String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_replacefieldaccesswithmethod_description, BasicElementLabels.getJavaElementName(ASTNodes.asString(method)));

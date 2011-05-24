@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,15 +26,14 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation.DelegateEntry;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -42,6 +41,8 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * Tests generation of delegate methods
@@ -55,12 +56,12 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 		super(name);
 	}
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
 	}
 
-	public static Test suite() {
-		return allTests();
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 
 	/* (non-Javadoc)
@@ -81,7 +82,7 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 		Assert.assertEquals(fields.length, methods.length);
 
-		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
+		RefactoringASTParser parser= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL);
 		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
 
 		DelegateEntry[] entries= new DelegateEntry[fields.length];

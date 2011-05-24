@@ -228,7 +228,6 @@ import org.eclipse.jdt.internal.ui.text.JavaWordIterator;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaExpandHover;
 import org.eclipse.jdt.internal.ui.text.java.hover.SourceViewerInformationControl;
-import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
@@ -1184,7 +1183,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		public void run() {
 
 			final JavaSourceViewer viewer= (JavaSourceViewer) getSourceViewer();
-			if (viewer.isEditable() && ElementValidator.check(getInputJavaElement(), getSite().getShell(), JavaEditorMessages.JavaEditor_FormatElementDialog_label, true)) {
+			if (viewer.isEditable()) {
 
 				final Point selection= viewer.rememberSelection();
 				try {

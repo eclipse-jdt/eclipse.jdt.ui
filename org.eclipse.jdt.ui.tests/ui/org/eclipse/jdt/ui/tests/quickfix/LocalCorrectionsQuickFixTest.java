@@ -53,17 +53,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		super(name);
 	}
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
-	}
-
-	public static Test suite() {
-		return allTests();
-//		return setUpTest(new LocalCorrectionsQuickFixTest("testTypePrametersToRawTypeReference04"));
 	}
 
 
@@ -6589,6 +6584,72 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected2= buf.toString();
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+	
+	public void testRemoveDeadCodeConditional2() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = true ? new Integer(1) + 2 : new Double(0.0) + 3;\n");
+		buf.append("        System.out.println(o);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = (double) (new Integer(1) + 2);\n");
+		buf.append("        System.out.println(o);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String[] expected= new String[] { buf.toString() };
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testRemoveDeadCodeConditional3() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = true ? new Integer(1) : new Double(0.0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object o = (double) new Integer(1);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String[] expected= new String[] { buf.toString() };
+		
+		assertExpectedExistInProposals(proposals, expected);
 	}
 	
 	public void testRemoveDeadCodeMultiStatements() throws Exception {

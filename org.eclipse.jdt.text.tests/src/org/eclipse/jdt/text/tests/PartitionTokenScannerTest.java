@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
  */
 public class PartitionTokenScannerTest extends TestCase {
 
+	private static final boolean DEBUG= false;
 	private IPartitionTokenScanner fReference;
 	private IPartitionTokenScanner fTestee;
 
@@ -123,7 +124,7 @@ public class PartitionTokenScannerTest extends TestCase {
 		final long referenceTime= getTime(fReference, document, COUNT);
 		final long testeeTime= getTime(fTestee, document, COUNT);
 
-		if (false) {
+		if (DEBUG) {
 			System.out.println("reference time = " + referenceTime / 1000.0f);
 			System.out.println("testee time = " + testeeTime / 1000.0f);
 			System.out.println("factor = " + (float) referenceTime / testeeTime);

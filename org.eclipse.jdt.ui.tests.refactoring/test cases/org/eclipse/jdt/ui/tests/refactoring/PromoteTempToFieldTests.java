@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class PromoteTempToFieldTests extends RefactoringTest{
 
+	private static final boolean BUG_39363= true;
 	private static final Class clazz= PromoteTempToFieldTests.class;
 	private static final String REFACTORING_PATH= "PromoteTempToField/";
     private Object fCompactPref;
@@ -575,7 +576,8 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 
 	public void test18() throws Exception{
 		//printTestDisabledMessage("regression test for bug 39363");
-		if (true) return;
+		if (BUG_39363)
+			return;
 		int accessModifier= Modifier.PRIVATE;
 		int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
 		boolean declareFinal= false;

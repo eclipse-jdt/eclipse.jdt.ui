@@ -22,7 +22,6 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -42,6 +41,8 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnv
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
+
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class TypeEnvironmentTests extends AbstractCUTestCase {
 
@@ -180,7 +181,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 
 	private ASTNode createAST(IPackageFragment pack) throws Exception {
 		IJavaProject project= pack.getJavaProject();
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setProject(project);
 		parser.setResolveBindings(true);
 		ICompilationUnit unit= createCU(pack, getName());

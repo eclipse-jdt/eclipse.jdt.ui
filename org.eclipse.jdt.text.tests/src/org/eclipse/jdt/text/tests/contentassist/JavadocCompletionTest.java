@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,9 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	 * This test tests only <= 1.5 source level tags.
 	 */
 
+	private static final boolean BUG_NO_HTML_TAG_PROPOSALS_IN_CORE_JDOC_ASSIST= true;
+	private static final boolean BUG_NO_BEST_EFFORT_IMPORTS_WITH_CORE_COMPLETION= true;
+	private static final boolean BUG_113544= true;
 	private static final Class THIS= JavadocCompletionTest.class;
 	private static final String METHOD=
 			"	public int method(int param) {\n" +
@@ -38,16 +41,12 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	private static final String[] FIELD_INLINE_TAGS= {"@docRoot", "@link", "@linkplain", "@value", "@code", "@literal", };
 	private static final String[] HTML_TAGS= {"b", "blockquote", "br", "code", "dd", "dl", "dt", "em", "hr", "h1", "h2", "h3", "h4", "h5", "h6", "i", "li", "nl", "ol", "p", "pre", "q", "td", "th", "tr", "tt", "ul",};
 
-	public static Test allTests() {
-		return new TestSuite(THIS, suiteName(THIS));
-	}
-
 	public static Test setUpTest(Test test) {
 		return new CompletionTestSetup(test);
 	}
 
 	public static Test suite() {
-		return new CompletionTestSetup(allTests());
+		return setUpTest(new TestSuite(THIS, suiteName(THIS)));
 	}
 
 	/*
@@ -118,7 +117,7 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	}
 
 	public void testSeeMethodWithoutImport() throws Exception {
-		if (true) {
+		if (BUG_NO_BEST_EFFORT_IMPORTS_WITH_CORE_COMPLETION) {
 			System.out.println("JavadocCompletionTest.testSeeMethodWithoutImport() - no best-effort imports with Core completion");
 			return;
 		}
@@ -152,7 +151,7 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 		assertTypeJavadocProposal(" * Prefix List|", "{@link List}", " * Prefix {@link java.util.List}|");
 	}
 	public void testDirectLinkTypeNoAutoClose() throws Exception {
-		if (true) {
+		if (BUG_113544) {
 			System.out.println("not testing autoclosing behavior, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544");
 			return;
 		}
@@ -203,7 +202,7 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	}
 
 	public void testDirectLinkTypeNoAutoCloseImportsOn() throws Exception {
-		if (true) {
+		if (BUG_113544) {
 			System.out.println("not testing autoclosing behavior, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544");
 			return;
 		}
@@ -228,7 +227,7 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	}
 
 	public void testLinkMethodWithoutImport() throws Exception {
-		if (true) {
+		if (BUG_NO_BEST_EFFORT_IMPORTS_WITH_CORE_COMPLETION) {
 			System.out.println("JavadocCompletionTest.testLinkMethodWithoutImport() - no best-effort imports with Core completion");
 			return;
 		}
@@ -400,7 +399,7 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	}
 
 	public void testHTMLTags() throws Exception {
- 		if (true) {
+		if (BUG_NO_HTML_TAG_PROPOSALS_IN_CORE_JDOC_ASSIST) {
  			System.out.println("no HTML tag proposals in core jdoc assist");
  			return;
  		}

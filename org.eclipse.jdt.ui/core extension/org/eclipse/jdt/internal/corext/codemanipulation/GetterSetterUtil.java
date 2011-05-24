@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Assignment.Operator;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -34,10 +33,10 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.Assignment.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -261,14 +260,8 @@ public class GetterSetterUtil {
 				InfixExpression infix= ast.newInfixExpression();
 				infix.setLeftOperand(getterExpression);
 				infix.setOperator(ASTNodes.convertToInfixOperator(assignment.getOperator()));
-				ITypeBinding infixType= infix.resolveTypeBinding();
-				if (NecessaryParenthesesChecker.needsParentheses(copiedRightOp, infix, InfixExpression.RIGHT_OPERAND_PROPERTY)) {
-					//TODO: this introduces extra parentheses as the new "infix" node doesn't have bindings
-					ParenthesizedExpression p= ast.newParenthesizedExpression();
-					p.setExpression(copiedRightOp);
-					copiedRightOp= p;
-				}
 				infix.setRightOperand(copiedRightOp);
+				ITypeBinding infixType= infix.resolveTypeBinding();
 				return createNarrowCastIfNessecary(infix, infixType, ast, variableType, is50OrHigher);
 			}
 		} else if (node.getNodeType() == ASTNode.POSTFIX_EXPRESSION) {
@@ -343,7 +336,7 @@ public class GetterSetterUtil {
 			castTo= ast.newPrimitiveType(PrimitiveType.SHORT);
 		if (castTo != null) {
 			CastExpression cast= ast.newCastExpression();
-			if (NecessaryParenthesesChecker.needsParentheses(expression, cast, CastExpression.EXPRESSION_PROPERTY)) {
+			if (ASTNodes.needsParentheses(expression)) {
 				ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
 				parenthesized.setExpression(expression);
 				cast.setExpression(parenthesized);

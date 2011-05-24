@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -133,7 +133,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
-import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
@@ -1625,7 +1624,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		if (BUG_89686 && node instanceof SimpleName && node.getParent() instanceof EnumConstantDeclaration)
 			node= node.getParent();
 
-		if (Invocations.isInvocationWithArguments(node))
+		if (isReferenceNode(node))
 			return new ReferenceUpdate(node, cuRewrite, result);
 
 		else if (node instanceof SimpleName && node.getParent() instanceof MethodDeclaration)
@@ -1639,6 +1638,21 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 		else
 			return new NullOccurrenceUpdate(node, cuRewrite, result);
+	}
+
+	private static boolean isReferenceNode(ASTNode node){
+		switch (node.getNodeType()) {
+			case ASTNode.METHOD_INVOCATION :
+			case ASTNode.SUPER_METHOD_INVOCATION :
+			case ASTNode.CLASS_INSTANCE_CREATION :
+			case ASTNode.CONSTRUCTOR_INVOCATION :
+			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION :
+			case ASTNode.ENUM_CONSTANT_DECLARATION :
+				return true;
+
+			default :
+				return false;
+		}
 	}
 
 	abstract class OccurrenceUpdate {
@@ -1869,7 +1883,25 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 		/** @return {@inheritDoc} (element type: Expression) */
 		protected ListRewrite getParamgumentsRewrite() {
-			return getASTRewrite().getListRewrite(fNode, Invocations.getArgumentsProperty(fNode));
+			if (fNode instanceof MethodInvocation)
+				return getASTRewrite().getListRewrite(fNode, MethodInvocation.ARGUMENTS_PROPERTY);
+
+			if (fNode instanceof SuperMethodInvocation)
+				return getASTRewrite().getListRewrite(fNode, SuperMethodInvocation.ARGUMENTS_PROPERTY);
+
+			if (fNode instanceof ClassInstanceCreation)
+				return getASTRewrite().getListRewrite(fNode, ClassInstanceCreation.ARGUMENTS_PROPERTY);
+
+			if (fNode instanceof ConstructorInvocation)
+				return getASTRewrite().getListRewrite(fNode, ConstructorInvocation.ARGUMENTS_PROPERTY);
+
+			if (fNode instanceof SuperConstructorInvocation)
+				return getASTRewrite().getListRewrite(fNode, SuperConstructorInvocation.ARGUMENTS_PROPERTY);
+
+			if (fNode instanceof EnumConstantDeclaration)
+				return getASTRewrite().getListRewrite(fNode, EnumConstantDeclaration.ARGUMENTS_PROPERTY);
+
+			return null;
 		}
 
 		protected ASTNode createNewParamgument(ParameterInfo info, List parameterInfos, List nodes) {

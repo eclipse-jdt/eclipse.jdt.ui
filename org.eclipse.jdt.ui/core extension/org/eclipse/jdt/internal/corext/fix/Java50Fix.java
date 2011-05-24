@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -123,25 +123,27 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 			InferTypeArgumentsUpdate update= solver.solveConstraints(new NullProgressMonitor());
 			solver= null; //free caches
 
-			ParameterizedType[] nodes= InferTypeArgumentsRefactoring.inferArguments(fTypes, update, model, cuRewrite);
+			ASTNode[] nodes= InferTypeArgumentsRefactoring.inferArguments(fTypes, update, model, cuRewrite);
 			if (nodes.length == 0)
 				return;
 
 			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 			for (int i= 0; i < nodes.length; i++) {
-				ParameterizedType type= nodes[i];
-				List args= (List)type.getStructuralProperty(ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
-				int j= 0;
-				for (Iterator iter= args.iterator(); iter.hasNext();) {
-					LinkedProposalPositionGroup group= new LinkedProposalPositionGroup("G" + i + "_" + j); //$NON-NLS-1$ //$NON-NLS-2$
-					Type argType= (Type)iter.next();
-					if (!positionGroups.hasLinkedPositions()) {
-						group.addPosition(astRewrite.track(argType), true);
-					} else {
-						group.addPosition(astRewrite.track(argType), false);
+				if (nodes[i] instanceof ParameterizedType) {
+					ParameterizedType type= (ParameterizedType)nodes[0];
+					List args= (List)type.getStructuralProperty(ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
+					int j= 0;
+					for (Iterator iter= args.iterator(); iter.hasNext();) {
+						LinkedProposalPositionGroup group= new LinkedProposalPositionGroup("G" + i + "_" + j); //$NON-NLS-1$ //$NON-NLS-2$
+						Type argType= (Type)iter.next();
+						if (!positionGroups.hasLinkedPositions()) {
+							group.addPosition(astRewrite.track(argType), true);
+						} else {
+							group.addPosition(astRewrite.track(argType), false);
+						}
+						positionGroups.addPositionGroup(group);
+						j++;
 					}
-					positionGroups.addPositionGroup(group);
-					j++;
 				}
 			}
 			positionGroups.setEndPosition(astRewrite.track(nodes[0]));

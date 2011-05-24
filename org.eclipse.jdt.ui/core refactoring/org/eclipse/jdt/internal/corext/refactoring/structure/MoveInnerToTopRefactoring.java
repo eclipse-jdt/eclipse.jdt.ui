@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1070,7 +1070,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			if (StubUtility.doAddComments(unit.getJavaProject()))
 				fileComment= CodeGeneration.getFileComment(unit, separator);
 			String content= CodeGeneration.getCompilationUnitContent(unit, fileComment, null, block, separator);
-			if (content == null) {
+			if (content == null || block.startsWith("/*") || block.startsWith("//")) { //$NON-NLS-1$//$NON-NLS-2$
 				final StringBuffer buffer= new StringBuffer();
 				if (!fType.getPackageFragment().isDefaultPackage()) {
 					buffer.append("package ").append(fType.getPackageFragment().getElementName()).append(';'); //$NON-NLS-1$

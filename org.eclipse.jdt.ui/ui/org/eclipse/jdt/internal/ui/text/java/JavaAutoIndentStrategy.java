@@ -680,8 +680,6 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			boolean isIndentDetected= false;
 			StringBuffer addition= new StringBuffer();
 			int insertLength= 0;
-			int firstLineInsertLength= 0;
-			int firstLineIndent= 0;
 			int first= document.computeNumberOfLines(prefix) + firstLine; // don't format first line
 			int lines= temp.getNumberOfLines();
 			int tabLength= getVisualTabLengthPreference();
@@ -704,14 +702,8 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 						return; // bail out
 
 					insertLength= subtractIndent(correct, current, addition, tabLength);
-					if (l == first) {
-						firstLineInsertLength= insertLength;
-						firstLineIndent= current.length();
-					}
 					if (l != first && temp.get(lineOffset, lineLength).trim().length() != 0) {
 						isIndentDetected= true;
-						if (firstLineIndent >= current.length())
-							insertLength= firstLineInsertLength;
 						if (insertLength == 0) {
 							 // no adjustment needed, bail out
 							if (firstLine == 0) {

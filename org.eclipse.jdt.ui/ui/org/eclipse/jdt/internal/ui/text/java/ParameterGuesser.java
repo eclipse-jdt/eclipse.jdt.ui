@@ -311,7 +311,7 @@ public class ParameterGuesser {
 
 			final char[] triggers= new char[v.triggerChars.length + 1];
 			System.arraycopy(v.triggerChars, 0, triggers, 0, v.triggerChars.length);
-			triggers[triggers.length - 1]= ',';
+			triggers[triggers.length - 1]= ';';
 
 			ret[i++]= new PositionBasedCompletionProposal(v.name, pos, replacementLength, getImage(v.descriptor), displayString, null, null, triggers);
 		}

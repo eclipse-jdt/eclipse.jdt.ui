@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -870,12 +870,7 @@ public class PackageExplorerPart extends ViewPart
 			if (je != null && je.exists()) {
 				IJavaProject javaProject= je.getJavaProject();
 				if (javaProject != null && javaProject.exists()) {
-					if (javaProject.equals(je) || javaProject.isOnClasspath(je)) {
-						return je;
-					} else {
-						// a working copy of a .java file that is not on classpath
-						return original;
-					}
+					return je;
 				}
 			}
 		} else if (original instanceof IAdaptable) {

@@ -63,7 +63,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	public static Test suite() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		return setUpTest(new TestSuite(THIS));
 	}
 	
 	public static Test setUpTest(Test test) {

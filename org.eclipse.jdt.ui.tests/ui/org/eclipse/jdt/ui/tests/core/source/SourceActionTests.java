@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,13 +27,13 @@ public class SourceActionTests extends TestCase {
 	public static Test suite() {
 
 		TestSuite suite= new TestSuite();
-		suite.addTest(AddUnimplementedMethodsTest.allTests());
-		suite.addTest(GenerateGettersSettersTest.allTests());
-		suite.addTest(GenerateDelegateMethodsTest.allTests());
-		suite.addTest(AddUnimplementedConstructorsTest.allTests());
-		suite.addTest(GenerateConstructorUsingFieldsTest.allTests());
-		suite.addTest(GenerateHashCodeEqualsTest.allTests());
-		suite.addTest(GenerateToStringTest.allTests());
+		suite.addTest(AddUnimplementedMethodsTest.suite());
+		suite.addTest(GenerateGettersSettersTest.suite());
+		suite.addTest(GenerateDelegateMethodsTest.suite());
+		suite.addTest(AddUnimplementedConstructorsTest.suite());
+		suite.addTest(GenerateConstructorUsingFieldsTest.suite());
+		suite.addTest(GenerateHashCodeEqualsTest.suite());
+		suite.addTest(GenerateToStringTest.suite());
 
 		return new ProjectTestSetup(suite);
 	}

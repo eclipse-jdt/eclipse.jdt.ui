@@ -41,6 +41,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+
 public class InlineMethodTests extends AbstractSelectionTestCase {
 	private static InlineMethodTestSetup fgTestSetup;
 	private static final boolean BUG_82166= true;
@@ -75,7 +77,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	protected void performTestInlineCall(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		int[] selection= getSelection();
-		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(AST.JLS3).parse(unit, true), selection[0], selection[1]);
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, true), selection[0], selection[1]);
 		String out= null;
 		switch (mode) {
 			case COMPARE_WITH_OUTPUT:
@@ -89,7 +91,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		IType type= unit.getTypes()[0];
 		IMethod method= getMethodToInline(type);
-		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(AST.JLS3).parse(unit, true), method.getNameRange().getOffset(), method.getNameRange().getLength());
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, true), method.getNameRange().getOffset(), method.getNameRange().getLength());
 		String out= null;
 		switch (mode) {
 			case COMPARE_WITH_OUTPUT:
@@ -112,7 +114,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		IType type= unit.getTypes()[0];
 		IMethod method= getFirstConstructor(type);
-		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(AST.JLS3).parse(unit, true), method.getNameRange().getOffset(), method.getNameRange().getLength());
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, true), method.getNameRange().getOffset(), method.getNameRange().getLength());
 		String out= null;
 		switch (mode) {
 			case COMPARE_WITH_OUTPUT:
@@ -200,7 +202,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void testNotMethodName() throws Exception {
 		ICompilationUnit unit= createCU(fgTestSetup.getInvalidPackage(), getName());
 		int[] selection= getSelection();
-		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(AST.JLS3).parse(unit, true), selection[0], selection[1]);
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, true), selection[0], selection[1]);
 		assertNull(refactoring);
 	}
 
@@ -939,6 +941,11 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void testParameterizedType6() throws Exception {
 		performGenericTest();
 	}
+	
+	public void testParameterizedMethod() throws Exception {
+		performGenericTest();
+	}
+
 	/* *********************** Binary Tests ******************************* */
 
 	public void testBinaryInlineSingle() throws Exception { // uses classes.Target#
@@ -953,7 +960,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		IMethod logMessage= target2type.getMethods()[1]; // method 0 is ctor
 		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(
 				target2ClassFile,
-				new RefactoringASTParser(AST.JLS3).parse(target2ClassFile, true),
+				new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(target2ClassFile, true),
 				logMessage.getNameRange().getOffset(),
 				logMessage.getNameRange().getLength());
 
@@ -1040,7 +1047,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}
 
 	public void testOperatorPredence() throws Exception {
-		AST ast= AST.newAST(AST.JLS3);
+		AST ast= AST.newAST(ASTProvider.SHARED_AST_LEVEL);
 
 		int assignment= OperatorPrecedence.getExpressionPrecedence(ast.newAssignment());
 		int conditional= OperatorPrecedence.getExpressionPrecedence(ast.newConditionalExpression());

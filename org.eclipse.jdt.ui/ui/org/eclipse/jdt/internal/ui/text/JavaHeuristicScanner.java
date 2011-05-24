@@ -60,7 +60,6 @@ public final class JavaHeuristicScanner implements Symbols {
 	private static final char LANGLE= '<';
 	private static final char RANGLE= '>';
 	private static final char PLUS= '+';
-	private static final char AT= '@';
 
 	/**
 	 * Specifies the stop condition, upon which the <code>scanXXX</code> methods will decide whether
@@ -337,8 +336,6 @@ public final class JavaHeuristicScanner implements Symbols {
 				return TokenGREATERTHAN;
 			case PLUS:
 				return TokenPLUS;
-			case AT:
-				return TokenAT;
 		}
 
 		// else
@@ -413,8 +410,6 @@ public final class JavaHeuristicScanner implements Symbols {
 				return TokenGREATERTHAN;
 			case PLUS:
 				return TokenPLUS;
-			case AT:
-				return TokenAT;
 		}
 
 		// else

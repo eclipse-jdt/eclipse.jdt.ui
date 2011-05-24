@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -72,10 +73,13 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -84,6 +88,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -424,6 +429,58 @@ public class ASTNodes {
 			|| locationInParent == DoStatement.BODY_PROPERTY;
 	}
 
+	public static boolean needsParentheses(Expression expression) {
+		int type= expression.getNodeType();
+		return type == ASTNode.INFIX_EXPRESSION || type == ASTNode.CONDITIONAL_EXPRESSION ||
+			type == ASTNode.PREFIX_EXPRESSION || type == ASTNode.POSTFIX_EXPRESSION ||
+			type == ASTNode.CAST_EXPRESSION || type == ASTNode.INSTANCEOF_EXPRESSION;
+	}
+
+	/**
+	 * Checks whether <code>substitute</code> must be parenthesized when used to replace
+	 * <code>location</code>.
+	 * 
+	 * @param substitute substitute expression
+	 * @param location expression to be replaced
+	 * @return <code>true</code> iff <code>substitute</code> must be parenthesized when used to
+	 *         replace <code>location</code>
+	 */
+	public static boolean substituteMustBeParenthesized(Expression substitute, Expression location) {
+		if (substitute instanceof Assignment) //for esthetic reasons
+			return true;
+
+    	if (!needsParentheses(substitute))
+    		return false;
+
+    	ASTNode parent= location.getParent();
+    	StructuralPropertyDescriptor locationInParent= location.getLocationInParent();
+		if (locationInParent instanceof ChildListPropertyDescriptor && locationInParent != InfixExpression.EXTENDED_OPERANDS_PROPERTY) {
+			// e.g. argument lists of MethodInvocation, ClassInstanceCreation, ...
+   			return false;
+    	} else if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+   			return false;
+    	} else if (locationInParent == SingleVariableDeclaration.INITIALIZER_PROPERTY) {
+    		return false;
+    	} else if (locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
+    		return false;
+    	} else if (locationInParent == EnhancedForStatement.EXPRESSION_PROPERTY) {
+    		return false;
+    	} else if (locationInParent == SwitchStatement.EXPRESSION_PROPERTY) {
+    		return false;
+    	} else if (locationInParent == SwitchCase.EXPRESSION_PROPERTY) {
+    		return false;
+    	} else if (locationInParent == ArrayAccess.INDEX_PROPERTY) {
+    		return false;
+    	} else if (parent instanceof Expression) {
+			int substitutePrecedence= OperatorPrecedence.getExpressionPrecedence(substitute);
+			int locationPrecedence= OperatorPrecedence.getExpressionPrecedence((Expression)parent);
+			if (substitutePrecedence > locationPrecedence)
+				return false;
+		}
+
+        return true;
+	}
+
 	/**
 	 * Returns the type to which an inlined variable initializer should be cast, or
 	 * <code>null</code> if no cast is necessary.
@@ -439,22 +496,16 @@ public class ASTNodes {
 		if (initializerType == null || referenceType == null)
 			return null;
 		
-		if (initializerType.isPrimitive() && referenceType.isPrimitive() && ! referenceType.isEqualTo(initializerType)) {
+		if (initializerType.isPrimitive() && referenceType.isPrimitive() && ! referenceType.isEqualTo(initializerType))
 			return referenceType;
-			
-		} else if (initializerType.isPrimitive() && ! referenceType.isPrimitive()) { // initializer is autoboxed
+		else if (initializerType.isPrimitive() && ! referenceType.isPrimitive()) { // initializer is autoboxed
 			ITypeBinding unboxedReferenceType= Bindings.getUnboxedTypeBinding(referenceType, reference.getAST());
 			if (!unboxedReferenceType.isEqualTo(initializerType))
 				return unboxedReferenceType;
 			else if (needsExplicitBoxing(reference))
 				return referenceType;
-			
-		} else if (initializerType.isRawType() && referenceType.isParameterizedType()) {
-			return referenceType; // don't lose the unchecked conversion
-			
-		} else if (! TypeRules.canAssign(initializerType, referenceType)) {
+		} else if (! TypeRules.canAssign(initializerType, referenceType))
 			return referenceType;
-		}
 		
 		return null;
 	}

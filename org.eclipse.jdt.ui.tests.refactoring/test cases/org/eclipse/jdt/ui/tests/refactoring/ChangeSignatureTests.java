@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,6 +48,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	private static final boolean BUG_83691_CORE_JAVADOC_REF= true;
 
+	private static final boolean BUG_NEED_TO_DECIDE_HOW_TO_TREAT_COMPILE_ERRORS= true;
+
 	private static final boolean RUN_CONSTRUCTOR_TEST= true;
 
 	public ChangeSignatureTests(String name) {
@@ -59,14 +61,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public static Test suite() {
-		if (true) {
-			return new RefactoringTestSetup(new TestSuite(clazz));
-		} else {
-			System.err.println("*** Running only parts of " + clazz.getName() + "!");
-			TestSuite suite= new TestSuite();
-			suite.addTest(new ChangeSignatureTests("testDelegate05"));
-			return new RefactoringTestSetup(suite);
-		}
+		return setUpTest(new TestSuite(clazz));
 	}
 
 	public static Test setUpTest(Test someTest) {
@@ -1203,7 +1198,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testAll44()throws Exception{
-		if (true){
+		if (BUG_NEED_TO_DECIDE_HOW_TO_TREAT_COMPILE_ERRORS) {
 			printTestDisabledMessage("need to decide how to treat compile errors");
 			return;
 		}
@@ -1224,7 +1219,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testAll45()throws Exception{
-		if (true){
+		if (BUG_NEED_TO_DECIDE_HOW_TO_TREAT_COMPILE_ERRORS) {
 			printTestDisabledMessage("need to decide how to treat compile errors");
 			return;
 		}

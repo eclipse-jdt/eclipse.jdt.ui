@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertArrayEquals;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -23,6 +25,8 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
+import org.eclipse.text.tests.Accessor;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -33,18 +37,22 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class TypeMismatchQuickFixTests extends QuickFixTest {
 
@@ -58,18 +66,13 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		super(name);
 	}
 
-	public static Test allTests() {
+	public static Test suite() {
 		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
 	}
-
-	public static Test suite() {
-		return allTests();
-	}
-
 
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getDefaultOptions();
@@ -708,7 +711,113 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 	}
 
+	public void testTypeMismatchForParameterizedType() throws Exception {
+		Map<String, String> options= fJProject1.getOptions(false);
+		try {
+			Map<String, String> tempOptions= new HashMap<String, String>(options);
+			tempOptions.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
+			tempOptions.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+			fJProject1.setOptions(tempOptions);
+		
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.*;\n");
+			buf.append("public class E {\n");
+			buf.append("    public void foo() {\n");
+			buf.append("        List list= new ArrayList<Integer>();\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList proposals= collectCorrections(cu, astRoot);
+			assertCorrectLabels(proposals);
+			assertNumberOfProposals(proposals, 5);
+		
+			String[] expected= new String[2];
+		
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.*;\n");
+			buf.append("public class E {\n");
+			buf.append("    public void foo() {\n");
+			buf.append("        List<Integer> list= new ArrayList<Integer>();\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
 
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.*;\n");
+			buf.append("public class E {\n");
+			buf.append("    public void foo() {\n");
+			buf.append("        ArrayList<Integer> list= new ArrayList<Integer>();\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+			
+			assertExpectedExistInProposals(proposals, expected);
+			
+			
+			
+		} finally {
+			fJProject1.setOptions(options);
+		}
+	}
+
+	public void testTypeMismatchForParameterizedType2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        List<Integer> list= new ArrayList<Number>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        List<Number> list= new ArrayList<Number>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+		
+		Accessor accessor= new Accessor(proposal, TypeChangeCorrectionProposal.class);
+		ITypeBinding[] typeProposals= (ITypeBinding[]) accessor.get("fTypeProposals");
+		String[] typeNames= new String[typeProposals.length];
+		for (int i= 0; i < typeNames.length; i++) {
+			typeNames[i]= BindingLabelProvider.getBindingLabel(typeProposals[i], JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.T_FULLY_QUALIFIED);
+		}
+		String[] expectedNames= new String[] {
+				"java.util.List<Number>",
+				"java.util.ArrayList<Number>",
+				"java.util.Collection<Number>",
+				"java.lang.Iterable<Number>",
+				"java.util.RandomAccess",
+				"java.lang.Cloneable",
+				"java.io.Serializable",
+				"java.util.AbstractList<Number>",
+				"java.util.AbstractCollection<Number>",
+				"java.lang.Object",
+		};
+		assertArrayEquals(expectedNames, typeNames);
+	}
+	
 	public void testTypeMismatchInFieldDecl() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1297,7 +1406,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 	public void testMismatchingReturnTypeOnGenericMethod14() throws Exception {
 		Map<String, String> options= fJProject1.getOptions(false);
 		try {
-			Map<String, String> options14= new HashMap<String, String>(options); 
+			Map<String, String> options14= new HashMap<String, String>(options);
 			JavaModelUtil.setComplianceOptions(options14, JavaCore.VERSION_1_4);
 			fJProject1.setOptions(options14);
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

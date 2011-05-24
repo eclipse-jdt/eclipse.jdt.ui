@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.ui.text.JavaIndenter;
  */
 public class JavaHeuristicScannerTest extends TestCase {
 
+	private static final boolean BUG_65463= true;
 	private FastPartitioner fPartitioner;
 	private Document fDocument;
 	private JavaIndenter fScanner;
@@ -810,7 +811,7 @@ public class JavaHeuristicScannerTest extends TestCase {
     }
 
 	public void testConditional1() throws Exception {
-		if (true) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
+		if (BUG_65463) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
 			return;
     	fDocument.set(
     			"		public boolean isPrime() {\n" +
@@ -823,7 +824,7 @@ public class JavaHeuristicScannerTest extends TestCase {
     }
 
 	public void testConditional2() throws Exception {
-		if (true) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
+		if (BUG_65463) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
 			return;
     	fDocument.set(
     			"		public boolean isPrime() {\n" +
@@ -974,20 +975,50 @@ public class JavaHeuristicScannerTest extends TestCase {
 		Assert.assertEquals("\t\t\t", indent);
 	}
 
-	public void testContinuationIndentationOfStrings() throws Exception {
-		fDocument.set("\tString[] i = new String[] {\n\t\t\"X.java\",\n\t\t\"public class X extends B{\"\n\t\t+ \"test\"\n\t\t+ \"    public \"};");
+	public void testContinuationIndentationOfStrings1() throws Exception {
+		fDocument.set(
+				"	String[] i = new String[] {\n" + //0-28
+				"		\"X.java\",\n" + //29-40
+				"		\"public class X extends B{\"\n" + //41-70
+				"		+ \"test\"\n" +	//71-81
+				"		+ \"    public \"};");//82-
 
-		String indent= fScanner.computeIndentation(73).toString();
+		String indent= fScanner.computeIndentation(73).toString(); // at the beginning of 4th line
 		Assert.assertEquals("\t\t\t", indent);
-		indent= fScanner.computeIndentation(84).toString();
-		Assert.assertEquals("\t\t\t", indent);
+		indent= fScanner.computeIndentation(84).toString(); // at the beginning of 5th line
+		Assert.assertEquals("\t\t", indent);
 
-		fDocument.set("\tString[] i = new String[] {\n\t\t\"X.java\",\n\t\t\"public class X extends B{\" +\n\t\t\"test\" +\n\t\t\"    public\"\n};");
+		fDocument.set(
+				"	String[] i = new String[] {\n" +//0-28
+				"		\"X.java\",\n" + //29-40
+				"		\"public class X extends B{\" +\n" + //41-72
+				"		\"test\" +\n" + //73-
+				"		\"    public\"\n};");
 
-		indent= fScanner.computeIndentation(75).toString();
+		indent= fScanner.computeIndentation(75).toString(); //at the beginning of 4th line
 		Assert.assertEquals("\t\t\t", indent);
 	}
 
+	public void testContinuationIndentationOfStrings2() throws Exception {
+		//Bug 338229
+		fDocument.set(
+				"	System.out.println(\"Some\"\n" + //0-26
+				"		+ new Object()\n" + //27-43
+						"		+ \"string:\\n\" + definedType.toString());\n"); //44-
+
+		String indent= fScanner.computeIndentation(59).toString(); //before the last +
+		Assert.assertEquals("\t\t", indent);
+	}
+
+	public void testContinuationIndentationOfStrings3() throws Exception {
+		fDocument.set(
+				"	String test =\n" + //0-14
+				"		\"this is the 1st string\"\n" + //15-41
+				"		+ \"this is the 1st string\";\n");//42-
+
+		String indent= fScanner.computeIndentation(44).toString();//at the beginning of 3rd line
+		Assert.assertEquals("\t\t\t", indent);
+	}
 
 	public void testContinuationIndentation1() throws Exception {
 		fDocument.set("\treturn (thisIsAVeryLongName == 1 && anotherVeryLongName == 1)\n" +

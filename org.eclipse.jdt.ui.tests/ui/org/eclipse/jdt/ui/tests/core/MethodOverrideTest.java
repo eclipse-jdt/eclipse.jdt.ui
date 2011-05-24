@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -52,6 +51,7 @@ import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class MethodOverrideTest extends CoreTests {
@@ -64,16 +64,12 @@ public class MethodOverrideTest extends CoreTests {
 	private static final Class THIS= MethodOverrideTest.class;
 	private static final boolean DEBUG_SHOWRESULTS= false;
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
-	}
-
-	public static Test suite() {
-		return allTests();
 	}
 
 	private IJavaProject fJProject1;
@@ -431,7 +427,7 @@ public class MethodOverrideTest extends CoreTests {
 	}
 
 	private CompilationUnit assertNoCompilationError(ICompilationUnit cu) {
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		CompilationUnit root= (CompilationUnit) parser.createAST(null);

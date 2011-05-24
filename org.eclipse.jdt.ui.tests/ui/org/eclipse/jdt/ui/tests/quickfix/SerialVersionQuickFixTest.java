@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,11 +52,12 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 
 	private static final Class THIS= SerialVersionQuickFixTest.class;
 
-	/**
-	 * @return Test
-	 */
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
+	}
+
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 
 	public static void assertEqualPreview(final String preview, final String buffer) {
@@ -69,20 +70,10 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertEqualString(preview.substring(preview.length() - (buffer.length() - end)), buffer.substring(end));
 	}
 
-	/*
-	 * @see org.eclipse.jdt.ui.tests.quickfix.QuickFixTest#suite()
-	 */
-	public static Test suite() {
-		return allTests();
-	}
-
 	private IJavaProject fProject;
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	/**
-	 * @param name
-	 */
 	public SerialVersionQuickFixTest(String name) {
 		super(name);
 	}

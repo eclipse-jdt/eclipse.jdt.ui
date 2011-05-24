@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,12 +24,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
 import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 
@@ -58,7 +58,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	protected void setUp() throws Exception {
-		fParser = ASTParser.newParser(AST.JLS3);
+		fParser = ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		fFinder= new BreakContinueTargetFinder();
 
 		fJProject1= ProjectTestSetup.getProject();
@@ -237,6 +237,23 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	public void testBreakFor2() throws Exception {
+		StringBuffer s= new StringBuffer();
+		s.append("class A{\n");
+		s.append("   void foo(int[] xs){\n");
+		s.append("      bar: for (int i = 0; i < xs.length; i++) {\n");
+		s.append("        baz: do{\n");
+		s.append("            break;");
+		s.append("        }while (xs != null);\n");
+		s.append("      }\n");
+		s.append("   }\n");
+		s.append("}\n");
+		int offset= s.indexOf("break") + 2; // inside 'break' 
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "baz", 1), find(s, ";", 4) };
+		checkSelection(s, offset, length, ranges);
+	}
+
 	public void testLabeledBreakIf() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -388,6 +405,23 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		int offset= s.indexOf("continue bar;") + 1+ "continue ".length();//middle of label reference
 		int length= 0;
 		OccurrenceLocation[] ranges= { find(s, "bar", 1) };
+		checkSelection(s, offset, length, ranges);
+	}
+
+	public void testContinueFor2() throws Exception {
+		StringBuffer s= new StringBuffer();
+		s.append("class A{\n");
+		s.append("   void foo(int[] xs){\n");
+		s.append("      bar: for (int i = 0; i < xs.length; i++) {\n");
+		s.append("        baz: do{\n");
+		s.append("            continue;");
+		s.append("        }while (xs != null);\n");
+		s.append("      }\n");
+		s.append("   }\n");
+		s.append("}\n");
+		int offset= s.indexOf("continue;") + 2; // inside 'continue'
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "baz", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 }

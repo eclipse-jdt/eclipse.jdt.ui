@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,7 +64,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
-import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -436,10 +435,10 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			Expression expression= cast.getExpression();
 			ASTNode placeholder= rewrite.createCopyTarget(expression);
 
-			if (NecessaryParenthesesChecker.needsParentheses(expression, cast.getParent(), cast.getLocationInParent())) {
+			if (ASTNodes.needsParentheses(expression)) {
 				rewrite.replace(fCast, placeholder, group);
 			} else {
-				rewrite.replace(fCast.getParent() instanceof ParenthesizedExpression ? fCast.getParent() : fSelectedNode, placeholder, group);
+				rewrite.replace(fSelectedNode, placeholder, group);
 			}
 		}
 	}
@@ -469,8 +468,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 					fUnnecessaryCasts.remove(down);
 				}
 
-				Expression expression= down.getExpression();
-				ASTNode move= rewrite.createMoveTarget(expression);
+				ASTNode move= rewrite.createMoveTarget(down.getExpression());
 
 				CastExpression top= castExpression;
 				while (fUnnecessaryCasts.contains(top.getParent())) {
@@ -478,11 +476,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 					fUnnecessaryCasts.remove(top);
 				}
 
-				ASTNode toReplace= top;
-				if (top.getParent() instanceof ParenthesizedExpression && !NecessaryParenthesesChecker.needsParentheses(expression, top.getParent(), top.getLocationInParent())) {
-					toReplace= top.getParent();
-				}
-				rewrite.replace(toReplace, move, group);
+				rewrite.replace(top, move, group);
 			}
 		}
 	}

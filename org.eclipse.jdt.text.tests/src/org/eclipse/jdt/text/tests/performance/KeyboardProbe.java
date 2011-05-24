@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -226,7 +226,7 @@ public class KeyboardProbe {
 		text.setText("");
 		do
 			driveEventQueue();
-		while (!fTextContinue && fDisplay.sleep());
+		while (!fTextContinue);
 	}
 
 	private Display createDisplay() {
@@ -297,7 +297,7 @@ public class KeyboardProbe {
 
 		do
 			driveEventQueue();
-		while (!fKeyContinue && fDisplay.sleep());
+		while (!fKeyContinue);
 
 	}
 
@@ -330,7 +330,7 @@ public class KeyboardProbe {
 
 		do
 			driveEventQueue();
-		while (!fKeyContinue && fDisplay.sleep());
+		while (!fKeyContinue);
 	}
 
 	private boolean fShiftPressed= false;
@@ -352,6 +352,11 @@ public class KeyboardProbe {
 
 	private void driveEventQueue() {
 		while (fDisplay.readAndDispatch()) {}
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+			// continue
+		}
 	}
 
 }

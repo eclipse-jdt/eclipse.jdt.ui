@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -93,17 +92,11 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	}
 
 	private void addCompatibleMethods(IMethod filterMethod, IType typeToFindIn, List children) throws JavaModelException {
-		int flags= filterMethod.getFlags();
-		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || filterMethod.isConstructor())
-			return;
 		synchronized (fTypeHierarchyLifeCycleListener) {
 			boolean filterMethodOverrides= initializeMethodOverrideTester(filterMethod, typeToFindIn);
 			IMethod[] methods= typeToFindIn.getMethods();
 			for (int i= 0; i < methods.length; i++) {
 				IMethod curr= methods[i];
-				flags= curr.getFlags();
-				if (Flags.isPrivate(flags) || Flags.isStatic(flags) || curr.isConstructor())
-					continue;
 				if (isCompatibleMethod(filterMethod, curr, filterMethodOverrides) && !children.contains(curr)) {
 					children.add(curr);
 				}
@@ -112,18 +105,11 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	}
 
 	private boolean hasCompatibleMethod(IMethod filterMethod, IType typeToFindIn) throws JavaModelException {
-		int flags= filterMethod.getFlags();
-		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || filterMethod.isConstructor())
-			return false;
 		synchronized (fTypeHierarchyLifeCycleListener) {
 			boolean filterMethodOverrides= initializeMethodOverrideTester(filterMethod, typeToFindIn);
 			IMethod[] methods= typeToFindIn.getMethods();
 			for (int i= 0; i < methods.length; i++) {
-				IMethod curr= methods[i];
-				flags= curr.getFlags();
-				if (Flags.isPrivate(flags) || Flags.isStatic(flags) || curr.isConstructor())
-					continue;
-				if (isCompatibleMethod(filterMethod, curr, filterMethodOverrides)) {
+				if (isCompatibleMethod(filterMethod, methods[i], filterMethodOverrides)) {
 					return true;
 				}
 			}

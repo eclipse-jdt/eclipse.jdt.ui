@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
@@ -74,7 +75,6 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -85,7 +85,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
-import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.refactoring.code.SourceAnalyzer.NameData;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -315,10 +314,10 @@ public class SourceProvider {
 		return fTypeRoot;
 	}
 
-	public boolean needsReturnedExpressionParenthesis(ASTNode parent, StructuralPropertyDescriptor locationInParent) {
+	public boolean needsReturnedExpressionParenthesis() {
 		ASTNode last= getLastStatement();
 		if (last instanceof ReturnStatement) {
-			return NecessaryParenthesesChecker.needsParentheses(((ReturnStatement)last).getExpression(), parent, locationInParent);
+			return ASTNodes.needsParentheses(((ReturnStatement)last).getExpression());
 		}
 		return false;
 	}
@@ -414,6 +413,16 @@ public class SourceProvider {
 		return new String[] {};
 	}
 
+	private boolean argumentNeedsParenthesis(Expression expression, ParameterData param) {
+		if (expression instanceof CastExpression || expression instanceof ArrayCreation)
+			return true;
+		int argPrecedence= OperatorPrecedence.getExpressionPrecedence(expression);
+		int paramPrecedence= param.getOperatorPrecedence();
+		if (argPrecedence != Integer.MAX_VALUE && paramPrecedence != Integer.MAX_VALUE)
+			return argPrecedence <= paramPrecedence;
+		return false;
+	}
+
 	private Expression createParenthesizedExpression(Expression newExpression, AST ast) {
 		ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
 		parenthesized.setExpression(newExpression);
@@ -446,15 +455,14 @@ public class SourceProvider {
 					ITypeBinding explicitCast= ASTNodes.getExplicitCast(expression, (Expression)element);
 					if (explicitCast != null) {
 						CastExpression cast= ast.newCastExpression();
-						if (NecessaryParenthesesChecker.needsParentheses(expression, cast, CastExpression.EXPRESSION_PROPERTY)) {
+						if (ASTNodes.substituteMustBeParenthesized(newExpression, cast)) {
 							newExpression= createParenthesizedExpression(newExpression, ast);
 						}
 						cast.setExpression(newExpression);
 						ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(expression, importRewrite);
 						cast.setType(importRewrite.addImport(explicitCast, ast, importRewriteContext));
-						expression= newExpression= cast;
-					}
-					if (NecessaryParenthesesChecker.needsParentheses(expression, element.getParent(), element.getLocationInParent())) {
+						newExpression= createParenthesizedExpression(cast, ast);
+					} else if (argumentNeedsParenthesis(expression, parameter)) {
 						newExpression= createParenthesizedExpression(newExpression, ast);
 					}
 					rewriter.replace(element, newExpression, null);

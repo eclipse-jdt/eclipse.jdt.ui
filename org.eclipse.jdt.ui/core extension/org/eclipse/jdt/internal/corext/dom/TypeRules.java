@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,9 +16,7 @@ package org.eclipse.jdt.internal.corext.dom;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PrimitiveType;
-
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
+import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 /**
  * Helper class to check if objects are assignable to each other.
@@ -26,17 +24,102 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnv
 public class TypeRules {
 
 	/**
+	 * Tests if a two primitive types are assign compatible
+	 * @param toAssignCode The binding of the type to assign
+	 * @param definedTypeCode The type of the object that is assigned
+	 * @return boolean Returns true if definedType = typeToAssign is true
+	 */
+	public static boolean canAssignPrimitive(PrimitiveType.Code toAssignCode, PrimitiveType.Code definedTypeCode) {
+		//	definedTypeCode = typeCodeToAssign;
+		if (toAssignCode == definedTypeCode) {
+			return true;
+		}
+		if (definedTypeCode == PrimitiveType.BOOLEAN || toAssignCode == PrimitiveType.BOOLEAN) {
+			return false;
+		}
+		if (definedTypeCode == PrimitiveType.CHAR && toAssignCode == PrimitiveType.BYTE) {
+			return false;
+		}
+		return getTypeOrder(definedTypeCode) > getTypeOrder(toAssignCode);
+	}
+
+	/**
 	 * Tests if two types are assign compatible. Void types are never compatible.
-	 * 
 	 * @param typeToAssign The binding of the type to assign
 	 * @param definedType The type of the object that is assigned
-	 * @return <code>true</code> iff definedType = typeToAssign is a valid assignment
+	 * @return boolean Returns true if definedType = typeToAssign is true
 	 */
 	public static boolean canAssign(ITypeBinding typeToAssign, ITypeBinding definedType) {
-		TypeEnvironment typeEnvironment= new TypeEnvironment(false, true);
-		TType defined= typeEnvironment.create(definedType);
-		TType toAssign= typeEnvironment.create(typeToAssign);
-		return toAssign.canAssignTo(defined);
+		//see bug 80715
+
+		// definedType = typeToAssign;
+
+		String voidName= PrimitiveType.VOID.toString();
+		if (voidName.equals(typeToAssign.getName()) || voidName.equals(definedType.getName())) {
+			return false;
+		}
+
+		if (typeToAssign.isNullType()) {
+			return !definedType.isPrimitive();
+		}
+		if (definedType.isArray()) {
+			if (!typeToAssign.isArray()) {
+				return false; // can not assign a non-array type to an array
+			}
+			int definedDim= definedType.getDimensions();
+			int toAssignDim= typeToAssign.getDimensions();
+			if (definedDim == toAssignDim) {
+				definedType= definedType.getElementType();
+				typeToAssign= typeToAssign.getElementType();
+				if (typeToAssign.isPrimitive() && typeToAssign != definedType) {
+					return false; // can't assign arrays of different primitive types to each other
+				}
+				// fall through
+			} else if (definedDim < toAssignDim) {
+				return isArrayCompatible(definedType.getElementType());
+			} else {
+				return false;
+			}
+		}
+
+		if (typeToAssign.isPrimitive()) {
+			if (!definedType.isPrimitive()) {
+				return false;
+			}
+			PrimitiveType.Code toAssignCode= PrimitiveType.toCode(typeToAssign.getName());
+			PrimitiveType.Code definedTypeCode= PrimitiveType.toCode(definedType.getName());
+			return canAssignPrimitive(toAssignCode, definedTypeCode);
+		} else {
+			if (definedType.isPrimitive()) {
+				return false;
+			}
+
+			if (typeToAssign.isArray()) {
+				return isArrayCompatible(definedType);
+			}
+			if (isJavaLangObject(definedType)) {
+				return true;
+			}
+			return Bindings.isSuperType(definedType, typeToAssign);
+		}
+	}
+
+	private static int getTypeOrder(Code type) {
+		if (type == PrimitiveType.BYTE)
+			return 2;
+		if (type == PrimitiveType.CHAR)
+			return 3;
+		if (type == PrimitiveType.SHORT)
+			return 3;
+		if (type == PrimitiveType.INT)
+			return 4;
+		if (type == PrimitiveType.LONG)
+			return 5;
+		if (type == PrimitiveType.FLOAT)
+			return 6;
+		if (type == PrimitiveType.DOUBLE)
+			return 7;
+		return 0;
 	}
 
 	public static boolean isArrayCompatible(ITypeBinding definedType) {

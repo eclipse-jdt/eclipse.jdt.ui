@@ -320,6 +320,21 @@ public class InlineTempTests extends RefactoringTest {
 		helper1(7, 35, 7, 41);
 	}
 	
+	public void test45() throws Exception {
+		// don't delete comment right before the local variable declaration (bug 295200)
+		helper1(5, 18, 5, 22);
+	}
+
+	public void test46() throws Exception {
+		// don't delete comment right after the local variable declaration (bug 318471)
+		helper1(5, 16, 5, 17);
+	}
+
+	public void test47() throws Exception {
+		// don't delete comment right before and after the local variable declaration (bug 295200)
+		helper1(5, 18, 5, 22);
+	}
+
 	//------
 
 	public void testFail0() throws Exception{

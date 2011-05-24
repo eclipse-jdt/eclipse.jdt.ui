@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,15 +31,12 @@ import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -353,6 +350,7 @@ public class JavaElementLinks {
 								} else {
 									//TODO: methods whose signature contains type parameters can not be found
 									// easily, since the Javadoc references are erasures
+									//TODO: reference can also point to method from supertype
 
 									//Shortcut: only check name and parameter count:
 									methods= type.getMethods();
@@ -361,12 +359,7 @@ public class JavaElementLinks {
 										if (method.getElementName().equals(refMemberName) && method.getNumberOfParameters() == paramSignatures.length)
 											return method;
 									}
-									
-									// reference can also point to method from supertype:
-									ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
-									method= JavaModelUtil.findMethodInHierarchy(hierarchy, type, refMemberName, paramSignatures, false);
-									if (method != null)
-										return method;
+
 								}
 							} else {
 								IField field= type.getField(refMemberName);

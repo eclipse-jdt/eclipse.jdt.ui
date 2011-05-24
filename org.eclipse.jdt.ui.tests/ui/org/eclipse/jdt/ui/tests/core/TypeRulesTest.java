@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -34,6 +33,8 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
+
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class TypeRulesTest extends CoreTests {
 
@@ -46,22 +47,12 @@ public class TypeRulesTest extends CoreTests {
 		super(name);
 	}
 
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
+	}
+
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
-	}
-
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
-	}
-
-	public static Test suite() {
-		if (true) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new TypeRulesTest("test1"));
-			return new ProjectTestSetup(suite);
-		}
 	}
 
 	protected void setUp() throws Exception {
@@ -151,7 +142,7 @@ public class TypeRulesTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setSource(cu1);
 		parser.setResolveBindings(true);
 
@@ -189,7 +180,7 @@ public class TypeRulesTest extends CoreTests {
 				buf.append("}\n");
 				char[] content= buf.toString().toCharArray();
 
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 				parser.setSource(content);
 				parser.setResolveBindings(true);
 				parser.setProject(fJProject1);
@@ -230,7 +221,7 @@ public class TypeRulesTest extends CoreTests {
 				buf.append("}\n");
 				char[] content= buf.toString().toCharArray();
 
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 				parser.setSource(content);
 				parser.setResolveBindings(true);
 				parser.setProject(fJProject1);
@@ -273,7 +264,7 @@ public class TypeRulesTest extends CoreTests {
 				buf.append("}\n");
 				char[] content= buf.toString().toCharArray();
 
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 				parser.setSource(content);
 				parser.setResolveBindings(true);
 				parser.setProject(fJProject1);
@@ -316,7 +307,7 @@ public class TypeRulesTest extends CoreTests {
 				buf.append("}\n");
 				char[] content= buf.toString().toCharArray();
 
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 				parser.setSource(content);
 				parser.setResolveBindings(true);
 				parser.setProject(fJProject1);

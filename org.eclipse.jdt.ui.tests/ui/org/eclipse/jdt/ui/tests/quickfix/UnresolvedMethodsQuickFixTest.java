@@ -48,12 +48,8 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		super(name);
 	}
 
-	public static Test allTests() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
 	public static Test suite() {
-		return allTests();
+		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {

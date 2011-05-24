@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,7 +75,6 @@ import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -910,14 +909,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			if (!duplicate.isMethodBody()) {
 				if (isDestinationReachable(duplicate.getEnclosingMethod())) {
 					ASTNode[] callNodes= createCallNodes(duplicate, modifiers);
-					ASTNode[] duplicateNodes= duplicate.getNodes();
-					for (int i= 0; i < duplicateNodes.length; i++) {
-						ASTNode parent= duplicateNodes[i].getParent();
-						if (parent instanceof ParenthesizedExpression) {
-							duplicateNodes[i]= parent;
-						}
-					}
-					new StatementRewrite(fRewriter, duplicateNodes).replace(callNodes, description);
+					new StatementRewrite(fRewriter, duplicate.getNodes()).replace(callNodes, description);
 				}
 			}
 		}
@@ -1067,15 +1059,13 @@ public class ExtractMethodRefactoring extends Refactoring {
 			ITypeBinding binding= fAnalyzer.getExpressionBinding();
 			if (binding != null && (!binding.isPrimitive() || !"void".equals(binding.getName()))) { //$NON-NLS-1$
 				ReturnStatement rs= fAST.newReturnStatement();
-				rs.setExpression((Expression)fRewriter.createMoveTarget(selectedNodes[0] instanceof ParenthesizedExpression
-						? ((ParenthesizedExpression)selectedNodes[0]).getExpression()
-						: selectedNodes[0]));
+				rs.setExpression((Expression)fRewriter.createMoveTarget(selectedNodes[0]));
 				statements.insertLast(rs, null);
 			} else {
 				ExpressionStatement st= fAST.newExpressionStatement((Expression)fRewriter.createMoveTarget(selectedNodes[0]));
 				statements.insertLast(st, null);
 			}
-			fRewriter.replace(selectedNodes[0].getParent() instanceof ParenthesizedExpression ? selectedNodes[0].getParent() : selectedNodes[0], replacementNode, substitute);
+			fRewriter.replace(selectedNodes[0], replacementNode, substitute);
 		} else {
 			if (selectedNodes.length == 1) {
 				statements.insertLast(fRewriter.createMoveTarget(selectedNodes[0]), substitute);

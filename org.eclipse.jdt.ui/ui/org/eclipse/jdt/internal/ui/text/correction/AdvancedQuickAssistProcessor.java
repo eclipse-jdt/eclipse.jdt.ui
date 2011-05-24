@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
@@ -84,7 +83,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
-import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
@@ -524,12 +522,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (expression instanceof PrefixExpression) {
 			PrefixExpression prefixExpression= (PrefixExpression) expression;
 			if (prefixExpression.getOperator() == PrefixExpression.Operator.NOT) {
-				Expression operand= prefixExpression.getOperand();
-				if ((operand instanceof ParenthesizedExpression)
-						&& NecessaryParenthesesChecker.canRemoveParentheses(operand, expression.getParent(), expression.getLocationInParent())) {
-					operand= ((ParenthesizedExpression)operand).getExpression();
-				}
-				return getRenamedNameCopy(provider, rewrite, operand);
+				return getRenamedNameCopy(provider, rewrite, prefixExpression.getOperand());
 			}
 		}
 		if (expression instanceof InstanceofExpression) {
@@ -547,22 +540,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			parenthesizedExpression= getParenthesizedExpression(ast, getInversedExpression(rewrite, innerExpression, provider));
 			return parenthesizedExpression;
 		}
-		if (expression instanceof ConditionalExpression) {
-			ConditionalExpression conditionalExpression= (ConditionalExpression)expression;
-			ConditionalExpression newExpression= ast.newConditionalExpression();
-			newExpression.setExpression((Expression)rewrite.createCopyTarget(conditionalExpression.getExpression()));
-			newExpression.setThenExpression(getInversedExpression(rewrite, conditionalExpression.getThenExpression()));
-			newExpression.setElseExpression(getInversedExpression(rewrite, conditionalExpression.getElseExpression()));
-			return newExpression;
-		}
-
+		//
 		PrefixExpression prefixExpression= ast.newPrefixExpression();
 		prefixExpression.setOperator(PrefixExpression.Operator.NOT);
-		Expression renamedNameCopy= getRenamedNameCopy(provider, rewrite, expression);
-		if (NecessaryParenthesesChecker.needsParentheses(renamedNameCopy, prefixExpression, PrefixExpression.OPERAND_PROPERTY)) {
-			renamedNameCopy= getParenthesizedExpression(ast, renamedNameCopy);
-		}
-		prefixExpression.setOperand(renamedNameCopy);
+		prefixExpression.setOperand(getRenamedNameCopy(provider, rewrite, expression));
 		return prefixExpression;
 	}
 
@@ -763,12 +744,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				//
 				AST ast= node.getAST();
 				ASTRewrite rewrite= ASTRewrite.create(ast);
+				// prepare condition parts, add parentheses if needed
+				Expression outerCondition= getParenthesizedForAndIfNeeded(ast, rewrite, outerIf.getExpression());
+				Expression innerCondition= getParenthesizedForAndIfNeeded(ast, rewrite, ifStatement.getExpression());
 				// create compound condition
 				InfixExpression condition= ast.newInfixExpression();
 				condition.setOperator(InfixExpression.Operator.CONDITIONAL_AND);
-				// prepare condition parts, add parentheses if needed
-				Expression outerCondition= getParenthesizedExpressionIfNeeded(ast, rewrite, outerIf.getExpression(), condition, InfixExpression.LEFT_OPERAND_PROPERTY);
-				Expression innerCondition= getParenthesizedExpressionIfNeeded(ast, rewrite, ifStatement.getExpression(), condition, InfixExpression.RIGHT_OPERAND_PROPERTY);
 				condition.setLeftOperand(outerCondition);
 				condition.setRightOperand(innerCondition);
 				// create new IfStatement
@@ -802,12 +783,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				//
 				AST ast= node.getAST();
 				ASTRewrite rewrite= ASTRewrite.create(ast);
+				// prepare condition parts, add parentheses if needed
+				Expression outerCondition= getParenthesizedForAndIfNeeded(ast, rewrite, ifStatement.getExpression());
+				Expression innerCondition= getParenthesizedForAndIfNeeded(ast, rewrite, innerIf.getExpression());
 				// create compound condition
 				InfixExpression condition= ast.newInfixExpression();
 				condition.setOperator(InfixExpression.Operator.CONDITIONAL_AND);
-				// prepare condition parts, add parentheses if needed
-				Expression outerCondition= getParenthesizedExpressionIfNeeded(ast, rewrite, ifStatement.getExpression(), condition, InfixExpression.LEFT_OPERAND_PROPERTY);
-				Expression innerCondition= getParenthesizedExpressionIfNeeded(ast, rewrite, innerIf.getExpression(), condition, InfixExpression.RIGHT_OPERAND_PROPERTY);
 				condition.setLeftOperand(outerCondition);
 				condition.setRightOperand(innerCondition);
 				// create new IfStatement
@@ -826,9 +807,16 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static Expression getParenthesizedExpressionIfNeeded(AST ast, ASTRewrite rewrite, Expression expression, ASTNode parent, StructuralPropertyDescriptor locationInParent) {
-		boolean addParentheses= NecessaryParenthesesChecker.needsParentheses(expression, parent, locationInParent);
-		expression= (Expression)rewrite.createCopyTarget(expression);
+	private static Expression getParenthesizedForAndIfNeeded(AST ast, ASTRewrite rewrite, Expression expression) {
+		boolean addParentheses= false;
+		int nodeType= expression.getNodeType();
+		if (nodeType == ASTNode.INFIX_EXPRESSION) {
+			InfixExpression infixExpression= (InfixExpression) expression;
+			addParentheses= infixExpression.getOperator() == InfixExpression.Operator.CONDITIONAL_OR;
+		} else {
+			addParentheses= nodeType == ASTNode.CONDITIONAL_EXPRESSION || nodeType == ASTNode.ASSIGNMENT || nodeType == ASTNode.INSTANCEOF_EXPRESSION;
+		}
+		expression= (Expression) rewrite.createCopyTarget(expression);
 		if (addParentheses) {
 			return getParenthesizedExpression(ast, expression);
 		}
@@ -987,18 +975,19 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			IfStatement ifStatement= (IfStatement) iter.next();
 			if (thenStatement == null)
 				thenStatement= (Statement) rewrite.createCopyTarget(ifStatement.getThenStatement());
+			Expression ifCondition= getParenthesizedForOrIfNeeded(ast, rewrite, ifStatement.getExpression());
 			if (condition == null) {
 				condition= ast.newInfixExpression();
 				condition.setOperator(orOperator);
-				condition.setLeftOperand(getParenthesizedExpressionIfNeeded(ast, rewrite, ifStatement.getExpression(), condition, InfixExpression.LEFT_OPERAND_PROPERTY));
+				condition.setLeftOperand(ifCondition);
 			} else if (!hasRightOperand) {
-				condition.setRightOperand(getParenthesizedExpressionIfNeeded(ast, rewrite, ifStatement.getExpression(), condition, InfixExpression.RIGHT_OPERAND_PROPERTY));
+				condition.setRightOperand(ifCondition);
 				hasRightOperand= true;
 			} else {
 				InfixExpression newCondition= ast.newInfixExpression();
 				newCondition.setOperator(orOperator);
 				newCondition.setLeftOperand(condition);
-				newCondition.setRightOperand(getParenthesizedExpressionIfNeeded(ast, rewrite, ifStatement.getExpression(), condition, InfixExpression.RIGHT_OPERAND_PROPERTY));
+				newCondition.setRightOperand(ifCondition);
 				condition= newCondition;
 			}
 		}
@@ -1028,6 +1017,17 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		resultingCollections.add(proposal);
 		return true;
+	}
+
+	private static Expression getParenthesizedForOrIfNeeded(AST ast, ASTRewrite rewrite, Expression expression) {
+		boolean addParentheses= false;
+		int nodeType= expression.getNodeType();
+		addParentheses= nodeType == ASTNode.CONDITIONAL_EXPRESSION || nodeType == ASTNode.ASSIGNMENT || nodeType == ASTNode.INSTANCEOF_EXPRESSION;
+		expression= (Expression) rewrite.createCopyTarget(expression);
+		if (addParentheses) {
+			return getParenthesizedExpression(ast, expression);
+		}
+		return expression;
 	}
 
 	public static boolean getSplitOrConditionProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
@@ -1253,11 +1253,14 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 
-		if (NecessaryParenthesesChecker.needsParentheses(leftExpression, infixExpression, InfixExpression.RIGHT_OPERAND_PROPERTY)) {
-			leftExpression= getParenthesizedExpression(ast, leftExpression);
-		}
-		if (NecessaryParenthesesChecker.needsParentheses(rightExpression, infixExpression, InfixExpression.LEFT_OPERAND_PROPERTY)) {
-			rightExpression= getParenthesizedExpression(ast, rightExpression);
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=332019
+		if (operator == InfixExpression.Operator.EQUALS || operator == InfixExpression.Operator.NOT_EQUALS) {
+			if (leftExpression instanceof InfixExpression && !(leftExpression instanceof ParenthesizedExpression)) {
+				leftExpression= getParenthesizedExpression(ast, leftExpression);
+			}
+			if (rightExpression instanceof InfixExpression && !(rightExpression instanceof ParenthesizedExpression)) {
+				rightExpression= getParenthesizedExpression(ast, rightExpression);
+			}
 		}
 
 		if (operator == InfixExpression.Operator.LESS) {
@@ -1315,17 +1318,13 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 	}
 
-	private static Expression combineOperands(ASTRewrite rewrite, Expression existing, Expression originalNode, boolean removeParentheses, Operator operator) {
+	private static Expression combineOperands(ASTRewrite rewrite, Expression existing, Expression nodeToAdd, boolean removeParentheses, Operator operator) {
 		if (existing == null && removeParentheses) {
-			while (originalNode instanceof ParenthesizedExpression) {
-				originalNode= ((ParenthesizedExpression)originalNode).getExpression();
+			while (nodeToAdd instanceof ParenthesizedExpression) {
+				nodeToAdd= ((ParenthesizedExpression) nodeToAdd).getExpression();
 			}
 		}
-		Expression newRight= (Expression)rewrite.createMoveTarget(originalNode);
-		if (originalNode instanceof InfixExpression) {
-			((InfixExpression)newRight).setOperator(((InfixExpression)originalNode).getOperator());
-		}
-
+		Expression newRight= (Expression) rewrite.createMoveTarget(nodeToAdd);
 		if (existing == null) {
 			return newRight;
 		}
@@ -1972,7 +1971,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			negationExpression= (PrefixExpression) covering.getParent();
 			parenthesizedExpression= (ParenthesizedExpression) covering;
 		}
-		if (negationExpression == null || (!(parenthesizedExpression.getExpression() instanceof InfixExpression) && !(parenthesizedExpression.getExpression() instanceof ConditionalExpression))) {
+		//
+		if (negationExpression == null) {
 			return false;
 		}
 		//  we could produce quick assist
@@ -2029,14 +2029,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (expression.getParent() instanceof InfixExpression) {
 			return expression;
 		}
-		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY || locationInParent == IfStatement.EXPRESSION_PROPERTY
-				|| locationInParent == WhileStatement.EXPRESSION_PROPERTY || locationInParent == DoStatement.EXPRESSION_PROPERTY
-				|| locationInParent == ReturnStatement.EXPRESSION_PROPERTY || locationInParent == ForStatement.EXPRESSION_PROPERTY
-				|| locationInParent == AssertStatement.EXPRESSION_PROPERTY || locationInParent == MethodInvocation.ARGUMENTS_PROPERTY
-				|| locationInParent == ConstructorInvocation.ARGUMENTS_PROPERTY || locationInParent == SuperMethodInvocation.ARGUMENTS_PROPERTY
-				|| locationInParent == EnumConstantDeclaration.ARGUMENTS_PROPERTY || locationInParent == SuperConstructorInvocation.ARGUMENTS_PROPERTY
-				|| locationInParent == ClassInstanceCreation.ARGUMENTS_PROPERTY || locationInParent == ConditionalExpression.EXPRESSION_PROPERTY
-				|| locationInParent == PrefixExpression.OPERAND_PROPERTY) {
+		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY || locationInParent == IfStatement.EXPRESSION_PROPERTY || locationInParent == WhileStatement.EXPRESSION_PROPERTY
+				|| locationInParent == DoStatement.EXPRESSION_PROPERTY || locationInParent == ReturnStatement.EXPRESSION_PROPERTY || locationInParent == ForStatement.EXPRESSION_PROPERTY
+				|| locationInParent == MethodInvocation.ARGUMENTS_PROPERTY || locationInParent == ConstructorInvocation.ARGUMENTS_PROPERTY
+				|| locationInParent == SuperMethodInvocation.ARGUMENTS_PROPERTY || locationInParent == EnumConstantDeclaration.ARGUMENTS_PROPERTY
+				|| locationInParent == SuperConstructorInvocation.ARGUMENTS_PROPERTY || locationInParent == ClassInstanceCreation.ARGUMENTS_PROPERTY
+				|| locationInParent == ConditionalExpression.EXPRESSION_PROPERTY || locationInParent == PrefixExpression.OPERAND_PROPERTY) {
 			return expression;
 		}
 		return null;
@@ -2050,7 +2048,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		ASTNode fullyCoveredNode= (ASTNode) coveredNodes.get(0);
 
 		Expression expression= getBooleanExpression(fullyCoveredNode);
-		if (expression == null || (!(expression instanceof InfixExpression) && !(expression instanceof ConditionalExpression))) {
+		if (expression == null) {
 			return false;
 		}
 		//  we could produce quick assist
@@ -2273,7 +2271,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		InfixExpression condition= ast.newInfixExpression();
 		condition.setOperator(InfixExpression.Operator.EQUALS);
 		//
-		Expression leftExpression= getParenthesizedExpressionIfNeeded(ast, rewrite, switchStatement.getExpression(), condition, InfixExpression.LEFT_OPERAND_PROPERTY);
+		Expression leftExpression= (Expression) rewrite.createCopyTarget(switchStatement.getExpression());
 		condition.setLeftOperand(leftExpression);
 		//
 		Expression rightExpression= null;

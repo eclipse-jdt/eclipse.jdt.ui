@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,7 +79,6 @@ import org.eclipse.jdt.core.refactoring.descriptors.InlineLocalVariableDescripto
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -334,7 +333,8 @@ public class InlineTempRefactoring extends Refactoring {
 
 	private Expression getInitializerSource(CompilationUnitRewrite rewrite, SimpleName reference) throws JavaModelException {
 		Expression copy= getModifiedInitializerSource(rewrite, reference);
-		if (NecessaryParenthesesChecker.needsParentheses(copy, reference.getParent(), reference.getLocationInParent())) {
+		boolean brackets= ASTNodes.substituteMustBeParenthesized(copy, reference);
+		if (brackets) {
 			ParenthesizedExpression parentExpr= rewrite.getAST().newParenthesizedExpression();
 			parentExpr.setExpression(copy);
 			return parentExpr;
@@ -367,7 +367,7 @@ public class InlineTempRefactoring extends Refactoring {
 		ITypeBinding explicitCast= ASTNodes.getExplicitCast(initializer, reference);
 		if (explicitCast != null) {
 			CastExpression cast= ast.newCastExpression();
-			if (NecessaryParenthesesChecker.needsParentheses(initializer, cast, CastExpression.EXPRESSION_PROPERTY)) {
+			if (ASTNodes.substituteMustBeParenthesized(copy, cast)) {
 				ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
 				parenthesized.setExpression(copy);
 				copy= parenthesized;

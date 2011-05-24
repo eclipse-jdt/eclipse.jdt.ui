@@ -932,10 +932,9 @@ public final class JavaIndenter {
 
 		// align parenthesis'
 		if (matchParen) {
-			if (skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN)) {
-				fIndent= fPrefs.prefContinuationIndent;
+			if (skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN))
 				return fPosition;
-			} else {
+			else {
 				// if we can't find the matching paren, the heuristic is to unindent
 				// by one against the normal position
 				int pos= findReferencePosition(offset, danglingElse, matchBrace, false, matchCase, throwsClause);
@@ -1036,10 +1035,6 @@ public final class JavaIndenter {
 					}
 					fPosition= scope;
 					if (looksLikeAnonymousTypeDecl()) {
-						return skipToStatementStart(danglingElse, false);
-					}
-					fPosition= scope;
-					if (looksLikeAnnotation()) {
 						return skipToStatementStart(danglingElse, false);
 					}
 				}
@@ -1225,14 +1220,6 @@ public final class JavaIndenter {
 					// skip behind the next if, as we have that one covered
 					pos= fPosition;
 					if (skipNextIF())
-						break;
-					else
-						return pos;
-
-				case Symbols.TokenCATCH:
-				case Symbols.TokenFINALLY:
-					pos= fPosition;
-					if (skipNextTRY())
 						break;
 					else
 						return pos;
@@ -1639,44 +1626,6 @@ public final class JavaIndenter {
 
 
 	/**
-	 * Skips over the next <code>try</code> keyword. The current token when calling this method must
-	 * be a <code>catch</code> or <code>finally</code> keyword. Returns <code>true</code> if a
-	 * matching <code>try</code> could be found, <code>false</code> otherwise. The cursor (
-	 * <code>fPosition</code>) is set to the offset of the <code>try</code> token.
-	 * 
-	 * @return <code>true</code> if a matching <code>try</code> token was found, <code>false</code>
-	 *         otherwise
-	 * @since 3.7
-	 */
-	private boolean skipNextTRY() {
-		Assert.isTrue(fToken == Symbols.TokenCATCH || fToken == Symbols.TokenFINALLY);
-	
-		while (true) {
-			nextToken();
-			switch (fToken) {
-			// scopes: skip them
-				case Symbols.TokenRPAREN:
-				case Symbols.TokenRBRACKET:
-				case Symbols.TokenRBRACE:
-				case Symbols.TokenGREATERTHAN:
-					skipScope();
-					break;
-	
-				case Symbols.TokenTRY:
-					// found it
-					return true;
-	
-					// shortcut scope starts
-				case Symbols.TokenLPAREN:
-				case Symbols.TokenLBRACE:
-				case Symbols.TokenLBRACKET:
-				case Symbols.TokenEOF:
-					return false;
-			}
-		}
-	}
-
-	/**
 	 * while(condition); is ambiguous when parsed backwardly, as it is a valid
 	 * statement by its own, so we have to check whether there is a matching
 	 * do. A <code>do</code> can either be separated from the while by a
@@ -1774,29 +1723,6 @@ public final class JavaIndenter {
 	}
 
 	/**
-	 * Returns <code>true</code> if the current tokens look like an annotation (i.e. an annotation
-	 * name (potentially qualified) preceded by an at-sign).
-	 * 
-	 * @return <code>true</code> if the current position looks like an annotation.
-	 * @since 3.7
-	 */
-
-	private boolean looksLikeAnnotation() {
-		nextToken();
-		if (fToken == Symbols.TokenIDENT) { // Annotation name
-			nextToken();
-			while (fToken == Symbols.TokenOTHER) { // dot of qualification
-				nextToken();
-				if (fToken != Symbols.TokenIDENT) // qualifying name
-					return false;
-				nextToken();
-			}
-			return fToken == Symbols.TokenAT;
-		}
-		return false;
-	}
-	
-	/**
 	 * Returns <code>true</code> if the current tokens look like an anonymous type declaration
 	 * header (i.e. a type name (potentially qualified) and a new keyword). The heuristic calls
 	 * <code>nextToken</code> and expects a possibly qualified identifier (type name) and a new
@@ -1812,7 +1738,7 @@ public final class JavaIndenter {
 			nextToken();
 			while (fToken == Symbols.TokenOTHER) { // dot of qualification
 				nextToken();
-				if (fToken != Symbols.TokenIDENT) // qualifying name
+				if (fToken != Symbols.TokenIDENT) // qualificating name
 					return false;
 				nextToken();
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.NullLiteral;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
@@ -255,8 +254,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		ITypeBinding typeBinding= Bindings.normalizeForDeclarationUse(fSelectedExpression.resolveTypeBinding(), fSelectedExpression.getAST());
 		String typeName= cuRewrite.getImportRewrite().addImport(typeBinding);
 		String name= fParameterName != null ? fParameterName : guessedParameterName();
-		Expression expression= fSelectedExpression instanceof ParenthesizedExpression ? ((ParenthesizedExpression)fSelectedExpression).getExpression() : fSelectedExpression;
-		String defaultValue= fSourceCU.getBuffer().getText(expression.getStartPosition(), expression.getLength());
+		String defaultValue= fSourceCU.getBuffer().getText(fSelectedExpression.getStartPosition(), fSelectedExpression.getLength());
 		fParameter= ParameterInfo.createInfoForAddedParameter(typeBinding, typeName, name, defaultValue);
 		if (fArguments == null) {
 			List parameterInfos= fChangeSignatureProcessor.getParameterInfos();
@@ -278,8 +276,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 
 		ASTNode newExpression= cuRewrite.getRoot().getAST().newSimpleName(fParameter.getNewName());
 		String description= RefactoringCoreMessages.IntroduceParameterRefactoring_replace;
-		cuRewrite.getASTRewrite().replace(expression.getParent() instanceof ParenthesizedExpression
-				? expression.getParent() : expression, newExpression, cuRewrite.createGroupDescription(description));
+		cuRewrite.getASTRewrite().replace(expression, newExpression, cuRewrite.createGroupDescription(description));
 	}
 
 	private void initializeSelectedExpression(CompilationUnitRewrite cuRewrite) throws JavaModelException {

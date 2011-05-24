@@ -41,6 +41,8 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class CleanUpStressTest extends CleanUpTestCase {
 
+	private static final Class THIS= CleanUpStressTest.class;
+
 	private static final String SRC_CONTAINER= "src";
 
 	protected static IPackageFragmentRoot fJunitSrcRoot;
@@ -57,7 +59,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
 	}
 
 	public static Test suite() {
-		return new ProjectTestSetup(new TestSuite(CleanUpStressTest.class));
+		return setUpTest(new TestSuite(THIS));
+	}
+
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 
 	private void addAllCUs(IJavaElement[] children, List result) throws JavaModelException {

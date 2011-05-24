@@ -3,7 +3,7 @@
 	
 	<target name="build" description="Cleans, builds and refreshes the impacted resources" depends="clean, jar-in-jar-loader_zip" />
 	
-	<!-- Empty target for "After a Clean" task (we don't want to rebuild the Jar here, e.g. on checkout). -->
+	<!-- Dummy clean target, workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=196811 and https://bugs.eclipse.org/bugs/show_bug.cgi?id=160895 -->
 	<target name="dummy_clean"/>
 	
 	<target name="init" depends="properties">
