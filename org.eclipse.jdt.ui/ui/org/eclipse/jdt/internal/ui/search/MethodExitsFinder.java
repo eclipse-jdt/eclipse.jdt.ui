@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -26,7 +30,6 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -40,6 +43,7 @@ import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.UnionType;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -188,9 +192,14 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		int currentSize= fCatchedExceptions.size();
 		List<CatchClause> catchClauses= node.catchClauses();
 		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext();) {
-			IVariableBinding variable= iter.next().getException().resolveBinding();
-			if (variable != null && variable.getType() != null) {
-				fCatchedExceptions.add(variable.getType());
+			Type type= iter.next().getException().getType();
+			if (type instanceof UnionType) {
+				List<Type> types= ((UnionType) type).types();
+				for (Iterator<Type> iterator= types.iterator(); iterator.hasNext();) {
+					addCatchedException(iterator.next());
+				}
+			} else {
+				addCatchedException(type);
 			}
 		}
 		node.getBody().accept(this);
@@ -208,6 +217,13 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 
 		// return false. We have visited the body by ourselves.
 		return false;
+	}
+
+	private void addCatchedException(Type type) {
+		ITypeBinding typeBinding= type.resolveBinding();
+		if (typeBinding != null) {
+			fCatchedExceptions.add(typeBinding);
+		}
 	}
 
 	@Override
