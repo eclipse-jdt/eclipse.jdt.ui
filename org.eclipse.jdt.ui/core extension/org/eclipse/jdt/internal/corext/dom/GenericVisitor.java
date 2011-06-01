@@ -773,6 +773,10 @@ public class GenericVisitor extends ASTVisitor {
 		endVisitNode(node);
 	}
 	@Override
+	public void endVisit(UnionType node) {
+		endVisitNode(node);
+	}
+	@Override
 	public void endVisit(SingleVariableDeclaration node) {
 		endVisitNode(node);
 	}
