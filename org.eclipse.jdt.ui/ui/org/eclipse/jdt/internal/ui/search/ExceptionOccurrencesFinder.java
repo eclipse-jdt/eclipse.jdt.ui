@@ -4,6 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -25,7 +29,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -39,6 +42,7 @@ import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+import org.eclipse.jdt.core.dom.UnionType;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -81,15 +85,15 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			fStart= decl.getBody();
 		} else if (parent instanceof Type) {
 			parent= parent.getParent();
+			if (parent instanceof UnionType) {
+				parent= parent.getParent();
+			}
 			if (parent instanceof SingleVariableDeclaration && parent.getParent() instanceof CatchClause) {
 				CatchClause catchClause= (CatchClause)parent.getParent();
 				TryStatement tryStatement= (TryStatement)catchClause.getParent();
 				if (tryStatement != null) {
-					IVariableBinding var= catchClause.getException().resolveBinding();
-					if (var != null && var.getType() != null) {
-						fException= var.getType();
-						fStart= tryStatement.getBody();
-					}
+					fException= fSelectedName.resolveTypeBinding();
+					fStart= tryStatement.getBody();
 				}
 			}
 		}
