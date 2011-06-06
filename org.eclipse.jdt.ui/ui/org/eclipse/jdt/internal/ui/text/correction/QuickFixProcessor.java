@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
@@ -214,6 +215,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnusedObjectAllocation:
 			case IProblem.MethodCanBeStatic:
 			case IProblem.MethodCanBePotentiallyStatic:
+			case IProblem.AutoManagedResourceNotBelow17:
+			case IProblem.MultiCatchNotBelow17:
+			case IProblem.PolymorphicMethodNotBelow17:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId);
@@ -230,6 +234,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				offset--;
 			}
 		} catch(JavaModelException e) {
+			// use start
 		}
 		return start;
 	}
@@ -548,7 +553,12 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.InvalidUsageOfVarargs:
 			case IProblem.InvalidUsageOfAnnotations:
 			case IProblem.InvalidUsageOfAnnotationDeclarations:
-				ReorgCorrectionsSubProcessor.getNeed50ComplianceProposals(context, problem, proposals);
+				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_1_5);
+				break;
+			case IProblem.AutoManagedResourceNotBelow17:
+			case IProblem.MultiCatchNotBelow17:
+			case IProblem.PolymorphicMethodNotBelow17:
+				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_1_7);
 				break;
 			case IProblem.NonGenericType:
 				TypeArgumentMismatchSubProcessor.removeMismatchedArguments(context, problem, proposals);
