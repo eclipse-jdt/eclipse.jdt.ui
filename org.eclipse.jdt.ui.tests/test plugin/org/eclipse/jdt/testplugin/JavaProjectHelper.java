@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
@@ -83,6 +87,7 @@ public class JavaProjectHelper {
 
 	public static final IPath RT_STUBS_15= new Path("testresources/rtstubs15.jar");
 	public static final IPath RT_STUBS_16= new Path("testresources/rtstubs16.jar");
+	public static final IPath RT_STUBS_17= new Path("testresources/rtstubs17.jar");
 	public static final IPath JUNIT_SRC_381= new Path("testresources/junit381-noUI-src.zip");
 	public static final String JUNIT_SRC_ENCODING= "ISO-8859-1";
 
@@ -203,15 +208,19 @@ public class JavaProjectHelper {
 	}
 
 	/**
+	 * Sets the compiler options to 1.7
+	 * @param options The compiler options to configure
+	 */
+	public static void set17CompilerOptions(Map options) {
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
+	}
+	
+	/**
 	 * Sets the compiler options to 1.6
 	 * @param options The compiler options to configure
 	 */
 	public static void set16CompilerOptions(Map options) {
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_6);
-		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
-		options.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.ERROR);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_6);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_6);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_6, options);
 	}
 
 	/**
@@ -219,11 +228,7 @@ public class JavaProjectHelper {
 	 * @param options The compiler options to configure
 	 */
 	public static void set15CompilerOptions(Map options) {
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
-		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
-		options.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.ERROR);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_5, options);
 	}
 
 	/**
@@ -231,11 +236,7 @@ public class JavaProjectHelper {
 	 * @param options The compiler options to configure
 	 */
 	public static void set14CompilerOptions(Map options) {
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
-		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
-		options.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.WARNING);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_3);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_2);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, options);
 	}
 
 	/**
@@ -243,11 +244,7 @@ public class JavaProjectHelper {
 	 * @param options The compiler options to configure
 	 */
 	public static void set13CompilerOptions(Map options) {
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_3);
-		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.WARNING);
-		options.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.WARNING);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_3);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_2);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_3, options);
 	}
 
 	/**
@@ -611,6 +608,16 @@ public class JavaProjectHelper {
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
 
+	public static IPackageFragmentRoot addRTJar17(IJavaProject jproject) throws CoreException {
+		IPath[] rtJarPath= findRtJar(RT_STUBS_17);
+		
+		Map options= jproject.getOptions(false);
+		JavaProjectHelper.set17CompilerOptions(options);
+		jproject.setOptions(options);
+		
+		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
+	}
+	
 	/**
 	 * Adds a variable entry with source attachment to a IJavaProject.
 	 * Can return null if variable can not be resolved.
