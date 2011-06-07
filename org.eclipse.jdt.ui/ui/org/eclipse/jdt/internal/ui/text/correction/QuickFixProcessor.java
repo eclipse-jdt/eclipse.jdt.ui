@@ -218,8 +218,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.AutoManagedResourceNotBelow17:
 			case IProblem.MultiCatchNotBelow17:
 			case IProblem.PolymorphicMethodNotBelow17:
-			case IProblem.IllegalBinaryLiteral:
-			case IProblem.IllegalUsageOfUnderscore:
+			case IProblem.BinaryLiteralNotBelow17:
+			case IProblem.UnderscoresInLiteralsNotBelow17:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId);
@@ -560,8 +560,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.AutoManagedResourceNotBelow17:
 			case IProblem.MultiCatchNotBelow17:
 			case IProblem.PolymorphicMethodNotBelow17:
-			case IProblem.IllegalBinaryLiteral:
-			case IProblem.IllegalUsageOfUnderscore:
+			case IProblem.BinaryLiteralNotBelow17:
+			case IProblem.UnderscoresInLiteralsNotBelow17:
 				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_1_7);
 				break;
 			case IProblem.NonGenericType:
