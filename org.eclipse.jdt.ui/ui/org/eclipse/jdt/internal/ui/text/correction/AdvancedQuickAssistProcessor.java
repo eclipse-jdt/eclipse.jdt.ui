@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *   Konstantin Scheglov (scheglov_ke@nlmk.ru) - initial API and implementation
  *          (reports 71244 & 74746: New Quick Assist's [quick assist])
@@ -2166,12 +2170,20 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		final ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
 		//
 		SwitchStatement switchStatement= (SwitchStatement) covering;
+		String label;
+		boolean isStringsInSwitch= false;
+		if ("java.lang.String".equals(switchStatement.getExpression().resolveTypeBinding().getQualifiedName())) { //$NON-NLS-1$
+			label= CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIfRemovingNullCheck;
+			isStringsInSwitch= true;
+		} else {
+			label= CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIf;
+		}
 		IfStatement firstIfStatement= null;
 		IfStatement currentIfStatement= null;
 		Block currentBlock= null;
 		boolean hasStopAsLastExecutableStatement= false;
 		Block defaultBlock= null;
-		InfixExpression currentCondition= null;
+		Expression currentCondition= null;
 		boolean defaultFound= false;
 
 		ArrayList<Block> allBlocks= new ArrayList<Block>();
@@ -2200,7 +2212,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					return false;
 				}
 				// prepare condition
-				InfixExpression switchCaseCondition= createSwitchCaseCondition(ast, rewrite, importRewrite, importRewriteContext, switchStatement, switchCase);
+				Expression switchCaseCondition= createSwitchCaseCondition(ast, rewrite, importRewrite, importRewriteContext, switchStatement, switchCase, isStringsInSwitch);
 				if (currentCondition == null) {
 					currentCondition= switchCaseCondition;
 				} else {
@@ -2265,8 +2277,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		// replace 'switch' with single if-else-if statement
 		rewrite.replace(switchStatement, firstIfStatement, null);
-		// prepare label, specially for Daniel :-)
-		String label= CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIf;
 
 		// add correction proposal
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -2276,29 +2286,35 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static InfixExpression createSwitchCaseCondition(AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, ImportRewriteContext importRewriteContext, SwitchStatement switchStatement,
-			SwitchCase switchCase) {
-		InfixExpression condition= ast.newInfixExpression();
-		condition.setOperator(InfixExpression.Operator.EQUALS);
-		//
-		Expression leftExpression= getParenthesizedExpressionIfNeeded(ast, rewrite, switchStatement.getExpression(), condition, InfixExpression.LEFT_OPERAND_PROPERTY);
-		condition.setLeftOperand(leftExpression);
-		//
-		Expression rightExpression= null;
+	private static Expression createSwitchCaseCondition(AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, ImportRewriteContext importRewriteContext, SwitchStatement switchStatement,
+			SwitchCase switchCase, boolean isStringsInSwitch) {
 		Expression expression= switchCase.getExpression();
-		if (expression instanceof SimpleName && ((SimpleName) expression).resolveBinding() instanceof IVariableBinding) {
-			IVariableBinding binding= (IVariableBinding) ((SimpleName) expression).resolveBinding();
-			if (binding.isEnumConstant()) {
-				String qualifiedName= importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext) + '.' + binding.getName();
-				rightExpression= ast.newName(qualifiedName);
+		if (isStringsInSwitch) {
+			MethodInvocation methodInvocation= ast.newMethodInvocation();
+			methodInvocation.setExpression((Expression) rewrite.createCopyTarget(expression));
+			methodInvocation.setName(ast.newSimpleName("equals")); //$NON-NLS-1$
+			methodInvocation.arguments().add(rewrite.createCopyTarget(switchStatement.getExpression()));
+			return methodInvocation;
+		} else {
+			InfixExpression condition= ast.newInfixExpression();
+			condition.setOperator(InfixExpression.Operator.EQUALS);
+			Expression leftExpression= getParenthesizedExpressionIfNeeded(ast, rewrite, switchStatement.getExpression(), condition, InfixExpression.LEFT_OPERAND_PROPERTY);
+			condition.setLeftOperand(leftExpression);
+
+			Expression rightExpression= null;
+			if (expression instanceof SimpleName && ((SimpleName) expression).resolveBinding() instanceof IVariableBinding) {
+				IVariableBinding binding= (IVariableBinding) ((SimpleName) expression).resolveBinding();
+				if (binding.isEnumConstant()) {
+					String qualifiedName= importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext) + '.' + binding.getName();
+					rightExpression= ast.newName(qualifiedName);
+				}
 			}
+			if (rightExpression == null) {
+				rightExpression= (Expression) rewrite.createCopyTarget(expression);
+			}
+			condition.setRightOperand(rightExpression);
+			return condition;
 		}
-		if (rightExpression == null) {
-			rightExpression= (Expression) rewrite.createCopyTarget(expression);
-		}
-		condition.setRightOperand(rightExpression);
-		//
-		return condition;
 	}
 
 
