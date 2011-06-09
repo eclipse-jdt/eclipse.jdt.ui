@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -81,6 +85,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(TypeMismatchQuickFixTests.suite());
 		suite.addTest(ReorgQuickFixTest.suite());
 		suite.addTest(ModifierCorrectionsQuickFixTest.suite());
+		suite.addTest(ModifierCorrectionsQuickFixTest17.suite());
 		suite.addTest(GetterSetterQuickFixTest.suite());
 		suite.addTest(AssistQuickFixTest.suite());
 		suite.addTest(ChangeNonStaticToStaticTest.suite());

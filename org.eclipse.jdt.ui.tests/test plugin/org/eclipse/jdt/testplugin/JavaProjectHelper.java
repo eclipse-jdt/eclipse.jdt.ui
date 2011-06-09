@@ -188,6 +188,26 @@ public class JavaProjectHelper {
 	}
 
 	/**
+	 * Sets the compiler options to 1.7 for the given project.
+	 * @param project the java project
+	 */
+	public static void set17CompilerOptions(IJavaProject project) {
+		Map options= project.getOptions(false);
+		JavaProjectHelper.set17CompilerOptions(options);
+		project.setOptions(options);
+	}
+	
+	/**
+	 * Sets the compiler options to 1.6 for the given project.
+	 * @param project the java project
+	 */
+	public static void set16CompilerOptions(IJavaProject project) {
+		Map options= project.getOptions(false);
+		JavaProjectHelper.set16CompilerOptions(options);
+		project.setOptions(options);
+	}
+	
+	/**
 	 * Sets the compiler options to 1.5 for the given project.
 	 * @param project the java project
 	 */
@@ -600,24 +620,16 @@ public class JavaProjectHelper {
 
 	public static IPackageFragmentRoot addRTJar16(IJavaProject jproject) throws CoreException {
 		IPath[] rtJarPath= findRtJar(RT_STUBS_16);
-
-		Map options= jproject.getOptions(false);
-		JavaProjectHelper.set16CompilerOptions(options);
-		jproject.setOptions(options);
-
+		set16CompilerOptions(jproject);
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
 
 	public static IPackageFragmentRoot addRTJar17(IJavaProject jproject) throws CoreException {
 		IPath[] rtJarPath= findRtJar(RT_STUBS_17);
-		
-		Map options= jproject.getOptions(false);
-		JavaProjectHelper.set17CompilerOptions(options);
-		jproject.setOptions(options);
-		
+		set17CompilerOptions(jproject);
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
-	
+
 	/**
 	 * Adds a variable entry with source attachment to a IJavaProject.
 	 * Can return null if variable can not be resolved.

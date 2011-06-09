@@ -225,6 +225,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.BinaryLiteralNotBelow17:
 			case IProblem.UnderscoresInLiteralsNotBelow17:
 			case IProblem.SwitchOnStringsNotBelow17:
+			case IProblem.PotentialHeapPollutionFromVararg :
+			case IProblem.UnsafeGenericArrayForVarargs:
+			case IProblem.SafeVarargsOnFixedArityMethod :
+			case IProblem.SafeVarargsOnNonFinalInstanceMethod:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId);
@@ -626,6 +630,16 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MethodCanBeStatic:
 			case IProblem.MethodCanBePotentiallyStatic:
 				ModifierCorrectionSubProcessor.addStaticMethodProposal(context, problem, proposals);
+				break;
+			case IProblem.PotentialHeapPollutionFromVararg :
+				VarargsWarningsSubProcessor.addAddSafeVarargsProposals(context, problem, proposals);
+				break;
+			case IProblem.UnsafeGenericArrayForVarargs:
+				VarargsWarningsSubProcessor.addAddSafeVarargsToDeclarationProposals(context, problem, proposals);
+				break;
+			case IProblem.SafeVarargsOnFixedArityMethod :
+			case IProblem.SafeVarargsOnNonFinalInstanceMethod:
+				VarargsWarningsSubProcessor.addRemoveSafeVarargsProposals(context, problem, proposals);
 				break;
 			default:
 		}

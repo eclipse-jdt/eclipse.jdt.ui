@@ -727,6 +727,10 @@ public final class JavaModelUtil {
 	public static boolean is50OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_5);
 	}
+	
+	public static boolean is70OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_1_7);
+	}
 
 	/**
 	 * Checks if the given project or workspace has source compliance 5.0 or greater.
@@ -739,6 +743,17 @@ public final class JavaModelUtil {
 		return is50OrHigher(source);
 	}
 
+	/**
+	 * Checks if the given project or workspace has source compliance 7.0 or greater.
+	 *
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 7.0 or greater.
+	 */
+	public static boolean is70OrHigher(IJavaProject project) {
+		String source= project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
+		return is70OrHigher(source);
+	}
+	
 	/**
 	 * Checks if the JRE of the given project or workspace default JRE have source compliance 5.0 or
 	 * greater.
