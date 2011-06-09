@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids <sdavids@gmx.de> - Bug 37432 getInvertEqualsProposal
@@ -40,11 +44,13 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -94,6 +100,7 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -182,6 +189,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null) {
 			return getCatchClauseToThrowsProposals(context, coveringNode, null)
+				|| getConvertToMultiCatchProposals(context, coveringNode, null)
+				|| getUnrollMultiCatchProposals(context, coveringNode, null)
 				|| getRenameLocalProposals(context, coveringNode, null, null)
 				|| getRenameRefactoringProposal(context, coveringNode, null, null)
 				|| getAssignToVariableProposals(context, coveringNode, null, null)
@@ -225,6 +234,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (noErrorsAtLocation) {
 				boolean problemsAtLocation= locations.length != 0;
 				getCatchClauseToThrowsProposals(context, coveringNode, resultingCollections);
+				getConvertToMultiCatchProposals(context, coveringNode, resultingCollections);
+				getUnrollMultiCatchProposals(context, coveringNode, resultingCollections);
 				getUnWrapProposals(context, coveringNode, resultingCollections);
 				getJoinVariableProposals(context, coveringNode, resultingCollections);
 				getSplitVariableProposals(context, coveringNode, resultingCollections);
@@ -1253,6 +1264,121 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
+	private static boolean getConvertToMultiCatchProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+		if (!JavaModelUtil.is70OrHigher(context.getCompilationUnit().getJavaProject()))
+			return false;
+
+		if (!(covering instanceof CatchClause))
+			return false;
+		TryStatement tryStatement= (TryStatement) covering.getParent();
+		List<CatchClause> catchClauses= tryStatement.catchClauses();
+		if (catchClauses.size() <= 1)
+			return false;
+
+		String commonSource= null;
+		try {
+			IBuffer buffer= context.getCompilationUnit().getBuffer();
+			for (Iterator<CatchClause> iterator= catchClauses.iterator(); iterator.hasNext();) {
+				CatchClause catchClause= iterator.next();
+				Block body= catchClause.getBody();
+				String source= buffer.getText(body.getStartPosition(), body.getLength());
+				if (commonSource == null) {
+					commonSource= source;
+				} else {
+					if (!commonSource.equals(source))
+						return false;
+				}
+			}
+		} catch (JavaModelException e) {
+			return false;
+		}
+
+		if (resultingCollections == null)
+			return true;
+
+		AST ast= covering.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		CatchClause firstCatchClause= catchClauses.get(0);
+
+		UnionType newUnionType= ast.newUnionType();
+		List<Type> types= newUnionType.types();
+		for (Iterator<CatchClause> iterator= catchClauses.iterator(); iterator.hasNext();) {
+			CatchClause catchClause= iterator.next();
+			Type type= catchClause.getException().getType();
+			if (type instanceof UnionType) {
+				List<Type> types2= ((UnionType) type).types();
+				for (Iterator<Type> iterator2= types2.iterator(); iterator2.hasNext();) {
+					types.add((Type) rewrite.createCopyTarget(iterator2.next()));
+				}
+			} else {
+				types.add((Type) rewrite.createCopyTarget(type));
+			}
+		}
+
+		SingleVariableDeclaration newExceptionDeclaration= ast.newSingleVariableDeclaration();
+		newExceptionDeclaration.setType(newUnionType);
+		newExceptionDeclaration.setName((SimpleName) rewrite.createCopyTarget(firstCatchClause.getException().getName()));
+		rewrite.replace(firstCatchClause.getException(), newExceptionDeclaration, null);
+
+		for (int i= 1; i < catchClauses.size(); i++) {
+			rewrite.remove(catchClauses.get(i), null);
+		}
+
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		String label= CorrectionMessages.QuickAssistProcessor_convert_to_single_multicatch_block;
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 2, image);
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private static boolean getUnrollMultiCatchProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+		if (!JavaModelUtil.is70OrHigher(context.getCompilationUnit().getJavaProject()))
+			return false;
+
+		if (!(covering instanceof CatchClause))
+			return false;
+
+		CatchClause catchClause= (CatchClause) covering;
+		SingleVariableDeclaration singleVariableDeclaration= catchClause.getException();
+		Type type= singleVariableDeclaration.getType();
+		if (!(type instanceof UnionType))
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		AST ast= covering.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+
+		TryStatement tryStatement= (TryStatement) covering.getParent();
+		ListRewrite listRewrite= rewrite.getListRewrite(tryStatement, TryStatement.CATCH_CLAUSES_PROPERTY);
+
+		UnionType unionType= (UnionType) type;
+		List<Type> types= unionType.types();
+		for (int i= types.size() - 1; i >= 0; i--) {
+			Type type2= types.get(i);
+			CatchClause newCatchClause= ast.newCatchClause();
+
+			SingleVariableDeclaration newSingleVariableDeclaration= ast.newSingleVariableDeclaration();
+			newSingleVariableDeclaration.setType((Type) rewrite.createCopyTarget(type2));
+			newSingleVariableDeclaration.setName((SimpleName) rewrite.createCopyTarget(singleVariableDeclaration.getName()));
+			newCatchClause.setException(newSingleVariableDeclaration);
+
+			//newCatchClause#setBody() destroys the formatting, hence copy statement by statement
+			List<Statement> statements= catchClause.getBody().statements();
+			for (Iterator<Statement> iterator2= statements.iterator(); iterator2.hasNext();) {
+				newCatchClause.getBody().statements().add(rewrite.createCopyTarget(iterator2.next()));
+			}
+			listRewrite.insertAfter(newCatchClause, catchClause, null);
+		}
+		rewrite.remove(catchClause, null);
+
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		String label= CorrectionMessages.QuickAssistProcessor_convert_to_multiple_singletype_catch_blocks;
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 2, image);
+		resultingCollections.add(proposal);
+		return true;
+	}
 
 	private static boolean getRenameLocalProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
 		if (!(node instanceof SimpleName)) {
