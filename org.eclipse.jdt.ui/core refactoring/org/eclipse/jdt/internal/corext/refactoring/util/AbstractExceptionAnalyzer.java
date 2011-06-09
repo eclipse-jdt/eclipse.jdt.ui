@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -25,7 +29,9 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.UnionType;
 
 public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 
@@ -125,15 +131,23 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 
 	private void handleCatchArguments(List<CatchClause> catchClauses) {
 		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext(); ) {
-			CatchClause clause= iter.next();
-			ITypeBinding catchTypeBinding= clause.getException().getType().resolveBinding();
-			if (catchTypeBinding == null)	// No correct type resolve.
-				continue;
-			for (Iterator<ITypeBinding> exceptions= new ArrayList<ITypeBinding>(fCurrentExceptions).iterator(); exceptions.hasNext(); ) {
-				ITypeBinding throwTypeBinding= exceptions.next();
-				if (catches(catchTypeBinding, throwTypeBinding))
-					fCurrentExceptions.remove(throwTypeBinding);
+			Type type= iter.next().getException().getType();
+			if (type instanceof UnionType) {
+				List<Type> types= ((UnionType) type).types();
+				for (Iterator<Type> iterator= types.iterator(); iterator.hasNext();) {
+					catches(iterator.next().resolveBinding());
+				}
+			} else {
+				catches(type.resolveBinding());
 			}
+		}
+	}
+
+	private void catches(ITypeBinding catchTypeBinding) {
+		for (Iterator<ITypeBinding> exceptions= new ArrayList<ITypeBinding>(fCurrentExceptions).iterator(); exceptions.hasNext();) {
+			ITypeBinding throwTypeBinding= exceptions.next();
+			if (catches(catchTypeBinding, throwTypeBinding))
+				fCurrentExceptions.remove(throwTypeBinding);
 		}
 	}
 

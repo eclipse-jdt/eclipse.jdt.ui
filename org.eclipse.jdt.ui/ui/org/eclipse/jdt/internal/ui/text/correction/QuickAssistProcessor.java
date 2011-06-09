@@ -1174,7 +1174,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		Type type= catchClause.getException().getType();
-		if (!type.isSimpleType()) {
+		if (!type.isSimpleType() && !type.isUnionType()) {
 			return false;
 		}
 
@@ -1196,13 +1196,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 			removeCatchBlock(rewrite, catchClause);
 
-			ITypeBinding binding= type.resolveBinding();
-			if (binding == null || isNotYetThrown(binding, methodDeclaration.thrownExceptions())) {
-				Name name= ((SimpleType) type).getName();
-				Name newName= (Name) ASTNode.copySubtree(ast, name);
-
-				ListRewrite listRewriter= rewrite.getListRewrite(methodDeclaration, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY);
-				listRewriter.insertLast(newName, null);
+			if (type.isUnionType()) {
+				UnionType unionType= (UnionType) type;
+				List<Type> types= unionType.types();
+				for (Iterator<Type> iterator= types.iterator(); iterator.hasNext();) {
+					addExceptionToThrows(ast, methodDeclaration, rewrite, iterator.next());
+				}
+			} else {
+				addExceptionToThrows(ast, methodDeclaration, rewrite, type);
 			}
 
 			String label= CorrectionMessages.QuickAssistProcessor_catchclausetothrows_description;
@@ -1221,6 +1222,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		return true;
+	}
+
+	private static void addExceptionToThrows(AST ast, MethodDeclaration methodDeclaration, ASTRewrite rewrite, Type type2) {
+		ITypeBinding binding= type2.resolveBinding();
+		if (binding == null || isNotYetThrown(binding, methodDeclaration.thrownExceptions())) {
+			Name name= ((SimpleType) type2).getName();
+			Name newName= (Name) ASTNode.copySubtree(ast, name);
+
+			ListRewrite listRewriter= rewrite.getListRewrite(methodDeclaration, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY);
+			listRewriter.insertLast(newName, null);
+		}
 	}
 
 	private static void removeCatchBlock(ASTRewrite rewrite, CatchClause catchClause) {

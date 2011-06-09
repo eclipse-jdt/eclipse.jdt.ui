@@ -28,9 +28,11 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 public class ASTNodeFactory {
@@ -119,8 +121,17 @@ public class ASTNodeFactory {
 	 */
 	public static Type newType(AST ast, VariableDeclaration declaration) {
 		Type type= ASTNodes.getType(declaration);
-		int extraDim= declaration.getExtraDimensions();
 
+		if (declaration instanceof SingleVariableDeclaration) {
+			Type type2= ((SingleVariableDeclaration) declaration).getType();
+			if (type2 instanceof UnionType) {
+				ITypeBinding typeBinding= type2.resolveBinding();
+				type= ast.newSimpleType(ast.newName(typeBinding.getName()));
+				//TODO: make sure that this type is imported
+				return type;
+			}
+		}
+		int extraDim= declaration.getExtraDimensions();
 		type= (Type) ASTNode.copySubtree(ast, type);
 		for (int i= 0; i < extraDim; i++) {
 			type= ast.newArrayType(type);
