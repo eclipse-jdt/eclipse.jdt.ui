@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 public class AssistQuickFixTest17 extends QuickFixTest {
 
 	private static final String CONVERT_TO_A_SINGLE_MULTI_CATCH_BLOCK= "Convert to a single multi-catch block";
-	private static final String CONVERT_TO_MULTIPLE_CATCH_BLOCKS= "Convert to multiple catch blocks";
+	private static final String CONVERT_TO_MULTIPLE_CATCH_BLOCKS= "Convert to multiple single-type catch blocks";
 
 	private static final Class THIS= AssistQuickFixTest17.class;
 
