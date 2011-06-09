@@ -88,12 +88,14 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(ModifierCorrectionsQuickFixTest17.suite());
 		suite.addTest(GetterSetterQuickFixTest.suite());
 		suite.addTest(AssistQuickFixTest.suite());
+		suite.addTest(AssistQuickFixTest17.suite());
 		suite.addTest(ChangeNonStaticToStaticTest.suite());
 		suite.addTest(MarkerResolutionTest.suite());
 		suite.addTest(JavadocQuickFixTest.suite());
 		suite.addTest(ConvertForLoopQuickFixTest.suite());
 		suite.addTest(ConvertIterableLoopQuickFixTest.suite());
 		suite.addTest(AdvancedQuickAssistTest.suite());
+		suite.addTest(AdvancedQuickAssistTest17.suite());
 		suite.addTest(CleanUpTestCase.suite());
 		suite.addTest(QuickFixEnablementTest.suite());
 		suite.addTest(SurroundWithTemplateTest.suite());
