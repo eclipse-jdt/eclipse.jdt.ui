@@ -66,24 +66,28 @@ public class ProjectTestSetup extends TestSetup {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		IJavaProject project= getProject();
-		if (project.exists()) { // allow nesting of ProjectTestSetups
+		if (projectExists()) { // allow nesting of ProjectTestSetups
 			return;
 		}
 
 		fAutobuilding = CoreUtility.setAutoBuilding(false);
 
-		fJProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
-		initializeProject();
+		fJProject= createAndInitializeProject();
 
 		JavaCore.setOptions(TestOptions.getDefaultOptions());
 		TestOptions.initializeCodeGenerationOptions();
 		JavaPlugin.getDefault().getCodeTemplateStore().load();
 	}
 
-	protected void initializeProject() throws Exception {
-		fJProject.setRawClasspath(getDefaultClasspath(), null);
-		TestOptions.initializeProjectOptions(fJProject);
+	protected boolean projectExists() {
+		return getProject().exists();
+	}
+
+	protected IJavaProject createAndInitializeProject() throws CoreException {
+		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
+		javaProject.setRawClasspath(getDefaultClasspath(), null);
+		TestOptions.initializeProjectOptions(javaProject);
+		return javaProject;
 	}
 
 	protected void tearDown() throws Exception {

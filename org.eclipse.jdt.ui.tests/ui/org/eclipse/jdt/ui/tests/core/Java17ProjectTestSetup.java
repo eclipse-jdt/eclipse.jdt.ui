@@ -21,25 +21,40 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 public class Java17ProjectTestSetup extends ProjectTestSetup {
 
-	public Java17ProjectTestSetup(Test test) {
-		super(test);
-	}
+	public static final String PROJECT_NAME17= "TestSetupProject17";
 
-	protected void initializeProject() throws JavaModelException, CoreException {
-		IJavaProject javaProject= ProjectTestSetup.getProject();
-		javaProject.setRawClasspath(getDefaultClasspath(), null);
-		JavaProjectHelper.set17CompilerOptions(javaProject);
+	public static IJavaProject getProject() {
+		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME17);
+		return JavaCore.create(project);
 	}
 
 	public static IClasspathEntry[] getDefaultClasspath() throws CoreException {
 		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_17);
 		return new IClasspathEntry[] { JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true) };
 	}
+
+	public Java17ProjectTestSetup(Test test) {
+		super(test);
+	}
+
+	protected boolean projectExists() {
+		return getProject().exists();
+	}
+
+	protected IJavaProject createAndInitializeProject() throws CoreException {
+		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME17, "bin");
+		javaProject.setRawClasspath(getDefaultClasspath(), null);
+		JavaProjectHelper.set17CompilerOptions(javaProject);
+		return javaProject;
+	}
+
 }
