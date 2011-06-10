@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -43,6 +44,7 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.UnionType;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -61,6 +63,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 
 	private ITypeBinding fException;
 	private ASTNode fStart;
+	private TryStatement fTryStatement;
 	private List<OccurrenceLocation> fResult;
 	private String fDescription;
 
@@ -90,10 +93,10 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			}
 			if (parent instanceof SingleVariableDeclaration && parent.getParent() instanceof CatchClause) {
 				CatchClause catchClause= (CatchClause)parent.getParent();
-				TryStatement tryStatement= (TryStatement)catchClause.getParent();
-				if (tryStatement != null) {
+				fTryStatement= (TryStatement)catchClause.getParent();
+				if (fTryStatement != null) {
 					fException= fSelectedName.resolveTypeBinding();
-					fStart= tryStatement.getBody();
+					fStart= fTryStatement.getBody();
 				}
 			}
 		}
@@ -126,6 +129,28 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 
 	private void performSearch() {
 		fStart.accept(this);
+		if (fTryStatement != null) {
+			List<VariableDeclarationExpression> resources= fTryStatement.resources();
+			for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
+				iterator.next().accept(this);
+			}
+
+			//check if the method could exit as a result of resource#close()
+			outer: for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
+				Type type= iterator.next().getType();
+				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$
+				ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
+				for (int j= 0; j < exceptionTypes.length; j++) {
+					if (matches(exceptionTypes[j])) {
+						Block body= fTryStatement.getBody();
+						int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
+						fResult.add(new OccurrenceLocation(offset, 1, 0, fDescription));
+						break outer;
+					}
+				}
+				break;
+			}
+		}
 		if (fSelectedName != null) {
 			fResult.add(new OccurrenceLocation(fSelectedName.getStartPosition(), fSelectedName.getLength(), F_EXCEPTION_DECLARATION, fDescription));
 		}

@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.UnionType;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -203,6 +204,28 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 			}
 		}
 		node.getBody().accept(this);
+
+		List<VariableDeclarationExpression> resources= node.resources();
+		for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
+			iterator.next().accept(this);
+		}
+
+		//check if the method could exit as a result of resource#close()
+		outer: for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
+			Type type= iterator.next().getType();
+			IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$
+			ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
+			for (int j= 0; j < exceptionTypes.length; j++) {
+				if (isExitPoint(exceptionTypes[j])) {
+					Block body= node.getBody();
+					int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
+					fResult.add(new OccurrenceLocation(offset, 1, 0, fExitDescription));
+					break outer;
+				}
+			}
+			break;
+		}
+
 		int toRemove= fCatchedExceptions.size() - currentSize;
 		for(int i= toRemove; i > 0; i--) {
 			fCatchedExceptions.remove(currentSize);

@@ -186,6 +186,107 @@ public class MarkOccurrenceTest17 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	public void testMarkMethodExits3() throws Exception {
+		fFinder= new MethodExitsFinder();
+		StringBuffer s= new StringBuffer();
+		s.append("import java.io.BufferedReader;\n");
+		s.append("import java.io.FileReader;\n");
+		s.append("import java.io.LineNumberReader;\n");
+		s.append("class A {\n");
+		s.append("   void foo() throws Throwable {\n");
+		s.append("      try (LineNumberReader reader = new LineNumberReader(new BufferedReader(\n");
+		s.append("            new FileReader(\"somefile\")))) {\n");
+		s.append("         String line;\n");
+		s.append("         while ((line = reader.readLine()) != null) {\n");
+		s.append("            System.out.println(line);\n");
+		s.append("         }\n");
+		s.append("      }\n");
+		s.append("   }\n");
+		s.append("}\n");
+
+		int offset= 1 + s.indexOf("void");//middle of word
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "void", 1), find(s, "FileReader", 2), find(s, "readLine", 1), find(s, "}", 2), find(s, "}", 3) };
+		checkSelection(s, offset, length, ranges);
+	}
+
+	public void testMarkMethodExits4() throws Exception {
+		fFinder= new MethodExitsFinder();
+		StringBuffer s= new StringBuffer();
+		s.append("import java.io.BufferedReader;\n");
+		s.append("import java.io.FileNotFoundException;\n");
+		s.append("import java.io.FileReader;\n");
+		s.append("import java.io.LineNumberReader;\n");
+		s.append("class A {\n");
+		s.append("   void foo() throws Throwable {\n");
+		s.append("      try (LineNumberReader reader = new LineNumberReader(new BufferedReader(\n");
+		s.append("            new FileReader(\"somefile\")))) {\n");
+		s.append("         String line;\n");
+		s.append("         while ((line = reader.readLine()) != null) {\n");
+		s.append("            System.out.println(line);\n");
+		s.append("         }\n");
+		s.append("      } catch (FileNotFoundException e) {\n");
+		s.append("         e.printStackTrace();\n");
+		s.append("      }\n");
+		s.append("   }\n");
+		s.append("}\n");
+
+		int offset= 1 + s.indexOf("void");//middle of word
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "void", 1), find(s, "readLine", 1), find(s, "}", 2), find(s, "}", 4) };
+		checkSelection(s, offset, length, ranges);
+	}
+
+	public void testMarkMethodExits5() throws Exception {
+		fFinder= new MethodExitsFinder();
+		StringBuffer s= new StringBuffer();
+		s.append("import java.io.BufferedReader;\n");
+		s.append("import java.io.FileReader;\n");
+		s.append("import java.io.IOException;\n");
+		s.append("import java.io.LineNumberReader;\n");
+		s.append("class A {\n");
+		s.append("   void foo() throws Throwable {\n");
+		s.append("      try (LineNumberReader reader = new LineNumberReader(new BufferedReader(\n");
+		s.append("            new FileReader(\"somefile\")))) {\n");
+		s.append("         String line;\n");
+		s.append("         while ((line = reader.readLine()) != null) {\n");
+		s.append("            System.out.println(line);\n");
+		s.append("         }\n");
+		s.append("      } catch (IOException e) {\n");
+		s.append("         e.printStackTrace();\n");
+		s.append("      }\n");
+		s.append("   }\n");
+		s.append("}\n");
+
+		int offset= 1 + s.indexOf("void");//middle of word
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "void", 1), find(s, "}", 4) };
+		checkSelection(s, offset, length, ranges);
+	}
+
+	public void testMarkMethodExits6() throws Exception {
+		fFinder= new MethodExitsFinder();
+		StringBuffer s= new StringBuffer();
+		s.append("import java.io.FileReader;\n");
+		s.append("class A {\n");
+		s.append("   void foo() throws Throwable {\n");
+		s.append("      try (FileReader reader1 = new FileReader(\"file1\");\n");
+		s.append("      FileReader reader2 = new FileReader(\"file2\");\n");
+		s.append("      FileReader reader3 = new FileReader(\"file3\")) {\n");
+		s.append("         int ch;\n");
+		s.append("         while ((ch = reader1.read()) != -1) {\n");
+		s.append("            System.out.println(ch);\n");
+		s.append("         }\n");
+		s.append("      }\n");
+		s.append("   }\n");
+		s.append("}\n");
+
+		int offset= 1 + s.indexOf("void");//middle of word
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "void", 1), find(s, "FileReader", 3), find(s, "FileReader", 5), find(s, "FileReader", 7), find(s, "read", 5), find(s, "}", 2), find(s, "}", 3) };
+		checkSelection(s, offset, length, ranges);
+	}
+
 	public void testThrowingException1() throws Exception {
 		fFinder= new ExceptionOccurrencesFinder();
 		StringBuffer s= new StringBuffer();
@@ -233,6 +334,86 @@ public class MarkOccurrenceTest17 extends TestCase {
 		int offset= 1 + s.indexOf("NullPointerException | ");//middle of word
 		int length= 0;
 		OccurrenceLocation[] ranges= { find(s, "throw", 2), find(s, "NullPointerException", 2) };
+		checkSelection(s, offset, length, ranges);
+	}
+
+	public void testThrowingException3() throws Exception {
+		fFinder= new ExceptionOccurrencesFinder();
+		StringBuffer s= new StringBuffer();
+		s.append("import java.io.BufferedReader;\n");
+		s.append("import java.io.FileNotFoundException;\n");
+		s.append("import java.io.FileReader;\n");
+		s.append("import java.io.LineNumberReader;\n");
+		s.append("class A {\n");
+		s.append("   void foo() throws Throwable {\n");
+		s.append("      try (LineNumberReader reader = new LineNumberReader(new BufferedReader(\n");
+		s.append("            new FileReader(\"somefile\")))) {\n");
+		s.append("         String line;\n");
+		s.append("         while ((line = reader.readLine()) != null) {\n");
+		s.append("            System.out.println(line);\n");
+		s.append("         }\n");
+		s.append("      } catch (FileNotFoundException e) {\n");
+		s.append("         e.printStackTrace();\n");
+		s.append("      }\n");
+		s.append("   }\n");
+		s.append("}\n");
+
+		int offset= 1 + s.indexOf("FileNotFoundException e");//middle of word
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "FileNotFoundException", 2), find(s, "FileReader", 2) };
+		checkSelection(s, offset, length, ranges);
+	}
+
+	public void testThrowingException4() throws Exception {
+		fFinder= new ExceptionOccurrencesFinder();
+		StringBuffer s= new StringBuffer();
+		s.append("import java.io.BufferedReader;\n");
+		s.append("import java.io.FileReader;\n");
+		s.append("import java.io.IOException;\n");
+		s.append("import java.io.LineNumberReader;\n");
+		s.append("class A {\n");
+		s.append("   void foo() throws Throwable {\n");
+		s.append("      try (LineNumberReader reader = new LineNumberReader(new BufferedReader(\n");
+		s.append("            new FileReader(\"somefile\")))) {\n");
+		s.append("         String line;\n");
+		s.append("         while ((line = reader.readLine()) != null) {\n");
+		s.append("            System.out.println(line);\n");
+		s.append("         }\n");
+		s.append("      } catch (IOException e) {\n");
+		s.append("         e.printStackTrace();\n");
+		s.append("      }\n");
+		s.append("   }\n");
+		s.append("}\n");
+
+		int offset= 1 + s.indexOf("IOException e");//middle of word
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "IOException", 2), find(s, "FileReader", 2), find(s, "readLine", 1), find(s, "}", 2) };
+		checkSelection(s, offset, length, ranges);
+	}
+
+	public void testThrowingException5() throws Exception {
+		fFinder= new ExceptionOccurrencesFinder();
+		StringBuffer s= new StringBuffer();
+		s.append("import java.io.FileReader;\n");
+		s.append("import java.io.IOException;\n");
+		s.append("class A {\n");
+		s.append("   void foo() throws Throwable {\n");
+		s.append("      try (FileReader reader1 = new FileReader(\"file1\");\n");
+		s.append("      FileReader reader2 = new FileReader(\"file2\");\n");
+		s.append("      FileReader reader3 = new FileReader(\"file3\")) {\n");
+		s.append("         int ch;\n");
+		s.append("         while ((ch = reader1.read()) != -1) {\n");
+		s.append("            System.out.println(ch);\n");
+		s.append("         }\n");
+		s.append("      } catch (IOException e) {\n");
+		s.append("         e.printStackTrace();\n");
+		s.append("      }\n");
+		s.append("   }\n");
+		s.append("}\n");
+
+		int offset= 1 + s.indexOf("IOException e");//middle of word
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "IOException", 2), find(s, "FileReader", 3), find(s, "FileReader", 5), find(s, "FileReader", 7), find(s, "read", 5), find(s, "}", 2) };
 		checkSelection(s, offset, length, ranges);
 	}
 }
