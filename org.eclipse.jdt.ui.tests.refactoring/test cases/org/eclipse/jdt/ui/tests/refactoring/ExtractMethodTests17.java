@@ -126,11 +126,27 @@ public class ExtractMethodTests17 extends AbstractSelectionTestCase {
 
 	//---- Test Try / catch block
 
-	public void test463() throws Exception {
+	public void test1() throws Exception {
 		tryTest();
 	}
 
-	public void test464() throws Exception {
+	public void test2() throws Exception {
+		tryTest();
+	}
+
+	public void test3() throws Exception {
+		tryTest();
+	}
+
+	public void test4() throws Exception {
+		tryTest();
+	}
+
+	public void test5() throws Exception {
+		tryTest();
+	}
+
+	public void test6() throws Exception {
 		tryTest();
 	}
 }

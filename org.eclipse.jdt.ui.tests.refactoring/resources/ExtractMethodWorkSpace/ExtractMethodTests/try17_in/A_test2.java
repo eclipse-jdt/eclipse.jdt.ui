@@ -1,9 +1,9 @@
-package try_out;
+package try_in;
 
 import java.io.FileNotFoundException;
 import java.io.InterruptedIOException;
 
-public class A_test464 {
+public class A_test2 {
 	public void foo(int a) throws Exception {
 		try {
 			if (a < 10)
@@ -11,11 +11,7 @@ public class A_test464 {
 			else if (a < 20)
 				throw new InterruptedIOException();
 		} catch (FileNotFoundException | InterruptedIOException ex) {
-			extracted(ex);
+			/*[*/ex.printStackTrace();/*]*/
 		}
-	}
-
-	protected void extracted(IOException ex) {
-		/*[*/ex.printStackTrace();/*]*/
 	}
 }

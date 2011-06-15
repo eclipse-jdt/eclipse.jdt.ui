@@ -1,11 +1,15 @@
-package try_in;
+package try_out;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 
-public class A_test463 {
+public class A_test1 {
 	public void foo(int a) throws Exception {
+		extracted(a);
+	}
+
+	protected void extracted(int a) throws IOException {
 		/*[*/try {
 			if (a < 10)
 				throw new FileNotFoundException();

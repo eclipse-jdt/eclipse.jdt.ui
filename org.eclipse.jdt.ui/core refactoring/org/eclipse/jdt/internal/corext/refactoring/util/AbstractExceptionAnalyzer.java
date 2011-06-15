@@ -19,12 +19,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
@@ -32,6 +34,9 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.UnionType;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 
@@ -90,6 +95,19 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 
 		// visit try block
 		node.getBody().accept(this);
+
+		if (node.getAST().apiLevel() >= AST.JLS4) {
+			List<VariableDeclarationExpression> resources= node.resources();
+			for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
+				iterator.next().accept(this);
+			}
+
+			for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
+				Type type= iterator.next().getType();
+				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$
+				addExceptions(methodBinding.getExceptionTypes());
+			}
+		}
 
 		// Remove those exceptions that get catch by following catch blocks
 		List<CatchClause> catchClauses= node.catchClauses();
