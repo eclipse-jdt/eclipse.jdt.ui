@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -129,13 +130,13 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 
 	private void performSearch() {
 		fStart.accept(this);
-		if (fTryStatement != null) {
+		if (fTryStatement != null && fTryStatement.getAST().apiLevel() >= AST.JLS4) {
 			List<VariableDeclarationExpression> resources= fTryStatement.resources();
 			for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
 				iterator.next().accept(this);
 			}
 
-			//check if the method could exit as a result of resource#close()
+			//check if the exception is thrown as a result of resource#close()
 			outer: for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
 				Type type= iterator.next().getType();
 				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$

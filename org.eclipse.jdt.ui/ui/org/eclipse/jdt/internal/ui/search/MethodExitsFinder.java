@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -205,34 +206,36 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 		node.getBody().accept(this);
 
-		List<VariableDeclarationExpression> resources= node.resources();
-		for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
-			iterator.next().accept(this);
-		}
-
-		//check if the method could exit as a result of resource#close()
-		outer: for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
-			Type type= iterator.next().getType();
-			IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$
-			ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
-			for (int j= 0; j < exceptionTypes.length; j++) {
-				if (isExitPoint(exceptionTypes[j])) {
-					Block body= node.getBody();
-					int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
-					fResult.add(new OccurrenceLocation(offset, 1, 0, fExitDescription));
-					break outer;
-				}
+		if (node.getAST().apiLevel() >= AST.JLS4) {
+			List<VariableDeclarationExpression> resources= node.resources();
+			for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
+				iterator.next().accept(this);
 			}
-			break;
+
+			//check if the method could exit as a result of resource#close()
+			outer: for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
+				Type type= iterator.next().getType();
+				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$
+				ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
+				for (int j= 0; j < exceptionTypes.length; j++) {
+					if (isExitPoint(exceptionTypes[j])) {
+						Block body= node.getBody();
+						int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
+						fResult.add(new OccurrenceLocation(offset, 1, 0, fExitDescription));
+						break outer;
+					}
+				}
+				break;
+			}
 		}
 
 		int toRemove= fCatchedExceptions.size() - currentSize;
-		for(int i= toRemove; i > 0; i--) {
+		for (int i= toRemove; i > 0; i--) {
 			fCatchedExceptions.remove(currentSize);
 		}
 
 		// visit catch and finally
-		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext(); ) {
+		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext();) {
 			iter.next().accept(this);
 		}
 		if (node.getFinally() != null)
