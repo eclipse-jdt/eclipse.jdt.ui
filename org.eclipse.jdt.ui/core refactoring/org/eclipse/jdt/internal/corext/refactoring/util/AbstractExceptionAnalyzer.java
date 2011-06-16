@@ -101,12 +101,6 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 			for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
 				iterator.next().accept(this);
 			}
-
-			for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
-				Type type= iterator.next().getType();
-				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$
-				addExceptions(methodBinding.getExceptionTypes());
-			}
 		}
 
 		// Remove those exceptions that get catch by following catch blocks
@@ -129,6 +123,17 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 		// return false. We have visited the body by ourselves.
 		return false;
 	}
+
+	@Override
+	public boolean visit(VariableDeclarationExpression node) {
+		if (node.getAST().apiLevel() >= AST.JLS4 && node.getLocationInParent() == TryStatement.RESOURCES_PROPERTY) {
+			Type type= node.getType();
+			IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$
+			addExceptions(methodBinding.getExceptionTypes());
+		}
+		return super.visit(node);
+	}
+
 
 	protected void addExceptions(ITypeBinding[] exceptions) {
 		if(exceptions == null)

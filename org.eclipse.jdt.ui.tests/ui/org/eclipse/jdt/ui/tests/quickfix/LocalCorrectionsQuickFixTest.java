@@ -1064,6 +1064,153 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
+	public void testUncaughtException4() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.io.InterruptedIOException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public E goo(int i) throws InterruptedIOException {\n");
+		buf.append("        return new E();\n");
+		buf.append("    }\n");
+		buf.append("    public E bar() throws FileNotFoundException {\n");
+		buf.append("        return new E();\n");
+		buf.append("    }\n");
+		buf.append("    /**\n");
+		buf.append("     * Not much to say here.\n");
+		buf.append("     */\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        goo(1).bar();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.io.InterruptedIOException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public E goo(int i) throws InterruptedIOException {\n");
+		buf.append("        return new E();\n");
+		buf.append("    }\n");
+		buf.append("    public E bar() throws FileNotFoundException {\n");
+		buf.append("        return new E();\n");
+		buf.append("    }\n");
+		buf.append("    /**\n");
+		buf.append("     * Not much to say here.\n");
+		buf.append("     * @throws InterruptedIOException \n");
+		buf.append("     * @throws FileNotFoundException \n");
+		buf.append("     */\n");
+		buf.append("    public void foo() throws FileNotFoundException, InterruptedIOException {\n");
+		buf.append("        goo(1).bar();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.io.InterruptedIOException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public E goo(int i) throws InterruptedIOException {\n");
+		buf.append("        return new E();\n");
+		buf.append("    }\n");
+		buf.append("    public E bar() throws FileNotFoundException {\n");
+		buf.append("        return new E();\n");
+		buf.append("    }\n");
+		buf.append("    /**\n");
+		buf.append("     * Not much to say here.\n");
+		buf.append("     */\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            goo(1).bar();\n");
+		buf.append("        } catch (FileNotFoundException e) {\n");
+		buf.append("        } catch (InterruptedIOException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	public void testUncaughtException5() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=31554
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            throw new IOException();\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("            throw new IOException();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() throws IOException {\n");
+		buf.append("        try {\n");
+		buf.append("            throw new IOException();\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("            throw new IOException();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            throw new IOException();\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("            try {\n");
+		buf.append("                throw new IOException();\n");
+		buf.append("            } catch (IOException e1) {\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
 	public void testUncaughtExceptionImportConflict() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Renaud Waldura &lt;renaud+eclipse@waldura.com&gt; - Access to static proposal
@@ -91,6 +95,7 @@ import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -178,7 +183,7 @@ public class LocalCorrectionsSubProcessor {
 		if (selectedNode == null) {
 			return;
 		}
-		while (selectedNode != null && !(selectedNode instanceof Statement)) {
+		while (selectedNode != null && !(selectedNode instanceof Statement) && !(selectedNode instanceof VariableDeclarationExpression)) {
 			selectedNode= selectedNode.getParent();
 		}
 		if (selectedNode == null) {
@@ -217,7 +222,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 
 		TryStatement surroundingTry= ASTResolving.findParentTryStatement(selectedNode);
-		if (surroundingTry != null && ASTNodes.isParent(selectedNode, surroundingTry.getBody())) {
+		if (surroundingTry != null && (ASTNodes.isParent(selectedNode, surroundingTry.getBody()) || selectedNode.getLocationInParent() == TryStatement.RESOURCES_PROPERTY)) {
 			ASTRewrite rewrite= ASTRewrite.create(surroundingTry.getAST());
 
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_addadditionalcatch_description;

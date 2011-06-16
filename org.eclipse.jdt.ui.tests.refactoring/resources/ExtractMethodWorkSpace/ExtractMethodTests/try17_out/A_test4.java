@@ -9,7 +9,7 @@ public class A_test4 {
 		extracted();
 	}
 
-	protected void extracted() throws Foo, Bar {
+	protected void extracted() throws Bar, Foo {
 		/*[*/try (Test t = new Test()) {
 
 		}/*]*/

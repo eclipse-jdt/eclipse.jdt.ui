@@ -217,12 +217,19 @@ public class QuickFixTest extends TestCase {
 		return collectCorrections(cu, astRoot, nProblems, null);
 	}
 
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, int problem) throws CoreException {
+		return collectCorrections(cu, astRoot, nProblems, problem, null);
+	}
 
 	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, AssistContext context) throws CoreException {
+		return collectCorrections(cu, astRoot, nProblems, 0, context);
+	}
+
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, int problem, AssistContext context) throws CoreException {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOfProblems(nProblems, problems);
-		
-		return collectCorrections(cu, problems[0], context);
+
+		return collectCorrections(cu, problems[problem], context);
 	}
 
 	protected static void assertNumberOfProblems(int nProblems, IProblem[] problems) {

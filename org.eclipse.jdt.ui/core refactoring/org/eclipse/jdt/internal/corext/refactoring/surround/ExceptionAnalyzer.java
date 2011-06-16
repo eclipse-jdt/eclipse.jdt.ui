@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -29,6 +33,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -127,6 +132,13 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 		if (!isSelected(node))
 			return false;
 		return handleExceptions(node.resolveConstructorBinding());
+	}
+
+	@Override
+	public boolean visit(VariableDeclarationExpression node) {
+		if (!isSelected(node))
+			return false;
+		return super.visit(node);
 	}
 
 	private boolean handleExceptions(IMethodBinding binding) {
