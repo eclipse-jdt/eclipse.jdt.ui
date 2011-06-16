@@ -2170,14 +2170,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		final ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
 		//
 		SwitchStatement switchStatement= (SwitchStatement) covering;
-		String label;
-		boolean isStringsInSwitch= false;
-		if ("java.lang.String".equals(switchStatement.getExpression().resolveTypeBinding().getQualifiedName())) { //$NON-NLS-1$
-			label= CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIfRemovingNullCheck;
-			isStringsInSwitch= true;
-		} else {
-			label= CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIf;
-		}
+		ITypeBinding expressionType= switchStatement.getExpression().resolveTypeBinding();
+		boolean isStringsInSwitch= expressionType != null && "java.lang.String".equals(expressionType.getQualifiedName()); //$NON-NLS-1$
+		String label= isStringsInSwitch ? CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIfRemovingNullCheck : CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIf;
 		IfStatement firstIfStatement= null;
 		IfStatement currentIfStatement= null;
 		Block currentBlock= null;
