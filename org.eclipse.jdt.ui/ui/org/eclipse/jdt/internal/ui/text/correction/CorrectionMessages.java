@@ -365,7 +365,6 @@ public final class CorrectionMessages extends NLS {
 	public static String SuppressWarningsSubProcessor_fix_suppress_token_label;
 	public static String SuppressWarningsSubProcessor_remove_annotation_label;
 	public static String VarargsWarningsSubProcessor_add_safevarargs_label;
-	public static String VarargsWarningsSubProcessor_add_safevarargs_to_method_declaration_label;
-	public static String VarargsWarningsSubProcessor_add_safevarargs_to_constructor_declaration_label;
+	public static String VarargsWarningsSubProcessor_add_safevarargs_to_method_label;
 	public static String VarargsWarningsSubProcessor_remove_safevarargs_label;
 }

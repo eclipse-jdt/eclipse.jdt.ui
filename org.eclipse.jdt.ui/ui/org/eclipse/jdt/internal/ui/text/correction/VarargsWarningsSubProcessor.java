@@ -36,10 +36,12 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -93,6 +95,17 @@ public class VarargsWarningsSubProcessor {
 		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
 
 		MethodDeclaration methodDeclaration= ASTResolving.findParentMethodDeclaration(coveringNode);
+		if (methodDeclaration == null)
+			return;
+		
+		IMethodBinding methodBinding= methodDeclaration.resolveBinding();
+		if (methodBinding == null)
+			return;
+		
+		int modifiers= methodBinding.getModifiers();
+		if (!Modifier.isStatic(modifiers) && !Modifier.isFinal(modifiers) && ! methodBinding.isConstructor())
+			return; 
+		
 		String label= CorrectionMessages.VarargsWarningsSubProcessor_add_safevarargs_label;
 		AddSafeVarargsProposal proposal= new AddSafeVarargsProposal(label, context.getCompilationUnit(), methodDeclaration, null, -2);
 		proposals.add(proposal);
@@ -104,16 +117,17 @@ public class VarargsWarningsSubProcessor {
 
 		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
 		IMethodBinding methodBinding;
-		String label;
 		if (coveringNode instanceof MethodInvocation) {
 			methodBinding= ((MethodInvocation) coveringNode).resolveMethodBinding();
-			label= CorrectionMessages.VarargsWarningsSubProcessor_add_safevarargs_to_method_declaration_label;
 		} else if (coveringNode instanceof ClassInstanceCreation) {
 			methodBinding= ((ClassInstanceCreation) coveringNode).resolveConstructorBinding();
-			label= CorrectionMessages.VarargsWarningsSubProcessor_add_safevarargs_to_constructor_declaration_label;
 		} else {
 			return;
 		}
+		if (methodBinding == null)
+			return;
+		
+		String label= Messages.format(CorrectionMessages.VarargsWarningsSubProcessor_add_safevarargs_to_method_label, methodBinding.getName());
 
 		ITypeBinding declaringType= methodBinding.getDeclaringClass();
 		CompilationUnit astRoot= (CompilationUnit) coveringNode.getRoot();
@@ -140,9 +154,9 @@ public class VarargsWarningsSubProcessor {
 
 		List<? extends ASTNode> modifiers= methodDeclaration.modifiers();
 		for (Iterator<? extends ASTNode> iterator= modifiers.iterator(); iterator.hasNext();) {
-			Object object= iterator.next();
-			if (object instanceof MarkerAnnotation) {
-				annotation= (MarkerAnnotation) object;
+			ASTNode node= iterator.next();
+			if (node instanceof MarkerAnnotation) {
+				annotation= (MarkerAnnotation) node;
 				if ("SafeVarargs".equals(annotation.resolveAnnotationBinding().getName())) { //$NON-NLS-1$
 					break;
 				}
