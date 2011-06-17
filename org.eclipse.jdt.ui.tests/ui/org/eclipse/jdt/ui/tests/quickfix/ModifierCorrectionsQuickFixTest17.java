@@ -43,8 +43,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 
-	private static final String ADD_SAFE_VARARGS_TO_METHOD_DECLARATION= "Add @SafeVarargs to method declaration";
-
+	private static final String ADD_SAFE_VARARGS= "Add @SafeVarargs";
 	private static final Class THIS= ModifierCorrectionsQuickFixTest17.class;
 
 	private IJavaProject fJProject1;
@@ -127,6 +126,39 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		buf.append("package p;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
+		buf.append("    public final <T> List<T> asList(T ... a) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SafeVarargs\n");
+		buf.append("    public final <T> List<T> asList(T ... a) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testAddSafeVarargs3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
 		buf.append("    @Deprecated\n");
 		buf.append("    public static <T> List<T> asList(T ... a) {\n");
 		buf.append("        return null;\n");
@@ -156,7 +188,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
-	public void testAddSafeVarargs3() throws Exception {
+	public void testAddSafeVarargs4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package p;\n");
@@ -183,6 +215,27 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		expected[0]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testAddSafeVarargs5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    public <T> List<T> asList(T ... a) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		assertProposalDoesNotExist(proposals, ADD_SAFE_VARARGS);
 	}
 
 	public void testAddSafeVarargsToDeclaration1() throws Exception {
@@ -385,8 +438,9 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList proposals= collectCorrections(cu, astRoot);
+			assertNumberOfProposals(proposals, 1);
 
-			assertProposalDoesNotExist(proposals, ADD_SAFE_VARARGS_TO_METHOD_DECLARATION);
+			assertProposalDoesNotExist(proposals, "Add @SafeVarargs to 'asList(..)'");
 		} finally {
 			JavaProjectHelper.set17CompilerOptions(fJProject1);
 		}
