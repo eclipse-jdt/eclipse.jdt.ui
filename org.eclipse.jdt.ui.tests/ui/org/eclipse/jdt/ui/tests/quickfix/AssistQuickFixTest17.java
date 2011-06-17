@@ -535,4 +535,30 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 
+	public void testSplitDeclaration1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() throws Exception {\n");
+		buf.append("        try (FileReader reader = new FileReader(\"file\")) {\n");
+		buf.append("            int ch;\n");
+		buf.append("            while ((ch = reader.read()) != -1) {\n");
+		buf.append("                System.out.println(ch);\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "reader";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		assertProposalDoesNotExist(proposals, "Split variable declaration");
+	}
+
 }

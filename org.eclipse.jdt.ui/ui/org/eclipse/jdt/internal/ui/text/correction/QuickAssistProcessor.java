@@ -588,6 +588,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (fragParent instanceof VariableDeclarationStatement) {
 			statement= (VariableDeclarationStatement) fragParent;
 		} else if (fragParent instanceof VariableDeclarationExpression) {
+			if (fragParent.getLocationInParent() == TryStatement.RESOURCES_PROPERTY) {
+				return false;
+			}
 			statement= (Statement) fragParent.getParent();
 		} else {
 			return false;
