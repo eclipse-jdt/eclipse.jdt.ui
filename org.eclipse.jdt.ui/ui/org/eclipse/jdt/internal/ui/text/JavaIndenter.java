@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -1008,12 +1012,18 @@ public final class JavaIndenter {
 				// the end of the previous statement / block previous.end
 				// search to the end of the statement / block before the previous; the token just after that is previous.start
 				pos= fPosition;
-				if (isForStatement()) {
+				if (isSemicolonPartOfForStatement()) {
 					fIndent= fPrefs.prefContinuationIndent;
 					return fPosition;
 				} else {
 					fPosition= pos;
-					return skipToStatementStart(danglingElse, false);
+					if (isTryWithResources()) {
+						fIndent= fPrefs.prefContinuationIndent;
+						return fPosition;
+					} else {
+						fPosition= pos;
+						return skipToStatementStart(danglingElse, false);
+					}
 				}
 			// scope introduction: special treat who special is
 			case Symbols.TokenLPAREN:
@@ -1156,7 +1166,7 @@ public final class JavaIndenter {
 	 * @return returns <code>true</code> if current position is part of for statement
 	 * @since 3.7
 	 */
-	private boolean isForStatement() {
+	private boolean isSemicolonPartOfForStatement() {
 		int semiColonCount= 1;
 		while (true) {
 			nextToken();
@@ -1170,6 +1180,28 @@ public final class JavaIndenter {
 					if (semiColonCount > 2)
 						return false;
 					break;
+				case Symbols.TokenCOLON:
+					return false;
+				case Symbols.TokenEOF:
+					return false;
+			}
+		}
+	}
+
+	/**
+	 * Checks if the semicolon at the current position is part of a try with resources statement.
+	 * 
+	 * @return returns <code>true</code> if current position is part of try with resources statement
+	 * @since 3.7
+	 */
+	private boolean isTryWithResources() {
+		while (true) {
+			nextToken();
+			switch (fToken) {
+				case Symbols.TokenTRY:
+					return true;
+				case Symbols.TokenLBRACE:
+					return false;
 				case Symbols.TokenEOF:
 					return false;
 			}
@@ -1449,7 +1481,7 @@ public final class JavaIndenter {
 
 				case Symbols.TokenSEMICOLON:
 					int savedPosition= fPosition;
-					if (isForStatement())
+					if (isSemicolonPartOfForStatement())
 						fIndent= fPrefs.prefContinuationIndent;
 					else
 						fPosition= savedPosition;

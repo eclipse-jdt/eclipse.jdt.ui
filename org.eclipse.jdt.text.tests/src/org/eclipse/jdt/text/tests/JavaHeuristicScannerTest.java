@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -870,6 +874,17 @@ public class JavaHeuristicScannerTest extends TestCase {
 		Assert.assertEquals("\t\t", indent);
 	}
 
+	public void testContinuationIndentationOfForEachStatement2() throws Exception {
+		// Bug 348198
+		fDocument.set("\tfor (int value : values)\n" +
+				"\t\tsum += value;\n" +
+				"\t\t\t\tSystem.out.println(sum);\n" +
+				"\t}");
+
+		String indent= fScanner.computeIndentation(44).toString();
+		Assert.assertEquals("\t", indent);
+	}
+
 	public void testContinuationIndentationOfBooleanExpression() throws Exception {
 		fDocument.set("\tboolean a = true || false;\n" +
 				"\tboolean b = a || false;\n");
@@ -1065,6 +1080,32 @@ public class JavaHeuristicScannerTest extends TestCase {
 				"");
 
 		String indent= fScanner.computeIndentation(29).toString();
+		Assert.assertEquals("\t\t\t", indent);
+	}
+
+	public void testIndentationTryWithResources() throws Exception {
+		String s= "class A {\n" +
+				"	void foo() throws Throwable {\n" +
+				"		try (FileReader reader1 = new FileReader(\"file1\");\n" +
+				"			FileReader reader2 = new FileReader(\"file2\");\n" +
+				"			FileReader reader3 = new FileReader(\"file3\");\n" +
+				"			FileReader reader4 = new FileReader(\"file4\");\n" +
+				"			FileReader reader5 = new FileReader(\"file5\")) {\n" +
+				"			int ch;\n" +
+				"			while ((ch = reader1.read()) != -1) {\n" +
+				"				System.out.println(ch);\n" +
+				"			}\n" +
+				"		}\n" +
+				"	}\n";
+
+		fDocument.set(s);
+
+		int offset= s.indexOf("FileReader reader2");
+		String indent= fScanner.computeIndentation(offset).toString();
+		Assert.assertEquals("\t\t\t", indent);
+
+		offset= s.indexOf("FileReader reader5");
+		indent= fScanner.computeIndentation(offset).toString();
 		Assert.assertEquals("\t\t\t", indent);
 	}
 }
