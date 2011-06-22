@@ -1342,12 +1342,12 @@ public class ASTView extends ViewPart implements IShowInSource {
 	}
 
 	private String askForKey(String dialogTitle) {
-		InputDialog dialog= new InputDialog(getSite().getShell(), dialogTitle, "Key: (optionally surrounded by <KEY: '> and <'>)", "", null);
+		InputDialog dialog= new InputDialog(getSite().getShell(), dialogTitle, "Key: (optionally surrounded by <KEY: \"> and <\">)", "", null);
 		if (dialog.open() != Window.OK)
 			return null;
 		
 		String key= dialog.getValue();
-		if (key.startsWith("KEY: '") && key.endsWith("'"))
+		if (key.startsWith("KEY: \"") && key.endsWith("\""))
 			key= key.substring(6, key.length() - 1);
 		return key;
 	}
