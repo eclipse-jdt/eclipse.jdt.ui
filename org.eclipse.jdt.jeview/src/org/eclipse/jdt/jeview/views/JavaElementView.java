@@ -942,7 +942,6 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		return null;
 	}
 	
-	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySheetPage.class) {

@@ -258,14 +258,12 @@ public class JavaElement extends JEAttribute {
 			}
 		});
 		result.add(new JavaElementChildrenProperty(this, "OPTIONS(FALSE)") {
-			@SuppressWarnings("unchecked")
 			@Override
 			protected JEAttribute[] computeChildren() {
 				return createOptions(this, project.getOptions(false));
 			}
 		});
 		result.add(new JavaElementChildrenProperty(this, "OPTIONS(TRUE)") {
-			@SuppressWarnings("unchecked")
 			@Override
 			protected JEAttribute[] computeChildren() {
 				return createOptions(this, project.getOptions(true));
