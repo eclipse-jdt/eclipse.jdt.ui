@@ -16,9 +16,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -891,7 +890,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= ((IStructuredSelection) selection);
 			if (structuredSelection.size() >= 1) {
-				Set<Object> input= new LinkedHashSet<Object>();
+				List<Object> input= new ArrayList<Object>();
 				for (Iterator<?> iter = structuredSelection.iterator(); iter.hasNext();) {
 					Object item= iter.next();
 					if (item instanceof IJavaElement || item instanceof IResource || item instanceof IJarEntryResource) {
