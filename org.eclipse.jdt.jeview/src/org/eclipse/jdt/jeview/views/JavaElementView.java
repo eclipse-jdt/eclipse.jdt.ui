@@ -64,8 +64,10 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.Window;
 
@@ -408,9 +410,9 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	}
 	
 	private void addCompareActionOrNot(IMenuManager manager) {
-		if (fViewer.getSelection() instanceof IStructuredSelection) {
-			IStructuredSelection structuredSelection= (IStructuredSelection) fViewer.getSelection();
-			if (structuredSelection.size() == 2) {
+		if (fViewer.getSelection() instanceof ITreeSelection) {
+			ITreeSelection treeSelection = (ITreeSelection) fViewer.getSelection();
+			if (treeSelection.getPaths().length == 2) {
 				manager.add(fCompareAction);
 			}
 		}
@@ -742,9 +744,9 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		
 		fCompareAction= new Action() {
 			@Override public void run() {
-				Object[] selection= ((IStructuredSelection) fViewer.getSelection()).toArray();
-				Object first= ((JEAttribute) selection[0]).getWrappedObject();
-				Object second= ((JEAttribute) selection[1]).getWrappedObject();
+				TreePath[] selection= ((ITreeSelection) fViewer.getSelection()).getPaths();
+				Object first= ((JEAttribute) selection[0].getLastSegment()).getWrappedObject();
+				Object second= ((JEAttribute) selection[1].getLastSegment()).getWrappedObject();
 				boolean identical= first == second;
 				boolean equals1= first != null && first.equals(second);
 				boolean equals2= second != null && second.equals(first);
