@@ -128,8 +128,13 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 	public boolean visit(VariableDeclarationExpression node) {
 		if (node.getAST().apiLevel() >= AST.JLS4 && node.getLocationInParent() == TryStatement.RESOURCES_PROPERTY) {
 			Type type= node.getType();
-			IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$
-			addExceptions(methodBinding.getExceptionTypes());
+			ITypeBinding resourceTypeBinding= type.resolveBinding();
+			if (resourceTypeBinding != null) {
+				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(resourceTypeBinding, "close", new ITypeBinding[0]); //$NON-NLS-1$
+				if (methodBinding != null) {
+					addExceptions(methodBinding.getExceptionTypes());
+				}
+			}
 		}
 		return super.visit(node);
 	}
@@ -158,15 +163,17 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 			if (type instanceof UnionType) {
 				List<Type> types= ((UnionType) type).types();
 				for (Iterator<Type> iterator= types.iterator(); iterator.hasNext();) {
-					catches(iterator.next().resolveBinding());
+					removeCaughtExceptions(iterator.next().resolveBinding());
 				}
 			} else {
-				catches(type.resolveBinding());
+				removeCaughtExceptions(type.resolveBinding());
 			}
 		}
 	}
 
-	private void catches(ITypeBinding catchTypeBinding) {
+	private void removeCaughtExceptions(ITypeBinding catchTypeBinding) {
+		if (catchTypeBinding == null)
+			return;
 		for (Iterator<ITypeBinding> exceptions= new ArrayList<ITypeBinding>(fCurrentExceptions).iterator(); exceptions.hasNext();) {
 			ITypeBinding throwTypeBinding= exceptions.next();
 			if (catches(catchTypeBinding, throwTypeBinding))
