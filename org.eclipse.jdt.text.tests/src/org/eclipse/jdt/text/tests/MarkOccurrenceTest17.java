@@ -206,7 +206,7 @@ public class MarkOccurrenceTest17 extends TestCase {
 
 		int offset= 1 + s.indexOf("void");//middle of word
 		int length= 0;
-		OccurrenceLocation[] ranges= { find(s, "void", 1), find(s, "FileReader", 2), find(s, "readLine", 1), find(s, "}", 2), find(s, "}", 3) };
+		OccurrenceLocation[] ranges= { find(s, "void", 1), find(s, "reader", 1), find(s, "FileReader", 2), find(s, "readLine", 1), find(s, "}", 2), find(s, "}", 3) };
 		checkSelection(s, offset, length, ranges);
 	}
 
@@ -233,7 +233,7 @@ public class MarkOccurrenceTest17 extends TestCase {
 
 		int offset= 1 + s.indexOf("void");//middle of word
 		int length= 0;
-		OccurrenceLocation[] ranges= { find(s, "void", 1), find(s, "readLine", 1), find(s, "}", 2), find(s, "}", 4) };
+		OccurrenceLocation[] ranges= { find(s, "void", 1), find(s, "reader", 1), find(s, "readLine", 1), find(s, "}", 2), find(s, "}", 4) };
 		checkSelection(s, offset, length, ranges);
 	}
 
@@ -283,10 +283,39 @@ public class MarkOccurrenceTest17 extends TestCase {
 
 		int offset= 1 + s.indexOf("void");//middle of word
 		int length= 0;
-		OccurrenceLocation[] ranges= { find(s, "void", 1), find(s, "FileReader", 3), find(s, "FileReader", 5), find(s, "FileReader", 7), find(s, "read", 5), find(s, "}", 2), find(s, "}", 3) };
+		OccurrenceLocation[] ranges= { find(s, "void", 1),
+				find(s, "reader1", 1), find(s, "FileReader", 3),
+				find(s, "reader2", 1), find(s, "FileReader", 5),
+				find(s, "reader3", 1), find(s, "FileReader", 7),
+				find(s, "read", 5), find(s, "}", 2), find(s, "}", 3) };
 		checkSelection(s, offset, length, ranges);
 	}
 
+	public void testMarkMethodExits7() throws Exception {
+		fFinder= new MethodExitsFinder();
+		StringBuffer s= new StringBuffer();
+		s.append("import java.io.FileReader;\n");
+		s.append("class A {\n");
+		s.append("   void foo() throws Throwable {\n");
+		s.append("      try (ACloseable closeable = new ACloseable();\n");
+		s.append("               FileReader reader = new FileReader(\"file1\")) {\n");
+		s.append("         int ch;\n");
+		s.append("         while ((ch = reader.read()) != -1) {\n");
+		s.append("            System.out.println(ch);\n");
+		s.append("         }\n");
+		s.append("      }\n");
+		s.append("   }\n");
+		s.append("}\n");
+		s.append("class ACloseable implements AutoCloseable {\n");
+		s.append("    @Override\n");
+		s.append("    public void close() { }\n");
+		s.append("}\n");		
+		int offset= 1 + s.indexOf("void");//middle of word
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "void", 1), find(s, "reader", 1), find(s, "FileReader", 3), find(s, "read", 3), find(s, "}", 2), find(s, "}", 3) };
+		checkSelection(s, offset, length, ranges);
+	}
+	
 	public void testThrowingException1() throws Exception {
 		fFinder= new ExceptionOccurrencesFinder();
 		StringBuffer s= new StringBuffer();
@@ -387,7 +416,7 @@ public class MarkOccurrenceTest17 extends TestCase {
 
 		int offset= 1 + s.indexOf("IOException e");//middle of word
 		int length= 0;
-		OccurrenceLocation[] ranges= { find(s, "IOException", 2), find(s, "FileReader", 2), find(s, "readLine", 1), find(s, "}", 2) };
+		OccurrenceLocation[] ranges= { find(s, "IOException", 2), find(s, "FileReader", 2), find(s, "readLine", 1), find(s, "}", 2), find(s, "reader", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 
@@ -413,7 +442,8 @@ public class MarkOccurrenceTest17 extends TestCase {
 
 		int offset= 1 + s.indexOf("IOException e");//middle of word
 		int length= 0;
-		OccurrenceLocation[] ranges= { find(s, "IOException", 2), find(s, "FileReader", 3), find(s, "FileReader", 5), find(s, "FileReader", 7), find(s, "read", 5), find(s, "}", 2) };
+		OccurrenceLocation[] ranges= { find(s, "IOException", 2), find(s, "FileReader", 3), find(s, "FileReader", 5), find(s, "FileReader", 7), find(s, "read", 5),
+				find(s, "}", 2), find(s, "reader1", 1), find(s, "reader2", 1), find(s, "reader3", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 }

@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -137,19 +138,29 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			}
 
 			//check if the exception is thrown as a result of resource#close()
-			outer: for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
-				Type type= iterator.next().getType();
+			boolean exitMarked= false;
+			for (VariableDeclarationExpression variable : resources) {
+				Type type= variable.getType();
 				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$
-				ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
-				for (int j= 0; j < exceptionTypes.length; j++) {
-					if (matches(exceptionTypes[j])) {
-						Block body= fTryStatement.getBody();
-						int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
-						fResult.add(new OccurrenceLocation(offset, 1, 0, fDescription));
-						break outer;
+				if (methodBinding != null) {
+					ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
+					for (int j= 0; j < exceptionTypes.length; j++) {
+						if (matches(exceptionTypes[j])) { // a close() throws the caught exception
+							// mark name of resource
+							for (VariableDeclarationFragment fragment : (List<VariableDeclarationFragment>) variable.fragments()) {
+								SimpleName name= fragment.getName();
+								fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fDescription));
+							}
+							if (!exitMarked) {
+								// mark exit position 
+								exitMarked= true;
+								Block body= fTryStatement.getBody();
+								int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
+								fResult.add(new OccurrenceLocation(offset, 1, 0, fDescription));
+							}
+						}
 					}
 				}
-				break;
 			}
 		}
 		if (fSelectedName != null) {
