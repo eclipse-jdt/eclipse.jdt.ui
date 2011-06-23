@@ -818,7 +818,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 
 	private String getType(VariableDeclaration declaration, boolean isVarargs) {
-		String type= ASTNodes.asString(ASTNodeFactory.newType(declaration.getAST(), declaration));
+		String type= ASTNodes.asString(ASTNodeFactory.newType(declaration.getAST(), declaration, fImportRewriter, new ContextSensitiveImportRewriteContext(declaration, fImportRewriter)));
 		if (isVarargs)
 			return type + ParameterInfo.ELLIPSIS;
 		else
@@ -999,6 +999,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 		result.modifiers().addAll(ASTNodeFactory.newModifiers(fAST, modifiers));
 		result.setReturnType2((Type)ASTNode.copySubtree(fAST, fAnalyzer.getReturnType()));
 		result.setName(fAST.newSimpleName(fMethodName));
+		
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(enclosingBodyDeclaration, fImportRewriter);
 
 		List<SingleVariableDeclaration> parameters= result.parameters();
 		for (int i= 0; i < fParameterInfos.size(); i++) {
@@ -1006,7 +1008,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			VariableDeclaration infoDecl= getVariableDeclaration(info);
 			SingleVariableDeclaration parameter= fAST.newSingleVariableDeclaration();
 			parameter.modifiers().addAll(ASTNodeFactory.newModifiers(fAST, ASTNodes.getModifiers(infoDecl)));
-			parameter.setType(ASTNodeFactory.newType(fAST, infoDecl));
+			parameter.setType(ASTNodeFactory.newType(fAST, infoDecl, fImportRewriter, context));
 			parameter.setName(fAST.newSimpleName(info.getNewName()));
 			parameter.setVarargs(info.isNewVarargs());
 			parameters.add(parameter);
@@ -1014,7 +1016,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 		List<Name> exceptions= result.thrownExceptions();
 		ITypeBinding[] exceptionTypes= fAnalyzer.getExceptions(fThrowRuntimeExceptions);
-		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(enclosingBodyDeclaration, fImportRewriter);
 		for (int i= 0; i < exceptionTypes.length; i++) {
 			ITypeBinding exceptionType= exceptionTypes[i];
 			exceptions.add(ASTNodeFactory.newName(fAST, fImportRewriter.addImport(exceptionType, context)));
@@ -1144,7 +1145,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fragment.setInitializer(intilizer);
 		VariableDeclarationStatement result= fAST.newVariableDeclarationStatement(fragment);
 		result.modifiers().addAll(ASTNode.copySubtrees(fAST, ASTNodes.getModifiers(original)));
-		result.setType(ASTNodeFactory.newType(fAST, original));
+		result.setType(ASTNodeFactory.newType(fAST, original, fImportRewriter, new ContextSensitiveImportRewriteContext(original, fImportRewriter)));
 		return result;
 	}
 

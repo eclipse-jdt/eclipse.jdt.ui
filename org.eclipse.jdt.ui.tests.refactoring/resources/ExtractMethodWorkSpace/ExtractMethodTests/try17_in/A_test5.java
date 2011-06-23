@@ -1,19 +1,19 @@
-package try_in;
+package try17_in;
 
-class Foo extends Exception {}
-class Bar extends Exception {}
+class Foo5 extends Exception {}
+class Bar5 extends Exception {}
 
 public class A_test5 {
 
 	void foo() throws Exception {
-		/*[*/try (Test t = new Test()) {
+		/*[*/try (Test5 t = new Test5()) {
 
 		}/*]*/
 	}
 }
 
-class Test implements AutoCloseable {
+class Test5 implements AutoCloseable {
 	@Override
-	public void close() throws Bar {
+	public void close() throws Bar5 {
 	}
 }

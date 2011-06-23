@@ -1,7 +1,7 @@
-package try_out;
+package try17_out;
 
-class Foo extends Exception {}
-class Bar extends Exception {}
+class Foo6 extends Exception {}
+class Bar6 extends Exception {}
 
 public class A_test6 {
 
@@ -9,15 +9,15 @@ public class A_test6 {
 		extracted();
 	}
 
-	protected void extracted() throws Foo {
-		/*[*/try (Test t = new Test()) {
+	protected void extracted() throws Foo6 {
+		/*[*/try (Test6 t = new Test6()) {
 
 		}/*]*/
 	}
 }
 
-class Test implements AutoCloseable {
-	Test() throws Foo {
+class Test6 implements AutoCloseable {
+	Test6() throws Foo6 {
 
 	}
 

@@ -14,25 +14,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IPackageFragment;
-
-import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
-import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
-
-public class ExtractMethodTests17 extends AbstractSelectionTestCase {
+public class ExtractMethodTests17 extends ExtractMethodTests {
 	private static ExtractMethodTestSetup17 fgTestSetup;
 
 	public ExtractMethodTests17(String name) {
@@ -40,7 +24,7 @@ public class ExtractMethodTests17 extends AbstractSelectionTestCase {
 	}
 
 	public static Test suite() {
-		fgTestSetup= new ExtractMethodTestSetup17(new TestSuite(ExtractMethodTests17.class));
+		fgTestSetup= new ExtractMethodTestSetup17(new NoSuperTestsSuite(ExtractMethodTests17.class));
 		return fgTestSetup;
 	}
 
@@ -49,75 +33,8 @@ public class ExtractMethodTests17 extends AbstractSelectionTestCase {
 		return fgTestSetup;
 	}
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		fIsPreDeltaTest= true;
-	}
-
-	protected String getResourceLocation() {
-		return "ExtractMethodWorkSpace/ExtractMethodTests/";
-	}
-
-	protected String adaptName(String name) {
-		return name + "_" + getName() + ".java";
-	}
-
-	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
-		performTest(packageFragment, id, mode, outputFolder, null, null, 0);
-	}
-
-	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder, String[] newNames, int[] newOrder, int destination) throws Exception {
-		ICompilationUnit unit= createCU(packageFragment, id);
-		int[] selection= getSelection();
-		ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(unit, selection[0], selection[1]);
-		refactoring.setMethodName("extracted");
-		refactoring.setVisibility(Modifier.PROTECTED);
-		TestModelProvider.clearDelta();
-		RefactoringStatus status= refactoring.checkInitialConditions(new NullProgressMonitor());
-		switch (mode) {
-			case VALID_SELECTION:
-				assertTrue(status.isOK());
-				break;
-			case INVALID_SELECTION:
-				if (!status.isOK())
-					return;
-		}
-		List parameters= refactoring.getParameterInfos();
-		if (newNames != null && newNames.length > 0) {
-			for (int i= 0; i < newNames.length; i++) {
-				if (newNames[i] != null)
-					((ParameterInfo)parameters.get(i)).setNewName(newNames[i]);
-			}
-		}
-		if (newOrder != null && newOrder.length > 0) {
-			assertTrue(newOrder.length == parameters.size());
-			List current= new ArrayList(parameters);
-			for (int i= 0; i < newOrder.length; i++) {
-				parameters.set(newOrder[i], current.get(i));
-			}
-		}
-		refactoring.setDestination(destination);
-
-		String out= null;
-		switch (mode) {
-			case COMPARE_WITH_OUTPUT:
-				out= getProofedContent(outputFolder, id);
-				break;
-		}
-		performTest(unit, refactoring, mode, out, true);
-	}
-
-	protected int getCheckingStyle() {
-		return CheckConditionsOperation.FINAL_CONDITIONS;
-	}
-
-	protected void clearPreDelta() {
-		// Do nothing. We clear the delta before
-		// initial condition checking
-	}
-
-	protected void tryTest() throws Exception {
-		performTest(fgTestSetup.getTryPackage(), "A", COMPARE_WITH_OUTPUT, "try17_out");
+	protected void try17Test() throws Exception {
+		performTest(fgTestSetup.getTry17Package(), "A", COMPARE_WITH_OUTPUT, "try17_out");
 	}
 
 	//====================================================================================
@@ -127,26 +44,26 @@ public class ExtractMethodTests17 extends AbstractSelectionTestCase {
 	//---- Test Try / catch block
 
 	public void test1() throws Exception {
-		tryTest();
+		try17Test();
 	}
 
 	public void test2() throws Exception {
-		tryTest();
+		try17Test();
 	}
 
 	public void test3() throws Exception {
-		tryTest();
+		try17Test();
 	}
 
 	public void test4() throws Exception {
-		tryTest();
+		try17Test();
 	}
 
 	public void test5() throws Exception {
-		tryTest();
+		try17Test();
 	}
 
 	public void test6() throws Exception {
-		tryTest();
+		try17Test();
 	}
 }

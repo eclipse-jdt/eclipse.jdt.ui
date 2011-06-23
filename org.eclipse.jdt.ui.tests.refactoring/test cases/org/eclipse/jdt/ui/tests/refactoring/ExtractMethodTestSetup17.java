@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 public class ExtractMethodTestSetup17 extends Java17Setup {
 
-	private IPackageFragment fTryPackage;
+	private IPackageFragment fTry17Package;
 
 	public ExtractMethodTestSetup17(Test test) {
 		super(test);
@@ -35,11 +35,11 @@ public class ExtractMethodTestSetup17 extends Java17Setup {
 		RefactoringCore.getUndoManager().flush();
 
 		IPackageFragmentRoot root= getDefaultSourceFolder();
-		fTryPackage= root.createPackageFragment("try17_in", true, null);
+		fTry17Package= root.createPackageFragment("try17_in", true, null);
 	}
 
-	public IPackageFragment getTryPackage() {
-		return fTryPackage;
+	public IPackageFragment getTry17Package() {
+		return fTry17Package;
 	}
 }
 

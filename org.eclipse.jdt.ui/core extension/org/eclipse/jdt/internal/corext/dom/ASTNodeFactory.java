@@ -34,6 +34,8 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 public class ASTNodeFactory {
 
@@ -120,14 +122,43 @@ public class ASTNodeFactory {
 	 * @return a new type node created with the given AST.
 	 */
 	public static Type newType(AST ast, VariableDeclaration declaration) {
+		return newType(ast, declaration, null, null);
+	}
+
+	/**
+	 * Returns the new type node corresponding to the type of the given declaration
+	 * including the extra dimensions. If the type is a {@link UnionType}, use the LUB type.
+	 * If the <code>importRewrite</code> is <code>null</code>, the type may be fully-qualified. 
+	 * 
+	 * @param ast The AST to create the resulting type with.
+	 * @param declaration The variable declaration to get the type from
+	 * @param importRewrite the import rewrite to use, or <code>null</code>
+	 * @param context the import rewrite context, or <code>null</code>
+	 * @return a new type node created with the given AST.
+	 * 
+	 * @since 3.7.1
+	 */
+	public static Type newType(AST ast, VariableDeclaration declaration, ImportRewrite importRewrite, ImportRewriteContext context) {
 		Type type= ASTNodes.getType(declaration);
 
 		if (declaration instanceof SingleVariableDeclaration) {
 			Type type2= ((SingleVariableDeclaration) declaration).getType();
 			if (type2 instanceof UnionType) {
 				ITypeBinding typeBinding= type2.resolveBinding();
-				type= ast.newSimpleType(ast.newName(typeBinding.getName()));
-				//TODO: make sure that this type is imported
+				if (typeBinding != null) {
+					if (importRewrite != null) {
+						type= importRewrite.addImport(typeBinding, ast, context);
+						return type;
+					} else {
+						String qualifiedName= typeBinding.getQualifiedName();
+						if (qualifiedName.length() > 0) {
+							type= ast.newSimpleType(ast.newName(qualifiedName));
+							return type;
+						}
+					}
+				}
+				// XXX: fallback for intersection types or unresolved types: take first type of union
+				type= (Type) ((UnionType) type2).types().get(0);
 				return type;
 			}
 		}
