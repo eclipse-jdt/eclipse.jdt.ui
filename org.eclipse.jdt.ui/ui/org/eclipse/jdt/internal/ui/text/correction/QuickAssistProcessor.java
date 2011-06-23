@@ -1202,11 +1202,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (type.isUnionType()) {
 				UnionType unionType= (UnionType) type;
 				List<Type> types= unionType.types();
-				for (Iterator<Type> iterator= types.iterator(); iterator.hasNext();) {
-					addExceptionToThrows(ast, methodDeclaration, rewrite, iterator.next());
+				for (Type elementType : types) {
+					if (!(elementType instanceof SimpleType))
+						return false;
+					addExceptionToThrows(ast, methodDeclaration, rewrite, (SimpleType) elementType);
 				}
 			} else {
-				addExceptionToThrows(ast, methodDeclaration, rewrite, type);
+				addExceptionToThrows(ast, methodDeclaration, rewrite, (SimpleType) type);
 			}
 
 			String label= CorrectionMessages.QuickAssistProcessor_catchclausetothrows_description;
@@ -1227,10 +1229,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static void addExceptionToThrows(AST ast, MethodDeclaration methodDeclaration, ASTRewrite rewrite, Type type2) {
+	private static void addExceptionToThrows(AST ast, MethodDeclaration methodDeclaration, ASTRewrite rewrite, SimpleType type2) {
 		ITypeBinding binding= type2.resolveBinding();
 		if (binding == null || isNotYetThrown(binding, methodDeclaration.thrownExceptions())) {
-			Name name= ((SimpleType) type2).getName();
+			Name name= type2.getName();
 			Name newName= (Name) ASTNode.copySubtree(ast, name);
 
 			ListRewrite listRewriter= rewrite.getListRewrite(methodDeclaration, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY);
@@ -1378,6 +1380,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			newSingleVariableDeclaration.setType((Type) rewrite.createCopyTarget(type2));
 			newSingleVariableDeclaration.setName((SimpleName) rewrite.createCopyTarget(singleVariableDeclaration.getName()));
 			newCatchClause.setException(newSingleVariableDeclaration);
+
+//			newCatchClause.setBody((Block) rewrite.createCopyTarget(catchClause.getBody()));
 
 			//newCatchClause#setBody() destroys the formatting, hence copy statement by statement
 			List<Statement> statements= catchClause.getBody().statements();

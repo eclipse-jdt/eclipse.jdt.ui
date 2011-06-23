@@ -535,6 +535,32 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 
+	public void testReplaceMultiCatchClauseWithThrows2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            System.out.println(\"foo\");\n");
+		buf.append("        } catch (Outer<String>.Inner | NullPointerException ex) {\n");
+		buf.append("            ex.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Outer<E> {\n");
+		buf.append("    class Inner extends IllegalArgumentException { }\n"); // yes, that's a compile error
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+	
+		int offset= buf.toString().indexOf("Inner");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		//assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		
+		assertProposalDoesNotExist(proposals, CONVERT_TO_MULTIPLE_CATCH_BLOCKS);
+	}
+
 	public void testSplitDeclaration1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
