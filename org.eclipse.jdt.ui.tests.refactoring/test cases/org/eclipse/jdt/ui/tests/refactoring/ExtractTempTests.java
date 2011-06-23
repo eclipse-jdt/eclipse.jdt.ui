@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -55,14 +59,14 @@ public class ExtractTempTests extends RefactoringTest {
 		return new RefactoringTestSetup(someTest);
 	}
 
-	private String getSimpleTestFileName(boolean canExtract, boolean input){
+	protected String getSimpleTestFileName(boolean canExtract, boolean input){
 		String fileName = "A_" + getName();
 		if (canExtract)
 			fileName += input ? "_in": "_out";
 		return fileName + ".java";
 	}
 
-	private String getTestFileName(boolean canExtract, boolean input){
+	protected String getTestFileName(boolean canExtract, boolean input){
 		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
 		fileName += canExtract ? "canExtract/": "cannotExtract/";
 		return fileName + getSimpleTestFileName(canExtract, input);
@@ -89,7 +93,7 @@ public class ExtractTempTests extends RefactoringTest {
 		JavaCore.setOptions(options);
 	}
 
-	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName, String guessedTempName) throws Exception{
+	protected void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName, String guessedTempName) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractTempRefactoring ref= new ExtractTempRefactoring(cu, selection.getOffset(), selection.getLength());

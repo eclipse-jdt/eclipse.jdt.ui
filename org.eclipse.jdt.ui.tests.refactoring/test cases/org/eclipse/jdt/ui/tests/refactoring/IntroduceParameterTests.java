@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -67,15 +71,15 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 		return result;
 	}
 
-	private void performOK() throws Exception {
+	protected void performOK() throws Exception {
 		perform(RefactoringStatus.OK, RefactoringStatus.OK);
 	}
 
-	private void performInvalidSelection() throws Exception {
+	protected void performInvalidSelection() throws Exception {
 		perform(RefactoringStatus.FATAL, RefactoringStatus.FATAL);
 	}
 
-	private void perform(int expectedActivationStatus, int expectedInputStatus) throws Exception {
+	protected void perform(int expectedActivationStatus, int expectedInputStatus) throws Exception {
 		String packageName= adaptPackage(getName());
 		IPackageFragment packageFragment= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment(packageName, true , null);
 		ICompilationUnit cu= createCU(packageFragment, getName());
