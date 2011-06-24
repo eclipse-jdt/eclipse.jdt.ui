@@ -45,8 +45,9 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 
 public class AssistQuickFixTest17 extends QuickFixTest {
 
+	private static final String REMOVE_SURROUNDING_TRY_BLOCK= "Remove surrounding 'try' block";
 	private static final String CONVERT_TO_A_SINGLE_MULTI_CATCH_BLOCK= "Convert to a single multi-catch block";
-	private static final String CONVERT_TO_MULTIPLE_CATCH_BLOCKS= "Convert to multiple single-type catch blocks";
+	private static final String CONVERT_TO_SEPARATE_CATCH_BLOCKS= "Convert to separate catch blocks";
 
 	private static final Class THIS= AssistQuickFixTest17.class;
 
@@ -490,7 +491,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertProposalDoesNotExist(proposals, CONVERT_TO_MULTIPLE_CATCH_BLOCKS);
+		assertProposalDoesNotExist(proposals, CONVERT_TO_SEPARATE_CATCH_BLOCKS);
 	}
 
 	public void testReplaceMultiCatchClauseWithThrows() throws Exception {
@@ -558,7 +559,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		//assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 		
-		assertProposalDoesNotExist(proposals, CONVERT_TO_MULTIPLE_CATCH_BLOCKS);
+		assertProposalDoesNotExist(proposals, CONVERT_TO_SEPARATE_CATCH_BLOCKS);
 	}
 
 	public void testSplitDeclaration1() throws Exception {
@@ -585,6 +586,32 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		assertProposalDoesNotExist(proposals, "Split variable declaration");
+	}
+
+	public void testUnwrapTryStatement() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.FileReader;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() throws Exception {\n");
+		buf.append("        try (FileReader reader1 = new FileReader(\"file\")) {\n");
+		buf.append("            int ch;\n");
+		buf.append("            while ((ch = reader1.read()) != -1) {\n");
+		buf.append("                System.out.println(ch);\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "try";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertProposalDoesNotExist(proposals, REMOVE_SURROUNDING_TRY_BLOCK);
 	}
 
 }

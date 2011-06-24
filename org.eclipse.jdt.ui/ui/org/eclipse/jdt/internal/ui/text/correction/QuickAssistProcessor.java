@@ -1242,7 +1242,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static void removeCatchBlock(ASTRewrite rewrite, CatchClause catchClause) {
 		TryStatement tryStatement= (TryStatement) catchClause.getParent();
-		if (tryStatement.catchClauses().size() > 1 || tryStatement.getFinally() != null) {
+		if (tryStatement.catchClauses().size() > 1 || tryStatement.getFinally() != null || (tryStatement.getAST().apiLevel() >= AST.JLS4 && !tryStatement.resources().isEmpty())) {
 			rewrite.remove(catchClause, null);
 		} else {
 			Block block= tryStatement.getBody();
@@ -1549,7 +1549,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			label= CorrectionMessages.QuickAssistProcessor_unwrap_dostatement;
 		} else if (outer instanceof TryStatement) {
 			TryStatement tryStatement= (TryStatement) outer;
-			if (tryStatement.catchClauses().isEmpty()) {
+			if (tryStatement.catchClauses().isEmpty() && (tryStatement.getAST().apiLevel() >= AST.JLS4 && tryStatement.resources().isEmpty())) {
 				body= tryStatement.getBody();
 			}
 			label= CorrectionMessages.QuickAssistProcessor_unwrap_trystatement;
