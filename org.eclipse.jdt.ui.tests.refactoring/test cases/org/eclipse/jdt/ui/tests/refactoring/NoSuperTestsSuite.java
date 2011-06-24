@@ -25,6 +25,11 @@ import junit.framework.TestSuite;
  * @since 3.7
  */
 public class NoSuperTestsSuite extends TestSuite {
+	/**
+	 * This implementation creates unnecessary test objects for tests from super classes
+	 * (in {@link junit.framework.TestSuite#addTestMethod}).
+	 * Alternative would have been to copy most of the implementation of TestSuite.
+	 */
 	
 	private static final Class<? extends Test> WARNING_TEST_CLASS= warning(null).getClass();
 
@@ -32,6 +37,10 @@ public class NoSuperTestsSuite extends TestSuite {
 		super(theClass);
 	}
 	
+	/**
+	 * Adds the given test to this suite, but only if the test was declared in
+	 * the test object's class (and not in a superclass).
+	 */
 	@Override
 	public void addTest(Test test) {
 		if (test instanceof TestCase) {
