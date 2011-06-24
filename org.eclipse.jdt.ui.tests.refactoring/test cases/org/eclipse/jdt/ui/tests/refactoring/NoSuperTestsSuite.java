@@ -25,11 +25,9 @@ import junit.framework.TestSuite;
  * @since 3.7
  */
 public class NoSuperTestsSuite extends TestSuite {
-	/*
-	 * Implementation creates a few unnecessary test objects.
-	 * Alternative would have been to copy most of the implementation of TestSuite.
-	 */
 	
+	private static final Class<? extends Test> WARNING_TEST_CLASS= warning(null).getClass();
+
 	public NoSuperTestsSuite(Class<? extends Test> theClass) {
 		super(theClass);
 	}
@@ -42,7 +40,7 @@ public class NoSuperTestsSuite extends TestSuite {
 			try {
 				testClass.getDeclaredMethod(testCase.getName());
 			} catch (NoSuchMethodException e) {
-				if (testClass != warning(null).getClass())
+				if (testClass != WARNING_TEST_CLASS)
 					return;
 			}
 			super.addTest(test);
