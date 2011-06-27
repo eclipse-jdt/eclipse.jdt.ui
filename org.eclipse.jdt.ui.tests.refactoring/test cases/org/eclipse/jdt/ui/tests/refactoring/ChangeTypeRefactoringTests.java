@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,13 +65,13 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		return new RefactoringTestSetup(test);
 	}
 
-	private String getSimpleTestFileName(boolean input) {
+	protected String getSimpleTestFileName(boolean input) {
 		String fileName= "A_" + getName() + (input ? "_in" : "_out") + ".java";
 
 		return fileName;
 	}
 
-	private String getTestFileName(boolean positive, boolean input){
+	protected String getTestFileName(boolean positive, boolean input) {
 		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
 
 		fileName += (positive ? "positive/": "negative/");
@@ -118,7 +118,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		return ref;
 	}
 
-	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn,
+	protected void failHelper1(int startLine, int startColumn, int endLine, int endColumn,
 							 int expectedStatus, String selectedTypeName) throws Exception {
 		ICompilationUnit	cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange		selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);

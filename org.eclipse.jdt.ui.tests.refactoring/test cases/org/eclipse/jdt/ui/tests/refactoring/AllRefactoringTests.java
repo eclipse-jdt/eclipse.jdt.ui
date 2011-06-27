@@ -71,6 +71,7 @@ public class AllRefactoringTests {
 		suite.addTest(RenameTypeTests.suite());
 		suite.addTest(RenameTypeParameterTests.suite());
 		suite.addTest(ChangeTypeRefactoringTests.suite());
+		suite.addTest(ChangeTypeRefactoringTests17.suite());
 
 		//--packages
 		suite.addTest(RenamePackageTests.suite());

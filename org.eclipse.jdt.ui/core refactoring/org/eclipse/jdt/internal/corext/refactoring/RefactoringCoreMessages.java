@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
@@ -148,6 +152,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ChangeTypeRefactoring_descriptor_description_short;
 
 	public static String ChangeTypeRefactoring_enumsNotSupported;
+
+	public static String ChangeTypeRefactoring_uniontypeNotSupported;
 
 	public static String ChangeTypeRefactoring_insideLocalTypesNotSupported;
 
