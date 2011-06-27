@@ -1315,6 +1315,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		AST ast= covering.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
+		TightSourceRangeComputer sourceRangeComputer= new TightSourceRangeComputer();
+		sourceRangeComputer.addTightSourceNode(catchClauses.get(catchClauses.size() - 1));
+		rewrite.setTargetSourceRangeComputer(sourceRangeComputer);
+		
 		CatchClause firstCatchClause= catchClauses.get(0);
 
 		UnionType newUnionType= ast.newUnionType();

@@ -189,6 +189,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		buf.append("        } catch (RuntimeException e) {\n");
 		buf.append("            e.printStackTrace();\n");
 		buf.append("        }\n");
+		buf.append("        // a comment at the end\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -209,6 +210,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		buf.append("        } catch (IllegalArgumentException | NullPointerException | RuntimeException e) {\n");
 		buf.append("            e.printStackTrace();\n");
 		buf.append("        }\n");
+		buf.append("        // a comment at the end\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
