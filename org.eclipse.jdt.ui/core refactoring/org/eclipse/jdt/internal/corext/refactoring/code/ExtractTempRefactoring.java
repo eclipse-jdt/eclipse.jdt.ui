@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -876,7 +880,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		AST ast= rewrite.getAST();
 
-		if (expression instanceof ClassInstanceCreation) {
+		if (expression instanceof ClassInstanceCreation && (typeBinding == null || typeBinding.getTypeArguments().length == 0)) {
 			resultingType= (Type) rewrite.createCopyTarget(((ClassInstanceCreation) expression).getType());
 		} else if (expression instanceof CastExpression) {
 			resultingType= (Type) rewrite.createCopyTarget(((CastExpression) expression).getType());

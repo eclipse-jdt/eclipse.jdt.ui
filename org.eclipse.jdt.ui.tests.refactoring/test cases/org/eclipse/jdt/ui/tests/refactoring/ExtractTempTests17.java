@@ -44,4 +44,16 @@ public class ExtractTempTests17 extends ExtractTempTests {
 	public void test110() throws Exception {
 		helper1(14, 13, 14, 15, true, false, "temp", "ex2");
 	}
+	
+	public void test111() throws Exception {
+		helper1(8, 16, 8, 33, true, false, "arrayList", "arrayList");
+	}
+	
+	public void test112() throws Exception {
+		helper1(8, 20, 8, 37, true, false, "arrayList", "arrayList");
+	}
+	
+	public void test113() throws Exception {
+		helper1(12, 16, 12, 33, true, false, "arrayList2", "arrayList2");
+	}
 }
