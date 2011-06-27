@@ -221,18 +221,19 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 				if (methodBinding != null) {
 					ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
 					for (int j= 0; j < exceptionTypes.length; j++) {
-						if (isExitPoint(exceptionTypes[j])) { // a close() throws the caught exception
+						if (isExitPoint(exceptionTypes[j])) { // a close() throws an uncaught exception
 							// mark name of resource
 							for (VariableDeclarationFragment fragment : (List<VariableDeclarationFragment>) variable.fragments()) {
 								SimpleName name= fragment.getName();
 								fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fExitDescription));
 							}
 							if (!exitMarked) {
-								// mark exit position 
+								// mark exit position
 								exitMarked= true;
 								Block body= node.getBody();
 								int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
-								fResult.add(new OccurrenceLocation(offset, 1, 0, fExitDescription));
+								fResult.add(new OccurrenceLocation(offset, 1, 0, Messages.format(SearchMessages.MethodExitsFinder_occurrence_exit_impclict_close_description,
+										BasicElementLabels.getJavaElementName(fMethodDeclaration.getName().toString()))));
 							}
 						}
 					}

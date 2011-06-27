@@ -152,11 +152,12 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 								fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fDescription));
 							}
 							if (!exitMarked) {
-								// mark exit position 
+								// mark exit position
 								exitMarked= true;
 								Block body= fTryStatement.getBody();
 								int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
-								fResult.add(new OccurrenceLocation(offset, 1, 0, fDescription));
+								fResult.add(new OccurrenceLocation(offset, 1, 0, Messages.format(SearchMessages.ExceptionOccurrencesFinder_occurrence_implicit_close_description,
+										BasicElementLabels.getJavaElementName(fException.getName()))));
 							}
 						}
 					}
