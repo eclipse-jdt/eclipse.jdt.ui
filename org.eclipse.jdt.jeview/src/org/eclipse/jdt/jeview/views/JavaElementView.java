@@ -106,6 +106,8 @@ import org.eclipse.ui.views.properties.PropertySheetPage;
 import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IAnnotatable;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICodeAssist;
@@ -144,6 +146,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	private Action fFocusAction;
 	private Action fFindTypeAction;
 	private Action fResolveTypeAction;
+	private Action fGetAnnotationAction;
 	private Action fCreateFromBindingKeyAction;
 	private Action fResetAction;
 	private Action fCodeSelectAction;
@@ -404,6 +407,9 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					if (javaElement instanceof IType) {
 						manager.add(fResolveTypeAction);
 					}
+					if (javaElement instanceof IAnnotatable) {
+						manager.add(fGetAnnotationAction);
+					}
 				}
 			}
 		}
@@ -598,6 +604,29 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		};
 		fResolveTypeAction.setText("resolveType(String)...");
+		
+		fGetAnnotationAction= new Action() {
+			@Override public void run() {
+				Object selected= ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
+				final IAnnotatable annotatable= (IAnnotatable) ((JavaElement) selected).getJavaElement();
+				
+				InputDialog dialog= new InputDialog(getSite().getShell(), "IAnnotatable#getAnnotation(String name)", "name:", "", null);
+				if (dialog.open() != Window.OK)
+					return;
+				final String name= dialog.getValue();
+				
+				JavaElementChildrenProperty element= new JavaElementChildrenProperty(fInput, "'" + ((IJavaElement) annotatable).getElementName() + "'.getAnnotation(\"" + name +"\")") {
+					@Override protected JEAttribute[] computeChildren() throws Exception {
+						IAnnotation annotation= annotatable.getAnnotation(name);
+						return new JEAttribute[] { new JavaElement(this, annotation) };
+					}
+				};
+				fViewer.add(fInput, element);
+				fViewer.setSelection(new StructuredSelection(element));
+				fViewer.setExpandedState(element, true);
+			}
+		};
+		fGetAnnotationAction.setText("getAnnotation(String)...");
 		
 		fCreateFromBindingKeyAction= new Action("Create From &Binding Key...") {
 			@Override public void run() {
