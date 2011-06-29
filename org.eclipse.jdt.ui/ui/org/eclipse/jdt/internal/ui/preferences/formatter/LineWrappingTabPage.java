@@ -397,6 +397,29 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	    FormatterMessages.LineWrappingTabPage_compact_if_else
 	);
 
+	private final Category fTryCategory= new Category(
+			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_RESOURCES_IN_TRY,
+			"class Example {" + //$NON-NLS-1$
+			"void foo() {" + //$NON-NLS-1$
+			"try (FileReader reader1 = new FileReader(\"file1\"); " + //$NON-NLS-1$
+			"  FileReader reader2 = new FileReader(\"file2\")) {" + //$NON-NLS-1$
+			"}" + //$NON-NLS-1$
+			"}}", //$NON-NLS-1$
+			FormatterMessages.LineWrappingTabPage_try
+			);
+
+	private final Category fCatchCategory= new Category(
+			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_UNION_TYPE_IN_MULTICATCH,
+			"class Example {" + //$NON-NLS-1$
+			"void foo() {" + //$NON-NLS-1$
+			"try {" + //$NON-NLS-1$
+			"} catch (IllegalArgumentException | NullPointerException | ClassCastException e) {" + //$NON-NLS-1$
+			"  e.printStackTrace();" + //$NON-NLS-1$
+			"}" + //$NON-NLS-1$
+			"}}", //$NON-NLS-1$
+			FormatterMessages.LineWrappingTabPage_catch
+			);
+
 
 	private final Category fTypeDeclarationSuperclassCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERCLASS_IN_TYPE_DECLARATION,
@@ -663,6 +686,8 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 		final Category statements= new Category(FormatterMessages.LineWrappingTabPage_statements);
 		statements.children.add(fCompactIfCategory);
+		statements.children.add(fTryCategory);
+		statements.children.add(fCatchCategory);
 
 		final List<Category> root= new ArrayList<Category>();
 		root.add(annotations);
