@@ -1282,7 +1282,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getConvertToMultiCatchProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		if (!JavaModelUtil.is70OrHigher(context.getCompilationUnit().getJavaProject()))
+		if (!JavaModelUtil.is17OrHigher(context.getCompilationUnit().getJavaProject()))
 			return false;
 
 		if (!(covering instanceof CatchClause))
@@ -1353,7 +1353,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getUnrollMultiCatchProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		if (!JavaModelUtil.is70OrHigher(context.getCompilationUnit().getJavaProject()))
+		if (!JavaModelUtil.is17OrHigher(context.getCompilationUnit().getJavaProject()))
 			return false;
 
 		if (!(covering instanceof CatchClause))

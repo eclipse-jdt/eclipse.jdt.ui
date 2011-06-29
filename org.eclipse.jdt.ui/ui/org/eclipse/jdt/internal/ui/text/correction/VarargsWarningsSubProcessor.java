@@ -112,7 +112,7 @@ public class VarargsWarningsSubProcessor {
 	}
 
 	public static void addAddSafeVarargsToDeclarationProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		if (!JavaModelUtil.is70OrHigher(context.getCompilationUnit().getJavaProject()))
+		if (!JavaModelUtil.is17OrHigher(context.getCompilationUnit().getJavaProject()))
 			return;
 
 		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
