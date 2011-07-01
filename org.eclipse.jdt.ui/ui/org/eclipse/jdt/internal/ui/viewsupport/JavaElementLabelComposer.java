@@ -377,23 +377,34 @@ public class JavaElementLabelComposer {
 
 			// parameters
 			fBuffer.append('(');
+			String[] declaredParameterTypes= method.getParameterTypes();
 			if (getFlag(flags, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES)) {
 				String[] types= null;
 				int nParams= 0;
 				boolean renderVarargs= false;
+				boolean isPolymorphic= false;
 				if (getFlag(flags, JavaElementLabels.M_PARAMETER_TYPES)) {
 					if (resolvedSig != null) {
 						types= Signature.getParameterTypes(resolvedSig);
 					} else {
-						types= method.getParameterTypes();
+						types= declaredParameterTypes;
 					}
 					nParams= types.length;
 					renderVarargs= method.exists() && Flags.isVarargs(method.getFlags());
+					if (renderVarargs
+							&& resolvedSig != null
+							&& declaredParameterTypes.length == 1
+							&& method.getAnnotation("java.lang.invoke.MethodHandle$PolymorphicSignature").exists()) { //$NON-NLS-1$
+						renderVarargs= false;
+						isPolymorphic= true;
+					}
 				}
 				String[] names= null;
 				if (getFlag(flags, JavaElementLabels.M_PARAMETER_NAMES) && method.exists()) {
 					names= method.getParameterNames();
-					if (types == null) {
+					if (isPolymorphic) {
+						// handled specially below
+					} else	if (types == null) {
 						nParams= names.length;
 					} else { // types != null
 						if (nParams != names.length) {
@@ -433,11 +444,15 @@ public class JavaElementLabelComposer {
 						if (types != null) {
 							fBuffer.append(' ');
 						}
-						fBuffer.append(names[i]);
+						if (isPolymorphic) {
+							fBuffer.append(names[0] + i);
+						} else {
+							fBuffer.append(names[i]);
+						}
 					}
 				}
 			} else {
-				if (method.getParameterTypes().length > 0) {
+				if (declaredParameterTypes.length > 0) {
 					fBuffer.append(JavaElementLabels.ELLIPSIS_STRING);
 				}
 			}
