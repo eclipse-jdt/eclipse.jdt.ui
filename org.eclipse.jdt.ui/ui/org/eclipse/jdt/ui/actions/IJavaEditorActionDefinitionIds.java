@@ -227,6 +227,8 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	/**
 	 * Action definition ID of the source -> surround with try/multi-catch action (value
 	 * <code>"org.eclipse.jdt.ui.edit.text.java.surround.with.try.multicatch"</code>).
+	 * 
+	 * @since 3.7
 	 */
 	public static final String SURROUND_WITH_TRY_MULTI_CATCH= "org.eclipse.jdt.ui.edit.text.java.surround.with.try.multicatch"; //$NON-NLS-1$
 
