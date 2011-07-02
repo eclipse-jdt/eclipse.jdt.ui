@@ -139,4 +139,41 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
+
+	public void testReplaceReturnConditionWithIf4() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=112443
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Collections;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    List<String> foo(int a) {\n");
+		buf.append("        return a > 0 ? new ArrayList<>() : new ArrayList<>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("?");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Collections;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    List<String> foo(int a) {\n");
+		buf.append("        if (a > 0)\n");
+		buf.append("            return new ArrayList<>();\n");
+		buf.append("        else\n");
+		buf.append("            return new ArrayList<>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
 }

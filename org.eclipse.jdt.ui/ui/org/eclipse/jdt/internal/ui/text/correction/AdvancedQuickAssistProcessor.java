@@ -160,6 +160,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (coveringNode != null) {
 			ArrayList<ASTNode> coveredNodes= getFullyCoveredNodes(context, coveringNode);
 			ArrayList<ICommandAccess> resultingCollections= new ArrayList<ICommandAccess>();
+
+			//quick assists that show up also if there is an error/warning
+			getReplaceConditionalWithIfElseProposals(context, coveringNode, resultingCollections);
+
 			if (QuickAssistProcessor.noErrorsAtLocation(locations)) {
 				getInverseIfProposals(context, coveringNode, resultingCollections);
 				getIfReturnIntoIfElseAtEndOfVoidMethodProposals(context, coveringNode, resultingCollections);
@@ -179,7 +183,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getCastAndAssignIfStatementProposals(context, coveringNode, resultingCollections);
 				getPickOutStringProposals(context, coveringNode, resultingCollections);
 				getReplaceIfElseWithConditionalProposals(context, coveringNode, resultingCollections);
-				getReplaceConditionalWithIfElseProposals(context, coveringNode, resultingCollections);
 				getInverseLocalVariableProposals(context, coveringNode, resultingCollections);
 				getPushNegationDownProposals(context, coveringNode, resultingCollections);
 				getPullNegationUpProposals(context, coveredNodes, resultingCollections);
