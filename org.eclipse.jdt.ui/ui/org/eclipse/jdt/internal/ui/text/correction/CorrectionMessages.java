@@ -82,7 +82,8 @@ public final class CorrectionMessages extends NLS {
 	public static String ReorgCorrectionsSubProcessor_change_workspace_compliance_description;
 	public static String ReorgCorrectionsSubProcessor_addcp_variable_description;
 	public static String ReorgCorrectionsSubProcessor_addcp_library_description;
-	public static String LocalCorrectionsSubProcessor_surroundwith_description;
+	public static String LocalCorrectionsSubProcessor_surroundwith_trycatch_description;
+	public static String LocalCorrectionsSubProcessor_surroundwith_trymulticatch_description;
 	public static String LocalCorrectionsSubProcessor_add_missing_cases_description;
 	public static String LocalCorrectionsSubProcessor_addthrows_description;
 	public static String ClasspathFixProcessorDescriptor_error_processing_processors;

@@ -369,7 +369,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot, 3, 2); //quick fix on 3rd problem
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 
@@ -451,7 +451,34 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
+		proposal= (CUCorrectionProposal)proposals.get(3);
+		String preview4= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.FileInputStream;\n");
+		buf.append("class MyException extends Exception {\n");
+		buf.append("    static final long serialVersionUID = 1L;\n");
+		buf.append("}\n");
+		buf.append("public class E {\n");
+		buf.append("    void bar(int n) throws IllegalArgumentException, MyException {\n");
+		buf.append("        if (n == 1)\n");
+		buf.append("            throw new IllegalArgumentException();\n");
+		buf.append("        else\n");
+		buf.append("            throw new MyException();\n");
+		buf.append("    }\n");
+		buf.append("    void foo(String name, boolean b) {\n");
+		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
+		buf.append("            try {\n");
+		buf.append("                bar(1);\n");
+		buf.append("            } catch (IllegalArgumentException | MyException e) {\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected4= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
 	}
 
 	public void testUnneededCatchBlockTryWithResources() throws Exception {

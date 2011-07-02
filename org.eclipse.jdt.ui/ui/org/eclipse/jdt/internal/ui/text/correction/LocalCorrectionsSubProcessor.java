@@ -204,11 +204,26 @@ public class LocalCorrectionsSubProcessor {
 
 		refactoring.setLeaveDirty(true);
 		if (refactoring.checkActivationBasics(astRoot).isOK()) {
-			String label= CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_description;
+			String label= CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_trycatch_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, (CompilationUnitChange) refactoring.createChange(null), 6, image);
 			proposal.setLinkedProposalModel(refactoring.getLinkedProposalModel());
 			proposals.add(proposal);
+		}
+
+		if (JavaModelUtil.is17OrHigher(cu.getJavaProject())) {
+			refactoring= SurroundWithTryCatchRefactoring.create(cu, offset, length, true);
+			if (refactoring == null)
+				return;
+
+			refactoring.setLeaveDirty(true);
+			if (refactoring.checkActivationBasics(astRoot).isOK()) {
+				String label= CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_trymulticatch_description;
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
+				CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, (CompilationUnitChange) refactoring.createChange(null), 6, image);
+				proposal.setLinkedProposalModel(refactoring.getLinkedProposalModel());
+				proposals.add(proposal);
+			}
 		}
 
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);

@@ -2323,6 +2323,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String SurroundWithTryCatchRefactoring_name;
 
+	public static String SurroundWithTryCatchRefactoring_notMultipleexceptions;
+
 	public static String TargetProvider_cannot_local_method_in_binary;
 
 	public static String TargetProvider_inaccurate_match;

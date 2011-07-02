@@ -160,6 +160,10 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		fAnalyzer= new SurroundWithTryCatchAnalyzer(fCUnit, fSelection);
 		fRootNode.accept(fAnalyzer);
 		result.merge(fAnalyzer.getStatus());
+		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
+		if (fIsMultiCatch && (exceptions == null || exceptions.length <= 1)) {
+			result.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.SurroundWithTryCatchRefactoring_notMultipleexceptions));
+		}
 		return result;
 	}
 
