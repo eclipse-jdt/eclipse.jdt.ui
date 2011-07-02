@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -46,6 +50,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -71,7 +76,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
- * Surround a set of statements with a try/catch block.
+ * Surround a set of statements with a try/catch block or a try/multi-catch block.
  *
  * Special case:
  *
@@ -100,18 +105,29 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 
 	private LinkedProposalModel fLinkedProposalModel;
 
-	private SurroundWithTryCatchRefactoring(ICompilationUnit cu, Selection selection) {
+	private final boolean fIsMultiCatch;
+
+	private SurroundWithTryCatchRefactoring(ICompilationUnit cu, Selection selection, boolean isMultiCatch) {
 		fCUnit= cu;
 		fSelection= selection;
+		fIsMultiCatch= isMultiCatch;
 		fLeaveDirty= false;
 	}
 
 	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, ITextSelection selection) {
-		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(selection.getOffset(), selection.getLength()));
+		return create(cu, selection, false);
 	}
 
 	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, int offset, int length) {
-		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(offset, length));
+		return create(cu, offset, length, false);
+	}
+
+	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, ITextSelection selection, boolean isMultiCatch) {
+		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(selection.getOffset(), selection.getLength()), isMultiCatch);
+	}
+
+	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, int offset, int length, boolean isMultiCatch) {
+		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(offset, length), isMultiCatch);
 	}
 
 	public LinkedProposalModel getLinkedProposalModel() {
@@ -219,24 +235,51 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		TryStatement tryStatement= getAST().newTryStatement();
 		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fAnalyzer.getEnclosingBodyDeclaration(), fImportRewrite);
-		for (int i= 0; i < exceptions.length; i++) {
-			ITypeBinding exception= exceptions[i];
-			String type= fImportRewrite.addImport(exception, context);
+
+		if (!fIsMultiCatch) {
+			for (int i= 0; i < exceptions.length; i++) {
+				ITypeBinding exception= exceptions[i];
+				String type= fImportRewrite.addImport(exception, context);
+				CatchClause catchClause= getAST().newCatchClause();
+				tryStatement.catchClauses().add(catchClause);
+				SingleVariableDeclaration decl= getAST().newSingleVariableDeclaration();
+				String varName= StubUtility.getExceptionVariableName(fCUnit.getJavaProject());
+
+				String name= fScope.createName(varName, false);
+				decl.setName(getAST().newSimpleName(name));
+				decl.setType(ASTNodeFactory.newType(getAST(), type));
+				catchClause.setException(decl);
+				Statement st= getCatchBody(type, name, lineDelimiter);
+				if (st != null) {
+					catchClause.getBody().statements().add(st);
+				}
+				fLinkedProposalModel.getPositionGroup(GROUP_EXC_TYPE + i, true).addPosition(fRewriter.track(decl.getType()), i == 0);
+				fLinkedProposalModel.getPositionGroup(GROUP_EXC_NAME + i, true).addPosition(fRewriter.track(decl.getName()), false);
+			}
+		} else {
 			CatchClause catchClause= getAST().newCatchClause();
-			tryStatement.catchClauses().add(catchClause);
 			SingleVariableDeclaration decl= getAST().newSingleVariableDeclaration();
 			String varName= StubUtility.getExceptionVariableName(fCUnit.getJavaProject());
-
 			String name= fScope.createName(varName, false);
 			decl.setName(getAST().newSimpleName(name));
-			decl.setType(ASTNodeFactory.newType(getAST(), type));
+
+			UnionType unionType= getAST().newUnionType();
+			List<Type> types= unionType.types();
+			for (int i= 0; i < exceptions.length; i++) {
+				ITypeBinding exception= exceptions[i];
+				Type type= fImportRewrite.addImport(exception, getAST(), context);
+				types.add(type);
+				fLinkedProposalModel.getPositionGroup(GROUP_EXC_TYPE + i, true).addPosition(fRewriter.track(type), i == 0);
+			}
+
+			decl.setType(unionType);
 			catchClause.setException(decl);
-			Statement st= getCatchBody(type, name, lineDelimiter);
+			fLinkedProposalModel.getPositionGroup(GROUP_EXC_NAME + 0, true).addPosition(fRewriter.track(decl.getName()), false);
+			Statement st= getCatchBody("Exception", varName, lineDelimiter); //$NON-NLS-1$
 			if (st != null) {
 				catchClause.getBody().statements().add(st);
 			}
-			fLinkedProposalModel.getPositionGroup(GROUP_EXC_TYPE + i, true).addPosition(fRewriter.track(decl.getType()), i == 0);
-			fLinkedProposalModel.getPositionGroup(GROUP_EXC_NAME + i, true).addPosition(fRewriter.track(decl.getName()), false);
+			tryStatement.catchClauses().add(catchClause);
 		}
 		List<ASTNode> variableDeclarations= getSpecialVariableDeclarationStatements();
 		ListRewrite statements= fRewriter.getListRewrite(tryStatement.getBody(), Block.STATEMENTS_PROPERTY);

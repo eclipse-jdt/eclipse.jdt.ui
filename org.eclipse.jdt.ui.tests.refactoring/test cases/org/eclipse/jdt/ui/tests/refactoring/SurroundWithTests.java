@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,11 +51,15 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 
 	protected void performTest(IPackageFragment packageFragment, String name, String outputFolder, int mode) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, name);
-		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(unit, getTextSelection());
+		SurroundWithTryCatchRefactoring refactoring= createRefactoring(unit);
 		String out= null;
 		if (mode == COMPARE_WITH_OUTPUT)
 			out= getProofedContent(outputFolder, name);
 		performTest(unit, refactoring, mode, out, true);
+	}
+
+	protected SurroundWithTryCatchRefactoring createRefactoring(ICompilationUnit unit) {
+		return SurroundWithTryCatchRefactoring.create(unit, getTextSelection());
 	}
 
 	protected void tryCatchInvalidTest() throws Exception {

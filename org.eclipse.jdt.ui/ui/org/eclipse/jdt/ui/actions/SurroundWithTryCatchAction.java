@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids - Fixed bug 25898
@@ -81,7 +85,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		ICompilationUnit cu= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		if (cu == null || !ElementValidator.checkValidateEdit(cu, getShell(), getDialogTitle()))
 			return;
-		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(cu, selection);
+		SurroundWithTryCatchRefactoring refactoring= createRefactoring(selection, cu);
 
 		if (refactoring == null)
 			return;
@@ -120,12 +124,16 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		}
 	}
 
+	SurroundWithTryCatchRefactoring createRefactoring(ITextSelection selection, ICompilationUnit cu) {
+		return SurroundWithTryCatchRefactoring.create(cu, selection);
+	}
+
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(selection.getLength() > 0 && (fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null));
 	}
 
-	private static String getDialogTitle() {
+	String getDialogTitle() {
 		return RefactoringMessages.SurroundWithTryCatchAction_dialog_title;
 	}
 }
