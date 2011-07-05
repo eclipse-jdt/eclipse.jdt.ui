@@ -79,4 +79,14 @@ public class SurroundWithTryMultiCatchAction extends SurroundWithTryCatchAction 
 	String getDialogTitle() {
 		return RefactoringMessages.SurroundWithTryMultiCatchAction_dialog_title;
 	}
+
+	@Override
+	public boolean isEnabled() {
+		ICompilationUnit compilationUnit= SelectionConverter.getInputAsCompilationUnit(fEditor);
+		IJavaProject javaProject= compilationUnit.getJavaProject();
+		if (!JavaModelUtil.is17OrHigher(javaProject))
+			return false;
+		return super.isEnabled();
+	}
+
 }
