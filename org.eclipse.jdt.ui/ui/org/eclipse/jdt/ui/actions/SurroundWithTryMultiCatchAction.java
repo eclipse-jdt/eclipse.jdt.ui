@@ -44,8 +44,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  */
 public class SurroundWithTryMultiCatchAction extends SurroundWithTryCatchAction {
 
-	private CompilationUnitEditor fEditor;
-
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the compilation unit editor
@@ -55,7 +53,6 @@ public class SurroundWithTryMultiCatchAction extends SurroundWithTryCatchAction 
 	public SurroundWithTryMultiCatchAction(CompilationUnitEditor editor) {
 		super(editor);
 		setText(RefactoringMessages.SurroundWithTryMultiCatchAction_label);
-		fEditor= editor;
 	}
 
 	@Override
@@ -81,12 +78,13 @@ public class SurroundWithTryMultiCatchAction extends SurroundWithTryCatchAction 
 	}
 
 	@Override
-	public boolean isEnabled() {
+	boolean isApplicable() {
+		if (!super.isApplicable())
+			return false;
+		
 		ICompilationUnit compilationUnit= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		IJavaProject javaProject= compilationUnit.getJavaProject();
-		if (!JavaModelUtil.is17OrHigher(javaProject))
-			return false;
-		return super.isEnabled();
+		return JavaModelUtil.is17OrHigher(javaProject);
 	}
 
 }
