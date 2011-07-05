@@ -220,7 +220,7 @@ public class LocalCorrectionsSubProcessor {
 			if (refactoring.checkActivationBasics(astRoot).isOK()) {
 				String label= CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_trymulticatch_description;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-				CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, (CompilationUnitChange) refactoring.createChange(null), 6, image);
+				CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, (CompilationUnitChange) refactoring.createChange(null), 7, image);
 				proposal.setLinkedProposalModel(refactoring.getLinkedProposalModel());
 				proposals.add(proposal);
 			}
