@@ -45,6 +45,8 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 
 public class AssistQuickFixTest17 extends QuickFixTest {
 
+	private static final String REMOVE_CATCH_CLAUSE= "Remove catch clause";
+	private static final String REPLACE_CATCH_CLAUSE_WITH_THROWS= "Replace catch clause with throws";
 	private static final String REMOVE_SURROUNDING_TRY_BLOCK= "Remove surrounding 'try' block";
 	private static final String CONVERT_TO_A_SINGLE_MULTI_CATCH_BLOCK= "Convert to a single multi-catch block";
 	private static final String CONVERT_TO_SEPARATE_CATCH_BLOCKS= "Convert to separate catch blocks";
@@ -496,7 +498,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CONVERT_TO_SEPARATE_CATCH_BLOCKS);
 	}
 
-	public void testReplaceMultiCatchClauseWithThrows() throws Exception {
+	public void testReplaceMultiCatchClauseWithThrows1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -510,8 +512,8 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		String str= "catch";
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		int offset= buf.toString().indexOf("catch");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
@@ -555,13 +557,323 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		buf.append("    class Inner extends IllegalArgumentException { }\n"); // yes, that's a compile error
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-	
+
 		int offset= buf.toString().indexOf("Inner");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		//assertNoErrors(context);
 		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertProposalDoesNotExist(proposals, REMOVE_CATCH_CLAUSE);
+		assertProposalDoesNotExist(proposals, REPLACE_CATCH_CLAUSE_WITH_THROWS);
+	}
+
+	public void testReplaceMultiCatchClauseWithThrows3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            goo();\n");
+		buf.append("        } catch (IllegalArgumentException | NullPointerException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("IllegalArgumentException");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            goo();\n");
+		buf.append("        } catch (NullPointerException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() throws IllegalArgumentException {\n");
+		buf.append("        try {\n");
+		buf.append("            goo();\n");
+		buf.append("        } catch (NullPointerException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            goo();\n");
+		buf.append("        } catch (NullPointerException e) {\n");
+		buf.append("        } catch (IllegalArgumentException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
+	}
+	
+	public void testReplaceMultiCatchClauseWithThrows4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.reflect.InvocationTargetException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            String.class.getConstructor().newInstance();\n");
+		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
+		buf.append("                | IllegalArgumentException | InvocationTargetException\n");
+		buf.append("                | NoSuchMethodException | SecurityException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("IllegalArgumentException");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.reflect.InvocationTargetException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            String.class.getConstructor().newInstance();\n");
+		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
+		buf.append("                | InvocationTargetException\n");
+		buf.append("                | NoSuchMethodException | SecurityException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.reflect.InvocationTargetException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() throws IllegalArgumentException {\n");
+		buf.append("        try {\n");
+		buf.append("            String.class.getConstructor().newInstance();\n");
+		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
+		buf.append("                | InvocationTargetException\n");
+		buf.append("                | NoSuchMethodException | SecurityException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.reflect.InvocationTargetException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            String.class.getConstructor().newInstance();\n");
+		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
+		buf.append("                | InvocationTargetException\n");
+		buf.append("                | NoSuchMethodException | SecurityException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        } catch (IllegalArgumentException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
+	}
+
+	public void testPickoutTypeFromMulticatch1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.reflect.InvocationTargetException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            String.class.getConstructor().newInstance();\n");
+		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
+		buf.append("                | IllegalArgumentException | InvocationTargetException\n");
+		buf.append("                | NoSuchMethodException | SecurityException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String string= "IllegalArgumentException | InvocationTargetException";
+		int offset= buf.toString().indexOf(string);
+		int length= string.length();
+		AssistContext context= getCorrectionContext(cu, offset, length);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 5);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.reflect.InvocationTargetException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String.class.getConstructor().newInstance();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.reflect.InvocationTargetException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {\n");
+		buf.append("        String.class.getConstructor().newInstance();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.reflect.InvocationTargetException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            String.class.getConstructor().newInstance();\n");
+		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
+		buf.append("                | NoSuchMethodException | SecurityException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        } catch (IllegalArgumentException | InvocationTargetException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
 		
-		assertProposalDoesNotExist(proposals, CONVERT_TO_SEPARATE_CATCH_BLOCKS);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.reflect.InvocationTargetException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            String.class.getConstructor().newInstance();\n");
+		buf.append("        } catch (InstantiationException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        } catch (IllegalAccessException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        } catch (IllegalArgumentException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        } catch (InvocationTargetException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        } catch (NoSuchMethodException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        } catch (SecurityException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected4= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4 });
+	}
+
+	public void testPickoutTypeFromMulticatch2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.reflect.InvocationTargetException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            String.class.getConstructor().newInstance();\n");
+		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
+		buf.append("                | IllegalArgumentException | InvocationTargetException\n");
+		buf.append("                | java.lang.NoSuchMethodException | SecurityException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String string= "MethodException";
+		int offset= buf.toString().indexOf(string);
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.reflect.InvocationTargetException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            String.class.getConstructor().newInstance();\n");
+		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
+		buf.append("                | IllegalArgumentException | InvocationTargetException\n");
+		buf.append("                | SecurityException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.reflect.InvocationTargetException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() throws java.lang.NoSuchMethodException {\n");
+		buf.append("        try {\n");
+		buf.append("            String.class.getConstructor().newInstance();\n");
+		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
+		buf.append("                | IllegalArgumentException | InvocationTargetException\n");
+		buf.append("                | SecurityException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.reflect.InvocationTargetException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            String.class.getConstructor().newInstance();\n");
+		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
+		buf.append("                | IllegalArgumentException | InvocationTargetException\n");
+		buf.append("                | SecurityException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        } catch (java.lang.NoSuchMethodException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
 	}
 
 	public void testSplitDeclaration1() throws Exception {

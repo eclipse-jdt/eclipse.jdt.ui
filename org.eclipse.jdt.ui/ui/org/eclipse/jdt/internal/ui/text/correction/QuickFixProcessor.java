@@ -65,6 +65,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnhandledExceptionOnAutoClose:
 			case IProblem.UnreachableCatch:
 			case IProblem.InvalidCatchBlockSequence:
+			case IProblem.InvalidUnionTypeReferenceSequence:
 			case IProblem.VoidMethodReturnsValue:
 			case IProblem.ShouldReturnValue:
 			case IProblem.MissingReturnType:
@@ -345,6 +346,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.UnreachableCatch:
 			case IProblem.InvalidCatchBlockSequence:
+			case IProblem.InvalidUnionTypeReferenceSequence:
 				LocalCorrectionsSubProcessor.addUnreachableCatchProposals(context, problem, proposals);
 				break;
 			case IProblem.RedundantSuperinterface:

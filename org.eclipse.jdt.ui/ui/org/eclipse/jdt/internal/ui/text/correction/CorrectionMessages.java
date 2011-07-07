@@ -48,6 +48,7 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_convert_to_multiple_singletype_catch_blocks;
 	public static String QuickAssistProcessor_convert_to_single_multicatch_block;
 	public static String QuickAssistProcessor_convert_to_string_buffer_description;
+	public static String QuickAssistProcessor_exceptiontothrows_description;
 	public static String QuickAssistProcessor_extract_to_constant_description;
 	public static String QuickAssistProcessor_inline_local_description;
 	public static String QuickAssistProcessor_name_extension_from_class;
@@ -88,6 +89,8 @@ public final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_addthrows_description;
 	public static String ClasspathFixProcessorDescriptor_error_processing_processors;
 	public static String LocalCorrectionsSubProcessor_addadditionalcatch_description;
+	public static String LocalCorrectionsSubProcessor_addadditionalmulticatch_description;
+	public static String LocalCorrectionsSubProcessor_addexceptiontoexistingcatch_description;
 	public static String LocalCorrectionsSubProcessor_unnecessaryinstanceof_description;
 	public static String LocalCorrectionsSubProcessor_unnecessarythrow_description;
 	public static String LocalCorrectionsSubProcessor_classtointerface_description;
@@ -242,6 +245,7 @@ public final class CorrectionMessages extends NLS {
 	public static String AssignToVariableAssistProposal_assignparamtofield_description;
 	public static String QuickAssistProcessor_catchclausetothrows_description;
 	public static String QuickAssistProcessor_removecatchclause_description;
+	public static String QuickAssistProcessor_removeexception_description;
 	public static String QuickAssistProcessor_unwrap_ifstatement;
 	public static String QuickAssistProcessor_unwrap_whilestatement;
 	public static String QuickAssistProcessor_unwrap_forstatement;
@@ -342,6 +346,8 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_extract_to_local_all_description;
 	public static String QuickAssistProcessor_extract_to_local_description;
 	public static String QuickAssistProcessor_extractmethod_description;
+	public static String QuickAssistProcessor_move_exception_to_separate_catch_block;
+	public static String QuickAssistProcessor_move_exceptions_to_separate_catch_block;
 	public static String SuppressWarningsSubProcessor_suppress_warnings_label;
 	public static String ReorgCorrectionsSubProcessor_accessrules_description;
 	public static String ReorgCorrectionsSubProcessor_project_seup_fix_description;
