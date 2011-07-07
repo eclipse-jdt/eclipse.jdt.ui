@@ -227,6 +227,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.BinaryLiteralNotBelow17:
 			case IProblem.UnderscoresInLiteralsNotBelow17:
 			case IProblem.SwitchOnStringsNotBelow17:
+			case IProblem.DiamondNotBelow17:
 			case IProblem.PotentialHeapPollutionFromVararg :
 			case IProblem.UnsafeGenericArrayForVarargs:
 			case IProblem.SafeVarargsOnFixedArityMethod :
@@ -576,6 +577,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.BinaryLiteralNotBelow17:
 			case IProblem.UnderscoresInLiteralsNotBelow17:
 			case IProblem.SwitchOnStringsNotBelow17:
+			case IProblem.DiamondNotBelow17:
 				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_1_7);
 				break;
 			case IProblem.NonGenericType:
