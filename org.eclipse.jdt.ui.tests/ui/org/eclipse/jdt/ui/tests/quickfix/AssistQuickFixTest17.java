@@ -48,8 +48,8 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 	private static final String REMOVE_CATCH_CLAUSE= "Remove catch clause";
 	private static final String REPLACE_CATCH_CLAUSE_WITH_THROWS= "Replace catch clause with throws";
 	private static final String REMOVE_SURROUNDING_TRY_BLOCK= "Remove surrounding 'try' block";
-	private static final String CONVERT_TO_A_SINGLE_MULTI_CATCH_BLOCK= "Convert to a single multi-catch block";
-	private static final String CONVERT_TO_SEPARATE_CATCH_BLOCKS= "Convert to separate catch blocks";
+	private static final String CONVERT_TO_A_SINGLE_MULTI_CATCH_BLOCK= "Combine catch blocks";
+	private static final String CONVERT_TO_SEPARATE_CATCH_BLOCKS= "Use separate catch blocks";
 
 	private static final Class THIS= AssistQuickFixTest17.class;
 
