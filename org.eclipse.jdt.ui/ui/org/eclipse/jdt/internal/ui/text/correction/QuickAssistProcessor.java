@@ -1374,13 +1374,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		newSingleVariableDeclaration.setName((SimpleName) rewrite.createCopyTarget(catchClause.getException().getName()));
 		newCatchClause.setException(newSingleVariableDeclaration);
 
-//		newCatchClause.setBody((Block) rewrite.createCopyTarget(catchClause.getBody()));
-
-		//newCatchClause#setBody() destroys the formatting, hence copy statement by statement. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=350285
-		List<Statement> statements= catchClause.getBody().statements();
-		for (Iterator<Statement> iterator2= statements.iterator(); iterator2.hasNext();) {
-			newCatchClause.getBody().statements().add(rewrite.createCopyTarget(iterator2.next()));
-		}
+		setCatchClauseBody(newCatchClause, rewrite, catchClause);
 
 		TryStatement tryStatement= (TryStatement)catchClause.getParent();
 		ListRewrite listRewrite= rewrite.getListRewrite(tryStatement, TryStatement.CATCH_CLAUSES_PROPERTY);
@@ -1536,14 +1530,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			newSingleVariableDeclaration.setType((Type) rewrite.createCopyTarget(type2));
 			newSingleVariableDeclaration.setName((SimpleName) rewrite.createCopyTarget(singleVariableDeclaration.getName()));
 			newCatchClause.setException(newSingleVariableDeclaration);
-
-//			newCatchClause.setBody((Block) rewrite.createCopyTarget(catchClause.getBody()));
-
-			//newCatchClause#setBody() destroys the formatting, hence copy statement by statement. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=350285
-			List<Statement> statements= catchClause.getBody().statements();
-			for (Iterator<Statement> iterator2= statements.iterator(); iterator2.hasNext();) {
-				newCatchClause.getBody().statements().add(rewrite.createCopyTarget(iterator2.next()));
-			}
+			setCatchClauseBody(newCatchClause, rewrite, catchClause);
 			listRewrite.insertAfter(newCatchClause, catchClause, null);
 		}
 		rewrite.remove(catchClause, null);
@@ -1553,6 +1540,18 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 2, image);
 		resultingCollections.add(proposal);
 		return true;
+	}
+
+	private static void setCatchClauseBody(CatchClause newCatchClause, ASTRewrite rewrite, CatchClause catchClause) {
+		// Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=350285
+		
+//		newCatchClause.setBody((Block) rewrite.createCopyTarget(catchClause.getBody()));
+		
+		//newCatchClause#setBody() destroys the formatting, hence copy statement by statement.
+		List<Statement> statements= catchClause.getBody().statements();
+		for (Iterator<Statement> iterator2= statements.iterator(); iterator2.hasNext();) {
+			newCatchClause.getBody().statements().add(rewrite.createCopyTarget(iterator2.next()));
+		}
 	}
 
 	private static boolean getRenameLocalProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
