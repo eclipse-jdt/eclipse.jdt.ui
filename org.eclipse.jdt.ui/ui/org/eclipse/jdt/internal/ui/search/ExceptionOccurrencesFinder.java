@@ -131,13 +131,28 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 
 	private void performSearch() {
 		fStart.accept(this);
-		if (fTryStatement != null && fTryStatement.getAST().apiLevel() >= AST.JLS4) {
-			List<VariableDeclarationExpression> resources= fTryStatement.resources();
+		if (fTryStatement != null) {
+			visitResourceDeclarations(fTryStatement);
+			handleImplicitResourceClosure(fTryStatement);
+		}
+		if (fSelectedName != null) {
+			fResult.add(new OccurrenceLocation(fSelectedName.getStartPosition(), fSelectedName.getLength(), F_EXCEPTION_DECLARATION, fDescription));
+		}
+	}
+
+	private void visitResourceDeclarations(TryStatement tryStatement) {
+		if (tryStatement.getAST().apiLevel() >= AST.JLS4) {
+			List<VariableDeclarationExpression> resources= tryStatement.resources();
 			for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
 				iterator.next().accept(this);
 			}
+		}
+	}
 
-			//check if the exception is thrown as a result of resource#close()
+	private void handleImplicitResourceClosure(TryStatement tryStatement) {
+		//check if the exception is thrown as a result of resource#close()
+		if (tryStatement.getAST().apiLevel() >= AST.JLS4) {
+			List<VariableDeclarationExpression> resources= tryStatement.resources();
 			boolean exitMarked= false;
 			for (VariableDeclarationExpression variable : resources) {
 				Type type= variable.getType();
@@ -154,7 +169,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 							if (!exitMarked) {
 								// mark exit position
 								exitMarked= true;
-								Block body= fTryStatement.getBody();
+								Block body= tryStatement.getBody();
 								int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
 								fResult.add(new OccurrenceLocation(offset, 1, 0, Messages.format(SearchMessages.ExceptionOccurrencesFinder_occurrence_implicit_close_description,
 										BasicElementLabels.getJavaElementName(fException.getName()))));
@@ -163,9 +178,6 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 					}
 				}
 			}
-		}
-		if (fSelectedName != null) {
-			fResult.add(new OccurrenceLocation(fSelectedName.getStartPosition(), fSelectedName.getLength(), F_EXCEPTION_DECLARATION, fDescription));
 		}
 	}
 
@@ -270,6 +282,12 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			// mark 'throw'
 			fResult.add(new OccurrenceLocation(node.getStartPosition(), 5, 0, fDescription));
 		}
+		return super.visit(node);
+	}
+
+	@Override
+	public boolean visit(TryStatement node) {
+		handleImplicitResourceClosure(node);
 		return super.visit(node);
 	}
 

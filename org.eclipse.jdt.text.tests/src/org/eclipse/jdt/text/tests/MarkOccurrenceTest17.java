@@ -309,7 +309,7 @@ public class MarkOccurrenceTest17 extends TestCase {
 		s.append("class ACloseable implements AutoCloseable {\n");
 		s.append("    @Override\n");
 		s.append("    public void close() { }\n");
-		s.append("}\n");		
+		s.append("}\n");
 		int offset= 1 + s.indexOf("void");//middle of word
 		int length= 0;
 		OccurrenceLocation[] ranges= { find(s, "void", 1), find(s, "reader", 1), find(s, "FileReader", 3), find(s, "read", 3), find(s, "}", 2), find(s, "}", 3) };
@@ -444,6 +444,33 @@ public class MarkOccurrenceTest17 extends TestCase {
 		int length= 0;
 		OccurrenceLocation[] ranges= { find(s, "IOException", 2), find(s, "FileReader", 3), find(s, "FileReader", 5), find(s, "FileReader", 7), find(s, "read", 5),
 				find(s, "}", 2), find(s, "reader1", 1), find(s, "reader2", 1), find(s, "reader3", 1) };
+		checkSelection(s, offset, length, ranges);
+	}
+
+	public void testThrowingException6() throws Exception {
+		fFinder= new ExceptionOccurrencesFinder();
+		StringBuffer s= new StringBuffer();
+		s.append("import java.io.FileReader;\n");
+		s.append("class A {\n");
+		s.append("   void foo() throws Throwable {\n");
+		s.append("      try (FileReader reader1 = new FileReader(\"file1\");\n");
+		s.append("      FileReader reader2 = new FileReader(\"file2\");\n");
+		s.append("      FileReader reader3 = new FileReader(\"file3\")) {\n");
+		s.append("         int ch;\n");
+		s.append("         while ((ch = reader1.read()) != -1) {\n");
+		s.append("            System.out.println(ch);\n");
+		s.append("         }\n");
+		s.append("      }\n");
+		s.append("   }\n");
+		s.append("}\n");
+
+		int offset= 1 + s.indexOf("Throwable");//middle of word
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "Throwable", 1),
+				find(s, "reader1", 1), find(s, "FileReader", 3),
+				find(s, "reader2", 1), find(s, "FileReader", 5),
+				find(s, "reader3", 1), find(s, "FileReader", 7),
+				find(s, "read", 5), find(s, "}", 2) };
 		checkSelection(s, offset, length, ranges);
 	}
 }
