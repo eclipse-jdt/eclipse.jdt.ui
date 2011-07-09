@@ -581,6 +581,108 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });
 	}
 
+	public void testUncaughtExceptionTryWithResources4() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=351464
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.FileInputStream;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("class MyException extends Exception {\n");
+		buf.append("    static final long serialVersionUID = 1L;\n");
+		buf.append("}\n");
+		buf.append("public class E {\n");
+		buf.append("    void bar() throws MyException {\n");
+		buf.append("        throw new MyException();\n");
+		buf.append("    }\n");
+		buf.append("    void foo(String name, boolean b) throws IOException {\n");
+		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
+		buf.append("            bar();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.FileInputStream;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("class MyException extends Exception {\n");
+		buf.append("    static final long serialVersionUID = 1L;\n");
+		buf.append("}\n");
+		buf.append("public class E {\n");
+		buf.append("    void bar() throws MyException {\n");
+		buf.append("        throw new MyException();\n");
+		buf.append("    }\n");
+		buf.append("    void foo(String name, boolean b) throws IOException, MyException {\n");
+		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
+		buf.append("            bar();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.FileInputStream;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("class MyException extends Exception {\n");
+		buf.append("    static final long serialVersionUID = 1L;\n");
+		buf.append("}\n");
+		buf.append("public class E {\n");
+		buf.append("    void bar() throws MyException {\n");
+		buf.append("        throw new MyException();\n");
+		buf.append("    }\n");
+		buf.append("    void foo(String name, boolean b) throws IOException {\n");
+		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
+		buf.append("            bar();\n");
+		buf.append("        } catch (MyException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		proposal= (CUCorrectionProposal)proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.FileInputStream;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("class MyException extends Exception {\n");
+		buf.append("    static final long serialVersionUID = 1L;\n");
+		buf.append("}\n");
+		buf.append("public class E {\n");
+		buf.append("    void bar() throws MyException {\n");
+		buf.append("        throw new MyException();\n");
+		buf.append("    }\n");
+		buf.append("    void foo(String name, boolean b) throws IOException {\n");
+		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
+		buf.append("            try {\n");
+		buf.append("                bar();\n");
+		buf.append("            } catch (MyException e) {\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
+	}
+
 	public void testUnneededCaughtException1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

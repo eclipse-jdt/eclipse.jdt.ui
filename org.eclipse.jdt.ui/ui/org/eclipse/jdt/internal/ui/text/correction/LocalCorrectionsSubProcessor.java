@@ -319,7 +319,7 @@ public class LocalCorrectionsSubProcessor {
 						rewrite.replace(type, newUnionType, null);
 					}
 					proposals.add(proposal);
-				} else if (catchClauses != null && catchClauses.size() == 0) {
+				} else if (catchClauses != null && catchClauses.size() == 0 && uncaughtExceptions.length > 1) {
 					String label= CorrectionMessages.LocalCorrectionsSubProcessor_addadditionalmulticatch_description;
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 					ASTRewrite rewrite= ASTRewrite.create(ast);
