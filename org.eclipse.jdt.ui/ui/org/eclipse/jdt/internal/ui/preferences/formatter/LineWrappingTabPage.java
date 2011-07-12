@@ -767,6 +767,17 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		layoutData.grabExcessHorizontalSpace= false;
 		fBinaryExpressionCategory.addPreference(expressionWrapPositionPreference);
 		
+		// button "Wrap before '|' operator" in multi-catch
+		Preference expressionWrapMulticatchPositionPreference= createCheckboxPref(fOptionsGroup, 1, FormatterMessages.LineWrappingTabPage_multicatch_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_OR_OPERATOR_MULTICATCH, FALSE_TRUE);
+		control= expressionWrapMulticatchPositionPreference.getControl();
+		control.setVisible(false);
+		layoutData= (GridData)control.getLayoutData();
+		layoutData.exclude= true;
+		layoutData.horizontalAlignment= SWT.BEGINNING;
+		layoutData.horizontalSpan= numColumns - 1;
+		layoutData.grabExcessHorizontalSpace= false;
+		fCatchCategory.addPreference(expressionWrapMulticatchPositionPreference);
+		
 		// label "Select indentation style:"
 		fIndentStylePolicy= createLabel(numColumns, fOptionsGroup, FormatterMessages.LineWrappingTabPage_indentation_policy_label_text);
 
