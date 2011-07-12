@@ -571,13 +571,15 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.InvalidUsageOfAnnotationDeclarations:
 				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_1_5);
 				break;
+			case IProblem.DiamondNotBelow17:
+				TypeArgumentMismatchSubProcessor.getInferDiamondArgumentsProposal(context, problem, proposals);
+				//$FALL-THROUGH$
 			case IProblem.AutoManagedResourceNotBelow17:
 			case IProblem.MultiCatchNotBelow17:
 			case IProblem.PolymorphicMethodNotBelow17:
 			case IProblem.BinaryLiteralNotBelow17:
 			case IProblem.UnderscoresInLiteralsNotBelow17:
 			case IProblem.SwitchOnStringsNotBelow17:
-			case IProblem.DiamondNotBelow17:
 				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_1_7);
 				break;
 			case IProblem.NonGenericType:

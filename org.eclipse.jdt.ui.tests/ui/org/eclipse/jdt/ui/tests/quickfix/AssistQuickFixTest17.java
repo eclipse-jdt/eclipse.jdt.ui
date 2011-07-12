@@ -42,6 +42,7 @@ import org.eclipse.jdt.ui.tests.core.Java17ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 
 public class AssistQuickFixTest17 extends QuickFixTest {
 
@@ -926,6 +927,42 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, REMOVE_SURROUNDING_TRY_BLOCK);
+	}
+
+	public void testInferDiamondArguments() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Map<String, ? extends Number> m = new HashMap<>(12);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "<>";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Map<String, ? extends Number> m = new HashMap<String, Number>(12);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
 	}
 
 }

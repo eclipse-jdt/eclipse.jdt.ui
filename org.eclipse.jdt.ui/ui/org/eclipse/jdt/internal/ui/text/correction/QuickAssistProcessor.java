@@ -85,6 +85,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -216,7 +217,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getRemoveBlockProposals(context, coveringNode, null)
 				|| getMakeVariableDeclarationFinalProposals(context, null)
 				|| getMissingCaseStatementProposals(context, coveringNode, null)
-				|| getConvertStringConcatenationProposals(context, null);
+				|| getConvertStringConcatenationProposals(context, null)
+				|| getInferDiamondArgumentsProposal(context, coveringNode, null, null);
 		}
 		return false;
 	}
@@ -233,6 +235,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			getRenameRefactoringProposal(context, coveringNode, locations, resultingCollections);
 			getAssignToVariableProposals(context, coveringNode, locations, resultingCollections);
 			getAssignParamToFieldProposals(context, coveringNode, resultingCollections);
+			getInferDiamondArgumentsProposal(context, coveringNode, locations, resultingCollections);
 
 			if (noErrorsAtLocation) {
 				boolean problemsAtLocation= locations.length != 0;
@@ -478,6 +481,77 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			proposals.add(proposal);
 		}
 		return false;
+	}
+
+	public static boolean getInferDiamondArgumentsProposal(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
+		ParameterizedType createdType= null;
+		
+		if (node instanceof Name) {
+			Name name= ASTNodes.getTopMostName((Name) node);
+			if (name.getLocationInParent() == SimpleType.NAME_PROPERTY) {
+				SimpleType type= (SimpleType) name.getParent();
+				if (type.getLocationInParent() == ParameterizedType.TYPE_PROPERTY) {
+					createdType= (ParameterizedType) type.getParent();
+					if (createdType.getLocationInParent() != ClassInstanceCreation.TYPE_PROPERTY) {
+						return false;
+					}
+				}
+			}
+		} else if (node instanceof ParameterizedType) {
+			createdType= (ParameterizedType) node;
+			if (createdType.getLocationInParent() != ClassInstanceCreation.TYPE_PROPERTY) {
+				return false;
+			}
+		} else if (node instanceof ClassInstanceCreation) {
+			ClassInstanceCreation creation= (ClassInstanceCreation) node;
+			Type type= creation.getType();
+			if (type instanceof ParameterizedType) {
+				createdType= (ParameterizedType) type;
+			}
+		}
+		
+		if (createdType == null || createdType.typeArguments().size() != 0) {
+			return false;
+		}
+		
+		ITypeBinding binding= createdType.resolveBinding();
+		if (binding == null) {
+			return false;
+		}
+		
+		ITypeBinding[] typeArguments= binding.getTypeArguments();
+		if (typeArguments.length == 0) {
+			return false;
+		}
+		
+		if (resultingCollections == null) {
+			return true;
+		}
+
+		// don't add if already added as quick fix
+		if (containsMatchingProblem(locations, IProblem.DiamondNotBelow17))
+			return false;
+		
+		AST ast= node.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
+		ContextSensitiveImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(context.getASTRoot(), createdType.getStartPosition(), importRewrite);
+
+		String label= CorrectionMessages.QuickAssistProcessor_infer_diamond_description;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		int relevance= locations == null ? 7 : 1; // if error -> higher than ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals()
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, relevance, image);
+
+		ListRewrite argumentsRewrite= rewrite.getListRewrite(createdType, ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
+		for (int i= 0; i < typeArguments.length; i++) {
+			ITypeBinding typeArgument= typeArguments[i];
+			Type argumentNode= importRewrite.addImport(typeArgument, ast, importContext);
+			argumentsRewrite.insertLast(argumentNode, null);
+			proposal.addLinkedPosition(rewrite.track(argumentNode), true, "arg" + i); //$NON-NLS-1$
+		}
+
+		resultingCollections.add(proposal);
+		return true;
 	}
 
 	private static boolean getJoinVariableProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {

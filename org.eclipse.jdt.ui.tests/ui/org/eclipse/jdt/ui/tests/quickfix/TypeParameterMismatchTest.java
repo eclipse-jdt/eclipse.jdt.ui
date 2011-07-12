@@ -138,8 +138,38 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 		expected[0]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
-		}
+	}
 
+	public void testInferDiamondArguments() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("import java.util.*;\n");
+		buf.append("public class A {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        List<String> a= new ArrayList<>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("import java.util.*;\n");
+		buf.append("public class A {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        List<String> a= new ArrayList<String>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
 
 
 }
