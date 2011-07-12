@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -77,7 +81,6 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -257,9 +260,7 @@ public class InlineConstantRefactoring extends Refactoring {
 
 			private void perform(Expression initializer) {
 				initializer.accept(this);
-				if (initializer instanceof MethodInvocation || initializer instanceof SuperMethodInvocation) {
-					addExplicitTypeArgumentsIfNecessary(initializer);
-				}
+				addExplicitTypeArgumentsIfNecessary(initializer);
 			}
 
 			private void addExplicitTypeArgumentsIfNecessary(Expression invocation) {
@@ -268,9 +269,8 @@ public class InlineConstantRefactoring extends Refactoring {
 					if (! (referenceContext instanceof VariableDeclarationFragment
 							|| referenceContext instanceof SingleVariableDeclaration
 							|| referenceContext instanceof Assignment)) {
-						IMethodBinding methodBinding= Invocations.resolveBinding(invocation);
-						ITypeBinding[] typeArguments= methodBinding.getTypeArguments();
-						ListRewrite typeArgsRewrite= fInitializerRewrite.getListRewrite(invocation, Invocations.getTypeArgumentsProperty(invocation));
+						ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(invocation);
+						ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(fInitializerRewrite, invocation);
 						for (int i= 0; i < typeArguments.length; i++) {
 							Type typeArgument= fNewLocationCuRewrite.getImportRewrite().addImport(typeArguments[i], fNewLocationCuRewrite.getAST(), fNewLocationContext);
 							fNewLocationCuRewrite.getImportRemover().registerAddedImports(typeArgument);
@@ -278,10 +278,14 @@ public class InlineConstantRefactoring extends Refactoring {
 						}
 						
 						if (invocation instanceof MethodInvocation) {
-							Expression expression= ((MethodInvocation)invocation).getExpression();
+							MethodInvocation methodInvocation= (MethodInvocation) invocation;
+							Expression expression= methodInvocation.getExpression();
 							if (expression == null) {
-								expression= fNewLocationCuRewrite.getAST().newName(fNewLocationCuRewrite.getImportRewrite().addImport(methodBinding.getDeclaringClass().getTypeDeclaration(), fNewLocationContext));
-								fInitializerRewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, expression, null);
+								IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+								if (methodBinding != null) {
+									expression= fNewLocationCuRewrite.getAST().newName(fNewLocationCuRewrite.getImportRewrite().addImport(methodBinding.getDeclaringClass().getTypeDeclaration(), fNewLocationContext));
+									fInitializerRewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, expression, null);
+								}
 							}
 						}
 					}

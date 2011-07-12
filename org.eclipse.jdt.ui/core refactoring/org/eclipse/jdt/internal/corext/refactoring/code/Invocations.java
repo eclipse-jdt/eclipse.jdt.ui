@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fixes for:
@@ -22,9 +26,14 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 public class Invocations {
 
@@ -140,39 +149,51 @@ public class Invocations {
 	}
 
 	public static boolean isResolvedTypeInferredFromExpectedType(Expression invocation) {
+		if (invocation == null)
+			return false;
+		
 		switch (invocation.getNodeType()) {
 			case ASTNode.METHOD_INVOCATION:
 				return ((MethodInvocation) invocation).isResolvedTypeInferredFromExpectedType();
 			case ASTNode.SUPER_METHOD_INVOCATION:
 				return ((SuperMethodInvocation) invocation).isResolvedTypeInferredFromExpectedType();
-				
-			case ASTNode.CONSTRUCTOR_INVOCATION:
-			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
-				
 			case ASTNode.CLASS_INSTANCE_CREATION:
-			case ASTNode.ENUM_CONSTANT_DECLARATION:
+				return ((ClassInstanceCreation) invocation).isResolvedTypeInferredFromExpectedType();
+				
+			default:
 				return false;
+		}
+	}
+	
+	public static ListRewrite getInferredTypeArgumentsRewrite(ASTRewrite rewrite, Expression invocation) {
+		switch (invocation.getNodeType()) {
+			case ASTNode.METHOD_INVOCATION:
+				return rewrite.getListRewrite(invocation, MethodInvocation.TYPE_ARGUMENTS_PROPERTY);
+			case ASTNode.SUPER_METHOD_INVOCATION:
+				return rewrite.getListRewrite(invocation, SuperMethodInvocation.TYPE_ARGUMENTS_PROPERTY);
+			case ASTNode.CLASS_INSTANCE_CREATION:
+				Type type= ((ClassInstanceCreation) invocation).getType();
+				return rewrite.getListRewrite(type, ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
+				
 			default:
 				throw new IllegalArgumentException(invocation.toString());
 		}
 	}
 
-	public static ChildListPropertyDescriptor getTypeArgumentsProperty(Expression invocation) {
+	public static ITypeBinding[] getInferredTypeArguments(Expression invocation) {
+		IMethodBinding methodBinding;
 		switch (invocation.getNodeType()) {
 			case ASTNode.METHOD_INVOCATION:
-				return MethodInvocation.TYPE_ARGUMENTS_PROPERTY;
+				methodBinding= ((MethodInvocation) invocation).resolveMethodBinding();
+				return methodBinding == null ? null : methodBinding.getTypeArguments();
 			case ASTNode.SUPER_METHOD_INVOCATION:
-				return SuperMethodInvocation.TYPE_ARGUMENTS_PROPERTY;
-				
-			case ASTNode.CONSTRUCTOR_INVOCATION:
-				return ConstructorInvocation.TYPE_ARGUMENTS_PROPERTY;
-			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
-				return SuperConstructorInvocation.TYPE_ARGUMENTS_PROPERTY;
-				
+				methodBinding= ((SuperMethodInvocation) invocation).resolveMethodBinding();
+				return methodBinding == null ? null : methodBinding.getTypeArguments();
 			case ASTNode.CLASS_INSTANCE_CREATION:
-				return ClassInstanceCreation.TYPE_ARGUMENTS_PROPERTY;
+				Type type= ((ClassInstanceCreation) invocation).getType();
+				ITypeBinding typeBinding= type.resolveBinding();
+				return typeBinding == null ? null : typeBinding.getTypeArguments();
 				
-			case ASTNode.ENUM_CONSTANT_DECLARATION:
 			default:
 				throw new IllegalArgumentException(invocation.toString());
 		}
