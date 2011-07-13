@@ -79,6 +79,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
@@ -1442,17 +1443,17 @@ public class LocalCorrectionsSubProcessor {
 		if (selectedNode == null)
 			return;
 
-		while (!(selectedNode instanceof org.eclipse.jdt.core.dom.ParameterizedType) && !(selectedNode instanceof Statement)) {
+		while (!(selectedNode instanceof ParameterizedType) && !(selectedNode instanceof Statement)) {
 			selectedNode= selectedNode.getParent();
 		}
-		if (!(selectedNode instanceof org.eclipse.jdt.core.dom.ParameterizedType)) {
+		if (!(selectedNode instanceof ParameterizedType)) {
 			return;
 		}
-		org.eclipse.jdt.core.dom.ParameterizedType parameterizedType= (org.eclipse.jdt.core.dom.ParameterizedType) selectedNode;
+		ParameterizedType parameterizedType= (ParameterizedType) selectedNode;
 
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		ListRewrite listRewrite= rewrite.getListRewrite(parameterizedType, org.eclipse.jdt.core.dom.ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(parameterizedType, ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
 
 		List<Type> typeArguments= parameterizedType.typeArguments();
 		for (Iterator<Type> iterator= typeArguments.iterator(); iterator.hasNext();) {
