@@ -93,6 +93,8 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.OrganizeImportsAction;
@@ -392,14 +394,36 @@ public class ReorgCorrectionsSubProcessor {
 			return false;
 		}
 
+		private String getVMInstallCompliance(IVMInstall install) {
+			if (install instanceof IVMInstall2) {
+				String compliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) install, JavaCore.VERSION_1_3);
+				return compliance;
+			}
+			return JavaCore.VERSION_1_1;
+		}
+		
 		private IVMInstall findRequiredOrGreaterVMInstall() {
+			String bestMatchingCompliance= null;
+			IVMInstall bestMatchingVMInstall= null;
 			IVMInstallType[] installTypes= JavaRuntime.getVMInstallTypes();
 			for (int i= 0; i < installTypes.length; i++) {
 				IVMInstall[] installs= installTypes[i].getVMInstalls();
 				for (int k= 0; k < installs.length; k++) {
-					if (isRequiredOrGreaterVMInstall(installs[k])) {
-						return installs[k];
+					String vmInstallCompliance= getVMInstallCompliance(installs[k]);
+					
+					if (fRequiredVersion.equals(vmInstallCompliance)) {
+						return installs[k]; // perfect match
+						
+					} else if (JavaModelUtil.isVersionLessThan(vmInstallCompliance, fRequiredVersion)) {
+						continue; // no match
+						
+					} else if (bestMatchingVMInstall != null) {
+						if (JavaModelUtil.isVersionLessThan(bestMatchingCompliance, vmInstallCompliance)) {
+							continue; // the other one is the least matching
+						}
 					}
+					bestMatchingCompliance= vmInstallCompliance;
+					bestMatchingVMInstall= installs[k];
 				}
 			}
 			return null;
@@ -414,36 +438,76 @@ public class ReorgCorrectionsSubProcessor {
 
 		private boolean updateJRE( IProgressMonitor monitor) throws CoreException, JavaModelException {
 			try {
-				IVMInstall vmInstall= findRequiredOrGreaterVMInstall();
-				fRequiredJREFound= vmInstall != null;
-				if (vmInstall != null) {
-					IVMInstall install= JavaRuntime.getVMInstall(fProject); // can be null
-					if (fChangeOnWorkspace) {
-						monitor.beginTask(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_operation, 4);
-						IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall(); // can be null
-						if (defaultVM != null && !defaultVM.equals(install)) {
-							IPath newPath= new Path(JavaRuntime.JRE_CONTAINER);
-							updateClasspath(newPath, new SubProgressMonitor(monitor, 1));
-						} else {
-							monitor.worked(1);
-						}
-						if (defaultVM == null || !isRequiredOrGreaterVMInstall(defaultVM)) {
-							JavaRuntime.setDefaultVMInstall(vmInstall, new SubProgressMonitor(monitor, 3), true);
-							return false;
-						}
-						return true;
-					} else {
-						if (install == null || !isRequiredOrGreaterVMInstall(install)) {
-							IPath newPath= new Path(JavaRuntime.JRE_CONTAINER).append(vmInstall.getVMInstallType().getId()).append(vmInstall.getName());
-							updateClasspath(newPath, monitor);
-							return false;
-						}
+				if (fChangeOnWorkspace) {
+					IVMInstall vmInstall= findRequiredOrGreaterVMInstall();
+					fRequiredJREFound= vmInstall != null;
+					if (vmInstall != null) {
+						IVMInstall install= JavaRuntime.getVMInstall(fProject); // can be null
+							monitor.beginTask(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_operation, 4);
+							IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall(); // can be null
+							if (defaultVM != null && !defaultVM.equals(install)) {
+								IPath newPath= new Path(JavaRuntime.JRE_CONTAINER);
+								updateClasspath(newPath, new SubProgressMonitor(monitor, 1));
+							} else {
+								monitor.worked(1);
+							}
+							if (defaultVM == null || !isRequiredOrGreaterVMInstall(defaultVM)) {
+								JavaRuntime.setDefaultVMInstall(vmInstall, new SubProgressMonitor(monitor, 3), true);
+								return false;
+							}
+							return true;
+					}
+
+				} else {
+					IExecutionEnvironment bestEE= findBestMatchingEE();
+					fRequiredJREFound= bestEE != null;
+					if (bestEE != null) {
+						IPath newPath= JavaRuntime.newJREContainerPath(bestEE);
+						updateClasspath(newPath, monitor);
+						return false;
 					}
 				}
 			} finally {
 				monitor.done();
 			}
 			return true;
+		}
+
+		private IExecutionEnvironment findBestMatchingEE() {
+			IExecutionEnvironmentsManager eeManager= JavaRuntime.getExecutionEnvironmentsManager();
+			IExecutionEnvironment[] ees= eeManager.getExecutionEnvironments();
+			IExecutionEnvironment bestEE= null;
+			String bestEECompliance= null;
+			
+			for (int i= 0; i < ees.length; i++) {
+				IExecutionEnvironment ee= ees[i];
+				String eeCompliance= JavaModelUtil.getExecutionEnvironmentCompliance(ee);
+				String eeId= ee.getId();
+				
+				if (fRequiredVersion.equals(eeCompliance)) {
+					if (eeId.startsWith("J") && eeId.endsWith(fRequiredVersion)) { //$NON-NLS-1$
+						bestEE= ee;
+						break; // perfect match
+					}
+					
+				} else if (JavaModelUtil.isVersionLessThan(eeCompliance, fRequiredVersion)) {
+					continue; // no match
+					
+				} else { // possible match
+					if (bestEE != null) {
+						if (! eeId.startsWith("J")) { //$NON-NLS-1$
+							continue; // avoid taking e.g. OSGi profile if a Java profile is available
+						}
+						if (JavaModelUtil.isVersionLessThan(bestEECompliance, eeCompliance)) {
+							continue; // the other one is the least matching
+						}
+					}
+				}
+				// found a new best
+				bestEE= ee;
+				bestEECompliance= eeCompliance;
+			}
+			return bestEE;
 		}
 
 		private void updateClasspath(IPath newPath, IProgressMonitor monitor) throws JavaModelException {
@@ -470,11 +534,11 @@ public class ReorgCorrectionsSubProcessor {
 				message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_required_compliance_changeproject_description, fRequiredVersion));
 			}
 
-			IVMInstall vmInstall= findRequiredOrGreaterVMInstall();
-			if (vmInstall != null) {
-				try {
-					IVMInstall install= JavaRuntime.getVMInstall(fProject); // can be null
-					if (fChangeOnWorkspace) {
+			try {
+				IVMInstall install= JavaRuntime.getVMInstall(fProject); // can be null
+				if (fChangeOnWorkspace) {
+					IVMInstall vmInstall= findRequiredOrGreaterVMInstall();
+					if (vmInstall != null) {
 						IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall(); // can be null
 						if (defaultVM != null && !defaultVM.equals(install)) {
 							message.append(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeProjectJREToDefault_description);
@@ -482,14 +546,17 @@ public class ReorgCorrectionsSubProcessor {
 						if (defaultVM == null || !isRequiredOrGreaterVMInstall(defaultVM)) {
 							message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeWorkspaceJRE_description, vmInstall.getName()));
 						}
-					} else {
+					}
+				} else {
+					IExecutionEnvironment bestEE= findBestMatchingEE();
+					if (bestEE != null) {
 						if (install == null || !isRequiredOrGreaterVMInstall(install)) {
-							message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeProjectJRE_description, vmInstall.getName()));
+							message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeProjectJRE_description, bestEE.getId()));
 						}
 					}
-				} catch (CoreException e) {
-					// ignore
 				}
+			} catch (CoreException e) {
+				// ignore
 			}
 			return message.toString();
 		}
