@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
@@ -264,6 +268,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_ignore_documented_unused_parameters;
 	public static String ProblemSeveritiesConfigurationBlock_pb_redundant_null_check;
 	public static String ProblemSeveritiesConfigurationBlock_pb_redundant_super_interface_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_redundant_type_arguments_label;
 	public static String ProblemSeveritiesConfigurationBlock_include_assert_in_null_analysis;
 	public static String ProblemSeveritiesConfigurationBlock_treat_optional_as_fatal;
 	public static String SourceAttachmentPropertyPage_error_title;
