@@ -207,6 +207,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnnecessaryNLSTag:
 			case IProblem.AssignmentHasNoEffect:
 			case IProblem.UnsafeTypeConversion:
+			case IProblem.RawTypeReference:
+			case IProblem.UnsafeRawMethodInvocation:
 			case IProblem.RedundantSpecificationOfTypeArguments:
 			case IProblem.UndefinedAnnotationMember:
 			case IProblem.MissingValueForAnnotationMember:
