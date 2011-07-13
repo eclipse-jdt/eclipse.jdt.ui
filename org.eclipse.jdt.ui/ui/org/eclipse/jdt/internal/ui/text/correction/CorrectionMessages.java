@@ -356,6 +356,7 @@ public final class CorrectionMessages extends NLS {
 	public static String UnresolvedElementsSubProcessor_change_full_type_description;
 	public static String LocalCorrectionsSubProcessor_remove_allocated_description;
 	public static String LocalCorrectionsSubProcessor_remove_redundant_superinterface;
+	public static String LocalCorrectionsSubProcessor_remove_type_arguments;
 	public static String LocalCorrectionsSubProcessor_return_allocated_description;
 	public static String LocalCorrectionsSubProcessor_qualify_left_hand_side_description;
 	public static String LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_qualify_right_hand_side_description;

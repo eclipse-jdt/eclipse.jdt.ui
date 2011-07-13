@@ -1436,6 +1436,35 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
+	public static void addRemoveRedundantTypeArgumentsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= problem.getCoveringNode(astRoot);
+		if (selectedNode == null)
+			return;
+
+		while (!(selectedNode instanceof org.eclipse.jdt.core.dom.ParameterizedType) && !(selectedNode instanceof Statement)) {
+			selectedNode= selectedNode.getParent();
+		}
+		if (!(selectedNode instanceof org.eclipse.jdt.core.dom.ParameterizedType)) {
+			return;
+		}
+		org.eclipse.jdt.core.dom.ParameterizedType parameterizedType= (org.eclipse.jdt.core.dom.ParameterizedType) selectedNode;
+
+		AST ast= astRoot.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		ListRewrite listRewrite= rewrite.getListRewrite(parameterizedType, org.eclipse.jdt.core.dom.ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
+
+		List<Type> typeArguments= parameterizedType.typeArguments();
+		for (Iterator<Type> iterator= typeArguments.iterator(); iterator.hasNext();) {
+			listRewrite.remove(iterator.next(), null);
+		}
+
+		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+		String label= CorrectionMessages.LocalCorrectionsSubProcessor_remove_type_arguments;
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image);
+		proposals.add(proposal);
+	}
+
 	public static void addFallThroughProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (selectedNode instanceof SwitchCase && selectedNode.getLocationInParent() == SwitchStatement.STATEMENTS_PROPERTY) {
