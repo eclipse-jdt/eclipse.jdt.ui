@@ -324,4 +324,17 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		return ""; //$NON-NLS-1$
 
 	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#createRequiredTypeCompletionProposal(org.eclipse.jdt.core.CompletionProposal, org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
+	 * @since 3.7
+	 */
+	@Override
+	protected LazyJavaCompletionProposal createRequiredTypeCompletionProposal(CompletionProposal completionProposal, JavaContentAssistInvocationContext invocationContext) {
+		LazyJavaCompletionProposal requiredProposal= super.createRequiredTypeCompletionProposal(completionProposal, invocationContext);
+		if (fProposal.getKind() == CompletionProposal.CONSTRUCTOR_INVOCATION && requiredProposal instanceof LazyGenericTypeProposal)
+			((LazyGenericTypeProposal) requiredProposal).canUseDiamond(fProposal.canUseDiamond(fInvocationContext.getCoreContext()));
+		return requiredProposal;
+	}
+
 }

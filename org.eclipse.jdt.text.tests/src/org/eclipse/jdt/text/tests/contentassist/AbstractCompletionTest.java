@@ -105,6 +105,10 @@ public class AbstractCompletionTest extends TestCase {
 		fWaitBeforeCompleting= false;
 	}
 
+	protected IPackageFragment getAnonymousTestPackage() throws CoreException {
+		return CompletionTestSetup.getAnonymousTestPackage();
+	}
+
 	protected void configureCoreOptions(Hashtable options) {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "1");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
@@ -318,7 +322,7 @@ public class AbstractCompletionTest extends TestCase {
 	}
 
 	private void assertProposal(String selector, StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection) throws CoreException {
-		fCU= createCU(CompletionTestSetup.getAnonymousTestPackage(), contents.toString());
+		fCU= createCU(getAnonymousTestPackage(), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
 		IDocument doc;
 		ITextSelection postSelection;
@@ -338,7 +342,7 @@ public class AbstractCompletionTest extends TestCase {
 	}
 
 	private void assertIncrementalCompletion(StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection) throws CoreException {
-		fCU= createCU(CompletionTestSetup.getAnonymousTestPackage(), contents.toString());
+		fCU= createCU(getAnonymousTestPackage(), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
 		IDocument doc;
 		ITextSelection postSelection;
@@ -357,7 +361,7 @@ public class AbstractCompletionTest extends TestCase {
 	}
 
 	private void assertNoProposal(String selector, StringBuffer contents, IRegion preSelection) throws CoreException {
-		fCU= createCU(CompletionTestSetup.getAnonymousTestPackage(), contents.toString());
+		fCU= createCU(getAnonymousTestPackage(), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
 		try {
 			assertNull(findNamedProposal(selector, preSelection));
