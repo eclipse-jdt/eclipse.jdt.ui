@@ -92,6 +92,7 @@ public final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_addadditionalcatch_description;
 	public static String LocalCorrectionsSubProcessor_addadditionalmulticatch_description;
 	public static String LocalCorrectionsSubProcessor_addexceptiontoexistingcatch_description;
+	public static String LocalCorrectionsSubProcessor_addexceptionstoexistingcatch_description;
 	public static String LocalCorrectionsSubProcessor_unnecessaryinstanceof_description;
 	public static String LocalCorrectionsSubProcessor_unnecessarythrow_description;
 	public static String LocalCorrectionsSubProcessor_classtointerface_description;

@@ -282,7 +282,9 @@ public class LocalCorrectionsSubProcessor {
 				List<CatchClause> catchClauses= surroundingTry.catchClauses();
 
 				if (catchClauses != null && catchClauses.size() == 1) {
-					String label= CorrectionMessages.LocalCorrectionsSubProcessor_addexceptiontoexistingcatch_description;
+					String label= uncaughtExceptions.length > 1
+							? CorrectionMessages.LocalCorrectionsSubProcessor_addexceptionstoexistingcatch_description
+							: CorrectionMessages.LocalCorrectionsSubProcessor_addexceptiontoexistingcatch_description;
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 					ASTRewrite rewrite= ASTRewrite.create(ast);
 					LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 7, image);
