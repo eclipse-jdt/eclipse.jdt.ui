@@ -325,7 +325,8 @@ public final class WhiteSpaceOptions {
 
 	/**
 	 * Create the tree, in this order: syntax element - position - abstract element
-	 * @param workingValues
+	 * 
+	 * @param workingValues the current values
 	 * @return returns roots (type <code>Node</code>)
 	 */
 	public List<InnerNode> createTreeBySyntaxElem(Map<String, String> workingValues) {
@@ -403,11 +404,11 @@ public final class WhiteSpaceOptions {
 	}
 
     /**
-     * Create the tree, in this order: position - syntax element - abstract
-     * element
-     * @param workingValues
-     * @return returns roots (type <code>Node</code>)
-     */
+	 * Create the tree, in this order: position - syntax element - abstract element
+	 * 
+	 * @param workingValues the current values
+	 * @return returns roots (type <code>Node</code>)
+	 */
     public List<Node> createAltTree(Map<String, String> workingValues) {
 
         final ArrayList<Node> roots= new ArrayList<Node>();
@@ -1094,7 +1095,7 @@ public final class WhiteSpaceOptions {
     }
 
 	private InnerNode createTryStatementTree(Map<String, String> workingValues, InnerNode parent) {
-		final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.WhiteSpaceTabPage_try);
+		final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.WhiteSpaceTabPage_tryWithResources);
 
 		createOption(root, workingValues, FormatterMessages.WhiteSpaceTabPage_before_opening_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_TRY, TRY_PREVIEW);
 		createOption(root, workingValues, FormatterMessages.WhiteSpaceTabPage_after_opening_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_TRY, TRY_PREVIEW);

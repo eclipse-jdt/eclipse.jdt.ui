@@ -83,7 +83,7 @@ final class FormatterMessages extends NLS {
 	public static String WhiteSpaceTabPage_do;
 	public static String WhiteSpaceTabPage_synchronized;
 	public static String WhiteSpaceTabPage_catch;
-	public static String WhiteSpaceTabPage_try;
+	public static String WhiteSpaceTabPage_tryWithResources;
 	public static String WhiteSpaceTabPage_if;
 	public static String WhiteSpaceTabPage_assert;
 	public static String WhiteSpaceTabPage_for;
