@@ -279,7 +279,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			decl.setType(unionType);
 			catchClause.setException(decl);
 			fLinkedProposalModel.getPositionGroup(GROUP_EXC_NAME + 0, true).addPosition(fRewriter.track(decl.getName()), false);
-			Statement st= getCatchBody("Exception", varName, lineDelimiter); //$NON-NLS-1$
+			Statement st= getCatchBody("Exception", name, lineDelimiter); //$NON-NLS-1$
 			if (st != null) {
 				catchClause.getBody().statements().add(st);
 			}
