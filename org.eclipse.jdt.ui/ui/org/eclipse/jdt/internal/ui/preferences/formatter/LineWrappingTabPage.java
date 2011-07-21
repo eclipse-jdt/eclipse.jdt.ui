@@ -99,6 +99,11 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		public Preference[] getSpecificPreferences() {
 			return preferences.toArray(new Preference[preferences.size()]);
 		}
+
+		public void setEnabled(boolean state) {
+			for (Preference preference : preferences)
+				preference.setEnabled(state);
+		}
 	}
 
 
@@ -948,7 +953,11 @@ public class LineWrappingTabPage extends FormatterTabPage {
     protected void updateControlEnablement(boolean inhomogenous, int wrappingStyle) {
 	    boolean doSplit= wrappingStyle != DefaultCodeFormatterConstants.WRAP_NO_SPLIT;
 	    fIndentStylePolicy.setEnabled(true);
-	    fIndentStyleCombo.setEnabled(inhomogenous || doSplit);
-	    fForceSplit.setEnabled(inhomogenous || doSplit);
+
+		boolean isEnabled= inhomogenous || doSplit;
+		fIndentStyleCombo.setEnabled(isEnabled);
+		fForceSplit.setEnabled(isEnabled);
+		fBinaryExpressionCategory.setEnabled(isEnabled);
+		fCatchCategory.setEnabled(isEnabled);
 	}
 }
