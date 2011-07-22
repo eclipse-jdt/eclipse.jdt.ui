@@ -692,6 +692,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 				return ((FieldDeclaration) node).getType();
 			case ASTNode.VARIABLE_DECLARATION_STATEMENT:
 				return ((VariableDeclarationStatement) node).getType();
+			case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
+				return ((VariableDeclarationExpression) node).getType();
 			case ASTNode.METHOD_DECLARATION:
 				return ((MethodDeclaration)node).getReturnType2();
 			case ASTNode.PARAMETERIZED_TYPE:

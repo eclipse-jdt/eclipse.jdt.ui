@@ -88,7 +88,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		return createCU(pack, fileName + ".java", getFileContents(fullName));
 	}
 
-	private ChangeTypeRefactoring helper1(int startLine, int startColumn, int endLine, int endColumn, String selectedTypeName)
+	protected ChangeTypeRefactoring helper1(int startLine, int startColumn, int endLine, int endColumn, String selectedTypeName)
 		throws Exception {
 		ICompilationUnit	cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange		selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);

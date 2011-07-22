@@ -14,7 +14,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.Collection;
+
 import junit.framework.Test;
+
+import org.eclipse.jdt.testplugin.StringAsserts;
 
 public class ChangeTypeRefactoringTests17 extends ChangeTypeRefactoringTests {
 
@@ -39,6 +43,14 @@ public class ChangeTypeRefactoringTests17 extends ChangeTypeRefactoringTests {
 		fileName+= (positive ? "positive17/" : "negative17/");
 		fileName += getSimpleTestFileName(input);
 		return fileName;
+	}
+
+	//--- TESTS
+	public void testTryWithResources() throws Exception {
+		Collection types= helper1(7, 25, 7, 31, "java.io.InputStreamReader").getValidTypeNames();
+		String[] actual= (String[])types.toArray(new String[types.size()]);
+		String[] expected= { "java.io.InputStreamReader", "java.io.Reader" };
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
 
 	// tests that are supposed to fail
