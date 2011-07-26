@@ -394,7 +394,7 @@ public class JavaElementLabelComposer {
 					if (renderVarargs
 							&& resolvedSig != null
 							&& declaredParameterTypes.length == 1
-							&& method.getAnnotation("java.lang.invoke.MethodHandle$PolymorphicSignature").exists()) { //$NON-NLS-1$
+							&& JavaModelUtil.isPolymorphicSignature(method)) {
 						renderVarargs= false;
 						isPolymorphic= true;
 					}

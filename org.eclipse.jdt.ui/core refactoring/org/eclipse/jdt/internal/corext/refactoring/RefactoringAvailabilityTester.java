@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -740,6 +744,8 @@ public final class RefactoringAvailabilityTester {
 		if (method.isConstructor())
 			return false;
 		if (method.getDeclaringType().isAnnotation())
+			return false;
+		if (JavaModelUtil.isPolymorphicSignature(method))
 			return false;
 
 		return true;

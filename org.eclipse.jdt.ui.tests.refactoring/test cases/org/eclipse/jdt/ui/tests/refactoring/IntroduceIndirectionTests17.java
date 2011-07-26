@@ -43,5 +43,10 @@ public class IntroduceIndirectionTests17 extends IntroduceIndirectionTests{
 		// test for bug 349405
 		helperPass(new String[] { "p.Foo" }, "getX", "p.Foo", 14, 17, 14, 21);
 	}
+	
+	public void test17_34() throws Exception {
+		// test for bug 
+		helperFail(new String[] { "p.Foo" }, "m2", "p.Foo", 7, 18, 7, 18);
+	}
 
 }

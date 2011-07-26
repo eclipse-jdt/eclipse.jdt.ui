@@ -909,4 +909,8 @@ public final class JavaModelUtil {
 		return "package-info.java".equals(cu.getElementName()); //$NON-NLS-1$
 	}
 
+	public static boolean isPolymorphicSignature(IMethod method) {
+		return method.getAnnotation("java.lang.invoke.MethodHandle$PolymorphicSignature").exists(); //$NON-NLS-1$
+	}
+
 }
