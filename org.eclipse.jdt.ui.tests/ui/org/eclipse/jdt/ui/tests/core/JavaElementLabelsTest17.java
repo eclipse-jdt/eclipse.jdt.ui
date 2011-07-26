@@ -89,7 +89,7 @@ public class JavaElementLabelsTest17 extends CoreTests {
 		assertEqualString(lab, "invokeExact(Object...)");
 	}
 
-	private IJavaElement createInvokeGenericReference(String invocation) throws CoreException, JavaModelException {
+	private IJavaElement createInvokeReference(String invocation) throws CoreException, JavaModelException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
@@ -104,112 +104,112 @@ public class JavaElementLabelsTest17 extends CoreTests {
 		String content= buf.toString();
 		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", content, false, null);
 		
-		IJavaElement elem= cu.codeSelect(content.indexOf("invokeGeneric"), 0)[0];
+		IJavaElement elem= cu.codeSelect(content.indexOf("invoke("), 0)[0];
 		return elem;
 	}
 
-	private static void assertInvokeGenericUnresolved(IJavaElement elem) {
+	private static void assertInvokeUnresolved(IJavaElement elem) {
 		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.ALL_DEFAULT);
-		assertEqualString(lab, "invokeGeneric(Object...)");
+		assertEqualString(lab, "invoke(Object...)");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_NAMES);
-		assertEqualString(lab, "invokeGeneric(arg0)");
+		assertEqualString(lab, "invoke(arg0)");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES);
-		assertEqualString(lab, "invokeGeneric(Object...)");
+		assertEqualString(lab, "invoke(Object...)");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PRE_RETURNTYPE);
-		assertEqualString(lab, "Object invokeGeneric(Object... arg0)");
+		assertEqualString(lab, "Object invoke(Object... arg0)");
 	}
 
 	public void testMethodLabelPolymorphicSignatureReference0() throws Exception {
-		IJavaElement elem= createInvokeGenericReference("mh.invokeGeneric()");
+		IJavaElement elem= createInvokeReference("mh.invoke()");
 		
-		assertInvokeGenericUnresolved(elem);
+		assertInvokeUnresolved(elem);
 		
 		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "invokeGeneric()");
+		assertEqualString(lab, "invoke()");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "invokeGeneric()");
+		assertEqualString(lab, "invoke()");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "Object invokeGeneric()");
+		assertEqualString(lab, "Object invoke()");
 	}
 
 	public void testMethodLabelPolymorphicSignatureReference0Ret() throws Exception {
-		IJavaElement elem= createInvokeGenericReference("String s= (String) mh.invokeGeneric()");
+		IJavaElement elem= createInvokeReference("String s= (String) mh.invoke()");
 		
-		assertInvokeGenericUnresolved(elem);
+		assertInvokeUnresolved(elem);
 		
 		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "invokeGeneric()");
+		assertEqualString(lab, "invoke()");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "invokeGeneric()");
+		assertEqualString(lab, "invoke()");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "Object invokeGeneric()");
+		assertEqualString(lab, "Object invoke()");
 	}
 	
 	public void testMethodLabelPolymorphicSignatureReference1() throws Exception {
-		IJavaElement elem= createInvokeGenericReference("mh.invokeGeneric(1)");
+		IJavaElement elem= createInvokeReference("mh.invoke(1)");
 		
-		assertInvokeGenericUnresolved(elem);
+		assertInvokeUnresolved(elem);
 		
 		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "invokeGeneric(int)");
+		assertEqualString(lab, "invoke(int)");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "invokeGeneric(int)");
+		assertEqualString(lab, "invoke(int)");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "Object invokeGeneric(int arg00)");
+		assertEqualString(lab, "Object invoke(int arg00)");
 	}
 	
 	public void testMethodLabelPolymorphicSignatureReference1Array() throws Exception {
-		IJavaElement elem= createInvokeGenericReference("mh.invokeGeneric(new Object[42])");
+		IJavaElement elem= createInvokeReference("mh.invoke(new Object[42])");
 		
-		assertInvokeGenericUnresolved(elem);
+		assertInvokeUnresolved(elem);
 		
 		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "invokeGeneric(Object[])");
+		assertEqualString(lab, "invoke(Object[])");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "invokeGeneric(Object[])");
+		assertEqualString(lab, "invoke(Object[])");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "Object invokeGeneric(Object[] arg00)");
+		assertEqualString(lab, "Object invoke(Object[] arg00)");
 	}
 	
 	public void testMethodLabelPolymorphicSignatureReference2() throws Exception {
-		IJavaElement elem= createInvokeGenericReference("mh.invokeGeneric('a', new Integer[0][])");
+		IJavaElement elem= createInvokeReference("mh.invoke('a', new Integer[0][])");
 		
-		assertInvokeGenericUnresolved(elem);
+		assertInvokeUnresolved(elem);
 		
 		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "invokeGeneric(char, Integer[][])");
+		assertEqualString(lab, "invoke(char, Integer[][])");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "invokeGeneric(char, Integer[][])");
+		assertEqualString(lab, "invoke(char, Integer[][])");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "Object invokeGeneric(char arg00, Integer[][] arg01)");
+		assertEqualString(lab, "Object invoke(char arg00, Integer[][] arg01)");
 	}
 	
 	public void testMethodLabelPolymorphicSignatureReference3Ret() throws Exception {
-		IJavaElement elem= createInvokeGenericReference("long l= (long) mh.invokeGeneric('a', new java.util.ArrayList<String>(), null)");
+		IJavaElement elem= createInvokeReference("long l= (long) mh.invoke('a', new java.util.ArrayList<String>(), null)");
 		
-		assertInvokeGenericUnresolved(elem);
+		assertInvokeUnresolved(elem);
 		
 		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "invokeGeneric(char, ArrayList, Void)");
+		assertEqualString(lab, "invoke(char, ArrayList, Void)");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "invokeGeneric(char, ArrayList, Void)");
+		assertEqualString(lab, "invoke(char, ArrayList, Void)");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "Object invokeGeneric(char arg00, ArrayList arg01, Void arg02)");
+		assertEqualString(lab, "Object invoke(char arg00, ArrayList arg01, Void arg02)");
 	}
 	
 }
