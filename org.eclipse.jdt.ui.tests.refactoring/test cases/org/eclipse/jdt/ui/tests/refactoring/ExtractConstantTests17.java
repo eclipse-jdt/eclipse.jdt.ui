@@ -14,15 +14,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+
 import junit.framework.Test;
 
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+public class ExtractConstantTests17 extends ExtractConstantTests {
 
-public class ExtractTempTests17 extends ExtractTempTests {
+	private static final Class clazz = ExtractConstantTests17.class;
 
-	private static final Class clazz= ExtractTempTests17.class;
-
-	public ExtractTempTests17(String name) {
+	public ExtractConstantTests17(String name) {
 		super(name);
 	}
 
@@ -30,41 +29,22 @@ public class ExtractTempTests17 extends ExtractTempTests {
 		return new Java17Setup(new NoSuperTestsSuite(clazz));
 	}
 
-	public static Test setUpTest(Test someTest) {
-		return new Java17Setup(someTest);
+	public static Test setUpTest(Test test) {
+		return new Java17Setup(test);
 	}
 
 	@Override
-	protected String getTestFileName(boolean canExtract, boolean input){
+	protected String getTestFileName(boolean canExtract, boolean input) {
 		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
-		fileName+= canExtract ? "canExtract17/" : "cannotExtract17/";
+		fileName+= (canExtract ? "canExtract17/" : "cannotExtract17/");
 		return fileName + getSimpleTestFileName(canExtract, input);
 	}
 
 	//--- TESTS
 
-	public void test110() throws Exception {
-		helper1(14, 13, 14, 15, true, false, "temp", "ex2");
-	}
-	
-	public void test111() throws Exception {
-		helper1(8, 16, 8, 33, true, false, "arrayList", "arrayList");
-	}
-	
-	public void test112() throws Exception {
-		helper1(8, 20, 8, 37, true, false, "arrayList", "arrayList");
-	}
-	
-	public void test113() throws Exception {
-		helper1(12, 16, 12, 33, true, false, "arrayList2", "arrayList2");
-	}
-
-	public void test114() throws Exception {
-		helper1(9, 34, 9, 56, true, false, "fileReader", "fileReader");
-	}
-
 	// -- testing failing preconditions
-	public void testFail1() throws Exception {
-		failHelper1(9, 14, 9, 56, false, false, "temp", RefactoringStatus.FATAL);
+	public void testFail0() throws Exception{
+		failHelper1(10, 14, 10, 56, true, true, "CONSTANT");
 	}
 }
+

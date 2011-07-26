@@ -569,6 +569,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodAnalyzer_parent_mismatch;
 
+	public static String ExtractMethodAnalyzer_resource_in_try_with_resources;
+
 	public static String ExtractMethodAnalyzer_single_expression_or_set;
 
 	public static String ExtractMethodAnalyzer_super_or_this;
@@ -690,6 +692,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractTempRefactoring_replace;
 
 	public static String ExtractTempRefactoring_replace_occurrences;
+
+	public static String ExtractTempRefactoring_resource_in_try_with_resources;
 
 	public static String ExtractTempRefactoring_select_expression;
 
@@ -866,6 +870,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineTempRefactoring_preview;
 
 	public static String InlineTempRefactoring_remove_edit_name;
+
+	public static String InlineTempRefactoring_resource_in_try_with_resources;
 
 	public static String InlineTempRefactoring_select_temp;
 

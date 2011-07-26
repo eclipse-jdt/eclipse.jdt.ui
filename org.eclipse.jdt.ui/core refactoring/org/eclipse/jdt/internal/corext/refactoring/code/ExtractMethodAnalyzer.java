@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
@@ -61,6 +65,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -843,6 +848,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 	@Override
 	public void endVisit(VariableDeclarationExpression node) {
+		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED && getFirstSelectedNode() == node) {
+			if (node.getLocationInParent() == TryStatement.RESOURCES_PROPERTY) {
+				invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_resource_in_try_with_resources, JavaStatusContext.create(fCUnit, getSelection()));
+			}
+		}
 		checkTypeInDeclaration(node.getType());
 		super.endVisit(node);
 	}

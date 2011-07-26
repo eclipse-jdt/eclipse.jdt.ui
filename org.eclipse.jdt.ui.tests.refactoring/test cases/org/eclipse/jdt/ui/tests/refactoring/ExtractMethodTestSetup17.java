@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 public class ExtractMethodTestSetup17 extends Java17Setup {
 
 	private IPackageFragment fTry17Package;
+	private IPackageFragment fInvalidSelectionPackage;
 
 	public ExtractMethodTestSetup17(Test test) {
 		super(test);
@@ -36,10 +37,15 @@ public class ExtractMethodTestSetup17 extends Java17Setup {
 
 		IPackageFragmentRoot root= getDefaultSourceFolder();
 		fTry17Package= root.createPackageFragment("try17_in", true, null);
+		fInvalidSelectionPackage= root.createPackageFragment("invalidSelection17", true, null);
 	}
 
 	public IPackageFragment getTry17Package() {
 		return fTry17Package;
+	}
+
+	public IPackageFragment getInvalidSelectionPackage() {
+		return fInvalidSelectionPackage;
 	}
 }
 

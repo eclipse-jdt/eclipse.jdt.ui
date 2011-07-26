@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -68,7 +72,7 @@ class ConstantChecks {
 		}
 		@Override
 		public boolean visit(FieldAccess node) {
-			fResult= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
+			fResult&= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
 			return false;
 		}
 		@Override
@@ -76,7 +80,7 @@ class ConstantChecks {
 			if(node.getExpression() == null) {
 				visitName(node.getName());
 			} else {
-				fResult= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
+				fResult&= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
 			}
 
 			return false;
@@ -91,7 +95,7 @@ class ConstantChecks {
 		}
 
 		private boolean visitName(Name name) {
-			fResult= checkName(name);
+			fResult&= checkName(name);
 			return false; //Do not descend further
 		}
 
