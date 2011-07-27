@@ -174,6 +174,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	private static class JEViewSelectionProvider implements ISelectionProvider {
 		private final TreeViewer fViewer;
 		ListenerList fSelectionChangedListeners= new ListenerList();
+		private IStructuredSelection fLastSelection;
 
 		public JEViewSelectionProvider(TreeViewer viewer) {
 			fViewer= viewer;
@@ -186,7 +187,31 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 
 		void fireSelectionChanged() {
 			if (fSelectionChangedListeners != null) {
-				SelectionChangedEvent event= new SelectionChangedEvent(this, getSelection());
+				IStructuredSelection selection = getSelection();
+				
+				if (fLastSelection != null) {
+					List<?> newSelection = selection.toList();
+					List<?> oldSelection = fLastSelection.toList();
+					int size = newSelection.size();
+					if (size == oldSelection.size()){
+						for (int i= 0; i < size; i++) {
+							Object newElement = newSelection.get(i);
+							Object oldElement = oldSelection.get(i);
+							if (newElement != oldElement && newElement.equals(oldElement) && newElement instanceof IJavaElement) {
+								// send out a fake selection event to make the Properties view update getKey():
+								SelectionChangedEvent event= new SelectionChangedEvent(this, StructuredSelection.EMPTY);
+								Object[] listeners= fSelectionChangedListeners.getListeners();
+								for (Object listener: listeners) {
+									((ISelectionChangedListener) listener).selectionChanged(event);
+								}
+								break;
+							}
+						}
+					}
+				}
+				fLastSelection= selection;
+				
+				SelectionChangedEvent event= new SelectionChangedEvent(this, selection);
 				
 				Object[] listeners= fSelectionChangedListeners.getListeners();
 				for (int i= 0; i < listeners.length; i++) {
@@ -200,7 +225,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			fSelectionChangedListeners.add(listener);
 		}
 
-		public ISelection getSelection() {
+		public IStructuredSelection getSelection() {
 			IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
 			ArrayList<Object> externalSelection= new ArrayList<Object>();
 			for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
