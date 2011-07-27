@@ -437,25 +437,29 @@ public class ReorgCorrectionsSubProcessor {
 		}
 
 		private boolean updateJRE( IProgressMonitor monitor) throws CoreException, JavaModelException {
+			// Caveat: Returns true iff the classpath has not been changed.
+			// If the classpath is changed, JDT Core triggers a build for free.
+			// If the classpath is not changed, we have to trigger a build because we changed
+			// the compiler compliance in #apply(IDocument).
 			try {
 				if (fChangeOnWorkspace) {
 					IVMInstall vmInstall= findRequiredOrGreaterVMInstall();
 					fRequiredJREFound= vmInstall != null;
 					if (vmInstall != null) {
 						IVMInstall install= JavaRuntime.getVMInstall(fProject); // can be null
-							monitor.beginTask(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_operation, 4);
-							IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall(); // can be null
-							if (defaultVM != null && !defaultVM.equals(install)) {
-								IPath newPath= new Path(JavaRuntime.JRE_CONTAINER);
-								updateClasspath(newPath, new SubProgressMonitor(monitor, 1));
-							} else {
-								monitor.worked(1);
-							}
-							if (defaultVM == null || !isRequiredOrGreaterVMInstall(defaultVM)) {
-								JavaRuntime.setDefaultVMInstall(vmInstall, new SubProgressMonitor(monitor, 3), true);
-								return false;
-							}
-							return true;
+						monitor.beginTask(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_operation, 4);
+						IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall(); // can be null
+						if (defaultVM != null && !defaultVM.equals(install)) {
+							IPath newPath= new Path(JavaRuntime.JRE_CONTAINER);
+							updateClasspath(newPath, new SubProgressMonitor(monitor, 1));
+						} else {
+							monitor.worked(1);
+						}
+						if (defaultVM == null || !isRequiredOrGreaterVMInstall(defaultVM)) {
+							JavaRuntime.setDefaultVMInstall(vmInstall, new SubProgressMonitor(monitor, 3), true);
+							return false;
+						}
+						return true;
 					}
 
 				} else {
@@ -463,8 +467,8 @@ public class ReorgCorrectionsSubProcessor {
 					fRequiredJREFound= bestEE != null;
 					if (bestEE != null) {
 						IPath newPath= JavaRuntime.newJREContainerPath(bestEE);
-						updateClasspath(newPath, monitor);
-						return false;
+						boolean classpathUpdated= updateClasspath(newPath, monitor);
+						return !classpathUpdated;
 					}
 				}
 			} finally {
@@ -510,16 +514,24 @@ public class ReorgCorrectionsSubProcessor {
 			return bestEE;
 		}
 
-		private void updateClasspath(IPath newPath, IProgressMonitor monitor) throws JavaModelException {
+		private boolean updateClasspath(IPath newPath, IProgressMonitor monitor) throws JavaModelException {
+			boolean updated= false;
+			
 			IClasspathEntry[] classpath= fProject.getRawClasspath();
 			IPath jreContainerPath= new Path(JavaRuntime.JRE_CONTAINER);
 			for (int i= 0; i < classpath.length; i++) {
 				IClasspathEntry curr= classpath[i];
 				if (curr.getEntryKind() == IClasspathEntry.CPE_CONTAINER && curr.getPath().matchingFirstSegments(jreContainerPath) > 0) {
-					classpath[i]= JavaCore.newContainerEntry(newPath, curr.getAccessRules(), curr.getExtraAttributes(), curr.isExported());
+					if (! newPath.equals(curr.getPath())) {
+						updated= true;
+						classpath[i]= JavaCore.newContainerEntry(newPath, curr.getAccessRules(), curr.getExtraAttributes(), curr.isExported());
+					}
 				}
 			}
-			fProject.setRawClasspath(classpath, monitor);
+			if (updated) {
+				fProject.setRawClasspath(classpath, monitor);
+			}
+			return updated;
 		}
 
 		/* (non-Javadoc)
@@ -550,7 +562,7 @@ public class ReorgCorrectionsSubProcessor {
 				} else {
 					IExecutionEnvironment bestEE= findBestMatchingEE();
 					if (bestEE != null) {
-						if (install == null || !isRequiredOrGreaterVMInstall(install)) {
+						if (install == null || !isEEOnClasspath(bestEE)) {
 							message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeProjectJRE_description, bestEE.getId()));
 						}
 					}
@@ -559,6 +571,16 @@ public class ReorgCorrectionsSubProcessor {
 				// ignore
 			}
 			return message.toString();
+		}
+
+		private boolean isEEOnClasspath(IExecutionEnvironment ee) throws JavaModelException {
+			IPath eePath= JavaRuntime.newJREContainerPath(ee);
+			
+			for (IClasspathEntry entry: fProject.getRawClasspath()) {
+				if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER && entry.getPath().equals(eePath))
+					return true;
+			}
+			return false;
 		}
 
 		/* (non-Javadoc)
