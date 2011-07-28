@@ -5,10 +5,6 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -38,7 +34,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  * 
- * @since 3.7
+ * @since 3.7.1
  * 
  * @noextend This class is not intended to be subclassed by clients.
  */

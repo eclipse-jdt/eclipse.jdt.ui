@@ -5,10 +5,6 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
@@ -228,7 +224,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * Action definition ID of the source -> surround with try/multi-catch action (value
 	 * <code>"org.eclipse.jdt.ui.edit.text.java.surround.with.try.multicatch"</code>).
 	 * 
-	 * @since 3.7
+	 * @since 3.7.1
 	 */
 	public static final String SURROUND_WITH_TRY_MULTI_CATCH= "org.eclipse.jdt.ui.edit.text.java.surround.with.try.multicatch"; //$NON-NLS-1$
 
