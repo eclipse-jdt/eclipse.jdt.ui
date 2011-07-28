@@ -68,7 +68,7 @@ class ConstantChecks {
 		}
 		@Override
 		public boolean visit(FieldAccess node) {
-			fResult= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
+			fResult&= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
 			return false;
 		}
 		@Override
@@ -76,7 +76,7 @@ class ConstantChecks {
 			if(node.getExpression() == null) {
 				visitName(node.getName());
 			} else {
-				fResult= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
+				fResult&= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
 			}
 
 			return false;
@@ -91,7 +91,7 @@ class ConstantChecks {
 		}
 
 		private boolean visitName(Name name) {
-			fResult= checkName(name);
+			fResult&= checkName(name);
 			return false; //Do not descend further
 		}
 

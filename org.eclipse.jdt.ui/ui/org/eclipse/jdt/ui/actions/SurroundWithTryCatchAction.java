@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.LinkedProposalModelPresenter;
  */
 public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 
-	private CompilationUnitEditor fEditor;
+	CompilationUnitEditor fEditor;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -70,7 +70,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		super(editor.getEditorSite());
 		setText(RefactoringMessages.SurroundWithTryCatchAction_label);
 		fEditor= editor;
-		setEnabled((fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null));
+		setEnabled(isApplicable());
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SURROUND_WITH_TRY_CATCH_ACTION);
 	}
 
@@ -81,7 +81,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		ICompilationUnit cu= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		if (cu == null || !ElementValidator.checkValidateEdit(cu, getShell(), getDialogTitle()))
 			return;
-		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(cu, selection);
+		SurroundWithTryCatchRefactoring refactoring= createRefactoring(selection, cu);
 
 		if (refactoring == null)
 			return;
@@ -120,12 +120,20 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		}
 	}
 
-	@Override
-	public void selectionChanged(ITextSelection selection) {
-		setEnabled(selection.getLength() > 0 && (fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null));
+	SurroundWithTryCatchRefactoring createRefactoring(ITextSelection selection, ICompilationUnit cu) {
+		return SurroundWithTryCatchRefactoring.create(cu, selection);
 	}
 
-	private static String getDialogTitle() {
+	@Override
+	public void selectionChanged(ITextSelection selection) {
+		setEnabled(selection.getLength() > 0 && isApplicable());
+	}
+
+	boolean isApplicable() {
+		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+	}
+
+	String getDialogTitle() {
 		return RefactoringMessages.SurroundWithTryCatchAction_dialog_title;
 	}
 }

@@ -41,8 +41,12 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_convert_anonym_to_nested;
 	public static String QuickAssistProcessor_convert_local_to_field_description;
 	public static String QuickAssistProcessor_convert_to_message_format;
+	public static String QuickAssistProcessor_convert_to_multiple_singletype_catch_blocks;
+	public static String QuickAssistProcessor_convert_to_single_multicatch_block;
 	public static String QuickAssistProcessor_convert_to_string_buffer_description;
+	public static String QuickAssistProcessor_exceptiontothrows_description;
 	public static String QuickAssistProcessor_extract_to_constant_description;
+	public static String QuickAssistProcessor_infer_diamond_description;
 	public static String QuickAssistProcessor_inline_local_description;
 	public static String QuickAssistProcessor_name_extension_from_class;
 	public static String QuickAssistProcessor_name_extension_from_interface;
@@ -72,15 +76,19 @@ public final class CorrectionMessages extends NLS {
 	public static String ReorgCorrectionsSubProcessor_addcp_project_description;
 	public static String ReorgCorrectionsSubProcessor_addcp_archive_description;
 	public static String ReorgCorrectionsSubProcessor_addcp_classfolder_description;
-	public static String ReorgCorrectionsSubProcessor_50_project_compliance_description;
-	public static String ReorgCorrectionsSubProcessor_50_workspace_compliance_description;
+	public static String ReorgCorrectionsSubProcessor_change_project_compliance_description;
+	public static String ReorgCorrectionsSubProcessor_change_workspace_compliance_description;
 	public static String ReorgCorrectionsSubProcessor_addcp_variable_description;
 	public static String ReorgCorrectionsSubProcessor_addcp_library_description;
-	public static String LocalCorrectionsSubProcessor_surroundwith_description;
+	public static String LocalCorrectionsSubProcessor_surroundwith_trycatch_description;
+	public static String LocalCorrectionsSubProcessor_surroundwith_trymulticatch_description;
 	public static String LocalCorrectionsSubProcessor_add_missing_cases_description;
 	public static String LocalCorrectionsSubProcessor_addthrows_description;
 	public static String ClasspathFixProcessorDescriptor_error_processing_processors;
 	public static String LocalCorrectionsSubProcessor_addadditionalcatch_description;
+	public static String LocalCorrectionsSubProcessor_addadditionalmulticatch_description;
+	public static String LocalCorrectionsSubProcessor_addexceptiontoexistingcatch_description;
+	public static String LocalCorrectionsSubProcessor_addexceptionstoexistingcatch_description;
 	public static String LocalCorrectionsSubProcessor_unnecessaryinstanceof_description;
 	public static String LocalCorrectionsSubProcessor_unnecessarythrow_description;
 	public static String LocalCorrectionsSubProcessor_classtointerface_description;
@@ -235,6 +243,7 @@ public final class CorrectionMessages extends NLS {
 	public static String AssignToVariableAssistProposal_assignparamtofield_description;
 	public static String QuickAssistProcessor_catchclausetothrows_description;
 	public static String QuickAssistProcessor_removecatchclause_description;
+	public static String QuickAssistProcessor_removeexception_description;
 	public static String QuickAssistProcessor_unwrap_ifstatement;
 	public static String QuickAssistProcessor_unwrap_whilestatement;
 	public static String QuickAssistProcessor_unwrap_forstatement;
@@ -290,6 +299,8 @@ public final class CorrectionMessages extends NLS {
 	public static String AdvancedQuickAssistProcessor_pushNegationDown;
 	public static String AdvancedQuickAssistProcessor_putConditionalExpressionInParentheses;
 	public static String AdvancedQuickAssistProcessor_convertSwitchToIf;
+	public static String AdvancedQuickAssistProcessor_convertSwitchToIfRemovingNullCheck;
+	public static String AdvancedQuickAssistProcessor_convertIfElseToSwitch;
 	public static String AdvancedQuickAssistProcessor_inverseIfContinue_description;
 	public static String AdvancedQuickAssistProcessor_inverseIfToContinue_description;
 	public static String AdvancedQuickAssistProcessor_exchangeInnerAndOuterIfConditions_description;
@@ -315,10 +326,10 @@ public final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_generate_hashCode_equals_description;
 	public static String AssignToVariableAssistProposal_assigntoexistingfield_description;
 	public static String ReorgCorrectionsSubProcessor_50_compliance_operation;
-	public static String ReorgCorrectionsSubProcessor_no_50jre_title;
-	public static String ReorgCorrectionsSubProcessor_no_50jre_message;
-	public static String ReorgCorrectionsSubProcessor_50_compliance_changeworkspace_description;
-	public static String ReorgCorrectionsSubProcessor_50_compliance_changeproject_description;
+	public static String ReorgCorrectionsSubProcessor_no_required_jre_title;
+	public static String ReorgCorrectionsSubProcessor_no_required_jre_message;
+	public static String ReorgCorrectionsSubProcessor_required_compliance_changeworkspace_description;
+	public static String ReorgCorrectionsSubProcessor_required_compliance_changeproject_description;
 	public static String GetterSetterCorrectionSubProcessor_creategetterunsingencapsulatefield_description;
 	public static String GetterSetterCorrectionSubProcessor_encapsulate_field_error_message;
 	public static String GetterSetterCorrectionSubProcessor_additional_info;
@@ -334,6 +345,8 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_extract_to_local_all_description;
 	public static String QuickAssistProcessor_extract_to_local_description;
 	public static String QuickAssistProcessor_extractmethod_description;
+	public static String QuickAssistProcessor_move_exception_to_separate_catch_block;
+	public static String QuickAssistProcessor_move_exceptions_to_separate_catch_block;
 	public static String SuppressWarningsSubProcessor_suppress_warnings_label;
 	public static String ReorgCorrectionsSubProcessor_accessrules_description;
 	public static String ReorgCorrectionsSubProcessor_project_seup_fix_description;
@@ -341,6 +354,7 @@ public final class CorrectionMessages extends NLS {
 	public static String UnresolvedElementsSubProcessor_change_full_type_description;
 	public static String LocalCorrectionsSubProcessor_remove_allocated_description;
 	public static String LocalCorrectionsSubProcessor_remove_redundant_superinterface;
+	public static String LocalCorrectionsSubProcessor_remove_type_arguments;
 	public static String LocalCorrectionsSubProcessor_return_allocated_description;
 	public static String LocalCorrectionsSubProcessor_qualify_left_hand_side_description;
 	public static String LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_qualify_right_hand_side_description;
@@ -357,4 +371,7 @@ public final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_throw_allocated_description;
 	public static String SuppressWarningsSubProcessor_fix_suppress_token_label;
 	public static String SuppressWarningsSubProcessor_remove_annotation_label;
+	public static String VarargsWarningsSubProcessor_add_safevarargs_label;
+	public static String VarargsWarningsSubProcessor_add_safevarargs_to_method_label;
+	public static String VarargsWarningsSubProcessor_remove_safevarargs_label;
 }

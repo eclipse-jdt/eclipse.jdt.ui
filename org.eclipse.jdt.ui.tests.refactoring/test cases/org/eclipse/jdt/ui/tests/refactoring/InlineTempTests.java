@@ -45,14 +45,14 @@ public class InlineTempTests extends RefactoringTest {
 		return new RefactoringTestSetup(test);
 	}
 
-	private String getSimpleTestFileName(boolean canInline, boolean input){
+	protected String getSimpleTestFileName(boolean canInline, boolean input){
 		String fileName = "A_" + getName();
 		if (canInline)
 			fileName += input ? "_in": "_out";
 		return fileName + ".java";
 	}
 
-	private String getTestFileName(boolean canInline, boolean input){
+	protected String getTestFileName(boolean canInline, boolean input){
 		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
 		fileName += (canInline ? "canInline/": "cannotInline/");
 		return fileName + getSimpleTestFileName(canInline, input);
@@ -83,13 +83,13 @@ public class InlineTempTests extends RefactoringTest {
 		assertEqualLines("incorrect inlining", getFileContents(getTestFileName(true, false)), newcu.getSource());
 	}
 
-	private void helper1(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
+	protected void helper1(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		helper1(cu, selection);
 	}
 
-	private void helper2() throws Exception{
+	protected void helper2() throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		helper2(cu, getSelection(cu));
 	}
@@ -104,7 +104,7 @@ public class InlineTempTests extends RefactoringTest {
 		}
 	}
 
-	private void helper2(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
+	protected void helper2(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		helper2(cu, selection);

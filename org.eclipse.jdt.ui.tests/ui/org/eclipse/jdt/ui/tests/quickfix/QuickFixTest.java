@@ -78,17 +78,21 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(UnresolvedMethodsQuickFixTest.suite());
 		suite.addTest(ReturnTypeQuickFixTest.suite());
 		suite.addTest(LocalCorrectionsQuickFixTest.suite());
+		suite.addTest(LocalCorrectionsQuickFixTest17.suite());
 		suite.addTest(TypeMismatchQuickFixTests.suite());
 		suite.addTest(ReorgQuickFixTest.suite());
 		suite.addTest(ModifierCorrectionsQuickFixTest.suite());
+		suite.addTest(ModifierCorrectionsQuickFixTest17.suite());
 		suite.addTest(GetterSetterQuickFixTest.suite());
 		suite.addTest(AssistQuickFixTest.suite());
+		suite.addTest(AssistQuickFixTest17.suite());
 		suite.addTest(ChangeNonStaticToStaticTest.suite());
 		suite.addTest(MarkerResolutionTest.suite());
 		suite.addTest(JavadocQuickFixTest.suite());
 		suite.addTest(ConvertForLoopQuickFixTest.suite());
 		suite.addTest(ConvertIterableLoopQuickFixTest.suite());
 		suite.addTest(AdvancedQuickAssistTest.suite());
+		suite.addTest(AdvancedQuickAssistTest17.suite());
 		suite.addTest(CleanUpTestCase.suite());
 		suite.addTest(QuickFixEnablementTest.suite());
 		suite.addTest(SurroundWithTemplateTest.suite());
@@ -209,12 +213,19 @@ public class QuickFixTest extends TestCase {
 		return collectCorrections(cu, astRoot, nProblems, null);
 	}
 
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, int problem) throws CoreException {
+		return collectCorrections(cu, astRoot, nProblems, problem, null);
+	}
 
 	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, AssistContext context) throws CoreException {
+		return collectCorrections(cu, astRoot, nProblems, 0, context);
+	}
+
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, int problem, AssistContext context) throws CoreException {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOfProblems(nProblems, problems);
-		
-		return collectCorrections(cu, problems[0], context);
+
+		return collectCorrections(cu, problems[problem], context);
 	}
 
 	protected static void assertNumberOfProblems(int nProblems, IProblem[] problems) {

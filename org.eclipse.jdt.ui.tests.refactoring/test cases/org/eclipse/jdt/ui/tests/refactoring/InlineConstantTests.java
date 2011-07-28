@@ -33,7 +33,7 @@ public class InlineConstantTests extends RefactoringTest {
 	private static final Class clazz = InlineConstantTests.class;
 	private static final String REFACTORING_PATH = "InlineConstant/";
 
-	private boolean toSucceed;
+	protected boolean toSucceed;
 
 	public InlineConstantTests(String name) {
 		super(name);
@@ -43,7 +43,7 @@ public class InlineConstantTests extends RefactoringTest {
 		return REFACTORING_PATH + successPath();
 	}
 
-	private String successPath() {
+	protected String successPath() {
 		return toSucceed ? "/canInline/" : "/cannotInline/";
 	}
 
@@ -81,10 +81,10 @@ public class InlineConstantTests extends RefactoringTest {
 				return i;
 		return -1;
 	}
-	private void helper1(String cuQName, int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean removeDeclaration) throws Exception{
+	protected void helper1(String cuQName, int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean removeDeclaration) throws Exception{
 		helper1(new String[] {cuQName}, cuQName, startLine, startColumn, endLine, endColumn, replaceAll, removeDeclaration);
 	}
-	private void helper1(String[] cuQNames, String selectionCuQName, int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean removeDeclaration) throws Exception{
+	protected void helper1(String[] cuQNames, String selectionCuQName, int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean removeDeclaration) throws Exception{
 		int selectionCuIndex= firstIndexOf(selectionCuQName, cuQNames);
 		Assert.isTrue(selectionCuIndex != -1, "parameter selectionCuQName must match some String in cuQNames.");
 		helper1(cuQNames, selectionCuIndex, startLine, startColumn, endLine, endColumn, replaceAll, removeDeclaration);

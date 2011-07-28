@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -98,6 +98,11 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 		public Preference[] getSpecificPreferences() {
 			return preferences.toArray(new Preference[preferences.size()]);
+		}
+
+		public void setEnabled(boolean state) {
+			for (Preference preference : preferences)
+				preference.setEnabled(state);
 		}
 	}
 
@@ -397,6 +402,29 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	    FormatterMessages.LineWrappingTabPage_compact_if_else
 	);
 
+	private final Category fTryCategory= new Category(
+			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_RESOURCES_IN_TRY,
+			"class Example {" + //$NON-NLS-1$
+			"void foo() {" + //$NON-NLS-1$
+			"try (FileReader reader1 = new FileReader(\"file1\"); " + //$NON-NLS-1$
+			"  FileReader reader2 = new FileReader(\"file2\")) {" + //$NON-NLS-1$
+			"}" + //$NON-NLS-1$
+			"}}", //$NON-NLS-1$
+			FormatterMessages.LineWrappingTabPage_try
+			);
+
+	private final Category fCatchCategory= new Category(
+			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_UNION_TYPE_IN_MULTICATCH,
+			"class Example {" + //$NON-NLS-1$
+			"void foo() {" + //$NON-NLS-1$
+			"try {" + //$NON-NLS-1$
+			"} catch (IllegalArgumentException | NullPointerException | ClassCastException e) {" + //$NON-NLS-1$
+			"  e.printStackTrace();" + //$NON-NLS-1$
+			"}" + //$NON-NLS-1$
+			"}}", //$NON-NLS-1$
+			FormatterMessages.LineWrappingTabPage_catch
+			);
+
 
 	private final Category fTypeDeclarationSuperclassCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERCLASS_IN_TYPE_DECLARATION,
@@ -663,6 +691,8 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 		final Category statements= new Category(FormatterMessages.LineWrappingTabPage_statements);
 		statements.children.add(fCompactIfCategory);
+		statements.children.add(fTryCategory);
+		statements.children.add(fCatchCategory);
 
 		final List<Category> root= new ArrayList<Category>();
 		root.add(annotations);
@@ -741,6 +771,17 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		layoutData.horizontalSpan= numColumns - 1;
 		layoutData.grabExcessHorizontalSpace= false;
 		fBinaryExpressionCategory.addPreference(expressionWrapPositionPreference);
+		
+		// button "Wrap before '|' operator" in multi-catch
+		Preference expressionWrapMulticatchPositionPreference= createCheckboxPref(fOptionsGroup, 1, FormatterMessages.LineWrappingTabPage_multicatch_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_OR_OPERATOR_MULTICATCH, FALSE_TRUE);
+		control= expressionWrapMulticatchPositionPreference.getControl();
+		control.setVisible(false);
+		layoutData= (GridData)control.getLayoutData();
+		layoutData.exclude= true;
+		layoutData.horizontalAlignment= SWT.BEGINNING;
+		layoutData.horizontalSpan= numColumns - 1;
+		layoutData.grabExcessHorizontalSpace= false;
+		fCatchCategory.addPreference(expressionWrapMulticatchPositionPreference);
 		
 		// label "Select indentation style:"
 		fIndentStylePolicy= createLabel(numColumns, fOptionsGroup, FormatterMessages.LineWrappingTabPage_indentation_policy_label_text);
@@ -912,7 +953,11 @@ public class LineWrappingTabPage extends FormatterTabPage {
     protected void updateControlEnablement(boolean inhomogenous, int wrappingStyle) {
 	    boolean doSplit= wrappingStyle != DefaultCodeFormatterConstants.WRAP_NO_SPLIT;
 	    fIndentStylePolicy.setEnabled(true);
-	    fIndentStyleCombo.setEnabled(inhomogenous || doSplit);
-	    fForceSplit.setEnabled(inhomogenous || doSplit);
+
+		boolean isEnabled= inhomogenous || doSplit;
+		fIndentStyleCombo.setEnabled(isEnabled);
+		fForceSplit.setEnabled(isEnabled);
+		fBinaryExpressionCategory.setEnabled(isEnabled);
+		fCatchCategory.setEnabled(isEnabled);
 	}
 }

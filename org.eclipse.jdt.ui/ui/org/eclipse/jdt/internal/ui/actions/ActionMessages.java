@@ -371,6 +371,7 @@ public final class ActionMessages extends NLS {
 	public static String SurroundWithTemplateMenuAction_NoneApplicable;
 	public static String SurroundWithTemplateMenuAction_SurroundWithTemplateSubMenuName;
 	public static String SurroundWithTemplateMenuAction_SurroundWithTryCatchActionName;
+	public static String SurroundWithTemplateMenuAction_SurroundWithTryMultiCatchActionName;
 
 	public static String ToggleLinkingAction_label;
 	public static String ToggleLinkingAction_tooltip;

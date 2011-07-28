@@ -89,6 +89,8 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.OrganizeImportsAction;
@@ -362,38 +364,62 @@ public class ReorgCorrectionsSubProcessor {
 		}
 	}
 
-	private static final class ChangeTo50Compliance extends ChangeCorrectionProposal implements IWorkspaceRunnable {
+	private static final class ChangeToRequiredCompilerCompliance extends ChangeCorrectionProposal implements IWorkspaceRunnable {
 
 		private final IJavaProject fProject;
 		private final boolean fChangeOnWorkspace;
+		private final String fRequiredVersion;
 
 		private Job fUpdateJob;
-		private boolean f50JREFound;
+		private boolean fRequiredJREFound;
 
-		public ChangeTo50Compliance(String name, IJavaProject project, boolean changeOnWorkspace, int relevance) {
+		public ChangeToRequiredCompilerCompliance(String name, IJavaProject project, boolean changeOnWorkspace, String requiredVersion, int relevance) {
 			super(name, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 			fProject= project;
 			fChangeOnWorkspace= changeOnWorkspace;
+			fRequiredVersion= requiredVersion;
 			fUpdateJob= null;
-			f50JREFound= false;
+			fRequiredJREFound= false;
 		}
 
-		private boolean is50orGreaterVMInstall(IVMInstall install) {
+		private boolean isRequiredOrGreaterVMInstall(IVMInstall install) {
 			if (install instanceof IVMInstall2) {
 				String compliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) install, JavaCore.VERSION_1_3);
-				return JavaModelUtil.is50OrHigher(compliance);
+				return !JavaModelUtil.isVersionLessThan(compliance, fRequiredVersion);
 			}
 			return false;
 		}
 
-		private IVMInstall find50OrGreaterVMInstall() {
+		private String getVMInstallCompliance(IVMInstall install) {
+			if (install instanceof IVMInstall2) {
+				String compliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) install, JavaCore.VERSION_1_3);
+				return compliance;
+			}
+			return JavaCore.VERSION_1_1;
+		}
+		
+		private IVMInstall findRequiredOrGreaterVMInstall() {
+			String bestMatchingCompliance= null;
+			IVMInstall bestMatchingVMInstall= null;
 			IVMInstallType[] installTypes= JavaRuntime.getVMInstallTypes();
 			for (int i= 0; i < installTypes.length; i++) {
 				IVMInstall[] installs= installTypes[i].getVMInstalls();
 				for (int k= 0; k < installs.length; k++) {
-					if (is50orGreaterVMInstall(installs[k])) {
-						return installs[k];
+					String vmInstallCompliance= getVMInstallCompliance(installs[k]);
+					
+					if (fRequiredVersion.equals(vmInstallCompliance)) {
+						return installs[k]; // perfect match
+						
+					} else if (JavaModelUtil.isVersionLessThan(vmInstallCompliance, fRequiredVersion)) {
+						continue; // no match
+						
+					} else if (bestMatchingVMInstall != null) {
+						if (JavaModelUtil.isVersionLessThan(bestMatchingCompliance, vmInstallCompliance)) {
+							continue; // the other one is the least matching
+						}
 					}
+					bestMatchingCompliance= vmInstallCompliance;
+					bestMatchingVMInstall= installs[k];
 				}
 			}
 			return null;
@@ -407,12 +433,16 @@ public class ReorgCorrectionsSubProcessor {
 		}
 
 		private boolean updateJRE( IProgressMonitor monitor) throws CoreException, JavaModelException {
+			// Caveat: Returns true iff the classpath has not been changed.
+			// If the classpath is changed, JDT Core triggers a build for free.
+			// If the classpath is not changed, we have to trigger a build because we changed
+			// the compiler compliance in #apply(IDocument).
 			try {
-				IVMInstall vm50Install= find50OrGreaterVMInstall();
-				f50JREFound= vm50Install != null;
-				if (vm50Install != null) {
-					IVMInstall install= JavaRuntime.getVMInstall(fProject); // can be null
-					if (fChangeOnWorkspace) {
+				if (fChangeOnWorkspace) {
+					IVMInstall vmInstall= findRequiredOrGreaterVMInstall();
+					fRequiredJREFound= vmInstall != null;
+					if (vmInstall != null) {
+						IVMInstall install= JavaRuntime.getVMInstall(fProject); // can be null
 						monitor.beginTask(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_operation, 4);
 						IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall(); // can be null
 						if (defaultVM != null && !defaultVM.equals(install)) {
@@ -421,17 +451,20 @@ public class ReorgCorrectionsSubProcessor {
 						} else {
 							monitor.worked(1);
 						}
-						if (defaultVM == null || !is50orGreaterVMInstall(defaultVM)) {
-							JavaRuntime.setDefaultVMInstall(vm50Install, new SubProgressMonitor(monitor, 3), true);
+						if (defaultVM == null || !isRequiredOrGreaterVMInstall(defaultVM)) {
+							JavaRuntime.setDefaultVMInstall(vmInstall, new SubProgressMonitor(monitor, 3), true);
 							return false;
 						}
 						return true;
-					} else {
-						if (install == null || !is50orGreaterVMInstall(install)) {
-							IPath newPath= new Path(JavaRuntime.JRE_CONTAINER).append(vm50Install.getVMInstallType().getId()).append(vm50Install.getName());
-							updateClasspath(newPath, monitor);
-							return false;
-						}
+					}
+
+				} else {
+					IExecutionEnvironment bestEE= findBestMatchingEE();
+					fRequiredJREFound= bestEE != null;
+					if (bestEE != null) {
+						IPath newPath= JavaRuntime.newJREContainerPath(bestEE);
+						boolean classpathUpdated= updateClasspath(newPath, monitor);
+						return !classpathUpdated;
 					}
 				}
 			} finally {
@@ -440,16 +473,61 @@ public class ReorgCorrectionsSubProcessor {
 			return true;
 		}
 
-		private void updateClasspath(IPath newPath, IProgressMonitor monitor) throws JavaModelException {
+		private IExecutionEnvironment findBestMatchingEE() {
+			IExecutionEnvironmentsManager eeManager= JavaRuntime.getExecutionEnvironmentsManager();
+			IExecutionEnvironment[] ees= eeManager.getExecutionEnvironments();
+			IExecutionEnvironment bestEE= null;
+			String bestEECompliance= null;
+			
+			for (int i= 0; i < ees.length; i++) {
+				IExecutionEnvironment ee= ees[i];
+				String eeCompliance= JavaModelUtil.getExecutionEnvironmentCompliance(ee);
+				String eeId= ee.getId();
+				
+				if (fRequiredVersion.equals(eeCompliance)) {
+					if (eeId.startsWith("J") && eeId.endsWith(fRequiredVersion)) { //$NON-NLS-1$
+						bestEE= ee;
+						break; // perfect match
+					}
+					
+				} else if (JavaModelUtil.isVersionLessThan(eeCompliance, fRequiredVersion)) {
+					continue; // no match
+					
+				} else { // possible match
+					if (bestEE != null) {
+						if (! eeId.startsWith("J")) { //$NON-NLS-1$
+							continue; // avoid taking e.g. OSGi profile if a Java profile is available
+						}
+						if (JavaModelUtil.isVersionLessThan(bestEECompliance, eeCompliance)) {
+							continue; // the other one is the least matching
+						}
+					}
+				}
+				// found a new best
+				bestEE= ee;
+				bestEECompliance= eeCompliance;
+			}
+			return bestEE;
+		}
+
+		private boolean updateClasspath(IPath newPath, IProgressMonitor monitor) throws JavaModelException {
+			boolean updated= false;
+			
 			IClasspathEntry[] classpath= fProject.getRawClasspath();
 			IPath jreContainerPath= new Path(JavaRuntime.JRE_CONTAINER);
 			for (int i= 0; i < classpath.length; i++) {
 				IClasspathEntry curr= classpath[i];
 				if (curr.getEntryKind() == IClasspathEntry.CPE_CONTAINER && curr.getPath().matchingFirstSegments(jreContainerPath) > 0) {
-					classpath[i]= JavaCore.newContainerEntry(newPath, curr.getAccessRules(), curr.getExtraAttributes(), curr.isExported());
+					if (! newPath.equals(curr.getPath())) {
+						updated= true;
+						classpath[i]= JavaCore.newContainerEntry(newPath, curr.getAccessRules(), curr.getExtraAttributes(), curr.isExported());
+					}
 				}
 			}
-			fProject.setRawClasspath(classpath, monitor);
+			if (updated) {
+				fProject.setRawClasspath(classpath, monitor);
+			}
+			return updated;
 		}
 
 		/* (non-Javadoc)
@@ -459,33 +537,46 @@ public class ReorgCorrectionsSubProcessor {
 		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 			StringBuffer message= new StringBuffer();
 			if (fChangeOnWorkspace) {
-				message.append(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeworkspace_description);
+				message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_required_compliance_changeworkspace_description, fRequiredVersion));
 			} else {
-				message.append(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeproject_description);
+				message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_required_compliance_changeproject_description, fRequiredVersion));
 			}
 
-			IVMInstall vm50Install= find50OrGreaterVMInstall();
-			if (vm50Install != null) {
-				try {
-					IVMInstall install= JavaRuntime.getVMInstall(fProject); // can be null
-					if (fChangeOnWorkspace) {
+			try {
+				IVMInstall install= JavaRuntime.getVMInstall(fProject); // can be null
+				if (fChangeOnWorkspace) {
+					IVMInstall vmInstall= findRequiredOrGreaterVMInstall();
+					if (vmInstall != null) {
 						IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall(); // can be null
 						if (defaultVM != null && !defaultVM.equals(install)) {
 							message.append(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeProjectJREToDefault_description);
 						}
-						if (defaultVM == null || !is50orGreaterVMInstall(defaultVM)) {
-							message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeWorkspaceJRE_description, vm50Install.getName()));
-						}
-					} else {
-						if (install == null || !is50orGreaterVMInstall(install)) {
-							message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeProjectJRE_description, vm50Install.getName()));
+						if (defaultVM == null || !isRequiredOrGreaterVMInstall(defaultVM)) {
+							message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeWorkspaceJRE_description, vmInstall.getName()));
 						}
 					}
-				} catch (CoreException e) {
-					// ignore
+				} else {
+					IExecutionEnvironment bestEE= findBestMatchingEE();
+					if (bestEE != null) {
+						if (install == null || !isEEOnClasspath(bestEE)) {
+							message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeProjectJRE_description, bestEE.getId()));
+						}
+					}
 				}
+			} catch (CoreException e) {
+				// ignore
 			}
 			return message.toString();
+		}
+
+		private boolean isEEOnClasspath(IExecutionEnvironment ee) throws JavaModelException {
+			IPath eePath= JavaRuntime.newJREContainerPath(ee);
+			
+			for (IClasspathEntry entry: fProject.getRawClasspath()) {
+				if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER && entry.getPath().equals(eePath))
+					return true;
+			}
+			return false;
 		}
 
 		/* (non-Javadoc)
@@ -495,15 +586,15 @@ public class ReorgCorrectionsSubProcessor {
 		public void apply(IDocument document) {
 			if (fChangeOnWorkspace) {
 				Hashtable<String, String> map= JavaCore.getOptions();
-				JavaModelUtil.set50ComplianceOptions(map);
+				JavaModelUtil.setComplianceOptions(map, fRequiredVersion);
 				JavaCore.setOptions(map);
 			} else {
 				Map<String, String> map= fProject.getOptions(false);
 				int optionsCount= map.size();
-				JavaModelUtil.set50ComplianceOptions(map);
+				JavaModelUtil.setComplianceOptions(map, fRequiredVersion);
 				if (map.size() > optionsCount) {
 					// options have been added -> ensure that all compliance options from preference page set
-					JavaModelUtil.setDefaultClassfileOptions(map, JavaCore.VERSION_1_5);
+					JavaModelUtil.setDefaultClassfileOptions(map, fRequiredVersion);
 				}
 				fProject.setOptions(map);
 			}
@@ -520,27 +611,30 @@ public class ReorgCorrectionsSubProcessor {
 				fUpdateJob.schedule();
 			}
 
-			if (!f50JREFound) {
-				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), CorrectionMessages.ReorgCorrectionsSubProcessor_no_50jre_title, CorrectionMessages.ReorgCorrectionsSubProcessor_no_50jre_message);
+			if (!fRequiredJREFound) {
+				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(),
+						Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_no_required_jre_title, fRequiredVersion),
+						Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_no_required_jre_message, fRequiredVersion));
 			}
 		}
 	}
 
 	/**
-	 * Adds a proposal to change to 5.0 compliance
+	 * Adds a proposal to increase the compiler compliance level
 	 * @param context the context
 	 * @param problem the current problem
 	 * @param proposals the resulting proposals
+	 * @param requiredVersion the minimal required Java compiler version
 	 */
-	public static void getNeed50ComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void getNeedHigherComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals, String requiredVersion) {
 		IJavaProject project= context.getCompilationUnit().getJavaProject();
 
-		String label1= CorrectionMessages.ReorgCorrectionsSubProcessor_50_project_compliance_description;
-		proposals.add(new ChangeTo50Compliance(label1, project, false, 5));
+		String label1= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description, requiredVersion);
+		proposals.add(new ChangeToRequiredCompilerCompliance(label1, project, false, requiredVersion, 5));
 
 		if (project.getOption(JavaCore.COMPILER_COMPLIANCE, false) == null) {
-			String label2= CorrectionMessages.ReorgCorrectionsSubProcessor_50_workspace_compliance_description;
-			proposals.add(new ChangeTo50Compliance(label2, project, true, 6));
+			String label2= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_workspace_compliance_description, requiredVersion);
+			proposals.add(new ChangeToRequiredCompilerCompliance(label2, project, true, requiredVersion, 6));
 		}
 	}
 

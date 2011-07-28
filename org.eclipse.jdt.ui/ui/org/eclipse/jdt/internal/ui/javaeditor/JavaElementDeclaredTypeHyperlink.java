@@ -46,6 +46,7 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 	private final IRegion fRegion;
 	private final SelectionDispatchAction fOpenAction;
 	private final IJavaElement fElement;
+	private final String fTypeSig;
 	private final boolean fQualify;
 	
 	/**
@@ -58,6 +59,20 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 	 *            element.
 	 */
 	public JavaElementDeclaredTypeHyperlink(IRegion region, SelectionDispatchAction openAction, IJavaElement element, boolean qualify) {
+		this(region, openAction, element, null, qualify);
+	}
+
+	/**
+	 * Creates a new Java element declared type hyperlink for variables.
+	 * 
+	 * @param region the region of the link
+	 * @param openAction the action to use to open the Java elements
+	 * @param element the Java element to open
+	 * @param typeSig the signature of the type to open
+	 * @param qualify <code>true</code> if the hyperlink text should show a qualified name for
+	 *            element.
+	 */
+	public JavaElementDeclaredTypeHyperlink(IRegion region, SelectionDispatchAction openAction, IJavaElement element, String typeSig, boolean qualify) {
 		Assert.isNotNull(openAction);
 		Assert.isNotNull(region);
 		Assert.isNotNull(element);
@@ -65,6 +80,7 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 		fRegion= region;
 		fOpenAction= openAction;
 		fElement= element;
+		fTypeSig= typeSig;
 		fQualify= qualify;
 	}
 
@@ -87,8 +103,13 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 	 */
 	public String getHyperlinkText() {
 		if (fQualify) {
-			String elementLabel= JavaElementLabels.getElementLabel(fElement, JavaElementLabels.ALL_FULLY_QUALIFIED);
-			return Messages.format(JavaEditorMessages.JavaElementDeclaredTypeHyperlink_hyperlinkText_qualified, new Object[] { elementLabel });
+			if (fTypeSig == null) {
+				String elementLabel= JavaElementLabels.getElementLabel(fElement, JavaElementLabels.ALL_FULLY_QUALIFIED);
+				return Messages.format(JavaEditorMessages.JavaElementDeclaredTypeHyperlink_hyperlinkText_qualified, new Object[] { elementLabel });
+			} else {
+				String type= Signature.toString(fTypeSig);
+				return Messages.format(JavaEditorMessages.JavaElementDeclaredTypeHyperlink_hyperlinkText_qualified_signature, new Object[] { type });
+			}
 		} else {
 			return JavaEditorMessages.JavaElementDeclaredTypeHyperlink_hyperlinkText;
 		}
@@ -98,12 +119,14 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 	 * @see org.eclipse.jface.text.hyperlink.IHyperlink#open()
 	 */
 	public void open() {
-		String typeSignature;
-		try {
-			typeSignature= JavaElementHyperlinkDeclaredTypeDetector.getTypeSignature(fElement);
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-			return;
+		String typeSignature= fTypeSig;
+		if (typeSignature == null) {
+			try {
+				typeSignature= JavaElementHyperlinkDeclaredTypeDetector.getTypeSignature(fElement);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+				return;
+			}
 		}
 		int kind= Signature.getTypeSignatureKind(typeSignature);
 		if (kind == Signature.ARRAY_TYPE_SIGNATURE) {

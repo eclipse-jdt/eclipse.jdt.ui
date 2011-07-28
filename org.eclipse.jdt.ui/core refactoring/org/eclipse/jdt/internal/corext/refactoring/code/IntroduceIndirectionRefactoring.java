@@ -1059,6 +1059,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			return status;
 		}
 
+		currentTypeBinding= currentTypeBinding.getTypeDeclaration();
+
 		ITypeBinding typeOfCall= ASTNodes.getEnclosingType(originalInvocation);
 		if (!typeOfCall.equals(currentTypeBinding)) {
 			if (currentTypeBinding.isAnonymous()) {

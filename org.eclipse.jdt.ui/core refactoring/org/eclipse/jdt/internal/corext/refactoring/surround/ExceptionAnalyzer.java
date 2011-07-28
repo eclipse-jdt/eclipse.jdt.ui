@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -127,6 +128,13 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 		if (!isSelected(node))
 			return false;
 		return handleExceptions(node.resolveConstructorBinding());
+	}
+
+	@Override
+	public boolean visit(VariableDeclarationExpression node) {
+		if (!isSelected(node))
+			return false;
+		return super.visit(node);
 	}
 
 	private boolean handleExceptions(IMethodBinding binding) {

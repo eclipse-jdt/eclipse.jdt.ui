@@ -64,10 +64,19 @@ import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 public final class JavaModelUtil {
 	
 	/**
+	 * The latest available {@link JavaCore}{@code #VERSION_*} level.
+	 * @since 3.7
+	 */
+	public static final String VERSION_LATEST;
+	static {
+		VERSION_LATEST= JavaCore.VERSION_1_7; // make sure it is not inlined
+	}
+	
+	/**
 	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=309163
 	 * @since 3.7
 	 */
-	public static final boolean HIDE_VERSION_1_7= true;
+	public static final boolean HIDE_VERSION_1_7= Boolean.FALSE.booleanValue();
 
 	/**
 	 * Only use this suffix for creating new .java files.
@@ -684,14 +693,6 @@ public final class JavaModelUtil {
 	}
 
 
-	/**
-	 * Sets all compliance settings in the given map to 5.0
-	 * @param map the map to update
-	 */
-	public static void set50ComplianceOptions(Map<String, String> map) {
-		setComplianceOptions(map, JavaCore.VERSION_1_5);
-	}
-
 	public static void setComplianceOptions(Map<String, String> map, String compliance) {
 		JavaCore.setComplianceOptions(compliance, map);
 	}
@@ -723,12 +724,16 @@ public final class JavaModelUtil {
 	public static boolean is50OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_5);
 	}
+	
+	public static boolean is17OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_1_7);
+	}
 
 	/**
-	 * Checks if the given project or workspace has source compliance 5.0 or greater.
+	 * Checks if the given project or workspace has source compliance 1.5 or greater.
 	 *
 	 * @param project the project to test or <code>null</code> to test the workspace settings
-	 * @return <code>true</code> if the given project or workspace has source compliance 5.0 or greater.
+	 * @return <code>true</code> if the given project or workspace has source compliance 1.5 or greater.
 	 */
 	public static boolean is50OrHigher(IJavaProject project) {
 		String source= project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
@@ -736,12 +741,23 @@ public final class JavaModelUtil {
 	}
 
 	/**
-	 * Checks if the JRE of the given project or workspace default JRE have source compliance 5.0 or
+	 * Checks if the given project or workspace has source compliance 1.7 or greater.
+	 *
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 1.7 or greater.
+	 */
+	public static boolean is17OrHigher(IJavaProject project) {
+		String source= project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
+		return is17OrHigher(source);
+	}
+	
+	/**
+	 * Checks if the JRE of the given project or workspace default JRE have source compliance 1.5 or
 	 * greater.
 	 *
 	 * @param project the project to test or <code>null</code> to test the workspace JRE
 	 * @return <code>true</code> if the JRE of the given project or workspace default JRE have
-	 *         source compliance 5.0 or greater.
+	 *         source compliance 1.5 or greater.
 	 * @throws CoreException if unable to determine the project's VM install
 	 */
 	public static boolean is50OrHigherJRE(IJavaProject project) throws CoreException {
@@ -752,11 +768,11 @@ public final class JavaModelUtil {
 			vmInstall= JavaRuntime.getVMInstall(project);
 		}
 		if (!(vmInstall instanceof IVMInstall2))
-			return true; // assume 5.0.
+			return true; // assume 1.5.
 
 		String compliance= getCompilerCompliance((IVMInstall2) vmInstall, null);
 		if (compliance == null)
-			return true; // assume 5.0
+			return true; // assume 1.5
 		return compliance.startsWith(JavaCore.VERSION_1_5)
 				|| compliance.startsWith(JavaCore.VERSION_1_6)
 				|| compliance.startsWith(JavaCore.VERSION_1_7);
@@ -887,6 +903,10 @@ public final class JavaModelUtil {
 	 */
 	public static boolean isPackageInfo(ICompilationUnit cu) {
 		return "package-info.java".equals(cu.getElementName()); //$NON-NLS-1$
+	}
+
+	public static boolean isPolymorphicSignature(IMethod method) {
+		return method.getAnnotation("java.lang.invoke.MethodHandle$PolymorphicSignature").exists(); //$NON-NLS-1$
 	}
 
 }

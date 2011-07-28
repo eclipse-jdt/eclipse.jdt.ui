@@ -83,6 +83,7 @@ public class JavaProjectHelper {
 
 	public static final IPath RT_STUBS_15= new Path("testresources/rtstubs15.jar");
 	public static final IPath RT_STUBS_16= new Path("testresources/rtstubs16.jar");
+	public static final IPath RT_STUBS_17= new Path("testresources/rtstubs17.jar");
 	public static final IPath JUNIT_SRC_381= new Path("testresources/junit381-noUI-src.zip");
 	public static final String JUNIT_SRC_ENCODING= "ISO-8859-1";
 
@@ -183,6 +184,26 @@ public class JavaProjectHelper {
 	}
 
 	/**
+	 * Sets the compiler options to 1.7 for the given project.
+	 * @param project the java project
+	 */
+	public static void set17CompilerOptions(IJavaProject project) {
+		Map options= project.getOptions(false);
+		JavaProjectHelper.set17CompilerOptions(options);
+		project.setOptions(options);
+	}
+	
+	/**
+	 * Sets the compiler options to 1.6 for the given project.
+	 * @param project the java project
+	 */
+	public static void set16CompilerOptions(IJavaProject project) {
+		Map options= project.getOptions(false);
+		JavaProjectHelper.set16CompilerOptions(options);
+		project.setOptions(options);
+	}
+	
+	/**
 	 * Sets the compiler options to 1.5 for the given project.
 	 * @param project the java project
 	 */
@@ -203,15 +224,19 @@ public class JavaProjectHelper {
 	}
 
 	/**
+	 * Sets the compiler options to 1.7
+	 * @param options The compiler options to configure
+	 */
+	public static void set17CompilerOptions(Map options) {
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
+	}
+	
+	/**
 	 * Sets the compiler options to 1.6
 	 * @param options The compiler options to configure
 	 */
 	public static void set16CompilerOptions(Map options) {
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_6);
-		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
-		options.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.ERROR);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_6);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_6);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_6, options);
 	}
 
 	/**
@@ -219,11 +244,7 @@ public class JavaProjectHelper {
 	 * @param options The compiler options to configure
 	 */
 	public static void set15CompilerOptions(Map options) {
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
-		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
-		options.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.ERROR);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_5, options);
 	}
 
 	/**
@@ -231,11 +252,7 @@ public class JavaProjectHelper {
 	 * @param options The compiler options to configure
 	 */
 	public static void set14CompilerOptions(Map options) {
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
-		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
-		options.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.WARNING);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_3);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_2);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, options);
 	}
 
 	/**
@@ -243,11 +260,7 @@ public class JavaProjectHelper {
 	 * @param options The compiler options to configure
 	 */
 	public static void set13CompilerOptions(Map options) {
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_3);
-		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.WARNING);
-		options.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.WARNING);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_3);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_2);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_3, options);
 	}
 
 	/**
@@ -603,11 +616,13 @@ public class JavaProjectHelper {
 
 	public static IPackageFragmentRoot addRTJar16(IJavaProject jproject) throws CoreException {
 		IPath[] rtJarPath= findRtJar(RT_STUBS_16);
+		set16CompilerOptions(jproject);
+		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
+	}
 
-		Map options= jproject.getOptions(false);
-		JavaProjectHelper.set16CompilerOptions(options);
-		jproject.setOptions(options);
-
+	public static IPackageFragmentRoot addRTJar17(IJavaProject jproject) throws CoreException {
+		IPath[] rtJarPath= findRtJar(RT_STUBS_17);
+		set17CompilerOptions(jproject);
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
 

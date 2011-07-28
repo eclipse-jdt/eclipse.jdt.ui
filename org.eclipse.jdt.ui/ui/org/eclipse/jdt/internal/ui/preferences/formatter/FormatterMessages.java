@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     istvan@benedek-home.de - 103706 [formatter] indent empty lines
@@ -82,7 +82,8 @@ final class FormatterMessages extends NLS {
 	public static String WhiteSpaceTabPage_switch_before_default_colon;
 	public static String WhiteSpaceTabPage_do;
 	public static String WhiteSpaceTabPage_synchronized;
-	public static String WhiteSpaceTabPage_try;
+	public static String WhiteSpaceTabPage_catch;
+	public static String WhiteSpaceTabPage_tryWithResources;
 	public static String WhiteSpaceTabPage_if;
 	public static String WhiteSpaceTabPage_assert;
 	public static String WhiteSpaceTabPage_for;
@@ -167,6 +168,7 @@ final class FormatterMessages extends NLS {
 	public static String WhiteSpaceOptions_postfix_operator;
 	public static String WhiteSpaceOptions_opening_paren;
 	public static String WhiteSpaceOptions_catch;
+	public static String WhiteSpaceOptions_try;
 	public static String WhiteSpaceOptions_for;
 	public static String WhiteSpaceOptions_if;
 	public static String WhiteSpaceOptions_switch;
@@ -262,6 +264,7 @@ final class FormatterMessages extends NLS {
 	public static String WhiteSpaceOptions_after_ellipsis;
 	public static String WhiteSpaceOptions_return_with_parenthesized_expression;
 	public static String WhiteSpaceOptions_throw_with_parenthesized_expression;
+	public static String LineWrappingTabPage_catch;
 	public static String LineWrappingTabPage_compact_if_else;
 	public static String LineWrappingTabPage_declaration;
 	public static String LineWrappingTabPage_extends_clause;
@@ -272,6 +275,7 @@ final class FormatterMessages extends NLS {
 	public static String LineWrappingTabPage_arguments;
 	public static String LineWrappingTabPage_qualified_invocations;
 	public static String LineWrappingTabPage_throws_clause;
+	public static String LineWrappingTabPage_try;
 	public static String LineWrappingTabPage_object_allocation;
 	public static String LineWrappingTabPage_qualified_object_allocation;
 	public static String LineWrappingTabPage_array_init;
@@ -311,6 +315,7 @@ final class FormatterMessages extends NLS {
 	public static String LineWrappingTabPage_enum_superinterfaces;
 	public static String LineWrappingTabPage_assignment_alignment;
 	public static String LineWrappingTabPage_binary_expression_wrap_operator;
+	public static String LineWrappingTabPage_multicatch_wrap_operator;
 	public static String LineWrappingTabPage_annotations;
 	public static String LineWrappingTabPage_annotations_arguments;
 	public static String LineWrappingTabPage_wrap_outer_expressions_when_nested;

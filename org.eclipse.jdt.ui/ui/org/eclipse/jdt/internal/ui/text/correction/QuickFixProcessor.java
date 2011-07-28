@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
@@ -57,8 +58,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UndefinedType:
 			case IProblem.TypeMismatch:
 			case IProblem.UnhandledException:
+			case IProblem.UnhandledExceptionOnAutoClose:
 			case IProblem.UnreachableCatch:
 			case IProblem.InvalidCatchBlockSequence:
+			case IProblem.InvalidUnionTypeReferenceSequence:
 			case IProblem.VoidMethodReturnsValue:
 			case IProblem.ShouldReturnValue:
 			case IProblem.MissingReturnType:
@@ -200,6 +203,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnnecessaryNLSTag:
 			case IProblem.AssignmentHasNoEffect:
 			case IProblem.UnsafeTypeConversion:
+			case IProblem.RawTypeReference:
+			case IProblem.UnsafeRawMethodInvocation:
+			case IProblem.RedundantSpecificationOfTypeArguments:
 			case IProblem.UndefinedAnnotationMember:
 			case IProblem.MissingValueForAnnotationMember:
 			case IProblem.FallthroughCase:
@@ -214,6 +220,17 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnusedObjectAllocation:
 			case IProblem.MethodCanBeStatic:
 			case IProblem.MethodCanBePotentiallyStatic:
+			case IProblem.AutoManagedResourceNotBelow17:
+			case IProblem.MultiCatchNotBelow17:
+			case IProblem.PolymorphicMethodNotBelow17:
+			case IProblem.BinaryLiteralNotBelow17:
+			case IProblem.UnderscoresInLiteralsNotBelow17:
+			case IProblem.SwitchOnStringsNotBelow17:
+			case IProblem.DiamondNotBelow17:
+			case IProblem.PotentialHeapPollutionFromVararg :
+			case IProblem.UnsafeGenericArrayForVarargs:
+			case IProblem.SafeVarargsOnFixedArityMethod :
+			case IProblem.SafeVarargsOnNonFinalInstanceMethod:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId);
@@ -230,6 +247,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				offset--;
 			}
 		} catch(JavaModelException e) {
+			// use start
 		}
 		return start;
 	}
@@ -323,10 +341,12 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				TypeMismatchSubProcessor.addIncompatibleThrowsProposals(context, problem, proposals);
 				break;
 			case IProblem.UnhandledException:
+			case IProblem.UnhandledExceptionOnAutoClose:
 				LocalCorrectionsSubProcessor.addUncaughtExceptionProposals(context, problem, proposals);
 				break;
 			case IProblem.UnreachableCatch:
 			case IProblem.InvalidCatchBlockSequence:
+			case IProblem.InvalidUnionTypeReferenceSequence:
 				LocalCorrectionsSubProcessor.addUnreachableCatchProposals(context, problem, proposals);
 				break;
 			case IProblem.RedundantSuperinterface:
@@ -548,7 +568,18 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.InvalidUsageOfVarargs:
 			case IProblem.InvalidUsageOfAnnotations:
 			case IProblem.InvalidUsageOfAnnotationDeclarations:
-				ReorgCorrectionsSubProcessor.getNeed50ComplianceProposals(context, problem, proposals);
+				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_1_5);
+				break;
+			case IProblem.DiamondNotBelow17:
+				TypeArgumentMismatchSubProcessor.getInferDiamondArgumentsProposal(context, problem, proposals);
+				//$FALL-THROUGH$
+			case IProblem.AutoManagedResourceNotBelow17:
+			case IProblem.MultiCatchNotBelow17:
+			case IProblem.PolymorphicMethodNotBelow17:
+			case IProblem.BinaryLiteralNotBelow17:
+			case IProblem.UnderscoresInLiteralsNotBelow17:
+			case IProblem.SwitchOnStringsNotBelow17:
+				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_1_7);
 				break;
 			case IProblem.NonGenericType:
 				TypeArgumentMismatchSubProcessor.removeMismatchedArguments(context, problem, proposals);
@@ -585,6 +616,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				LocalCorrectionsSubProcessor.addDeprecatedFieldsToMethodsProposals(context, problem, proposals);
 				LocalCorrectionsSubProcessor.addTypePrametersToRawTypeReference(context, problem, proposals);
 				break;
+			case IProblem.RedundantSpecificationOfTypeArguments:
+				LocalCorrectionsSubProcessor.addRemoveRedundantTypeArgumentsProposals(context, problem, proposals);
+				break;
 			case IProblem.FallthroughCase:
 				LocalCorrectionsSubProcessor.addFallThroughProposals(context, problem, proposals);
 				break;
@@ -606,6 +640,16 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MethodCanBeStatic:
 			case IProblem.MethodCanBePotentiallyStatic:
 				ModifierCorrectionSubProcessor.addStaticMethodProposal(context, problem, proposals);
+				break;
+			case IProblem.PotentialHeapPollutionFromVararg :
+				VarargsWarningsSubProcessor.addAddSafeVarargsProposals(context, problem, proposals);
+				break;
+			case IProblem.UnsafeGenericArrayForVarargs:
+				VarargsWarningsSubProcessor.addAddSafeVarargsToDeclarationProposals(context, problem, proposals);
+				break;
+			case IProblem.SafeVarargsOnFixedArityMethod :
+			case IProblem.SafeVarargsOnNonFinalInstanceMethod:
+				VarargsWarningsSubProcessor.addRemoveSafeVarargsProposals(context, problem, proposals);
 				break;
 			default:
 		}

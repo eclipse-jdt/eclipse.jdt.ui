@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import java.util.List;
+
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
@@ -33,10 +35,9 @@ public class JavaElementHyperlinkImplementationDetector extends JavaElementHyper
 	 * @since 3.5
 	 */
 	@Override
-	protected IHyperlink createHyperlink(IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
+	protected void addHyperlinks(List<IHyperlink> hyperlinksCollector, IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
 		if (element.getElementType() == IJavaElement.METHOD && SelectionConverter.canOperateOn(editor)) {
-			return new JavaElementImplementationHyperlink(wordRegion, openAction, (IMethod)element, qualify, editor);
+			hyperlinksCollector.add(new JavaElementImplementationHyperlink(wordRegion, openAction, (IMethod)element, qualify, editor));
 		}
-		return null;
 	}
 }

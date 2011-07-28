@@ -45,6 +45,7 @@ public class CoreTests extends TestCase {
 		suite.addTest(HierarchicalASTVisitorTest.suite());
 		suite.addTest(ImportOrganizeTest.suite());
 		suite.addTest(JavaElementLabelsTest.suite());
+		suite.addTest(JavaElementLabelsTest17.suite());
 		suite.addTest(JavaElementPropertyTesterTest.suite());
 		suite.addTest(JavaModelUtilTest.suite());
 		suite.addTest(MethodOverrideTest.suite());

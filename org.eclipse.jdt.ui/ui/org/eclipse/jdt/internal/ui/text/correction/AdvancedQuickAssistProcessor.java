@@ -26,6 +26,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -38,6 +39,7 @@ import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ContinueStatement;
@@ -47,6 +49,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -55,6 +58,7 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
@@ -88,6 +92,7 @@ import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
+import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -156,6 +161,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (coveringNode != null) {
 			ArrayList<ASTNode> coveredNodes= getFullyCoveredNodes(context, coveringNode);
 			ArrayList<ICommandAccess> resultingCollections= new ArrayList<ICommandAccess>();
+
+			//quick assists that show up also if there is an error/warning
+			getReplaceConditionalWithIfElseProposals(context, coveringNode, resultingCollections);
+
 			if (QuickAssistProcessor.noErrorsAtLocation(locations)) {
 				getInverseIfProposals(context, coveringNode, resultingCollections);
 				getIfReturnIntoIfElseAtEndOfVoidMethodProposals(context, coveringNode, resultingCollections);
@@ -175,7 +184,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getCastAndAssignIfStatementProposals(context, coveringNode, resultingCollections);
 				getPickOutStringProposals(context, coveringNode, resultingCollections);
 				getReplaceIfElseWithConditionalProposals(context, coveringNode, resultingCollections);
-				getReplaceConditionalWithIfElseProposals(context, coveringNode, resultingCollections);
 				getInverseLocalVariableProposals(context, coveringNode, resultingCollections);
 				getPushNegationDownProposals(context, coveringNode, resultingCollections);
 				getPullNegationUpProposals(context, coveredNodes, resultingCollections);
@@ -708,7 +716,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static ArrayList<ASTNode> getFullyCoveredNodes(IInvocationContext context, ASTNode coveringNode) {
+	static ArrayList<ASTNode> getFullyCoveredNodes(IInvocationContext context, ASTNode coveringNode) {
 		final ArrayList<ASTNode> coveredNodes= new ArrayList<ASTNode>();
 		final int selectionBegin= context.getSelectionOffset();
 		final int selectionEnd= selectionBegin + context.getSelectionLength();
@@ -1668,7 +1676,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Expression elseCopy= (Expression) rewrite.createCopyTarget(elseExpression);
 
 
-		if (!JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {
+		IJavaProject project= context.getCompilationUnit().getJavaProject();
+		if (!JavaModelUtil.is50OrHigher(project)) {
 			ITypeBinding thenBinding= thenExpression.resolveTypeBinding();
 			ITypeBinding elseBinding= elseExpression.resolveTypeBinding();
 			if (thenBinding != null && elseBinding != null && exprBinding != null && !elseBinding.isAssignmentCompatible(thenBinding)) {
@@ -1679,6 +1688,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				castException.setExpression(elseCopy);
 				elseCopy= castException;
 			}
+		} else if (JavaModelUtil.is17OrHigher(project)) {
+			addExplicitTypeArgumentsIfNecessary(rewrite, proposal, thenExpression);
+			addExplicitTypeArgumentsIfNecessary(rewrite, proposal, elseExpression);
 		}
 		conditionalExpression.setThenExpression(thenCopy);
 		conditionalExpression.setElseExpression(elseCopy);
@@ -1703,6 +1715,42 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
+	private static void addExplicitTypeArgumentsIfNecessary(ASTRewrite rewrite, ASTRewriteCorrectionProposal proposal, Expression invocation) {
+		if (Invocations.isResolvedTypeInferredFromExpectedType(invocation)) {
+			ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(invocation);
+			if (typeArguments == null)
+				return;
+			
+			ImportRewrite importRewrite= proposal.getImportRewrite();
+			if (importRewrite == null) {
+				importRewrite= proposal.createImportRewrite((CompilationUnit) invocation.getRoot());
+			}
+			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(invocation, importRewrite);
+			
+			AST ast= invocation.getAST();
+			ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(rewrite, invocation);
+			
+			for (int i= 0; i < typeArguments.length; i++) {
+				Type typeArgumentNode= importRewrite.addImport(typeArguments[i], ast, importRewriteContext);
+				typeArgsRewrite.insertLast(typeArgumentNode, null);
+			}
+			
+			if (invocation instanceof MethodInvocation) {
+				MethodInvocation methodInvocation= (MethodInvocation) invocation;
+				Expression expression= methodInvocation.getExpression();
+				if (expression == null) {
+					IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+					if (methodBinding != null && Modifier.isStatic(methodBinding.getModifiers())) {
+						expression= ast.newName(importRewrite.addImport(methodBinding.getDeclaringClass().getTypeDeclaration(), importRewriteContext));
+					} else {
+						expression= ast.newThisExpression();
+					}
+					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, expression, null);
+				}
+			}
+		}
+	}
+	
 	private static ReturnStatement createReturnExpression(ASTRewrite rewrite, Expression expression) {
 		AST ast= rewrite.getAST();
 		ReturnStatement thenReturn= ast.newReturnStatement();
@@ -2166,12 +2214,15 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		final ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
 		//
 		SwitchStatement switchStatement= (SwitchStatement) covering;
+		ITypeBinding expressionType= switchStatement.getExpression().resolveTypeBinding();
+		boolean isStringsInSwitch= expressionType != null && "java.lang.String".equals(expressionType.getQualifiedName()); //$NON-NLS-1$
+		String label= isStringsInSwitch ? CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIfRemovingNullCheck : CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIf;
 		IfStatement firstIfStatement= null;
 		IfStatement currentIfStatement= null;
 		Block currentBlock= null;
 		boolean hasStopAsLastExecutableStatement= false;
 		Block defaultBlock= null;
-		InfixExpression currentCondition= null;
+		Expression currentCondition= null;
 		boolean defaultFound= false;
 
 		ArrayList<Block> allBlocks= new ArrayList<Block>();
@@ -2200,7 +2251,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					return false;
 				}
 				// prepare condition
-				InfixExpression switchCaseCondition= createSwitchCaseCondition(ast, rewrite, importRewrite, importRewriteContext, switchStatement, switchCase);
+				Expression switchCaseCondition= createSwitchCaseCondition(ast, rewrite, importRewrite, importRewriteContext, switchStatement, switchCase, isStringsInSwitch);
 				if (currentCondition == null) {
 					currentCondition= switchCaseCondition;
 				} else {
@@ -2265,8 +2316,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		// replace 'switch' with single if-else-if statement
 		rewrite.replace(switchStatement, firstIfStatement, null);
-		// prepare label, specially for Daniel :-)
-		String label= CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIf;
 
 		// add correction proposal
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -2276,29 +2325,35 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static InfixExpression createSwitchCaseCondition(AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, ImportRewriteContext importRewriteContext, SwitchStatement switchStatement,
-			SwitchCase switchCase) {
-		InfixExpression condition= ast.newInfixExpression();
-		condition.setOperator(InfixExpression.Operator.EQUALS);
-		//
-		Expression leftExpression= getParenthesizedExpressionIfNeeded(ast, rewrite, switchStatement.getExpression(), condition, InfixExpression.LEFT_OPERAND_PROPERTY);
-		condition.setLeftOperand(leftExpression);
-		//
-		Expression rightExpression= null;
+	private static Expression createSwitchCaseCondition(AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, ImportRewriteContext importRewriteContext, SwitchStatement switchStatement,
+			SwitchCase switchCase, boolean isStringsInSwitch) {
 		Expression expression= switchCase.getExpression();
-		if (expression instanceof SimpleName && ((SimpleName) expression).resolveBinding() instanceof IVariableBinding) {
-			IVariableBinding binding= (IVariableBinding) ((SimpleName) expression).resolveBinding();
-			if (binding.isEnumConstant()) {
-				String qualifiedName= importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext) + '.' + binding.getName();
-				rightExpression= ast.newName(qualifiedName);
+		if (isStringsInSwitch) {
+			MethodInvocation methodInvocation= ast.newMethodInvocation();
+			methodInvocation.setExpression((Expression) rewrite.createCopyTarget(expression));
+			methodInvocation.setName(ast.newSimpleName("equals")); //$NON-NLS-1$
+			methodInvocation.arguments().add(rewrite.createCopyTarget(switchStatement.getExpression()));
+			return methodInvocation;
+		} else {
+			InfixExpression condition= ast.newInfixExpression();
+			condition.setOperator(InfixExpression.Operator.EQUALS);
+			Expression leftExpression= getParenthesizedExpressionIfNeeded(ast, rewrite, switchStatement.getExpression(), condition, InfixExpression.LEFT_OPERAND_PROPERTY);
+			condition.setLeftOperand(leftExpression);
+
+			Expression rightExpression= null;
+			if (expression instanceof SimpleName && ((SimpleName) expression).resolveBinding() instanceof IVariableBinding) {
+				IVariableBinding binding= (IVariableBinding) ((SimpleName) expression).resolveBinding();
+				if (binding.isEnumConstant()) {
+					String qualifiedName= importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext) + '.' + binding.getName();
+					rightExpression= ast.newName(qualifiedName);
+				}
 			}
+			if (rightExpression == null) {
+				rightExpression= (Expression) rewrite.createCopyTarget(expression);
+			}
+			condition.setRightOperand(rightExpression);
+			return condition;
 		}
-		if (rightExpression == null) {
-			rightExpression= (Expression) rewrite.createCopyTarget(expression);
-		}
-		condition.setRightOperand(rightExpression);
-		//
-		return condition;
 	}
 
 

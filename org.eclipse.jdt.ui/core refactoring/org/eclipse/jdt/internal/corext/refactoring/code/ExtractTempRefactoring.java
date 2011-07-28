@@ -85,6 +85,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -442,12 +443,13 @@ public class ExtractTempRefactoring extends Refactoring {
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_assignment);
 				else
 					return null;
-
 			} else if (selectedExpression instanceof SimpleName) {
 				if ((((SimpleName) selectedExpression)).isDeclaration())
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_names_in_declarations);
 				if (parent instanceof QualifiedName && selectedExpression.getLocationInParent() == QualifiedName.NAME_PROPERTY || parent instanceof FieldAccess && selectedExpression.getLocationInParent() == FieldAccess.NAME_PROPERTY)
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_select_expression);
+			} else if (selectedExpression instanceof VariableDeclarationExpression && parent instanceof TryStatement) {
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_resource_in_try_with_resources);
 			}
 		}
 
@@ -876,7 +878,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		AST ast= rewrite.getAST();
 
-		if (expression instanceof ClassInstanceCreation) {
+		if (expression instanceof ClassInstanceCreation && (typeBinding == null || typeBinding.getTypeArguments().length == 0)) {
 			resultingType= (Type) rewrite.createCopyTarget(((ClassInstanceCreation) expression).getType());
 		} else if (expression instanceof CastExpression) {
 			resultingType= (Type) rewrite.createCopyTarget(((CastExpression) expression).getType());

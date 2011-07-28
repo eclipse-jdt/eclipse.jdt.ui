@@ -98,6 +98,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -1069,6 +1070,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 
 	@Override
 	public void endVisit(WildcardType node) {
+		endVisit((Type)node);
+	}
+
+	@Override
+	public boolean visit(UnionType node) {
+		return visit((Type)node);
+	}
+
+	@Override
+	public void endVisit(UnionType node) {
 		endVisit((Type)node);
 	}
 

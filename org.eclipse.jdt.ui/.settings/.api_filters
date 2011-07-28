@@ -135,5 +135,27 @@
                 <message_argument value="IJavaEditorActionDefinitionIds"/>
             </message_arguments>
         </filter>
+        <filter id="1210056707">
+            <message_arguments>
+                <message_argument value="3.7.1"/>
+                <message_argument value="SURROUND_WITH_TRY_MULTI_CATCH"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/ui/actions/JdtActionConstants.java" type="org.eclipse.jdt.ui.actions.JdtActionConstants">
+        <filter id="1142947843">
+            <message_arguments>
+                <message_argument value="3.7.1"/>
+                <message_argument value="SURROUND_WITH_TRY_MULTI_CATCH"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/ui/actions/SurroundWithTryMultiCatchAction.java" type="org.eclipse.jdt.ui.actions.SurroundWithTryMultiCatchAction">
+        <filter id="1109393411">
+            <message_arguments>
+                <message_argument value="3.7.1"/>
+                <message_argument value="org.eclipse.jdt.ui.actions.SurroundWithTryMultiCatchAction"/>
+            </message_arguments>
+        </filter>
     </resource>
 </component>

@@ -61,6 +61,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -247,7 +248,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		switch (fReturnKind) {
 			case ACCESS_TO_LOCAL:
 				VariableDeclaration declaration= ASTNodes.findVariableDeclaration(fReturnValue, fEnclosingBodyDeclaration);
-				fReturnType= ASTNodeFactory.newType(ast, declaration);
+				fReturnType= ASTNodeFactory.newType(ast, declaration, rewriter, new ContextSensitiveImportRewriteContext(declaration, rewriter));
 				if (declaration.resolveBinding() != null) {
 					fReturnTypeBinding= declaration.resolveBinding().getType();
 				}
@@ -843,6 +844,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 	@Override
 	public void endVisit(VariableDeclarationExpression node) {
+		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED && getFirstSelectedNode() == node) {
+			if (node.getLocationInParent() == TryStatement.RESOURCES_PROPERTY) {
+				invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_resource_in_try_with_resources, JavaStatusContext.create(fCUnit, getSelection()));
+			}
+		}
 		checkTypeInDeclaration(node.getType());
 		super.endVisit(node);
 	}

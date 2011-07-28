@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import java.util.List;
+
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
@@ -17,6 +19,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -37,16 +40,25 @@ public class JavaElementHyperlinkDeclaredTypeDetector extends JavaElementHyperli
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkDetector#createHyperlink(org.eclipse.jface.text.IRegion, org.eclipse.jdt.ui.actions.SelectionDispatchAction, org.eclipse.jdt.core.IJavaElement, boolean, org.eclipse.jdt.internal.ui.javaeditor.JavaEditor)
 	 */
 	@Override
-	protected IHyperlink createHyperlink(IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
+	protected void addHyperlinks(List<IHyperlink> hyperlinksCollector, IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
 		try {
-			if ((element.getElementType() == IJavaElement.FIELD || element.getElementType() == IJavaElement.LOCAL_VARIABLE) && !JavaModelUtil.isPrimitive(getTypeSignature(element))
-					&& SelectionConverter.canOperateOn(editor)) {
-				return new JavaElementDeclaredTypeHyperlink(wordRegion, openAction, element, qualify);
+			if (element.getElementType() == IJavaElement.FIELD || element.getElementType() == IJavaElement.LOCAL_VARIABLE) {
+				String typeSignature= getTypeSignature(element);
+				if (!JavaModelUtil.isPrimitive(typeSignature) && SelectionConverter.canOperateOn(editor)) {
+					if (Signature.getTypeSignatureKind(typeSignature) == Signature.INTERSECTION_TYPE_SIGNATURE) {
+						String[] bounds= Signature.getIntersectionTypeBounds(typeSignature);
+						qualify|= bounds.length >= 2;
+						for (int i= 0; i < bounds.length; i++) {
+							hyperlinksCollector.add(new JavaElementDeclaredTypeHyperlink(wordRegion, openAction, element, bounds[i], qualify));
+						}
+					} else {
+						hyperlinksCollector.add(new JavaElementDeclaredTypeHyperlink(wordRegion, openAction, element, qualify));
+					}
+				}
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		return null;
 	}
 
 	/**

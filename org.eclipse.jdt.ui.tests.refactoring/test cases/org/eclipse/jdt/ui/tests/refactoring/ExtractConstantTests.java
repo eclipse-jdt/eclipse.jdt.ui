@@ -61,14 +61,14 @@ public class ExtractConstantTests extends RefactoringTest {
 		return new RefactoringTestSetup(test);
 	}
 
-	private String getSimpleTestFileName(boolean canInline, boolean input){
+	protected String getSimpleTestFileName(boolean canInline, boolean input) {
 		String fileName = "A_" + getName();
 		if (canInline)
 			fileName += input ? "_in": "_out";
 		return fileName + ".java";
 	}
 
-	private String getTestFileName(boolean canExtract, boolean input){
+	protected String getTestFileName(boolean canExtract, boolean input) {
 		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
 		fileName += (canExtract ? "canExtract/": "cannotExtract/");
 		return fileName + getSimpleTestFileName(canExtract, input);
@@ -139,11 +139,11 @@ public class ExtractConstantTests extends RefactoringTest {
 		assertEqualLines(getFileContents(getTestFileName(true, false)), newcu.getSource());
 	}
 
-	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName, String guessedConstantName) throws Exception{
+	protected void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName, String guessedConstantName) throws Exception {
 		helper1(startLine, startColumn, endLine, endColumn, replaceAll, allowLoadtime, false, constantName, guessedConstantName);
 	}
 
-	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName) throws Exception {
+	protected void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName) throws Exception {
 		failHelper1(startLine, startColumn, endLine, endColumn, replaceAll, allowLoadtime, constantName, 0, false);
 	}
 

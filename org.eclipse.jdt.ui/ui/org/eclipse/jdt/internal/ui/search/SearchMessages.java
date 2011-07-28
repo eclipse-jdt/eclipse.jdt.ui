@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -144,6 +144,7 @@ public final class SearchMessages extends NLS {
 	public static String ExceptionOccurrencesFinder_label_singular;
 	public static String ExceptionOccurrencesFinder_label_plural;
 	public static String ExceptionOccurrencesFinder_occurrence_description;
+	public static String ExceptionOccurrencesFinder_occurrence_implicit_close_description;
 	public static String ImplementOccurrencesFinder_invalidTarget;
 	public static String ImplementOccurrencesFinder_searchfor;
 	public static String ImplementOccurrencesFinder_label_singular;
@@ -250,6 +251,7 @@ public final class SearchMessages extends NLS {
 	public static String MethodExitsFinder_label_singular;
 	public static String MethodExitsFinder_no_return_type_selected;
 	public static String MethodExitsFinder_occurrence_exit_description;
+	public static String MethodExitsFinder_occurrence_exit_impclict_close_description;
 	public static String MethodExitsFinder_occurrence_return_description;
 	public static String BreakContinueTargetFinder_break_label_plural;
 	public static String BreakContinueTargetFinder_break_label_singular;

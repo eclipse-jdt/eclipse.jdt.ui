@@ -585,6 +585,9 @@ public class FullConstraintCreator extends ConstraintCreator{
 
 	private ITypeConstraint[] getArgumentConstraints(List<Expression> arguments, IMethodBinding methodBinding) {
 		List<ITypeConstraint> result= new ArrayList<ITypeConstraint>(arguments.size());
+		
+		if (methodBinding == null)
+			return new ITypeConstraint[0];
 
 		if (methodBinding.isVarargs()) {
 			ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();

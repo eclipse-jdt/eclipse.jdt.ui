@@ -373,23 +373,34 @@ public class JavaElementLabelComposer {
 
 			// parameters
 			fBuffer.append('(');
+			String[] declaredParameterTypes= method.getParameterTypes();
 			if (getFlag(flags, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES)) {
 				String[] types= null;
 				int nParams= 0;
 				boolean renderVarargs= false;
+				boolean isPolymorphic= false;
 				if (getFlag(flags, JavaElementLabels.M_PARAMETER_TYPES)) {
 					if (resolvedSig != null) {
 						types= Signature.getParameterTypes(resolvedSig);
 					} else {
-						types= method.getParameterTypes();
+						types= declaredParameterTypes;
 					}
 					nParams= types.length;
 					renderVarargs= method.exists() && Flags.isVarargs(method.getFlags());
+					if (renderVarargs
+							&& resolvedSig != null
+							&& declaredParameterTypes.length == 1
+							&& JavaModelUtil.isPolymorphicSignature(method)) {
+						renderVarargs= false;
+						isPolymorphic= true;
+					}
 				}
 				String[] names= null;
 				if (getFlag(flags, JavaElementLabels.M_PARAMETER_NAMES) && method.exists()) {
 					names= method.getParameterNames();
-					if (types == null) {
+					if (isPolymorphic) {
+						// handled specially below
+					} else	if (types == null) {
 						nParams= names.length;
 					} else { // types != null
 						if (nParams != names.length) {
@@ -429,11 +440,15 @@ public class JavaElementLabelComposer {
 						if (types != null) {
 							fBuffer.append(' ');
 						}
-						fBuffer.append(names[i]);
+						if (isPolymorphic) {
+							fBuffer.append(names[0] + i);
+						} else {
+							fBuffer.append(names[i]);
+						}
 					}
 				}
 			} else {
-				if (method.getParameterTypes().length > 0) {
+				if (declaredParameterTypes.length > 0) {
 					fBuffer.append(JavaElementLabels.ELLIPSIS_STRING);
 				}
 			}
@@ -744,6 +759,10 @@ public class JavaElementLabelComposer {
 			case Signature.CAPTURE_TYPE_SIGNATURE:
 				appendTypeSignatureLabel(enclosingElement, typeSig.substring(1), flags);
 				break;
+			case Signature.INTERSECTION_TYPE_SIGNATURE:
+				String[] typeBounds= Signature.getIntersectionTypeBounds(typeSig);
+				appendTypeBoundsSignaturesLabel(enclosingElement, typeBounds, flags);
+				break;
 			default:
 				// unknown
 		}
@@ -773,6 +792,15 @@ public class JavaElementLabelComposer {
 		}
 	}
 
+	private void appendTypeBoundsSignaturesLabel(IJavaElement enclosingElement, String[] typeArgsSig, long flags) {
+		for (int i = 0; i < typeArgsSig.length; i++) {
+			if (i > 0) {
+				fBuffer.append(" | "); //$NON-NLS-1$
+			}
+			appendTypeSignatureLabel(enclosingElement, typeArgsSig[i], flags);
+		}
+	}
+	
 	/**
 	 * Appends labels for type parameters from a signature.
 	 *
