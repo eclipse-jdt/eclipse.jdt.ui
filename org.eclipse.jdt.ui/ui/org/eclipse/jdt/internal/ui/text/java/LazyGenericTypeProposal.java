@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -193,6 +193,8 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 
 	private IRegion fSelectedRegion; // initialized by apply()
 	private TypeArgumentProposal[] fTypeArgumentProposals;
+	private boolean fCanUseDiamond;
+
 
 	public LazyGenericTypeProposal(CompletionProposal typeProposal, JavaContentAssistInvocationContext context) {
 		super(typeProposal, context);
@@ -203,15 +205,27 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	 */
 	@Override
 	public void apply(IDocument document, char trigger, int offset) {
+		boolean onlyAppendArguments;
+		try {
+			onlyAppendArguments= fProposal.getCompletion().length == 0 && offset > 0 && document.getChar(offset - 1) == '<';
+		} catch (BadLocationException e) {
+			onlyAppendArguments= false;
+		}
 
-		if (shouldAppendArguments(document, offset, trigger)) {
+		if (onlyAppendArguments || shouldAppendArguments(document, offset, trigger)) {
 			try {
 				TypeArgumentProposal[] typeArgumentProposals= computeTypeArgumentProposals();
 				if (typeArgumentProposals.length > 0) {
 
 					int[] offsets= new int[typeArgumentProposals.length];
 					int[] lengths= new int[typeArgumentProposals.length];
-					StringBuffer buffer= createParameterList(typeArgumentProposals, offsets, lengths);
+					StringBuffer buffer;
+
+					if (canUseDiamond()) {
+						buffer= new StringBuffer(getReplacementString());
+						buffer.append("<>"); //$NON-NLS-1$
+					} else
+						buffer= createParameterList(typeArgumentProposals, offsets, lengths, onlyAppendArguments);
 
 					// set the generic type as replacement string
 					boolean insertClosingParenthesis= trigger == '(' && autocloseBrackets();
@@ -663,16 +677,18 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		}
 	}
 
-	private StringBuffer createParameterList(TypeArgumentProposal[] typeArguments, int[] offsets, int[] lengths) {
+	private StringBuffer createParameterList(TypeArgumentProposal[] typeArguments, int[] offsets, int[] lengths, boolean onlyAppendArguments) {
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(getReplacementString());
 
 		FormatterPrefs prefs= getFormatterPrefs();
 		final char LESS= '<';
 		final char GREATER= '>';
-		if (prefs.beforeOpeningBracket)
-			buffer.append(SPACE);
-		buffer.append(LESS);
+		if (!onlyAppendArguments) {
+			if (prefs.beforeOpeningBracket)
+				buffer.append(SPACE);
+			buffer.append(LESS);
+		}
 		if (prefs.afterOpeningBracket)
 			buffer.append(SPACE);
 		StringBuffer separator= new StringBuffer(3);
@@ -692,7 +708,9 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		}
 		if (prefs.beforeClosingBracket)
 			buffer.append(SPACE);
-		buffer.append(GREATER);
+
+		if (!onlyAppendArguments)
+			buffer.append(GREATER);
 
 		return buffer;
 	}
@@ -811,4 +829,27 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 			return false;
 		}
 	}
+
+	/**
+	 * Sets whether this proposal can use the diamond.
+	 * 
+	 * @param canUseDiamond <code>true</code> if a diamond can be inserted
+	 * @see CompletionProposal#canUseDiamond(org.eclipse.jdt.core.CompletionContext)
+	 * @since 3.7
+	 */
+	void canUseDiamond(boolean canUseDiamond) {
+		fCanUseDiamond= canUseDiamond;
+	}
+
+	/**
+	 * Tells whether this proposal can use the diamond.
+	 * 
+	 * @return <code>true</code> if a diamond can be used
+	 * @see CompletionProposal#canUseDiamond(org.eclipse.jdt.core.CompletionContext)
+	 * @since 3.7
+	 */
+	protected boolean canUseDiamond() {
+		return fCanUseDiamond;
+	}
+
 }

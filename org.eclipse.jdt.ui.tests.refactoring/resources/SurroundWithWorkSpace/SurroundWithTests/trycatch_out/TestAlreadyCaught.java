@@ -1,4 +1,4 @@
-package trycatch_in;
+package trycatch_out;
 
 import java.io.File;
 import java.net.MalformedURLException;

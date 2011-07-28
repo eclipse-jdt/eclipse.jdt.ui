@@ -36,6 +36,8 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
+import org.eclipse.jdt.internal.corext.util.CollectionsUtil;
+
 import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -86,22 +88,14 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 			if (elements.length == 0)
 				return null;
 			
-			IHyperlink[] links= new IHyperlink[elements.length];
-			int j= 0;
+			ArrayList<IHyperlink> links= new ArrayList<IHyperlink>(elements.length);
 			for (int i= 0; i < elements.length; i++) {
-				IHyperlink link= createHyperlink(wordRegion, (SelectionDispatchAction)openAction, elements[i], elements.length > 1, (JavaEditor)textEditor);
-				if (link != null) {
-					links[j++]= link;
-				}
+				addHyperlinks(links, wordRegion, (SelectionDispatchAction)openAction, elements[i], elements.length > 1, (JavaEditor)textEditor);
 			}
-			if (j == 0) {
+			if (links.size() == 0)
 				return null;
-			} else if (j < elements.length) {
-				IHyperlink[] result= new IHyperlink[j];
-				System.arraycopy(links, 0, result, 0, j);
-				return result;
-			}
-			return links;
+			
+			return CollectionsUtil.toArray(links, IHyperlink.class);
 
 		} catch (JavaModelException e) {
 			return null;
@@ -126,20 +120,20 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 	}
 
 	/**
-	 * Creates a java element hyperlink.
+	 * Creates and adds Java element hyperlinks.
 	 * 
+	 * @param hyperlinksCollector the list to which hyperlinks should be added
 	 * @param wordRegion the region of the link
-	 * @param openAction the action to use to open the java elements
-	 * @param element the java element to open
+	 * @param openAction the action to use to open the Java elements
+	 * @param element the Java element to open
 	 * @param qualify <code>true</code> if the hyperlink text should show a qualified name for
 	 *            element
-	 * @param editor the active java editor
-	 * @return a Java element hyperlink or <code>null</code> if no hyperlink can be created for the
-	 *         given arguments
+	 * @param editor the active Java editor
+	 * 
 	 * @since 3.5
 	 */
-	protected IHyperlink createHyperlink(IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
-		return new JavaElementHyperlink(wordRegion, openAction, element, qualify);
+	protected void addHyperlinks(List<IHyperlink> hyperlinksCollector, IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
+		hyperlinksCollector.add(new JavaElementHyperlink(wordRegion, openAction, element, qualify));
 	}
 
 

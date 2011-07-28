@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -221,8 +221,16 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String SURROUND_WITH_TRY_CATCH= "org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch"; //$NON-NLS-1$
 
 	/**
-	 * Action definition ID of the source -> override methods action
-	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.override.methods"</code>).
+	 * Action definition ID of the source -> surround with try/multi-catch action (value
+	 * <code>"org.eclipse.jdt.ui.edit.text.java.surround.with.try.multicatch"</code>).
+	 * 
+	 * @since 3.7.1
+	 */
+	public static final String SURROUND_WITH_TRY_MULTI_CATCH= "org.eclipse.jdt.ui.edit.text.java.surround.with.try.multicatch"; //$NON-NLS-1$
+
+	/**
+	 * Action definition ID of the source -> override methods action (value
+	 * <code>"org.eclipse.jdt.ui.edit.text.java.override.methods"</code>).
 	 */
 	public static final String OVERRIDE_METHODS= "org.eclipse.jdt.ui.edit.text.java.override.methods"; //$NON-NLS-1$
 

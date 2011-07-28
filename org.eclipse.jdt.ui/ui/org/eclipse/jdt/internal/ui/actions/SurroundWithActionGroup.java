@@ -25,6 +25,7 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.SurroundWithTryCatchAction;
+import org.eclipse.jdt.ui.actions.SurroundWithTryMultiCatchAction;
 
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
@@ -32,17 +33,20 @@ public class SurroundWithActionGroup extends ActionGroup {
 
 	private CompilationUnitEditor fEditor;
 	private SurroundWithTryCatchAction fSurroundWithTryCatchAction;
+	private SurroundWithTryMultiCatchAction fSurroundWithTryMultiCatchAction;
 	private final String fGroup;
 
 	public SurroundWithActionGroup(CompilationUnitEditor editor, String group) {
 		fEditor= editor;
 		fGroup= group;
 		fSurroundWithTryCatchAction= createSurroundWithTryCatchAction(fEditor);
+		fSurroundWithTryMultiCatchAction= createSurroundWithTryMultiCatchAction(fEditor);
 	}
 
 	@Override
 	public void fillActionBars(IActionBars actionBar) {
 		actionBar.setGlobalActionHandler(JdtActionConstants.SURROUND_WITH_TRY_CATCH, fSurroundWithTryCatchAction);
+		actionBar.setGlobalActionHandler(JdtActionConstants.SURROUND_WITH_TRY_MULTI_CATCH, fSurroundWithTryMultiCatchAction);
 	}
 
 	/**
@@ -72,7 +76,7 @@ public class SurroundWithActionGroup extends ActionGroup {
 		subMenu.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager) {
 				manager.removeAll();
-				SurroundWithTemplateMenuAction.fillMenu(manager, fEditor, fSurroundWithTryCatchAction);
+				SurroundWithTemplateMenuAction.fillMenu(manager, fEditor, fSurroundWithTryCatchAction, fSurroundWithTryMultiCatchAction);
 			}
 		});
 	}
@@ -82,6 +86,14 @@ public class SurroundWithActionGroup extends ActionGroup {
 		result.setText(ActionMessages.SurroundWithTemplateMenuAction_SurroundWithTryCatchActionName);
 		result.setActionDefinitionId(IJavaEditorActionDefinitionIds.SURROUND_WITH_TRY_CATCH);
 		editor.setAction("SurroundWithTryCatch", result); //$NON-NLS-1$
+		return result;
+	}
+
+	private static SurroundWithTryMultiCatchAction createSurroundWithTryMultiCatchAction(CompilationUnitEditor editor) {
+		SurroundWithTryMultiCatchAction result= new SurroundWithTryMultiCatchAction(editor);
+		result.setText(ActionMessages.SurroundWithTemplateMenuAction_SurroundWithTryMultiCatchActionName);
+		result.setActionDefinitionId(IJavaEditorActionDefinitionIds.SURROUND_WITH_TRY_MULTI_CATCH);
+		editor.setAction("SurroundWithTryMultiCatch", result); //$NON-NLS-1$
 		return result;
 	}
 }

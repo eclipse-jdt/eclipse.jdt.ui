@@ -67,15 +67,15 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 		return result;
 	}
 
-	private void performOK() throws Exception {
+	protected void performOK() throws Exception {
 		perform(RefactoringStatus.OK, RefactoringStatus.OK);
 	}
 
-	private void performInvalidSelection() throws Exception {
+	protected void performInvalidSelection() throws Exception {
 		perform(RefactoringStatus.FATAL, RefactoringStatus.FATAL);
 	}
 
-	private void perform(int expectedActivationStatus, int expectedInputStatus) throws Exception {
+	protected void perform(int expectedActivationStatus, int expectedInputStatus) throws Exception {
 		String packageName= adaptPackage(getName());
 		IPackageFragment packageFragment= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment(packageName, true , null);
 		ICompilationUnit cu= createCU(packageFragment, getName());

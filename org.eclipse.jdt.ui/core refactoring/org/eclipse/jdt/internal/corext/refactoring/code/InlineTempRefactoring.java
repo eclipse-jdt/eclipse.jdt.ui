@@ -64,7 +64,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -237,6 +237,10 @@ public class InlineTempRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_for_initializers);
 		}
 
+		if (parent instanceof VariableDeclarationExpression && parent.getLocationInParent() == TryStatement.RESOURCES_PROPERTY) {
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_resource_in_try_with_resources);
+		}
+
 		if (decl.getInitializer() == null) {
 			String message= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_not_initialized, BasicElementLabels.getJavaElementName(decl.getName().getIdentifier()));
 			return RefactoringStatus.createFatalErrorStatus(message);
@@ -356,16 +360,14 @@ public class InlineTempRefactoring extends Refactoring {
 		Expression initializer= varDecl.getInitializer();
 
 		ASTNode referenceContext= reference.getParent();
-		if (isInvocation(initializer)) {
-			if (Invocations.isResolvedTypeInferredFromExpectedType(initializer)) {
-				if (! (referenceContext instanceof VariableDeclarationFragment
-						|| referenceContext instanceof SingleVariableDeclaration
-						|| referenceContext instanceof Assignment)) {
-					IMethodBinding methodBinding= Invocations.resolveBinding(initializer);
-					if (methodBinding != null) {
-						String newSource= createParameterizedInvocation(initializer, methodBinding, rewrite);
-						return (Expression) rewrite.getASTRewrite().createStringPlaceholder(newSource, initializer.getNodeType());
-					}
+		if (Invocations.isResolvedTypeInferredFromExpectedType(initializer)) {
+			if (! (referenceContext instanceof VariableDeclarationFragment
+					|| referenceContext instanceof SingleVariableDeclaration
+					|| referenceContext instanceof Assignment)) {
+				ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(initializer);
+				if (typeArguments != null) {
+					String newSource= createParameterizedInvocation(initializer, typeArguments, rewrite);
+					return (Expression) rewrite.getASTRewrite().createStringPlaceholder(newSource, initializer.getNodeType());
 				}
 			}
 		}
@@ -396,20 +398,21 @@ public class InlineTempRefactoring extends Refactoring {
 		return copy;
 	}
 
-	private String createParameterizedInvocation(Expression invocation, IMethodBinding methodBinding, CompilationUnitRewrite cuRewrite) throws JavaModelException {
+	private String createParameterizedInvocation(Expression invocation, ITypeBinding[] typeArguments, CompilationUnitRewrite cuRewrite) throws JavaModelException {
 		ASTRewrite rewrite= ASTRewrite.create(invocation.getAST());
-		ListRewrite typeArgsRewrite= rewrite.getListRewrite(invocation, Invocations.getTypeArgumentsProperty(invocation));
+		ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(rewrite, invocation);
 		
-		ITypeBinding[] typeArguments= methodBinding.getTypeArguments();
 		for (int i= 0; i < typeArguments.length; i++) {
 			Type typeArgumentNode= cuRewrite.getImportRewrite().addImport(typeArguments[i], cuRewrite.getAST());
 			typeArgsRewrite.insertLast(typeArgumentNode, null);
 		}
 		
 		if (invocation instanceof MethodInvocation) {
-			Expression expression= ((MethodInvocation)invocation).getExpression();
+			MethodInvocation methodInvocation= (MethodInvocation) invocation;
+			Expression expression= methodInvocation.getExpression();
 			if (expression == null) {
-				if (Modifier.isStatic(methodBinding.getModifiers())) {
+				IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+				if (methodBinding != null && Modifier.isStatic(methodBinding.getModifiers())) {
 					expression= cuRewrite.getAST().newName(cuRewrite.getImportRewrite().addImport(methodBinding.getDeclaringClass().getTypeDeclaration()));
 				} else {
 					expression= invocation.getAST().newThisExpression();
@@ -436,10 +439,6 @@ public class InlineTempRefactoring extends Refactoring {
 		}
 		//fallback:
 		return fCu.getBuffer().getText(invocation.getStartPosition(), invocation.getLength());
-	}
-
-	private static boolean isInvocation(Expression node) {
-		return node instanceof MethodInvocation || node instanceof SuperMethodInvocation;
 	}
 
 	public SimpleName[] getReferences() {

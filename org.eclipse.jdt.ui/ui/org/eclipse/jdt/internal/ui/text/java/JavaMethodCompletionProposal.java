@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Tom Eicher <eclipse@tom.eicher.name> - [content assist] prefix complete casted method proposals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=247547
@@ -324,4 +324,17 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		return ""; //$NON-NLS-1$
 
 	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#createRequiredTypeCompletionProposal(org.eclipse.jdt.core.CompletionProposal, org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
+	 * @since 3.7
+	 */
+	@Override
+	protected LazyJavaCompletionProposal createRequiredTypeCompletionProposal(CompletionProposal completionProposal, JavaContentAssistInvocationContext invocationContext) {
+		LazyJavaCompletionProposal requiredProposal= super.createRequiredTypeCompletionProposal(completionProposal, invocationContext);
+		if (fProposal.getKind() == CompletionProposal.CONSTRUCTOR_INVOCATION && requiredProposal instanceof LazyGenericTypeProposal)
+			((LazyGenericTypeProposal) requiredProposal).canUseDiamond(fProposal.canUseDiamond(fInvocationContext.getCoreContext()));
+		return requiredProposal;
+	}
+
 }

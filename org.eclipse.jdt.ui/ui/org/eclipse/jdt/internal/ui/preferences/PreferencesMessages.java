@@ -264,6 +264,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_ignore_documented_unused_parameters;
 	public static String ProblemSeveritiesConfigurationBlock_pb_redundant_null_check;
 	public static String ProblemSeveritiesConfigurationBlock_pb_redundant_super_interface_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_redundant_type_arguments_label;
 	public static String ProblemSeveritiesConfigurationBlock_include_assert_in_null_analysis;
 	public static String ProblemSeveritiesConfigurationBlock_treat_optional_as_fatal;
 	public static String SourceAttachmentPropertyPage_error_title;

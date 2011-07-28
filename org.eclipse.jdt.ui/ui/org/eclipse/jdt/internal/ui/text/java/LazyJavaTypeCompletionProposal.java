@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -41,6 +41,7 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 
 /**
  * If passed compilation unit is not null, the replacement string will be seen as a qualified type name.
@@ -103,7 +104,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		if (fCompilationUnit != null && JavaModelUtil.isPackageInfo(fCompilationUnit))
 			return qualifiedTypeName;
 
- 		if (qualifiedTypeName.indexOf('.') == -1)
+		if (qualifiedTypeName.indexOf('.') == -1 && replacement.length() > 0)
  			// default package - no imports needed
  			return qualifiedTypeName;
 

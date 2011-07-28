@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,17 +23,22 @@ public class AllRefactoringTests {
 
 		//--code
 		suite.addTest(ExtractMethodTests.suite());
+		suite.addTest(ExtractMethodTests17.suite());
 		suite.addTest(InlineMethodTests.suite());
 		suite.addTest(ReplaceInvocationsTests.suite());
 		suite.addTest(SefTests.suite());
 		suite.addTest(InlineTempTests.suite());
+		suite.addTest(InlineTempTests17.suite());
 		suite.addTest(ExtractTempTests.suite());
+		suite.addTest(ExtractTempTests17.suite());
 		suite.addTest(RenameTempTests.suite());
 		suite.addTest(ExtractConstantTests.suite());
 		suite.addTest(PromoteTempToFieldTests.suite());
 		suite.addTest(ConvertAnonymousToNestedTests.suite());
 		suite.addTest(InlineConstantTests.suite());
+		suite.addTest(InlineConstantTests17.suite());
 		suite.addTest(IntroduceParameterTests.suite());
+		suite.addTest(IntroduceParameterTests17.suite());
 		suite.addTest(IntroduceFactoryTests.suite());
 
 		//-- structure
@@ -59,11 +64,13 @@ public class AllRefactoringTests {
 		suite.addTest(RenameParametersTests.suite());
 		suite.addTest(MoveInstanceMethodTests.suite());
 		suite.addTest(IntroduceIndirectionTests.suite());
+		suite.addTest(IntroduceIndirectionTests17.suite());
 
 		//--types
 		suite.addTest(RenameTypeTests.suite());
 		suite.addTest(RenameTypeParameterTests.suite());
 		suite.addTest(ChangeTypeRefactoringTests.suite());
+		suite.addTest(ChangeTypeRefactoringTests17.suite());
 
 		//--packages
 		suite.addTest(RenamePackageTests.suite());

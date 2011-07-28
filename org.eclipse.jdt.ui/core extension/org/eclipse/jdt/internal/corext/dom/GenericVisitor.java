@@ -90,6 +90,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -364,6 +365,10 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public boolean visit(TypeLiteral node) {
+		return visitNode(node);
+	}
+	@Override
+	public boolean visit(UnionType node) {
 		return visitNode(node);
 	}
 	@Override
@@ -761,6 +766,10 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public void endVisit(TypeLiteral node) {
+		endVisitNode(node);
+	}
+	@Override
+	public void endVisit(UnionType node) {
 		endVisitNode(node);
 	}
 	@Override

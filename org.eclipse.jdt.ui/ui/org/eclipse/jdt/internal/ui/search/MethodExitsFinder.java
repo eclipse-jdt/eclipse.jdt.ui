@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -26,7 +27,6 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -40,6 +40,9 @@ import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.UnionType;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -188,19 +191,59 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		int currentSize= fCatchedExceptions.size();
 		List<CatchClause> catchClauses= node.catchClauses();
 		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext();) {
-			IVariableBinding variable= iter.next().getException().resolveBinding();
-			if (variable != null && variable.getType() != null) {
-				fCatchedExceptions.add(variable.getType());
+			Type type= iter.next().getException().getType();
+			if (type instanceof UnionType) {
+				List<Type> types= ((UnionType) type).types();
+				for (Iterator<Type> iterator= types.iterator(); iterator.hasNext();) {
+					addCatchedException(iterator.next());
+				}
+			} else {
+				addCatchedException(type);
 			}
 		}
 		node.getBody().accept(this);
+
+		if (node.getAST().apiLevel() >= AST.JLS4) {
+			List<VariableDeclarationExpression> resources= node.resources();
+			for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
+				iterator.next().accept(this);
+			}
+
+			//check if the method could exit as a result of resource#close()
+			boolean exitMarked= false;
+			for (VariableDeclarationExpression variable : resources) {
+				Type type= variable.getType();
+				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$
+				if (methodBinding != null) {
+					ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
+					for (int j= 0; j < exceptionTypes.length; j++) {
+						if (isExitPoint(exceptionTypes[j])) { // a close() throws an uncaught exception
+							// mark name of resource
+							for (VariableDeclarationFragment fragment : (List<VariableDeclarationFragment>) variable.fragments()) {
+								SimpleName name= fragment.getName();
+								fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fExitDescription));
+							}
+							if (!exitMarked) {
+								// mark exit position
+								exitMarked= true;
+								Block body= node.getBody();
+								int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
+								fResult.add(new OccurrenceLocation(offset, 1, 0, Messages.format(SearchMessages.MethodExitsFinder_occurrence_exit_impclict_close_description,
+										BasicElementLabels.getJavaElementName(fMethodDeclaration.getName().toString()))));
+							}
+						}
+					}
+				}
+			}
+		}
+
 		int toRemove= fCatchedExceptions.size() - currentSize;
-		for(int i= toRemove; i > 0; i--) {
+		for (int i= toRemove; i > 0; i--) {
 			fCatchedExceptions.remove(currentSize);
 		}
 
 		// visit catch and finally
-		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext(); ) {
+		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext();) {
 			iter.next().accept(this);
 		}
 		if (node.getFinally() != null)
@@ -208,6 +251,13 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 
 		// return false. We have visited the body by ourselves.
 		return false;
+	}
+
+	private void addCatchedException(Type type) {
+		ITypeBinding typeBinding= type.resolveBinding();
+		if (typeBinding != null) {
+			fCatchedExceptions.add(typeBinding);
+		}
 	}
 
 	@Override

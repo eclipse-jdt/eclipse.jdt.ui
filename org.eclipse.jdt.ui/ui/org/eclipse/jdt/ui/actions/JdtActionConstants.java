@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -208,6 +208,14 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.SurroundWithTryCatch"</code>).
 	 */
 	public static final String SURROUND_WITH_TRY_CATCH= "org.eclipse.jdt.ui.actions.SurroundWithTryCatch"; //$NON-NLS-1$
+
+	/**
+	 * Source menu: name of standard Surround with try/multi-catch block global action (value
+	 * <code>"org.eclipse.jdt.ui.actions.SurroundWithTryMultiCatch"</code>).
+	 * 
+	 * @since 3.7.1
+	 */
+	public static final String SURROUND_WITH_TRY_MULTI_CATCH= "org.eclipse.jdt.ui.actions.SurroundWithTryMultiCatch"; //$NON-NLS-1$
 
 	/**
 	 * Source menu: name of standard Override Methods global action

@@ -67,4 +67,13 @@ public class TypeArgumentMismatchSubProcessor {
 		}
 	}
 
+	public static void getInferDiamondArgumentsProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		ASTNode selectedNode= problem.getCoveredNode(context.getASTRoot());
+		if (!(selectedNode instanceof SimpleName)) {
+			return;
+		}
+		
+		QuickAssistProcessor.getInferDiamondArgumentsProposal(context, selectedNode, null, proposals);
+	}
+
 }

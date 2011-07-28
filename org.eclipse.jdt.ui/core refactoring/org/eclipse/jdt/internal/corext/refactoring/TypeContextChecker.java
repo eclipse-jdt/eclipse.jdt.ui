@@ -713,7 +713,7 @@ public class TypeContextChecker {
 		ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		p.setSource(cuBuff.toString().toCharArray());
 		Map<String, String> options= new HashMap<String, String>();
-		JavaModelUtil.set50ComplianceOptions(options);
+		JavaModelUtil.setComplianceOptions(options, JavaModelUtil.VERSION_LATEST);
 		p.setCompilerOptions(options);
 		CompilationUnit cu= (CompilationUnit) p.createAST(null);
 		ASTNode selected= NodeFinder.perform(cu, offset, superType.length());

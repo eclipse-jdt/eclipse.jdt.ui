@@ -4,12 +4,12 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.preferences.formatter;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -174,6 +174,10 @@ public final class WhiteSpaceOptions {
     CodeFormatter.K_STATEMENTS,
     "try { number= Integer.parseInt(value); } catch (NumberFormatException e) {}"); //$NON-NLS-1$
 
+	private final PreviewSnippet TRY_PREVIEW= new PreviewSnippet(
+	CodeFormatter.K_STATEMENTS, 
+	"try (FileReader reader1 = new FileReader(\"file1\"); FileReader reader2 = new FileReader(\"file2\")) {}"); //$NON-NLS-1$
+
     private final PreviewSnippet IF_PREVIEW= new PreviewSnippet(
     CodeFormatter.K_STATEMENTS,
     "if (condition) { return foo; } else {return bar;}"); //$NON-NLS-1$
@@ -321,7 +325,8 @@ public final class WhiteSpaceOptions {
 
 	/**
 	 * Create the tree, in this order: syntax element - position - abstract element
-	 * @param workingValues
+	 * 
+	 * @param workingValues the current values
 	 * @return returns roots (type <code>Node</code>)
 	 */
 	public List<InnerNode> createTreeBySyntaxElem(Map<String, String> workingValues) {
@@ -399,11 +404,11 @@ public final class WhiteSpaceOptions {
 	}
 
     /**
-     * Create the tree, in this order: position - syntax element - abstract
-     * element
-     * @param workingValues
-     * @return returns roots (type <code>Node</code>)
-     */
+	 * Create the tree, in this order: position - syntax element - abstract element
+	 * 
+	 * @param workingValues the current values
+	 * @return returns roots (type <code>Node</code>)
+	 */
     public List<Node> createAltTree(Map<String, String> workingValues) {
 
         final ArrayList<Node> roots= new ArrayList<Node>();
@@ -543,7 +548,8 @@ public final class WhiteSpaceOptions {
         createSwitchStatementTree(workingValues, statements);
         createDoWhileTree(workingValues, statements);
         createSynchronizedTree(workingValues, statements);
-        createTryStatementTree(workingValues, statements);
+		createTryStatementTree(workingValues, statements);
+		createCatchTree(workingValues, statements);
         createAssertTree(workingValues, statements);
         createReturnTree(workingValues, statements);
         createThrowTree(workingValues, statements);
@@ -592,6 +598,7 @@ public final class WhiteSpaceOptions {
 
     private void createBeforeSemicolonTree(Map<String, String> workingValues, final InnerNode parent) {
         createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_for, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON_IN_FOR, FOR_PREVIEW);
+		createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_try, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON_IN_TRY_RESOURCES, TRY_PREVIEW);
         createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_statements, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON, SEMICOLON_PREVIEW);
     }
 
@@ -700,6 +707,7 @@ public final class WhiteSpaceOptions {
 
     private void createBeforeClosingParenTree(Map<String, String> workingValues, final InnerNode parent) {
 
+		createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_try, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_TRY, TRY_PREVIEW);
         createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_catch, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CATCH, CATCH_PREVIEW);
         createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_for, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_FOR, FOR_PREVIEW);
         createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_if, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_IF, IF_PREVIEW);
@@ -723,6 +731,7 @@ public final class WhiteSpaceOptions {
 
     private void createBeforeOpenParenTree(Map<String, String> workingValues, final InnerNode parent) {
 
+		createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_try, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_TRY, TRY_PREVIEW);
         createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_catch, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_CATCH, CATCH_PREVIEW);
         createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_for, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_FOR, FOR_PREVIEW);
         createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_if, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_IF, IF_PREVIEW);
@@ -770,6 +779,7 @@ public final class WhiteSpaceOptions {
 
     private void createAfterSemicolonTree(Map<String, String> workingValues, final InnerNode parent) {
         createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_for, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_SEMICOLON_IN_FOR, FOR_PREVIEW);
+		createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_try, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_SEMICOLON_IN_TRY_RESOURCES, TRY_PREVIEW);
     }
 
     private void createAfterColonTree(Map<String, String> workingValues, final InnerNode parent) {
@@ -859,6 +869,7 @@ public final class WhiteSpaceOptions {
     }
 
     private void createAfterOpenParenTree(Map<String, String> workingValues, final InnerNode parent) {
+		createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_try, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_TRY, TRY_PREVIEW);
         createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_catch, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CATCH, CATCH_PREVIEW);
         createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_for, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_FOR, FOR_PREVIEW);
         createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_if, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_IF, IF_PREVIEW);
@@ -1074,14 +1085,26 @@ public final class WhiteSpaceOptions {
         return root;
     }
 
-    private InnerNode createTryStatementTree(Map<String, String> workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.WhiteSpaceTabPage_try);
+	private InnerNode createCatchTree(Map<String, String> workingValues, InnerNode parent) {
+		final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.WhiteSpaceTabPage_catch);
 
         createOption(root, workingValues, FormatterMessages.WhiteSpaceTabPage_before_opening_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_CATCH, CATCH_PREVIEW);
         createOption(root, workingValues, FormatterMessages.WhiteSpaceTabPage_after_opening_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CATCH, CATCH_PREVIEW);
         createOption(root, workingValues, FormatterMessages.WhiteSpaceTabPage_before_closing_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CATCH, CATCH_PREVIEW);
         return root;
     }
+
+	private InnerNode createTryStatementTree(Map<String, String> workingValues, InnerNode parent) {
+		final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.WhiteSpaceTabPage_tryWithResources);
+
+		createOption(root, workingValues, FormatterMessages.WhiteSpaceTabPage_before_opening_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_TRY, TRY_PREVIEW);
+		createOption(root, workingValues, FormatterMessages.WhiteSpaceTabPage_after_opening_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_TRY, TRY_PREVIEW);
+		createOption(root, workingValues, FormatterMessages.WhiteSpaceTabPage_before_semicolon, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON_IN_TRY_RESOURCES, TRY_PREVIEW);
+		createOption(root, workingValues, FormatterMessages.WhiteSpaceTabPage_after_semicolon, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_SEMICOLON_IN_TRY_RESOURCES, TRY_PREVIEW);
+		createOption(root, workingValues, FormatterMessages.WhiteSpaceTabPage_before_closing_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_TRY, TRY_PREVIEW);
+		return root;
+	}
+
     private InnerNode createIfStatementTree(Map<String, String> workingValues, InnerNode parent) {
         final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.WhiteSpaceTabPage_if);
 

@@ -741,6 +741,8 @@ public final class RefactoringAvailabilityTester {
 			return false;
 		if (method.getDeclaringType().isAnnotation())
 			return false;
+		if (JavaModelUtil.isPolymorphicSignature(method))
+			return false;
 
 		return true;
 	}

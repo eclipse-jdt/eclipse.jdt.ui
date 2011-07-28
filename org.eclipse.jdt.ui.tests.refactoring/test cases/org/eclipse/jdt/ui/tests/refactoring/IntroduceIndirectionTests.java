@@ -123,19 +123,19 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 		}
 	}
 
-	private void helperPass(String[] topLevelName, String newName, String target, int startLine, int startColumn, int endLine, int endColumn) throws Exception {
+	protected void helperPass(String[] topLevelName, String newName, String target, int startLine, int startColumn, int endLine, int endColumn) throws Exception {
 		helper(topLevelName, newName, target, startLine, startColumn, endLine, endColumn, true, false, false, false);
 	}
 
-	private void helperWarn(String[] topLevelName, String newName, String target, int startLine, int startColumn, int endLine, int endColumn) throws Exception {
+	protected void helperWarn(String[] topLevelName, String newName, String target, int startLine, int startColumn, int endLine, int endColumn) throws Exception {
 		helper(topLevelName, newName, target, startLine, startColumn, endLine, endColumn, true, true, false, false);
 	}
 
-	private void helperErr(String[] topLevelName, String newName, String target, int startLine, int startColumn, int endLine, int endColumn) throws Exception {
+	protected void helperErr(String[] topLevelName, String newName, String target, int startLine, int startColumn, int endLine, int endColumn) throws Exception {
 		helper(topLevelName, newName, target, startLine, startColumn, endLine, endColumn, true, true, true, false);
 	}
 
-	private void helperFail(String[] topLevelName, String newName, String target, int startLine, int startColumn, int endLine, int endColumn) throws Exception {
+	protected void helperFail(String[] topLevelName, String newName, String target, int startLine, int startColumn, int endLine, int endColumn) throws Exception {
 		helper(topLevelName, newName, target, startLine, startColumn, endLine, endColumn, true, true, true, true);
 	}
 
@@ -304,6 +304,5 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 	public void test31() throws Exception {
 		// test for bug 127665
 		helperPass(new String[] { "p.Test" }, "foo", "p.Test0", 13, 20, 13, 23);
-	}
-
+	}	
 }

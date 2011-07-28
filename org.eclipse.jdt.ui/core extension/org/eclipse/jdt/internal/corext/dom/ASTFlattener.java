@@ -103,6 +103,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -521,7 +522,7 @@ public class ASTFlattener extends GenericVisitor {
 		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
 	}
-
+	
 	/*
 	 * @see ASTVisitor#visit(DoStatement)
 	 */
@@ -1437,6 +1438,19 @@ public class ASTFlattener extends GenericVisitor {
 	@Override
 	public boolean visit(TryStatement node) {
 		this.fBuffer.append("try ");//$NON-NLS-1$
+		if (node.getAST().apiLevel() >= AST.JLS4) {
+			if (!node.resources().isEmpty()) {
+				this.fBuffer.append("(");//$NON-NLS-1$
+				for (Iterator<VariableDeclarationExpression> it= node.resources().iterator(); it.hasNext();) {
+					VariableDeclarationExpression var= it.next();
+					var.accept(this);
+					if (it.hasNext()) {
+						this.fBuffer.append(",");//$NON-NLS-1$
+					}
+				}
+				this.fBuffer.append(") ");//$NON-NLS-1$
+			}
+		}
 		node.getBody().accept(this);
 		this.fBuffer.append(" ");//$NON-NLS-1$
 		for (Iterator<CatchClause> it= node.catchClauses().iterator(); it.hasNext();) {
@@ -1558,6 +1572,21 @@ public class ASTFlattener extends GenericVisitor {
 		return false;
 	}
 
+	/*
+	 * @see ASTVisitor#visit(UnionType)
+	 */
+	@Override
+	public boolean visit(UnionType node) {
+		for (Iterator<Type> it= node.types().iterator(); it.hasNext();) {
+			Type t= it.next();
+			t.accept(this);
+			if (it.hasNext()) {
+				this.fBuffer.append("|");//$NON-NLS-1$
+			}
+		}
+		return false;
+	}
+	
 	/*
 	 * @see ASTVisitor#visit(VariableDeclarationExpression)
 	 */

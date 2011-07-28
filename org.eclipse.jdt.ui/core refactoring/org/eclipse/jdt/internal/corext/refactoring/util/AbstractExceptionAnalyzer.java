@@ -15,17 +15,24 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.UnionType;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 
@@ -85,6 +92,13 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 		// visit try block
 		node.getBody().accept(this);
 
+		if (node.getAST().apiLevel() >= AST.JLS4) {
+			List<VariableDeclarationExpression> resources= node.resources();
+			for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
+				iterator.next().accept(this);
+			}
+		}
+
 		// Remove those exceptions that get catch by following catch blocks
 		List<CatchClause> catchClauses= node.catchClauses();
 		if (!catchClauses.isEmpty())
@@ -106,6 +120,22 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 		return false;
 	}
 
+	@Override
+	public boolean visit(VariableDeclarationExpression node) {
+		if (node.getAST().apiLevel() >= AST.JLS4 && node.getLocationInParent() == TryStatement.RESOURCES_PROPERTY) {
+			Type type= node.getType();
+			ITypeBinding resourceTypeBinding= type.resolveBinding();
+			if (resourceTypeBinding != null) {
+				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(resourceTypeBinding, "close", new ITypeBinding[0]); //$NON-NLS-1$
+				if (methodBinding != null) {
+					addExceptions(methodBinding.getExceptionTypes());
+				}
+			}
+		}
+		return super.visit(node);
+	}
+
+
 	protected void addExceptions(ITypeBinding[] exceptions) {
 		if(exceptions == null)
 			return;
@@ -125,15 +155,25 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 
 	private void handleCatchArguments(List<CatchClause> catchClauses) {
 		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext(); ) {
-			CatchClause clause= iter.next();
-			ITypeBinding catchTypeBinding= clause.getException().getType().resolveBinding();
-			if (catchTypeBinding == null)	// No correct type resolve.
-				continue;
-			for (Iterator<ITypeBinding> exceptions= new ArrayList<ITypeBinding>(fCurrentExceptions).iterator(); exceptions.hasNext(); ) {
-				ITypeBinding throwTypeBinding= exceptions.next();
-				if (catches(catchTypeBinding, throwTypeBinding))
-					fCurrentExceptions.remove(throwTypeBinding);
+			Type type= iter.next().getException().getType();
+			if (type instanceof UnionType) {
+				List<Type> types= ((UnionType) type).types();
+				for (Iterator<Type> iterator= types.iterator(); iterator.hasNext();) {
+					removeCaughtExceptions(iterator.next().resolveBinding());
+				}
+			} else {
+				removeCaughtExceptions(type.resolveBinding());
 			}
+		}
+	}
+
+	private void removeCaughtExceptions(ITypeBinding catchTypeBinding) {
+		if (catchTypeBinding == null)
+			return;
+		for (Iterator<ITypeBinding> exceptions= new ArrayList<ITypeBinding>(fCurrentExceptions).iterator(); exceptions.hasNext();) {
+			ITypeBinding throwTypeBinding= exceptions.next();
+			if (catches(catchTypeBinding, throwTypeBinding))
+				fCurrentExceptions.remove(throwTypeBinding);
 		}
 	}
 
