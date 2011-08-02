@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -119,6 +119,7 @@ import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 
 public class ASTView extends ViewPart implements IShowInSource {
 	
+	private static final int JLS4= AST.JLS4;
 	private static final int JLS3= AST.JLS3;
 	/** (Used to get rid of deprecation warnings in code)
 	 * @deprecated
@@ -454,11 +455,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fStatementsRecovery= !fDialogSettings.getBoolean(SETTINGS_NO_STATEMENTS_RECOVERY); // inverse so that default is use recovery
 		fBindingsRecovery= !fDialogSettings.getBoolean(SETTINGS_NO_BINDINGS_RECOVERY); // inverse so that default is use recovery
 		fIgnoreMethodBodies= fDialogSettings.getBoolean(SETTINGS_IGNORE_METHOD_BODIES);
-		fCurrentASTLevel= JLS3;
+		fCurrentASTLevel= JLS4;
 		try {
 			int level= fDialogSettings.getInt(SETTINGS_JLS);
-			if (level == JLS2 || level == JLS3) {
-				fCurrentASTLevel= level;
+			switch (level) {
+				case JLS2:
+				case JLS3:
+				case JLS4:
+					fCurrentASTLevel= level;
 			}
 		} catch (NumberFormatException e) {
 			// ignore
@@ -514,35 +518,25 @@ public class ASTView extends ViewPart implements IShowInSource {
 				throw new CoreException(getErrorStatus("Editor not showing a CU or class file", null)); //$NON-NLS-1$
 			}
 			fTypeRoot= typeRoot;
-			int astLevel= getInitialASTLevel(typeRoot);
 			
 			ISelection selection= editor.getSelectionProvider().getSelection();
 			if (selection instanceof ITextSelection) {
 				ITextSelection textSelection= (ITextSelection) selection;
-				fRoot= internalSetInput(typeRoot, textSelection.getOffset(), textSelection.getLength(), astLevel);
+				fRoot= internalSetInput(typeRoot, textSelection.getOffset(), textSelection.getLength());
 				fEditor= editor;
-				setASTLevel(astLevel, false);
 			}
 			installModificationListener();
 		}
 
 	}
 	
-	private int getInitialASTLevel(ITypeRoot typeRoot) {
-		String option= typeRoot.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true);
-		if (option.compareTo(JavaCore.VERSION_1_5) >= 0) {
-			return JLS3;
-		}
-		return fCurrentASTLevel; // use previous level
-	}
-
-	private CompilationUnit internalSetInput(ITypeRoot input, int offset, int length, int astLevel) throws CoreException {
+	private CompilationUnit internalSetInput(ITypeRoot input, int offset, int length) throws CoreException {
 		if (input.getBuffer() == null) {
 			throw new CoreException(getErrorStatus("Input has no buffer", null)); //$NON-NLS-1$
 		}
 		
 		try {
-			CompilationUnit root= createAST(input, astLevel, offset);
+			CompilationUnit root= createAST(input, offset);
 			resetView(root);
 			if (root == null) {
 				setContentDescription("AST could not be created."); //$NON-NLS-1$
@@ -584,7 +578,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fPreviousDouble= null; // avoid leaking AST
 	}
 	
-	private CompilationUnit createAST(ITypeRoot input, int astLevel, int offset) throws JavaModelException, CoreException {
+	private CompilationUnit createAST(ITypeRoot input, int offset) throws JavaModelException, CoreException {
 		long startTime;
 		long endTime;
 		CompilationUnit root;
@@ -613,7 +607,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 				if (fIgnoreMethodBodies)
 					reconcileFlags |= ICompilationUnit.IGNORE_METHOD_BODIES;
 				startTime= System.currentTimeMillis();
-				root= wc.reconcile(getCurrentASTLevel(), reconcileFlags, null, null);
+				root= wc.reconcile(fCurrentASTLevel, reconcileFlags, null, null);
 				endTime= System.currentTimeMillis();
 			} finally {
 				wc.discardWorkingCopy();
@@ -626,7 +620,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			endTime= System.currentTimeMillis();
 			
 		} else {
-			ASTParser parser= ASTParser.newParser(astLevel);
+			ASTParser parser= ASTParser.newParser(fCurrentASTLevel);
 			parser.setResolveBindings(fCreateBindings);
 			if (input instanceof ICompilationUnit) {
 				parser.setSource((ICompilationUnit) input);
@@ -663,12 +657,13 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fStatementsRecoveryAction.setEnabled(enabled);
 		fBindingsRecoveryAction.setEnabled(enabled);
 		fIgnoreMethodBodiesAction.setEnabled(enabled);
-		fASTVersionToggleActions[0].setEnabled(enabled);
-		fASTVersionToggleActions[1].setEnabled(enabled);
+		for (int i= 0; i < fASTVersionToggleActions.length; i++) {
+			fASTVersionToggleActions[i].setEnabled(enabled);
+		}
 	}
 
 	private void updateContentDescription(IJavaElement element, CompilationUnit root, long time) {
-		String version= root.getAST().apiLevel() == JLS2 ? "AST Level 2" : "AST Level 3";  //$NON-NLS-1$//$NON-NLS-2$
+		String version= "AST Level " + root.getAST().apiLevel();
 		if (getCurrentInputKind() == ASTInputKindAction.USE_RECONCILE) {
 			version+= ", from reconciler"; //$NON-NLS-1$
 		} else if (getCurrentInputKind() == ASTInputKindAction.USE_CACHE) {
@@ -1046,7 +1041,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 			
 		fASTVersionToggleActions= new ASTLevelToggle[] {
 				new ASTLevelToggle("AST Level &2.0", JLS2), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level &3.0", JLS3) //$NON-NLS-1$
+				new ASTLevelToggle("AST Level &3.0", JLS3), //$NON-NLS-1$
+				new ASTLevelToggle("AST Level &4.0", JLS4), //$NON-NLS-1$
 		};
 		
 		fAddToTrayAction= new Action() {
@@ -1084,7 +1080,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			length= node.getLength();
 		}
 
-		internalSetInput(fTypeRoot, offset, length, getCurrentASTLevel());
+		internalSetInput(fTypeRoot, offset, length);
 	}
 		
 	protected void setASTLevel(int level, boolean doRefresh) {
@@ -1346,12 +1342,12 @@ public class ASTView extends ViewPart implements IShowInSource {
 	}
 
 	private String askForKey(String dialogTitle) {
-		InputDialog dialog= new InputDialog(getSite().getShell(), dialogTitle, "Key: (optionally surrounded by <KEY: '> and <'>)", "", null);
+		InputDialog dialog= new InputDialog(getSite().getShell(), dialogTitle, "Key: (optionally surrounded by <KEY: \"> and <\">)", "", null);
 		if (dialog.open() != Window.OK)
 			return null;
 		
 		String key= dialog.getValue();
-		if (key.startsWith("KEY: '") && key.endsWith("'"))
+		if (key.startsWith("KEY: \"") && key.endsWith("\""))
 			key= key.substring(6, key.length() - 1);
 		return key;
 	}

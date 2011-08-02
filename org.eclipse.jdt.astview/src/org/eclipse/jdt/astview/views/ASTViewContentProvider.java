@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -125,8 +125,11 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 				String inferred= String.valueOf(superMethodInvocation.isResolvedTypeInferredFromExpectedType());
 				res.add(new GeneralAttribute(expression, "ResolvedTypeInferredFromExpectedType", inferred)); //$NON-NLS-1$
 			} else if (expression instanceof ClassInstanceCreation) {
-				IMethodBinding binding= ((ClassInstanceCreation) expression).resolveConstructorBinding();
+				ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) expression;
+				IMethodBinding binding= classInstanceCreation.resolveConstructorBinding();
 				res.add(createBinding(expression, binding));
+				String inferred= String.valueOf(classInstanceCreation.isResolvedTypeInferredFromExpectedType());
+				res.add(new GeneralAttribute(expression, "ResolvedTypeInferredFromExpectedType", inferred)); //$NON-NLS-1$
 			} else if (expression instanceof FieldAccess) {
 				IVariableBinding binding= ((FieldAccess) expression).resolveFieldBinding();
 				res.add(createBinding(expression, binding));
