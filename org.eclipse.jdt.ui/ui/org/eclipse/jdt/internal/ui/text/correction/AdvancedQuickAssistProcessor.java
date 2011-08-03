@@ -2216,7 +2216,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		SwitchStatement switchStatement= (SwitchStatement) covering;
 		ITypeBinding expressionType= switchStatement.getExpression().resolveTypeBinding();
 		boolean isStringsInSwitch= expressionType != null && "java.lang.String".equals(expressionType.getQualifiedName()); //$NON-NLS-1$
-		String label= isStringsInSwitch ? CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIfRemovingNullCheck : CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIf;
 		IfStatement firstIfStatement= null;
 		IfStatement currentIfStatement= null;
 		Block currentBlock= null;
@@ -2319,7 +2318,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 		// add correction proposal
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIf, context.getCompilationUnit(), rewrite, 1, image);
 		proposal.setImportRewrite(importRewrite);
 		resultingCollections.add(proposal);
 		return true;
