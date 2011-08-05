@@ -555,8 +555,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				}
 			}
 			fFoldersList.refresh();
+			fFoldersList.dialogFieldChanged(); // validate
 		} else if (field == fFoldersList) {
 			updateClasspathList();
+			fClassPathList.dialogFieldChanged(); // validate
 		}
 	}
 
