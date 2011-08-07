@@ -137,9 +137,11 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 		}
 
 		public void partBroughtToTop(IWorkbenchPartReference partRef) {
+			// nothing to do
 		}
 
 		public void partClosed(IWorkbenchPartReference partRef) {
+			// nothing to do
 		}
 
 		public void partDeactivated(IWorkbenchPartReference partRef) {
@@ -150,15 +152,19 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 		}
 
 		public void partHidden(IWorkbenchPartReference partRef) {
+			// nothing to do
 		}
 
 		public void partInputChanged(IWorkbenchPartReference partRef) {
+			// nothing to do
 		}
 
 		public void partOpened(IWorkbenchPartReference partRef) {
+			// nothing to do
 		}
 
 		public void partVisible(IWorkbenchPartReference partRef) {
+			// nothing to do
 		}
 
 
@@ -174,9 +180,11 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 
 
 		public void mouseDoubleClick(MouseEvent e) {
+			// nothing to do
 		}
 
 		public void mouseDown(MouseEvent e) {
+			// nothing to do
 		}
 
 		public void mouseUp(MouseEvent e) {
@@ -190,6 +198,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 		}
 
 		public void keyReleased(KeyEvent e) {
+			// nothing to do
 		}
 
 
@@ -212,7 +221,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 	 */
 	private static boolean MAC = Util.isMac();
 
-	private static final int WIDGET_PRIORITY= 1000;
+	private static final int WIDGET_PRIORITY= 15;
 
 	private static final String DIALOG_SETTINGS_SECTION= "RenameInformationPopup"; //$NON-NLS-1$
 	private static final String SNAP_POSITION_KEY= "snap_position"; //$NON-NLS-1$
@@ -402,7 +411,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 				ISourceViewer viewer= fEditor.getViewer();
 				if (viewer instanceof IWidgetTokenOwnerExtension) {
 					IWidgetTokenOwnerExtension widgetTokenOwnerExtension= (IWidgetTokenOwnerExtension) viewer;
-					widgetTokenOwnerExtension.requestWidgetToken(this, WIDGET_PRIORITY);
+					visible= widgetTokenOwnerExtension.requestWidgetToken(this, WIDGET_PRIORITY);
 				}
 			} else if (! visible && fPopup.isVisible()) {
 				releaseWidgetToken();
@@ -850,6 +859,12 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 	}
 
 	public boolean requestWidgetToken(IWidgetTokenOwner owner, int priority) {
+		if (priority > WIDGET_PRIORITY) {
+			if (fPopup != null && !fPopup.isDisposed()) {
+				fPopup.setVisible(false);
+			}
+			return true;
+		}
 		return false;
 	}
 
