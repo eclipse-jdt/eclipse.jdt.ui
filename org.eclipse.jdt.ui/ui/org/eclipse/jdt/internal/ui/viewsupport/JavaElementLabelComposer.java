@@ -371,6 +371,17 @@ public class JavaElementLabelComposer {
 
 			fBuffer.append(getElementName(method));
 
+			// constructor type arguments
+			if (getFlag(flags, JavaElementLabels.T_TYPE_PARAMETERS) && method.isConstructor()) {
+				if (resolvedSig != null && resolvedKey.isParameterizedType()) {
+					BindingKey declaringType= resolvedKey.getDeclaringType();
+					if (declaringType != null) {
+						String[] declaringTypeArguments= declaringType.getTypeArguments();
+						appendTypeArgumentSignaturesLabel(method, declaringTypeArguments, flags);
+					}
+				}
+			}
+		
 			// parameters
 			fBuffer.append('(');
 			String[] declaredParameterTypes= method.getParameterTypes();
