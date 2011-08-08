@@ -28,9 +28,9 @@
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.jdt.core" version="3.6.0" match="compatible"/>
+      <import plugin="org.eclipse.jdt.core" version="3.7.1" match="compatible"/>
       <import plugin="org.eclipse.core.filebuffers"/>
-      <import plugin="org.eclipse.jdt.ui" version="3.6.0" match="compatible"/>
+      <import plugin="org.eclipse.jdt.ui" version="3.7.1" match="compatible"/>
    </requires>
 
    <plugin
