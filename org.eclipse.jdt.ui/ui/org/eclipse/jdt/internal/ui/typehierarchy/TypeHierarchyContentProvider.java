@@ -221,6 +221,8 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 
 		IJavaElement[] input= fTypeHierarchy.getInputElements();
+		if (input == null)
+			return false;
 		for (int i= 0; i < input.length; i++) {
 			int inputType= input[i].getElementType();
 			if (inputType == IJavaElement.TYPE) {
