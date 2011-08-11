@@ -8138,6 +8138,51 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	public void testTypeParametersToRawTypeReference09() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    private List<String> l= new ArrayList();\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+
+		String[] expected= new String[3];
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
+		buf.append("    private List<String> l= new ArrayList();\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    private List<String> l= new ArrayList<String>();\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 	public void testTypeParametersToRawTypeReferenceBug212557() throws Exception {
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);

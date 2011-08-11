@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.EmptyStatement;
@@ -1413,6 +1414,10 @@ public class LocalCorrectionsSubProcessor {
 		// try to resolve type in context
 		ITypeBinding binding= ASTResolving.guessBindingForTypeReference(node);
 		if (binding != null) {
+			ASTNode parent= node.getParent();
+			if (parent instanceof Type && parent.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY && binding.isInterface()) { //bug 351853
+				return;
+			}
 			ITypeBinding simpleBinding= binding;
 			if (simpleBinding.isArray()) {
 				simpleBinding= simpleBinding.getElementType();
@@ -1421,7 +1426,7 @@ public class LocalCorrectionsSubProcessor {
 		
 			if (!simpleBinding.isRecovered()) {
 				if (binding.isParameterizedType() && node.getParent() instanceof SimpleType && !(node.getParent().getParent() instanceof Type)) {
-					proposals.add(UnresolvedElementsSubProcessor.createTypeRefChangeFullProposal(cu, binding, node, 3 + 2));
+					proposals.add(UnresolvedElementsSubProcessor.createTypeRefChangeFullProposal(cu, binding, node, 2));
 				}
 			}
 		} else {
@@ -1429,7 +1434,7 @@ public class LocalCorrectionsSubProcessor {
 			if (!(normalizedNode.getParent() instanceof Type) && node.getParent() != normalizedNode) {
 				ITypeBinding normBinding= ASTResolving.guessBindingForTypeReference(normalizedNode);
 				if (normBinding != null && !normBinding.isRecovered()) {
-					proposals.add(UnresolvedElementsSubProcessor.createTypeRefChangeFullProposal(cu, normBinding, normalizedNode, 3 + 2));
+					proposals.add(UnresolvedElementsSubProcessor.createTypeRefChangeFullProposal(cu, normBinding, normalizedNode, 2));
 				}
 			}
 		}
