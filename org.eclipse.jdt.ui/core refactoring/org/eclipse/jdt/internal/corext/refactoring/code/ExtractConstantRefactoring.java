@@ -815,8 +815,15 @@ public class ExtractConstantRefactoring extends Refactoring {
 		}
 		if (parent instanceof ExpressionStatement)
 			return false;
-		if (parent instanceof SwitchCase)
-			return false;
+		if (parent instanceof SwitchCase) {
+			if (node instanceof Name) {
+				Name name= (Name) node;
+				ITypeBinding typeBinding= name.resolveTypeBinding();
+				if (typeBinding != null) {
+					return !typeBinding.isEnum();
+				}
+			}
+		}
 		return true;
 	}
 
