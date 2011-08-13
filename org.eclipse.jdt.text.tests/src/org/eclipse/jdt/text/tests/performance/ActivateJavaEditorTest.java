@@ -52,11 +52,4 @@ public class ActivateJavaEditorTest extends ActivateEditorTest {
 		ITypeRoot cu= EditorUtility.getEditorInputJavaElement(editor, false);
 		SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
 	}
-
-	@Override
-	protected String getDegradationComment() {
-		return "The small regression is because of fix for <a href=\"https://bugs.eclipse.org/bugs/show_bug.cgi?id=322914\">bug 322914</a>. " +
-				"(See also <a href=\"https://bugs.eclipse.org/bugs/show_bug.cgi?id=341976\">bug 341976</a>)";
-	}
-
 }
