@@ -1712,6 +1712,100 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] {preview1, preview2}, new String[] {expected1, expected2});
 	}
 
+	public void testUncaughtExceptionOnSuper5() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349051
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Closeable;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("public class A implements Closeable {\n");
+		buf.append("    public void close() {\n");
+		buf.append("        throw new FileNotFoundException();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Closeable;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("public class A implements Closeable {\n");
+		buf.append("    public void close() throws FileNotFoundException {\n");
+		buf.append("        throw new FileNotFoundException();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Closeable;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("public class A implements Closeable {\n");
+		buf.append("    public void close() {\n");
+		buf.append("        try {\n");
+		buf.append("            throw new FileNotFoundException();\n");
+		buf.append("        } catch (FileNotFoundException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	public void testUncaughtExceptionOnSuper6() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349051
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Closeable;\n");
+		buf.append("public class A implements Closeable {\n");
+		buf.append("    public void close() {\n");
+		buf.append("        throw new Throwable();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Closeable;\n");
+		buf.append("public class A implements Closeable {\n");
+		buf.append("    public void close() {\n");
+		buf.append("        try {\n");
+		buf.append("            throw new Throwable();\n");
+		buf.append("        } catch (Throwable e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+	}
 	public void testUncaughtExceptionOnThis() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

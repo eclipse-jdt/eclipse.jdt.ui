@@ -369,6 +369,18 @@ public class LocalCorrectionsSubProcessor {
 				IMethodBinding overriddenMethod= Bindings.findOverriddenMethod(binding, true);
 				if (overriddenMethod != null ) {
 					isApplicable= overriddenMethod.getDeclaringClass().isFromSource();
+					if (!isApplicable) { // bug 349051
+						ITypeBinding[] exceptionTypes= overriddenMethod.getExceptionTypes();
+						ArrayList<ITypeBinding> unhandledExceptions= new ArrayList<ITypeBinding>(uncaughtExceptions.length);
+						for (int i= 0; i < uncaughtExceptions.length; i++) {
+							ITypeBinding curr= uncaughtExceptions[i];
+							if (isSubtype(curr, exceptionTypes)) {
+								unhandledExceptions.add(curr);
+							}
+						}
+						uncaughtExceptions= unhandledExceptions.toArray(new ITypeBinding[unhandledExceptions.size()]);
+						isApplicable|= uncaughtExceptions.length > 0;
+					}
 				}
 			}
 			if (isApplicable) {
@@ -376,7 +388,7 @@ public class LocalCorrectionsSubProcessor {
 				ArrayList<ITypeBinding> unhandledExceptions= new ArrayList<ITypeBinding>(uncaughtExceptions.length);
 				for (int i= 0; i < uncaughtExceptions.length; i++) {
 					ITypeBinding curr= uncaughtExceptions[i];
-					if (!canRemoveException(curr, methodExceptions)) {
+					if (!isSubtype(curr, methodExceptions)) {
 						unhandledExceptions.add(curr);
 					}
 				}
@@ -387,7 +399,7 @@ public class LocalCorrectionsSubProcessor {
 				ChangeDescription[] desc= new ChangeDescription[nExistingExceptions + uncaughtExceptions.length];
 				for (int i= 0; i < exceptions.size(); i++) {
 					Name elem= exceptions.get(i);
-					if (canRemoveException(elem.resolveTypeBinding(), uncaughtExceptions)) {
+					if (isSubtype(elem.resolveTypeBinding(), uncaughtExceptions)) {
 						desc[i]= new RemoveDescription();
 					}
 				}
@@ -417,7 +429,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 
-	private static boolean canRemoveException(ITypeBinding curr, ITypeBinding[] addedExceptions) {
+	private static boolean isSubtype(ITypeBinding curr, ITypeBinding[] addedExceptions) {
 		while (curr != null) {
 			for (int i= 0; i < addedExceptions.length; i++) {
 				if (curr == addedExceptions[i]) {
