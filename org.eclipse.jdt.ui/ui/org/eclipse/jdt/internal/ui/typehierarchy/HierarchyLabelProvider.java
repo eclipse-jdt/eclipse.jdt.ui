@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import java.util.Arrays;
-import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -104,8 +103,8 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		if (element instanceof IType) {
 			ImageDescriptor desc= getTypeImageDescriptor((IType) element);
 			if (desc != null) {
-				List<IJavaElement> inputElements= Arrays.asList(fHierarchy.getInputElements());
-				if (inputElements.contains(element)) {
+				IJavaElement[] elements= fHierarchy.getInputElements();
+				if (elements != null && Arrays.asList(elements).contains(element)) {
 					desc= new FocusDescriptor(desc);
 				}
 				result= JavaPlugin.getImageDescriptorRegistry().get(desc);

@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Display;
@@ -191,7 +192,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				return;
 			}
 		}
-		boolean hierachyCreationNeeded= (fHierarchy == null || !elements.equals(fInputElements));
+		boolean hierachyCreationNeeded= (fHierarchy == null || !Arrays.equals(elements, fInputElements));
 
 		if (hierachyCreationNeeded || fHierarchyRefreshNeeded) {
 			if (fTypeHierarchyViewPart == null) {
@@ -318,7 +319,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 
 
 	public void doHierarchyRefresh(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
-		boolean hierachyCreationNeeded= (fHierarchy == null || !elements.equals(fInputElements));
+		boolean hierachyCreationNeeded= (fHierarchy == null || !Arrays.equals(elements, fInputElements));
 		// to ensure the order of the two listeners always remove / add listeners on operations
 		// on type hierarchies
 		if (fHierarchy != null) {
