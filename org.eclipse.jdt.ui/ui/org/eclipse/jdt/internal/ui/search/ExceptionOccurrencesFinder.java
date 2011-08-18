@@ -64,6 +64,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	private TryStatement fTryStatement;
 	private List<OccurrenceLocation> fResult;
 	private String fDescription;
+	private List<ITypeBinding> fCaughtExceptions;
 
 	public ExceptionOccurrencesFinder() {
 		fResult= new ArrayList<OccurrenceLocation>();
@@ -126,29 +127,24 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	}
 
 	private void performSearch() {
+		fCaughtExceptions= new ArrayList<ITypeBinding>();
 		fStart.accept(this);
 		if (fTryStatement != null) {
-			visitResourceDeclarations(fTryStatement);
-			handleImplicitResourceClosure(fTryStatement);
+			handleResourceDeclarations(fTryStatement);
 		}
 		if (fSelectedName != null) {
 			fResult.add(new OccurrenceLocation(fSelectedName.getStartPosition(), fSelectedName.getLength(), F_EXCEPTION_DECLARATION, fDescription));
 		}
 	}
 
-	private void visitResourceDeclarations(TryStatement tryStatement) {
+	private void handleResourceDeclarations(TryStatement tryStatement) {
 		if (tryStatement.getAST().apiLevel() >= AST.JLS4) {
 			List<VariableDeclarationExpression> resources= tryStatement.resources();
 			for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
 				iterator.next().accept(this);
 			}
-		}
-	}
 
-	private void handleImplicitResourceClosure(TryStatement tryStatement) {
-		//check if the exception is thrown as a result of resource#close()
-		if (tryStatement.getAST().apiLevel() >= AST.JLS4) {
-			List<VariableDeclarationExpression> resources= tryStatement.resources();
+			//check if the exception is thrown as a result of resource#close()
 			boolean exitMarked= false;
 			for (VariableDeclarationExpression variable : resources) {
 				Type type= variable.getType();
@@ -283,8 +279,45 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 
 	@Override
 	public boolean visit(TryStatement node) {
-		handleImplicitResourceClosure(node);
-		return super.visit(node);
+		int currentSize= fCaughtExceptions.size();
+		List<CatchClause> catchClauses= node.catchClauses();
+		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext();) {
+			Type type= iter.next().getException().getType();
+			if (type instanceof UnionType) {
+				List<Type> types= ((UnionType) type).types();
+				for (Iterator<Type> iterator= types.iterator(); iterator.hasNext();) {
+					addCaughtException(iterator.next());
+				}
+			} else {
+				addCaughtException(type);
+			}
+		}
+
+		node.getBody().accept(this);
+
+		handleResourceDeclarations(node);
+
+		int toRemove= fCaughtExceptions.size() - currentSize;
+		for (int i= toRemove; i > 0; i--) {
+			fCaughtExceptions.remove(currentSize);
+		}
+
+		// visit catch and finally
+		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext();) {
+			iter.next().accept(this);
+		}
+		if (node.getFinally() != null)
+			node.getFinally().accept(this);
+
+		// return false. We have visited the body by ourselves.
+		return false;
+	}
+
+	private void addCaughtException(Type type) {
+		ITypeBinding typeBinding= type.resolveBinding();
+		if (typeBinding != null) {
+			fCaughtExceptions.add(typeBinding);
+		}
 	}
 
 	@Override
@@ -308,10 +341,30 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	private boolean matches(ITypeBinding exception) {
 		if (exception == null)
 			return false;
+		if (isCaught(exception))
+			return false;
 		while (exception != null) {
 			if (Bindings.equals(fException, exception))
 				return true;
 			exception= exception.getSuperclass();
+		}
+		return false;
+	}
+
+	private boolean isCaught(ITypeBinding binding) {
+		for (Iterator<ITypeBinding> iter= fCaughtExceptions.iterator(); iter.hasNext();) {
+			ITypeBinding catchException= iter.next();
+			if (catches(catchException, binding))
+				return true;
+		}
+		return false;
+	}
+
+	private boolean catches(ITypeBinding catchTypeBinding, ITypeBinding throwTypeBinding) {
+		while (throwTypeBinding != null) {
+			if (throwTypeBinding == catchTypeBinding)
+				return true;
+			throwTypeBinding= throwTypeBinding.getSuperclass();
 		}
 		return false;
 	}

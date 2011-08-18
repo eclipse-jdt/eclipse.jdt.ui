@@ -61,7 +61,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 
 	private MethodDeclaration fMethodDeclaration;
 	private List<OccurrenceLocation> fResult;
-	private List<ITypeBinding> fCatchedExceptions;
+	private List<ITypeBinding> fCaughtExceptions;
 	private String fExitDescription;
 	private CompilationUnit fASTRoot;
 
@@ -127,7 +127,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 
 
 	private void markReferences() {
-		fCatchedExceptions= new ArrayList<ITypeBinding>();
+		fCaughtExceptions= new ArrayList<ITypeBinding>();
 		boolean isVoid= true;
 		Type returnType= fMethodDeclaration.getReturnType2();
 		if (returnType != null) {
@@ -188,17 +188,17 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 
 	@Override
 	public boolean visit(TryStatement node) {
-		int currentSize= fCatchedExceptions.size();
+		int currentSize= fCaughtExceptions.size();
 		List<CatchClause> catchClauses= node.catchClauses();
 		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext();) {
 			Type type= iter.next().getException().getType();
 			if (type instanceof UnionType) {
 				List<Type> types= ((UnionType) type).types();
 				for (Iterator<Type> iterator= types.iterator(); iterator.hasNext();) {
-					addCatchedException(iterator.next());
+					addCaughtException(iterator.next());
 				}
 			} else {
-				addCatchedException(type);
+				addCaughtException(type);
 			}
 		}
 		node.getBody().accept(this);
@@ -237,9 +237,9 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 			}
 		}
 
-		int toRemove= fCatchedExceptions.size() - currentSize;
+		int toRemove= fCaughtExceptions.size() - currentSize;
 		for (int i= toRemove; i > 0; i--) {
-			fCatchedExceptions.remove(currentSize);
+			fCaughtExceptions.remove(currentSize);
 		}
 
 		// visit catch and finally
@@ -253,10 +253,10 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		return false;
 	}
 
-	private void addCatchedException(Type type) {
+	private void addCaughtException(Type type) {
 		ITypeBinding typeBinding= type.resolveBinding();
 		if (typeBinding != null) {
-			fCatchedExceptions.add(typeBinding);
+			fCaughtExceptions.add(typeBinding);
 		}
 	}
 
@@ -318,7 +318,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 	private boolean isExitPoint(ITypeBinding binding) {
 		if (binding == null)
 			return false;
-		return !isCatched(binding);
+		return !isCaught(binding);
 	}
 
 	private boolean isExitPoint(IMethodBinding binding) {
@@ -326,14 +326,14 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 			return false;
 		ITypeBinding[] exceptions= binding.getExceptionTypes();
 		for (int i= 0; i < exceptions.length; i++) {
-			if (!isCatched(exceptions[i]))
+			if (!isCaught(exceptions[i]))
 				return true;
 		}
 		return false;
 	}
 
-	private boolean isCatched(ITypeBinding binding) {
-		for (Iterator<ITypeBinding> iter= fCatchedExceptions.iterator(); iter.hasNext();) {
+	private boolean isCaught(ITypeBinding binding) {
+		for (Iterator<ITypeBinding> iter= fCaughtExceptions.iterator(); iter.hasNext();) {
 			ITypeBinding catchException= iter.next();
 			if (catches(catchException, binding))
 				return true;

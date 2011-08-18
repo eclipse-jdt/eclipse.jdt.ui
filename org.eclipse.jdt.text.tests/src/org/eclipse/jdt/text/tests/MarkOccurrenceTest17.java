@@ -469,4 +469,54 @@ public class MarkOccurrenceTest17 extends TestCase {
 				find(s, "read", 5), find(s, "}", 2) };
 		checkSelection(s, offset, length, ranges);
 	}
+
+	public void testThrowingException7() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=68305
+		fFinder= new ExceptionOccurrencesFinder();
+		StringBuffer s= new StringBuffer();
+		s.append("class A{\n");
+		s.append("   int foo(String s) throws Exception {\n");
+		s.append("      try {\n");
+		s.append("         if (s == null)\n");
+		s.append("            throw new NullPointerException();\n");
+		s.append("         else if (s.length() > 10)\n");
+		s.append("            throw new IllegalArgumentException();\n");
+		s.append("         else\n");
+		s.append("            throw new Exception();\n");
+		s.append("      } catch (NullPointerException e) {\n");
+		s.append("         e.printStackTrace();\n");
+		s.append("      } catch (IllegalArgumentException e) {\n");
+		s.append("         e.printStackTrace();\n");
+		s.append("      }\n");
+		s.append("      return s.length();\n");
+		s.append("   }\n");
+		s.append("}\n");
+		int offset= 1 + s.indexOf("Exception {");//middle of word
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "Exception", 1), find(s, "throw", 4) };
+		checkSelection(s, offset, length, ranges);
+	}
+
+	public void testThrowingException8() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=68305
+		fFinder= new ExceptionOccurrencesFinder();
+		StringBuffer s= new StringBuffer();
+		s.append("import java.net.URL;\n");
+		s.append("class A{\n");
+		s.append("   void foo() {\n");
+		s.append("   	try {\n");
+		s.append("   		URL u1 = new URL(\"mal://formed\");\n");
+		s.append("   		try {\n");
+		s.append("   			URL u2 = new URL(\"mal://formed\");\n");
+		s.append("   		} catch (Exception e2) {\n");
+		s.append("   		}\n");
+		s.append("   	} catch (Exception e1) {\n");
+		s.append("   	}\n");
+		s.append("   }\n");
+		s.append("}\n");
+		int offset= 1 + s.indexOf("Exception e1");//middle of word
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "Exception", 2), find(s, "URL", 3) };
+		checkSelection(s, offset, length, ranges);
+	}
 }
