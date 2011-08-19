@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -88,6 +92,7 @@ import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ChangeMethodSignatureDescriptor;
@@ -107,6 +112,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRangeFactory;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -1852,8 +1858,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					newTypeNode= (Type) getASTRewrite().createStringPlaceholder(newTypeName, ASTNode.SIMPLE_TYPE);
 				//Don't import if not resolved.
 			} else {
-				newTypeNode= getImportRewrite().addImport(newTypeBinding, fCuRewrite.getAST());
-				getImportRemover().registerAddedImports(newTypeNode);
+				ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(fCuRewrite.getRoot(), getMethodNameNode().getStartPosition(), getImportRewrite());
+				newTypeNode= getImportRewrite().addImport(newTypeBinding, fCuRewrite.getAST(), importRewriteContext);
+				getImportRemover().registerAddedImports(newTypeNode);				
 			}
 			return newTypeNode;
 		}
@@ -2037,7 +2044,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				// may be null if the delegate is an interface method or
 				// abstract -> no body
 				new ReferenceUpdate(delegateInvocation, creator.getDelegateRewrite(), fResult).updateNode();
-			new DocReferenceUpdate(creator.getJavadocReference(), creator.getDelegateRewrite(), fResult).updateNode();
+			MethodRef javadocReference= creator.getJavadocReference();
+			if (javadocReference != null)
+				new DocReferenceUpdate(javadocReference, creator.getDelegateRewrite(), fResult).updateNode();
 
 			creator.createEdit();
 		}
