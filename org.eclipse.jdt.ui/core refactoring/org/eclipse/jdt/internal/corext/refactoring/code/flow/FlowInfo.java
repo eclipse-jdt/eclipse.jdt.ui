@@ -227,13 +227,13 @@ public abstract class FlowInfo {
 			IVariableBinding binding= iter.next().getException().resolveBinding();
 			if (binding == null)
 				continue;
-			ITypeBinding catchedType= binding.getType();
-			while (catchedType != null) {
-				if (catchedType == type) {
+			ITypeBinding caughtType= binding.getType();
+			while (caughtType != null) {
+				if (caughtType == type) {
 					fExceptions.remove(type);
 					return;
 				}
-				catchedType= catchedType.getSuperclass();
+				caughtType= caughtType.getSuperclass();
 			}
 		}
 	}

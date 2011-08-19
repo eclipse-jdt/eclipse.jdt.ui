@@ -131,15 +131,15 @@ public class FlowContext {
 	boolean isExceptionCaught(ITypeBinding excpetionType) {
 		for (Iterator<List<CatchClause>> exceptions= fExceptionStack.iterator(); exceptions.hasNext(); ) {
 			for (Iterator<CatchClause> catchClauses= exceptions.next().iterator(); catchClauses.hasNext(); ) {
-				SingleVariableDeclaration catchedException= catchClauses.next().getException();
-				IVariableBinding binding= catchedException.resolveBinding();
+				SingleVariableDeclaration caughtException= catchClauses.next().getException();
+				IVariableBinding binding= caughtException.resolveBinding();
 				if (binding == null)
 					continue;
-				ITypeBinding catchedType= binding.getType();
-				while (catchedType != null) {
-					if (catchedType == excpetionType)
+				ITypeBinding caughtype= binding.getType();
+				while (caughtype != null) {
+					if (caughtype == excpetionType)
 						return true;
-					catchedType= catchedType.getSuperclass();
+					caughtype= caughtype.getSuperclass();
 				}
 			}
 		}
