@@ -149,7 +149,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	/*
 	 * Rename method 'A.m(signature)' to 'A.newMethodName(signature)'
 	 */
-	private void helperRenameMethod(String[] signature, String newMethodName, boolean createDelegate) throws Exception {
+	private void helperRenameMethod(String[] signature, String newMethodName, boolean createDelegate, boolean markAsDeprecated) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
@@ -161,6 +161,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 		processor.setNewMethodName(newMethodName);
 		processor.setDelegateUpdating(createDelegate);
+		processor.setDeprecateDelegates(markAsDeprecated);
 		ref.checkInitialConditions(new NullProgressMonitor());
 		JavaRefactoringDescriptor descriptor= processor.createDescriptor();
 		RefactoringStatus result= performRefactoring(descriptor);
@@ -1685,12 +1686,12 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	public void testName01() throws Exception {
 		String[] signature= {"QString;"};
-		helperRenameMethod(signature, "newName", false);
+		helperRenameMethod(signature, "newName", false, true);
 	}
 
 	public void testName02() throws Exception {
 		String[] signature= {"QString;"};
-		helperRenameMethod(signature, "newName", false);
+		helperRenameMethod(signature, "newName", false, true);
 	}
 
 	public void testFailImport01() throws Exception {
@@ -1894,7 +1895,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testStaticImport01() throws Exception {
-		helperRenameMethod(new String[0], "abc", false);
+		helperRenameMethod(new String[0], "abc", false, true);
 	}
 
 	public void testStaticImport02() throws Exception {
@@ -2234,8 +2235,14 @@ public class ChangeSignatureTests extends RefactoringTest {
 	public void testDelegate05() throws Exception {
 		// bug 138320
 		String[] signature= {};
-		helperRenameMethod(signature, "renamed", true);
+		helperRenameMethod(signature, "renamed", true, true);
 	}
 
+	public void testDelegate06() throws Exception {
+		// bug 350375
+		String[] signature= {};
+		helperRenameMethod(signature, "renamed", true, false);
+	}
+	
 }
 

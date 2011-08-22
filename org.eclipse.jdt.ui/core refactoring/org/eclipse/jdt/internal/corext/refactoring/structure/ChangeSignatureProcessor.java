@@ -2037,7 +2037,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				// may be null if the delegate is an interface method or
 				// abstract -> no body
 				new ReferenceUpdate(delegateInvocation, creator.getDelegateRewrite(), fResult).updateNode();
-			new DocReferenceUpdate(creator.getJavadocReference(), creator.getDelegateRewrite(), fResult).updateNode();
+			MethodRef javadocReference= creator.getJavadocReference();
+			if (javadocReference != null)
+				new DocReferenceUpdate(javadocReference, creator.getDelegateRewrite(), fResult).updateNode();
 
 			creator.createEdit();
 		}
