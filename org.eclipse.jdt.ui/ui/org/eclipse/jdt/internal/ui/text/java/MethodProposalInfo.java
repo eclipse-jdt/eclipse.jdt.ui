@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -90,7 +91,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 */
 	private IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IType type) throws JavaModelException {
 		Map<String, char[]> typeVariables= computeTypeVariables(type);
-		return findMethod(name, paramTypes, isConstructor, type.getMethods(), typeVariables);
+		return findMethod(name, paramTypes, isConstructor, type, typeVariables);
 	}
 
 	/**
@@ -142,14 +143,15 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * @param paramTypes The type signatures of the parameters e.g.
 	 *        <code>{"QString;","I"}</code>
 	 * @param isConstructor If the method is a constructor
-	 * @param methods The methods to search in
+	 * @param type the given type in which to search for methods
 	 * @param typeVariables a map from type variables to concretely used types
 	 * @return The found method or <code>null</code>, if nothing found
 	 * @throws JavaModelException if the method does not exist or if an exception occurs while accessing its corresponding resource
 	 */
-	private IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IMethod[] methods, Map<String, char[]> typeVariables) throws JavaModelException {
+	private IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IType type, Map<String, char[]> typeVariables) throws JavaModelException {
+		IMethod[] methods = type.getMethods();
 		for (int i= methods.length - 1; i >= 0; i--) {
-			if (isSameMethodSignature(name, paramTypes, isConstructor, methods[i], typeVariables)) {
+			if (isSameMethodSignature(name, paramTypes, isConstructor, methods[i], typeVariables, type)) {
 				return methods[i];
 			}
 		}
@@ -167,15 +169,21 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * @param isConstructor Specifies if the method is a constructor
 	 * @param method the method to be compared with this info's method
 	 * @param typeVariables a map from type variables to types
+	 * @param type the given type that declares the method
 	 * @return Returns <code>true</code> if the method has the given name and
 	 *         parameter types and constructor state.
 	 * @throws JavaModelException if the method does not exist or if an exception occurs while accessing its corresponding resource
 	 */
-	private boolean isSameMethodSignature(String name, String[] paramTypes, boolean isConstructor, IMethod method, Map<String, char[]> typeVariables) throws JavaModelException {
+	private boolean isSameMethodSignature(String name, String[] paramTypes, boolean isConstructor, IMethod method, Map<String, char[]> typeVariables, IType type) throws JavaModelException {
 		if (isConstructor || name.equals(method.getElementName())) {
 			if (isConstructor == method.isConstructor()) {
 				String[] otherParams= method.getParameterTypes(); // types may be type variables
-				if (paramTypes.length == otherParams.length) {
+				boolean isBinaryConstructorForNonStaticMemberClass=
+						method.isBinary()
+						&& type.isMember()
+						&& !Flags.isStatic(type.getFlags());
+				int syntheticParameterCorrection= isBinaryConstructorForNonStaticMemberClass && paramTypes.length == otherParams.length - 1 ? 1 : 0;
+				if (paramTypes.length == otherParams.length - syntheticParameterCorrection) {
 					fFallbackMatch= method;
 					String signature= method.getSignature();
 					String[] otherParamsFromSignature= Signature.getParameterTypes(signature); // types are resolved / upper-bounded
@@ -183,9 +191,9 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 					// not yet bound when proposing a method
 					for (int i= 0; i < paramTypes.length; i++) {
 						String ourParamName= computeSimpleTypeName(paramTypes[i], typeVariables);
-						String otherParamName1= computeSimpleTypeName(otherParams[i], typeVariables);
-						String otherParamName2= computeSimpleTypeName(otherParamsFromSignature[i], typeVariables);
-
+						String otherParamName1= computeSimpleTypeName(otherParams[i + syntheticParameterCorrection], typeVariables);
+						String otherParamName2= computeSimpleTypeName(otherParamsFromSignature[i + syntheticParameterCorrection], typeVariables);
+	
 						if (!ourParamName.equals(otherParamName1) && !ourParamName.equals(otherParamName2)) {
 							return false;
 						}
