@@ -43,6 +43,7 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
@@ -56,6 +57,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
@@ -141,9 +143,8 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			LayoutUtil.doDefaultLayout(composite, new DialogField[] { fCategoryList }, true, 5, 5);
 			LayoutUtil.setHorizontalGrabbing(fCategoryList.getListControl(null));
 			Dialog.applyDialogFont(composite);
-
 			setHelpAvailable(false);
-
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.VISIBLE_CATEGORIES_DIALOG);
 			return composite;
 		}
 

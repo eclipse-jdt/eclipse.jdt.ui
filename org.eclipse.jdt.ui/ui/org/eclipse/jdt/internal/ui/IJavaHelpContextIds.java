@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -297,6 +297,11 @@ public interface IJavaHelpContextIds {
 	public static final String WORKING_SET_ASSIGNMENTS_DIALOG= PREFIX + "working_set_assignments_dialog_context"; //$NON-NLS-1$
 	public static final String ASSIGN_WORKING_SETS_ACTION = PREFIX + "assign_working_sets_action_context"; //$NON-NLS-1$
 	public static final String CONFIGURE_WORKING_SETS_ACTION= PREFIX + "configure_working_sets_action_context"; //$NON-NLS-1$
+
+	/**
+	 * @since 3.8
+	 */
+	public static final String VISIBLE_CATEGORIES_DIALOG= PREFIX + "visible_categories_dialog_context"; //$NON-NLS-1$
 
 	// view parts
 	public static final String TYPE_HIERARCHY_VIEW= PREFIX + "type_hierarchy_view_context"; //$NON-NLS-1$
