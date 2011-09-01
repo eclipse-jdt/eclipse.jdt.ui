@@ -110,7 +110,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	}
 
 	private static Long calculateSerialVersionId(IClassFileReader cfReader) throws IOException {
-		// implementing algorithm specified on http://java.sun.com/j2se/1.5.0/docs/guide/serialization/spec/class.html#4100
+		// implementing algorithm specified on http://download.oracle.com/javase/6/docs/platform/serialization/spec/class.html#4100
 
 		ByteArrayOutputStream os= new ByteArrayOutputStream();
 		DataOutputStream doos= new DataOutputStream(os);

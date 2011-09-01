@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -525,8 +525,9 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 
 	/**
 	 * Returns the JNI-style signature of the given method. See
-	 * http://java.sun.com/j2se/1.4.2/docs/guide/jpda/jdi/com/sun/jdi/doc-files/signature.html
-	 *
+	 * http://download.oracle.com/javase/6/docs
+	 * /jdk/api/jpda/jdi/com/sun/jdi/doc-files/signature.html
+	 * 
 	 * @param method the method
 	 * @return the JNI style signature
 	 */
@@ -536,8 +537,9 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 
 	/**
 	 * Returns the JNI-style signature of the given constructor. See
-	 * http://java.sun.com/j2se/1.4.2/docs/guide/jpda/jdi/com/sun/jdi/doc-files/signature.html
-	 *
+	 * http://download.oracle.com/javase
+	 * /6/docs/jdk/api/jpda/jdi/com/sun/jdi/doc-files/signature.html
+	 * 
 	 * @param constructor the constructor
 	 * @return the JNI style signature
 	 */
@@ -547,8 +549,9 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 
 	/**
 	 * Returns the JNI-style signature of the given parameter types. See
-	 * http://java.sun.com/j2se/1.4.2/docs/guide/jpda/jdi/com/sun/jdi/doc-files/signature.html
-	 *
+	 * http://download.oracle.com/javase
+	 * /6/docs/jdk/api/jpda/jdi/com/sun/jdi/doc-files/signature.html
+	 * 
 	 * @param paramTypes the parameter types
 	 * @return the JNI style signature
 	 */
@@ -563,8 +566,9 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 
 	/**
 	 * Returns the JNI-style signature of the given class. See
-	 * http://java.sun.com/j2se/1.4.2/docs/guide/jpda/jdi/com/sun/jdi/doc-files/signature.html
-	 *
+	 * http://download.oracle.com/javase/6/docs
+	 * /jdk/api/jpda/jdi/com/sun/jdi/doc-files/signature.html
+	 * 
 	 * @param clazz the class
 	 * @return the JNI style signature
 	 */

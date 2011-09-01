@@ -613,7 +613,7 @@ public class JavadocTagsSubProcessor {
 		return false;
 	}
 
-	private static String[] TAG_ORDER= { // see http://java.sun.com/j2se/javadoc/writingdoccomments/index.html#orderoftags
+	private static String[] TAG_ORDER= { // see http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#orderoftags
 		TagElement.TAG_AUTHOR,
 		TagElement.TAG_VERSION,
 		TagElement.TAG_PARAM,

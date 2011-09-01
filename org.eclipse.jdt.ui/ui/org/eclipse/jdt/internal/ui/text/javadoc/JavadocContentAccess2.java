@@ -99,16 +99,19 @@ public class JavadocContentAccess2 {
 	private static final String PARAM_NAME_END= "</b> "; //$NON-NLS-1$
 
 	/**
-	 * Implements the "Algorithm for Inheriting Method Comments" as specified for
-	 * <a href="http://java.sun.com/j2se/1.4.2/docs/tooldocs/solaris/javadoc.html#inheritingcomments">1.4.2</a>,
-	 * <a href="http://java.sun.com/j2se/1.5.0/docs/tooldocs/windows/javadoc.html#inheritingcomments">1.5</a>, and
-	 * <a href="http://java.sun.com/javase/6/docs/technotes/tools/windows/javadoc.html#inheritingcomments">1.6</a>.
-	 *
+	 * Implements the "Algorithm for Inheriting Method Comments" as specified for <a href=
+	 * "http://download.oracle.com/javase/1.4.2/docs/tooldocs/solaris/javadoc.html#inheritingcomments"
+	 * >1.4.2</a>, <a href=
+	 * "http://download.oracle.com/javase/1.5.0/docs/tooldocs/windows/javadoc.html#inheritingcomments"
+	 * >1.5</a>, and <a href=
+	 * "http://download.oracle.com/javase/6/docs/technotes/tools/windows/javadoc.html#inheritingcomments"
+	 * >1.6</a>.
+	 * 
 	 * <p>
-	 * Unfortunately, the implementation is broken in Javadoc implementations since 1.5, see
-	 * <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6376959">Sun's bug</a>.
+	 * Unfortunately, the implementation is broken in Javadoc implementations since 1.5, see <a
+	 * href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6376959">Sun's bug</a>.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * We adhere to the spec.
 	 * </p>

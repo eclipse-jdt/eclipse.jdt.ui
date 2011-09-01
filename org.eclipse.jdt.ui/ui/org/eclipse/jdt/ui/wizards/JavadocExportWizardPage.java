@@ -137,10 +137,12 @@ public abstract class JavadocExportWizardPage {
 
 	/**
 	 * Called when the command line arguments are collected. Clients can add or modify arguments.
-	 *
+	 * 
 	 * @param vmOptions A {@link List} of {@link String} with the VM arguments.
-	 * @param toolOptions A {@link List} of {@link String} with the Javadoc tool arguments.
-	 * See the <a href="http://java.sun.com/javase/6/docs/technotes/guides/javadoc/index.html"> Javadoc command specification</a> for the format of the arguments.
+	 * @param toolOptions A {@link List} of {@link String} with the Javadoc tool arguments. See the
+	 *            <a href=
+	 *            "http://download.oracle.com/javase/6/docs/technotes/guides/javadoc/index.html">
+	 *            Javadoc command specification</a> for the format of the arguments.
 	 */
 	public void updateArguments(List<String> vmOptions, List<String> toolOptions) {
 	}
