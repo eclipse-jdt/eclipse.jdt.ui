@@ -4343,12 +4343,18 @@
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.add.block.comment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <!-- free this on MAC, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=113981 -->
+      <!-- Command+Shift+/ opens the Help > Search menu on carbon, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=113981 -->
       <key
             platform="carbon"
             sequence="M1+M2+/"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M1+M4+/"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.add.block.comment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 
       <key
@@ -4356,6 +4362,14 @@
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.remove.block.comment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <!-- For consistency, add variant on carbon that is the reverse of Add Block Comment: -->
+      <key
+            platform="carbon"
+            sequence="M1+M4+\"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.remove.block.comment"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+
       <key
             sequence="M1+I"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
