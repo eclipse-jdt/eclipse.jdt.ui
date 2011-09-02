@@ -578,6 +578,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("package pack1;\r\n");
 		buf.append("\r\n");
 		buf.append("import java.util.Vector;\r\n");
+		buf.append("// comment\r\n");
 		buf.append("\r\n");
 		buf.append("public class C {\r\n");
 		buf.append("    Vector v;\r\n");
@@ -2575,6 +2576,8 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("import java.util.HashMap;\n");
+		buf.append("// some comment;\n");
+		buf.append("/*another comment*/\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    public void foo() {\n");
@@ -2625,6 +2628,8 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("import java.util.HashMap;\n");
 		buf.append("\n");
 		buf.append("import static java.io.File.pathSeparator;\n");
+		buf.append("// some comment;\n");
+		buf.append("/*another comment*/\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    public void foo() {\n");
