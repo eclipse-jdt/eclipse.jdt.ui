@@ -772,6 +772,18 @@ public class RenameTypeTests extends RefactoringTest {
 		helper1();
 	}
 
+	public void testFail96() throws Exception {
+		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
+		IPackageFragment packageP2= getRoot().createPackageFragment("p2", true, null);
+		
+		IType classA= getClassFromTestFile(packageP1, "A");
+		getClassFromTestFile(packageP1, "B");
+		getClassFromTestFile(packageP2, "C");
+		
+		RefactoringStatus result= performRefactoring(createRefactoringDescriptor(classA, "C"));
+		assertNotNull("precondition was supposed to fail", result);
+	}
+
 	public void testFail00() throws Exception {
 		helper1();
 	}

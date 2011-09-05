@@ -974,24 +974,36 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			return result;
 		ICompilationUnit[] 	cusWithReferencesToRenamedType= getCus(fReferences);
 
-		ICompilationUnit[] intersection= isIntersectionEmpty(cusWithReferencesToRenamedType, cusWithReferencesToConflictingTypes);
-		if (intersection.length == 0)
-			return result;
-
-		for (int i= 0; i < intersection.length; i++) {
-			RefactoringStatusContext context= JavaStatusContext.create(intersection[i]);
+		Set<ICompilationUnit> conflicts= getIntersection(cusWithReferencesToRenamedType, cusWithReferencesToConflictingTypes);
+		if (cusWithReferencesToConflictingTypes.length > 0) {
+			for (ICompilationUnit cu : cusWithReferencesToConflictingTypes) {
+				String packageName= fType.getPackageFragment().getElementName();
+				if (((IPackageFragment) cu.getParent()).getElementName().equals(packageName)) {
+					IImportDeclaration[] imports= cu.getImports();
+					for (IImportDeclaration importDecl : imports) {
+						if (importDecl.isOnDemand()) {
+							conflicts.add(cu);
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		for (ICompilationUnit conflict : conflicts) {
+			RefactoringStatusContext context= JavaStatusContext.create(conflict);
 			String message= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_another_type,
-				new String[] { getNewElementLabel(), BasicElementLabels.getFileName(intersection[i])});
+				new String[] { getNewElementLabel(), BasicElementLabels.getFileName(conflict)});
 			result.addError(message, context);
 		}
 		return result;
 	}
 
-	private static ICompilationUnit[] isIntersectionEmpty(ICompilationUnit[] a1, ICompilationUnit[] a2){
+	private static Set<ICompilationUnit> getIntersection(ICompilationUnit[] a1, ICompilationUnit[] a2){
 		Set<ICompilationUnit> set1= new HashSet<ICompilationUnit>(Arrays.asList(a1));
 		Set<ICompilationUnit> set2= new HashSet<ICompilationUnit>(Arrays.asList(a2));
 		set1.retainAll(set2);
-		return set1.toArray(new ICompilationUnit[set1.size()]);
+		return set1;
 	}
 
 	private static ICompilationUnit[] getCus(SearchResultGroup[] searchResultGroups){
