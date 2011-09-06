@@ -110,26 +110,32 @@ public class DeleteAction extends SelectionDispatchAction {
 		if (selection.size() == 1) {
 			IWorkingSet workingSet= (IWorkingSet)selection.getFirstElement();
 			final String workingSetID= workingSet.getId();
-				dialog= new MessageDialog(getShell(), ReorgMessages.DeleteWorkingSet_single, null, MessageFormat.format(ReorgMessages.DeleteWorkingSet_removeorhideworkingset_single,
-						new Object[] { workingSet.getLabel() }), MessageDialog.QUESTION, new String[] { ReorgMessages.DeleteWorkingSet_Hide, ReorgMessages.DeleteWorkingSet_Remove,
-						IDialogConstants.CANCEL_LABEL }, 0) {
-					/*
-					 * @see org.eclipse.jface.dialogs.MessageDialog#createButton(org.eclipse.swt.widgets.Composite, int, java.lang.String, boolean)
-					 * @since 3.5
-					 */
-					@Override
-					protected Button createButton(Composite parent, int id, String label, boolean defaultButton) {
-						Button button= super.createButton(parent, id, label, defaultButton);
+			String dialogMessage;
+			if (isDefaultWorkingSet(workingSetID))
+				dialogMessage= MessageFormat.format(ReorgMessages.DeleteWorkingSet_hideworkingset_single, new Object[] { workingSet.getLabel() });
+			else
+				dialogMessage= MessageFormat.format(ReorgMessages.DeleteWorkingSet_removeorhideworkingset_single, new Object[] { workingSet.getLabel() });
+			
+			dialog= new MessageDialog(getShell(), ReorgMessages.DeleteWorkingSet_single, null, dialogMessage, MessageDialog.QUESTION, new String[] { ReorgMessages.DeleteWorkingSet_Hide,
+					ReorgMessages.DeleteWorkingSet_Remove,
+					IDialogConstants.CANCEL_LABEL }, 0) {
+				/*
+				 * @see org.eclipse.jface.dialogs.MessageDialog#createButton(org.eclipse.swt.widgets.Composite, int, java.lang.String, boolean)
+				 * @since 3.5
+				 */
+				@Override
+				protected Button createButton(Composite parent, int id, String label, boolean defaultButton) {
+					Button button= super.createButton(parent, id, label, defaultButton);
 					if (id == REMOVE_BUTTON && IWorkingSetIDs.OTHERS.equals(workingSetID))
-							button.setEnabled(false);
-						return button;
-					}
-				};
+						button.setEnabled(false);
+					return button;
+				}
+			};
 		} else {
 			dialog= new MessageDialog(getShell(), ReorgMessages.DeleteWorkingSet_multiple, null, MessageFormat.format(ReorgMessages.DeleteWorkingSet_removeorhideworkingset_multiple,
 					new Object[] { new Integer(selection.size()) }),
 					MessageDialog.QUESTION, new String[] { ReorgMessages.DeleteWorkingSet_Hide, ReorgMessages.DeleteWorkingSet_Remove,
-					IDialogConstants.CANCEL_LABEL }, 0);
+							IDialogConstants.CANCEL_LABEL }, 0);
 		}
 
 		int dialogResponse= dialog.open();
@@ -137,23 +143,48 @@ public class DeleteAction extends SelectionDispatchAction {
 			Iterator<?> iter= selection.iterator();
 			IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 			while (iter.hasNext()) {
-				IWorkingSet workingSet= (IWorkingSet)iter.next();
-				if (!(IWorkingSetIDs.OTHERS.equals(workingSet.getId())))
+				IWorkingSet workingSet= (IWorkingSet) iter.next();
+				if (isDefaultWorkingSet(workingSet.getId())) {
+					ArrayList< IWorkingSet> list= new ArrayList<IWorkingSet>();
+					list.add(workingSet);
+					hideWorkingSets(list);
+				} else
 					manager.removeWorkingSet(workingSet);
 			}
 		} else if (dialogResponse == HIDE_BUTTON) {
-			IWorkbenchPage page= JavaPlugin.getActivePage();
-			if (page != null) {
-				IWorkbenchPart activePart= page.getActivePart();
-				if (activePart instanceof PackageExplorerPart) {
-					PackageExplorerPart packagePart= (PackageExplorerPart)activePart;
-					WorkingSetModel model= packagePart.getWorkingSetModel();
-					List<IWorkingSet> activeWorkingSets= new ArrayList<IWorkingSet>(Arrays.asList(model.getActiveWorkingSets()));
-					activeWorkingSets.removeAll(SelectionUtil.toList(selection));
-					model.setActiveWorkingSets(activeWorkingSets.toArray(new IWorkingSet[activeWorkingSets.size()]));
-				}
+			hideWorkingSets((List<IWorkingSet>) SelectionUtil.toList(selection));
+		}
+	}
+
+	/**
+	 * Hides all the working sets in the list from the Package Explorer.
+	 * 
+	 * @param selection the selection of working sets 
+	 * @since 3.8
+	 */
+	private void hideWorkingSets(List<IWorkingSet> selection) {
+		IWorkbenchPage page= JavaPlugin.getActivePage();
+		if (page != null) {
+			IWorkbenchPart activePart= page.getActivePart();
+			if (activePart instanceof PackageExplorerPart) {
+				PackageExplorerPart packagePart= (PackageExplorerPart) activePart;
+				WorkingSetModel model= packagePart.getWorkingSetModel();
+				List<IWorkingSet> activeWorkingSets= new ArrayList<IWorkingSet>(Arrays.asList(model.getActiveWorkingSets()));
+				activeWorkingSets.removeAll(selection);
+				model.setActiveWorkingSets(activeWorkingSets.toArray(new IWorkingSet[activeWorkingSets.size()]));
 			}
 		}
+	}
+
+	/**
+	 * Checks if the working set is default working set.
+	 * 
+	 * @param workingSetID the working set id
+	 * @return <code>true</code> if default working set, <code>false</code> otherwise 
+	 * @since 3.8
+	 */
+	private boolean isDefaultWorkingSet(String workingSetID) {
+		return IWorkingSetIDs.OTHERS.equals(workingSetID);
 	}
 
 	/* (non-Javadoc)
