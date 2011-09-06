@@ -381,7 +381,14 @@ abstract class GenericTypeFilter extends JavaMatchFilter {
 		QuerySpecification spec= query.getSpecification();
 		if (spec instanceof ElementQuerySpecification) {
 			ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
-			Object element= elementSpec.getElement();
+			IJavaElement element= elementSpec.getElement();
+			return isParameterizedElement(element);
+		}
+		return false;
+	}
+
+	private static boolean isParameterizedElement(IJavaElement element) {
+		while (element != null) {
 			ITypeParameter[] typeParameters= null;
 			try {
 				if (element instanceof IType) {
@@ -392,7 +399,13 @@ abstract class GenericTypeFilter extends JavaMatchFilter {
 			} catch (JavaModelException e) {
 				return false;
 			}
-			return typeParameters != null && typeParameters.length > 0;
+			if (typeParameters == null)
+				return false;
+			
+			if (typeParameters.length > 0)
+				return true;
+			
+			element= element.getParent();
 		}
 		return false;
 	}
