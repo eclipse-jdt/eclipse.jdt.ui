@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -144,11 +145,9 @@ public class DeleteAction extends SelectionDispatchAction {
 			IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 			while (iter.hasNext()) {
 				IWorkingSet workingSet= (IWorkingSet) iter.next();
-				if (isDefaultWorkingSet(workingSet.getId())) {
-					ArrayList< IWorkingSet> list= new ArrayList<IWorkingSet>();
-					list.add(workingSet);
-					hideWorkingSets(list);
-				} else
+				if (isDefaultWorkingSet(workingSet.getId()))
+					hideWorkingSets(Collections.singletonList(workingSet));
+				else
 					manager.removeWorkingSet(workingSet);
 			}
 		} else if (dialogResponse == HIDE_BUTTON) {
@@ -177,9 +176,9 @@ public class DeleteAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Checks if the working set is default working set.
+	 * Checks if the working set is the default working set.
 	 * 
-	 * @param workingSetID the working set id
+	 * @param workingSetID the working set id, can be <code>null</code>
 	 * @return <code>true</code> if default working set, <code>false</code> otherwise 
 	 * @since 3.8
 	 */
