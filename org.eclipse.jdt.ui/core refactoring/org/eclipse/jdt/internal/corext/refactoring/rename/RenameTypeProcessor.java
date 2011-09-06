@@ -976,15 +976,27 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 		Set<ICompilationUnit> conflicts= getIntersection(cusWithReferencesToRenamedType, cusWithReferencesToConflictingTypes);
 		if (cusWithReferencesToConflictingTypes.length > 0) {
-			for (ICompilationUnit cu : cusWithReferencesToConflictingTypes) {
+			cus: for (ICompilationUnit cu : cusWithReferencesToConflictingTypes) {
 				String packageName= fType.getPackageFragment().getElementName();
 				if (((IPackageFragment) cu.getParent()).getElementName().equals(packageName)) {
+					boolean hasOnDemandImport= false;
 					IImportDeclaration[] imports= cu.getImports();
 					for (IImportDeclaration importDecl : imports) {
 						if (importDecl.isOnDemand()) {
-							conflicts.add(cu);
-							break;
+							hasOnDemandImport= true;
+						} else {
+							String importName= importDecl.getElementName();
+							int packageLength= importName.length() - getNewElementName().length() - 1;
+							if (packageLength > 0
+									&& importName.endsWith(getNewElementName())
+									&& importName.charAt(packageLength) == '.') {
+								continue cus; // explicit import from another package => no problem
+							}
 						}
+					}
+					if (hasOnDemandImport) {
+						// the renamed type in the same package will shadow the *-imported type
+						conflicts.add(cu);
 					}
 				}
 			}

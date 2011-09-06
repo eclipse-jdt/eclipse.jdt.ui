@@ -773,6 +773,7 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 
 	public void testFail96() throws Exception {
+		// https://bugs.eclipse.org/356677
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
 		IPackageFragment packageP2= getRoot().createPackageFragment("p2", true, null);
 		
@@ -1146,6 +1147,23 @@ public class RenameTypeTests extends RefactoringTest {
 		assertEqualLines("invalid renaming in p2.A", getFileContents(getOutputTestFileName(type, folder)), cu.getSource());
 	}
 
+	public void test65() throws Exception {
+		// https://bugs.eclipse.org/356677
+		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
+		IPackageFragment packageP2= getRoot().createPackageFragment("p2", true, null);
+		
+		IType classA= getClassFromTestFile(packageP1, "A");
+		IType classB= getClassFromTestFile(packageP1, "B");
+		IType classC= getClassFromTestFile(packageP2, "C");
+		
+		RefactoringStatus result= performRefactoring(createRefactoringDescriptor(classA, "C"));
+		assertEquals("was supposed to pass", null, result);
+
+		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("NewC")), packageP1.getCompilationUnit("C.java").getSource());
+		assertEqualLines("invalid renaming in B", getFileContents(getOutputTestFileName("B")), classB.getCompilationUnit().getSource());
+		assertEqualLines("invalid renaming in C", getFileContents(getOutputTestFileName("C")), classC.getCompilationUnit().getSource());
+	}
+	
 	public void test5() throws Exception {
 		helper2("A", "B");
 	}
