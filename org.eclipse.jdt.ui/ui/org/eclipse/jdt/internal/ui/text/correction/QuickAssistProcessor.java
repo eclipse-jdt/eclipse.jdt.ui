@@ -32,6 +32,8 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.text.edits.InsertEdit;
 
+import org.eclipse.jface.text.link.LinkedPositionGroup;
+
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -44,6 +46,7 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -52,6 +55,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
@@ -81,8 +85,10 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -114,6 +120,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
@@ -204,12 +211,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getCreateInSuperClassProposals(context, coveringNode, null)
 				|| getInvertEqualsProposal(context, coveringNode, null)
 				|| getConvertForLoopProposal(context, coveringNode, null)
+				|| getConvertIterableLoopProposal(context, coveringNode, null)
+				|| getConvertEnhancedForLoopProposal(context, coveringNode, null)
 				|| getExtractVariableProposal(context, false, null)
 				|| getExtractMethodProposal(context, coveringNode, false, null)
 				|| getInlineLocalProposal(context, coveringNode, null)
 				|| getConvertLocalToFieldProposal(context, coveringNode, null)
 				|| getConvertAnonymousToNestedProposal(context, coveringNode, null)
-				|| getConvertIterableLoopProposal(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
 				|| getMakeVariableDeclarationFinalProposals(context, null)
 				|| getMissingCaseStatementProposals(context, coveringNode, null)
@@ -255,6 +263,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertAnonymousToNestedProposal(context, coveringNode, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
+				getConvertEnhancedForLoopProposal(context, coveringNode, resultingCollections);
 				getRemoveBlockProposals(context, coveringNode, resultingCollections);
 				getMakeVariableDeclarationFinalProposals(context, resultingCollections);
 				getConvertStringConcatenationProposals(context, resultingCollections);
@@ -1846,6 +1855,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			case ASTNode.IF_STATEMENT:
 			case ASTNode.WHILE_STATEMENT:
 			case ASTNode.FOR_STATEMENT:
+			case ASTNode.ENHANCED_FOR_STATEMENT:
 			case ASTNode.DO_STATEMENT:
 				return true;
 			default:
@@ -1949,6 +1959,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				if (!(forBody instanceof Block)) {
 					childProperty= ForStatement.BODY_PROPERTY;
 					child= forBody;
+				}
+				break;
+			case ASTNode.ENHANCED_FOR_STATEMENT:
+				ASTNode enhancedForBody= ((EnhancedForStatement) node).getBody();
+				if (!(enhancedForBody instanceof Block)) {
+					childProperty= EnhancedForStatement.BODY_PROPERTY;
+					child= enhancedForBody;
 				}
 				break;
 			case ASTNode.DO_STATEMENT:
@@ -2204,6 +2221,280 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
+	private static boolean getConvertEnhancedForLoopProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+		EnhancedForStatement enhancedForStatement= getEnclosingHeader(node, EnhancedForStatement.class, EnhancedForStatement.PARAMETER_PROPERTY, EnhancedForStatement.EXPRESSION_PROPERTY);
+		if (enhancedForStatement == null) {
+			return false;
+		}
+		SingleVariableDeclaration parameter= enhancedForStatement.getParameter();
+		IVariableBinding parameterBinding= parameter.resolveBinding();
+		if (parameterBinding == null) {
+			return false;
+		}
+		Expression initializer= enhancedForStatement.getExpression();
+		ITypeBinding initializerTypeBinding= initializer.resolveTypeBinding();
+		if (initializerTypeBinding == null) {
+			return false;
+		}
+		
+		if (resultingCollections == null) {
+			return true;
+		}
+		
+		Statement topLabelStatement= enhancedForStatement;
+		while (topLabelStatement.getLocationInParent() == LabeledStatement.BODY_PROPERTY) {
+			topLabelStatement= (Statement) topLabelStatement.getParent();
+		}
+		
+		IJavaProject project= context.getCompilationUnit().getJavaProject();
+		AST ast= node.getAST();
+		Statement enhancedForBody= enhancedForStatement.getBody();
+		Collection<String> usedVarNames= Arrays.asList(ASTResolving.getUsedVariableNames(enhancedForBody));
+		
+		boolean initializerIsArray= initializerTypeBinding.isArray();
+		ITypeBinding initializerListType= Bindings.findTypeInHierarchy(initializerTypeBinding, "java.util.List"); //$NON-NLS-1$
+		ITypeBinding initializerIterableType= Bindings.findTypeInHierarchy(initializerTypeBinding, "java.lang.Iterable"); //$NON-NLS-1$
+		
+		if (initializerIterableType != null && initializerIterableType.getTypeArguments().length == 1) {
+			String label= CorrectionMessages.QuickAssistProcessor_convert_to_iterator_for_loop;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			
+			String iterNameKey= "iterName"; //$NON-NLS-1$
+			ASTRewrite rewrite= ASTRewrite.create(ast);
+			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+			
+			// convert 'for' statement
+			ForStatement forStatement= ast.newForStatement();
+			
+			// create initializer
+			MethodInvocation iterInitializer= ast.newMethodInvocation();
+			iterInitializer.setName(ast.newSimpleName("iterator")); //$NON-NLS-1$
+			ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
+			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, imports);
+			Type iterTypeArgument= imports.addImport(Bindings.normalizeTypeBinding(initializerIterableType.getTypeArguments()[0]), ast, importRewriteContext);
+			ParameterizedType iterType= ast.newParameterizedType(ast.newSimpleType(ast.newName(imports.addImport("java.util.Iterator", importRewriteContext)))); //$NON-NLS-1$
+			iterType.typeArguments().add(iterTypeArgument);
+			String[] iterNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, project, iterType, iterInitializer, usedVarNames);
+			String iterName= iterNames[0];
+			SimpleName initializerIterName= ast.newSimpleName(iterName);
+			
+			VariableDeclarationFragment iterFragment= ast.newVariableDeclarationFragment();
+			iterFragment.setName(initializerIterName);
+			proposal.addLinkedPosition(rewrite.track(initializerIterName), 0, iterNameKey);
+			for (int i= 0; i < iterNames.length; i++) {
+				proposal.addLinkedPositionProposal(iterNameKey, iterNames[i], null);
+			}
+			
+			Expression initializerExpression= (Expression) rewrite.createCopyTarget(initializer);
+			iterInitializer.setExpression(initializerExpression);
+			iterFragment.setInitializer(iterInitializer);
+			
+			VariableDeclarationExpression iterVariable= ast.newVariableDeclarationExpression(iterFragment);
+			iterVariable.setType(iterType);
+			forStatement.initializers().add(iterVariable);
+			
+			// create condition
+			MethodInvocation condition= ast.newMethodInvocation();
+			condition.setName(ast.newSimpleName("hasNext")); //$NON-NLS-1$
+			SimpleName conditionExpression= ast.newSimpleName(iterName);
+			proposal.addLinkedPosition(rewrite.track(conditionExpression), LinkedPositionGroup.NO_STOP, iterNameKey);
+			condition.setExpression(conditionExpression);
+			forStatement.setExpression(condition);
+			
+			// create 'for' body element variable
+			VariableDeclarationFragment elementFragment= ast.newVariableDeclarationFragment();
+			elementFragment.setExtraDimensions(parameter.getExtraDimensions());
+			elementFragment.setName((SimpleName) rewrite.createCopyTarget(parameter.getName()));
+			
+			SimpleName elementIterName= ast.newSimpleName(iterName);
+			proposal.addLinkedPosition(rewrite.track(elementIterName), LinkedPositionGroup.NO_STOP, iterNameKey);
+			
+			MethodInvocation getMethodInvocation= ast.newMethodInvocation();
+			getMethodInvocation.setName(ast.newSimpleName("next")); //$NON-NLS-1$
+			getMethodInvocation.setExpression(elementIterName);
+			elementFragment.setInitializer(getMethodInvocation);
+			
+			VariableDeclarationStatement elementVariable= ast.newVariableDeclarationStatement(elementFragment);
+			ModifierRewrite.create(rewrite, elementVariable).copyAllModifiers(parameter, null);
+			elementVariable.setType((Type) rewrite.createCopyTarget(parameter.getType()));
+
+			Block newBody= ast.newBlock();
+			List<Statement> statements= newBody.statements();
+			statements.add(elementVariable);
+			if (enhancedForBody instanceof Block) {
+				List<Statement> oldStatements= ((Block) enhancedForBody).statements();
+				if (oldStatements.size() > 0) {
+					ListRewrite statementsRewrite= rewrite.getListRewrite(enhancedForBody, Block.STATEMENTS_PROPERTY);
+					Statement oldStatementsCopy= (Statement) statementsRewrite.createCopyTarget(oldStatements.get(0), oldStatements.get(oldStatements.size() - 1));
+					statements.add(oldStatementsCopy);
+				}
+			} else {
+				statements.add((Statement) rewrite.createCopyTarget(enhancedForBody));
+			}
+			
+			forStatement.setBody(newBody);
+			rewrite.replace(enhancedForStatement, forStatement, null);
+			
+			resultingCollections.add(proposal);
+		}
+		
+		if (initializerIsArray || initializerListType != null) {
+			String label= CorrectionMessages.QuickAssistProcessor_convert_to_indexed_for_loop;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			
+			String varNameKey= "varName"; //$NON-NLS-1$
+			String indexNameKey= "indexName"; //$NON-NLS-1$
+			ASTRewrite rewrite= ASTRewrite.create(ast);
+			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 2, image);
+			
+			// create temp variable from initializer if necessary
+			String varName;
+			boolean varNameGenerated;
+			if (initializer instanceof SimpleName) {
+				varName= ((SimpleName) initializer).getIdentifier();
+				varNameGenerated= false;
+			} else {
+				VariableDeclarationFragment varFragment= ast.newVariableDeclarationFragment();
+				String[] varNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, project, initializerTypeBinding, initializer, usedVarNames);
+				varName= varNames[0];
+				usedVarNames= new ArrayList<String>(usedVarNames);
+				usedVarNames.add(varName);
+				varNameGenerated= true;
+				SimpleName varNameNode= ast.newSimpleName(varName);
+				varFragment.setName(varNameNode);
+				proposal.addLinkedPosition(rewrite.track(varNameNode), 0, varNameKey);
+				for (int i= 0; i < varNames.length; i++) {
+					proposal.addLinkedPositionProposal(varNameKey, varNames[i], null);
+				}
+				
+				varFragment.setInitializer((Expression) rewrite.createCopyTarget(initializer));
+				
+				VariableDeclarationStatement varDeclaration= ast.newVariableDeclarationStatement(varFragment);
+				Type varType;
+				if (initializerIsArray) {
+					varType= ast.newArrayType((Type) rewrite.createCopyTarget(parameter.getType()), parameter.getExtraDimensions() + 1);
+				} else {
+					ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
+					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, imports);
+					varType= imports.addImport(Bindings.normalizeForDeclarationUse(initializerTypeBinding, ast), ast, importRewriteContext);
+				}
+				varDeclaration.setType(varType);
+				
+				if (!(topLabelStatement.getParent() instanceof Block)) {
+					Block block= ast.newBlock();
+					List<Statement> statements= block.statements();
+					statements.add(varDeclaration);
+					statements.add((Statement) rewrite.createCopyTarget(topLabelStatement));
+					rewrite.replace(topLabelStatement, block, null);
+				} else {
+					rewrite.getListRewrite(topLabelStatement.getParent(), Block.STATEMENTS_PROPERTY).insertBefore(varDeclaration, topLabelStatement, null);
+				}
+			}
+			
+			// convert 'for' statement
+			ForStatement forStatement= ast.newForStatement();
+			
+			// create initializer
+			VariableDeclarationFragment indexFragment= ast.newVariableDeclarationFragment();
+			NumberLiteral indexInitializer= ast.newNumberLiteral();
+			indexFragment.setInitializer(indexInitializer);
+			PrimitiveType indexType= ast.newPrimitiveType(PrimitiveType.INT);
+			String[] indexNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, project, indexType, indexInitializer, usedVarNames);
+			String indexName= indexNames[0];
+			SimpleName initializerIndexName= ast.newSimpleName(indexName);
+			indexFragment.setName(initializerIndexName);
+			proposal.addLinkedPosition(rewrite.track(initializerIndexName), 0, indexNameKey);
+			for (int i= 0; i < indexNames.length; i++) {
+				proposal.addLinkedPositionProposal(indexNameKey, indexNames[i], null);
+			}
+			VariableDeclarationExpression indexVariable= ast.newVariableDeclarationExpression(indexFragment);
+			indexVariable.setType(indexType);
+			forStatement.initializers().add(indexVariable);
+			
+			// create condition
+			InfixExpression condition= ast.newInfixExpression();
+			condition.setOperator(InfixExpression.Operator.LESS);
+			SimpleName conditionLeft= ast.newSimpleName(indexName);
+			proposal.addLinkedPosition(rewrite.track(conditionLeft), LinkedPositionGroup.NO_STOP, indexNameKey);
+			condition.setLeftOperand(conditionLeft);
+			SimpleName conditionRightName= ast.newSimpleName(varName);
+			if (varNameGenerated) {
+				proposal.addLinkedPosition(rewrite.track(conditionRightName), LinkedPositionGroup.NO_STOP, varNameKey);
+			}
+			Expression conditionRight;
+			if (initializerIsArray) {
+				conditionRight= ast.newQualifiedName(conditionRightName, ast.newSimpleName("length")); //$NON-NLS-1$
+			} else {
+				MethodInvocation sizeMethodInvocation= ast.newMethodInvocation();
+				sizeMethodInvocation.setName(ast.newSimpleName("size")); //$NON-NLS-1$
+				sizeMethodInvocation.setExpression(conditionRightName);
+				conditionRight= sizeMethodInvocation;
+			}
+			condition.setRightOperand(conditionRight);
+			forStatement.setExpression(condition);
+			
+			// create updater
+			SimpleName indexUpdaterName= ast.newSimpleName(indexName);
+			proposal.addLinkedPosition(rewrite.track(indexUpdaterName), LinkedPositionGroup.NO_STOP, indexNameKey);
+			PostfixExpression indexUpdater= ast.newPostfixExpression();
+			indexUpdater.setOperator(PostfixExpression.Operator.INCREMENT);
+			indexUpdater.setOperand(indexUpdaterName);
+			forStatement.updaters().add(indexUpdater);
+			
+			// create 'for' body element variable
+			VariableDeclarationFragment elementFragment= ast.newVariableDeclarationFragment();
+			elementFragment.setExtraDimensions(parameter.getExtraDimensions());
+			elementFragment.setName((SimpleName) rewrite.createCopyTarget(parameter.getName()));
+			
+			SimpleName elementVarName= ast.newSimpleName(varName);
+			if (varNameGenerated) {
+				proposal.addLinkedPosition(rewrite.track(elementVarName), LinkedPositionGroup.NO_STOP, varNameKey);
+			}
+			SimpleName elementIndexName= ast.newSimpleName(indexName);
+			proposal.addLinkedPosition(rewrite.track(elementIndexName), LinkedPositionGroup.NO_STOP, indexNameKey);
+			
+			Expression elementAccess;
+			if (initializerIsArray) {
+				ArrayAccess elementArrayAccess= ast.newArrayAccess();
+				elementArrayAccess.setArray(elementVarName);
+				elementArrayAccess.setIndex(elementIndexName);
+				elementAccess= elementArrayAccess;
+			} else {
+				MethodInvocation getMethodInvocation= ast.newMethodInvocation();
+				getMethodInvocation.setName(ast.newSimpleName("get")); //$NON-NLS-1$
+				getMethodInvocation.setExpression(elementVarName);
+				getMethodInvocation.arguments().add(elementIndexName);
+				elementAccess= getMethodInvocation;
+			}
+			elementFragment.setInitializer(elementAccess);
+			
+			VariableDeclarationStatement elementVariable= ast.newVariableDeclarationStatement(elementFragment);
+			ModifierRewrite.create(rewrite, elementVariable).copyAllModifiers(parameter, null);
+			elementVariable.setType((Type) rewrite.createCopyTarget(parameter.getType()));
+
+			Block newBody= ast.newBlock();
+			List<Statement> statements= newBody.statements();
+			statements.add(elementVariable);
+			if (enhancedForBody instanceof Block) {
+				List<Statement> oldStatements= ((Block) enhancedForBody).statements();
+				if (oldStatements.size() > 0) {
+					ListRewrite statementsRewrite= rewrite.getListRewrite(enhancedForBody, Block.STATEMENTS_PROPERTY);
+					Statement oldStatementsCopy= (Statement) statementsRewrite.createCopyTarget(oldStatements.get(0), oldStatements.get(oldStatements.size() - 1));
+					statements.add(oldStatementsCopy);
+				}
+			} else {
+				statements.add((Statement) rewrite.createCopyTarget(enhancedForBody));
+			}
+			
+			forStatement.setBody(newBody);
+			rewrite.replace(enhancedForStatement, forStatement, null);
+			
+			resultingCollections.add(proposal);
+		}
+		
+		return true;
+	}
+	
 	private static boolean getConvertForLoopProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		ForStatement forStatement= getEnclosingForStatementHeader(node);
 		if (forStatement == null)
@@ -2251,19 +2542,22 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static ForStatement getEnclosingForStatementHeader(ASTNode node) {
-		if (node instanceof ForStatement)
-			return (ForStatement) node;
+		return getEnclosingHeader(node, ForStatement.class, ForStatement.INITIALIZERS_PROPERTY, ForStatement.EXPRESSION_PROPERTY, ForStatement.UPDATERS_PROPERTY);
+	}
+
+	private static <T extends ASTNode> T getEnclosingHeader(ASTNode node, Class<T> headerType, StructuralPropertyDescriptor... headerProperties) {
+		if (headerType.isInstance(node))
+			return headerType.cast(node);
 
 		while (node != null) {
 			ASTNode parent= node.getParent();
-			if (parent instanceof ForStatement) {
+			if (headerType.isInstance(parent)) {
 				StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
-				if (locationInParent == ForStatement.EXPRESSION_PROPERTY
-						|| locationInParent == ForStatement.INITIALIZERS_PROPERTY
-						|| locationInParent == ForStatement.UPDATERS_PROPERTY)
-					return (ForStatement) parent;
-				else
-					return null;
+				for (StructuralPropertyDescriptor property : headerProperties) {
+					if (locationInParent == property)
+						return headerType.cast(parent);
+				}
+				return null;
 			}
 			node= parent;
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	}
 
 	/**
-	 * Adds a linked position to be shown when the proposal is applied. All position with the
+	 * Adds a linked position to be shown when the proposal is applied. All positions with the
 	 * same group id are linked.
 	 * @param position The position to add.
 	 * @param isFirst If set, the proposal is jumped to first.
@@ -54,6 +54,18 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		getLinkedProposalModel().getPositionGroup(groupID, true).addPosition(position, isFirst);
 	}
 
+	/**
+	 * Adds a linked position to be shown when the proposal is applied. All positions with the
+	 * same group id are linked.
+	 * @param position The position to add.
+	 * @param sequenceRank The sequence rank, see TODO.
+	 * @param groupID The id of the group the proposal belongs to. All proposals in the same group
+	 * are linked.
+	 */
+	public void addLinkedPosition(ITrackedNodePosition position, int sequenceRank, String groupID) {
+		getLinkedProposalModel().getPositionGroup(groupID, true).addPosition(position, sequenceRank);
+	}
+	
 	/**
 	 * Sets the end position of the linked mode to the end of the passed range.
 	 * @param position The position that describes the end position of the linked mode.

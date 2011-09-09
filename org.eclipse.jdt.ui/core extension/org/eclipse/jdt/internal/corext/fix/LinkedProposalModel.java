@@ -48,7 +48,7 @@ public class LinkedProposalModel {
 			return new Iterator<LinkedProposalPositionGroup>() {
 				public boolean hasNext() {return false;}
 				public LinkedProposalPositionGroup next() {return null;}
-				public void remove() {}
+				public void remove() {throw new UnsupportedOperationException();}
 			};
 		}
 		return fPositionGroups.values().iterator();
@@ -64,7 +64,7 @@ public class LinkedProposalModel {
 	}
 
 	public void setEndPosition(ITrackedNodePosition position) {
-		setEndPosition(LinkedProposalPositionGroup.createPositionInformation(position, false));
+		setEndPosition(LinkedProposalPositionGroup.createPositionInformation(position, 1));
 	}
 
 	public PositionInformation getEndPosition() {

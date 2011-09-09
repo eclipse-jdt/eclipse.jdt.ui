@@ -795,7 +795,7 @@ public class Bindings {
 		if (hierarchyType.isArray() || hierarchyType.isPrimitive()) {
 			return null;
 		}
-		if (fullyQualifiedTypeName.equals(hierarchyType.getQualifiedName())) {
+		if (fullyQualifiedTypeName.equals(hierarchyType.getTypeDeclaration().getQualifiedName())) {
 			return hierarchyType;
 		}
 		ITypeBinding superClass= hierarchyType.getSuperclass();

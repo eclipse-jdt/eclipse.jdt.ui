@@ -5801,4 +5801,195 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+
+	public void testConvertEnhancedForArray01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void main(String... args) {\n");
+		buf.append("        for (final @Deprecated String arg : args) {\n");
+		buf.append("            System.out.print(arg);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("for"), 0);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void main(String... args) {\n");
+		buf.append("        for (int i = 0; i < args.length; i++) {\n");
+		buf.append("            final @Deprecated String arg = args[i];\n");
+		buf.append("            System.out.print(arg);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testConvertEnhancedForArray02() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int[][][] ints) {\n");
+		buf.append("        outer: for (int[] is[] : ints.clone ()) {\n");
+		buf.append("            //convert this\n");
+		buf.append("            for (int i : is) {\n");
+		buf.append("                System.out.print(i);\n");
+		buf.append("                System.out.print(\", \");\n");
+		buf.append("            }\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("for"), 0);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int[][][] ints) {\n");
+		buf.append("        int[][][] clone = ints.clone ();\n");
+		buf.append("        outer: for (int j = 0; j < clone.length; j++) {\n");
+		buf.append("            int[] is[] = clone[j];\n");
+		buf.append("            //convert this\n");
+		buf.append("            for (int i : is) {\n");
+		buf.append("                System.out.print(i);\n");
+		buf.append("                System.out.print(\", \");\n");
+		buf.append("            }\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testConvertEnhancedForList01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        for (Number number : getNums()) {\n");
+		buf.append("            System.out.println(number.doubleValue());\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private List<? extends Number> getNums() {\n");
+		buf.append("        return Arrays.asList(1, 2.34, 0xFFFF);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(":"), 0);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        List<? extends Number> nums = getNums();\n");
+		buf.append("        for (int i = 0; i < nums.size(); i++) {\n");
+		buf.append("            Number number = nums.get(i);\n");
+		buf.append("            System.out.println(number.doubleValue());\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private List<? extends Number> getNums() {\n");
+		buf.append("        return Arrays.asList(1, 2.34, 0xFFFF);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        for (Iterator<? extends Number> iterator = getNums().iterator(); iterator\n");
+		buf.append("                .hasNext();) {\n");
+		buf.append("            Number number = iterator.next();\n");
+		buf.append("            System.out.println(number.doubleValue());\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private List<? extends Number> getNums() {\n");
+		buf.append("        return Arrays.asList(1, 2.34, 0xFFFF);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testConvertEnhancedForCollection01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Collection;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Collection<? extends List<? extends Number>> allNums) {\n");
+		buf.append("        for (List<? extends Number> nums : allNums) {\n");
+		buf.append("            for (Number number : nums) {\n");
+		buf.append("                System.out.println(number.doubleValue());\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+	
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("for"), 0);
+		List proposals= collectAssists(context, false);
+	
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+	
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Collection;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Collection<? extends List<? extends Number>> allNums) {\n");
+		buf.append("        for (Iterator<? extends List<? extends Number>> iterator = allNums\n");
+		buf.append("                .iterator(); iterator.hasNext();) {\n");
+		buf.append("            List<? extends Number> nums = iterator.next();\n");
+		buf.append("            for (Number number : nums) {\n");
+		buf.append("                System.out.println(number.doubleValue());\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+	
+		assertExpectedExistInProposals(proposals, expected);
+	}
 }

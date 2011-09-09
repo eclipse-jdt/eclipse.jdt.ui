@@ -90,18 +90,18 @@ public class LinkedProposalPositionGroup {
 		}
 	}
 
-	public static PositionInformation createPositionInformation(ITrackedNodePosition pos, boolean isFirst) {
-		return new TrackedNodePosition(pos, isFirst);
+	public static PositionInformation createPositionInformation(ITrackedNodePosition pos, int sequenceRank) {
+		return new TrackedNodePosition(pos, sequenceRank);
 	}
 
 	private static class TrackedNodePosition extends PositionInformation {
 
 		private final ITrackedNodePosition fPos;
-		private final boolean fIsFirst;
+		private final int fSequenceRank;
 
-		public TrackedNodePosition(ITrackedNodePosition pos, boolean isFirst) {
+		public TrackedNodePosition(ITrackedNodePosition pos, int sequenceRank) {
 			fPos= pos;
-			fIsFirst= isFirst;
+			fSequenceRank= sequenceRank;
 		}
 
 		@Override
@@ -116,7 +116,7 @@ public class LinkedProposalPositionGroup {
 
 		@Override
 		public int getSequenceRank() {
-			return fIsFirst ? 0 : 1;
+			return fSequenceRank;
 		}
 	}
 
@@ -243,15 +243,19 @@ public class LinkedProposalPositionGroup {
 		fPositions.add(position);
 	}
 
+	public void addPosition(ITrackedNodePosition position, int sequenceRank) {
+		addPosition(createPositionInformation(position, sequenceRank));
+	}
+
+	public void addPosition(ITrackedNodePosition position, boolean isFirst) {
+		addPosition(position, isFirst ? 0 : 1);
+	}
+
+
 	public void addProposal(Proposal proposal) {
 		fProposals.add(proposal);
 	}
-
-
-	public void addPosition(ITrackedNodePosition position, boolean isFirst) {
-		addPosition(createPositionInformation(position, isFirst));
-	}
-
+	
 	public void addProposal(String displayString, Image image, int relevance) {
 		addProposal(new Proposal(displayString, image, relevance));
 	}
