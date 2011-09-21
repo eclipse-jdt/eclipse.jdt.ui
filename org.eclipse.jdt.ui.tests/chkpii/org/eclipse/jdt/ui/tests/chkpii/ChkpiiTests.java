@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import junit.framework.TestSuite;
 import org.eclipse.osgi.service.environment.Constants;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 
 public class ChkpiiTests extends TestCase {
@@ -191,7 +192,7 @@ public class ChkpiiTests extends TestCase {
 
 			path= path + File.separator + token;
 		}
-		return path + File.separator;
+		return new Path(path).removeLastSegments(2).toOSString() + File.separator;
 	}
 
 	private String toLocation(URL platformURL) {

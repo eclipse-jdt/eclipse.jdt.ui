@@ -65,6 +65,7 @@ org.eclipse.core.variables/*
 org.eclipse.core.tests.harness/*
 org.eclipse.debug.core/*
 org.eclipse.debug.ui/*
+org.eclipse.debug.examples.core/*
 org.eclipse.equinox.common/*
 org.eclipse.equinox.preferences/*
 org.eclipse.equinox.registry/*
@@ -81,11 +82,14 @@ org.eclipse.jdt.launching/*
 org.eclipse.jdt.launching.j9/*
 org.eclipse.jface/*
 org.eclipse.osgi/*
-org.eclipse.pde.core/*
+org.eclipse.pde.ui.tests/*
+org.eclipse.pde.api.tools.tests/*
 org.eclipse.sdk/*
 org.eclipse.swt/*
-org.eclipse.swt.examples/*
+org.eclipse.swt.examples*/*
 org.eclipse.swt.snippets/*
+org.eclipse.swt.tests/*
+org.eclipse.swt.tools/*
 org.eclipse.swt.gtk.linux.x86/*
 org.eclipse.swt.win32.win32.x86/*
 org.eclipse.team.core/*
@@ -93,6 +97,7 @@ org.eclipse.team.ui/*
 org.eclipse.ua.tests/*
 org.eclipse.ui.cheatsheets/*
 org.eclipse.ui.console/*
+org.eclipse.ui.examples.*/*
 org.eclipse.ui.forms/*
 org.eclipse.ui.intro/*
 org.eclipse.ui.navigator/*
@@ -119,6 +124,7 @@ org.objectweb.asm/*
 org.sat4j.core/*
 org.sat4j.pb/*
 
+www*eclipse.org-root/*
 www*eclipse.org-eclipse-root/*
 www*eclipse.org-development/*
 www*platform-search/*
