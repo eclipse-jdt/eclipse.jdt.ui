@@ -15,6 +15,7 @@ buildnotes*.html
 */doc_zip/*
 */scripts/*
 */icons/*
+.git/*
 
 com.oti.zrh.contextids/*
 com.oti.zrh.eclipse.tools/*
