@@ -456,7 +456,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 				int nextToken= scanner.nextToken(offset + length, endLine.getOffset() + endLine.getLength());
 				String next= nextToken == Symbols.TokenEOF ? null : document.get(offset, scanner.getPosition() - offset).trim();
-				int prevToken= scanner.previousToken(offset - 1, startLine.getOffset());
+				int prevToken= scanner.previousToken(offset - 1, startLine.getOffset() - 1);
 				int prevTokenOffset= scanner.getPosition() + 1;
 				String previous= prevToken == Symbols.TokenEOF ? null : document.get(prevTokenOffset, offset - prevTokenOffset).trim();
 

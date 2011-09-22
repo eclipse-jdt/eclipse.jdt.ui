@@ -87,6 +87,7 @@ public class BracketInserterTest extends TestCase {
 
 	// document offsets
 	private static final int BODY_OFFSET= 196;
+	private static final int FIRST_COLUMN_OFFSET= 188;
 	private static final int ARGS_OFFSET= 171;
 	private static final int BRACKETS_OFFSET= 178;
 	private static final int MAIN_VOID_OFFSET= 161;
@@ -439,6 +440,36 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 	
+	public void testAngleBracketsAfterIdentifierOnFirstColumn1_15() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=347734
+		use15();
+
+		String PRE= "x";
+
+		fDocument.replace(FIRST_COLUMN_OFFSET, 0, PRE);
+		setCaret(FIRST_COLUMN_OFFSET + PRE.length());
+
+		type('<');
+
+		assertEquals(PRE + "< ", fDocument.get(FIRST_COLUMN_OFFSET, PRE.length() + 2));
+		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
+	}
+
+	public void testAngleBracketsAfterIdentifierOnFirstColumn2_15() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=347734
+		use15();
+
+		String PRE= "List";
+
+		fDocument.replace(FIRST_COLUMN_OFFSET, 0, PRE);
+		setCaret(FIRST_COLUMN_OFFSET + PRE.length());
+
+		type('<');
+
+		assertEquals(PRE + "<>", fDocument.get(FIRST_COLUMN_OFFSET, PRE.length() + 2));
+		assertSingleLinkedPosition(FIRST_COLUMN_OFFSET + PRE.length() + 1);
+	}
+
 	/* utilities */
 
 	private void assertSingleLinkedPosition(int offset) {
