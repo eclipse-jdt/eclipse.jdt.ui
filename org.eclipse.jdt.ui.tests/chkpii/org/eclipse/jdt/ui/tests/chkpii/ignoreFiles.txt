@@ -140,3 +140,5 @@ www*jdt-ui/*
 Text*Team*Documents/*
 Eclipse*JDT*Builds/*
 T*JDT-UI*Team*Documents/*
+JDT-UI*Team*Documents/*
+
