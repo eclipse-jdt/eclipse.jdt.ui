@@ -54,8 +54,10 @@ public class SuperTypeHierarchyCache {
 		}
 
 		public void dispose() {
-			fTypeHierarchy.removeTypeHierarchyChangedListener(this);
-			fTypeHierarchy= null;
+			if (fTypeHierarchy != null) {
+				fTypeHierarchy.removeTypeHierarchyChangedListener(this);
+				fTypeHierarchy= null;
+			}
 		}
 
 		/* (non-Javadoc)
