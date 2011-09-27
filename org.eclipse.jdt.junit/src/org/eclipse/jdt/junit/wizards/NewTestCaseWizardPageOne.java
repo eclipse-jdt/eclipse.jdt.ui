@@ -182,7 +182,16 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		};
 		enableCommentControl(true);
 
-		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 2);
+		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 2) {
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.junit.wizards.MethodStubsSelectionButtonGroup#doWidgetSelected(org.eclipse.swt.events.SelectionEvent)			
+			 */
+			@Override
+			protected void doWidgetSelected(SelectionEvent e) {
+				super.doWidgetSelected(e);
+				saveWidgetValues();
+			}
+		};
 		fMethodStubsButtons.setLabelText(WizardMessages.NewTestCaseWizardPageOne_method_Stub_label);
 
 		fClassToTestCompletionProcessor= new JavaTypeCompletionProcessor(false, false, true);

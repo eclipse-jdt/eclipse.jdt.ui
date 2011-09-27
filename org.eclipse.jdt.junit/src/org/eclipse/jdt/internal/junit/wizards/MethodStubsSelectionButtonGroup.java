@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -200,7 +200,7 @@ public class MethodStubsSelectionButtonGroup {
 		return null;
 	}
 
-	private void doWidgetSelected(SelectionEvent e) {
+	protected void doWidgetSelected(SelectionEvent e) {
 		Button button= (Button)e.widget;
 		for (int i= 0; i < fButtons.length; i++) {
 			if (fButtons[i] == button) {
@@ -218,7 +218,7 @@ public class MethodStubsSelectionButtonGroup {
 	 */
 	public boolean isSelected(int index) {
 		if (index >= 0 && index < fButtonsSelected.length) {
-			return fButtonsSelected[index] && fButtonsEnabled[index];
+			return fButtonsSelected[index];
 		}
 		return false;
 	}
@@ -267,11 +267,7 @@ public class MethodStubsSelectionButtonGroup {
 					Button button= fButtons[index];
 					if (isOkToUse(button)) {
 						button.setEnabled(enabled);
-						if (!enabled) {
-							button.setSelection(false);
-						} else {
-							button.setSelection(fButtonsSelected[index]);
-						}
+						button.setSelection(fButtonsSelected[index]);
 					}
 				}
 			}
