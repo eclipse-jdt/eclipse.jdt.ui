@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 
 class MessageSendFlowInfo extends FlowInfo {
 
@@ -29,18 +27,5 @@ class MessageSendFlowInfo extends FlowInfo {
 		if (info == null)
 			return;
 		mergeSequential(info, context);
-	}
-
-	public void mergeExceptions(IMethodBinding binding, FlowContext context) {
-		if (binding == null)
-			return;
-		ITypeBinding[] exceptions= binding.getExceptionTypes();
-		if (exceptions == null)
-			return;
-		for (int i= 0; i < exceptions.length; i++) {
-			ITypeBinding exception= exceptions[i];
-			if (context.isExceptionCaught(exception))
-				addException(exception);
-		}
 	}
 }

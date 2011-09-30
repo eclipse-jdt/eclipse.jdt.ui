@@ -17,11 +17,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.TryStatement;
 
 public abstract class FlowInfo {
 
@@ -89,7 +87,7 @@ public abstract class FlowInfo {
 	protected int fReturnKind;
 	protected int[] fAccessModes;
 	protected Set<String> fBranches;
-	protected Set<ITypeBinding> fExceptions;
+	//protected Set<ITypeBinding> fExceptions;
 	protected Set<ITypeBinding> fTypeVariables;
 
 	protected FlowInfo() {
@@ -105,7 +103,6 @@ public abstract class FlowInfo {
 	protected void assignExecutionFlow(FlowInfo right) {
 		fReturnKind= right.fReturnKind;
 		fBranches= right.fBranches;
-		fExceptions= right.fExceptions;
 	}
 
 	protected void assignAccessMode(FlowInfo right) {
@@ -188,56 +185,6 @@ public abstract class FlowInfo {
 			return label.getIdentifier();
 	}
 
-	//---- Exceptions -----------------------------------------------------------------------
-
-	public ITypeBinding[] getExceptions() {
-		if (fExceptions == null)
-			return new ITypeBinding[0];
-		return fExceptions.toArray(new ITypeBinding[fExceptions.size()]);
-	}
-
-	protected boolean hasUncaughtException() {
-		return fExceptions != null && !fExceptions.isEmpty();
-	}
-
-	protected void addException(ITypeBinding type) {
-		if (fExceptions == null)
-			fExceptions= new HashSet<ITypeBinding>(2);
-		fExceptions.add(type);
-	}
-
-	protected void removeExceptions(TryStatement node) {
-		if (fExceptions == null)
-			return;
-
-		List<CatchClause> catchClauses= node.catchClauses();
-		if (catchClauses.isEmpty())
-			return;
-		// Make sure we have a copy since we are modifying the fExceptions list
-		ITypeBinding[] exceptions= fExceptions.toArray(new ITypeBinding[fExceptions.size()]);
-		for (int i= 0; i < exceptions.length; i++) {
-			handleException(catchClauses, exceptions[i]);
-		}
-		if (fExceptions.isEmpty())
-			fExceptions= null;
-	}
-
-	private void handleException(List<CatchClause> catchClauses, ITypeBinding type) {
-		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext();) {
-			IVariableBinding binding= iter.next().getException().resolveBinding();
-			if (binding == null)
-				continue;
-			ITypeBinding caughtType= binding.getType();
-			while (caughtType != null) {
-				if (caughtType == type) {
-					fExceptions.remove(type);
-					return;
-				}
-				caughtType= caughtType.getSuperclass();
-			}
-		}
-	}
-
 	//---- Type parameters -----------------------------------------------------------------
 
 	public ITypeBinding[] getTypeVariables() {
@@ -268,21 +215,15 @@ public abstract class FlowInfo {
 			other= PARTIAL_RETURN;
 		fReturnKind= RETURN_KIND_SEQUENTIAL_TABLE[fReturnKind][other];
 		mergeBranches(otherInfo);
-		mergeExceptions(otherInfo);
 	}
 
 	private void mergeExecutionFlowConditional(FlowInfo otherInfo) {
 		fReturnKind= RETURN_KIND_CONDITIONAL_TABLE[fReturnKind][otherInfo.fReturnKind];
 		mergeBranches(otherInfo);
-		mergeExceptions(otherInfo);
 	}
 
 	private void mergeBranches(FlowInfo otherInfo) {
 		fBranches= mergeSets(fBranches, otherInfo.fBranches);
-	}
-
-	private void mergeExceptions(FlowInfo otherInfo) {
-		fExceptions= mergeSets(fExceptions, otherInfo.fExceptions);
 	}
 
 	private static <T> Set<T> mergeSets(Set<T> thisSet, Set<T> otherSet) {
@@ -380,7 +321,7 @@ public abstract class FlowInfo {
 
 		// Must not consider return kind since a return statement can't control execution flow
 		// inside a method. It always leaves the method.
-		if (branches() || hasUncaughtException()) {
+		if (branches()) {
 			for (int i= 0; i < others.length; i++)
 				others[i]= ACCESS_MODE_OPEN_BRANCH_TABLE[getIndex(others[i])];
 		}

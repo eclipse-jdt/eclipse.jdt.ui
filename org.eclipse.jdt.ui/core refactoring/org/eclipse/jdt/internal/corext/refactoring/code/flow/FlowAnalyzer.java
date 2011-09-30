@@ -915,7 +915,6 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		setFlowInfo(node, info);
 		Expression expression= node.getExpression();
 		info.merge(getFlowInfo(expression), fFlowContext);
-		info.mergeException(expression.resolveTypeBinding(), fFlowContext);
 	}
 
 	@Override
@@ -925,7 +924,6 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		TryFlowInfo info= createTry();
 		setFlowInfo(node, info);
 		info.mergeTry(getFlowInfo(node.getBody()), fFlowContext);
-		info.removeExceptions(node);
 		for (Iterator<CatchClause> iter= node.catchClauses().iterator(); iter.hasNext();) {
 			CatchClause element= iter.next();
 			info.mergeCatch(getFlowInfo(element), fFlowContext);
@@ -1026,7 +1024,6 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			info.mergeArgument(getFlowInfo(arg), fFlowContext);
 		}
 		info.mergeReceiver(getFlowInfo(receiver), fFlowContext);
-		info.mergeExceptions(binding, fFlowContext);
 	}
 
 	private void endVisitIncDecOperation(Expression node, Expression operand) {
