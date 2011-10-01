@@ -324,6 +324,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	 * Must be one of:
 	 * <ul>
 	 * <li>[indexBinding]++</li>
+	 * <li>++[indexBinding]</li>
 	 * <li>[indexBinding]+= 1</li>
 	 * <li>[indexBinding]= [indexBinding] + 1</li>
 	 * <li>[indexBinding]= 1 + [indexBinding]</li>
@@ -342,6 +343,17 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 				return false;
 
 			IBinding binding= getBinding(postfix.getOperand());
+			if (!fIndexBinding.equals(binding))
+				return false;
+
+			return true;
+		} else if (updater instanceof PrefixExpression) {
+			PrefixExpression prefix= (PrefixExpression) updater;
+
+			if (!PrefixExpression.Operator.INCREMENT.equals(prefix.getOperator()))
+				return false;
+
+			IBinding binding= getBinding(prefix.getOperand());
 			if (!fIndexBinding.equals(binding))
 				return false;
 

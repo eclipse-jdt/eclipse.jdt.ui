@@ -1595,6 +1595,21 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	public void testUpdatePrecondition07() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349782
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0; i < x.length; ++i) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		assertTrue(satisfiesPrecondition(cu));
+	}
+
 	public void testBodyPrecondition01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
