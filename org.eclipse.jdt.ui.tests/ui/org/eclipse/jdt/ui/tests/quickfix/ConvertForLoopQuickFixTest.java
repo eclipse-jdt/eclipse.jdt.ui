@@ -1829,6 +1829,160 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 	
+	public void testBodyPrecondition344674_1() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    Object[] x;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = 0; i < this.x.length; i++) {\n");
+		buf.append("            System.out.println(x[i]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		assertTrue(satisfiesPrecondition(cu));
+	}
+
+	public void testBodyPrecondition344674_2() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    Object[] x;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = 0; i < this.x.length; i++) {\n");
+		buf.append("            System.out.println(this.x[i]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		assertTrue(satisfiesPrecondition(cu));
+	}
+
+	public void testBodyPrecondition344674_3() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    Object[] x;\n");
+		buf.append("    public void foo(Object obj) {\n");
+		buf.append("        for (int i = 0; i < ((E) obj).x.length; i++) {\n");
+		buf.append("            System.out.println(((E) obj).x[i]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		assertTrue(satisfiesPrecondition(cu));
+	}
+
+	public void testBodyPrecondition344674_4() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E implements Comparable<Object> {\n");
+		buf.append("    private int[] tokens;\n");
+		buf.append("    public int compareTo(Object obj) {\n");
+		buf.append("        for (int i = 0; i < tokens.length; i++) {\n");
+		buf.append("            int v = compare(tokens[i], ((E) obj).tokens[i]);\n");
+		buf.append("            if (v != 0)\n");
+		buf.append("                return v;\n");
+		buf.append("        }\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");
+		buf.append("    private int compare(int i, int j) {\n");
+		buf.append("        return i < j ? -1 : i == j ? 0 : 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		assertFalse(satisfiesPrecondition(cu));
+	}
+
+	public void testBodyPrecondition344674_5() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E implements Comparable<Object> {\n");
+		buf.append("    private int[] tokens;\n");
+		buf.append("    public int compareTo(Object obj) {\n");
+		buf.append("        for (int i = 0; i < this.tokens.length; i++) {\n");
+		buf.append("            int v = compare(tokens[i], ((E) obj).tokens[i]);\n");
+		buf.append("            if (v != 0)\n");
+		buf.append("                return v;\n");
+		buf.append("        }\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");
+		buf.append("    private int compare(int i, int j) {\n");
+		buf.append("        return i < j ? -1 : i == j ? 0 : 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		assertFalse(satisfiesPrecondition(cu));
+	}
+
+	public void testBodyPrecondition344674_6() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E implements Comparable<Object> {\n");
+		buf.append("    private int[] tokens;\n");
+		buf.append("    public int compareTo(Object obj) {\n");
+		buf.append("        for (int i = 0; i < ((E) obj).tokens.length; i++) {\n");
+		buf.append("            int v = compare(((E) obj).tokens[i], tokens[i]);\n");
+		buf.append("            if (v != 0)\n");
+		buf.append("                return v;\n");
+		buf.append("        }\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");
+		buf.append("    private int compare(int i, int j) {\n");
+		buf.append("        return i < j ? -1 : i == j ? 0 : 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		assertFalse(satisfiesPrecondition(cu));
+	}
+
+	public void testBodyPrecondition344674_7() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E implements Comparable<Object> {\n");
+		buf.append("    private int[] tokens;\n");
+		buf.append("    public int compareTo(Object obj) {\n");
+		buf.append("        for (int i = 0; i < ((E) obj).tokens.length; i++) {\n");
+		buf.append("            int v = compare(((E) obj).tokens[i], this.tokens[i]);\n");
+		buf.append("            if (v != 0)\n");
+		buf.append("                return v;\n");
+		buf.append("        }\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");
+		buf.append("    private int compare(int i, int j) {\n");
+		buf.append("        return i < j ? -1 : i == j ? 0 : 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		assertFalse(satisfiesPrecondition(cu));
+	}
+
 	public void testBug110599() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

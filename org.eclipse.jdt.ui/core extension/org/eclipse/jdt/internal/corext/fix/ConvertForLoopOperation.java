@@ -21,6 +21,7 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -44,6 +45,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -440,8 +442,32 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 								IBinding varBinding2= ((QualifiedName) fArrayAccess).getQualifier().resolveBinding();
 								if (!varBinding1.equals(varBinding2))
 									throw new InvalidBodyError();
-							} else if (fArrayAccess instanceof QualifiedName) {
-								throw new InvalidBodyError();
+							} else if (array instanceof FieldAccess) {
+								Expression arrayExpression= ((FieldAccess) array).getExpression();
+								if (arrayExpression instanceof ThisExpression) {
+									if (fArrayAccess instanceof FieldAccess) {
+										Expression arrayAccessExpression= ((FieldAccess) fArrayAccess).getExpression();
+										if (!(arrayAccessExpression instanceof ThisExpression))
+											throw new InvalidBodyError();
+									}
+								} else {
+									if (!(fArrayAccess instanceof FieldAccess))
+										throw new InvalidBodyError();
+
+									Expression arrayAccessExpression= ((FieldAccess) fArrayAccess).getExpression();
+									if (!arrayExpression.subtreeMatch(new ASTMatcher(), arrayAccessExpression)) {
+										throw new InvalidBodyError();
+									}
+								}
+							} else {
+								if (fArrayAccess instanceof QualifiedName) {
+									throw new InvalidBodyError();
+								}
+								if (fArrayAccess instanceof FieldAccess) {
+									Expression arrayAccessExpression= ((FieldAccess) fArrayAccess).getExpression();
+									if (!(arrayAccessExpression instanceof ThisExpression))
+										throw new InvalidBodyError();
+								}
 							}
 
 							IBinding binding= getBinding(array);

@@ -4569,6 +4569,38 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	public void testJava50ForLoop344674() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int[] array;\n");
+		buf.append("    public void foo(Object obj) {\n");
+		buf.append("        for (int i = 0; i < ((E1) obj).array.length; i++) {\n");
+		buf.append("            System.out.println(((E1) obj).array[i]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int[] array;\n");
+		buf.append("    public void foo(Object obj) {\n");
+		buf.append("        for (int element : ((E1) obj).array) {\n");
+		buf.append("            System.out.println(element);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
 	public void testCombination01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
