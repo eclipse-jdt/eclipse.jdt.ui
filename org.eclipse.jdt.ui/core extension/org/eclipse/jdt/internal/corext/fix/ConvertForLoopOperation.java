@@ -449,6 +449,8 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 										Expression arrayAccessExpression= ((FieldAccess) fArrayAccess).getExpression();
 										if (!(arrayAccessExpression instanceof ThisExpression))
 											throw new InvalidBodyError();
+									} else if (fArrayAccess instanceof QualifiedName) {
+										throw new InvalidBodyError();
 									}
 								} else {
 									if (!(fArrayAccess instanceof FieldAccess))

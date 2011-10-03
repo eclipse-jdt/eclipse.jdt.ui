@@ -1983,6 +1983,31 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	public void testBodyPrecondition344674_8() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E implements Comparable<E> {\n");
+		buf.append("    private int[] tokens;\n");
+		buf.append("    public int compareTo(E obj) {\n");
+		buf.append("        for (int i = 0; i < obj.tokens.length; i++) {\n");
+		buf.append("            int v = compare(obj.tokens[i], this.tokens[i]);\n");
+		buf.append("            if (v != 0)\n");
+		buf.append("                return v;\n");
+		buf.append("        }\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");
+		buf.append("    private int compare(int i, int j) {\n");
+		buf.append("        return i < j ? -1 : i == j ? 0 : 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		assertFalse(satisfiesPrecondition(cu));
+	}
+
 	public void testBug110599() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
