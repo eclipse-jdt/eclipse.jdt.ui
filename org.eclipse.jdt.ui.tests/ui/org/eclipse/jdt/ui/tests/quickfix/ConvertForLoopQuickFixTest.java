@@ -2008,6 +2008,30 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	public void testBodyPrecondition344674_9() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    String[] tokens;\n");
+		buf.append("    E other;\n");
+		buf.append("    private E get(E a) {\n");
+		buf.append("        return a;\n");
+		buf.append("    }\n");
+		buf.append("    public void foo(E arg) {\n");
+		buf.append("        for (int i = 0; i < get(other).tokens.length; i++) {\n");
+		buf.append("            E other = this; // local var shadows field\n");
+		buf.append("            System.out.println(get(other).tokens[i]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		assertFalse(satisfiesPrecondition(cu));
+	}
+
 	public void testBug110599() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

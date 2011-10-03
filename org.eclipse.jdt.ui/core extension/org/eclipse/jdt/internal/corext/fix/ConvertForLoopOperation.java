@@ -21,7 +21,6 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -57,6 +56,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
+import org.eclipse.jdt.internal.corext.dom.JdtASTMatcher;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
@@ -457,7 +457,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 										throw new InvalidBodyError();
 
 									Expression arrayAccessExpression= ((FieldAccess) fArrayAccess).getExpression();
-									if (!arrayExpression.subtreeMatch(new ASTMatcher(), arrayAccessExpression)) {
+									if (!arrayExpression.subtreeMatch(new JdtASTMatcher(), arrayAccessExpression)) {
 										throw new InvalidBodyError();
 									}
 								}
