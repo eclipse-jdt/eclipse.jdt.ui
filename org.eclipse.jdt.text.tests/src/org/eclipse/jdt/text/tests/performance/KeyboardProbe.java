@@ -205,15 +205,18 @@ public class KeyboardProbe {
 		char c;
 		if (content.length() == 2) {
 			c= content.charAt(0);
-			if (TRACE && content.charAt(1) != FAKE_CHAR)
-				System.out.println("second char was '" + content.charAt(1) + "'");
+			if (TRACE)
+				if (content.charAt(1) != FAKE_CHAR)
+					System.out.println("second char was '" + content.charAt(1) + "'");
 		} else if (content.length() > 2) {
 			c= content.charAt(0);
-			if (TRACE) System.out.println("rest content was '" + content.substring(1) + "'");
+			if (TRACE)
+				System.out.println("rest content was '" + content.substring(1) + "'");
 		} else if (content.length() == 1) {
 			c= '\0';
-			if (TRACE && content.charAt(0) != FAKE_CHAR)
-				System.out.println("second char was '" + content.charAt(0) + "'");
+			if (TRACE)
+				if (content.charAt(0) != FAKE_CHAR)
+					System.out.println("second char was '" + content.charAt(0) + "'");
 		} else {
 			c= '\0';
 			if (TRACE) System.out.println("no content");

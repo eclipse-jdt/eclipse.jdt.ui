@@ -285,11 +285,13 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 				TType oType= types[o];
 				TType iType= types[i];
 				boolean uiResult= oType.canAssignTo(iType);
-				if (coreResult != uiResult && !oType.isWildcardType() && ! BUG_83616_core_wildcard_assignments) { // see bug 83616
-					System.out.println("Different assignment rule(" +
-						PrettySignatures.get(iBinding) + "= " + PrettySignatures.get(oBinding) +
-						"): Bindings<" + coreResult +
-						"> TType<" + uiResult + ">");
+				if (!BUG_83616_core_wildcard_assignments) {
+					if (coreResult != uiResult && !oType.isWildcardType()) {
+						System.out.println("Different assignment rule(" +
+								PrettySignatures.get(iBinding) + "= " + PrettySignatures.get(oBinding) +
+								"): Bindings<" + coreResult +
+								"> TType<" + uiResult + ">");
+					}
 				}
 			}
 		}
