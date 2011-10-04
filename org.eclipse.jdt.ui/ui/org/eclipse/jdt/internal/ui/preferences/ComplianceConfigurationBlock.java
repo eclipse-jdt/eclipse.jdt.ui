@@ -700,12 +700,13 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private void updateComplianceEnableState() {
 		boolean enableComplianceControls= true;
 		if (fProject != null) {
+			boolean hasProjectSpecificOptions= hasProjectSpecificOptions(fProject);
 			String complianceFollowsEE= getValue(INTR_COMPLIANCE_FOLLOWS_EE);
 			updateCheckBox(getCheckBox(INTR_COMPLIANCE_FOLLOWS_EE));
-			boolean enableComplianceFollowsEE= ! DISABLED.equals(complianceFollowsEE); // is default or user
+			boolean enableComplianceFollowsEE= hasProjectSpecificOptions && ! DISABLED.equals(complianceFollowsEE); // is default or user
 			updateControlsEnableState(fComplianceFollowsEEControls, enableComplianceFollowsEE);
 		
-			enableComplianceControls= ! DEFAULT_CONF.equals(complianceFollowsEE); // is disabled or user
+			enableComplianceControls= hasProjectSpecificOptions && ! DEFAULT_CONF.equals(complianceFollowsEE); // is disabled or user
 			updateControlsEnableState(fComplianceControls, enableComplianceControls);
 		}
 		
