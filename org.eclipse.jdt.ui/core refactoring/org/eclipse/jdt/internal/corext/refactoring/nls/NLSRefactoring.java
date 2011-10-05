@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class NLSRefactoring extends Refactoring {
 
-	public static final String BUNDLE_NAME= "BUNDLE_NAME"; //$NON-NLS-1$
+	public static final String BUNDLE_NAME_FIELD= "BUNDLE_NAME"; //$NON-NLS-1$
 	public static final String PROPERTY_FILE_EXT= ".properties"; //$NON-NLS-1$
 	public static final String DEFAULT_ACCESSOR_CLASSNAME= "Messages"; //$NON-NLS-1$
 

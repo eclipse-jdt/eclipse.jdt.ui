@@ -158,7 +158,7 @@ public class AccessorClassCreator {
 
 			StringBuffer result= new StringBuffer();
 			result.append("public class ").append(fAccessorClassName).append(" extends NLS {"); //$NON-NLS-1$ //$NON-NLS-2$
-			result.append("private static final String ").append(NLSRefactoring.BUNDLE_NAME).append(" = \"").append(getResourceBundleName()).append("\"; "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			result.append("private static final String ").append(NLSRefactoring.BUNDLE_NAME_FIELD).append(" = \"").append(getResourceBundleName()).append("\"; "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			result.append(NLSElement.createTagText(1)).append(lineDelim);
 
 			if (constructorIdx < fieldIdx) {
@@ -196,11 +196,11 @@ public class AccessorClassCreator {
 
 			StringBuffer result= new StringBuffer();
 			result.append("public class ").append(fAccessorClassName).append(" {"); //$NON-NLS-1$ //$NON-NLS-2$
-			result.append("private static final String ").append(NLSRefactoring.BUNDLE_NAME); //$NON-NLS-1$
+			result.append("private static final String ").append(NLSRefactoring.BUNDLE_NAME_FIELD); //$NON-NLS-1$
 			result.append(" = \"").append(getResourceBundleName()).append("\"; ").append(NLSElement.createTagText(1)).append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
 
 			result.append(lineDelim).append("private static final ResourceBundle ").append(getResourceBundleConstantName()); //$NON-NLS-1$
-			result.append("= ResourceBundle.getBundle(").append(NLSRefactoring.BUNDLE_NAME).append(");").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
+			result.append("= ResourceBundle.getBundle(").append(NLSRefactoring.BUNDLE_NAME_FIELD).append(");").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
 
 			if (constructorIdx < methodIdx) {
 				result.append(constructor);
