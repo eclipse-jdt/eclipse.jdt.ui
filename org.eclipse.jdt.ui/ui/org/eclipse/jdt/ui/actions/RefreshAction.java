@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -196,7 +196,7 @@ public class RefreshAction extends SelectionDispatchAction {
 		ArrayList javaElements= new ArrayList();
 		for (int i= 0; i < selectedElements.length; i++) {
 			Object curr= selectedElements[i];
-			if (curr instanceof IJavaElement) {
+			if (curr instanceof IPackageFragmentRoot) {
 				javaElements.add(curr);
 			} else if (curr instanceof PackageFragmentRootContainer) {
 				javaElements.addAll(Arrays.asList(((PackageFragmentRootContainer) curr).getPackageFragmentRoots()));
@@ -204,22 +204,14 @@ public class RefreshAction extends SelectionDispatchAction {
 				IAdaptable[] members= ((IWorkingSet) curr).getElements();
 				for (int k= 0; k < members.length; k++) {
 					Object adapted= members[k].getAdapter(IJavaElement.class);
-					if (adapted != null) {
+					if (adapted instanceof IPackageFragmentRoot) {
 						javaElements.add(adapted);
 					}
 				}
-			} else if (curr instanceof IAdaptable) {
-				Object adapted= ((IAdaptable) curr).getAdapter(IJavaElement.class);
-				if (adapted != null) {
-					javaElements.add(adapted);
-				}
 			}
  		}
-		IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-		if (selection.isEmpty()) {
-			javaElements.add(model);
-		}
 		if (!javaElements.isEmpty()) {
+			IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 			model.refreshExternalArchives((IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]), monitor);
 		}
 	}
