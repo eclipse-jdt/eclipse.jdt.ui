@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,9 +68,6 @@ public class RefactoringTestSetup extends AbstractRefactoringTestSetup {
 		if (JavaPlugin.getActivePage() != null)
 			JavaPlugin.getActivePage().close(); // Closed perspective is NOT restored in tearDown()!
 
-		if (fgJavaTestProject != null && fgJavaTestProject.exists()) {
-			int breakpointTarget= 0; breakpointTarget++;
-		}
 		fgJavaTestProject= JavaProjectHelper.createJavaProject("TestProject"+System.currentTimeMillis(), "bin");
 		fgJRELibrary= addRTJar(fgJavaTestProject);
 		fgRoot= JavaProjectHelper.addSourceContainer(fgJavaTestProject, CONTAINER);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,10 +65,8 @@ import org.eclipse.search.core.text.TextSearchMatchAccess;
 import org.eclipse.search.core.text.TextSearchRequestor;
 import org.eclipse.search.core.text.TextSearchScope;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -89,17 +87,16 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 /**
  * Properties key hyperlink.
  * <p>
- * XXX:	This does not work for properties files coming from a JAR due to
- * 		missing J Core functionality. For details see:
- * 		https://bugs.eclipse.org/bugs/show_bug.cgi?id=22376
+ * XXX: This does not work for properties files coming from a JAR due to missing J Core
+ * functionality. For details see http://bugs.eclipse.org/22376
  * </p>
- *
+ * 
  * @since 3.1
  */
 public class PropertyKeyHyperlink implements IHyperlink {
 
 
-	private static class KeyReference extends PlatformObject implements IWorkbenchAdapter, Comparable {
+	private static class KeyReference extends PlatformObject implements IWorkbenchAdapter, Comparable<KeyReference> {
 
 		private static final Collator fgCollator= Collator.getInstance();
 
@@ -118,6 +115,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		/*
 		 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 		 */
+		@Override
 		public Object getAdapter(Class adapter) {
 			if (adapter == IWorkbenchAdapter.class)
 				return this;
@@ -173,8 +171,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 			return null;
 		}
 
-		public int compareTo(Object o) {
-			KeyReference otherRef= (KeyReference)o;
+		public int compareTo(KeyReference otherRef) {
 			String thisPath= storage.getFullPath().toString();
 			String otherPath= otherRef.storage.getFullPath().toString();
 			int result= fgCollator.compare(thisPath, otherPath);
@@ -188,14 +185,15 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 	private static class ResultCollector extends TextSearchRequestor {
 
-		private List fResult;
+		private List<KeyReference> fResult;
 		private boolean fIsKeyDoubleQuoted;
 
-		public ResultCollector(List result, boolean isKeyDoubleQuoted) {
+		public ResultCollector(List<KeyReference> result, boolean isKeyDoubleQuoted) {
 			fResult= result;
 			fIsKeyDoubleQuoted= isKeyDoubleQuoted;
 		}
 
+		@Override
 		public boolean acceptPatternMatch(TextSearchMatchAccess matchAccess) throws CoreException {
 			int start= matchAccess.getMatchOffset();
 			int length= matchAccess.getMatchLength();
@@ -298,6 +296,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		Arrays.sort(keyReferences);
 		final int length= keyReferences.length;
 		ILabelProvider labelProvider= new WorkbenchLabelProvider() {
+			@Override
 			public String decorateText(String input, Object element) {
 				KeyReference keyRef= (KeyReference)element;
 				IStorage storage= keyRef.storage;
@@ -321,7 +320,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 		TwoPaneElementSelector dialog= new TwoPaneElementSelector(fShell, labelProvider, new WorkbenchLabelProvider());
 		dialog.setLowerListLabel(PropertiesFileEditorMessages.OpenAction_SelectionDialog_details);
-		dialog.setLowerListComparator(new Comparator() {
+		dialog.setLowerListComparator(new Comparator<Object>() {
 			public int compare(Object o1, Object o2) {
 				return 0; // don't sort
 			}
@@ -412,65 +411,59 @@ public class PropertyKeyHyperlink implements IHyperlink {
 	 * @param key the properties key
 	 * @return the references or <code>null</code> if the search has been canceled by the user
 	 */
-	private KeyReference[] search(final IResource scope, String key) {
+	private KeyReference[] search(final IResource scope, final String key) {
 		if (key == null)
 			return new KeyReference[0];
 
-		final List result= new ArrayList(5);
-		final String searchString;
-
-		// XXX: This is a hack to improve the accuracy of matches, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81140
-		final boolean useDoubleQuotedKey= useDoubleQuotedKey();
-		if (useDoubleQuotedKey) {
-			StringBuffer buf= new StringBuffer("\""); //$NON-NLS-1$
-			buf.append(fPropertiesKey);
-			buf.append('"');
-			searchString= buf.toString();
-		} else
-			searchString= fPropertiesKey;
-
+		final List<KeyReference> result= new ArrayList<KeyReference>(5);
 		try {
 			fEditor.getEditorSite().getWorkbenchWindow().getWorkbench().getProgressService().busyCursorWhile(
 				new IRunnableWithProgress() {
-					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						if (monitor == null)
-							monitor= new NullProgressMonitor();
+						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+							if (monitor == null)
+								monitor= new NullProgressMonitor();
 
-						monitor.beginTask("", 5); //$NON-NLS-1$
-						try {
-							ResultCollector collector= new ResultCollector(result, useDoubleQuotedKey);
-							TextSearchEngine engine= TextSearchEngine.create();
-							Pattern searchPattern= PatternConstructor.createPattern(searchString, true, false);
-							engine.search(createScope(scope), collector, searchPattern, new SubProgressMonitor(monitor, 4));
-
-							if (result.size() == 0 && useDoubleQuotedKey) {
-								//Try without, maybe an eclipse style NLS string
-								IJavaElement element= JavaCore.create(scope);
-								if (element == null)
-									return;
-
-								int includeMask = IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.REFERENCED_PROJECTS;
-								IJavaSearchScope javaSearchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element }, includeMask);
-
-								SearchPattern pattern= SearchPattern.createPattern(fPropertiesKey, IJavaSearchConstants.FIELD, IJavaSearchConstants.REFERENCES, SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE);
-								if (pattern == null)
-									return;
-								try {
-									new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), javaSearchScope, new SearchRequestor() {
-										public void acceptSearchMatch(SearchMatch match) throws CoreException {
-											result.add(new KeyReference((IStorage)match.getResource(), match.getOffset(), match.getLength()));
-										}
-									}, new SubProgressMonitor(monitor, 1));
-								} catch (CoreException e) {
-									throw new InvocationTargetException(e);
+							monitor.beginTask("", 5); //$NON-NLS-1$
+							try {
+								// XXX: This is a hack to improve the accuracy of matches, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81140
+								boolean useDoubleQuotedKey= useDoubleQuotedKey();
+								if (useDoubleQuotedKey) {
+									SearchPattern pattern= SearchPattern.createPattern(key, IJavaSearchConstants.FIELD, IJavaSearchConstants.REFERENCES, SearchPattern.R_PATTERN_MATCH
+											| SearchPattern.R_CASE_SENSITIVE);
+									if (pattern == null)
+										return;
+									try {
+										new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), SearchEngine.createWorkspaceScope(), new SearchRequestor() {
+											@Override
+											public void acceptSearchMatch(SearchMatch match) throws CoreException {
+												result.add(new KeyReference((IStorage)match.getResource(), match.getOffset(), match.getLength()));
+											}
+										}, new SubProgressMonitor(monitor, 1));
+									} catch (CoreException e) {
+										throw new InvocationTargetException(e);
+									}
 								}
-							} else {
-								monitor.worked(1);
+								if (result.size() == 0) {
+									//maybe not an eclipse style NLS string
+									String searchString;
+									if (useDoubleQuotedKey) {
+										StringBuffer buf= new StringBuffer("\""); //$NON-NLS-1$
+										buf.append(key);
+										buf.append('"');
+										searchString= buf.toString();
+									} else
+										searchString= key;
+									ResultCollector collector= new ResultCollector(result, useDoubleQuotedKey);
+									TextSearchEngine engine= TextSearchEngine.create();
+									Pattern searchPattern= PatternConstructor.createPattern(searchString, true, false);
+									engine.search(createScope(scope), collector, searchPattern, new SubProgressMonitor(monitor, 4));
+								} else {
+									monitor.worked(1);
+								}
+							} finally {
+								monitor.done();
 							}
-						} finally {
-							monitor.done();
 						}
-					}
 				}
 			);
 		} catch (InvocationTargetException ex) {
@@ -480,11 +473,11 @@ public class PropertyKeyHyperlink implements IHyperlink {
 			return null; // canceled
 		}
 
-		return (KeyReference[])result.toArray(new KeyReference[result.size()]);
+		return result.toArray(new KeyReference[result.size()]);
 	}
 
 	private static TextSearchScope createScope(IResource scope) {
-		ArrayList fileNamePatternStrings= new ArrayList();
+		ArrayList<String> fileNamePatternStrings= new ArrayList<String>();
 
 		// XXX: Should be configurable via preference, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81117
 		String[] javaExtensions= JavaCore.getJavaLikeExtensions();
@@ -493,7 +486,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		fileNamePatternStrings.add("*.xml"); //$NON-NLS-1$
 		fileNamePatternStrings.add("*.ini"); //$NON-NLS-1$
 
-		String[] allPatternStrings= (String[]) fileNamePatternStrings.toArray(new String[fileNamePatternStrings.size()]);
+		String[] allPatternStrings= fileNamePatternStrings.toArray(new String[fileNamePatternStrings.size()]);
 		Pattern fileNamePattern= PatternConstructor.createPattern(allPatternStrings, false, false);
 
 		return TextSearchScope.newSearchScope(new IResource[] { scope }, fileNamePattern, false);

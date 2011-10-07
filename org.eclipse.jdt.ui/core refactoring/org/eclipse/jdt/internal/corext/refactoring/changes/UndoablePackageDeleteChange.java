@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,19 +25,20 @@ import org.eclipse.ltk.core.refactoring.Change;
 
 public class UndoablePackageDeleteChange extends DynamicValidationStateChange {
 
-	private final List/*<IResource>*/ fPackageDeletes;
+	private final List<IResource> fPackageDeletes;
 
-	public UndoablePackageDeleteChange(String name, List/*<IResource>*/ packageDeletes) {
+	public UndoablePackageDeleteChange(String name, List<IResource> packageDeletes) {
 		super(name);
 		fPackageDeletes= packageDeletes;
 	}
 
+	@Override
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		int count= fPackageDeletes.size();
 		pm.beginTask("", count * 3); //$NON-NLS-1$
 		ResourceDescription[] packageDeleteDescriptions= new ResourceDescription[fPackageDeletes.size()];
 		for (int i= 0; i < fPackageDeletes.size(); i++) {
-			IResource resource= (IResource) fPackageDeletes.get(i);
+			IResource resource= fPackageDeletes.get(i);
 			packageDeleteDescriptions[i]= ResourceDescription.fromResource(resource);
 			pm.worked(1);
 		}
@@ -45,7 +46,7 @@ public class UndoablePackageDeleteChange extends DynamicValidationStateChange {
 		DynamicValidationStateChange result= (DynamicValidationStateChange) super.perform(new SubProgressMonitor(pm, count));
 
 		for (int i= 0; i < fPackageDeletes.size(); i++) {
-			IResource resource= (IResource) fPackageDeletes.get(i);
+			IResource resource= fPackageDeletes.get(i);
 			ResourceDescription resourceDescription= packageDeleteDescriptions[i];
 			resourceDescription.recordStateFromHistory(resource, new SubProgressMonitor(pm, 1));
 			result.add(new UndoDeleteResourceChange(resourceDescription));

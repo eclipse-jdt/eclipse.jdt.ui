@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,13 +78,13 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 	}
 
 	private JarPackageData[] readJarPackages(IFile[] descriptions, MultiStatus readStatus) {
-		List jarPackagesList= new ArrayList(descriptions.length);
+		List<JarPackageData> jarPackagesList= new ArrayList<JarPackageData>(descriptions.length);
 		for (int i= 0; i < descriptions.length; i++) {
 			JarPackageData jarPackage= readJarPackage(descriptions[i], readStatus);
 			if (jarPackage != null)
 				jarPackagesList.add(jarPackage);
 		}
-		return (JarPackageData[])jarPackagesList.toArray(new JarPackageData[jarPackagesList.size()]);
+		return jarPackagesList.toArray(new JarPackageData[jarPackagesList.size()]);
 	}
 
 	private IStatus export(JarPackageData[] jarPackages) {

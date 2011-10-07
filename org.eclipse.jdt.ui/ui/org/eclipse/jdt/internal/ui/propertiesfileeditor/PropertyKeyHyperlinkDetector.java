@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.text.StringCharacterIterator;
 import java.util.Properties;
 
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.IDocument;
@@ -31,17 +33,17 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
 
+import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 
 /**
  * Properties key hyperlink detector.
  * <p>
- * XXX:	This does not work for properties files coming from a JAR due to
- * 		missing J Core functionality. For details see:
- * 		https://bugs.eclipse.org/bugs/show_bug.cgi?id=22376
+ * XXX: This does not work for properties files coming from a JAR due to missing J Core
+ * functionality. For details see http://bugs.eclipse.org/22376
  * </p>
- *
+ * 
  * @since 3.1
  */
 public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
@@ -93,13 +95,16 @@ public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 				return null;
 			}
 
-			return new PropertyKeyHyperlink[] {new PropertyKeyHyperlink(new Region(partition.getOffset() + delta, realKey.length()), realKey, textEditor)};
+			return new PropertyKeyHyperlink[] { new PropertyKeyHyperlink(new Region(partition.getOffset() + delta, realKey.length()), realKey, textEditor) };
 
 		} catch (BadLocationException ex) {
 			return null;
 		} catch (BadPartitioningException ex) {
 			return null;
 		} catch (IOException ex) {
+			return null;
+		} catch (IllegalArgumentException ex) {
+			showErrorInStatusLine(ex.getLocalizedMessage(), textEditor);
 			return null;
 		}
 	}
@@ -133,5 +138,21 @@ public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 
 		 // XXX: Must be changed to IStorageEditorInput once support for JARs is available (see class Javadoc for details)
 		return textEditor.getEditorInput() instanceof IFileEditorInput;
+	}
+
+	private void showErrorInStatusLine(final String message, ITextEditor textEditor) {
+		Display display= textEditor.getEditorSite().getShell().getDisplay();
+		display.beep();
+		final IEditorStatusLine statusLine= (IEditorStatusLine)textEditor.getAdapter(IEditorStatusLine.class);
+		if (statusLine != null) {
+			display.asyncExec(new Runnable() {
+				/*
+				 * @see java.lang.Runnable#run()
+				 */
+				public void run() {
+					statusLine.setMessage(true, message, null);
+				}
+			});
+		}
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,7 @@ public class RenameTypeWizard extends RenameRefactoringWizard {
 	 *
 	 * @see RefactoringWizard#addUserInputPages
 	 */
+	@Override
 	protected void addUserInputPages() {
 		super.addUserInputPages();
 		if (isRenameType())
@@ -68,9 +69,11 @@ public class RenameTypeWizard extends RenameRefactoringWizard {
 		return true;
 	}
 
+	@Override
 	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
 		return new RenameTypeWizardInputPage(message, IJavaHelpContextIds.RENAME_TYPE_WIZARD_PAGE, true, initialSetting) {
 
+			@Override
 			protected RefactoringStatus validateTextField(String text) {
 				return validateNewName(text);
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -94,7 +94,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 	private File fDotProjectBackup;
 	private File fDotClasspathBackup;
 	private Boolean fIsAutobuild;
-	private HashSet fOrginalFolders;
+	private HashSet<IFileStore> fOrginalFolders;
 
 	/**
 	 * Constructor for the {@link NewJavaProjectWizardPageTwo}.
@@ -115,6 +115,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage#useNewSourcePage()
 	 */
+	@Override
 	protected final boolean useNewSourcePage() {
 		return true;
 	}
@@ -123,6 +124,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		boolean isShownFirstTime= visible && fCurrProject == null;
 		if (visible) {
@@ -286,7 +288,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 					monitor.worked(2);
 				}
 			} else {
-				List cpEntries= new ArrayList();
+				List<IClasspathEntry> cpEntries= new ArrayList<IClasspathEntry>();
 				IWorkspaceRoot root= project.getWorkspace().getRoot();
 
 				IClasspathEntry[] sourceClasspathEntries= fFirstPage.getSourceClasspathEntries();
@@ -301,7 +303,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 
 				cpEntries.addAll(Arrays.asList(fFirstPage.getDefaultClasspathEntries()));
 
-				entries= (IClasspathEntry[]) cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
+				entries= cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
 
 				outputLocation= fFirstPage.getOutputLocation();
 				if (outputLocation.segmentCount() > 1) {
@@ -330,7 +332,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 	}
 
 	private void rememberExisitingFolders(URI projectLocation) {
-		fOrginalFolders= new HashSet();
+		fOrginalFolders= new HashSet<IFileStore>();
 
 		try {
 			IFileStore[] children= EFS.getStore(projectLocation).childStores(EFS.NONE, null);
@@ -358,8 +360,8 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 				}
 			}
 
-			for (Iterator iterator= fOrginalFolders.iterator(); iterator.hasNext();) {
-				IFileStore deleted= (IFileStore) iterator.next();
+			for (Iterator<IFileStore> iterator= fOrginalFolders.iterator(); iterator.hasNext();) {
+				IFileStore deleted= iterator.next();
 				deleted.mkdir(EFS.NONE, null);
 			}
 		} catch (CoreException e) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,7 +60,7 @@ public class TableLayoutComposite extends Composite {
 			COLUMN_TRIM= 3;
 	}
 
-	private List columns= new ArrayList();
+	private List<ColumnLayoutData> columns= new ArrayList<ColumnLayoutData>();
 
 	/**
 	 * Creates a new <code>TableLayoutComposite</code>.
@@ -71,7 +71,8 @@ public class TableLayoutComposite extends Composite {
 	public TableLayoutComposite(Composite parent, int style) {
 		super(parent, style);
         addControlListener(new ControlAdapter() {
-            public void controlResized(ControlEvent e) {
+            @Override
+			public void controlResized(ControlEvent e) {
                 Rectangle area= getClientArea();
                 Table table= (Table)getChildren()[0];
                 Point preferredSize= computeTableSize(table);
@@ -104,7 +105,7 @@ public class TableLayoutComposite extends Composite {
 		int width= 0;
 		int size= columns.size();
 		for (int i= 0; i < size; ++i) {
-			ColumnLayoutData layoutData= (ColumnLayoutData) columns.get(i);
+			ColumnLayoutData layoutData= columns.get(i);
 			if (layoutData instanceof ColumnPixelData) {
 				ColumnPixelData col= (ColumnPixelData) layoutData;
 				width += col.width;
@@ -140,7 +141,7 @@ public class TableLayoutComposite extends Composite {
 
 		// First calc space occupied by fixed columns
 		for (int i= 0; i < size; i++) {
-			ColumnLayoutData col= (ColumnLayoutData) columns.get(i);
+			ColumnLayoutData col= columns.get(i);
 			if (col instanceof ColumnPixelData) {
 				ColumnPixelData cpd= (ColumnPixelData) col;
 				int pixels= cpd.width;
@@ -167,7 +168,7 @@ public class TableLayoutComposite extends Composite {
 			int rest= width - fixedWidth;
 			int totalDistributed= 0;
 			for (int i= 0; i < size; ++i) {
-				ColumnLayoutData col= (ColumnLayoutData) columns.get(i);
+				ColumnLayoutData col= columns.get(i);
 				if (col instanceof ColumnWeightData) {
 					ColumnWeightData cw= (ColumnWeightData) col;
 					// calculate weight as above
@@ -186,7 +187,7 @@ public class TableLayoutComposite extends Composite {
 			for (int i= 0; diff > 0; ++i) {
 				if (i == size)
 					i= 0;
-				ColumnLayoutData col= (ColumnLayoutData) columns.get(i);
+				ColumnLayoutData col= columns.get(i);
 				if (col instanceof ColumnWeightData) {
 					++widths[i];
 					--diff;

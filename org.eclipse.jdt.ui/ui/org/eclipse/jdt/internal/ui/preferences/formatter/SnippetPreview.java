@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,14 +42,15 @@ public class SnippetPreview extends JavaPreview {
         }
     }
 
-    private ArrayList fSnippets;
+    private ArrayList<PreviewSnippet> fSnippets;
 
-    public SnippetPreview(Map workingValues, Composite parent) {
+    public SnippetPreview(Map<String, String> workingValues, Composite parent) {
         super(workingValues, parent);
-        fSnippets= new ArrayList();
+        fSnippets= new ArrayList<PreviewSnippet>();
     }
 
-    protected void doFormatPreview() {
+    @Override
+	protected void doFormatPreview() {
         if (fSnippets.isEmpty()) {
             fPreviewDocument.set(""); //$NON-NLS-1$
             return;
@@ -59,8 +60,8 @@ public class SnippetPreview extends JavaPreview {
         final String delimiter= "\n"; //$NON-NLS-1$
 
         final StringBuffer buffer= new StringBuffer();
-        for (final Iterator iter= fSnippets.iterator(); iter.hasNext();) {
-            final PreviewSnippet snippet= (PreviewSnippet) iter.next();
+        for (final Iterator<PreviewSnippet> iter= fSnippets.iterator(); iter.hasNext();) {
+            final PreviewSnippet snippet= iter.next();
             String formattedSource;
             try {
                 formattedSource= CodeFormatterUtil.format(snippet.kind, snippet.source, 0, delimiter, fWorkingValues);
@@ -88,7 +89,7 @@ public class SnippetPreview extends JavaPreview {
         fSnippets.remove(snippet);
     }
 
-    public void addAll(Collection snippets) {
+    public void addAll(Collection<PreviewSnippet> snippets) {
         fSnippets.addAll(snippets);
     }
 

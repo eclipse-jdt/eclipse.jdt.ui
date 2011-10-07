@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
@@ -103,19 +104,100 @@ public class LinkedProposalPositionGroup {
 			fIsFirst= isFirst;
 		}
 
+		@Override
 		public int getOffset() {
 			return fPos.getStartPosition();
 		}
 
+		@Override
 		public int getLength() {
 			return fPos.getLength();
 		}
 
+		@Override
 		public int getSequenceRank() {
 			return fIsFirst ? 0 : 1;
 		}
 	}
 
+	/**
+	 * A position that contains all of the given tracked node positions.
+	 * 
+	 * @since 3.7
+	 */
+	public static class TrackedNodesPosition extends PositionInformation {
+		
+		private final Collection<ITrackedNodePosition> fPos;
+		
+		/**
+		 * A position that contains all of the given tracked node positions.
+		 * 
+		 * @param pos the positions
+		 */
+		public TrackedNodesPosition(Collection<ITrackedNodePosition> pos) {
+			fPos= pos;
+		}
+		
+		@Override
+		public int getOffset() {
+			int minStart= Integer.MAX_VALUE;
+			for (ITrackedNodePosition node : fPos) {
+				minStart= Math.min(minStart, node.getStartPosition());
+			}
+			return minStart == Integer.MAX_VALUE ? -1 : minStart;
+		}
+		
+		@Override
+		public int getLength() {
+			int minStart= Integer.MAX_VALUE;
+			int maxEnd= 0;
+			for (ITrackedNodePosition node : fPos) {
+				minStart= Math.min(minStart, node.getStartPosition());
+				maxEnd= Math.max(maxEnd, node.getStartPosition() + node.getLength());
+			}
+			return minStart == Integer.MAX_VALUE ? 0 : maxEnd - getOffset();
+		}
+		
+		@Override
+		public int getSequenceRank() {
+			return 0;
+		}
+	}
+	
+	/**
+	 * A position for the start of the given tracked node position.
+	 * 
+	 * @since 3.7
+	 */
+	public static class StartPositionInformation extends PositionInformation {
+		
+		private ITrackedNodePosition fPos;
+
+		/**
+		 * A position for the start of the given tracked node position.
+		 * 
+		 * @param pos the position
+		 */
+		public StartPositionInformation(ITrackedNodePosition pos) {
+			fPos= pos;
+		}
+		
+		@Override
+		public int getOffset() {
+			return fPos.getStartPosition();
+		}
+		
+		@Override
+		public int getLength() {
+			return 0;
+		}
+		
+		@Override
+		public int getSequenceRank() {
+			return 0;
+		}
+	}
+	
 	private static final class JavaLinkedModeProposal extends Proposal {
 		private final ITypeBinding fTypeProposal;
 		private final ICompilationUnit fCompilationUnit;
@@ -133,6 +215,7 @@ public class LinkedProposalPositionGroup {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.fix.PositionGroup.Proposal#computeEdits(int, org.eclipse.jface.text.link.LinkedPosition, char, int, org.eclipse.jface.text.link.LinkedModeModel)
 		 */
+		@Override
 		public TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model) throws CoreException {
 			ImportRewrite impRewrite= StubUtility.createImportRewrite(fCompilationUnit, true);
 			String replaceString= impRewrite.addImport(fTypeProposal);
@@ -146,14 +229,14 @@ public class LinkedProposalPositionGroup {
 
 
 	private final String fGroupId;
-	private final List/*<Position>*/ fPositions;
-	private final List/*<Proposal>*/ fProposals;
+	private final List<PositionInformation> fPositions;
+	private final List<Proposal> fProposals;
 
 
 	public LinkedProposalPositionGroup(String groupID) {
 		fGroupId= groupID;
-		fPositions= new ArrayList();
-		fProposals= new ArrayList();
+		fPositions= new ArrayList<PositionInformation>();
+		fProposals= new ArrayList<Proposal>();
 	}
 
 	public void addPosition(PositionInformation position) {
@@ -182,11 +265,11 @@ public class LinkedProposalPositionGroup {
 	}
 
 	public PositionInformation[] getPositions() {
-		return (PositionInformation[])fPositions.toArray(new PositionInformation[fPositions.size()]);
+		return fPositions.toArray(new PositionInformation[fPositions.size()]);
 	}
 
 	public Proposal[] getProposals() {
-		return (Proposal[])fProposals.toArray(new Proposal[fProposals.size()]);
+		return fProposals.toArray(new Proposal[fProposals.size()]);
 	}
 
 }

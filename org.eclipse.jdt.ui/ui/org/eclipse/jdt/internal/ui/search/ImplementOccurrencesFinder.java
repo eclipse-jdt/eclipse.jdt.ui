@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 		/*
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodDeclaration)
 		 */
+		@Override
 		public boolean visit(MethodDeclaration node) {
 			IMethodBinding binding= node.resolveBinding();
 			if (binding != null && !Modifier.isStatic(binding.getModifiers())) {
@@ -67,6 +68,7 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 		/*
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.AnonymousClassDeclaration)
 		 */
+		@Override
 		public boolean visit(AnonymousClassDeclaration node) {
 			// don't dive into anonymous type declarations.
 			return false;
@@ -75,6 +77,7 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 		/*
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TypeDeclarationStatement)
 		 */
+		@Override
 		public boolean visit(TypeDeclarationStatement node) {
 			// don't dive into local type declarations.
 			return false;
@@ -83,13 +86,13 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 
 	private CompilationUnit fASTRoot;
 	private ASTNode fStart;
-	private List fResult;
+	private List<OccurrenceLocation> fResult;
 	private ASTNode fSelectedNode;
 	private ITypeBinding fSelectedType;
 	private String fDescription;
 
 	public ImplementOccurrencesFinder() {
-		fResult= new ArrayList();
+		fResult= new ArrayList<OccurrenceLocation>();
 	}
 
 	public String initialize(CompilationUnit root, int offset, int length) {
@@ -129,7 +132,7 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 		performSearch();
 		if (fResult.isEmpty())
 			return null;
-		return (OccurrenceLocation[]) fResult.toArray(new OccurrenceLocation[fResult.size()]);
+		return fResult.toArray(new OccurrenceLocation[fResult.size()]);
 	}
 
 	public int getSearchKind() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ public class EditFilterWizard extends BuildPathWizard {
 	/*
 	 * @see Wizard#addPages
 	 */
+	@Override
 	public void addPages() {
 		super.addPages();
 
@@ -44,6 +45,7 @@ public class EditFilterWizard extends BuildPathWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
 	 */
+	@Override
 	public boolean performFinish() {
 		CPListElement entryToEdit= getEntryToEdit();
 		entryToEdit.setAttribute(CPListElement.INCLUSION, fFilterPage.getInclusionPattern());
@@ -55,6 +57,7 @@ public class EditFilterWizard extends BuildPathWizard {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void cancel() {
 		CPListElement entryToEdit= getEntryToEdit();
 		entryToEdit.setAttribute(CPListElement.INCLUSION, fOrginalInclusion);

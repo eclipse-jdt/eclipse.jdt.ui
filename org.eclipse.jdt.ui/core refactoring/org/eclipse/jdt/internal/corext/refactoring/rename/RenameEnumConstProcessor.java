@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,6 +71,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor#canEnableGetterRenaming()
 	 */
+	@Override
 	public String canEnableGetterRenaming() throws CoreException {
 		return ""; //$NON-NLS-1$
 	}
@@ -78,6 +79,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor#canEnableSetterRenaming()
 	 */
+	@Override
 	public String canEnableSetterRenaming() throws CoreException {
 		return ""; //$NON-NLS-1$
 	}
@@ -85,6 +87,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#checkNewElementName(java.lang.String)
 	 */
+	@Override
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		RefactoringStatus result= Checks.checkEnumConstantName(newName, getField());
 		if (Checks.isAlreadyNamed(getField(), newName))
@@ -94,6 +97,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 		return result;
 	}
 
+	@Override
 	protected RenameJavaElementDescriptor createRefactoringDescriptor() {
 		final IField field= getField();
 		String project= null;
@@ -128,6 +132,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getIdentifier()
 	 */
+	@Override
 	public String getIdentifier() {
 		return IRefactoringProcessorIds.RENAME_ENUM_CONSTANT_PROCESSOR;
 	}
@@ -135,6 +140,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
+	@Override
 	public String getProcessorName() {
 		return RefactoringCoreMessages.RenameEnumConstRefactoring_name;
 	}
@@ -167,6 +173,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 		return new RefactoringStatus();
 	}
 
+	@Override
 	public boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isRenameEnumConstAvailable(getField());
 	}

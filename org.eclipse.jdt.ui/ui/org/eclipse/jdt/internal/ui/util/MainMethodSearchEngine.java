@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,10 +42,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class MainMethodSearchEngine{
 
 	private static class MethodCollector extends SearchRequestor {
-			private List fResult;
+			private List<IType> fResult;
 			private int fStyle;
 
-			public MethodCollector(List result, int style) {
+			public MethodCollector(List<IType> result, int style) {
 				Assert.isNotNull(result);
 				fResult= result;
 				fStyle= style;
@@ -62,6 +62,7 @@ public class MainMethodSearchEngine{
 			/* (non-Javadoc)
 			 * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)
 			 */
+			@Override
 			public void acceptSearchMatch(SearchMatch match) throws CoreException {
 				Object enclosingElement= match.getElement();
 				if (enclosingElement instanceof IMethod) { // defensive code
@@ -97,14 +98,14 @@ public class MainMethodSearchEngine{
 	 * @throws CoreException
 	 */
 	public IType[] searchMainMethods(IProgressMonitor pm, IJavaSearchScope scope, int style) throws CoreException {
-		List typesFound= new ArrayList(200);
+		List<IType> typesFound= new ArrayList<IType>(200);
 
 		SearchPattern pattern= SearchPattern.createPattern("main(String[]) void", //$NON-NLS-1$
 				IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
 		SearchRequestor requestor= new MethodCollector(typesFound, style);
 		new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, pm);
 
-		return (IType[]) typesFound.toArray(new IType[typesFound.size()]);
+		return typesFound.toArray(new IType[typesFound.size()]);
 	}
 
 

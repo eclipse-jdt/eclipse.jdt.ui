@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ public class MultiStateCellEditor extends CellEditor {
 	/*
 	 * @see org.eclipse.jface.viewers.CellEditor#activate()
 	 */
+	@Override
 	public void activate() {
 		fValue= getNextValue(fStateCount, fValue);
 		fireApplyEditorValue();
@@ -56,6 +57,7 @@ public class MultiStateCellEditor extends CellEditor {
 	/*
 	 * @see org.eclipse.jface.viewers.CellEditor#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createControl(Composite parent) {
 		return null;
 	}
@@ -64,6 +66,7 @@ public class MultiStateCellEditor extends CellEditor {
 	 * @see org.eclipse.jface.viewers.CellEditor#doGetValue()
 	 * @return the Integer value
 	 */
+	@Override
 	protected Object doGetValue() {
 		return new Integer(fValue);
 	}
@@ -71,6 +74,7 @@ public class MultiStateCellEditor extends CellEditor {
 	/*
 	 * @see org.eclipse.jface.viewers.CellEditor#doSetFocus()
 	 */
+	@Override
 	protected void doSetFocus() {
 		// ignore
 	}
@@ -80,6 +84,7 @@ public class MultiStateCellEditor extends CellEditor {
 	 * @param value an Integer value
 	 * must be >=0 and < stateCount (value passed in the constructor)
 	 */
+	@Override
 	protected void doSetValue(Object value) {
 		Assert.isTrue(value instanceof Integer, "value must be Integer"); //$NON-NLS-1$
 		fValue = ((Integer) value).intValue();

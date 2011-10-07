@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,6 +85,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
@@ -144,6 +145,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
    		status.merge(initializeStatus);
     }
 
+	@Override
 	public String getName() {
 		return RefactoringCoreMessages.ReplaceInvocationsRefactoring_name;
 	}
@@ -176,6 +178,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		fParameterNames= parameterNames;
 	}
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		// TargetProvider must get an untampered AST with original invocation node
 		// SourceProvider must get a tweaked AST with method body / parameter names replaced
@@ -187,7 +190,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReplaceInvocationsRefactoring_cannot_replace_in_binary);
 
 			ICompilationUnit cu= (ICompilationUnit) fSelectionTypeRoot;
-			CompilationUnit root= new RefactoringASTParser(AST.JLS3).parse(cu, true);
+			CompilationUnit root= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(cu, true);
 			fSelectionNode= getTargetNode(cu, root, fSelectionStart, fSelectionLength);
 			if (fSelectionNode == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReplaceInvocationsRefactoring_select_method_to_apply);
@@ -206,7 +209,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 			fMethod= (IMethod) fMethodBinding.getJavaElement();
 
 		} else {
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			parser.setProject(fMethod.getJavaProject());
 			IBinding[] bindings= parser.createBindings(new IJavaElement[] { fMethod }, null);
 			fMethodBinding= (IMethodBinding) bindings[0];
@@ -230,7 +233,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		ICompilationUnit methodCu= (method).getCompilationUnit();
 		if (methodCu != null) {
 			typeRoot= methodCu;
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			parser.setSource(methodCu);
 			parser.setFocalPosition(method.getNameRange().getOffset());
 			CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
@@ -240,9 +243,9 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 			Block newBody= ast.newBlock();
 			newBody.statements().add(rewrite.createStringPlaceholder(fBody, ASTNode.EMPTY_STATEMENT));
 			rewrite.replace(methodDecl.getBody(), newBody, null);
-			List parameters= methodDecl.parameters();
+			List<SingleVariableDeclaration> parameters= methodDecl.parameters();
 			for (int i= 0; i < parameters.size(); i++) {
-				SingleVariableDeclaration parameter= (SingleVariableDeclaration) parameters.get(i);
+				SingleVariableDeclaration parameter= parameters.get(i);
 				rewrite.set(parameter.getName(), SimpleName.IDENTIFIER_PROPERTY, fParameterNames[i], null);
 			}
 			TextEdit textEdit= rewrite.rewriteAST();
@@ -256,12 +259,13 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 			}
 			source= document;
 
-			methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(source.get(), methodCu, true, true, null);
+			methodDeclarationAstRoot= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(source.get(), methodCu, true, true, null);
 
 		} else {
 			IClassFile classFile= method.getClassFile();
 			//TODO: use source if available?
 			StubCreator stubCreator= new StubCreator(true) {
+				@Override
 				protected void appendMethodBody(IMethod currentMethod) throws JavaModelException {
 					if (currentMethod.equals(method)) {
 						fBuffer.append(fBody);
@@ -272,6 +276,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 				/*
 				 * @see org.eclipse.jdt.internal.corext.refactoring.binary.StubCreator#appendMethodParameterName(org.eclipse.jdt.core.IMethod, int)
 				 */
+				@Override
 				protected void appendMethodParameterName(IMethod currentMethod, int index) {
 					if (currentMethod.equals(method)) {
 						fBuffer.append(fParameterNames[index]);
@@ -283,7 +288,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 
 			String stub= stubCreator.createStub(classFile.getType(), null);
 			source= new Document(stub);
-			methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(stub, classFile, true, true, null);
+			methodDeclarationAstRoot= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(stub, classFile, true, true, null);
 			typeRoot= classFile;
 		}
 		ASTNode node= methodDeclarationAstRoot.findDeclaringNode(methodBinding.getKey());
@@ -329,6 +334,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		return null;
 	}
 
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 20); //$NON-NLS-1$
 		fChangeManager= new TextChangeManager();
@@ -427,9 +433,10 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		return result;
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		// TODO: update for fSelectionStart == -1
-		final Map arguments= new HashMap();
+		final Map<String, String> arguments= new HashMap<String, String>();
 		String project= null;
 		IJavaProject javaProject= fSelectionTypeRoot.getJavaProject();
 		if (javaProject != null)
@@ -452,14 +459,14 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 	}
 
 	private IFile[] getFilesToBeModified(ICompilationUnit[] units) {
-		List result= new ArrayList(units.length + 1);
+		List<IFile> result= new ArrayList<IFile>(units.length + 1);
 		IFile file;
 		for (int i= 0; i < units.length; i++) {
 			file= getFile(units[i]);
 			if (file != null)
 				result.add(file);
 		}
-		return (IFile[])result.toArray(new IFile[result.size()]);
+		return result.toArray(new IFile[result.size()]);
 	}
 
 	private IFile getFile(ICompilationUnit unit) {
@@ -530,12 +537,12 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		for (int i= 0; i < invocations.length; i++) {
 			removeNestedCalls(status, unit, parents, invocations, i);
 		}
-		List result= new ArrayList();
+		List<ASTNode> result= new ArrayList<ASTNode>();
 		for (int i= 0; i < invocations.length; i++) {
 			if (invocations[i] != null)
 				result.add(invocations[i]);
 		}
-		return (ASTNode[])result.toArray(new ASTNode[result.size()]);
+		return result.toArray(new ASTNode[result.size()]);
 	}
 
 	private void removeNestedCalls(RefactoringStatus status, ICompilationUnit unit, ASTNode[] parents, ASTNode[] invocations, int index) {

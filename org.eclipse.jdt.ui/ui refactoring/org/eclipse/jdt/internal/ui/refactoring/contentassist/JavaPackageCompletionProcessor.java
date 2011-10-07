@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -140,7 +140,7 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 	}
 
 	private ICompletionProposal[] createPackagesProposals(int documentOffset, String input) {
-		ArrayList proposals= new ArrayList();
+		ArrayList<JavaCompletionProposal> proposals= new ArrayList<JavaCompletionProposal>();
 		String prefix= input.substring(0, documentOffset);
 		try {
 			IJavaElement[] packageFragments= fPackageFragmentRoot.getChildren();
@@ -156,6 +156,6 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 		} catch (JavaModelException e) {
 			//fPackageFragmentRoot is not a proper root -> no proposals
 		}
-		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+		return proposals.toArray(new ICompletionProposal[proposals.size()]);
 	}
 }

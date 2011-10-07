@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,13 +35,13 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class RenameSelectionState {
 	private final Display fDisplay;
 	private final Object fElement;
-	private final List fParts;
-	private final List fSelections;
+	private final List<IWorkbenchPart> fParts;
+	private final List<IStructuredSelection> fSelections;
 
 	public RenameSelectionState(Object element) {
 		fElement= element;
-		fParts= new ArrayList();
-		fSelections= new ArrayList();
+		fParts= new ArrayList<IWorkbenchPart>();
+		fSelections= new ArrayList<IStructuredSelection>();
 
 		IWorkbenchWindow dw = JavaPlugin.getActiveWorkbenchWindow();
 		if (dw ==  null) {
@@ -90,7 +90,7 @@ public class RenameSelectionState {
 		if (fDisplay == null)
 			return;
 		for (int i= 0; i < fParts.size(); i++) {
-			IStructuredSelection currentSelection= (IStructuredSelection)fSelections.get(i);
+			IStructuredSelection currentSelection= fSelections.get(i);
 			boolean changed= false;
 			final ISetSelectionTarget target= (ISetSelectionTarget)fParts.get(i);
 			final IStructuredSelection[] newSelection= new IStructuredSelection[1];

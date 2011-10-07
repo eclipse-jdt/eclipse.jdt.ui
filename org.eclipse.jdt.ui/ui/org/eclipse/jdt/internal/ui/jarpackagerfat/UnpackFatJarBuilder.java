@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,14 +50,17 @@ public class UnpackFatJarBuilder extends FatJarBuilder {
 		return new FatJarManifestProvider(this);
 	}
 
+	@Override
 	public String getManifestClasspath() {
 		return "."; //$NON-NLS-1$
 	}
 
+	@Override
 	public boolean isMergeManifests() {
 		return true;
 	}
 
+	@Override
 	public boolean isRemoveSigners() {
 		return true;
 	}
@@ -66,9 +69,9 @@ public class UnpackFatJarBuilder extends FatJarBuilder {
 	 * {@inheritDoc}
 	 */
 	public void writeArchive(ZipFile jarFile, IProgressMonitor progressMonitor) {
-		Enumeration jarEntriesEnum= jarFile.entries();
+		Enumeration<? extends ZipEntry> jarEntriesEnum= jarFile.entries();
 		while (jarEntriesEnum.hasMoreElements()) {
-			ZipEntry jarEntry= (ZipEntry) jarEntriesEnum.nextElement();
+			ZipEntry jarEntry= jarEntriesEnum.nextElement();
 			if (!jarEntry.isDirectory()) {
 				String entryName= jarEntry.getName();
 				addFile(entryName, jarEntry, jarFile);

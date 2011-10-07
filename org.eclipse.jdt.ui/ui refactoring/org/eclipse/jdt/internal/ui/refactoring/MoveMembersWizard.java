@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,6 +79,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */
+	@Override
 	protected void addUserInputPages(){
 		addPage(new MoveMembersInputPage(fProcessor));
 	}
@@ -92,7 +93,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 		private Button fLeaveDelegateCheckBox;
 		private Button fDeprecateDelegateCheckBox;
 		private static final int MRU_COUNT= 10;
-		private static List fgMruDestinations= new ArrayList(MRU_COUNT);
+		private static List<String> fgMruDestinations= new ArrayList<String>(MRU_COUNT);
 		private final MoveStaticMembersProcessor fProcessor;
 
 		public MoveMembersInputPage(MoveStaticMembersProcessor processor) {
@@ -100,6 +101,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 			fProcessor= processor;
 		}
 
+		@Override
 		public void setVisible(boolean visible){
 			if (visible){
 				IMember[] membersToMove= getMoveProcessor().getMembersToMove();
@@ -136,12 +138,14 @@ public class MoveMembersWizard extends RefactoringWizard {
 				fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(getMoveProcessor()));
 				getMoveProcessor().setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
 				fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						getMoveProcessor().setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
 					}
 				});
 				fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
 				fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
 					}
@@ -152,6 +156,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.MOVE_MEMBERS_WIZARD_PAGE);
 		}
 
+		@Override
 		public void dispose() {
 			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
 			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);
@@ -180,7 +185,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 			SWTUtil.setDefaultVisibleItemCount(fDestinationField);
 			fDestinationField.setFocus();
 			fDestinationField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fDestinationField.setItems((String[]) fgMruDestinations.toArray(new String[fgMruDestinations.size()]));
+			fDestinationField.setItems(fgMruDestinations.toArray(new String[fgMruDestinations.size()]));
 			fDestinationField.addModifyListener(new ModifyListener(){
 				public void modifyText(ModifyEvent e) {
 					handleDestinationChanged();
@@ -230,17 +235,20 @@ public class MoveMembersWizard extends RefactoringWizard {
 			button.setLayoutData(new GridData());
 			SWTUtil.setButtonDimensionHint(button);
 			button.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					openTypeSelectionDialog();
 				}
 			});
 		}
 
+		@Override
 		protected boolean performFinish() {
 			initializeRefactoring();
 			return super.performFinish();
 		}
 
+		@Override
 		public IWizardPage getNextPage() {
 			initializeRefactoring();
 			return super.getNextPage();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,32 @@ public class PropertiesFileDocumentProvider extends TextFileDocumentProvider {
 
 	private static final IContentType JAVA_PROPERTIES_FILE_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaProperties"); //$NON-NLS-1$
 
+	/**
+	 * Checks whether the passed file editor input defines a Java properties file.
+	 * 
+	 * @param element the file editor input
+	 * @return <code>true</code> if element defines a Java properties file, <code>false</code>
+	 *         otherwise
+	 * @throws CoreException
+	 * 
+	 * @since 3.7
+	 */
+	public static boolean isJavaPropertiesFile(Object element) throws CoreException {
+		if (JAVA_PROPERTIES_FILE_CONTENT_TYPE == null || !(element instanceof IFileEditorInput))
+			return false;
+
+		IFileEditorInput input= (IFileEditorInput)element;
+
+		IFile file= input.getFile();
+		if (file == null || !file.isAccessible())
+			return false;
+
+		IContentDescription description= file.getContentDescription();
+		if (description == null || description.getContentType() == null || !description.getContentType().isKindOf(JAVA_PROPERTIES_FILE_CONTENT_TYPE))
+			return false;
+
+		return true;
+	}
 
 	/**
 	 * Creates a new properties file document provider and
@@ -52,18 +78,9 @@ public class PropertiesFileDocumentProvider extends TextFileDocumentProvider {
 	/*
 	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createFileInfo(java.lang.Object)
 	 */
+	@Override
 	protected FileInfo createFileInfo(Object element) throws CoreException {
-		if (JAVA_PROPERTIES_FILE_CONTENT_TYPE == null || !(element instanceof IFileEditorInput))
-			return null;
-
-		IFileEditorInput input= (IFileEditorInput)element;
-
-		IFile file= input.getFile();
-		if (file == null || !file.isAccessible())
-			return null;
-
-		IContentDescription description= file.getContentDescription();
-		if (description == null || description.getContentType() == null || !description.getContentType().isKindOf(JAVA_PROPERTIES_FILE_CONTENT_TYPE))
+		if (!isJavaPropertiesFile(element))
 			return null;
 
 		return super.createFileInfo(element);
@@ -73,6 +90,7 @@ public class PropertiesFileDocumentProvider extends TextFileDocumentProvider {
 	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createSaveOperation(java.lang.Object, org.eclipse.jface.text.IDocument, boolean)
 	 * @since 3.1
 	 */
+	@Override
 	protected DocumentProviderOperation createSaveOperation(final Object element, final IDocument document, final boolean overwrite) throws CoreException {
 		if (getFileInfo(element) == null)
 			return null;

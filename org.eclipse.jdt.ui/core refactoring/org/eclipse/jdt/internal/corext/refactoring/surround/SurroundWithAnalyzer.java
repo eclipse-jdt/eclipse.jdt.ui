@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,7 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 
 	public Statement[] getSelectedStatements() {
 		if (hasSelectedNodes()) {
-			return (Statement[])internalGetSelectedNodes().toArray(new Statement[internalGetSelectedNodes().size()]);
+			return internalGetSelectedNodes().toArray(new Statement[internalGetSelectedNodes().size()]);
 		} else {
 			return new Statement[0];
 		}
@@ -62,10 +62,12 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 		return (BodyDeclaration)ASTNodes.getParent(node, BodyDeclaration.class);
 	}
 
+	@Override
 	protected boolean handleSelectionEndsIn(ASTNode node) {
 		return true;
 	}
 
+	@Override
 	public void endVisit(CompilationUnit node) {
 		postProcessSelectedNodes(internalGetSelectedNodes());
 		BodyDeclaration enclosingNode= null;
@@ -99,6 +101,7 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 		super.endVisit(node);
 	}
 
+	@Override
 	public void endVisit(SuperConstructorInvocation node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
 			invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_cannotHandleSuper, JavaStatusContext.create(fCUnit, node));
@@ -106,6 +109,7 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 		super.endVisit(node);
 	}
 
+	@Override
 	public void endVisit(ConstructorInvocation node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
 			invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_cannotHandleThis, JavaStatusContext.create(fCUnit, node));
@@ -113,11 +117,11 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 		super.endVisit(node);
 	}
 
-	protected void postProcessSelectedNodes(List selectedNodes) {
+	protected void postProcessSelectedNodes(List<ASTNode> selectedNodes) {
 		if (selectedNodes == null || selectedNodes.size() == 0)
 			return;
 		if (selectedNodes.size() == 1) {
-			ASTNode node= (ASTNode)selectedNodes.get(0);
+			ASTNode node= selectedNodes.get(0);
 			if (node instanceof Expression && node.getParent() instanceof ExpressionStatement) {
 				selectedNodes.clear();
 				selectedNodes.add(node.getParent());

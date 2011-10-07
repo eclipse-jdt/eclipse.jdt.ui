@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,7 +61,7 @@ public final class SaveParticipantRegistry {
 	private static final IPostSaveListener[] EMPTY_ARRAY= new IPostSaveListener[0];
 
 	/** The map of descriptors, indexed by their identifiers. */
-	private Map fDescriptors;
+	private Map<String, SaveParticipantDescriptor> fDescriptors;
 
 	/**
 	 * Creates a new instance.
@@ -77,7 +77,7 @@ public final class SaveParticipantRegistry {
 	 */
 	public synchronized SaveParticipantDescriptor[] getSaveParticipantDescriptors() {
 		ensureRegistered();
-		return (SaveParticipantDescriptor[]) fDescriptors.values().toArray(new SaveParticipantDescriptor[fDescriptors.size()]);
+		return fDescriptors.values().toArray(new SaveParticipantDescriptor[fDescriptors.size()]);
 	}
 
 	/**
@@ -89,7 +89,7 @@ public final class SaveParticipantRegistry {
 	 */
 	public synchronized SaveParticipantDescriptor getSaveParticipantDescriptor(String id) {
 		ensureRegistered();
-		return (SaveParticipantDescriptor) fDescriptors.get(id);
+		return fDescriptors.get(id);
 	}
 
 	/**
@@ -109,11 +109,12 @@ public final class SaveParticipantRegistry {
 	 * </p>
 	 */
 	private void reloadDescriptors() {
-		Map map= new HashMap();
+		Map<String, SaveParticipantDescriptor> map= new HashMap<String, SaveParticipantDescriptor>();
 		SaveParticipantDescriptor desc= new SaveParticipantDescriptor(new CleanUpPostSaveListener()) {
 			/**
 			 * {@inheritDoc}
 			 */
+			@Override
 			public ISaveParticipantPreferenceConfiguration createPreferenceConfiguration() {
 				return new CleanUpSaveParticipantPreferenceConfiguration();
 			}
@@ -135,8 +136,8 @@ public final class SaveParticipantRegistry {
 	public synchronized boolean hasSettingsInScope(IScopeContext context) {
 		ensureRegistered();
 
-    	for (Iterator iterator= fDescriptors.values().iterator(); iterator.hasNext();) {
-	        SaveParticipantDescriptor descriptor= (SaveParticipantDescriptor)iterator.next();
+    	for (Iterator<SaveParticipantDescriptor> iterator= fDescriptors.values().iterator(); iterator.hasNext();) {
+	        SaveParticipantDescriptor descriptor= iterator.next();
 	        if (descriptor.getPreferenceConfiguration().hasSettingsInScope(context))
 	        	return true;
     	}
@@ -158,12 +159,12 @@ public final class SaveParticipantRegistry {
 	public synchronized IPostSaveListener[] getEnabledPostSaveListeners(IScopeContext context) {
 		ensureRegistered();
 
-		ArrayList result= null;
-		for (Iterator iterator= fDescriptors.values().iterator(); iterator.hasNext();) {
-			SaveParticipantDescriptor descriptor= (SaveParticipantDescriptor)iterator.next();
+		ArrayList<IPostSaveListener> result= null;
+		for (Iterator<SaveParticipantDescriptor> iterator= fDescriptors.values().iterator(); iterator.hasNext();) {
+			SaveParticipantDescriptor descriptor= iterator.next();
 			if (descriptor.getPreferenceConfiguration().isEnabled(context)) {
 				if (result == null) {
-					result= new ArrayList();
+					result= new ArrayList<IPostSaveListener>();
 				}
 				result.add(descriptor.getPostSaveListener());
 			}
@@ -172,7 +173,7 @@ public final class SaveParticipantRegistry {
 		if (result == null) {
 			return EMPTY_ARRAY;
 		} else {
-			return (IPostSaveListener[])result.toArray(new IPostSaveListener[result.size()]);
+			return result.toArray(new IPostSaveListener[result.size()]);
 		}
 	}
 

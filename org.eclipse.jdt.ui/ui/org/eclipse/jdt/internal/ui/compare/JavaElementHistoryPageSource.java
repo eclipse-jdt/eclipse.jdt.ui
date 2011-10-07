@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ public class JavaElementHistoryPageSource extends ElementLocalHistoryPageSource 
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.ui.history.ElementLocalHistoryPageSource#getFile(java.lang.Object)
 	 */
+	@Override
 	public IFile getFile(Object input) {
 		// extract CU from input
 		ICompilationUnit cu= null;

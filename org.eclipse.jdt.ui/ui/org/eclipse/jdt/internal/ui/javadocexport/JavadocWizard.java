@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,13 +11,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javadocexport;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.w3c.dom.Element;
@@ -113,10 +118,13 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 	private static final String ID_JAVADOC_PROCESS_TYPE= "org.eclipse.jdt.ui.javadocProcess"; //$NON-NLS-1$
 
+	private static final String ENCODING_ARGUMENT_PREFIX= "-J-Dfile.encoding="; //$NON-NLS-1$
+
 	public static void openJavadocWizard(JavadocWizard wizard, Shell shell, IStructuredSelection selection ) {
 		wizard.init(PlatformUI.getWorkbench(), selection);
 
 		WizardDialog dialog= new WizardDialog(shell, wizard) {
+			@Override
 			protected IDialogSettings getDialogBoundsSettings() {
 				// added so that the wizard can remember the last used size
 				return JavaPlugin.getDefault().getDialogSettingsSection("JavadocWizardDialog"); //$NON-NLS-1$
@@ -146,6 +154,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	/*
 	 * @see IWizard#performFinish()
 	 */
+	@Override
 	public boolean performFinish() {
 		updateStore();
 
@@ -169,7 +178,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 				URL newURL= fDestination.toFile().toURI().toURL();
 				String newExternalForm= newURL.toExternalForm();
-				List projs= new ArrayList();
+				List<IJavaProject> projs= new ArrayList<IJavaProject>();
 				//get javadoc locations for all projects
 				for (int i= 0; i < checkedProjects.length; i++) {
 					IJavaProject curr= checkedProjects[i];
@@ -181,7 +190,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 					}
 				}
 				if (!projs.isEmpty()) {
-					setAllJavadocLocations((IJavaProject[]) projs.toArray(new IJavaProject[projs.size()]), newURL);
+					setAllJavadocLocations(projs.toArray(new IJavaProject[projs.size()]), newURL);
 				}
 			} catch (MalformedURLException e) {
 				JavaPlugin.log(e);
@@ -230,6 +239,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#performCancel()
 	 */
+	@Override
 	public boolean performCancel() {
 		updateStore();
 
@@ -274,8 +284,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	private boolean executeJavadocGeneration() {
 		Process process= null;
 		try {
-			ArrayList vmArgs= new ArrayList();
-			ArrayList progArgs= new ArrayList();
+			ArrayList<String> vmArgs= new ArrayList<String>();
+			ArrayList<String> progArgs= new ArrayList<String>();
 
 			IStatus status= fStore.getArgumentArray(vmArgs, progArgs);
 			if (!status.isOK()) {
@@ -291,10 +301,10 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			File file= File.createTempFile("javadoc-arguments", ".tmp");  //$NON-NLS-1$//$NON-NLS-2$
 			vmArgs.add('@' + file.getAbsolutePath());
 
-			FileWriter writer= new FileWriter(file);
+			BufferedWriter writer= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), getEncoding(vmArgs)));
 			try {
 				for (int i= 0; i < progArgs.size(); i++) {
-					String curr= (String) progArgs.get(i);
+					String curr= progArgs.get(i);
 					curr= checkForSpaces(curr);
 
 					writer.write(curr);
@@ -303,8 +313,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			} finally {
 				writer.close();
 			}
-
-			String[] args= (String[]) vmArgs.toArray(new String[vmArgs.size()]);
+			String[] args= vmArgs.toArray(new String[vmArgs.size()]);
 			process= Runtime.getRuntime().exec(args);
 			if (process != null) {
 				// construct a formatted command line for the process properties
@@ -355,6 +364,21 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 	}
 
+	private static String getEncoding(ArrayList<String> vmArgs) {
+		Iterator<String> iter= vmArgs.iterator();
+		while (iter.hasNext()) {
+			String argument= iter.next();
+			if (argument.length() > ENCODING_ARGUMENT_PREFIX.length() && argument.startsWith(ENCODING_ARGUMENT_PREFIX)) {
+				String encoding= argument.substring(ENCODING_ARGUMENT_PREFIX.length());
+				if (Charset.isSupported(encoding))
+					return encoding;
+				break;
+			}
+		}
+		return System.getProperty("file.encoding"); //$NON-NLS-1$
+
+	}
+
 	private String checkForSpaces(String curr) {
 		if (curr.indexOf(' ') == -1) {
 			return curr;
@@ -375,6 +399,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	/*
 	 * @see IWizard#addPages()
 	 */
+	@Override
 	public void addPages() {
 		fContributedJavadocWizardPages= ContributedJavadocWizardPage.getContributedPages(fStore);
 
@@ -397,7 +422,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 	public void init(IWorkbench workbench, IStructuredSelection structuredSelection) {
 		IWorkbenchWindow window= workbench.getActiveWorkbenchWindow();
-		List selected= Collections.EMPTY_LIST;
+		List<?> selected= Collections.EMPTY_LIST;
 		if (window != null) {
 			ISelection selection= window.getSelectionService().getSelection();
 			if (selection instanceof IStructuredSelection) {
@@ -405,8 +430,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			} else {
 				IJavaElement element= EditorUtility.getActiveEditorJavaInput();
 				if (element != null) {
-					selected= new ArrayList();
-					selected.add(element);
+					selected= Arrays.asList(element);
 				}
 			}
 		}
@@ -474,6 +498,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		public void launchesRemoved(ILaunch[] launches) { }
 	}
 
+	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
 		if (page == fTreeWizardPage && fTreeWizardPage.getCustom()) {
 			return fLastWizardPage;
@@ -481,6 +506,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		return super.getNextPage(page);
 	}
 
+	@Override
 	public IWizardPage getPreviousPage(IWizardPage page) {
 		if (page == fLastWizardPage && fTreeWizardPage.getCustom()) {
 			return fTreeWizardPage;

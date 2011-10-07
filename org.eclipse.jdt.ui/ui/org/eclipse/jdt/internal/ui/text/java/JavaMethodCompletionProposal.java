@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Tom Eicher <eclipse@tom.eicher.name> - [content assist] prefix complete casted method proposals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=247547
@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
@@ -49,6 +50,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		super(proposal, context);
 	}
 
+	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 		if (trigger == ' ' || trigger == '(')
 			trigger= '\0';
@@ -62,6 +64,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		return hasArgumentList() && hasParameters();
 	}
 
+	@Override
 	public int getPrefixCompletionStart(IDocument document, int completionOffset) {
 		if (fProposal.getKind() == CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER) {
 			return fProposal.getTokenStart();
@@ -70,6 +73,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		return super.getPrefixCompletionStart(document, completionOffset);
 	}
 	
+	@Override
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		if (hasArgumentList() || fProposal.getKind() == CompletionProposal.CONSTRUCTOR_INVOCATION) {
 			String completion= String.valueOf(fProposal.getName());
@@ -82,6 +86,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		return super.getPrefixCompletionText(document, completionOffset);
 	}
 
+	@Override
 	protected IContextInformation computeContextInformation() {
 		// no context information for METHOD_NAME_REF proposals (e.g. for static imports)
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=94654
@@ -95,6 +100,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		return super.computeContextInformation();
 	}
 
+	@Override
 	protected char[] computeTriggerCharacters() {
 		if (fProposal.getKind() == CompletionProposal.METHOD_NAME_REFERENCE)
 			return METHOD_NAME_TRIGGERS;
@@ -145,6 +151,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	 *
 	 * @return the formatter settings
 	 */
+	@Override
 	protected final FormatterPrefs getFormatterPrefs() {
 		if (fFormatterPrefs == null)
 			fFormatterPrefs= new FormatterPrefs(fInvocationContext.getProject());
@@ -154,6 +161,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeReplacementString()
 	 */
+	@Override
 	protected String computeReplacementString() {
 		if (!hasArgumentList())
 			return super.computeReplacementString();
@@ -212,6 +220,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		buffer.append(LPAREN);
 	}
 
+	@Override
 	protected ProposalInfo computeProposalInfo() {
 		IJavaProject project= fInvocationContext.getProject();
 		if (project != null)
@@ -222,6 +231,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeSortString()
 	 */
+	@Override
 	protected String computeSortString() {
 		/*
 		 * Lexicographical sort order:
@@ -246,6 +256,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isOffsetValid(int)
 	 * @since 3.5
 	 */
+	@Override
 	protected boolean isOffsetValid(int offset) {
 		if (fProposal.getKind() != CompletionProposal.CONSTRUCTOR_INVOCATION)
 			return super.isOffsetValid(offset);
@@ -256,11 +267,18 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
 	 */
+	@Override
 	protected boolean isValidPrefix(String prefix) {
 		if (super.isValidPrefix(prefix))
 			return true;
 
 		String word= TextProcessor.deprocess(getDisplayString());
+		if (fProposal.getKind() == CompletionProposal.CONSTRUCTOR_INVOCATION) {
+			int start= word.indexOf(JavaElementLabels.CONCAT_STRING) + JavaElementLabels.CONCAT_STRING.length();
+			word= word.substring(start);
+			return isPrefix(prefix, word) || isPrefix(prefix, new String(fProposal.getName()));
+		}
+
 		if (isInJavadoc()) {
 			int idx = word.indexOf("{@link "); //$NON-NLS-1$
 			if (idx==0) {
@@ -279,6 +297,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isPrefix(java.lang.String, java.lang.String)
 	 * @since 3.4
 	 */
+	@Override
 	protected boolean isPrefix(String prefix, String string) {
 		if (fProposal.getKind() == CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER && prefix != null)
 			prefix= prefix.substring(fProposal.getReceiverEnd() - fProposal.getReceiverStart() + 1);
@@ -289,6 +308,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getPrefix(org.eclipse.jface.text.IDocument, int)
 	 * @since 3.5
 	 */
+	@Override
 	protected String getPrefix(IDocument document, int offset) {
 		if (fProposal.getKind() != CompletionProposal.CONSTRUCTOR_INVOCATION)
 			return super.getPrefix(document, offset);
@@ -304,4 +324,17 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		return ""; //$NON-NLS-1$
 
 	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#createRequiredTypeCompletionProposal(org.eclipse.jdt.core.CompletionProposal, org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
+	 * @since 3.7
+	 */
+	@Override
+	protected LazyJavaCompletionProposal createRequiredTypeCompletionProposal(CompletionProposal completionProposal, JavaContentAssistInvocationContext invocationContext) {
+		LazyJavaCompletionProposal requiredProposal= super.createRequiredTypeCompletionProposal(completionProposal, invocationContext);
+		if (fProposal.getKind() == CompletionProposal.CONSTRUCTOR_INVOCATION && requiredProposal instanceof LazyGenericTypeProposal)
+			((LazyGenericTypeProposal) requiredProposal).canUseDiamond(fProposal.canUseDiamond(fInvocationContext.getCoreContext()));
+		return requiredProposal;
+	}
+
 }

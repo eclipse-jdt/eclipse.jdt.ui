@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -52,6 +53,7 @@ import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -63,6 +65,8 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
@@ -73,9 +77,12 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
 public class CopyQualifiedNameAction extends SelectionDispatchAction {
@@ -105,15 +112,18 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		setToolTipText(ActionMessages.CopyQualifiedNameAction_ToolTipText);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_COPY_QUALIFIED_NAME);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_COPY_QUALIFIED_NAME);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.COPY_QUALIFIED_NAME_ACTION);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canEnable(selection.toArray()));
 	}
 
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		//Must not create an AST
 	}
@@ -159,12 +169,16 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		if (element instanceof IResource)
 			return true;
 
+		if (element instanceof LogicalPackage)
+			return true;
+
 		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
+	@Override
 	public void run() {
 
 		try {
@@ -180,12 +194,12 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 			if (elements.length == 1) {
 				Object element= elements[0];
 				String qualifiedName= getQualifiedName(element);
-				IResource resource;
-				if (element instanceof IJavaElement)
-					resource= ((IJavaElement)element).getCorrespondingResource();
-				else if (element instanceof IJarEntryResource)
-					resource= null;
-				else
+				IResource resource= null;
+				if (element instanceof IJavaElement) {
+					IJavaElement je= ((IJavaElement)element);
+					if (je.exists())
+						resource= je.getCorrespondingResource();
+				} else if (element instanceof IResource)
 					resource= (IResource)element;
 
 				if (resource != null) {
@@ -237,30 +251,36 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		if (element instanceof IJarEntryResource)
 			return ((IJarEntryResource)element).getFullPath().toString();
 
+		if (element instanceof LogicalPackage)
+			return ((LogicalPackage)element).getElementName();
+
 		if (element instanceof IJavaProject || element instanceof IPackageFragmentRoot || element instanceof ITypeRoot) {
 			IResource resource= ((IJavaElement)element).getCorrespondingResource();
 			if (resource != null)
 				return getQualifiedName(resource);
 		}
 
+		if (element instanceof IBinding)
+			return BindingLabelProvider.getBindingLabel((IBinding)element, LABEL_FLAGS);
+
 		return TextProcessor.deprocess(JavaElementLabels.getTextLabel(element, LABEL_FLAGS));
 	}
 
 	private Object[] getSelectedElements() {
 		if (fEditor != null) {
-			IJavaElement element= getSelectedElement(fEditor);
+			Object element= getSelectedElement(fEditor);
 			if (element == null)
 				return null;
 
-			return new IJavaElement[] { element };
+			return new Object[] { element };
 		}
 
 		ISelection selection= getSelection();
 		if (!(selection instanceof IStructuredSelection))
 			return null;
 
-		List result= new ArrayList();
-		for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
+		List<Object> result= new ArrayList<Object>();
+		for (Iterator<?> iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (isValidElement(element))
 				result.add(element);
@@ -271,7 +291,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		return result.toArray(new Object[result.size()]);
 	}
 
-	private IJavaElement getSelectedElement(JavaEditor editor) {
+	private Object getSelectedElement(JavaEditor editor) {
 		ISourceViewer viewer= editor.getViewer();
 		if (viewer == null)
 			return null;
@@ -293,6 +313,9 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 
 		IBinding binding= null;
 		if (node instanceof Name) {
+			binding= getConstructorBindingIfAvailable((Name)node);
+			if (binding != null)
+				return binding;
 			binding= ((Name)node).resolveBinding();
 		} else if (node instanceof MethodInvocation) {
 			binding= ((MethodInvocation)node).resolveMethodBinding();
@@ -325,6 +348,25 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		if (binding != null)
 			return binding.getJavaElement();
 
+		return null;
+	}
+
+	/**
+	 * Checks whether the given name belongs to a {@link ClassInstanceCreation} and if so, returns
+	 * its constructor binding.
+	 * 
+	 * @param nameNode the name node
+	 * @return the constructor binding or <code>null</code> if not found
+	 * @since 3.7
+	 */
+	private IBinding getConstructorBindingIfAvailable(Name nameNode) {
+		StructuralPropertyDescriptor loc= nameNode.getLocationInParent();
+		if (loc == SimpleType.NAME_PROPERTY) {
+			ASTNode parent= nameNode.getParent();
+			loc= parent.getLocationInParent();
+			if (loc == ClassInstanceCreation.TYPE_PROPERTY)
+				return ((ClassInstanceCreation)parent.getParent()).resolveConstructorBinding();
+		}
 		return null;
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,9 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.Region;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
@@ -35,9 +37,9 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -53,6 +55,8 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkDetector;
+import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
@@ -106,12 +110,14 @@ public class OpenAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}
@@ -119,7 +125,7 @@ public class OpenAction extends SelectionDispatchAction {
 	private boolean checkEnabled(IStructuredSelection selection) {
 		if (selection.isEmpty())
 			return false;
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof ISourceReference)
 				continue;
@@ -135,17 +141,26 @@ public class OpenAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(ITextSelection selection) {
-		if (!isProcessable())
+		ITypeRoot input= EditorUtility.getEditorInputJavaElement(fEditor, false);
+		if (input == null) {
+			setStatusLineMessage();
 			return;
+		}
+		IRegion region= new Region(selection.getOffset(), selection.getLength());
+		OccurrenceLocation location= JavaElementHyperlinkDetector.findBreakOrContinueTarget(input, region);
+		if (location != null) {
+			fEditor.selectAndReveal(location.getOffset(), location.getLength());
+			return;
+		}
 		try {
 			IJavaElement[] elements= SelectionConverter.codeResolveForked(fEditor, false);
 			elements= selectOpenableElements(elements);
 			if (elements == null || elements.length == 0) {
-				IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
-				if (statusLine != null)
-					statusLine.setMessage(true, ActionMessages.OpenAction_error_messageBadSelection, null);
-				getShell().getDisplay().beep();
+				if (!ActionUtil.isProcessable(fEditor))
+					return;
+				setStatusLineMessage();
 				return;
 			}
 
@@ -165,6 +180,19 @@ public class OpenAction extends SelectionDispatchAction {
 	}
 
 	/**
+	 * Sets the error message in the status line.
+	 * 
+	 * @since 3.7
+	 */
+	private void setStatusLineMessage() {
+		IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
+		if (statusLine != null)
+			statusLine.setMessage(true, ActionMessages.OpenAction_error_messageBadSelection, null);
+		getShell().getDisplay().beep();
+		return;
+	}
+
+	/**
 	 * Selects the openable elements out of the given ones.
 	 *
 	 * @param elements the elements to filter
@@ -172,7 +200,7 @@ public class OpenAction extends SelectionDispatchAction {
 	 * @since 3.4
 	 */
 	private IJavaElement[] selectOpenableElements(IJavaElement[] elements) {
-		List result= new ArrayList(elements.length);
+		List<IJavaElement> result= new ArrayList<IJavaElement>(elements.length);
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement element= elements[i];
 			switch (element.getElementType()) {
@@ -187,21 +215,13 @@ public class OpenAction extends SelectionDispatchAction {
 					break;
 			}
 		}
-		return (IJavaElement[])result.toArray(new IJavaElement[result.size()]);
-	}
-
-	private boolean isProcessable() {
-		if (fEditor != null) {
-			IJavaElement je= EditorUtility.getEditorInputJavaElement(fEditor, false);
-			if (je instanceof ICompilationUnit && !JavaModelUtil.isPrimary((ICompilationUnit)je))
-				return true; // can process non-primary working copies
-		}
-		return ActionUtil.isProcessable(fEditor);
+		return result.toArray(new IJavaElement[result.size()]);
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		if (!checkEnabled(selection))
 			return;

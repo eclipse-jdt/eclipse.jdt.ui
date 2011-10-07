@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -113,6 +113,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		public ToggleStatusLineAction() {
 			super(JavaUIMessages.TypeSelectionComponent_show_status_line_label, IAction.AS_CHECK_BOX);
 		}
+		@Override
 		public void run() {
 			if (fForm == null)
 				return;
@@ -129,6 +130,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		public FullyQualifyDuplicatesAction() {
 			super(JavaUIMessages.TypeSelectionComponent_fully_qualify_duplicates_label, IAction.AS_CHECK_BOX);
 		}
+		@Override
 		public void run() {
 			boolean checked= isChecked();
 			fViewer.setFullyQualifyDuplicates(checked, true);
@@ -218,6 +220,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 			}
 		});
 		fFilter.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			@Override
 			public void getName(AccessibleEvent e) {
 				e.result= Strings.removeMnemonicIndicator(message);
 			}
@@ -251,6 +254,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		gd.horizontalSpan= 2;
 		table.setLayoutData(gd);
 		table.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			@Override
 			public void getName(AccessibleEvent e) {
 				if (table.getSelectionCount() == 0) {
 					e.result= Strings.removeMnemonicIndicator(JavaUIMessages.TypeSelectionComponent_label);
@@ -279,6 +283,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 			table.addSelectionListener(new SelectionAdapter() {
 				private TypeNameMatchLabelProvider fLabelProvider= new TypeNameMatchLabelProvider(
 					TypeNameMatchLabelProvider.SHOW_TYPE_CONTAINER_ONLY + TypeNameMatchLabelProvider.SHOW_ROOT_POSTFIX);
+				@Override
 				public void widgetSelected(SelectionEvent event) {
 					TypeNameMatch[] selection= fViewer.getSelection();
 					if (selection.length != 1) {
@@ -362,6 +367,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		fToolItem.setDisabledImage(JavaPluginImages.get(JavaPluginImages.IMG_DLCL_VIEW_MENU));
 		fToolItem.setToolTipText(JavaUIMessages.TypeSelectionComponent_menu);
 		fToolItem.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				showViewMenu();
 			}

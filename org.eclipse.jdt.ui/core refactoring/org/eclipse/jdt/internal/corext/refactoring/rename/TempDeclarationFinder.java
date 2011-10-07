@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,6 +78,7 @@ public class TempDeclarationFinder {
 		}
 
 		//overridden
+		@Override
 		public boolean visitNode(ASTNode node) {
 			if (node instanceof VariableDeclaration)
 				return visitVariableDeclaration((VariableDeclaration)node);
@@ -115,6 +116,7 @@ public class TempDeclarationFinder {
 		}
 
 		//overridden
+		@Override
 		public ASTNode[] getSelectedNodes() {
 			if (fNode != null)
 				return new ASTNode[] { fNode };

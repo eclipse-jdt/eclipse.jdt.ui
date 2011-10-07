@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.ui" version="2">
+    <resource path="META-INF/MANIFEST.MF">
+        <filter comment="Add Java 7 support on top of 3.6.2+" id="924844039">
+            <message_arguments>
+                <message_argument value="3.6.50.qualifier"/>
+                <message_argument value="3.6.2.r362_v20110203"/>
+            </message_arguments>
+        </filter>
+        <filter id="924844039">
+            <message_arguments>
+                <message_argument value="3.7.1"/>
+                <message_argument value="3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/ReplaceInvocationsRefactoring.java" type="org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring">
         <filter id="571519004">
             <message_arguments>
@@ -128,11 +142,90 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/ui/JavaElementImageDescriptor.java" type="org.eclipse.jdt.ui.JavaElementImageDescriptor">
+        <filter comment="Add Java 7 support on top of 3.6.2+" id="1141899266">
+            <message_arguments>
+                <message_argument value="3.7"/>
+                <message_argument value="3.6"/>
+                <message_argument value="NATIVE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Add Java 7 support on top of 3.6.2+" id="1192230914">
+            <message_arguments>
+                <message_argument value="3.7"/>
+                <message_argument value="3.6"/>
+                <message_argument value="BUILDPATH_ERROR"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/ui/PreferenceConstants.java" type="org.eclipse.jdt.ui.PreferenceConstants">
+        <filter comment="Add Java 7 support on top of 3.6.2+" id="1141899266">
+            <message_arguments>
+                <message_argument value="3.7"/>
+                <message_argument value="3.6"/>
+                <message_argument value="EDITOR_SMART_INDENT_AFTER_NEWLINE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Add Java 7 support on top of 3.6.2+" id="1192230914">
+            <message_arguments>
+                <message_argument value="3.7"/>
+                <message_argument value="3.6"/>
+                <message_argument value="APPEARANCE_ABBREVIATE_PACKAGE_NAMES"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Add Java 7 support on top of 3.6.2+" id="1192230914">
+            <message_arguments>
+                <message_argument value="3.7"/>
+                <message_argument value="3.6"/>
+                <message_argument value="APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/ui/actions/CCPActionGroup.java" type="org.eclipse.jdt.ui.actions.CCPActionGroup">
+        <filter comment="Add Java 7 support on top of 3.6.2+" id="1141899266">
+            <message_arguments>
+                <message_argument value="3.7"/>
+                <message_argument value="3.6"/>
+                <message_argument value="CCPActionGroup(IViewPart, boolean)"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/ui/actions/IJavaEditorActionDefinitionIds.java" type="org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds">
         <filter id="571473929">
             <message_arguments>
                 <message_argument value="ITextEditorActionDefinitionIds"/>
                 <message_argument value="IJavaEditorActionDefinitionIds"/>
+            </message_arguments>
+        </filter>
+        <filter id="1210056707">
+            <message_arguments>
+                <message_argument value="3.7.1"/>
+                <message_argument value="SURROUND_WITH_TRY_MULTI_CATCH"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/ui/actions/JdtActionConstants.java" type="org.eclipse.jdt.ui.actions.JdtActionConstants">
+        <filter id="1142947843">
+            <message_arguments>
+                <message_argument value="3.7.1"/>
+                <message_argument value="SURROUND_WITH_TRY_MULTI_CATCH"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/ui/actions/SurroundWithTryMultiCatchAction.java" type="org.eclipse.jdt.ui.actions.SurroundWithTryMultiCatchAction">
+        <filter id="1109393411">
+            <message_arguments>
+                <message_argument value="3.7.1"/>
+                <message_argument value="org.eclipse.jdt.ui.actions.SurroundWithTryMultiCatchAction"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/ui/text/java/CompletionProposalComparator.java" type="org.eclipse.jdt.ui.text.java.CompletionProposalComparator">
+        <filter comment="Add Java 7 support on top of 3.6.2+" id="1141899266">
+            <message_arguments>
+                <message_argument value="3.7"/>
+                <message_argument value="3.6"/>
+                <message_argument value="compare(ICompletionProposal, ICompletionProposal)"/>
             </message_arguments>
         </filter>
     </resource>

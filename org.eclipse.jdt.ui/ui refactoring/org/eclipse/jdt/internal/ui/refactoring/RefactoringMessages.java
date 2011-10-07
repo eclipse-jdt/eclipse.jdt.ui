@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -958,9 +958,15 @@ public final class RefactoringMessages extends NLS {
 
 	public static String SurroundWithTryCatchAction_dialog_title;
 
+	public static String SurroundWithTryMultiCatchAction_dialog_title;
+
 	public static String SurroundWithTryCatchAction_exception;
 
 	public static String SurroundWithTryCatchAction_label;
+
+	public static String SurroundWithTryMultiCatchAction_label;
+
+	public static String SurroundWithTryMultiCatchAction_not17;
 
 	public static String UseSupertypeAction_to_activate;
 

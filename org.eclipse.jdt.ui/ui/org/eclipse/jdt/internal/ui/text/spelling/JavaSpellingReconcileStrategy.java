@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -121,6 +121,7 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
 	 */
+	@Override
 	public void reconcile(IRegion region) {
 		if (fRequestor != null && isSpellingEnabled())
 			super.reconcile(region);
@@ -134,6 +135,7 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy#createSpellingProblemCollector()
 	 * @since 3.3
 	 */
+	@Override
 	protected ISpellingProblemCollector createSpellingProblemCollector() {
 		return new SpellingProblemCollector();
 	}
@@ -142,6 +144,7 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy#getContentType()
 	 * @since 3.3
 	 */
+	@Override
 	protected IContentType getContentType() {
 		return JAVA_CONTENT_TYPE;
 	}
@@ -149,6 +152,7 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#setDocument(org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public void setDocument(IDocument document) {
 		super.setDocument(document);
 		updateProblemRequester();
@@ -166,6 +170,7 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy#getAnnotationModel()
 	 * @since 3.3
 	 */
+	@Override
 	protected IAnnotationModel getAnnotationModel() {
 		final IDocumentProvider documentProvider= fEditor.getDocumentProvider();
 		if (documentProvider == null)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -166,6 +166,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 	}
 
 	private class ToggleLinkingAction extends AbstractToggleLinkingAction {
+		@Override
 		public void run() {
 			setLinkingEnabled(isChecked());
 		}
@@ -179,12 +180,14 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR);
 	}
 
+	@Override
 	public void init(IPageSite pageSite) {
 		super.init(pageSite);
 		// wait until site is set
 		setLinkingEnabled(getDialogSettings().getBoolean(DIALOGSTORE_LINKEDITORS));
 	}
 
+	@Override
 	public void dispose() {
 		if (fLinkingEnabled) {
 			fLinkWithEditorListener.uninstall(getSite().getPage());
@@ -192,11 +195,13 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 		super.dispose();
 	}
 
+	@Override
 	protected void fillToolbar(IToolBarManager tbm) {
 		super.fillToolbar(tbm);
 		tbm.add(fToggleLinkingAction);
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 
@@ -211,6 +216,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#showMatch(org.eclipse.search.ui.text.Match, int, int)
 	 */
+	@Override
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
 		JavaElementLine element= (JavaElementLine) match.getElement();
 		IJavaElement javaElement= element.getJavaElement();
@@ -234,6 +240,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#elementsChanged(java.lang.Object[])
 	 */
+	@Override
 	protected void elementsChanged(Object[] objects) {
 		if (fContentProvider != null)
 			fContentProvider.elementsChanged(objects);
@@ -242,6 +249,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#clear()
 	 */
+	@Override
 	protected void clear() {
 		if (fContentProvider != null)
 			fContentProvider.clear();
@@ -250,6 +258,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#configureTreeViewer(org.eclipse.jface.viewers.TreeViewer)
 	 */
+	@Override
 	protected void configureTreeViewer(TreeViewer viewer) {
 		throw new IllegalStateException("Doesn't support tree mode."); //$NON-NLS-1$
 	}
@@ -257,8 +266,10 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#configureTableViewer(org.eclipse.jface.viewers.TableViewer)
 	 */
+	@Override
 	protected void configureTableViewer(TableViewer viewer) {
 		viewer.setComparator(new ViewerComparator() {
+			@Override
 			public int compare(Viewer v, Object e1, Object e2) {
 				JavaElementLine jel1= (JavaElementLine) e1;
 				JavaElementLine jel2= (JavaElementLine) e2;

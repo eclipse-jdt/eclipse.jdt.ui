@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,9 +55,9 @@ public final class LoggedCreateTargetQueries implements ICreateTargetQueries {
 			final IFolder folder= project.getProject().getFolder(root.getElementName());
 			if (!folder.exists())
 				CoreUtility.createFolder(folder, true, true, new NullProgressMonitor());
-			final List list= Arrays.asList(project.getRawClasspath());
+			final List<IClasspathEntry> list= Arrays.asList(project.getRawClasspath());
 			list.add(JavaCore.newSourceEntry(folder.getFullPath()));
-			project.setRawClasspath((IClasspathEntry[]) list.toArray(new IClasspathEntry[list.size()]), new NullProgressMonitor());
+			project.setRawClasspath(list.toArray(new IClasspathEntry[list.size()]), new NullProgressMonitor());
 		}
 
 		/**

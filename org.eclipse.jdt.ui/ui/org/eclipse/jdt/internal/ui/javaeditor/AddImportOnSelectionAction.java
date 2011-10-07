@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,10 +67,10 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 
 	private static final AddImportComparator ADD_IMPORT_COMPARATOR= new AddImportComparator();
 
-	private static final class AddImportComparator implements Comparator {
+	private static final class AddImportComparator implements Comparator<String> {
 
-		public int compare(Object o1, Object o2) {
-			if (((String)o1).equals(o2))
+		public int compare(String o1, String o2) {
+			if (o1.equals(o2))
 				return 0;
 
 			History history= QualifiedTypeNameHistory.getDefault();
@@ -116,6 +116,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	/*
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
+	@Override
 	public void run() {
 		final ICompilationUnit cu= getCompilationUnit();
 		if (cu == null || fEditor == null)
@@ -227,6 +228,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			}
 			fIsShowing= true;
 			ElementListSelectionDialog dialog= new ElementListSelectionDialog(fShell, new TypeNameMatchLabelProvider(TypeNameMatchLabelProvider.SHOW_FULLYQUALIFIED)) {
+				@Override
 				protected FilteredList createFilteredList(Composite parent) {
 					FilteredList filteredList= super.createFilteredList(parent);
 					filteredList.setComparator(ADD_IMPORT_COMPARATOR);

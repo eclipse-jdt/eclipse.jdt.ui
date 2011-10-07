@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -288,6 +288,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 	/*
 	 * Implements method from IJarPackageWizardPage
 	 */
+	@Override
 	public boolean isPageComplete() {
 		if (fJarPackage.isDescriptionSaved()){
 			if (fJarPackage.getDescriptionLocation().toString().length() == 0) {
@@ -319,6 +320,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 		return true;
 	}
 
+	@Override
 	public boolean canFlipToNextPage() {
 		return fJarPackage.areGeneratedFilesExported() && super.canFlipToNextPage();
 	}
@@ -350,6 +352,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 		fDescriptionFileBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		SWTUtil.setButtonDimensionHint(fDescriptionFileBrowseButton);
 		fDescriptionFileBrowseButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleDescriptionFileBrowseButtonPressed();
 			}
@@ -373,6 +376,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 	/*
 	 * Method declared on IWizardPage.
 	 */
+	@Override
 	public void setPreviousPage(IWizardPage page) {
 		super.setPreviousPage(page);
 		updateWidgetEnablements();

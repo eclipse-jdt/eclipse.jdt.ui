@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSourceTransfer;
 
 public class PasteActionTest extends RefactoringTest{
 
+	private static final boolean BUG_NOT_IMPLEMENTED_YET= true;
 	private Clipboard fClipboard;
 	private static final Class clazz= PasteActionTest.class;
 	private static final String REFACTORING_PATH= "Paste/";
@@ -90,7 +91,7 @@ public class PasteActionTest extends RefactoringTest{
 		return elements.toArray();
 	}
 
-	private PasteAction verifyEnabled(IResource[] copySelectedResources, IJavaElement[] copySelectedJavaElements, IResource[] pasteSelectedResources, IJavaElement[] pasteSelectedJavaElements) throws JavaModelException {
+	private PasteAction verifyEnabled(IResource[] copySelectedResources, IJavaElement[] copySelectedJavaElements, IResource[] pasteSelectedResources, IJavaElement[] pasteSelectedJavaElements) {
 		PasteAction pasteAction= new PasteAction(new MockWorkbenchSite(merge(pasteSelectedResources, pasteSelectedJavaElements)), fClipboard);
 		CopyToClipboardAction copyToClipboardAction= new CopyToClipboardAction(new MockWorkbenchSite(merge(copySelectedResources, copySelectedJavaElements)), fClipboard);
 		copyToClipboardAction.setAutoRepeatOnFailure(true);
@@ -103,7 +104,7 @@ public class PasteActionTest extends RefactoringTest{
 		return pasteAction;
 	}
 
-	private PasteAction verifyEnabled(IResource[] copySelectedResources, IJavaElement[] copySelectedJavaElements, IWorkingSet pasteSelectedWorkingSet) throws JavaModelException {
+	private PasteAction verifyEnabled(IResource[] copySelectedResources, IJavaElement[] copySelectedJavaElements, IWorkingSet pasteSelectedWorkingSet) {
 		PasteAction pasteAction= new PasteAction(new MockWorkbenchSite(new Object[] {pasteSelectedWorkingSet}), fClipboard);
 		CopyToClipboardAction copyToClipboardAction= new CopyToClipboardAction(new MockWorkbenchSite(merge(copySelectedResources, copySelectedJavaElements)), fClipboard);
 		copyToClipboardAction.setAutoRepeatOnFailure(true);
@@ -152,7 +153,7 @@ public class PasteActionTest extends RefactoringTest{
 	}
 
 	public void test0() throws Exception{
-		if (true) {
+		if (BUG_NOT_IMPLEMENTED_YET) {
 			printTestDisabledMessage("not implemented yet");
 			return;
 		}

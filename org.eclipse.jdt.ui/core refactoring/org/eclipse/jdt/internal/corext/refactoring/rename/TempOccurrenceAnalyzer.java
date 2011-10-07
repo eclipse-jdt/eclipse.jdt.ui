@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,9 +30,9 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 public class TempOccurrenceAnalyzer extends ASTVisitor {
 	/** Set of SimpleName */
-	private Set fReferenceNodes;
+	private Set<SimpleName> fReferenceNodes;
 	/** Set of SimpleName */
-	private Set fJavadocNodes;
+	private Set<SimpleName> fJavadocNodes;
 
 	private VariableDeclaration fTempDeclaration;
 	private IBinding fTempBinding;
@@ -42,8 +42,8 @@ public class TempOccurrenceAnalyzer extends ASTVisitor {
 
 	public TempOccurrenceAnalyzer(VariableDeclaration tempDeclaration, boolean analyzeJavadoc){
 		Assert.isNotNull(tempDeclaration);
-		fReferenceNodes= new HashSet();
-		fJavadocNodes= new HashSet();
+		fReferenceNodes= new HashSet<SimpleName>();
+		fJavadocNodes= new HashSet<SimpleName>();
 		fAnalyzeJavadoc= analyzeJavadoc;
 		fTempDeclaration= tempDeclaration;
 		fTempBinding= tempDeclaration.resolveBinding();
@@ -68,10 +68,10 @@ public class TempOccurrenceAnalyzer extends ASTVisitor {
 		return offsets;
 	}
 
-	private void addOffsets(int[] offsets, int start, Set nodeSet) {
+	private void addOffsets(int[] offsets, int start, Set<SimpleName> nodeSet) {
 		int i= start;
-		for (Iterator iter= nodeSet.iterator(); iter.hasNext(); i++) {
-			ASTNode node= (ASTNode) iter.next();
+		for (Iterator<SimpleName> iter= nodeSet.iterator(); iter.hasNext(); i++) {
+			ASTNode node= iter.next();
 			offsets[i]= node.getStartPosition();
 		}
 	}
@@ -81,31 +81,34 @@ public class TempOccurrenceAnalyzer extends ASTVisitor {
 	}
 
 	public SimpleName[] getReferenceNodes() {
-		return (SimpleName[]) fReferenceNodes.toArray(new SimpleName[fReferenceNodes.size()]);
+		return fReferenceNodes.toArray(new SimpleName[fReferenceNodes.size()]);
 	}
 
 	public SimpleName[] getJavadocNodes() {
-		return (SimpleName[]) fJavadocNodes.toArray(new SimpleName[fJavadocNodes.size()]);
+		return fJavadocNodes.toArray(new SimpleName[fJavadocNodes.size()]);
 	}
 
 	public SimpleName[] getReferenceAndDeclarationNodes() {
-		SimpleName[] nodes= (SimpleName[]) fReferenceNodes.toArray(new SimpleName[fReferenceNodes.size() + 1]);
+		SimpleName[] nodes= fReferenceNodes.toArray(new SimpleName[fReferenceNodes.size() + 1]);
 		nodes[fReferenceNodes.size()]= fTempDeclaration.getName();
 		return nodes;
 	}
 
 	//------- visit ------ (don't call)
 
+	@Override
 	public boolean visit(Javadoc node) {
 		if (fAnalyzeJavadoc)
 			fIsInJavadoc= true;
 		return fAnalyzeJavadoc;
 	}
 
+	@Override
 	public void endVisit(Javadoc node) {
 		fIsInJavadoc= false;
 	}
 
+	@Override
 	public boolean visit(SimpleName node){
 		if (node.getParent() instanceof VariableDeclaration){
 			if (((VariableDeclaration)node.getParent()).getName() == node)

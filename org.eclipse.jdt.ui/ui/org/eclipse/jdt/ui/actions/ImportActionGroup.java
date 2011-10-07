@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ public class ImportActionGroup extends ActionGroup {
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new Separator(GROUP_IMPORT));
 		menu.appendToGroup(GROUP_IMPORT, fImportAction);
@@ -66,6 +67,7 @@ public class ImportActionGroup extends ActionGroup {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void dispose() {
 		fImportAction.dispose();
 		fExportAction.dispose();

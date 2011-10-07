@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,6 @@ import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.TextViewer;
 
 import org.eclipse.jdt.internal.ui.text.TypingRun.ChangeType;
-
 
 
 /**
@@ -167,7 +166,7 @@ public class SmartBackspaceManager {
 
 	private ITextViewer fViewer;
 	private BackspaceListener fBackspaceListener;
-	private Map fSpecs;
+	private Map<Integer, UndoSpec> fSpecs;
 	private TypingRunDetector fRunDetector;
 	private ITypingRunListener fRunListener;
 
@@ -192,7 +191,7 @@ public class SmartBackspaceManager {
 
 	private UndoSpec removeEdit(int offset) {
 		Integer i= new Integer(offset);
-		UndoSpec spec= (UndoSpec) fSpecs.remove(i);
+		UndoSpec spec= fSpecs.remove(i);
 		return spec;
 	}
 
@@ -224,14 +223,14 @@ public class SmartBackspaceManager {
 
 	/**
 	 * Installs the receiver on a text viewer.
-	 *
-	 * @param viewer
+	 * 
+	 * @param viewer the text viewer
 	 */
 	public void install(ITextViewer viewer) {
 		Assert.isLegal(viewer != null);
 
 		fViewer= viewer;
-		fSpecs= new HashMap();
+		fSpecs= new HashMap<Integer, UndoSpec>();
 		fRunDetector= new TypingRunDetector();
 		fRunDetector.install(viewer);
 		fRunListener= new ITypingRunListener() {
@@ -256,8 +255,8 @@ public class SmartBackspaceManager {
 	}
 
 	private void prune() {
-		for (Iterator it= fSpecs.values().iterator(); it.hasNext();) {
-			UndoSpec spec= (UndoSpec) it.next();
+		for (Iterator<UndoSpec> it= fSpecs.values().iterator(); it.hasNext();) {
+			UndoSpec spec= it.next();
 			if (--spec.lives < 0)
 				it.remove();
 		}

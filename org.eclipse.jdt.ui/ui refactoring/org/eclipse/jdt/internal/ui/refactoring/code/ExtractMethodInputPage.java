@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -129,6 +129,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			combo.select(0);
 			combo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			combo.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fRefactoring.setDestination(combo.getSelectionIndex());
 					updatePreview(getText());
@@ -160,6 +161,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			if (data[i].equals(visibility))
 				radio.setSelection(true);
 			radio.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent event) {
 					final Integer selectedModifier= (Integer)event.widget.getData();
 					fSettings.put(ACCESS_MODIFIER, selectedModifier.intValue());
@@ -193,6 +195,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		checkBox.setText(RefactoringMessages.ExtractMethodInputPage_throwRuntimeExceptions);
 		checkBox.setSelection(fSettings.getBoolean(THROW_RUNTIME_EXCEPTIONS));
 		checkBox.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				setRethrowRuntimeException(((Button)e.widget).getSelection());
 			}
@@ -205,6 +208,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		setGenerateJavadoc(generate);
 		checkBox.setSelection(generate);
 		checkBox.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				setGenerateJavadoc(((Button)e.widget).getSelection());
 			}
@@ -225,6 +229,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		checkBox.setSelection(fRefactoring.getReplaceDuplicates());
 		checkBox.setEnabled(duplicates > 0);
 		checkBox.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fRefactoring.setReplaceDuplicates(((Button)e.widget).getSelection());
 			}
@@ -311,7 +316,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		fSignaturePreview= new JavaSourceViewer(composite, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP /*| SWT.BORDER*/, store);
 		fSignaturePreview.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
 		fSignaturePreview.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
-		fSignaturePreview.getTextWidget().setBackground(composite.getBackground());
+		fSignaturePreview.adaptBackgroundColor(composite);
 		fSignaturePreview.setDocument(fSignaturePreviewDocument);
 		fSignaturePreview.setEditable(false);
 
@@ -360,6 +365,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 
 	//---- Input validation ------------------------------------------------------
 
+	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
 			if (fFirstTime) {
@@ -415,9 +421,9 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 
 	private RefactoringStatus validateParameters() {
 		RefactoringStatus result= new RefactoringStatus();
-		List parameters= fRefactoring.getParameterInfos();
-		for (Iterator iter= parameters.iterator(); iter.hasNext();) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+		List<ParameterInfo> parameters= fRefactoring.getParameterInfos();
+		for (Iterator<ParameterInfo> iter= parameters.iterator(); iter.hasNext();) {
+			ParameterInfo info= iter.next();
 			if ("".equals(info.getNewName())) { //$NON-NLS-1$
 				result.addFatalError(RefactoringMessages.ExtractMethodInputPage_validation_emptyParameterName);
 				return result;

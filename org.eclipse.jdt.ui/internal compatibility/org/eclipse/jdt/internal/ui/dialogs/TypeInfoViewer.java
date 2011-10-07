@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -124,6 +124,7 @@ public class TypeInfoViewer {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.core.search.TypeNameMatchRequestor#acceptTypeNameMatch(org.eclipse.jdt.core.search.TypeNameMatch)
 		 */
+		@Override
 		public void acceptTypeNameMatch(TypeNameMatch match) {
 			if (fStop)
 				return;
@@ -408,6 +409,7 @@ public class TypeInfoViewer {
 			fStopped= true;
 			cancel();
 		}
+		@Override
 		public IStatus runInUIThread(IProgressMonitor monitor) {
 			if (stopped())
 				return new Status(IStatus.CANCEL, JavaPlugin.getPluginId(), IStatus.CANCEL, "", null); //$NON-NLS-1$
@@ -432,25 +434,30 @@ public class TypeInfoViewer {
 			super(monitor);
 			fViewer= viewer;
 		}
+		@Override
 		public void setTaskName(String name) {
 			super.setTaskName(name);
 			fName= name;
 		}
+		@Override
 		public void beginTask(String name, int totalWork) {
 			super.beginTask(name, totalWork);
 			if (fName == null)
 				fName= name;
 			fTotalWork= totalWork;
 		}
+		@Override
 		public void worked(int work) {
 			super.worked(work);
 			internalWorked(work);
 		}
+		@Override
 		public void done() {
 			fDone= true;
 			fViewer.setProgressMessage(""); //$NON-NLS-1$
 			super.done();
 		}
+		@Override
 		public void internalWorked(double work) {
 			fWorked= fWorked + work;
 			fViewer.setProgressMessage(getMessage());
@@ -475,6 +482,7 @@ public class TypeInfoViewer {
 			fViewer= viewer;
 			setSystem(true);
 		}
+		@Override
 		protected final IStatus run(IProgressMonitor parent) {
 			ProgressMonitor monitor= new ProgressMonitor(parent, fViewer);
 			try {
@@ -508,6 +516,7 @@ public class TypeInfoViewer {
 		public void stop() {
 			cancel();
 		}
+		@Override
 		protected IStatus doRun(ProgressMonitor monitor) {
 			try {
 				if (VIRTUAL) {
@@ -651,10 +660,12 @@ public class TypeInfoViewer {
 			fElementKind= elementKind;
 			fReqestor= new SearchRequestor(filter);
 		}
+		@Override
 		public void stop() {
 			fReqestor.cancel();
 			super.stop();
 		}
+		@Override
 		protected TypeNameMatch[] getSearchResult(Set matchIdsInHistory, ProgressMonitor monitor) throws CoreException {
 			long start= System.currentTimeMillis();
 			fReqestor.setHistory(matchIdsInHistory);
@@ -689,6 +700,7 @@ public class TypeInfoViewer {
 			super(ticket, viewer, filter, history, numberOfVisibleItems, mode);
 			fLastResult= lastResult;
 		}
+		@Override
 		protected TypeNameMatch[] getSearchResult(Set filteredHistory, ProgressMonitor monitor) throws CoreException {
 			List result= new ArrayList(2048);
 			for (int i= 0; i < fLastResult.length; i++) {
@@ -714,6 +726,7 @@ public class TypeInfoViewer {
 		public void stop() {
 			cancel();
 		}
+		@Override
 		protected IStatus doRun(ProgressMonitor monitor) {
 			try {
 				monitor.setTaskName(JavaUIMessages.TypeInfoViewer_syncJob_taskName);
@@ -871,6 +884,7 @@ public class TypeInfoViewer {
 		fTable.setHeaderVisible(false);
 		addPopupMenu();
 		fTable.addControlListener(new ControlAdapter() {
+			@Override
 			public void controlResized(ControlEvent event) {
 				int itemHeight= fTable.getItemHeight();
 				Rectangle clientArea= fTable.getClientArea();
@@ -878,6 +892,7 @@ public class TypeInfoViewer {
 			}
 		});
 		fTable.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == SWT.DEL) {
 					deleteHistoryEntry();
@@ -897,6 +912,7 @@ public class TypeInfoViewer {
 			}
 		});
 		fTable.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (fLastSelection != null) {
 					for (int i= 0; i < fLastSelection.length; i++) {
@@ -1142,12 +1158,14 @@ public class TypeInfoViewer {
 		final MenuItem remove= new MenuItem(menu, SWT.NONE);
 		remove.setText(JavaUIMessages.TypeInfoViewer_remove_from_history);
 		menu.addMenuListener(new MenuAdapter() {
+			@Override
 			public void menuShown(MenuEvent e) {
 				TableItem[] selection= fTable.getSelection();
 				remove.setEnabled(canEnable(selection));
 			}
 		});
 		remove.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				deleteHistoryEntry();
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 	private int fSelectionStart;
 	private int fSelectionLength;
 
-	private Map/*<ASTNode, SourceRange>*/ fRanges;
+	private Map<ASTNode, SourceRange> fRanges;
 	private String fDocumentPortionToScan;
 
 	public SelectionAwareSourceRangeComputer(ASTNode[] selectedNodes, IBuffer buffer, int selectionStart, int selectionLength) {
@@ -41,23 +41,24 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 		fDocumentPortionToScan= buffer.getText(fSelectionStart, fSelectionLength);
 	}
 
+	@Override
 	public SourceRange computeSourceRange(ASTNode node) {
 		try {
 			if (fRanges == null)
 				initializeRanges();
-			SourceRange result= (SourceRange)fRanges.get(node);
+			SourceRange result= fRanges.get(node);
 			if (result != null)
 				return result;
 			return super.computeSourceRange(node);
 		} catch (CoreException e) {
 			// fall back to standard implementation
-			fRanges= new HashMap();
+			fRanges= new HashMap<ASTNode, SourceRange>();
 		}
 		return super.computeSourceRange(node);
 	}
 
 	private void initializeRanges() throws CoreException {
-		fRanges= new HashMap();
+		fRanges= new HashMap<ASTNode, SourceRange>();
 		if (fSelectedNodes.length == 0)
 			return;
 
@@ -75,7 +76,7 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 
 		ASTNode currentNode= fSelectedNodes[0];
 		int newStart= Math.min(fSelectionStart + pos, currentNode.getStartPosition());
-		SourceRange range= (SourceRange)fRanges.get(currentNode);
+		SourceRange range= fRanges.get(currentNode);
 		fRanges.put(currentNode, new SourceRange(newStart, range.getLength() + range.getStartPosition() - newStart));
 
 		currentNode= fSelectedNodes[last];
@@ -99,7 +100,7 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 		}
 
 		int newEnd= Math.max(fSelectionStart + pos, currentNode.getStartPosition() + currentNode.getLength());
-		range= (SourceRange)fRanges.get(currentNode);
+		range= fRanges.get(currentNode);
 		fRanges.put(currentNode, new SourceRange(range.getStartPosition(), newEnd - range.getStartPosition()));
 	}
 }

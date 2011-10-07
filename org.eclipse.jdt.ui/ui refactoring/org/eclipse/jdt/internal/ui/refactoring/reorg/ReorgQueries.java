@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -409,6 +409,7 @@ public class ReorgQueries implements IReorgQueries {
 			fYesToAllNoToAll= includeYesToAllNoToAll;
 		}
 
+		@Override
 		protected Label createMessageArea(Composite composite) {
 			Label label= new Label(composite, SWT.WRAP);
 			label.setText(getMessage());
@@ -419,12 +420,14 @@ public class ReorgQueries implements IReorgQueries {
 			return label;
 		}
 
+		@Override
 		protected void buttonPressed(int buttonId) {
 			super.buttonPressed(buttonId);
 			setReturnCode(buttonId);
 			close();
 		}
 
+		@Override
 		protected void createButtonsForButtonBar(Composite parent) {
 			createButton(parent, IDialogConstants.YES_ID, IDialogConstants.YES_LABEL, true);
 			if (fYesToAllNoToAll)

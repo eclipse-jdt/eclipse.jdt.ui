@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -230,7 +230,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		private static void checkRequiredMethodsForNonLeaf(Class clazz, boolean isEndVisit) {
 			Assert.isTrue(ASTNode.class.isAssignableFrom(clazz));
 			try {
-				TestHierarchicalASTVisitor.class.getDeclaredMethod(getMethodNameFor(clazz, isEndVisit), new Class[] { clazz });
+				TestHierarchicalASTVisitor.class.getDeclaredMethod(getVisitMethodName(isEndVisit), new Class[] { clazz });
 			} catch (NoSuchMethodException e) {
 				fail("Test must be updated since TestHierarchicalASTVisitor (declared within test class), is missing a method corresponding to non-leaf node class '" + getSimpleName(clazz) + "'");
 			}
@@ -259,7 +259,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			 * to reflectively instantiate an appropriately typed node.
 			 */
 			try {
-				Method method= TestHierarchicalASTVisitor.class.getMethod(isLeaf ? getMethodNameFor(clazz, isEndVisit) : "superVisit", new Class[] { clazz });
+				Method method= TestHierarchicalASTVisitor.class.getMethod(isLeaf ? getVisitMethodName(isEndVisit) : "superVisit", new Class[] { clazz });
 				method.invoke(this, new Object[] { null });
 			} catch (NoSuchMethodException e) {
 				/* This should have already been discovered by
@@ -280,9 +280,9 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			 * a call to visit(YY), where YY is the name of the superclass of
 			 * clazz. (Also, verify that no other visit(ZZ) method was called).
 			 */
-			checkSuperclassMethodCalled(clazz, isLeaf, isEndVisit);
+			checkSuperclassMethodCalled(clazz, isEndVisit);
 		}
-		private void checkSuperclassMethodCalled(Class clazz, boolean isLeaf, boolean isEndVisit) {
+		private void checkSuperclassMethodCalled(Class clazz, boolean isEndVisit) {
 			Assert.isNotNull(clazz.getSuperclass());
 			/*
 			 * This class' implementations of the visit(YY) methods (for non-
@@ -292,10 +292,10 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			 * method corresponding to XX's superclass, YY. We check here that
 			 * fNodeClassForCalledMethod was set to the superclass of clazz.
 			 */
-			assertTrue(getSuperMethodNotCalledMessageFor(clazz, isLeaf, isEndVisit), clazz.getSuperclass().equals(fNodeClassForCalledMethod));
+			assertTrue(getSuperMethodNotCalledMessageFor(clazz, isEndVisit), clazz.getSuperclass().equals(fNodeClassForCalledMethod));
 		}
-		private String getSuperMethodNotCalledMessageFor(Class clazz, boolean isLeaf, boolean isEndVisit) {
-			return getMethodSignatureFor(clazz, isLeaf, isEndVisit) + " in HierarchicalASTVisitor should call " + getMethodSignatureFor(clazz.getSuperclass(), false, isEndVisit) + ", the visitor method for its superclass.";
+		private String getSuperMethodNotCalledMessageFor(Class clazz, boolean isEndVisit) {
+			return getMethodSignatureFor(clazz, isEndVisit) + " in HierarchicalASTVisitor should call " + getMethodSignatureFor(clazz.getSuperclass(), isEndVisit) + ", the visitor method for its superclass.";
 		}
 
 		private void registerCall(Class nodeClassForMethod) {
@@ -347,10 +347,6 @@ public class HierarchicalASTVisitorTest extends TestCase {
 
 	public HierarchicalASTVisitorTest(String name) {
 		super(name);
-	}
-
-	public static Test allTests() {
-		return new TestSuite(THIS_CLASS);
 	}
 
 	public static Test suite() {
@@ -409,14 +405,14 @@ public class HierarchicalASTVisitorTest extends TestCase {
 	private void checkHierarchicalASTVisitorMethodExistsFor(Class nodeClass, boolean isEndVisit) {
 		Assert.isTrue(ASTNode.class.isAssignableFrom(nodeClass));
 		try {
-			HierarchicalASTVisitor.class.getDeclaredMethod(getMethodNameFor(nodeClass, isEndVisit), new Class[] { nodeClass });
+			HierarchicalASTVisitor.class.getDeclaredMethod(getVisitMethodName(isEndVisit), new Class[] { nodeClass });
 		} catch (NoSuchMethodException e) {
-			String signature= getMethodNameFor(nodeClass, isEndVisit) + "(" + getSimpleName(nodeClass) + ")";
+			String signature= getVisitMethodName(isEndVisit) + "(" + getSimpleName(nodeClass) + ")";
 			assertTrue("HierarchicalASTVisitor must be updated to reflect a change in the ASTNode hierarchy.  No method " + signature + " was found in HierarchicalASTVisitor.", false);
 		}
 	}
 
-	private static String getMethodNameFor(Class clazz, boolean isEndVisit) {
+	private static String getVisitMethodName(boolean isEndVisit) {
 		return isEndVisit ? "endVisit" : "visit";
 	}
 
@@ -429,8 +425,8 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		return qualified.substring(qualified.lastIndexOf('.') + 1);
 	}
 
-	private static String getMethodSignatureFor(Class clazz, boolean isLeaf, boolean isEndVisit) {
-		return getMethodNameFor(clazz, isEndVisit) + "(" + getSimpleName(clazz) + ")";
+	private static String getMethodSignatureFor(Class clazz, boolean isEndVisit) {
+		return getVisitMethodName(isEndVisit) + "(" + getSimpleName(clazz) + ")";
 	}
 
 	/**

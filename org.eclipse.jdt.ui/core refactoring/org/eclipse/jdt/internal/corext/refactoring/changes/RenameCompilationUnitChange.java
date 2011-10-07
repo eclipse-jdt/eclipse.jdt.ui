@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ public final class RenameCompilationUnitChange extends AbstractJavaElementRename
 		setValidationMethod(VALIDATE_NOT_READ_ONLY | SAVE_IF_DIRTY);
 	}
 
+	@Override
 	protected IPath createNewPath() {
 		final IPath path= getResourcePath();
 		if (path.getFileExtension() != null)
@@ -49,16 +50,19 @@ public final class RenameCompilationUnitChange extends AbstractJavaElementRename
 			return path.removeLastSegments(1).append(getNewName());
 	}
 
+	@Override
 	protected Change createUndoChange(long stampToRestore) throws JavaModelException {
 		return new RenameCompilationUnitChange(createNewPath(), getNewName(), getOldName(), stampToRestore);
 	}
 
+	@Override
 	protected void doRename(IProgressMonitor pm) throws CoreException {
 		ICompilationUnit cu= (ICompilationUnit) getModifiedElement();
 		if (cu != null)
 			cu.rename(getNewName(), false, pm);
 	}
 
+	@Override
 	public String getName() {
 		String[] keys= new String[] { BasicElementLabels.getJavaElementName(getOldName()), BasicElementLabels.getJavaElementName(getNewName())};
 		return Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_name, keys);

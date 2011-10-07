@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
 	 */
+	@Override
 	public String getText(Object element) {
 		return getLabelWithCounts(element, internalGetText(element));
 	}
@@ -74,6 +75,7 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 		return res;
 	}
 
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof JavaElementLine) {
 			int flags= ((JavaElementLine) element).getFlags();

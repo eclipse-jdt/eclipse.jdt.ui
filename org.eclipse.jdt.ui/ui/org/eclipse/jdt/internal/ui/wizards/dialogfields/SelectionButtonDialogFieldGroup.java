@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,6 +83,7 @@ public class SelectionButtonDialogFieldGroup extends DialogField {
 	/*
 	 * @see DialogField#doFillIntoGrid
 	 */
+	@Override
 	public Control[] doFillIntoGrid(Composite parent, int nColumns) {
 		assertEnoughColumns(nColumns);
 
@@ -109,6 +110,7 @@ public class SelectionButtonDialogFieldGroup extends DialogField {
 	/*
 	 * @see DialogField#doFillIntoGrid
 	 */
+	@Override
 	public int getNumberOfControls() {
 		return (fGroupBorderStyle == SWT.NONE) ? 2 : 1;
 	}
@@ -230,6 +232,7 @@ public class SelectionButtonDialogFieldGroup extends DialogField {
 
 	// ------ enable / disable management
 
+	@Override
 	protected void updateEnableState() {
 		super.updateEnableState();
 		if (fButtons != null) {
@@ -262,6 +265,7 @@ public class SelectionButtonDialogFieldGroup extends DialogField {
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#refresh()
 	 */
+	@Override
 	public void refresh() {
 		super.refresh();
 		for (int i= 0; i < fButtons.length; i++) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,7 +76,7 @@ public class TypeMismatchSubProcessor {
 	private TypeMismatchSubProcessor() {
 	}
 
-	public static void addTypeMismatchProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addTypeMismatchProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		String[] args= problem.getProblemArguments();
 		if (args.length != 2) {
 			return;
@@ -230,7 +230,7 @@ public class TypeMismatchSubProcessor {
 		}
 	}
 
-	public static void addChangeSenderTypeProposals(IInvocationContext context, Expression nodeToCast, ITypeBinding castTypeBinding, boolean isAssignedNode, int relevance, Collection proposals) throws JavaModelException {
+	public static void addChangeSenderTypeProposals(IInvocationContext context, Expression nodeToCast, ITypeBinding castTypeBinding, boolean isAssignedNode, int relevance, Collection<ICommandAccess> proposals) throws JavaModelException {
 		IBinding callerBinding= Bindings.resolveExpressionBinding(nodeToCast, false);
 
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -302,7 +302,7 @@ public class TypeMismatchSubProcessor {
 		return new CastCorrectionProposal(label, cu, nodeToCast, castTypeBinding, relevance);
 	}
 
-	public static void addIncompatibleReturnTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws JavaModelException {
+	public static void addIncompatibleReturnTypeProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws JavaModelException {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (selectedNode == null) {
@@ -317,37 +317,41 @@ public class TypeMismatchSubProcessor {
 			return;
 		}
 
+		ITypeBinding returnType= methodDeclBinding.getReturnType();
 		IMethodBinding overridden= Bindings.findOverriddenMethod(methodDeclBinding, false);
-		if (overridden == null || overridden.getReturnType() == methodDeclBinding.getReturnType()) {
+		if (overridden == null || overridden.getReturnType() == returnType) {
 			return;
 		}
 
 
 		ICompilationUnit cu= context.getCompilationUnit();
 		IMethodBinding methodDecl= methodDeclBinding.getMethodDeclaration();
-		proposals.add(new TypeChangeCorrectionProposal(cu, methodDecl, astRoot, overridden.getReturnType(), false, 8));
+		ITypeBinding overriddenReturnType= overridden.getReturnType();
+		if (! JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {
+			overriddenReturnType= overriddenReturnType.getErasure();
+		}
+		proposals.add(new TypeChangeCorrectionProposal(cu, methodDecl, astRoot, overriddenReturnType, false, 8));
 
 		ICompilationUnit targetCu= cu;
 
 		IMethodBinding overriddenDecl= overridden.getMethodDeclaration();
 		ITypeBinding overridenDeclType= overriddenDecl.getDeclaringClass();
 
-		ITypeBinding returnType= methodDeclBinding.getReturnType();
 		if (overridenDeclType.isFromSource()) {
 			targetCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, overridenDeclType);
-		}
-		if (targetCu != null && ASTResolving.isUseableTypeInContext(returnType, overriddenDecl, false)) {
-			TypeChangeCorrectionProposal proposal= new TypeChangeCorrectionProposal(targetCu, overriddenDecl, astRoot, returnType, false, 7);
-			if (overridenDeclType.isInterface()) {
-				proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofimplemented_description, BasicElementLabels.getJavaElementName(overriddenDecl.getName())));
-			} else {
-				proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofoverridden_description, BasicElementLabels.getJavaElementName(overriddenDecl.getName())));
+			if (targetCu != null && ASTResolving.isUseableTypeInContext(returnType, overriddenDecl, false)) {
+				TypeChangeCorrectionProposal proposal= new TypeChangeCorrectionProposal(targetCu, overriddenDecl, astRoot, returnType, false, 7);
+				if (overridenDeclType.isInterface()) {
+					proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofimplemented_description, BasicElementLabels.getJavaElementName(overriddenDecl.getName())));
+				} else {
+					proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofoverridden_description, BasicElementLabels.getJavaElementName(overriddenDecl.getName())));
+				}
+				proposals.add(proposal);
 			}
-			proposals.add(proposal);
 		}
 	}
 
-	public static void addIncompatibleThrowsProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws JavaModelException {
+	public static void addIncompatibleThrowsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws JavaModelException {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (!(selectedNode instanceof MethodDeclaration)) {
@@ -369,7 +373,7 @@ public class TypeMismatchSubProcessor {
 		ITypeBinding[] methodExceptions= methodDeclBinding.getExceptionTypes();
 		ITypeBinding[] definedExceptions= overridden.getExceptionTypes();
 
-		ArrayList undeclaredExceptions= new ArrayList();
+		ArrayList<ITypeBinding> undeclaredExceptions= new ArrayList<ITypeBinding>();
 		{
 			ChangeDescription[] changes= new ChangeDescription[methodExceptions.length];
 
@@ -393,7 +397,7 @@ public class TypeMismatchSubProcessor {
 			ChangeDescription[] changes= new ChangeDescription[definedExceptions.length + undeclaredExceptions.size()];
 
 			for (int i= 0; i < undeclaredExceptions.size(); i++) {
-				changes[i + definedExceptions.length]= new InsertDescription((ITypeBinding) undeclaredExceptions.get(i), ""); //$NON-NLS-1$
+				changes[i + definedExceptions.length]= new InsertDescription(undeclaredExceptions.get(i), ""); //$NON-NLS-1$
 			}
 			IMethodBinding overriddenDecl= overridden.getMethodDeclaration();
 			String[] args= {  BasicElementLabels.getJavaElementName(declaringType.getName()), BasicElementLabels.getJavaElementName(overridden.getName()) };
@@ -412,7 +416,7 @@ public class TypeMismatchSubProcessor {
 		return false;
 	}
 
-	public static void addTypeMismatchInForEachProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addTypeMismatchInForEachProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (selectedNode == null || selectedNode.getLocationInParent() != EnhancedForStatement.EXPRESSION_PROPERTY) {

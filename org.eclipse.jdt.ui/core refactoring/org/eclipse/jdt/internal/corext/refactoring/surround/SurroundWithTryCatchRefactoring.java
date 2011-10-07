@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -45,13 +46,14 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -67,8 +69,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+
 /**
- * Surround a set of statements with a try/catch block.
+ * Surround a set of statements with a try/catch block or a try/multi-catch block.
  *
  * Special case:
  *
@@ -97,18 +101,29 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 
 	private LinkedProposalModel fLinkedProposalModel;
 
-	private SurroundWithTryCatchRefactoring(ICompilationUnit cu, Selection selection) {
+	private final boolean fIsMultiCatch;
+
+	private SurroundWithTryCatchRefactoring(ICompilationUnit cu, Selection selection, boolean isMultiCatch) {
 		fCUnit= cu;
 		fSelection= selection;
+		fIsMultiCatch= isMultiCatch;
 		fLeaveDirty= false;
 	}
 
 	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, ITextSelection selection) {
-		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(selection.getOffset(), selection.getLength()));
+		return create(cu, selection, false);
 	}
 
 	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, int offset, int length) {
-		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(offset, length));
+		return create(cu, offset, length, false);
+	}
+
+	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, ITextSelection selection, boolean isMultiCatch) {
+		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(selection.getOffset(), selection.getLength()), isMultiCatch);
+	}
+
+	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, int offset, int length, boolean isMultiCatch) {
+		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(offset, length), isMultiCatch);
 	}
 
 	public LinkedProposalModel getLinkedProposalModel() {
@@ -129,6 +144,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	/* non Java-doc
 	 * @see IRefactoring#getName()
 	 */
+	@Override
 	public String getName() {
 		return RefactoringCoreMessages.SurroundWithTryCatchRefactoring_name;
 	}
@@ -140,6 +156,10 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		fAnalyzer= new SurroundWithTryCatchAnalyzer(fCUnit, fSelection);
 		fRootNode.accept(fAnalyzer);
 		result.merge(fAnalyzer.getStatus());
+		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
+		if (fIsMultiCatch && (exceptions == null || exceptions.length <= 1)) {
+			result.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.SurroundWithTryCatchRefactoring_notMultipleexceptions));
+		}
 		return result;
 	}
 
@@ -147,14 +167,16 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		CompilationUnit rootNode= new RefactoringASTParser(AST.JLS3).parse(fCUnit, true, pm);
+		CompilationUnit rootNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(fCUnit, true, pm);
 		return checkActivationBasics(rootNode);
 	}
 
 	/*
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		return Checks.validateModifiesFiles(
 			ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit}),
@@ -164,6 +186,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	/* non Java-doc
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		final String NN= ""; //$NON-NLS-1$
 		if (pm == null) pm= new NullProgressMonitor();
@@ -208,30 +231,57 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	}
 
 	private void createTryCatchStatement(org.eclipse.jdt.core.IBuffer buffer, String lineDelimiter) throws CoreException {
-		List result= new ArrayList(1);
+		List<Statement> result= new ArrayList<Statement>(1);
 		TryStatement tryStatement= getAST().newTryStatement();
 		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fAnalyzer.getEnclosingBodyDeclaration(), fImportRewrite);
-		for (int i= 0; i < exceptions.length; i++) {
-			ITypeBinding exception= exceptions[i];
-			String type= fImportRewrite.addImport(exception, context);
+
+		if (!fIsMultiCatch) {
+			for (int i= 0; i < exceptions.length; i++) {
+				ITypeBinding exception= exceptions[i];
+				String type= fImportRewrite.addImport(exception, context);
+				CatchClause catchClause= getAST().newCatchClause();
+				tryStatement.catchClauses().add(catchClause);
+				SingleVariableDeclaration decl= getAST().newSingleVariableDeclaration();
+				String varName= StubUtility.getExceptionVariableName(fCUnit.getJavaProject());
+
+				String name= fScope.createName(varName, false);
+				decl.setName(getAST().newSimpleName(name));
+				decl.setType(ASTNodeFactory.newType(getAST(), type));
+				catchClause.setException(decl);
+				Statement st= getCatchBody(type, name, lineDelimiter);
+				if (st != null) {
+					catchClause.getBody().statements().add(st);
+				}
+				fLinkedProposalModel.getPositionGroup(GROUP_EXC_TYPE + i, true).addPosition(fRewriter.track(decl.getType()), i == 0);
+				fLinkedProposalModel.getPositionGroup(GROUP_EXC_NAME + i, true).addPosition(fRewriter.track(decl.getName()), false);
+			}
+		} else {
 			CatchClause catchClause= getAST().newCatchClause();
-			tryStatement.catchClauses().add(catchClause);
 			SingleVariableDeclaration decl= getAST().newSingleVariableDeclaration();
 			String varName= StubUtility.getExceptionVariableName(fCUnit.getJavaProject());
-
 			String name= fScope.createName(varName, false);
 			decl.setName(getAST().newSimpleName(name));
-			decl.setType(ASTNodeFactory.newType(getAST(), type));
+
+			UnionType unionType= getAST().newUnionType();
+			List<Type> types= unionType.types();
+			for (int i= 0; i < exceptions.length; i++) {
+				ITypeBinding exception= exceptions[i];
+				Type type= fImportRewrite.addImport(exception, getAST(), context);
+				types.add(type);
+				fLinkedProposalModel.getPositionGroup(GROUP_EXC_TYPE + i, true).addPosition(fRewriter.track(type), i == 0);
+			}
+
+			decl.setType(unionType);
 			catchClause.setException(decl);
-			Statement st= getCatchBody(type, name, lineDelimiter);
+			fLinkedProposalModel.getPositionGroup(GROUP_EXC_NAME + 0, true).addPosition(fRewriter.track(decl.getName()), false);
+			Statement st= getCatchBody("Exception", name, lineDelimiter); //$NON-NLS-1$
 			if (st != null) {
 				catchClause.getBody().statements().add(st);
 			}
-			fLinkedProposalModel.getPositionGroup(GROUP_EXC_TYPE + i, true).addPosition(fRewriter.track(decl.getType()), i == 0);
-			fLinkedProposalModel.getPositionGroup(GROUP_EXC_NAME + i, true).addPosition(fRewriter.track(decl.getName()), false);
+			tryStatement.catchClauses().add(catchClause);
 		}
-		List variableDeclarations= getSpecialVariableDeclarationStatements();
+		List<ASTNode> variableDeclarations= getSpecialVariableDeclarationStatements();
 		ListRewrite statements= fRewriter.getListRewrite(tryStatement.getBody(), Block.STATEMENTS_PROPERTY);
 		boolean selectedNodeRemoved= false;
 		ASTNode expressionStatement= null;
@@ -242,16 +292,16 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				VariableDeclarationStatement statement= (VariableDeclarationStatement)node;
 				// Create a copy and remove the initializer
 				VariableDeclarationStatement copy= (VariableDeclarationStatement)ASTNode.copySubtree(ast, statement);
-				List modifiers= copy.modifiers();
-				for (Iterator iter= modifiers.iterator(); iter.hasNext();) {
-					IExtendedModifier modifier= (IExtendedModifier) iter.next();
+				List<IExtendedModifier> modifiers= copy.modifiers();
+				for (Iterator<IExtendedModifier> iter= modifiers.iterator(); iter.hasNext();) {
+					IExtendedModifier modifier= iter.next();
 					if (modifier.isModifier() && Modifier.isFinal(((Modifier)modifier).getKeyword().toFlagValue())) {
 						iter.remove();
 					}
 				}
-				List fragments= copy.fragments();
-				for (Iterator iter= fragments.iterator(); iter.hasNext();) {
-					VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
+				List<VariableDeclarationFragment> fragments= copy.fragments();
+				for (Iterator<VariableDeclarationFragment> iter= fragments.iterator(); iter.hasNext();) {
+					VariableDeclarationFragment fragment= iter.next();
 					fragment.setInitializer(null);
 				}
 				CompilationUnit root= (CompilationUnit)statement.getRoot();
@@ -268,9 +318,9 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				// convert the fragments into expression statements
 				fragments= statement.fragments();
 				if (!fragments.isEmpty()) {
-					List newExpressionStatements= new ArrayList();
-					for (Iterator iter= fragments.iterator(); iter.hasNext();) {
-						VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
+					List<ExpressionStatement> newExpressionStatements= new ArrayList<ExpressionStatement>();
+					for (Iterator<VariableDeclarationFragment> iter= fragments.iterator(); iter.hasNext();) {
+						VariableDeclarationFragment fragment= iter.next();
 						Expression initializer= fragment.getInitializer();
 						if (initializer != null) {
 							Assignment assignment= ast.newAssignment();
@@ -281,11 +331,11 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 					}
 					if (!newExpressionStatements.isEmpty()) {
 						if (fSelectedNodes.length == 1) {
-							expressionStatement= fRewriter.createGroupNode((ASTNode[])newExpressionStatements.toArray(new ASTNode[newExpressionStatements.size()]));
+							expressionStatement= fRewriter.createGroupNode(newExpressionStatements.toArray(new ASTNode[newExpressionStatements.size()]));
 						} else {
 							fRewriter.replace(
 								statement,
-								fRewriter.createGroupNode((ASTNode[])newExpressionStatements.toArray(new ASTNode[newExpressionStatements.size()])),
+								fRewriter.createGroupNode(newExpressionStatements.toArray(new ASTNode[newExpressionStatements.size()])),
 								null);
 						}
 					} else {
@@ -301,9 +351,9 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		result.add(tryStatement);
 		ASTNode replacementNode;
 		if (result.size() == 1) {
-			replacementNode= (ASTNode)result.get(0);
+			replacementNode= result.get(0);
 		} else {
-			replacementNode= fRewriter.createGroupNode((ASTNode[])result.toArray(new ASTNode[result.size()]));
+			replacementNode= fRewriter.createGroupNode(result.toArray(new ASTNode[result.size()]));
 		}
 		if (fSelectedNodes.length == 1) {
 			if (expressionStatement != null) {
@@ -324,8 +374,8 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		}
 	}
 
-	private List getSpecialVariableDeclarationStatements() {
-		List result= new ArrayList(3);
+	private List<ASTNode> getSpecialVariableDeclarationStatements() {
+		List<ASTNode> result= new ArrayList<ASTNode>(3);
 		VariableDeclaration[] locals= fAnalyzer.getAffectedLocals();
 		for (int i= 0; i < locals.length; i++) {
 			ASTNode parent= locals[i].getParent();

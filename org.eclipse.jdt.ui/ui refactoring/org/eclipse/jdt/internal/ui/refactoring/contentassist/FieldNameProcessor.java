@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,7 +108,7 @@ public class FieldNameProcessor implements IContentAssistProcessor, ISubjectCont
 			return null;
 		String input= contentAssistSubject.getDocument().get();
 
-		ArrayList proposals= new ArrayList();
+		ArrayList<JavaCompletionProposal> proposals= new ArrayList<JavaCompletionProposal>();
 		String prefix= input.substring(0, documentOffset);
 		ImageDescriptor imageDescriptor= JavaElementImageProvider.getFieldImageDescriptor(false, fRefactoring.getVisibility());
 		Image image= fImageRegistry.get(imageDescriptor);
@@ -120,7 +120,7 @@ public class FieldNameProcessor implements IContentAssistProcessor, ISubjectCont
 			proposals.add(proposal);
 		}
 		fErrorMessage= proposals.size() > 0 ? null : JavaUIMessages.JavaEditor_codeassist_noCompletions;
-		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+		return proposals.toArray(new ICompletionProposal[proposals.size()]);
 	}
 
 }

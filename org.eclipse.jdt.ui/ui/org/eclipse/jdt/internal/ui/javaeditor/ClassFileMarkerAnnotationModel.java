@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,6 +53,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 	/**
 	 * @see AbstractMarkerAnnotationModel#isAcceptable
 	 */
+	@Override
 	protected boolean isAcceptable(IMarker marker) {
 		try {
 			return JavaCore.isReferencedBy(fClassFile, marker);
@@ -74,6 +75,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 	/**
 	 * @see AbstractMarkerAnnotationModel#createMarkerAnnotation(IMarker)
 	 */
+	@Override
 	protected MarkerAnnotation createMarkerAnnotation(IMarker marker) {
 		return new JavaMarkerAnnotation(marker);
 	}
@@ -81,6 +83,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 	/**
 	 * @see AbstractMarkerAnnotationModel#listenToMarkerChanges(boolean)
 	 */
+	@Override
 	protected void listenToMarkerChanges(boolean listen) {
 		if (listen)
 			fWorkspace.addResourceChangeListener(this);
@@ -91,6 +94,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 	/**
 	 * @see AbstractMarkerAnnotationModel#deleteMarkers(IMarker[])
 	 */
+	@Override
 	protected void deleteMarkers(IMarker[] markers) throws CoreException {
 		// empty as class files are read only
 	}
@@ -98,6 +102,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 	/**
 	 * @see AbstractMarkerAnnotationModel#retrieveMarkers()
 	 */
+	@Override
 	protected IMarker[] retrieveMarkers() throws CoreException {
 		if (fMarkerResource != null) {
 			IMarker[] workspaceMarkers= fWorkspace.getRoot().findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);

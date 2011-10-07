@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDelegate2 {
 
 	private static Action NO_ACTION_AVAILABLE= new Action(ActionMessages.OccurrencesSearchMenuAction_no_entries_available) {
+		@Override
 		public boolean isEnabled() {
 			return false;
 		}
@@ -88,6 +89,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 
 	protected void initMenu(Menu menu) {
 		menu.addMenuListener(new MenuAdapter() {
+			@Override
 			public void menuShown(MenuEvent e) {
 				Menu m= (Menu) e.widget;
 				MenuItem[] items= m.getItems();
@@ -175,7 +177,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 			selection= activePart.getSite().getSelectionProvider().getSelection();
 		}
 
-		final ArrayList activeActions= new ArrayList(fRetargetActions.length);
+		final ArrayList<IAction> activeActions= new ArrayList<IAction>(fRetargetActions.length);
 		for (int i= 0; i < fRetargetActions.length; i++) {
 			RetargetAction action= fRetargetActions[i];
 			IAction actionHandler= action.getActionHandler();
@@ -187,9 +189,10 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 			}
 		}
 		if (activeActions.size() == 1) {
-			((IAction) activeActions.get(0)).run();
+			activeActions.get(0).run();
 		} else {
 			new JDTQuickMenuCreator(editor) {
+				@Override
 				protected void fillMenu(IMenuManager menu) {
 					fillQuickMenu(menu, activeActions);
 				}
@@ -236,12 +239,12 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 	public void selectionChanged(IAction action, ISelection selection) {
 	}
 
-	private void fillQuickMenu(IMenuManager manager, List activeActions) {
+	private void fillQuickMenu(IMenuManager manager, List<IAction> activeActions) {
 		if (activeActions.isEmpty()) {
 			manager.add(NO_ACTION_AVAILABLE);
 		} else {
 			for (int i= 0; i < activeActions.size(); i++) {
-				manager.add((IAction) activeActions.get(i));
+				manager.add(activeActions.get(i));
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,11 +52,13 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 		setValidationMethod(SAVE_IF_DIRTY | VALIDATE_NOT_READ_ONLY);
 	}
 
+	@Override
 	public String getName() {
 		return Messages.format(RefactoringCoreMessages.MoveCompilationUnitChange_name,
 		new String[]{BasicElementLabels.getFileName(getCu()), getPackageName(getDestinationPackage())});
 	}
 
+	@Override
 	Change doPerformReorg(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		String name;
 		String newName= getNewName();
@@ -108,7 +110,7 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 		String packageName= destination.getElementName();
 		String[] split= packageName.split("\\."); //$NON-NLS-1$
 
-		ArrayList created= new ArrayList();
+		ArrayList<IPackageFragment> created= new ArrayList<IPackageFragment>();
 
 		StringBuffer name= new StringBuffer();
 		name.append(split[0]);
@@ -120,7 +122,7 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 
 			if (fragment.equals(destination)) {
 				root.createPackageFragment(name.toString(), true, pm);
-				return (IPackageFragment[]) created.toArray(new IPackageFragment[created.size()]);
+				return created.toArray(new IPackageFragment[created.size()]);
 			}
 
 			name.append("."); //$NON-NLS-1$

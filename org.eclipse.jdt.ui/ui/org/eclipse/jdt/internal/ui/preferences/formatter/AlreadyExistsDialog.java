@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,11 +64,13 @@ public class AlreadyExistsDialog extends StatusDialog {
 	}
 
 
+	@Override
 	public void create() {
 		super.create();
 		setTitle(FormatterMessages.AlreadyExistsDialog_dialog_title);
 	}
 
+	@Override
 	public Control createDialogArea(Composite parent) {
 
 		fComposite = (Composite) super.createDialogArea(parent);
@@ -176,6 +178,7 @@ public class AlreadyExistsDialog extends StatusDialog {
 	}
 
 
+	@Override
 	protected void okPressed() {
 		if (!getStatus().isOK())
 			return;

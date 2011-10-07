@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,6 +57,7 @@ public class CopyResourceChange extends ResourceChange {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ltk.core.refactoring.Change#getName()
 	 */
+	@Override
 	public String getName() {
 		return Messages.format(RefactoringCoreMessages.CopyResourceString_copy, new String[] { BasicElementLabels.getPathLabel(getResource().getFullPath(), false), BasicElementLabels.getResourceName(getDestination()) });
 	}
@@ -64,6 +65,7 @@ public class CopyResourceChange extends ResourceChange {
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
+	@Override
 	public final Change perform(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		try{
 			pm.beginTask(getName(), 2);
@@ -129,6 +131,7 @@ public class CopyResourceChange extends ResourceChange {
 		return name;
 	}
 
+	@Override
 	protected IResource getModifiedResource() {
 		return getResource();
 	}

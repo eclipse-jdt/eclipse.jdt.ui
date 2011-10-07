@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,18 +55,18 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 
 public class JavaStructureCreator extends StructureCreator {
 
-	private Map fDefaultCompilerOptions;
+	private Map<String, String> fDefaultCompilerOptions;
 
 	/**
 	 * A root node for the structure. It is similar to {@link StructureRootNode} but needed
@@ -88,6 +88,7 @@ public class JavaStructureCreator extends StructureCreator {
 		/* (non-Javadoc)
 		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#isEditable()
 		 */
+		@Override
 		public boolean isEditable() {
 			return fEditable;
 		}
@@ -95,6 +96,7 @@ public class JavaStructureCreator extends StructureCreator {
 		/* (non-Javadoc)
 		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#nodeChanged(org.eclipse.compare.structuremergeviewer.DocumentRangeNode)
 		 */
+		@Override
 		protected void nodeChanged(DocumentRangeNode node) {
 			save(this, fInput);
 		}
@@ -111,6 +113,7 @@ public class JavaStructureCreator extends StructureCreator {
 		/* (non-Javadoc)
 		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#getAdapter(java.lang.Class)
 		 */
+		@Override
 		public Object getAdapter(Class adapter) {
 			if (adapter == ISharedDocumentAdapter.class) {
 				return fAdapter;
@@ -122,6 +125,7 @@ public class JavaStructureCreator extends StructureCreator {
 		/* (non-Javadoc)
 		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#isReadOnly()
 		 */
+		@Override
 		public boolean isReadOnly() {
 			if (fInput instanceof IEditableContentExtension) {
 				IEditableContentExtension ext = (IEditableContentExtension) fInput;
@@ -133,6 +137,7 @@ public class JavaStructureCreator extends StructureCreator {
 		/* (non-Javadoc)
 		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#validateEdit(org.eclipse.swt.widgets.Shell)
 		 */
+		@Override
 		public IStatus validateEdit(Shell shell) {
 			if (fInput instanceof IEditableContentExtension) {
 				IEditableContentExtension ext = (IEditableContentExtension) fInput;
@@ -154,7 +159,7 @@ public class JavaStructureCreator extends StructureCreator {
 		JavaNode fLeft= null;
 		JavaNode fRight= null;
 
-		ArrayList fChildren= new ArrayList();
+		ArrayList<IDiffElement> fChildren= new ArrayList<IDiffElement>();
 
 		void add(IDiffElement diff) {
 			fChildren.add(diff);
@@ -200,7 +205,7 @@ public class JavaStructureCreator extends StructureCreator {
 	public JavaStructureCreator() {
 	}
 
-	void setDefaultCompilerOptions(Map compilerSettings) {
+	void setDefaultCompilerOptions(Map<String, String> compilerSettings) {
 		fDefaultCompilerOptions= compilerSettings;
 	}
 
@@ -216,6 +221,7 @@ public class JavaStructureCreator extends StructureCreator {
 	 * @return a tree of JavaNodes for the given input.
 	 * In case of error null is returned.
 	 */
+	@Override
 	public IStructureComparator getStructure(final Object input) {
 		String contents= null;
 		char[] buffer= null;
@@ -247,6 +253,7 @@ public class JavaStructureCreator extends StructureCreator {
 	/* (non-Javadoc)
 	 * @see org.eclipse.compare.structuremergeviewer.StructureCreator#createStructureComparator(java.lang.Object, org.eclipse.jface.text.IDocument, org.eclipse.compare.ISharedDocumentAdapter, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	protected IStructureComparator createStructureComparator(Object element,
 			IDocument document, ISharedDocumentAdapter sharedDocumentAdapter,
 			IProgressMonitor monitor) throws CoreException {
@@ -255,7 +262,7 @@ public class JavaStructureCreator extends StructureCreator {
 
 	private IStructureComparator createStructureComparator(final Object input, char[] buffer, IDocument doc, ISharedDocumentAdapter adapter, IProgressMonitor monitor) {
 		String contents;
-		Map compilerOptions= null;
+		Map<String, String> compilerOptions= null;
 
 		if (input instanceof IResourceProvider) {
 			IResource resource= ((IResourceProvider) input).getResource();
@@ -286,7 +293,7 @@ public class JavaStructureCreator extends StructureCreator {
 				contents.getChars(0, n, buffer, 0);
 			}
 
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			if (compilerOptions != null)
 				parser.setCompilerOptions(compilerOptions);
 			parser.setSource(buffer);
@@ -381,7 +388,7 @@ public class JavaStructureCreator extends StructureCreator {
 	 */
 	public void rewriteTree(Differencer differencer, IDiffContainer root) {
 
-		HashMap map= new HashMap(10);
+		HashMap<String, RewriteInfo> map= new HashMap<String, RewriteInfo>(10);
 
 		Object[] children= root.getChildren();
 		for (int i= 0; i < children.length; i++) {
@@ -397,7 +404,7 @@ public class JavaStructureCreator extends StructureCreator {
 
 				// find or create a RewriteInfo for all methods with the same name
 				String name= jn.extractMethodName();
-				RewriteInfo nameInfo= (RewriteInfo) map.get(name);
+				RewriteInfo nameInfo= map.get(name);
 				if (nameInfo == null) {
 					nameInfo= new RewriteInfo();
 					map.put(name, nameInfo);
@@ -409,7 +416,7 @@ public class JavaStructureCreator extends StructureCreator {
 				String argList= jn.extractArgumentList();
 				RewriteInfo argInfo= null;
 				if (argList != null && !argList.equals("()")) { //$NON-NLS-1$
-					argInfo= (RewriteInfo) map.get(argList);
+					argInfo= map.get(argList);
 					if (argInfo == null) {
 						argInfo= new RewriteInfo();
 						map.put(argList, argInfo);
@@ -440,10 +447,10 @@ public class JavaStructureCreator extends StructureCreator {
 
 		// now we have to rebuild the diff tree according to the combined
 		// changes
-		Iterator it= map.keySet().iterator();
+		Iterator<String> it= map.keySet().iterator();
 		while (it.hasNext()) {
-			String name= (String) it.next();
-			RewriteInfo i= (RewriteInfo) map.get(name);
+			String name= it.next();
+			RewriteInfo i= map.get(name);
 			if (i.matches()) { // we found a RewriteInfo that could be successfully combined
 
 				// we have to find the differences of the newly combined node
@@ -451,9 +458,9 @@ public class JavaStructureCreator extends StructureCreator {
 				DiffNode d= (DiffNode) differencer.findDifferences(true, null, root, i.fAncestor, i.fLeft, i.fRight);
 				if (d != null) {// there better should be a difference
 					d.setDontExpand(true);
-					Iterator it2= i.fChildren.iterator();
+					Iterator<IDiffElement> it2= i.fChildren.iterator();
 					while (it2.hasNext()) {
-						IDiffElement rd= (IDiffElement) it2.next();
+						IDiffElement rd= it2.next();
 						root.removeToRoot(rd);
 						d.add(rd);
 					}
@@ -476,6 +483,7 @@ public class JavaStructureCreator extends StructureCreator {
 	/* (non-Javadoc)
 	 * @see org.eclipse.compare.structuremergeviewer.StructureCreator#getDocumentPartitioner()
 	 */
+	@Override
 	protected IDocumentPartitioner getDocumentPartitioner() {
 		return JavaCompareUtilities.createJavaPartitioner();
 	}
@@ -483,6 +491,7 @@ public class JavaStructureCreator extends StructureCreator {
 	/* (non-Javadoc)
 	 * @see org.eclipse.compare.structuremergeviewer.StructureCreator#getDocumentPartitioning()
 	 */
+	@Override
 	protected String getDocumentPartitioning() {
 		return IJavaPartitions.JAVA_PARTITIONING;
 	}
@@ -490,12 +499,13 @@ public class JavaStructureCreator extends StructureCreator {
 	/* (non-Javadoc)
 	 * @see org.eclipse.compare.structuremergeviewer.StructureCreator#getPath(java.lang.Object, java.lang.Object)
 	 */
+	@Override
 	protected String[] getPath(Object element, Object input) {
 		if (element instanceof IJavaElement) {
 			IJavaElement je = (IJavaElement) element;
 			// build a path starting at the given Java element and walk
 			// up the parent chain until we reach a IWorkingCopy or ICompilationUnit
-			List args= new ArrayList();
+			List<String> args= new ArrayList<String>();
 			while (je != null) {
 				// each path component has a name that uses the same
 				// conventions as a JavaNode name
@@ -512,7 +522,7 @@ public class JavaStructureCreator extends StructureCreator {
 			int n= args.size();
 			String[] path= new String[n];
 			for (int i= 0; i < n; i++)
-				path[i]= (String) args.get(n-1-i);
+				path[i]= args.get(n-1-i);
 
 			return path;
 		}

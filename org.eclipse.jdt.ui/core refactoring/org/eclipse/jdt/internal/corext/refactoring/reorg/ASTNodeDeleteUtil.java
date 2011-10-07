@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,10 +74,11 @@ public class ASTNodeDeleteUtil {
 		return ASTNodeSearchUtil.getDeclarationNodes(element, cuNode);
 	}
 
-	private static Set getRemovedNodes(final List removed, final CompilationUnitRewrite rewrite) {
-		final Set result= new HashSet();
+	private static Set<ASTNode> getRemovedNodes(final List<ASTNode> removed, final CompilationUnitRewrite rewrite) {
+		final Set<ASTNode> result= new HashSet<ASTNode>();
 		rewrite.getRoot().accept(new GenericVisitor(true) {
 
+			@Override
 			protected boolean visitNode(ASTNode node) {
 				if (removed.contains(node))
 					result.add(node);
@@ -88,14 +89,14 @@ public class ASTNodeDeleteUtil {
 	}
 
 	public static void markAsDeleted(IJavaElement[] javaElements, CompilationUnitRewrite rewrite, TextEditGroup group) throws JavaModelException {
-		final List removed= new ArrayList();
+		final List<ASTNode> removed= new ArrayList<ASTNode>();
 		for (int i= 0; i < javaElements.length; i++) {
 			markAsDeleted(removed, javaElements[i], rewrite, group);
 		}
 		propagateFieldDeclarationNodeDeletions(removed, rewrite, group);
 	}
 
-	private static void markAsDeleted(List list, IJavaElement element, CompilationUnitRewrite rewrite, TextEditGroup group) throws JavaModelException {
+	private static void markAsDeleted(List<ASTNode> list, IJavaElement element, CompilationUnitRewrite rewrite, TextEditGroup group) throws JavaModelException {
 		ASTNode[] declarationNodes= getNodesToDelete(element, rewrite.getRoot());
 		for (int i= 0; i < declarationNodes.length; i++) {
 			ASTNode node= declarationNodes[i];
@@ -107,10 +108,10 @@ public class ASTNodeDeleteUtil {
 		}
 	}
 
-	private static void propagateFieldDeclarationNodeDeletions(final List removed, final CompilationUnitRewrite rewrite, final TextEditGroup group) {
-		Set removedNodes= getRemovedNodes(removed, rewrite);
-		for (Iterator iter= removedNodes.iterator(); iter.hasNext();) {
-			ASTNode node= (ASTNode) iter.next();
+	private static void propagateFieldDeclarationNodeDeletions(final List<ASTNode> removed, final CompilationUnitRewrite rewrite, final TextEditGroup group) {
+		Set<ASTNode> removedNodes= getRemovedNodes(removed, rewrite);
+		for (Iterator<ASTNode> iter= removedNodes.iterator(); iter.hasNext();) {
+			ASTNode node= iter.next();
 			if (node instanceof VariableDeclarationFragment) {
 				if (node.getParent() instanceof FieldDeclaration) {
 					FieldDeclaration fd= (FieldDeclaration) node.getParent();

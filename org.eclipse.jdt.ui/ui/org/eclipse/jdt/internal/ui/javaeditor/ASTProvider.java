@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -202,7 +202,7 @@ public final class ASTProvider {
 		}
 	}
 
-	public static final int SHARED_AST_LEVEL= AST.JLS3;
+	public static final int SHARED_AST_LEVEL= AST.JLS4;
 	public static final boolean SHARED_AST_STATEMENT_RECOVERY= true;
 	public static final boolean SHARED_BINDING_RECOVERY= true;
 
@@ -295,7 +295,7 @@ public final class ASTProvider {
 	 * @return <code>true</code> if the given compilation unit is the active one
 	 * @since 3.1
 	 */
-	public boolean isActive(ICompilationUnit cu) {
+	public synchronized boolean isActive(ICompilationUnit cu) {
 		return cu != null && cu.equals(fActiveJavaElement);
 	}
 
@@ -360,9 +360,9 @@ public final class ASTProvider {
 		if (ast == null)
 			return "null"; //$NON-NLS-1$
 
-		List types= ast.types();
+		List<AbstractTypeDeclaration> types= ast.types();
 		if (types != null && types.size() > 0)
-			return ((AbstractTypeDeclaration)types.get(0)).getName().getIdentifier();
+			return types.get(0).getName().getIdentifier() + "(" + ast.hashCode() + ")"; //$NON-NLS-1$//$NON-NLS-2$
 		else
 			return "AST without any type"; //$NON-NLS-1$
 	}
@@ -407,7 +407,7 @@ public final class ASTProvider {
 	 * @param progressMonitor the progress monitor or <code>null</code>
 	 * @return the AST or <code>null</code> if the AST is not available
 	 */
-	public CompilationUnit getAST(ITypeRoot input, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
+	public CompilationUnit getAST(final ITypeRoot input, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
 		if (input == null || waitFlag == null)
 			throw new IllegalArgumentException("input or wait flag are null"); //$NON-NLS-1$
 
@@ -436,18 +436,19 @@ public final class ASTProvider {
 
 		final boolean canReturnNull= waitFlag == SharedASTProvider.WAIT_NO || (waitFlag == SharedASTProvider.WAIT_ACTIVE_ONLY && !(isActiveElement && fAST == null));
 		boolean isReconciling= false;
+		final ITypeRoot activeElement;
 		if (isActiveElement) {
 			synchronized (fReconcileLock) {
+				activeElement= fReconcilingJavaElement;
 				isReconciling= isReconciling(input);
 				if (!isReconciling && !canReturnNull)
 					aboutToBeReconciled(input);
 			}
-		}
+		} else
+			activeElement= null;
 
 		if (isReconciling) {
 			try {
-				final ITypeRoot activeElement= fReconcilingJavaElement;
-
 				// Wait for AST
 				synchronized (fWaitLock) {
 					if (isReconciling(input)) {
@@ -461,7 +462,7 @@ public final class ASTProvider {
 				synchronized (this) {
 					if (activeElement == fActiveJavaElement && fAST != null) {
 						if (DEBUG)
-							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "...got AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "...got AST: " + toString(fAST) + " for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 						return fAST;
 					}
@@ -607,6 +608,7 @@ public final class ASTProvider {
 			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "reconciled: " + toString(javaElement) + ", AST: " + toString(ast)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		synchronized (fReconcileLock) {
+			fIsReconciling= false;
 			if (javaElement == null || !javaElement.equals(fReconcilingJavaElement)) {
 
 				if (DEBUG)
@@ -619,7 +621,6 @@ public final class ASTProvider {
 
 				return;
 			}
-			fIsReconciling= false;
 			cache(ast, javaElement);
 		}
 	}

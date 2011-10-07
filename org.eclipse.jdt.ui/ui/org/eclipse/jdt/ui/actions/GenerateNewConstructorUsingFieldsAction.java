@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -162,7 +162,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 	 * not valid.
 	 */
 	private IField[] getSelectedFields(IStructuredSelection selection) {
-		List elements= selection.toList();
+		List<?> elements= selection.toList();
 		if (elements.size() > 0) {
 			IField[] fields= new IField[elements.size()];
 			ICompilationUnit unit= null;
@@ -218,6 +218,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			IType selectionType= getSelectedType(selection);
@@ -258,6 +259,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(fEditor)) {
 			notifyResult(false);
@@ -312,7 +314,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			return;
 		}
 
-		List allSelected= Arrays.asList(selectedFields);
+		List<IField> allSelected= Arrays.asList(selectedFields);
 
 		CompilationUnit astRoot= SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, new NullProgressMonitor());
 		ITypeBinding typeBinding= ASTNodes.getTypeBinding(astRoot, type);
@@ -322,8 +324,8 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			return;
 		}
 
-		HashMap fieldsToBindings= new HashMap();
-		ArrayList selected= new ArrayList();
+		HashMap<IJavaElement, IVariableBinding> fieldsToBindings= new HashMap<IJavaElement, IVariableBinding>();
+		ArrayList<IVariableBinding> selected= new ArrayList<IVariableBinding>();
 
 		IVariableBinding[] candidates= typeBinding.getDeclaredFields();
 		for (int i= 0; i < candidates.length; i++) {
@@ -352,10 +354,10 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			return;
 		}
 
-		ArrayList fields= new ArrayList();
+		ArrayList<IVariableBinding> fields= new ArrayList<IVariableBinding>();
 		IField[] allFields= type.getFields();
 		for (int i= 0; i < allFields.length; i++) {
-			Object fieldBinding= fieldsToBindings.remove(allFields[i]);
+			IVariableBinding fieldBinding= fieldsToBindings.remove(allFields[i]);
 			if (fieldBinding != null) {
 				fields.add(fieldBinding);
 			}
@@ -398,12 +400,12 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				notifyResult(false);
 				return;
 			}
-			ArrayList result= new ArrayList(elements.length);
+			ArrayList<IVariableBinding> result= new ArrayList<IVariableBinding>(elements.length);
 			for (int index= 0; index < elements.length; index++) {
 				if (elements[index] instanceof IVariableBinding)
-					result.add(elements[index]);
+					result.add((IVariableBinding) elements[index]);
 			}
-			IVariableBinding[] variables= (IVariableBinding[]) result.toArray(new IVariableBinding[result.size()]);
+			IVariableBinding[] variables= result.toArray(new IVariableBinding[result.size()]);
 
 			IEditorPart editor= JavaUI.openInEditor(cu);
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
@@ -442,6 +444,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(canEnable(selection));
@@ -458,6 +461,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 }

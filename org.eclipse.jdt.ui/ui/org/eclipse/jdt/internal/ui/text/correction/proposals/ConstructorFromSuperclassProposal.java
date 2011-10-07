@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -66,6 +67,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
 	 */
+	@Override
 	public Image getImage() {
 		return JavaPlugin.getImageDescriptorRegistry().get(
 				new JavaElementImageDescriptor(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE)
@@ -75,6 +77,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal#getName()
 	 */
+	@Override
 	public String getName() {
 		StringBuffer buf= new StringBuffer();
 		buf.append(fTypeNode.getName().getIdentifier());
@@ -95,6 +98,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
+	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		AST ast= fTypeNode.getAST();
 
@@ -117,9 +121,9 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 	}
 
 	private void addLinkedRanges(ASTRewrite rewrite, MethodDeclaration newStub) {
-		List parameters= newStub.parameters();
+		List<SingleVariableDeclaration> parameters= newStub.parameters();
 		for (int i= 0; i < parameters.size(); i++) {
-			SingleVariableDeclaration curr= (SingleVariableDeclaration) parameters.get(i);
+			SingleVariableDeclaration curr= parameters.get(i);
 			String name= curr.getName().getIdentifier();
 			addLinkedPosition(rewrite.track(curr.getType()), false, "arg_type_" + name); //$NON-NLS-1$
 			addLinkedPosition(rewrite.track(curr.getName()), false, "arg_name_" + name); //$NON-NLS-1$
@@ -136,7 +140,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 
 		SuperConstructorInvocation invocation= null;
 
-		List parameters= decl.parameters();
+		List<SingleVariableDeclaration> parameters= decl.parameters();
 		String[] paramNames= getArgumentNames(binding);
 
 		ITypeBinding enclosingInstance= getEnclosingInstance();
@@ -157,7 +161,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 				parameters.add(var);
 			}
 
-			List thrownExceptions= decl.thrownExceptions();
+			List<Name> thrownExceptions= decl.thrownExceptions();
 			ITypeBinding[] excTypes= binding.getExceptionTypes();
 			for (int i= 0; i < excTypes.length; i++) {
 				String excTypeName= getImportRewrite().addImport(excTypes[i], importRewriteContext);
@@ -168,7 +172,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 				invocation= ast.newSuperConstructorInvocation();
 			}
 
-			List arguments= invocation.arguments();
+			List<Expression> arguments= invocation.arguments();
 			for (int i= 0; i < paramNames.length; i++) {
 				Name argument= ast.newSimpleName(paramNames[i]);
 				arguments.add(argument);
@@ -192,7 +196,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		return decl;
 	}
 
-	private SuperConstructorInvocation addEnclosingInstanceAccess(ASTRewrite rewrite, ImportRewriteContext importRewriteContext, List parameters, String[] paramNames, ITypeBinding enclosingInstance) {
+	private SuperConstructorInvocation addEnclosingInstanceAccess(ASTRewrite rewrite, ImportRewriteContext importRewriteContext, List<SingleVariableDeclaration> parameters, String[] paramNames, ITypeBinding enclosingInstance) {
 		AST ast= rewrite.getAST();
 		SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();
 

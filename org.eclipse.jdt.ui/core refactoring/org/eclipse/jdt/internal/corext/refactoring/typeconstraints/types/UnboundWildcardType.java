@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,14 +16,17 @@ public final class UnboundWildcardType extends WildcardType {
 		super(environment);
 	}
 
+	@Override
 	public int getKind() {
 		return UNBOUND_WILDCARD_TYPE;
 	}
 
+	@Override
 	public TType getErasure() {
 		return getEnvironment().getJavaLangObject();
 	}
 
+	@Override
 	protected boolean doCanAssignTo(TType lhs) {
 		switch(lhs.getKind()) {
 			case STANDARD_TYPE:
@@ -40,6 +43,7 @@ public final class UnboundWildcardType extends WildcardType {
 		}
 	}
 
+	@Override
 	protected boolean checkTypeArgument(TType rhs) {
 		switch(rhs.getKind()) {
 			case ARRAY_TYPE:
@@ -57,15 +61,18 @@ public final class UnboundWildcardType extends WildcardType {
 		}
 	}
 
+	@Override
 	protected boolean checkAssignmentBound(TType rhs) {
 		// unbound equals ? extends Object.
 		return rhs.isNullType();
 	}
 
+	@Override
 	public String getName() {
 		return "?"; //$NON-NLS-1$
 	}
 
+	@Override
 	protected String getPlainPrettySignature() {
 		return getName();
 	}

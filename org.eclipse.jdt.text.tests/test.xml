@@ -87,7 +87,6 @@
     </ant>
     
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="timeout" value="10800000"/>
       <property name="vmargs" value="-Xms250M -Xmx250M"/>
       <property name="data-dir" value="${jdt-text-performance-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>

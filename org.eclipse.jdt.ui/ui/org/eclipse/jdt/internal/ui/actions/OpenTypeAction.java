@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,10 +61,12 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_TYPE_ACTION);
 	}
 
+	@Override
 	public void run() {
 		runWithEvent(null);
 	}
 
+	@Override
 	public void runWithEvent(Event e) {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		if (! doCreateProjectFirstOnEmptyWorkspace(parent)) {

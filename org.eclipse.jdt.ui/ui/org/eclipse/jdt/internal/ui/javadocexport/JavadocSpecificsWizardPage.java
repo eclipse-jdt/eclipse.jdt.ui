@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -151,6 +151,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 		//Listeners
 		fOverViewButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fOverViewBrowseButton, fOverViewText }) {
+			@Override
 			public void validate() {
 				doValidation(OVERVIEWSTATUS);
 			}
@@ -163,6 +164,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		});
 
 		fOverViewBrowseButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				handleFileBrowseButtonPressed(fOverViewText, new String[] { "*.html" }, JavadocExportMessages.JavadocSpecificsWizardPage_overviewbrowsedialog_title);  //$NON-NLS-1$
 			}
@@ -193,6 +195,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		fCheckbrowser.setSelection(fStore.doOpenInBrowser());
 
 		fAntButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fAntText, fAntBrowseButton }) {
+			@Override
 			public void validate() {
 				doValidation(ANTSTATUS);
 			}
@@ -205,6 +208,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		});
 
 		fAntBrowseButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				String temp= fAntText.getText();
 				IPath path= Path.fromOSString(temp);
@@ -287,6 +291,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 	}
 
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {

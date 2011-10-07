@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,8 +47,8 @@ public final class FixMessages extends NLS {
 	public static String ConvertIterableLoopOperation_RemoveUpdateExpression_Warning;
 	public static String ConvertIterableLoopOperation_RemoveUpdateExpressions_Warning;
 	public static String ConvertIterableLoopOperation_semanticChangeWarning;
-	public static String ExpressionsFix_add_parenthesis_change_name;
-	public static String ExpressionsFix_remove_parenthesis_change_name;
+	public static String ExpressionsFix_add_parentheses_change_name;
+	public static String ExpressionsFix_remove_parentheses_change_name;
 	public static String ImportsFix_OrganizeImports_Description;
 	public static String Java50Fix_add_annotations_change_name;
 	public static String Java50Fix_add_type_parameters_change_name;
@@ -110,8 +110,8 @@ public final class FixMessages extends NLS {
 	public static String ControlStatementsFix_removeIfElseBlock_proposalDescription;
 	public static String ControlStatementsFix_removeBrackets_proposalDescription;
 
-	public static String ExpressionsFix_addParanoiacParenthesis_description;
-	public static String ExpressionsFix_removeUnnecessaryParenthesis_description;
+	public static String ExpressionsFix_addParanoiacParentheses_description;
+	public static String ExpressionsFix_removeUnnecessaryParentheses_description;
 	public static String VariableDeclarationFix_add_final_change_name;
 
 	public static String VariableDeclarationFix_changeModifierOfUnknownToFinal_description;

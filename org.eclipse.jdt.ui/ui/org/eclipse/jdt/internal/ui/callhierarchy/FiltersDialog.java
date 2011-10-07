@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.StatusDialog;
 
 import org.eclipse.ui.PlatformUI;
@@ -49,28 +48,27 @@ class FiltersDialog extends StatusDialog {
     /* (non-Javadoc)
      * Method declared on Window.
      */
-    protected void configureShell(Shell newShell) {
+    @Override
+	protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
         newShell.setText(CallHierarchyMessages.FiltersDialog_filter);
         PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.CALL_HIERARCHY_FILTERS_DIALOG);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+	protected boolean isResizable() {
+    	return true;
     }
 
     /* (non-Javadoc)
      * Method declared on Dialog.
      */
-    protected Control createDialogArea(Composite parent) {
-        Composite superComposite = (Composite) super.createDialogArea(parent);
-
-        Composite composite = new Composite(superComposite, SWT.NONE);
-        composite.setFont(superComposite.getFont());
-        composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-        GridLayout layout = new GridLayout();
-        layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
-        layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
-        layout.verticalSpacing= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
-        layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
-        composite.setLayout(layout);
+    @Override
+	protected Control createDialogArea(Composite parent) {
+    	Composite composite= (Composite) super.createDialogArea(parent);
 
         createNamesArea(composite);
         new Label(composite, SWT.NONE);         // Filler
@@ -148,6 +146,7 @@ class FiltersDialog extends StatusDialog {
 
         button.setText(text);
         button.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				validateInput();
 				updateEnabledState();
@@ -192,7 +191,8 @@ class FiltersDialog extends StatusDialog {
      * because after super.open() is called, the widgetry is disposed.
 	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
      */
-    protected void okPressed() {
+    @Override
+	protected void okPressed() {
         if (!isMaxCallDepthValid()) {
             if (fMaxCallDepth.forceFocus()) {
                 fMaxCallDepth.setSelection(0, fMaxCallDepth.getCharCount());

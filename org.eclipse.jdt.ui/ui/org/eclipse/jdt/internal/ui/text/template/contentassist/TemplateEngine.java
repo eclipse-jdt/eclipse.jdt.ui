@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,9 +49,9 @@ public class TemplateEngine {
 	/** The context type. */
 	private TemplateContextType fContextType;
 	/** The result proposals. */
-	private ArrayList fProposals= new ArrayList();
+	private ArrayList<TemplateProposal> fProposals= new ArrayList<TemplateProposal>();
 	/** Positions created on the key documents to remove in reset. */
-	private final Map fPositions= new HashMap();
+	private final Map<IDocument, Position> fPositions= new HashMap<IDocument, Position>();
 
 	/**
 	 * Creates the template engine for the given <code>contextType</code>.
@@ -71,10 +71,10 @@ public class TemplateEngine {
 	 */
 	public void reset() {
 		fProposals.clear();
-		for (Iterator it= fPositions.entrySet().iterator(); it.hasNext();) {
-			Entry entry= (Entry) it.next();
-			IDocument doc= (IDocument) entry.getKey();
-			Position position= (Position) entry.getValue();
+		for (Iterator<Entry<IDocument, Position>> it= fPositions.entrySet().iterator(); it.hasNext();) {
+			Entry<IDocument, Position> entry= it.next();
+			IDocument doc= entry.getKey();
+			Position position= entry.getValue();
 			doc.removePosition(position);
 		}
 		fPositions.clear();
@@ -86,7 +86,7 @@ public class TemplateEngine {
 	 * @return the template proposals
 	 */
 	public TemplateProposal[] getResults() {
-		return (TemplateProposal[]) fProposals.toArray(new TemplateProposal[fProposals.size()]);
+		return fProposals.toArray(new TemplateProposal[fProposals.size()]);
 	}
 
 	/**

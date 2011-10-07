@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,11 +35,13 @@ public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
 		setValidationMethod(SAVE_IF_DIRTY);
 	}
 
+	@Override
 	Change doPerformReorg(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		getCu().copy(getDestinationPackage(), null, getNewName(), true, pm);
 		return null;
 	}
 
+	@Override
 	public String getName() {
 		return Messages.format(RefactoringCoreMessages.CopyCompilationUnitChange_copy,
 			new String[]{ BasicElementLabels.getFileName(getCu()), getPackageName(getDestinationPackage())});

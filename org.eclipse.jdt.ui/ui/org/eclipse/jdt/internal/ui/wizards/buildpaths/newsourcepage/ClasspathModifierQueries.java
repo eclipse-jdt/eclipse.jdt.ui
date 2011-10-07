@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,7 @@ public class ClasspathModifierQueries {
      */
     public static abstract class OutputFolderValidator {
         protected IClasspathEntry[] fEntries;
-        protected List fElements;
+        protected List<?> fElements;
 
         /**
          * Create a output folder validator.
@@ -68,7 +68,7 @@ public class ClasspathModifierQueries {
          * @param project the Java project
          * @throws JavaModelException
          */
-        public OutputFolderValidator(List newElements, IJavaProject project) throws JavaModelException {
+        public OutputFolderValidator(List<?> newElements, IJavaProject project) throws JavaModelException {
             fEntries= project.getRawClasspath();
             fElements= newElements;
         }
@@ -85,45 +85,6 @@ public class ClasspathModifierQueries {
         public abstract boolean validate(IPath outputLocation);
     }
 
-    /**
-     * Query that processes the request of
-     * creating a link to an existing source
-     * folder.
-     *
-     * @deprecated Not used anymore in 3.4
-     */
-    public static interface ILinkToQuery {
-        /**
-         * Query that processes the request of
-         * creating a link to an existing source
-         * folder.
-         *
-         * @return <code>true</code> if the query was
-         * executed successfully (that is the result of
-         * this query can be used), <code>false</code>
-         * otherwise
-         */
-        public boolean doQuery();
-
-        /**
-         * Get the newly created folder.
-         * This method is only valid after having
-         * called <code>doQuery</code>.
-         *
-         * @return the created folder of type
-         * <code>IFolder</code>
-         */
-        public IFolder getCreatedFolder();
-
-        /**
-         * Getter for an output folder query.
-         *
-         * @return an output folder query which will be needed
-         * when adding the folder to the build path
-         *
-         */
-        public OutputFolderQuery getOutputFolderQuery();
-    }
     /**
      * Query to get information about whether the project should be removed as
      * source folder and update build folder to <code>outputLocation</code>
@@ -407,7 +368,8 @@ public class ClasspathModifierQueries {
 			protected IPath fOutputLocation;
 			protected boolean fRemoveProject;
 
-            public boolean doQuery(final boolean editingOutputFolder,  final OutputFolderValidator validator, final IJavaProject project) throws JavaModelException {
+            @Override
+			public boolean doQuery(final boolean editingOutputFolder,  final OutputFolderValidator validator, final IJavaProject project) throws JavaModelException {
                 final boolean[] result= { false };
                 fRemoveProject= false;
                 fOutputLocation= project.getOutputLocation();
@@ -447,11 +409,13 @@ public class ClasspathModifierQueries {
                 return result[0];
             }
 
-            public IPath getOutputLocation() {
+            @Override
+			public IPath getOutputLocation() {
                 return fOutputLocation;
             }
 
-            public boolean removeProjectFromClasspath() {
+            @Override
+			public boolean removeProjectFromClasspath() {
                 return fRemoveProject;
             }
 
@@ -506,54 +470,6 @@ public class ClasspathModifierQueries {
 			}
 		};
 	}
-
-    /**
-     * Query to create a linked source folder.
-     *
-     * The default query shows a dialog which allows
-     * the user to specify the new folder that should
-     * be created.
-     *
-     * @param shell shell if there is any or <code>null</code>
-     * @param project the Java project to create the linked source folder for
-     * @param desiredOutputLocation the output location
-     * @return an <code>ILinkToQuery</code> showing a dialog
-     * to create a linked source folder.
-     *
-     * @see ClasspathModifierQueries.ICreateFolderQuery
-     * @see LinkFolderDialog
-     *
-     * @deprecated Not used anymore in 3.4
-     */
-    public static ILinkToQuery getDefaultLinkQuery(final Shell shell, final IJavaProject project, final IPath desiredOutputLocation) {
-        return new ILinkToQuery() {
-            protected IFolder fFolder;
-
-            public boolean doQuery() {
-                final boolean[] isOK= {false};
-                Display.getDefault().syncExec(new Runnable() {
-                    public void run() {
-                        Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
-
-                        LinkFolderDialog dialog= new LinkFolderDialog(sh, project.getProject());
-                        isOK[0]= dialog.open() == Window.OK;
-                        if (isOK[0])
-                            fFolder= dialog.getCreatedFolder();
-                    }
-                });
-                return isOK[0];
-            }
-
-            public IFolder getCreatedFolder() {
-                return fFolder;
-            }
-
-            public OutputFolderQuery getOutputFolderQuery() {
-                return getDefaultFolderQuery(shell, desiredOutputLocation);
-            }
-
-        };
-    }
 
     /**
      * Shows the UI to select new external JAR or ZIP archive entries. If the query

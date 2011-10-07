@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -148,6 +148,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	/*
 	 * @see Viewer#inputChanged(Object, Object)
 	 */
+	@Override
 	protected void inputChanged(Object input, Object oldInput) {
 		super.inputChanged(input, oldInput);
 	}
@@ -254,13 +255,14 @@ public class MethodsViewer extends ProblemTableViewer {
 	/*
 	 * @see StructuredViewer#handleInvalidSelection(ISelection, ISelection)
 	 */
+	@Override
 	protected void handleInvalidSelection(ISelection invalidSelection, ISelection newSelection) {
 		// on change of input, try to keep selected methods stable by selecting a method with the same
 		// signature: See #5466
-		List oldSelections= SelectionUtil.toList(invalidSelection);
-		List newSelections= SelectionUtil.toList(newSelection);
+		List<?> oldSelections= SelectionUtil.toList(invalidSelection);
+		List<?> newSelections= SelectionUtil.toList(newSelection);
 		if (!oldSelections.isEmpty()) {
-			ArrayList newSelectionElements= new ArrayList(newSelections);
+			ArrayList<Object> newSelectionElements= new ArrayList<Object>(newSelections);
 			try {
 				Object[] currElements= getFilteredChildren(getInput());
 				for (int i= 0; i < oldSelections.size(); i++) {

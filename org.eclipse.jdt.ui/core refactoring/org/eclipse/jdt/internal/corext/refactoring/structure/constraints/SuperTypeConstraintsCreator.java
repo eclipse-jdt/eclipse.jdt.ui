@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -88,7 +88,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @param originals the original methods which have already been found (element type: <code>IMethodBinding</code>)
 	 * @param implementations <code>true</code> to favor implementation methods, <code>false</code> otherwise
 	 */
-	private static void getOriginalMethods(final IMethodBinding binding, final ITypeBinding type, final Collection originals, final boolean implementations) {
+	private static void getOriginalMethods(final IMethodBinding binding, final ITypeBinding type, final Collection<IMethodBinding> originals, final boolean implementations) {
 		final ITypeBinding ancestor= type.getSuperclass();
 		if (!implementations) {
 			final ITypeBinding[] types= type.getInterfaces();
@@ -106,8 +106,8 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 			if (!binding.getKey().equals(method.getKey())) {
 				boolean match= false;
 				IMethodBinding current= null;
-				for (final Iterator iterator= originals.iterator(); iterator.hasNext();) {
-					current= (IMethodBinding) iterator.next();
+				for (final Iterator<IMethodBinding> iterator= originals.iterator(); iterator.hasNext();) {
+					current= iterator.next();
 					if (Bindings.isSubsignature(method, current))
 						match= true;
 				}
@@ -118,7 +118,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	}
 
 	/** The current method declarations being processed (element type: <code>MethodDeclaration</code>) */
-	private final Stack fCurrentMethods= new Stack();
+	private final Stack<MethodDeclaration> fCurrentMethods= new Stack<MethodDeclaration>();
 
 	/** Should instanceof expressions be rewritten? */
 	private final boolean fInstanceOf;
@@ -142,6 +142,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ArrayAccess)
 	 */
+	@Override
 	public final void endVisit(final ArrayAccess node) {
 		node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, node.getArray().getProperty(PROPERTY_CONSTRAINT_VARIABLE));
 	}
@@ -149,6 +150,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ArrayCreation)
 	 */
+	@Override
 	public final void endVisit(final ArrayCreation node) {
 		final ConstraintVariable2 ancestor= (ConstraintVariable2) node.getType().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
 		node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
@@ -163,6 +165,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ArrayInitializer)
 	 */
+	@Override
 	public final void endVisit(final ArrayInitializer node) {
 		final ITypeBinding binding= node.resolveTypeBinding();
 		if (binding != null && binding.isArray()) {
@@ -170,9 +173,9 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
 			Expression expression= null;
 			ConstraintVariable2 descendant= null;
-			final List expressions= node.expressions();
+			final List<Expression> expressions= node.expressions();
 			for (int index= 0; index < expressions.size(); index++) {
-				expression= (Expression) expressions.get(index);
+				expression= expressions.get(index);
 				descendant= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
 				if (descendant != null)
 					fModel.createSubtypeConstraint(descendant, ancestor);
@@ -183,6 +186,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ArrayType)
 	 */
+	@Override
 	public final void endVisit(final ArrayType node) {
 		Type elementType= node.getElementType();
 		final ConstraintVariable2 variable= fModel.createTypeVariable(elementType);
@@ -195,6 +199,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.Assignment)
 	 */
+	@Override
 	public final void endVisit(final Assignment node) {
 		final ConstraintVariable2 ancestor= (ConstraintVariable2) node.getLeftHandSide().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
 		final ConstraintVariable2 descendant= (ConstraintVariable2) node.getRightHandSide().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
@@ -206,6 +211,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.CastExpression)
 	 */
+	@Override
 	public final void endVisit(final CastExpression node) {
 		final ConstraintVariable2 first= (ConstraintVariable2) node.getType().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
 		if (first != null) {
@@ -219,6 +225,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.CatchClause)
 	 */
+	@Override
 	public final void endVisit(final CatchClause node) {
 		final SingleVariableDeclaration declaration= node.getException();
 		if (declaration != null) {
@@ -237,6 +244,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ClassInstanceCreation)
 	 */
+	@Override
 	public final void endVisit(final ClassInstanceCreation node) {
 		final IMethodBinding binding= node.resolveConstructorBinding();
 		if (binding != null) {
@@ -260,6 +268,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ConditionalExpression)
 	 */
+	@Override
 	public final void endVisit(final ConditionalExpression node) {
 		ConstraintVariable2 thenVariable= null;
 		ConstraintVariable2 elseVariable= null;
@@ -289,6 +298,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ConstructorInvocation)
 	 */
+	@Override
 	public final void endVisit(final ConstructorInvocation node) {
 		final IMethodBinding binding= node.resolveConstructorBinding();
 		if (binding != null)
@@ -298,6 +308,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.FieldAccess)
 	 */
+	@Override
 	public final void endVisit(final FieldAccess node) {
 		final IVariableBinding binding= node.resolveFieldBinding();
 		if (binding != null)
@@ -307,6 +318,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.FieldDeclaration)
 	 */
+	@Override
 	public final void endVisit(final FieldDeclaration node) {
 		endVisit(node.fragments(), node.getType(), node);
 	}
@@ -321,9 +333,9 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 		ConstraintVariable2 ancestor= null;
 		final ConstraintVariable2 descendant= fModel.createReturnTypeVariable(binding);
 		if (descendant != null) {
-			final Collection originals= getOriginalMethods(binding);
-			for (final Iterator iterator= originals.iterator(); iterator.hasNext();) {
-				method= (IMethodBinding) iterator.next();
+			final Collection<IMethodBinding> originals= getOriginalMethods(binding);
+			for (final Iterator<IMethodBinding> iterator= originals.iterator(); iterator.hasNext();) {
+				method= iterator.next();
 				if (!method.getKey().equals(binding.getKey())) {
 					ancestor= fModel.createReturnTypeVariable(method);
 					if (ancestor != null)
@@ -342,9 +354,9 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	private void endVisit(final IMethodBinding binding, final ConstraintVariable2 descendant) {
 		ITypeBinding declaring= null;
 		IMethodBinding method= null;
-		final Collection originals= getOriginalMethods(binding);
-		for (final Iterator iterator= originals.iterator(); iterator.hasNext();) {
-			method= (IMethodBinding) iterator.next();
+		final Collection<IMethodBinding> originals= getOriginalMethods(binding);
+		for (final Iterator<IMethodBinding> iterator= originals.iterator(); iterator.hasNext();) {
+			method= iterator.next();
 			declaring= method.getDeclaringClass();
 			if (declaring != null) {
 				final ConstraintVariable2 ancestor= fModel.createDeclaringTypeVariable(declaring);
@@ -395,12 +407,12 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @param arguments the arguments (element type: <code>Expression</code>)
 	 * @param binding the method binding
 	 */
-	private void endVisit(final List arguments, final IMethodBinding binding) {
+	private void endVisit(final List<Expression> arguments, final IMethodBinding binding) {
 		Expression expression= null;
 		ConstraintVariable2 ancestor= null;
 		ConstraintVariable2 descendant= null;
 		for (int index= 0; index < arguments.size(); index++) {
-			expression= (Expression) arguments.get(index);
+			expression= arguments.get(index);
 			descendant= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
 			ancestor= fModel.createMethodParameterVariable(binding, index);
 			if (ancestor != null && descendant != null)
@@ -415,14 +427,14 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @param type the type of the fragments
 	 * @param parent the parent of the fragment list
 	 */
-	private void endVisit(final List fragments, final Type type, final ASTNode parent) {
+	private void endVisit(final List<VariableDeclarationFragment> fragments, final Type type, final ASTNode parent) {
 		final ConstraintVariable2 ancestor= (ConstraintVariable2) type.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
 		if (ancestor != null) {
 			IVariableBinding binding= null;
 			ConstraintVariable2 descendant= null;
 			VariableDeclarationFragment fragment= null;
 			for (int index= 0; index < fragments.size(); index++) {
-				fragment= (VariableDeclarationFragment) fragments.get(index);
+				fragment= fragments.get(index);
 				descendant= (ConstraintVariable2) fragment.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
 				if (descendant != null)
 					fModel.createSubtypeConstraint(descendant, ancestor);
@@ -440,6 +452,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.MethodDeclaration)
 	 */
+	@Override
 	public final void endVisit(final MethodDeclaration node) {
 		fCurrentMethods.pop();
 		final IMethodBinding binding= node.resolveBinding();
@@ -459,12 +472,12 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 			ConstraintVariable2 ancestor= null;
 			ConstraintVariable2 descendant= null;
 			IVariableBinding variable= null;
-			final List parameters= node.parameters();
+			final List<SingleVariableDeclaration> parameters= node.parameters();
 			if (!parameters.isEmpty()) {
-				final Collection originals= getOriginalMethods(binding);
+				final Collection<IMethodBinding> originals= getOriginalMethods(binding);
 				SingleVariableDeclaration declaration= null;
 				for (int index= 0; index < parameters.size(); index++) {
-					declaration= (SingleVariableDeclaration) parameters.get(index);
+					declaration= parameters.get(index);
 					ancestor= fModel.createMethodParameterVariable(binding, index);
 					if (ancestor != null) {
 						descendant= (ConstraintVariable2) declaration.getType().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
@@ -477,8 +490,8 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 								fModel.createEqualityConstraint(ancestor, descendant);
 						}
 						IMethodBinding method= null;
-						for (final Iterator iterator= originals.iterator(); iterator.hasNext();) {
-							method= (IMethodBinding) iterator.next();
+						for (final Iterator<IMethodBinding> iterator= originals.iterator(); iterator.hasNext();) {
+							method= iterator.next();
 							if (!method.getKey().equals(binding.getKey())) {
 								descendant= fModel.createMethodParameterVariable(method, index);
 								if (descendant != null)
@@ -488,7 +501,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 					}
 				}
 			}
-			final List exceptions= node.thrownExceptions();
+			final List<Name> exceptions= node.thrownExceptions();
 			if (!exceptions.isEmpty()) {
 				final ITypeBinding throwable= node.getAST().resolveWellKnownType("java.lang.Throwable"); //$NON-NLS-1$
 				if (throwable != null) {
@@ -496,7 +509,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 					if (ancestor != null) {
 						Name exception= null;
 						for (int index= 0; index < exceptions.size(); index++) {
-							exception= (Name) exceptions.get(index);
+							exception= exceptions.get(index);
 							descendant= (ConstraintVariable2) exception.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
 							if (descendant != null)
 								fModel.createSubtypeConstraint(descendant, ancestor);
@@ -510,6 +523,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.MethodInvocation)
 	 */
+	@Override
 	public final void endVisit(final MethodInvocation node) {
 		final IMethodBinding binding= node.resolveMethodBinding();
 		if (binding != null) {
@@ -541,6 +555,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.NullLiteral)
 	 */
+	@Override
 	public final void endVisit(final NullLiteral node) {
 		node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, fModel.createImmutableTypeVariable(node.resolveTypeBinding()));
 	}
@@ -548,6 +563,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ParenthesizedExpression)
 	 */
+	@Override
 	public final void endVisit(final ParenthesizedExpression node) {
 		node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, node.getExpression().getProperty(PROPERTY_CONSTRAINT_VARIABLE));
 	}
@@ -555,6 +571,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.QualifiedName)
 	 */
+	@Override
 	public final void endVisit(final QualifiedName node) {
 		final ASTNode parent= node.getParent();
 		final Name qualifier= node.getQualifier();
@@ -574,12 +591,13 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ReturnStatement)
 	 */
+	@Override
 	public final void endVisit(final ReturnStatement node) {
 		final Expression expression= node.getExpression();
 		if (expression != null) {
 			final ConstraintVariable2 descendant= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
 			if (descendant != null) {
-				final MethodDeclaration declaration= (MethodDeclaration) fCurrentMethods.peek();
+				final MethodDeclaration declaration= fCurrentMethods.peek();
 				if (declaration != null) {
 					final IMethodBinding binding= declaration.resolveBinding();
 					if (binding != null) {
@@ -597,6 +615,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.SimpleName)
 	 */
+	@Override
 	public final void endVisit(final SimpleName node) {
 		final ASTNode parent= node.getParent();
 		if (!(parent instanceof ImportDeclaration) && !(parent instanceof PackageDeclaration) && !(parent instanceof AbstractTypeDeclaration)) {
@@ -611,6 +630,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.SingleVariableDeclaration)
 	 */
+	@Override
 	public final void endVisit(final SingleVariableDeclaration node) {
 		final ConstraintVariable2 ancestor= (ConstraintVariable2) node.getType().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
 		if (ancestor != null) {
@@ -627,6 +647,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.EnhancedForStatement)
 	 */
+	@Override
 	public void endVisit(EnhancedForStatement node) {
 		SingleVariableDeclaration parameter= node.getParameter();
 		final ConstraintVariable2 ancestor= (ConstraintVariable2) parameter.getType().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
@@ -651,6 +672,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.SuperConstructorInvocation)
 	 */
+	@Override
 	public final void endVisit(final SuperConstructorInvocation node) {
 		final IMethodBinding binding= node.resolveConstructorBinding();
 		if (binding != null)
@@ -660,6 +682,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.SuperFieldAccess)
 	 */
+	@Override
 	public final void endVisit(final SuperFieldAccess node) {
 		final Name name= node.getName();
 		final IBinding binding= name.resolveBinding();
@@ -670,11 +693,12 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.SuperMethodInvocation)
 	 */
+	@Override
 	public final void endVisit(final SuperMethodInvocation node) {
 		final IMethodBinding superBinding= node.resolveMethodBinding();
 		if (superBinding != null) {
 			endVisit(node.arguments(), superBinding);
-			final MethodDeclaration declaration= (MethodDeclaration) fCurrentMethods.peek();
+			final MethodDeclaration declaration= fCurrentMethods.peek();
 			if (declaration != null) {
 				final IMethodBinding subBinding= declaration.resolveBinding();
 				if (subBinding != null) {
@@ -693,6 +717,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ThisExpression)
 	 */
+	@Override
 	public final void endVisit(final ThisExpression node) {
 		final ITypeBinding binding= node.resolveTypeBinding();
 		if (binding != null)
@@ -702,6 +727,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.Type)
 	 */
+	@Override
 	public final void endVisit(final Type node) {
 		final ASTNode parent= node.getParent();
 		if (!(parent instanceof AbstractTypeDeclaration) && !(parent instanceof ClassInstanceCreation) && !(parent instanceof TypeLiteral) && (!(parent instanceof InstanceofExpression) || fInstanceOf))
@@ -711,6 +737,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.VariableDeclarationExpression)
 	 */
+	@Override
 	public final void endVisit(final VariableDeclarationExpression node) {
 		endVisit(node.fragments(), node.getType(), node);
 	}
@@ -718,6 +745,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.VariableDeclarationFragment)
 	 */
+	@Override
 	public final void endVisit(final VariableDeclarationFragment node) {
 		final Expression initializer= node.getInitializer();
 		if (initializer != null)
@@ -727,6 +755,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.VariableDeclarationStatement)
 	 */
+	@Override
 	public final void endVisit(final VariableDeclarationStatement node) {
 		endVisit(node.fragments(), node.getType(), node);
 	}
@@ -737,8 +766,8 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @param binding the method binding
 	 * @return the original methods (element type: <code>IMethodBinding</code>)
 	 */
-	private Collection getOriginalMethods(final IMethodBinding binding) {
-		final Collection originals= new ArrayList();
+	private Collection<IMethodBinding> getOriginalMethods(final IMethodBinding binding) {
+		final Collection<IMethodBinding> originals= new ArrayList<IMethodBinding>();
 		final ITypeBinding type= binding.getDeclaringClass();
 		getOriginalMethods(binding, type, originals, false);
 		getOriginalMethods(binding, type, originals, true);
@@ -750,6 +779,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.AnnotationTypeDeclaration)
 	 */
+	@Override
 	public final boolean visit(final AnnotationTypeDeclaration node) {
 		return false;
 	}
@@ -757,6 +787,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.Comment)
 	 */
+	@Override
 	public final boolean visit(final Comment node) {
 		return false;
 	}
@@ -764,6 +795,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.ImportDeclaration)
 	 */
+	@Override
 	public final boolean visit(final ImportDeclaration node) {
 		return false;
 	}
@@ -771,6 +803,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.MethodDeclaration)
 	 */
+	@Override
 	public final boolean visit(final MethodDeclaration node) {
 		fCurrentMethods.push(node);
 		return super.visit(node);
@@ -779,6 +812,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.PackageDeclaration)
 	 */
+	@Override
 	public final boolean visit(final PackageDeclaration node) {
 		return false;
 	}
@@ -786,6 +820,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.ThisExpression)
 	 */
+	@Override
 	public final boolean visit(final ThisExpression node) {
 		return false;
 	}
@@ -793,6 +828,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.Type)
 	 */
+	@Override
 	public final boolean visit(final Type node) {
 		return false;
 	}

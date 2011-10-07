@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.PerformanceStats;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -160,7 +162,7 @@ public final class ProposalSorterHandle {
 	 * @param proposals the list of computed completion proposals to be sorted (element type:
 	 *        {@link org.eclipse.jface.text.contentassist.ICompletionProposal}), must be writable
 	 */
-	public void sortProposals(ContentAssistInvocationContext context, List proposals) {
+	public void sortProposals(ContentAssistInvocationContext context, List<ICompletionProposal> proposals) {
 		IStatus status;
 		try {
 			AbstractProposalSorter sorter= getSorter();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,8 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class CleanUpStressTest extends CleanUpTestCase {
 
+	private static final Class THIS= CleanUpStressTest.class;
+
 	private static final String SRC_CONTAINER= "src";
 
 	protected static IPackageFragmentRoot fJunitSrcRoot;
@@ -57,7 +59,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
 	}
 
 	public static Test suite() {
-		return new ProjectTestSetup(new TestSuite(CleanUpStressTest.class));
+		return setUpTest(new TestSuite(THIS));
+	}
+
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 
 	private void addAllCUs(IJavaElement[] children, List result) throws JavaModelException {
@@ -384,7 +390,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("            } else if (args[i].equals(\"-nofilterstack\")) { //$NON-NLS-1$\n");
         buf.append("                BaseTestRunner.fgFilterStack = false;\n");
         buf.append("            } else if (args[i].equals(\"-c\")) { //$NON-NLS-1$\n");
-        buf.append("                if (args.length > i + 1) {\n");
+		buf.append("                if (args.length > (i + 1)) {\n");
         buf.append("                    suiteName = this.extractClassName(args[i + 1]);\n");
         buf.append("                } else {\n");
         buf.append("                    System.out.println(\"Missing Test class name\"); //$NON-NLS-1$\n");
@@ -3694,7 +3700,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        for (int i = 0; i < 100; i++) {\n");
         buf.append("            this.fFull.addElement(new Integer(i));\n");
         buf.append("        }\n");
-        buf.append("        Assert.assertTrue(this.fFull.size() == 100 + size);\n");
+		buf.append("        Assert.assertTrue(this.fFull.size() == (100 + size));\n");
         buf.append("    }\n");
         buf.append("    public void testClone() {\n");
         buf.append("        final Vector clone = (Vector) this.fFull.clone();\n");
@@ -3802,10 +3808,10 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("                actual = \"...\" + actual; //$NON-NLS-1$\n");
         buf.append("            }\n");
         buf.append("\n");
-        buf.append("            if (j < this.fExpected.length() - 1) {\n");
+		buf.append("            if (j < (this.fExpected.length() - 1)) {\n");
         buf.append("                expected = expected + \"...\"; //$NON-NLS-1$\n");
         buf.append("            }\n");
-        buf.append("            if (k < this.fActual.length() - 1) {\n");
+		buf.append("            if (k < (this.fActual.length() - 1)) {\n");
         buf.append("                actual = actual + \"...\"; //$NON-NLS-1$\n");
         buf.append("            }\n");
         buf.append("        }\n");

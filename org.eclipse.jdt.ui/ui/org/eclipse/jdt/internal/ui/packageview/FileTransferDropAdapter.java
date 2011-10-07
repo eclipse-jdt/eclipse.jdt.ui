@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,6 +74,7 @@ public class FileTransferDropAdapter extends JdtViewerDropAdapter implements Tra
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean validateDrop(Object target, int operation, TransferData transferType) {
 		return determineOperation(target, operation, transferType, DND.DROP_MOVE | DND.DROP_LINK | DND.DROP_COPY) != DND.DROP_NONE;
 	}
@@ -81,6 +82,7 @@ public class FileTransferDropAdapter extends JdtViewerDropAdapter implements Tra
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected int determineOperation(Object target, int operation, TransferData transferType, int operations) {
 
 		boolean isPackageFragment= target instanceof IPackageFragment;
@@ -107,6 +109,7 @@ public class FileTransferDropAdapter extends JdtViewerDropAdapter implements Tra
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean performDrop(final Object data) {
 		try {
 			final int currentOperation= getCurrentOperation();

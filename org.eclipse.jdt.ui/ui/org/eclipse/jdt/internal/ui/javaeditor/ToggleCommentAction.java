@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,7 +52,7 @@ public final class ToggleCommentAction extends TextEditorAction {
 	/** The document partitioning */
 	private String fDocumentPartitioning;
 	/** The comment prefixes */
-	private Map fPrefixesMap;
+	private Map<String, String[]> fPrefixesMap;
 
 	/**
 	 * Creates and initializes the action for the given text editor. The action
@@ -73,6 +73,7 @@ public final class ToggleCommentAction extends TextEditorAction {
 	 * Implementation of the <code>IAction</code> prototype. Checks if the selected
 	 * lines are all commented or not and uncomments/comments them respectively.
 	 */
+	@Override
 	public void run() {
 		if (fOperationTarget == null || fDocumentPartitioning == null || fPrefixesMap == null)
 			return;
@@ -129,7 +130,6 @@ public final class ToggleCommentAction extends TextEditorAction {
 			IRegion block= getTextBlockFromSelection(textSelection, document);
 			ITypedRegion[] regions= TextUtilities.computePartitioning(document, fDocumentPartitioning, block.getOffset(), block.getLength(), false);
 
-			int lineCount= 0;
 			int[] lines= new int[regions.length * 2]; // [startline, endline, startline, endline, ...]
 			for (int i= 0, j= 0; i < regions.length; i++, j+= 2) {
 				// start line of region
@@ -140,12 +140,11 @@ public final class ToggleCommentAction extends TextEditorAction {
 				if (length > 0)
 					offset--;
 				lines[j + 1]= (lines[j] == -1 ? -1 : document.getLineOfOffset(offset));
-				lineCount += lines[j + 1] - lines[j] + 1;
 			}
 
 			// Perform the check
 			for (int i= 0, j= 0; i < regions.length; i++, j += 2) {
-				String[] prefixes= (String[]) fPrefixesMap.get(regions[i].getType());
+				String[] prefixes= fPrefixesMap.get(regions[i].getType());
 				if (prefixes != null && prefixes.length > 0 && lines[j] >= 0 && lines[j + 1] >= 0)
 					if (!isBlockCommented(lines[j], lines[j + 1], prefixes, document))
 						return false;
@@ -268,6 +267,7 @@ public final class ToggleCommentAction extends TextEditorAction {
 	 * <code>ITextOperationTarget</code> adapter, and sets the enabled state
 	 * accordingly.
 	 */
+	@Override
 	public void update() {
 		super.update();
 
@@ -287,6 +287,7 @@ public final class ToggleCommentAction extends TextEditorAction {
 	/*
 	 * @see TextEditorAction#setEditor(ITextEditor)
 	 */
+	@Override
 	public void setEditor(ITextEditor editor) {
 		super.setEditor(editor);
 		fOperationTarget= null;
@@ -296,7 +297,7 @@ public final class ToggleCommentAction extends TextEditorAction {
 		fPrefixesMap= null;
 
 		String[] types= configuration.getConfiguredContentTypes(sourceViewer);
-		Map prefixesMap= new HashMap(types.length);
+		Map<String, String[]> prefixesMap= new HashMap<String, String[]>(types.length);
 		for (int i= 0; i < types.length; i++) {
 			String type= types[i];
 			String[] prefixes= configuration.getDefaultPrefixes(sourceViewer, type);

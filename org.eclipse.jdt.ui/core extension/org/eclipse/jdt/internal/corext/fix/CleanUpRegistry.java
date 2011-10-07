@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -260,9 +260,9 @@ public class CleanUpRegistry {
 	 * @return an array of clean ups
 	 * @since 3.5
 	 */
-	public synchronized ICleanUp[] createCleanUps(Set ids) {
+	public synchronized ICleanUp[] createCleanUps(Set<String> ids) {
 		ensureCleanUpsRegistered();
-		ArrayList result= new ArrayList(fCleanUpDescriptors.length);
+		ArrayList<ICleanUp> result= new ArrayList<ICleanUp>(fCleanUpDescriptors.length);
 		for (int i= 0; i < fCleanUpDescriptors.length; i++) {
 			if (ids == null || ids.contains(fCleanUpDescriptors[i].getId())) {
 				ICleanUp cleanUp= fCleanUpDescriptors[i].createCleanUp();
@@ -270,7 +270,7 @@ public class CleanUpRegistry {
 					result.add(cleanUp);
 			}
 		}
-		return (ICleanUp[])result.toArray(new ICleanUp[result.size()]);
+		return result.toArray(new ICleanUp[result.size()]);
 	}
 
 	/**
@@ -284,12 +284,12 @@ public class CleanUpRegistry {
 	public synchronized CleanUpTabPageDescriptor[] getCleanUpTabPageDescriptors(int kind) {
 		ensurePagesRegistered();
 
-		ArrayList result= new ArrayList();
+		ArrayList<CleanUpTabPageDescriptor> result= new ArrayList<CleanUpTabPageDescriptor>();
 		for (int i= 0; i < fPageDescriptors.length; i++) {
 			if (fPageDescriptors[i].getKind() == kind)
 				result.add(fPageDescriptors[i]);
 		}
-		return (CleanUpTabPageDescriptor[])result.toArray(new CleanUpTabPageDescriptor[result.size()]);
+		return result.toArray(new CleanUpTabPageDescriptor[result.size()]);
 	}
 
 	/**
@@ -321,7 +321,7 @@ public class CleanUpRegistry {
 			return;
 
 
-		final ArrayList descriptors= new ArrayList();
+		final ArrayList<CleanUpDescriptor> descriptors= new ArrayList<CleanUpDescriptor>();
 
 		IExtensionPoint point= Platform.getExtensionRegistry().getExtensionPoint(JavaPlugin.getPluginId(), EXTENSION_POINT_NAME);
 		IConfigurationElement[] elements= point.getConfigurationElements();
@@ -336,7 +336,7 @@ public class CleanUpRegistry {
 
 		// Make sure we filter those who fail or misbehave
 		for (int i= 0; i < descriptors.size(); i++) {
-			final CleanUpDescriptor cleanUpDescriptor= (CleanUpDescriptor)descriptors.get(i);
+			final CleanUpDescriptor cleanUpDescriptor= descriptors.get(i);
 			final boolean disable[]= new boolean[1];
 			ISafeRunnable runnable= new SafeRunnable() {
 				
@@ -355,6 +355,7 @@ public class CleanUpRegistry {
 						}
 					}
 				}
+				@Override
 				public void handleException(Throwable t) {
 					disable[0]= true;
 					String message= Messages.format(FixMessages.CleanUpRegistry_cleanUpCreation_error, new String[] { cleanUpDescriptor.getId(),
@@ -369,7 +370,7 @@ public class CleanUpRegistry {
 				descriptors.remove(i--);
 		}
 
-		fCleanUpDescriptors= (CleanUpDescriptor[])descriptors.toArray(new CleanUpDescriptor[descriptors.size()]);
+		fCleanUpDescriptors= descriptors.toArray(new CleanUpDescriptor[descriptors.size()]);
 		sort(fCleanUpDescriptors);
 
 	}
@@ -415,7 +416,7 @@ public class CleanUpRegistry {
 		if (fPageDescriptors != null)
 			return;
 		
-		ArrayList result= new ArrayList();
+		ArrayList<CleanUpTabPageDescriptor> result= new ArrayList<CleanUpTabPageDescriptor>();
 
 		IExtensionPoint point= Platform.getExtensionRegistry().getExtensionPoint(JavaPlugin.getPluginId(), EXTENSION_POINT_NAME);
 		IConfigurationElement[] elements= point.getConfigurationElements();
@@ -427,11 +428,11 @@ public class CleanUpRegistry {
 			}
 		}
 
-		fPageDescriptors= (CleanUpTabPageDescriptor[])result.toArray(new CleanUpTabPageDescriptor[result.size()]);
-		Arrays.sort(fPageDescriptors, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				String name1= ((CleanUpTabPageDescriptor)o1).getName();
-				String name2= ((CleanUpTabPageDescriptor)o2).getName();
+		fPageDescriptors= result.toArray(new CleanUpTabPageDescriptor[result.size()]);
+		Arrays.sort(fPageDescriptors, new Comparator<CleanUpTabPageDescriptor>() {
+			public int compare(CleanUpTabPageDescriptor o1, CleanUpTabPageDescriptor o2) {
+				String name1= o1.getName();
+				String name2= o2.getName();
 				return Collator.getInstance().compare(name1.replaceAll("&", ""), name2.replaceAll("&", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 		});
@@ -441,7 +442,7 @@ public class CleanUpRegistry {
 		if (fCleanUpInitializerDescriptors != null)
 			return;
 
-		ArrayList result= new ArrayList();
+		ArrayList<CleanUpInitializerDescriptor> result= new ArrayList<CleanUpInitializerDescriptor>();
 
 		IExtensionPoint point= Platform.getExtensionRegistry().getExtensionPoint(JavaPlugin.getPluginId(), EXTENSION_POINT_NAME);
 		IConfigurationElement[] elements= point.getConfigurationElements();
@@ -453,7 +454,7 @@ public class CleanUpRegistry {
 			}
 		}
 
-		fCleanUpInitializerDescriptors= (CleanUpInitializerDescriptor[])result.toArray(new CleanUpInitializerDescriptor[result.size()]);
+		fCleanUpInitializerDescriptors= result.toArray(new CleanUpInitializerDescriptor[result.size()]);
 	}
 
 	private static int getCleanUpKind(String kind) {

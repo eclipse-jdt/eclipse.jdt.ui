@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -100,6 +100,7 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.wizards.AbstractOpenWizardAction#createWizard()
 		 */
+		@Override
 		protected INewWizard createWizard() throws CoreException {
 			return (INewWizard) CoreUtility.createExtension(fConfigurationElement, ATT_CLASS);
 		}
@@ -153,12 +154,13 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 		return fMenu;
 	}
 
+	@Override
 	public void run() {
 		new OpenNewClassWizardAction().run();
 	}
 
 	public static OpenTypeWizardAction[] getActionFromDescriptors() {
-		ArrayList containers= new ArrayList();
+		ArrayList<OpenTypeWizardAction> containers= new ArrayList<OpenTypeWizardAction>();
 
 		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(PlatformUI.PLUGIN_ID, PL_NEW);
 		if (extensionPoint != null) {
@@ -170,7 +172,7 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 				}
 			}
 		}
-		return (OpenTypeWizardAction[]) containers.toArray(new OpenTypeWizardAction[containers.size()]);
+		return containers.toArray(new OpenTypeWizardAction[containers.size()]);
 	}
 
 	private static boolean isJavaTypeWizard(IConfigurationElement element) {

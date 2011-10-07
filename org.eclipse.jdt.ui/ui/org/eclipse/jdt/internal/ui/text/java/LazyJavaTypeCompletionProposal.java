@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -41,6 +41,7 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 
 /**
  * If passed compilation unit is not null, the replacement string will be seen as a qualified type name.
@@ -84,6 +85,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeReplacementString()
 	 */
+	@Override
 	protected String computeReplacementString() {
 		String replacement= super.computeReplacementString();
 
@@ -102,7 +104,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		if (fCompilationUnit != null && JavaModelUtil.isPackageInfo(fCompilationUnit))
 			return qualifiedTypeName;
 
- 		if (qualifiedTypeName.indexOf('.') == -1)
+		if (qualifiedTypeName.indexOf('.') == -1 && replacement.length() > 0)
  			// default package - no imports needed
  			return qualifiedTypeName;
 
@@ -187,6 +189,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#apply(org.eclipse.jface.text.IDocument, char, int)
 	 */
+	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 		try {
 			boolean insertClosingParenthesis= trigger == '(' && autocloseBrackets();
@@ -302,6 +305,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#isValidPrefix(java.lang.String)
 	 */
+	@Override
 	protected boolean isValidPrefix(String prefix) {
 		return isPrefix(prefix, getSimpleTypeName()) || isPrefix(prefix, getQualifiedTypeName());
 	}
@@ -309,6 +313,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal#getCompletionText()
 	 */
+	@Override
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		String prefix= getPrefix(document, completionOffset);
 
@@ -328,6 +333,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeTriggerCharacters()
 	 */
+	@Override
 	protected char[] computeTriggerCharacters() {
 		return isInJavadoc() ? JDOC_TYPE_TRIGGERS : TYPE_TRIGGERS;
 	}
@@ -335,6 +341,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeProposalInfo()
 	 */
+	@Override
 	protected ProposalInfo computeProposalInfo() {
 		if (fCompilationUnit != null) {
 			IJavaProject project= fCompilationUnit.getJavaProject();
@@ -347,6 +354,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeSortString()
 	 */
+	@Override
 	protected String computeSortString() {
 		// try fast sort string to avoid display string creation
 		return getSimpleTypeName() + Character.MIN_VALUE + getQualifiedTypeName();
@@ -355,6 +363,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeRelevance()
 	 */
+	@Override
 	protected int computeRelevance() {
 		/*
 		 * There are two histories: the RHS history remembers types used for the current expected
@@ -380,6 +389,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeContextInformation()
 	 * @since 3.3
 	 */
+	@Override
 	protected IContextInformation computeContextInformation() {
 		char[] signature= fProposal.getSignature();
 		char[][] typeParameters= Signature.getTypeArguments(signature);

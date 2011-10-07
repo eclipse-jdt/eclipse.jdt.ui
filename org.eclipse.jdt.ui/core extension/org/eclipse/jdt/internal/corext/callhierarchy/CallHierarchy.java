@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -39,6 +38,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 public class CallHierarchy {
@@ -71,7 +71,7 @@ public class CallHierarchy {
         settings.setValue(PREF_USE_IMPLEMENTORS, enabled);
     }
 
-    public Collection getImplementingMethods(IMethod method) {
+    public Collection<IJavaElement> getImplementingMethods(IMethod method) {
         if (isSearchUsingImplementorsEnabled()) {
             IJavaElement[] result = Implementors.getInstance().searchForImplementors(new IJavaElement[] {
                         method
@@ -82,10 +82,10 @@ public class CallHierarchy {
             }
         }
 
-        return new ArrayList(0);
+        return new ArrayList<IJavaElement>(0);
     }
 
-    public Collection getInterfaceMethods(IMethod method) {
+    public Collection<IJavaElement> getInterfaceMethods(IMethod method) {
         if (isSearchUsingImplementorsEnabled()) {
             IJavaElement[] result = Implementors.getInstance().searchForInterfaces(new IJavaElement[] {
                         method
@@ -96,7 +96,7 @@ public class CallHierarchy {
             }
         }
 
-        return new ArrayList(0);
+        return new ArrayList<IJavaElement>(0);
     }
 
     public MethodWrapper[] getCallerRoots(IMember[] members) {
@@ -108,7 +108,7 @@ public class CallHierarchy {
     }
 
 	private MethodWrapper[] getRoots(IMember[] members, boolean callers) {
-		ArrayList roots= new ArrayList();
+		ArrayList<MethodWrapper> roots= new ArrayList<MethodWrapper>();
     	for (int i= 0; i < members.length; i++) {
 			IMember member= members[i];
 			if (member instanceof IType) {
@@ -134,10 +134,10 @@ public class CallHierarchy {
 				addRoot(member, roots, callers);
 			}
 		}
-    	return (MethodWrapper[]) roots.toArray(new MethodWrapper[roots.size()]);
+    	return roots.toArray(new MethodWrapper[roots.size()]);
 	}
 
-	private void addRoot(IMember member, ArrayList roots, boolean callers) {
+	private void addRoot(IMember member, ArrayList<MethodWrapper> roots, boolean callers) {
 		MethodCall methodCall= new MethodCall(member);
 		MethodWrapper root;
 		if (callers) {
@@ -252,10 +252,10 @@ public class CallHierarchy {
         return fFilters;
     }
 
-    public static boolean arePossibleInputElements(List elements) {
+    public static boolean arePossibleInputElements(List<?> elements) {
 		if (elements.size() < 1)
 			return false;
-		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 			if (! isPossibleInputElement(iter.next()))
 				return false;
 		}
@@ -269,7 +269,7 @@ public class CallHierarchy {
 	 * @return an array of {@link StringMatcher} objects
 	 */
     private static StringMatcher[] parseList(String listString) {
-        List list = new ArrayList(10);
+        List<StringMatcher> list = new ArrayList<StringMatcher>(10);
         StringTokenizer tokenizer = new StringTokenizer(listString, ","); //$NON-NLS-1$
 
         while (tokenizer.hasMoreTokens()) {
@@ -277,14 +277,14 @@ public class CallHierarchy {
             list.add(new StringMatcher(textFilter, false, false));
         }
 
-        return (StringMatcher[]) list.toArray(new StringMatcher[list.size()]);
+        return list.toArray(new StringMatcher[list.size()]);
     }
 
     static CompilationUnit getCompilationUnitNode(IMember member, boolean resolveBindings) {
     	ITypeRoot typeRoot= member.getTypeRoot();
         try {
 	    	if (typeRoot.exists() && typeRoot.getBuffer() != null) {
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 				parser.setSource(typeRoot);
 				parser.setResolveBindings(resolveBindings);
 				return (CompilationUnit) parser.createAST(null);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore.OverlayKey;
 import org.eclipse.jdt.internal.ui.text.java.hover.SourceViewerInformationControl;
 
 
@@ -76,7 +77,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 
-		ArrayList overlayKeys= new ArrayList();
+		ArrayList<OverlayKey> overlayKeys= new ArrayList<OverlayKey>();
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MATCHING_BRACKETS));
@@ -132,14 +133,14 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		Link link= new Link(contents, SWT.NONE);
 		link.setText(text);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(shell, "org.eclipse.ui.preferencePages.GeneralTextEditor", null, null); //$NON-NLS-1$
+				if ("org.eclipse.ui.preferencePages.GeneralTextEditor".equals(e.text)) //$NON-NLS-1$
+					PreferencesUtil.createPreferenceDialogOn(shell, e.text, null, null);
+				else if ("org.eclipse.ui.preferencePages.ColorsAndFonts".equals(e.text)) //$NON-NLS-1$
+					PreferencesUtil.createPreferenceDialogOn(shell, e.text, null, "selectFont:org.eclipse.jdt.ui.editors.textfont"); //$NON-NLS-1$
 			}
 		});
-		// TODO replace by link-specific tooltips when
-		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
-		link.setToolTipText(PreferencesMessages.JavaEditorPreferencePage_link_tooltip);
-
 
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint= 150; // only expand further if anyone else requires it
@@ -342,6 +343,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		gd.horizontalIndent= indent;
 		link.setLayoutData(gd);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, null);
 			}
@@ -374,6 +376,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#initialize()
 	 */
+	@Override
 	public void initialize() {
 		super.initialize();
 		initializeDefaultColors();
@@ -410,6 +413,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#performDefaults()
 	 */
+	@Override
 	public void performDefaults() {
 		super.performDefaults();
 		initializeDefaultColors();

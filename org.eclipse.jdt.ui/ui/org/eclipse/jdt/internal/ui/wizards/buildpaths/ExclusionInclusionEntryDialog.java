@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,10 +63,10 @@ public class ExclusionInclusionEntryDialog extends StatusDialog {
 
 	private IContainer fCurrSourceFolder;
 	private String fExclusionPattern;
-	private List fExistingPatterns;
+	private List<String> fExistingPatterns;
 	private boolean fIsExclusion;
 
-	public ExclusionInclusionEntryDialog(Shell parent, boolean isExclusion, String patternToEdit, List existingPatterns, CPListElement entryToEdit) {
+	public ExclusionInclusionEntryDialog(Shell parent, boolean isExclusion, String patternToEdit, List<String> existingPatterns, CPListElement entryToEdit) {
 		super(parent);
 		fIsExclusion= isExclusion;
 		fExistingPatterns= existingPatterns;
@@ -115,6 +115,7 @@ public class ExclusionInclusionEntryDialog extends StatusDialog {
 	}
 
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
 
@@ -208,6 +209,7 @@ public class ExclusionInclusionEntryDialog extends StatusDialog {
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.EXCLUSION_PATTERN_DIALOG);
@@ -234,7 +236,7 @@ public class ExclusionInclusionEntryDialog extends StatusDialog {
 	}
 
 	public static IPath[] chooseExclusionPattern(Shell shell, IContainer currentSourceFolder, String title, String message, IPath initialPath, boolean multiSelection) {
-		Class[] acceptedClasses= new Class[] { IFolder.class, IFile.class };
+		Class<?>[] acceptedClasses= new Class[] { IFolder.class, IFile.class };
 		ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, multiSelection);
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses);
 

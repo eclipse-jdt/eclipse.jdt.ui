@@ -77,11 +77,6 @@
     
     <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="classname" value="org.eclipse.jdt.ui.tests.performance.PerformanceTestSuite"/>
-    </ant>
-  	
-    <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
-    <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerPerfTest"/>
     </ant>
     

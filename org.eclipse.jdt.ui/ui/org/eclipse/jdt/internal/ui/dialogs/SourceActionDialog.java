@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -99,8 +99,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	private static final String SETTINGS_COMMENTS= "Comments"; //$NON-NLS-1$
 
 
-	private List fInsertPositions;
-	private List fLabels;
+	private List<IJavaElement> fInsertPositions;
+	private List<String> fLabels;
 
 	/**
 	 * One of:
@@ -151,8 +151,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fFinal= asBoolean(fSettings.get(SETTINGS_FINAL_MODIFIER), false);
 		fSynchronized= asBoolean(fSettings.get(SETTINGS_SYNCHRONIZED_MODIFIER), false);
 		fGenerateComment= asBoolean(fSettings.get(SETTINGS_COMMENTS), generateCommentsDefault);
-		fInsertPositions= new ArrayList();
-		fLabels= new ArrayList();
+		fInsertPositions= new ArrayList<IJavaElement>();
+		fLabels= new ArrayList<String>();
 
 		IJavaElement[] members= fType.getChildren();
 
@@ -233,6 +233,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#close()
 	 */
+	@Override
 	public boolean close() {
 		fSettings.put(SETTINGS_VISIBILITY_MODIFIER, StringConverter.asString(fVisibilityModifier));
 		fSettings.put(SETTINGS_FINAL_MODIFIER, StringConverter.asString(fFinal));
@@ -254,6 +255,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	 * @param width  the width of the tree.
 	 * @param height the height of the tree.
 	 */
+	@Override
 	public void setSize(int width, int height) {
 		fWidth = width;
 		fHeight = height;
@@ -302,6 +304,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fSynchronized= value;
 	}
 
+	@Override
 	protected Composite createSelectionButtons(Composite composite) {
 		Composite buttonComposite= super.createSelectionButtons(composite);
 
@@ -315,6 +318,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return buttonComposite;
 	}
 
+	@Override
 	protected void buttonPressed(int buttonId) {
 		switch (buttonId) {
 			case IDialogConstants.OK_ID: {
@@ -334,6 +338,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	 * @param composite the parent composite
 	 * @return the label
 	 */
+	@Override
 	protected Label createMessageArea(Composite composite) {
 		if (getMessage() != null) {
 			Label label = new Label(composite,SWT.NONE);
@@ -347,6 +352,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	/*
 	 * @see Dialog#createDialogArea(Composite)
 	 */
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -417,7 +423,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	}
 
 	protected void openCodeTempatePage(String id) {
-		HashMap arg= new HashMap();
+		HashMap<String, String> arg= new HashMap<String, String>();
 		arg.put(CodeTemplatePreferencePage.DATA_SELECT_TEMPLATE, id);
 		PreferencesUtil.createPropertyDialogOn(getShell(), fType.getJavaProject().getProject(), CodeTemplatePreferencePage.PROP_ID, null, arg).open();
 	}
@@ -481,8 +487,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return visibilityComposite;
 	}
 
-	private List convertToIntegerList(int[] array) {
-		List result= new ArrayList(array.length);
+	private List<Integer> convertToIntegerList(int[] array) {
+		List<Integer> result= new ArrayList<Integer>(array.length);
 		for (int i= 0; i < array.length; i++) {
 			result.add(new Integer(array[i]));
 		}
@@ -492,6 +498,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.dialogs.CheckedTreeSelectionDialog#create()
 	 */
+	@Override
 	public void create() {
 		super.create();
 
@@ -513,7 +520,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	}
 
 	protected Composite createVisibilityControl(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
-		List allowedVisibilities= convertToIntegerList(availableVisibilities);
+		List<Integer> allowedVisibilities= convertToIntegerList(availableVisibilities);
 		if (allowedVisibilities.size() == 1)
 			return null;
 
@@ -547,6 +554,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			radio.setSelection(visibilityCode.equals(initialVisibility));
 			radio.setEnabled(allowedVisibilities.contains(visibilityCode));
 			radio.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent event) {
 					visibilityChangeListener.visibilityChanged(((Integer)event.widget.getData()).intValue());
 				}
@@ -624,6 +632,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		gd.widthHint= convertWidthInCharsToPixels(fWidth);
 		enterCombo.setLayoutData(gd);
 		enterCombo.addSelectionListener(new SelectionAdapter(){
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				int index= enterCombo.getSelectionIndex();
 				// Add persistence only if first or last method: http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
@@ -636,7 +645,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	}
 
 	private void fillWithPossibleInsertPositions(Combo combo) {
-		combo.setItems((String[]) fLabels.toArray(new String[fLabels.size()]));
+		combo.setItems(fLabels.toArray(new String[fLabels.size()]));
 		combo.select(fCurrentPositionIndex);
 	}
 
@@ -668,7 +677,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	 * Determine where in the file to enter the newly created methods.
 	 */
 	public IJavaElement getElementPosition() {
-		return (IJavaElement) fInsertPositions.get(fCurrentPositionIndex);
+		return fInsertPositions.get(fCurrentPositionIndex);
 	}
 
 	public int getInsertOffset() throws JavaModelException {

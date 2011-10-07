@@ -14,7 +14,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.Performance;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
 
@@ -47,13 +46,11 @@ public class MoveStaticMembersPerfTests2 extends AbstractMoveStaticMemberPrefTes
 	}
 
 	public void test_10_100() throws Exception {
-		setComment(Performance.EXPLAINS_DEGRADATION_COMMENT, "Performance slowed down because the code in the baseline was not correct and got fixed in 3.6 (see bug 304193)");
 		executeRefactoring(10, 100, true, 1);
 	}
 
 	public void test_10_1000() throws Exception {
 		tagAsSummary("Move static members - 10 CUs, 1000 Refs", Dimension.ELAPSED_PROCESS);
-		setComment(Performance.EXPLAINS_DEGRADATION_COMMENT, "Performance slowed down because the code in the baseline was not correct and got fixed in 3.6 (see bug 304193)");
 		executeRefactoring(10, 1000, true, 1);
 	}
 }

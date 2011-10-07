@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,20 +30,21 @@ public class ElementTypeResolver extends TemplateVariableResolver {
 	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
 	 * @since 3.3
 	 */
+	@Override
 	public void resolve(TemplateVariable variable, TemplateContext context) {
 		if (!(variable instanceof MultiVariable)) {
 			super.resolve(variable, context);
 			return;
 		}
 		MultiVariable mv= (MultiVariable) variable;
-		List params= variable.getVariableType().getParams();
+		List<String> params= variable.getVariableType().getParams();
 		if (params.isEmpty()) {
 			super.resolve(variable, context);
 			return;
 		}
 
 		JavaContext jc= (JavaContext) context;
-		String reference= (String) params.get(0);
+		String reference= params.get(0);
 		TemplateVariable refVar= jc.getTemplateVariable(reference);
 		if (refVar instanceof JavaVariable) {
 			JavaVariable jvar= (JavaVariable) refVar;

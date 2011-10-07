@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,18 +46,18 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
  */
 public class DeleteModifications extends RefactoringModifications {
 
-	private List/*<IJavaElement>*/ fDelete;
+	private List<IJavaElement> fDelete;
 
 	/**
 	 * Contains the actual packages when executing
 	 * <code>handlePackageFragmentDelete</code>. This is part of the
 	 * algorithm to check if a parent folder can be deleted.
 	 */
-	private List/*<IPackageFragment>*/ fPackagesToDelete;
+	private List<IPackageFragment> fPackagesToDelete;
 
 	public DeleteModifications() {
-		fDelete= new ArrayList();
-		fPackagesToDelete= new ArrayList();
+		fDelete= new ArrayList<IJavaElement>();
+		fPackagesToDelete= new ArrayList<IPackageFragment>();
 	}
 
 	public void delete(IResource resource) {
@@ -101,7 +101,7 @@ public class DeleteModifications extends RefactoringModifications {
 				return;
 			case IJavaElement.PACKAGE_FRAGMENT:
 				fDelete.add(element);
-				fPackagesToDelete.add(element);
+				fPackagesToDelete.add((IPackageFragment) element);
 				return;
 			case IJavaElement.COMPILATION_UNIT:
 				fDelete.add(element);
@@ -120,28 +120,30 @@ public class DeleteModifications extends RefactoringModifications {
 	 * @return a List of IResources that are removed by package deletes
 	 * @throws CoreException
 	 */
-	public List/*<IResource>*/ postProcess() throws CoreException {
-		ArrayList resourcesCollector= new ArrayList();
-		for (Iterator iter= fPackagesToDelete.iterator(); iter.hasNext();) {
-			IPackageFragment pack= (IPackageFragment) iter.next();
+	public List<IResource> postProcess() throws CoreException {
+		ArrayList<IResource> resourcesCollector= new ArrayList<IResource>();
+		for (Iterator<IPackageFragment> iter= fPackagesToDelete.iterator(); iter.hasNext();) {
+			IPackageFragment pack= iter.next();
 			handlePackageFragmentDelete(pack, resourcesCollector);
 		}
 		return resourcesCollector;
 	}
 
+	@Override
 	public void buildDelta(IResourceChangeDescriptionFactory deltaFactory) {
 		getResourceModifications().buildDelta(deltaFactory);
 	}
 
+	@Override
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {
-		List result= new ArrayList();
-		for (Iterator iter= fDelete.iterator(); iter.hasNext();) {
+		List<RefactoringParticipant> result= new ArrayList<RefactoringParticipant>();
+		for (Iterator<IJavaElement> iter= fDelete.iterator(); iter.hasNext();) {
 			result.addAll(Arrays.asList(ParticipantManager.loadDeleteParticipants(status,
 				owner, iter.next(),
 				new DeleteArguments(), natures, shared)));
 		}
 		result.addAll(Arrays.asList(getResourceModifications().getParticipants(status, owner, natures, shared)));
-		return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
+		return result.toArray(new RefactoringParticipant[result.size()]);
 	}
 
 	/**
@@ -160,7 +162,7 @@ public class DeleteModifications extends RefactoringModifications {
 	 * @param resourcesCollector a collector for IResources to be deleted
 	 * @throws CoreException
 	 */
-	private void handlePackageFragmentDelete(IPackageFragment pack, ArrayList resourcesCollector) throws CoreException {
+	private void handlePackageFragmentDelete(IPackageFragment pack, ArrayList<IResource> resourcesCollector) throws CoreException {
 		final IContainer container= (IContainer)pack.getResource();
 		if (container == null)
 			return;

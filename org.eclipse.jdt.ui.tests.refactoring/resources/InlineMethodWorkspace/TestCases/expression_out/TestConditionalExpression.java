@@ -5,6 +5,6 @@ public class TestConditionalExpression {
 		return k == 3 ? s.hashCode() : 3;
 	}
 	void f(int p) {
-		int u = (p == 3 ? this.hashCode() : 3);
+		int u = p == 3 ? this.hashCode() : 3;
 	}
 }

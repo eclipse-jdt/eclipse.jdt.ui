@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
@@ -76,6 +77,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 		fImportedNames= null;
 	}
 
+	@Override
 	public int findInContext(String qualifier, String name, int kind) {
 		IBinding[] declarationsInScope= getDeclarationsInScope();
 		for (int i= 0; i < declarationsInScope.length; i++) {
@@ -105,9 +107,9 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 			}
 		}
 
-		List list= fCompilationUnit.types();
-		for (Iterator iter= list.iterator(); iter.hasNext();) {
-			AbstractTypeDeclaration type= (AbstractTypeDeclaration)iter.next();
+		List<AbstractTypeDeclaration> list= fCompilationUnit.types();
+		for (Iterator<AbstractTypeDeclaration> iter= list.iterator(); iter.hasNext();) {
+			AbstractTypeDeclaration type= iter.next();
 			ITypeBinding binding= type.resolveBinding();
 			if (binding != null) {
 				if (isSameType(binding, qualifier, name)) {
@@ -220,9 +222,9 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 			if (javaElement != null)
 				project= javaElement.getJavaProject();
 
-			List imports= new ArrayList();
+			List<SimpleName> imports= new ArrayList<SimpleName>();
 			ImportReferencesCollector.collect(fCompilationUnit, project, null, imports, null);
-			fImportedNames= (Name[])imports.toArray(new Name[imports.size()]);
+			fImportedNames= imports.toArray(new Name[imports.size()]);
 		}
 		return fImportedNames;
 	}

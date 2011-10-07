@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -138,6 +138,7 @@ public class CoreUtility {
 		/* (non-Javadoc)
 		 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 		 */
+		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			synchronized (getClass()) {
 				if (monitor.isCanceled()) {
@@ -173,6 +174,7 @@ public class CoreUtility {
 			}
 			return Status.OK_STATUS;
 		}
+		@Override
 		public boolean belongsTo(Object family) {
 			return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
 		}

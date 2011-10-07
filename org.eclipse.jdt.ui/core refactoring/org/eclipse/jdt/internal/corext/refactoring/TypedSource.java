@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -38,6 +37,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
+
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * A tuple used to keep source of an element and its type.
@@ -82,6 +83,7 @@ public class TypedSource {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object other) {
 		if (! (other instanceof TypedSource))
 			return false;
@@ -93,6 +95,7 @@ public class TypedSource {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return getSource().hashCode() ^ (97 * getType());
 	}
@@ -112,27 +115,27 @@ public class TypedSource {
 		Arrays.sort(typedSources, createTypeComparator());
 	}
 
-	public static Comparator createTypeComparator() {
-		return new Comparator(){
-			public int compare(Object arg0, Object arg1) {
-				return ((TypedSource)arg0).getType() - ((TypedSource)arg1).getType();
+	public static Comparator<TypedSource> createTypeComparator() {
+		return new Comparator<TypedSource>(){
+			public int compare(TypedSource arg0, TypedSource arg1) {
+				return arg0.getType() - arg1.getType();
 			}
 		};
 	}
 	public static TypedSource[] createTypedSources(IJavaElement[] javaElements) throws CoreException {
 		//Map<ICompilationUnit, List<IJavaElement>>
-		Map grouped= ReorgUtils.groupByCompilationUnit(Arrays.asList(javaElements));
-		List result= new ArrayList(javaElements.length);
-		for (Iterator iter= grouped.keySet().iterator(); iter.hasNext();) {
-			ICompilationUnit cu= (ICompilationUnit) iter.next();
-			for (Iterator iterator= ((List) grouped.get(cu)).iterator(); iterator.hasNext();) {
+		Map<ICompilationUnit, List<IJavaElement>> grouped= ReorgUtils.groupByCompilationUnit(Arrays.asList(javaElements));
+		List<TypedSource> result= new ArrayList<TypedSource>(javaElements.length);
+		for (Iterator<ICompilationUnit> iter= grouped.keySet().iterator(); iter.hasNext();) {
+			ICompilationUnit cu= iter.next();
+			for (Iterator<IJavaElement> iterator= grouped.get(cu).iterator(); iterator.hasNext();) {
 				SourceTuple tuple= new SourceTuple(cu);
-				TypedSource[] ts= createTypedSources((IJavaElement) iterator.next(), tuple);
+				TypedSource[] ts= createTypedSources(iterator.next(), tuple);
 				if (ts != null)
 					result.addAll(Arrays.asList(ts));
 			}
 		}
-		return (TypedSource[]) result.toArray(new TypedSource[result.size()]);
+		return result.toArray(new TypedSource[result.size()]);
 	}
 
 	private static TypedSource[] createTypedSources(IJavaElement elem, SourceTuple tuple) throws CoreException {
@@ -147,11 +150,11 @@ public class TypedSource {
 
 	private static TypedSource[] createTypedSourcesForImportContainer(SourceTuple tuple, IImportContainer container) throws JavaModelException, CoreException {
 		IJavaElement[] imports= container.getChildren();
-		List result= new ArrayList(imports.length);
+		List<TypedSource> result= new ArrayList<TypedSource>(imports.length);
 		for (int i= 0; i < imports.length; i++) {
 			result.addAll(Arrays.asList(createTypedSources(imports[i], tuple)));
 		}
-		return (TypedSource[]) result.toArray(new TypedSource[result.size()]);
+		return result.toArray(new TypedSource[result.size()]);
 	}
 
 	private static String getFieldSource(IField field, SourceTuple tuple) throws CoreException {
@@ -161,7 +164,7 @@ public class TypedSource {
 				return source;
 		} else {
 			if (tuple.node == null) {
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 				parser.setSource(tuple.unit);
 				tuple.node= (CompilationUnit) parser.createAST(null);
 			}

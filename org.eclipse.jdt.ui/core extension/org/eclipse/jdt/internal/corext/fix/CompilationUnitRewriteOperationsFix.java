@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,6 +81,7 @@ public class CompilationUnitRewriteOperationsFix extends AbstractFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public LinkedProposalModel getLinkedPositions() {
 		if (!fLinkedProposalModel.hasLinkedPositions())
 			return null;
@@ -110,6 +111,7 @@ public class CompilationUnitRewriteOperationsFix extends AbstractFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getAdditionalProposalInfo(){
 		StringBuffer sb= new StringBuffer();
 		for (int i= 0; i < fOperations.length; i++) {

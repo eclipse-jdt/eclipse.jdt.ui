@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.packageview.PackageExplorerProblemsDecorator;
 
 /**
  * A {@link JavaElementImageDescriptor} consists of a base image and several adornments. The adornments
@@ -88,10 +87,15 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 
 	/**
 	 * Flag to render the build path error adornment.
-	 * @since 3.6
+	 * @since 3.7
 	 */
-	//TODO: make API in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=308672
-	final static int BUILDPATH_ERROR= PackageExplorerProblemsDecorator.BUILDPATH_ERROR;
+	public final static int BUILDPATH_ERROR= 0x2000;
+
+	/**
+	 * Flag to render the 'native' adornment.
+	 * @since 3.7
+	 */
+	public final static int NATIVE= 	0x4000;
 
 	private ImageDescriptor fBaseImage;
 	private int fFlags;
@@ -118,7 +122,8 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 * Sets the descriptors adornments. Valid values are: {@link #ABSTRACT}, {@link #FINAL},
 	 * {@link #SYNCHRONIZED}, {@link #STATIC}, {@link #RUNNABLE}, {@link #WARNING},
 	 * {@link #ERROR}, {@link #OVERRIDES}, {@link #IMPLEMENTS}, {@link #CONSTRUCTOR},
-	 * {@link #DEPRECATED}, {@link #VOLATILE}, {@link #TRANSIENT} or any combination of those.
+	 * {@link #DEPRECATED}, {@link #VOLATILE}, {@link #TRANSIENT}, {@link #BUILDPATH_ERROR},
+	 * {@link #NATIVE}, or any combination of those.
 	 *
 	 * @param adornments the image descriptors adornments
 	 */
@@ -159,6 +164,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	/* (non-Javadoc)
 	 * Method declared in CompositeImageDescriptor
 	 */
+	@Override
 	protected Point getSize() {
 		return fSize;
 	}
@@ -166,6 +172,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	/* (non-Javadoc)
 	 * Method declared on Object.
 	 */
+	@Override
 	public boolean equals(Object object) {
 		if (object == null || !JavaElementImageDescriptor.class.equals(object.getClass()))
 			return false;
@@ -177,6 +184,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	/* (non-Javadoc)
 	 * Method declared on Object.
 	 */
+	@Override
 	public int hashCode() {
 		return fBaseImage.hashCode() | fFlags | fSize.hashCode();
 	}
@@ -184,6 +192,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	/* (non-Javadoc)
 	 * Method declared in CompositeImageDescriptor
 	 */
+	@Override
 	protected void drawCompositeImage(int width, int height) {
 		ImageData bg= getImageData(fBaseImage);
 
@@ -257,7 +266,9 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		if ((fFlags & STATIC) != 0) {
 			addTopRightImage(JavaPluginImages.DESC_OVR_STATIC, pos);
 		}
-
+		if ((fFlags & NATIVE) != 0) {
+			addTopRightImage(JavaPluginImages.DESC_OVR_NATIVE, pos);
+		}
 	}
 
 	private void drawBottomRight() {
@@ -269,6 +280,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		int syncAndOver= SYNCHRONIZED | OVERRIDES;
 		int syncAndImpl= SYNCHRONIZED | IMPLEMENTS;
 
+		// methods:
 		if ((flags & syncAndOver) == syncAndOver) { // both flags set: merged overlay image
 			addBottomRightImage(JavaPluginImages.DESC_OVR_SYNCH_AND_OVERRIDES, pos);
 			flags &= ~syncAndOver; // clear to not render again
@@ -285,9 +297,13 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		if ((flags & SYNCHRONIZED) != 0) {
 			addBottomRightImage(JavaPluginImages.DESC_OVR_SYNCH, pos);
 		}
+		
+		// types:
 		if ((flags & RUNNABLE) != 0) {
 			addBottomRightImage(JavaPluginImages.DESC_OVR_RUN, pos);
 		}
+		
+		// fields:
 		if ((flags & TRANSIENT) != 0) {
 			addBottomRightImage(JavaPluginImages.DESC_OVR_TRANSIENT, pos);
 		}
@@ -298,7 +314,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		if ((fFlags & ERROR) != 0) {
 			addBottomLeftImage(JavaPluginImages.DESC_OVR_ERROR, pos);
 		}
-		if ((fFlags & PackageExplorerProblemsDecorator.BUILDPATH_ERROR) != 0) {
+		if ((fFlags & BUILDPATH_ERROR) != 0) {
 			addBottomLeftImage(JavaPluginImages.DESC_OVR_BUILDPATH_ERROR, pos);
 		}
 		if ((fFlags & WARNING) != 0) {

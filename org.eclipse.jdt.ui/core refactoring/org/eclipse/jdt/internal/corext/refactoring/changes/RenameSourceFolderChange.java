@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,14 +87,17 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 		super(resourcePath, oldName, newName, stampToRestore);
 	}
 
+	@Override
 	protected IPath createNewPath() {
 		return getResourcePath().removeLastSegments(1).append(getNewName());
 	}
 
+	@Override
 	protected Change createUndoChange(long stampToRestore) {
 		return new RenameSourceFolderChange(createNewPath(), getNewName(), getOldName(), stampToRestore);
 	}
 
+	@Override
 	protected void doRename(IProgressMonitor pm) throws CoreException {
 		IPackageFragmentRoot sourceFolder= getSourceFolder();
 		if (sourceFolder != null)
@@ -112,6 +115,7 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 		return IPackageFragmentRoot.DESTINATION_PROJECT_CLASSPATH | IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH | IPackageFragmentRoot.OTHER_REFERRING_PROJECTS_CLASSPATH | IPackageFragmentRoot.REPLACE;
 	}
 
+	@Override
 	public String getName() {
 		String[] keys= { BasicElementLabels.getJavaElementName(getOldName()), BasicElementLabels.getJavaElementName(getNewName())};
 		return Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_rename, keys);
@@ -125,6 +129,7 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 		return (IPackageFragmentRoot) getModifiedElement();
 	}
 
+	@Override
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= super.isValid(pm);
 		if (result.hasFatalError())

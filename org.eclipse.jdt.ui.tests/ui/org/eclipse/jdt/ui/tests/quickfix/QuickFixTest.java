@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -53,11 +54,11 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.correction.GetterSetterCorrectionSubProcessor.SelfEncapsulateFieldProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.ReorgCorrectionsSubProcessor;
-import org.eclipse.jdt.internal.ui.text.correction.GetterSetterCorrectionSubProcessor.SelfEncapsulateFieldProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
@@ -70,28 +71,32 @@ public class QuickFixTest extends TestCase {
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
-		suite.addTest(SerialVersionQuickFixTest.allTests());
-		suite.addTest(UtilitiesTest.allTests());
-		suite.addTest(UnresolvedTypesQuickFixTest.allTests());
-		suite.addTest(UnresolvedVariablesQuickFixTest.allTests());
-		suite.addTest(UnresolvedMethodsQuickFixTest.allTests());
-		suite.addTest(ReturnTypeQuickFixTest.allTests());
-		suite.addTest(LocalCorrectionsQuickFixTest.allTests());
-		suite.addTest(TypeMismatchQuickFixTests.allTests());
-		suite.addTest(ReorgQuickFixTest.allTests());
-		suite.addTest(ModifierCorrectionsQuickFixTest.allTests());
-		suite.addTest(GetterSetterQuickFixTest.allTests());
-		suite.addTest(AssistQuickFixTest.allTests());
+		suite.addTest(SerialVersionQuickFixTest.suite());
+		suite.addTest(UtilitiesTest.suite());
+		suite.addTest(UnresolvedTypesQuickFixTest.suite());
+		suite.addTest(UnresolvedVariablesQuickFixTest.suite());
+		suite.addTest(UnresolvedMethodsQuickFixTest.suite());
+		suite.addTest(ReturnTypeQuickFixTest.suite());
+		suite.addTest(LocalCorrectionsQuickFixTest.suite());
+		suite.addTest(LocalCorrectionsQuickFixTest17.suite());
+		suite.addTest(TypeMismatchQuickFixTests.suite());
+		suite.addTest(ReorgQuickFixTest.suite());
+		suite.addTest(ModifierCorrectionsQuickFixTest.suite());
+		suite.addTest(ModifierCorrectionsQuickFixTest17.suite());
+		suite.addTest(GetterSetterQuickFixTest.suite());
+		suite.addTest(AssistQuickFixTest.suite());
+		suite.addTest(AssistQuickFixTest17.suite());
 		suite.addTest(ChangeNonStaticToStaticTest.suite());
-		suite.addTest(MarkerResolutionTest.allTests());
-		suite.addTest(JavadocQuickFixTest.allTests());
-		suite.addTest(ConvertForLoopQuickFixTest.allTests());
-		suite.addTest(ConvertIterableLoopQuickFixTest.allTests());
-		suite.addTest(AdvancedQuickAssistTest.allTests());
-		suite.addTest(CleanUpTestCase.allTests());
-		suite.addTest(QuickFixEnablementTest.allTests());
-		suite.addTest(SurroundWithTemplateTest.allTests());
-		suite.addTest(TypeParameterMismatchTest.allTests());
+		suite.addTest(MarkerResolutionTest.suite());
+		suite.addTest(JavadocQuickFixTest.suite());
+		suite.addTest(ConvertForLoopQuickFixTest.suite());
+		suite.addTest(ConvertIterableLoopQuickFixTest.suite());
+		suite.addTest(AdvancedQuickAssistTest.suite());
+		suite.addTest(AdvancedQuickAssistTest17.suite());
+		suite.addTest(CleanUpTestCase.suite());
+		suite.addTest(QuickFixEnablementTest.suite());
+		suite.addTest(SurroundWithTemplateTest.suite());
+		suite.addTest(TypeParameterMismatchTest.suite());
 
 		return new ProjectTestSetup(suite);
 	}
@@ -140,14 +145,23 @@ public class QuickFixTest extends TestCase {
 		StringAsserts.assertEqualStringsIgnoreOrder(actuals, expecteds);
 	}
 
+	public static void assertEqualStringsIgnoreOrder(Collection actuals, Collection expecteds) {
+		String[] act= (String[]) actuals.toArray(new String[actuals.size()]);
+		String[] exp= (String[]) expecteds.toArray(new String[actuals.size()]);
+		StringAsserts.assertEqualStringsIgnoreOrder(act, exp);
+	}
 
 	public static void assertExpectedExistInProposals(List actualProposals, String[] expecteds) throws CoreException, BadLocationException {
 		StringAsserts.assertExpectedExistInProposals(getPreviewContents(actualProposals), expecteds);
 	}
 
 
-	public static void assertCommandIdDoesNotExists(List actualProposals, String commandId) {
+	public static void assertCommandIdDoesNotExist(List actualProposals, String commandId) {
 		assertTrue(findProposalByCommandId(commandId, actualProposals) == null);
+	}
+
+	public static void assertProposalDoesNotExist(List actualProposals, String proposalName) {
+		assertTrue(findProposalByName(proposalName, actualProposals) == null);
 	}
 
 	public static TypeDeclaration findTypeDeclaration(CompilationUnit astRoot, String simpleTypeName) {
@@ -199,12 +213,19 @@ public class QuickFixTest extends TestCase {
 		return collectCorrections(cu, astRoot, nProblems, null);
 	}
 
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, int problem) throws CoreException {
+		return collectCorrections(cu, astRoot, nProblems, problem, null);
+	}
 
 	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, AssistContext context) throws CoreException {
+		return collectCorrections(cu, astRoot, nProblems, 0, context);
+	}
+
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, int problem, AssistContext context) throws CoreException {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOfProblems(nProblems, problems);
-		
-		return collectCorrections(cu, problems[0], context);
+
+		return collectCorrections(cu, problems[problem], context);
 	}
 
 	protected static void assertNumberOfProblems(int nProblems, IProblem[] problems) {
@@ -328,6 +349,12 @@ public class QuickFixTest extends TestCase {
 		return ASTResolving.createQuickFixAST(cu, null);
 	}
 
+	public static void addPreviewAndExpected(List proposals, StringBuffer expected, ArrayList expecteds, ArrayList previews) throws CoreException {
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(expecteds.size());
+		previews.add(getPreviewContent(proposal));
+		expecteds.add(expected.toString());
+	}
+
 
 	protected static String[] getPreviewContents(List proposals) throws CoreException, BadLocationException {
 		String[] res= new String[proposals.size()];
@@ -416,6 +443,15 @@ public class QuickFixTest extends TestCase {
 					return (ICommandAccess) curr;
 				}
 			}
+		}
+		return null;
+	}
+
+	protected static ICompletionProposal findProposalByName(String name, List proposals) {
+		for (int i= 0; i < proposals.size(); i++) {
+			Object curr= proposals.get(i);
+			if (curr instanceof ICompletionProposal && name.equals(((ICompletionProposal)curr).getDisplayString()))
+				return (ICompletionProposal)curr;
 		}
 		return null;
 	}

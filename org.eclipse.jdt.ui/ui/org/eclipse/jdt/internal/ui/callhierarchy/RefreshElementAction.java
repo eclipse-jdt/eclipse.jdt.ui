@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 IBM Corporation and others.
+ * Copyright (c) 2009, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,7 @@ import java.util.List;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.PlatformUI;
@@ -40,7 +38,6 @@ public class RefreshElementAction extends Action {
 	/**
 	 * Creates the action to refresh a single element in the call hierarchy.
 	 *
-	 * @param part the call hierarchy view part
 	 * @param viewer the call hierarchy viewer
 	 */
 	public RefreshElementAction(CallHierarchyViewer viewer) {
@@ -48,25 +45,24 @@ public class RefreshElementAction extends Action {
 		setText(CallHierarchyMessages.RefreshSingleElementAction_text);
 		setToolTipText(CallHierarchyMessages.RefreshSingleElementAction_tooltip);
 		setDescription(CallHierarchyMessages.RefreshSingleElementAction_description);
-		JavaPluginImages.setLocalImageDescriptors(this, "refresh_nav.gif");//$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "refresh.gif");//$NON-NLS-1$
 		setActionDefinitionId(IWorkbenchCommandConstants.FILE_REFRESH);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REFRESH_SINGLE_ELEMENT_ACTION);
-		setEnabled(!fViewer.getSelection().isEmpty());
-
-		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				setEnabled(!fViewer.getSelection().isEmpty());
-			}
-		});
+		setEnabled(true);
 	}
 
 	/**
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
+	@Override
 	public void run() {
 		IStructuredSelection selection= (IStructuredSelection)getSelection();
-		List toExpand= new ArrayList();
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		if (selection.isEmpty()) {
+			fViewer.getPart().refresh();
+			return;
+		}
+		List<MethodWrapper> toExpand= new ArrayList<MethodWrapper>();
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			MethodWrapper element= (MethodWrapper)iter.next();
 			boolean isExpanded= fViewer.getExpandedState(element);
 			element.removeFromCache();
@@ -76,8 +72,8 @@ public class RefreshElementAction extends Action {
 			}
 			fViewer.refresh(element);
 		}
-		for (Iterator iter= toExpand.iterator(); iter.hasNext();) {
-			MethodWrapper elem= (MethodWrapper)iter.next();
+		for (Iterator<MethodWrapper> iter= toExpand.iterator(); iter.hasNext();) {
+			MethodWrapper elem= iter.next();
 			fViewer.setExpandedState(elem, true);
 		}
 	}
@@ -89,16 +85,5 @@ public class RefreshElementAction extends Action {
 	 */
 	private ISelection getSelection() {
 		return fViewer.getSelection();
-	}
-
-	/**
-	 * Returns <code>true</code> if the action can be added to the menu, <code>false</code>
-	 * otherwise.
-	 * 
-	 * @return <code>true</code> if the action can be added to the menu, <code>false</code> otherwise
-	 * @since 3.6
-	 */
-	protected boolean canActionBeAdded() {
-		return fViewer.getSelection().isEmpty() ? false : true;
 	}
 }

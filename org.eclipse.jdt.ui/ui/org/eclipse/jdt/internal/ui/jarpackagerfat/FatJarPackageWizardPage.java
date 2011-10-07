@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -112,18 +112,22 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		public ExtractLibraryHandler() {
 		}
 
+		@Override
 		public FatJarAntExporter getAntExporter(IPath antScriptLocation, IPath jarLocation, ILaunchConfiguration launchConfiguration) {
 			return new UnpackFatJarAntExporter(antScriptLocation, jarLocation, launchConfiguration);
 		}
 
+		@Override
 		public FatJarBuilder getBuilder(JarPackageData jarPackageData) {
 			return new UnpackFatJarBuilder();
 		}
 
+		@Override
 		public int getID() {
 			return ID;
 		}
 
+		@Override
 		public boolean isShowWarning() {
 			return true;
 		}
@@ -136,18 +140,22 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		public PackageLibraryHandler() {
 		}
 
+		@Override
 		public FatJarAntExporter getAntExporter(IPath antScriptLocation, IPath jarLocation, ILaunchConfiguration launchConfiguration) {
 			return new FatJarRsrcUrlAntExporter(antScriptLocation, jarLocation, launchConfiguration);
 		}
 
+		@Override
 		public FatJarBuilder getBuilder(JarPackageData jarPackageData) {
 			return new FatJarRsrcUrlBuilder();
 		}
 
+		@Override
 		public int getID() {
 			return ID;
 		}
 
+		@Override
 		public boolean isShowWarning() {
 			return false;
 		}
@@ -160,18 +168,22 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		public CopyLibraryHandler() {
 		}
 
+		@Override
 		public FatJarAntExporter getAntExporter(IPath antScriptLocation, IPath jarLocation, ILaunchConfiguration launchConfiguration) {
 			return new UnpackJarAntExporter(antScriptLocation, jarLocation, launchConfiguration);
 		}
 
+		@Override
 		public FatJarBuilder getBuilder(JarPackageData jarPackageData) {
 			return new UnpackJarBuilder(jarPackageData);
 		}
 
+		@Override
 		public int getID() {
 			return ID;
 		}
 
+		@Override
 		public boolean isShowWarning() {
 			return false;
 		}
@@ -205,6 +217,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public ILaunchConfiguration getLaunchConfiguration() {
 			return fLaunchConfiguration;
 		}
@@ -212,6 +225,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public String getLaunchConfigurationName() {
 			StringBuffer result= new StringBuffer();
 
@@ -222,6 +236,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			return result.toString();
 		}
 
+		@Override
 		public boolean hasProgramArguments() {
 			try {
 				return fLaunchConfiguration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, (String) null) != null;
@@ -231,6 +246,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			}
 		}
 
+		@Override
 		public boolean hasVMArguments() {
 			try {
 				return fLaunchConfiguration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, (String) null) != null;
@@ -258,7 +274,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	/**
 	 * Model for the launch combo box. Element: {@link LaunchConfigurationElement}
 	 */
-	private final ArrayList fLauchConfigurationModel;
+	private final ArrayList<LaunchConfigurationElement> fLauchConfigurationModel;
 
 	private Combo fLaunchConfigurationCombo;
 
@@ -279,12 +295,13 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		setTitle(FatJarPackagerMessages.JarPackageWizardPage_title);
 		setDescription(FatJarPackagerMessages.FatJarPackageWizardPage_description);
 		fJarPackage= jarPackage;
-		fLauchConfigurationModel= new ArrayList();
+		fLauchConfigurationModel= new ArrayList<LaunchConfigurationElement>();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -322,6 +339,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		createDestinationGroup(composite);
 	}
 
+	@Override
 	protected String getDestinationLabel() {
 		return null;
 	}
@@ -334,7 +352,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fLauchConfigurationModel.addAll(Arrays.asList(getLaunchConfigurations()));
 		String[] names= new String[fLauchConfigurationModel.size()];
 		for (int i= 0, size= fLauchConfigurationModel.size(); i < size; i++) {
-			LaunchConfigurationElement element= (LaunchConfigurationElement) fLauchConfigurationModel.get(i);
+			LaunchConfigurationElement element= fLauchConfigurationModel.get(i);
 			names[i]= element.getLaunchConfigurationName();
 		}
 		fLaunchConfigurationCombo.setItems(names);
@@ -375,6 +393,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fAntScriptBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		SWTUtil.setButtonDimensionHint(fAntScriptBrowseButton);
 		fAntScriptBrowseButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleAntScriptBrowseButtonPressed();
 			}
@@ -500,6 +519,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	/**
 	 * Stores the widget values in the JAR package.
 	 */
+	@Override
 	protected void updateModel() {
 		super.updateModel();
 
@@ -511,6 +531,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fAntScriptLocation= path;
 	}
 
+	@Override
 	protected void updateWidgetEnablements() {
 		boolean antScriptSave= fAntScriptSaveCheckbox.getSelection();
 		fAntScriptLabel.setEnabled(antScriptSave);
@@ -518,6 +539,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fAntScriptBrowseButton.setEnabled(antScriptSave);
 	}
 
+	@Override
 	public boolean isPageComplete() {
 		clearMessages();
 		boolean complete= validateDestinationGroup();
@@ -531,7 +553,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		if (index == -1)
 			return false;
 
-		LaunchConfigurationElement element= (LaunchConfigurationElement) fLauchConfigurationModel.get(index);
+		LaunchConfigurationElement element= fLauchConfigurationModel.get(index);
 		if (element.hasProgramArguments())
 			setWarningMessage(FatJarPackagerMessages.FatJarPackageWizardPage_warning_launchConfigContainsProgramArgs);
 
@@ -618,7 +640,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	}
 
 	private LaunchConfigurationElement[] getLaunchConfigurations() {
-		ArrayList result= new ArrayList();
+		ArrayList<ExistingLaunchConfigurationElement> result= new ArrayList<ExistingLaunchConfigurationElement>();
 
 		try {
 			ILaunchManager manager= DebugPlugin.getDefault().getLaunchManager();
@@ -636,12 +658,12 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			JavaPlugin.log(e);
 		}
 
-		return (LaunchConfigurationElement[]) result.toArray(new LaunchConfigurationElement[result.size()]);
+		return result.toArray(new LaunchConfigurationElement[result.size()]);
 	}
 
 	public Object[] getSelectedElementsWithoutContainedChildren(MultiStatus status) {
 		try {
-			LaunchConfigurationElement element= (LaunchConfigurationElement) fLauchConfigurationModel.get(fLaunchConfigurationCombo.getSelectionIndex());
+			LaunchConfigurationElement element= fLauchConfigurationModel.get(fLaunchConfigurationCombo.getSelectionIndex());
 			ILaunchConfiguration launchconfig= element.getLaunchConfiguration();
 			fJarPackage.setLaunchConfigurationName(element.getLaunchConfigurationName());
 
@@ -654,12 +676,12 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 	private static IJavaProject[] getProjectSearchOrder(String projectName) {
 
-		ArrayList projectNames= new ArrayList();
+		ArrayList<String> projectNames= new ArrayList<String>();
 		projectNames.add(projectName);
 
 		int nextProject= 0;
 		while (nextProject < projectNames.size()) {
-			String nextProjectName= (String) projectNames.get(nextProject);
+			String nextProjectName= projectNames.get(nextProject);
 			IJavaProject jproject= getJavaProject(nextProjectName);
 
 			if (jproject != null) {
@@ -677,15 +699,15 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			nextProject+= 1;
 		}
 
-		ArrayList result= new ArrayList();
+		ArrayList<IJavaProject> result= new ArrayList<IJavaProject>();
 		for (int i= 0, size= projectNames.size(); i < size; i++) {
-			String name= (String) projectNames.get(i);
+			String name= projectNames.get(i);
 			IJavaProject project= getJavaProject(name);
 			if (project != null)
 				result.add(project);
 		}
 
-		return (IJavaProject[]) result.toArray(new IJavaProject[result.size()]);
+		return result.toArray(new IJavaProject[result.size()]);
 	}
 
 	private static IJavaProject getJavaProject(String projectName) {
@@ -707,7 +729,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		IRuntimeClasspathEntry[] entries= JavaRuntime.computeUnresolvedRuntimeClasspath(configuration);
 		entries= JavaRuntime.resolveRuntimeClasspath(entries, configuration);
 
-		ArrayList userEntries= new ArrayList(entries.length);
+		ArrayList<IPath> userEntries= new ArrayList<IPath>(entries.length);
 		for (int i= 0; i < entries.length; i++) {
 			if (entries[i].getClasspathProperty() == IRuntimeClasspathEntry.USER_CLASSES) {
 
@@ -720,7 +742,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 				}
 			}
 		}
-		return (IPath[]) userEntries.toArray(new IPath[userEntries.size()]);
+		return userEntries.toArray(new IPath[userEntries.size()]);
 	}
 
 	private static String getMainClass(ILaunchConfiguration launchConfig, MultiStatus status) {
@@ -746,7 +768,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 * @return all package fragment roots corresponding to each classpath entry start the search at project with projectName
 	 */
 	private static IPackageFragmentRoot[] getRequiredPackageFragmentRoots(IPath[] classpathEntries, final String projectName, MultiStatus status) {
-		HashSet result= new HashSet();
+		HashSet<IPackageFragmentRoot> result= new HashSet<IPackageFragmentRoot>();
 
 		IJavaProject[] searchOrder= getProjectSearchOrder(projectName);
 
@@ -762,7 +784,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			}
 		}
 
-		return (IPackageFragmentRoot[]) result.toArray(new IPackageFragmentRoot[result.size()]);
+		return result.toArray(new IPackageFragmentRoot[result.size()]);
 	}
 
 	private static IPackageFragmentRoot[] findRootsForClasspath(IPath entry, IJavaProject[] searchOrder) {
@@ -776,7 +798,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	}
 
 	private static IPackageFragmentRoot[] findRootsInProject(IPath entry, IJavaProject project) {
-		ArrayList result= new ArrayList();
+		ArrayList<IPackageFragmentRoot> result= new ArrayList<IPackageFragmentRoot>();
 
 		try {
 			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
@@ -789,7 +811,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			JavaPlugin.log(e);
 		}
 
-		return (IPackageFragmentRoot[]) result.toArray(new IPackageFragmentRoot[result.size()]);
+		return result.toArray(new IPackageFragmentRoot[result.size()]);
 	}
 
 	private static boolean isRootAt(IPackageFragmentRoot root, IPath entry) {
@@ -821,18 +843,18 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 	private static IType findMainMethodByName(String name, IPackageFragmentRoot[] classpathResources, IRunnableContext context) {
 
-		List resources= JarPackagerUtil.asResources(classpathResources);
+		List<IResource> resources= JarPackagerUtil.asResources(classpathResources);
 		if (resources == null) {
 			return null;
 		}
 
-		for (Iterator iterator= resources.iterator(); iterator.hasNext();) {
-			IResource element= (IResource) iterator.next();
+		for (Iterator<IResource> iterator= resources.iterator(); iterator.hasNext();) {
+			IResource element= iterator.next();
 			if (element == null)
 				iterator.remove();
 		}
 
-		IJavaSearchScope searchScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope((IResource[]) resources.toArray(new IResource[resources.size()]), true);
+		IJavaSearchScope searchScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(resources.toArray(new IResource[resources.size()]), true);
 		MainMethodSearchEngine engine= new MainMethodSearchEngine();
 		try {
 			IType[] mainTypes= engine.searchMainMethods(context, searchScope, 0);
@@ -849,16 +871,18 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		return null;
 	}
 
+	@Override
 	public void dispose() {
 		super.dispose();
 		if (fLauchConfigurationModel != null) {
 			for (int i= 0, size= fLauchConfigurationModel.size(); i < size; i++) {
-				LaunchConfigurationElement element= (LaunchConfigurationElement) fLauchConfigurationModel.get(i);
+				LaunchConfigurationElement element= fLauchConfigurationModel.get(i);
 				element.dispose();
 			}
 		}
 	}
 
+	@Override
 	protected void restoreWidgetValues() {
 
 		// restore JARPACKAGEDATA from SETTINGS and set widgets
@@ -920,6 +944,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void saveWidgetValues() {
 		super.saveWidgetValues();
 
@@ -993,7 +1018,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			return;
 
 		if (canCreateAntScript(getShell())) {
-			LaunchConfigurationElement element= (LaunchConfigurationElement) fLauchConfigurationModel.get(fLaunchConfigurationCombo.getSelectionIndex());
+			LaunchConfigurationElement element= fLauchConfigurationModel.get(fLaunchConfigurationCombo.getSelectionIndex());
 			Assert.isNotNull(element);
 			FatJarAntExporter antExporter= getLibraryHandler().getAntExporter(fAntScriptLocation, fJarPackage.getAbsoluteJarLocation(), element.getLaunchConfiguration());
 			try {

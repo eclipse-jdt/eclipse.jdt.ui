@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ public final class JavadocLinkTypeCompletionProposal extends LazyJavaTypeComplet
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal#computeReplacementString()
 	 */
+	@Override
 	protected String computeReplacementString() {
 		String typeReplacement= super.computeReplacementString();
 		// XXX: respect the auto-close preference, but do so consistently with method completions
@@ -48,6 +49,7 @@ public final class JavadocLinkTypeCompletionProposal extends LazyJavaTypeComplet
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal#apply(org.eclipse.jface.text.IDocument, char, int)
 	 */
+	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 		// convert . to #
 		if (trigger == '.')

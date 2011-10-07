@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,8 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -70,17 +72,8 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 	private static final Class THIS= CodeCompletionTest.class;
 
-
-	public static Test allTests() {
-		return new TestSuite(THIS, suiteName(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
 	public static Test suite() {
-		return allTests();
+		return new TestSuite(THIS, suiteName(THIS));
 	}
 
 	private IJavaProject fJProject1;
@@ -95,7 +88,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 	}
 
 	private void codeComplete(ICompilationUnit cu, int offset, CompletionProposalCollector collector) throws JavaModelException {
-		cu.codeComplete(offset, collector);
+		cu.codeComplete(offset, collector, new NullProgressMonitor());
 	}
 
 	protected void setUp() throws Exception {
@@ -464,6 +457,149 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	public void testAnonymousTypeCompletionBug280801() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Try {\n");
+		buf.append("    Object m() {\n");
+		buf.append("        return new Run;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("Try.java", contents, false, null);
+
+		String str= "new Run";
+		int offset= contents.indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+
+		cu.codeComplete(offset, collector, new NullProgressMonitor());
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Try {\n");
+		buf.append("    Object m() {\n");
+		buf.append("        return new Runnable() {\n");
+		buf.append("            \n");
+		buf.append("            public void run() {\n");
+		buf.append("                //TODO\n");
+		buf.append("                \n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals("", buf.toString(), doc.get());
+	}
+
+	public void testAnonymousTypeCompletionBug324391() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Try {\n");
+		buf.append("    Object m() {\n");
+		buf.append("        take(new Run, (String) o);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("Try.java", contents, false, null);
+
+		String str= "new Run";
+		int offset= contents.indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+
+		cu.codeComplete(offset, collector, new NullProgressMonitor());
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Try {\n");
+		buf.append("    Object m() {\n");
+		buf.append("        take(new Runnable() {\n");
+		buf.append("            \n");
+		buf.append("            public void run() {\n");
+		buf.append("                //TODO\n");
+		buf.append("                \n");
+		buf.append("            }\n");
+		buf.append("        }, (String) o);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals("", buf.toString(), doc.get());
+	}
+
+	public void testAnonymousTypeCompletionBug326377() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Try {\n");
+		buf.append("    Object m() {\n");
+		buf.append("        take(new Run)\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("Try.java", contents, false, null);
+
+		String str= "new Run";
+		int offset= contents.indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+
+		cu.codeComplete(offset, collector, new NullProgressMonitor());
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Try {\n");
+		buf.append("    Object m() {\n");
+		buf.append("        take(new Runnable() {\n");
+		buf.append("            \n");
+		buf.append("            public void run() {\n");
+		buf.append("                //TODO\n");
+		buf.append("                \n");
+		buf.append("            }\n");
+		buf.append("        })\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals("", buf.toString(), doc.get());
+	}
 
 	public void testConstructorCompletion() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -1521,6 +1657,89 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		}
 	}
 
+	public void testConstructorCompletion_Bug336451() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("public class EclipseTest {\n");
+		buf.append("   private static interface InvokerIF{\n");
+		buf.append("       public <T extends ArgIF, Y> T invoke(T arg) throws RuntimeException, IndexOutOfBoundsException;\n");
+		buf.append("   }\n");
+		buf.append("   private static class Invoker implements InvokerIF{        \n");
+		buf.append("       public <T extends ArgIF, Y> T invoke(T arg){          \n");
+		buf.append("           return arg;                                       \n");
+		buf.append("       }                                                     \n");
+		buf.append("   }                                                         \n");
+		buf.append("                                                             \n");
+		buf.append("   private static interface ArgIF{                           \n");
+		buf.append("   }                                                         \n");
+		buf.append("                                                             \n");
+		buf.append("   private static interface ArgIF2<C> extends ArgIF{         \n");
+		buf.append("                                                             \n");
+		buf.append("   }                                                         \n");
+		buf.append("   private static class ArgImpl<C> implements ArgIF2<C>{     \n");
+		buf.append("       public ArgImpl() {                                    \n");
+		buf.append("           super();                                          \n");
+		buf.append("       }                                                     \n");
+		buf.append("   }                                                         \n");
+		buf.append("   public static void main(String[] args) throws Exception { \n");
+		buf.append("       InvokerIF test = new Invoker();                       \n");
+		buf.append("       test.invoke(new ArgImpl)                              \n");
+		buf.append("   }                                                         \n");
+		buf.append("}                                                             \n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("EclipseTest.java", contents, false, null);
+
+		String str= "test.invoke(new ArgImpl)";
+
+		int offset= contents.indexOf(str) + str.length() - 1;
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setAllowsRequiredProposals(CompletionProposal.CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+
+		collector.setReplacementLength(0);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("public class EclipseTest {\n");
+		buf.append("   private static interface InvokerIF{\n");
+		buf.append("       public <T extends ArgIF, Y> T invoke(T arg) throws RuntimeException, IndexOutOfBoundsException;\n");
+		buf.append("   }\n");
+		buf.append("   private static class Invoker implements InvokerIF{        \n");
+		buf.append("       public <T extends ArgIF, Y> T invoke(T arg){          \n");
+		buf.append("           return arg;                                       \n");
+		buf.append("       }                                                     \n");
+		buf.append("   }                                                         \n");
+		buf.append("                                                             \n");
+		buf.append("   private static interface ArgIF{                           \n");
+		buf.append("   }                                                         \n");
+		buf.append("                                                             \n");
+		buf.append("   private static interface ArgIF2<C> extends ArgIF{         \n");
+		buf.append("                                                             \n");
+		buf.append("   }                                                         \n");
+		buf.append("   private static class ArgImpl<C> implements ArgIF2<C>{     \n");
+		buf.append("       public ArgImpl() {                                    \n");
+		buf.append("           super();                                          \n");
+		buf.append("       }                                                     \n");
+		buf.append("   }                                                         \n");
+		buf.append("   public static void main(String[] args) throws Exception { \n");
+		buf.append("       InvokerIF test = new Invoker();                       \n");
+		buf.append("       test.invoke(new ArgImpl<C>())                              \n");
+		buf.append("   }                                                         \n");
+		buf.append("}                                                             \n");
+		assertEquals(buf.toString(), doc.get());
+	}
 
 	private static void assertNumberOf(String name, int is, int expected) {
 		assertTrue("Wrong number of " + name + ", is: " + is + ", expected: " + expected, is == expected);

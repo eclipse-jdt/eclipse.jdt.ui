@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
 import org.eclipse.ui.IEditorPart;
@@ -50,7 +51,7 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	 * @param restrict <code>true</code> if proposals should be restricted
 	 */
 	public void restrictProposalsToVisibility(boolean restrict) {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		Object value= options.get(VISIBILITY);
 		if (value instanceof String) {
 			String newValue= restrict ? ENABLED : DISABLED;
@@ -74,6 +75,7 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationValidator()
 	 */
+	@Override
 	public IContextInformationValidator getContextInformationValidator() {
 		if (fValidator == null)
 			fValidator= new JavaParameterListValidator();
@@ -83,7 +85,8 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor#filterAndSort(java.util.List, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	protected List filterAndSortProposals(List proposals, IProgressMonitor monitor, ContentAssistInvocationContext context) {
+	@Override
+	protected List<ICompletionProposal> filterAndSortProposals(List<ICompletionProposal> proposals, IProgressMonitor monitor, ContentAssistInvocationContext context) {
 		ProposalSorterRegistry.getDefault().getCurrentSorter().sortProposals(context, proposals);
 		return proposals;
 	}
@@ -91,6 +94,7 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor#createContext(org.eclipse.jface.text.ITextViewer, int)
 	 */
+	@Override
 	protected ContentAssistInvocationContext createContext(ITextViewer viewer, int offset) {
 		return new JavaContentAssistInvocationContext(viewer, offset, fEditor);
 	}

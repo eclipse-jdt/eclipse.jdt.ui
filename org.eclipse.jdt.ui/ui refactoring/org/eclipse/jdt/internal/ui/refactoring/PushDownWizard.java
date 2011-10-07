@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -112,6 +112,7 @@ public final class PushDownWizard extends RefactoringWizard {
 
 			private final ILabelProvider fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_SMALL_ICONS);
 
+			@Override
 			public void dispose() {
 				fLabelProvider.dispose();
 				super.dispose();
@@ -266,6 +267,7 @@ public final class PushDownWizard extends RefactoringWizard {
 			SWTUtil.setButtonDimensionHint(fSelectAllButton);
 			fSelectAllButton.addSelectionListener(new SelectionAdapter() {
 
+				@Override
 				public void widgetSelected(final SelectionEvent event) {
 					final IMember[] members= getMembers();
 					setActionForMembers(members, MemberActionInfo.PUSH_DOWN_ACTION);
@@ -280,6 +282,7 @@ public final class PushDownWizard extends RefactoringWizard {
 			SWTUtil.setButtonDimensionHint(fDeselectAllButton);
 			fDeselectAllButton.addSelectionListener(new SelectionAdapter() {
 
+				@Override
 				public void widgetSelected(final SelectionEvent event) {
 					final IMember[] members= getMembers();
 					setActionForMembers(members, MemberActionInfo.NO_ACTION);
@@ -296,6 +299,7 @@ public final class PushDownWizard extends RefactoringWizard {
 			SWTUtil.setButtonDimensionHint(fEditButton);
 			fEditButton.addSelectionListener(new SelectionAdapter() {
 
+				@Override
 				public void widgetSelected(final SelectionEvent event) {
 					PushDownInputPage.this.editSelectedMembers();
 				}
@@ -307,6 +311,7 @@ public final class PushDownWizard extends RefactoringWizard {
 			SWTUtil.setButtonDimensionHint(addButton);
 			addButton.addSelectionListener(new SelectionAdapter() {
 
+				@Override
 				public void widgetSelected(final SelectionEvent event) {
 					PushDownInputPage.this.markAdditionalRequiredMembersAsMembersToPushDown();
 				}
@@ -411,8 +416,8 @@ public final class PushDownWizard extends RefactoringWizard {
 		}
 
 		// String -> Integer
-		private Map createStringMappingForSelectedElements() {
-			final Map result= new HashMap();
+		private Map<String, Integer> createStringMappingForSelectedElements() {
+			final Map<String, Integer> result= new HashMap<String, Integer>();
 			int action= MemberActionInfo.PUSH_DOWN_ACTION;
 			result.put(MemberActionInfoLabelProvider.getActionLabel(action), new Integer(action));
 			int action1= MemberActionInfo.PUSH_ABSTRACT_ACTION;
@@ -429,8 +434,8 @@ public final class PushDownWizard extends RefactoringWizard {
 				final String labelText= selectedMembers.length == 1 ? Messages.format(RefactoringMessages.PushDownInputPage_Mark_selected_members_singular, JavaElementLabels.getElementLabel(
 						selectedMembers[0].getMember(), JavaElementLabels.M_PARAMETER_TYPES)) : Messages.format(RefactoringMessages.PushDownInputPage_Mark_selected_members_plural, String
 						.valueOf(selectedMembers.length));
-				final Map stringMapping= createStringMappingForSelectedElements();
-				final String[] keys= (String[]) stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
+				final Map<String, Integer> stringMapping= createStringMappingForSelectedElements();
+				final String[] keys= stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
 				Arrays.sort(keys);
 				final int initialSelectionIndex= getInitialSelectionIndexForEditDialog(stringMapping, keys);
 
@@ -438,7 +443,7 @@ public final class PushDownWizard extends RefactoringWizard {
 				dialog.setBlockOnOpen(true);
 				if (dialog.open() == Window.CANCEL)
 					return;
-				final int action= ((Integer) stringMapping.get(dialog.getSelectedString())).intValue();
+				final int action= stringMapping.get(dialog.getSelectedString()).intValue();
 				setInfoAction(selectedMembers, action);
 			} finally {
 				updateWizardPage(preserved, true);
@@ -453,13 +458,13 @@ public final class PushDownWizard extends RefactoringWizard {
 
 		private MemberActionInfo[] getActiveInfos() {
 			final MemberActionInfo[] infos= fProcessor.getMemberActionInfos();
-			final List result= new ArrayList(infos.length);
+			final List<MemberActionInfo> result= new ArrayList<MemberActionInfo>(infos.length);
 			for (int index= 0; index < infos.length; index++) {
 				final MemberActionInfo info= infos[index];
 				if (info.isActive())
 					result.add(info);
 			}
-			return (MemberActionInfo[]) result.toArray(new MemberActionInfo[result.size()]);
+			return result.toArray(new MemberActionInfo[result.size()]);
 		}
 
 		private int getCommonActionCodeForSelectedInfos() {
@@ -475,13 +480,13 @@ public final class PushDownWizard extends RefactoringWizard {
 			return code;
 		}
 
-		private int getInitialSelectionIndexForEditDialog(final Map mapping, final String[] keys) {
+		private int getInitialSelectionIndexForEditDialog(final Map<String, Integer> mapping, final String[] keys) {
 			final int commonActionCode= getCommonActionCodeForSelectedInfos();
 			if (commonActionCode == -1)
 				return 0;
-			for (final Iterator iterator= mapping.keySet().iterator(); iterator.hasNext();) {
-				final String key= (String) iterator.next();
-				final int action= ((Integer) mapping.get(key)).intValue();
+			for (final Iterator<String> iterator= mapping.keySet().iterator(); iterator.hasNext();) {
+				final String key= iterator.next();
+				final int action= mapping.get(key).intValue();
 				if (commonActionCode == action) {
 					for (int index= 0; index < keys.length; index++) {
 						if (key.equals(keys[index]))
@@ -495,17 +500,17 @@ public final class PushDownWizard extends RefactoringWizard {
 
 		private IMember[] getMembers() {
 			final MemberActionInfo[] infos= (MemberActionInfo[]) fTableViewer.getInput();
-			final List result= new ArrayList(infos.length);
+			final List<IMember> result= new ArrayList<IMember>(infos.length);
 			for (int index= 0; index < infos.length; index++) {
 				result.add(infos[index].getMember());
 			}
-			return (IMember[]) result.toArray(new IMember[result.size()]);
+			return result.toArray(new IMember[result.size()]);
 		}
 
 		private MemberActionInfo[] getSelectedMemberActionInfos() {
 			Assert.isTrue(fTableViewer.getSelection() instanceof IStructuredSelection);
-			final List result= ((IStructuredSelection) fTableViewer.getSelection()).toList();
-			return (MemberActionInfo[]) result.toArray(new MemberActionInfo[result.size()]);
+			final List<?> result= ((IStructuredSelection) fTableViewer.getSelection()).toList();
+			return result.toArray(new MemberActionInfo[result.size()]);
 		}
 
 		public void markAdditionalRequiredMembersAsMembersToPushDown() {
@@ -564,6 +569,7 @@ public final class PushDownWizard extends RefactoringWizard {
 			fTableViewer.setColumnProperties(new String[] { MEMBER_PROPERTY, ACTION_PROPERTY});
 		}
 
+		@Override
 		public void setVisible(final boolean visible) {
 			super.setVisible(visible);
 			if (visible) {
@@ -611,6 +617,7 @@ public final class PushDownWizard extends RefactoringWizard {
 		setDefaultPageTitle(RefactoringMessages.PushDownWizard_defaultPageTitle);
 	}
 
+	@Override
 	protected void addUserInputPages() {
 		addPage(new PushDownInputPage(fProcessor));
 	}

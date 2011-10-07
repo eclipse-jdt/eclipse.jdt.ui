@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -211,6 +211,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 	}
 
 
+	@Override
 	public void apply(IDocument document) {
 		StructuredSelection selection= new StructuredSelection(fCompilationUnit);
 		NewElementWizard wizard= createWizard(selection);
@@ -334,7 +335,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 				if (type.isClass() && (fTypeKind == K_CLASS)) {
 					page.setSuperClass(type.getQualifiedName(), true);
 				} else if (type.isInterface()) {
-					List superInterfaces= new ArrayList();
+					List<String> superInterfaces= new ArrayList<String>();
 					superInterfaces.add(type.getQualifiedName());
 					page.setSuperInterfaces(superInterfaces, true);
 				}
@@ -380,6 +381,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
 	 * @since 3.5
 	 */
+	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 		StringBuffer buf= new StringBuffer();
 		switch (fTypeKind) {

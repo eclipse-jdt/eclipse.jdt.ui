@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 			super(type, description);
 		}
 
+		@Override
 		protected String[] resolveAll(TemplateContext context) {
 	        JavaContext jc= (JavaContext) context;
 	        Variable[] iterables= getLocalVariables(jc);
@@ -56,6 +57,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 		/*
 		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
 		 */
+		@Override
 		public void resolve(TemplateVariable variable, TemplateContext context) {
 			if (variable instanceof MultiVariable) {
 				JavaContext jc= (JavaContext) context;
@@ -83,6 +85,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 			super("array", JavaTemplateMessages.JavaContextType_variable_description_array);  //$NON-NLS-1$
 		}
 
+		@Override
 		protected Variable[] getLocalVariables(JavaContext jc) {
 			return jc.getArrays();
 		}
@@ -93,6 +96,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 		    super("iterable", JavaTemplateMessages.JavaContextType_variable_description_iterable);  //$NON-NLS-1$
 		}
 
+		@Override
 		protected Variable[] getLocalVariables(JavaContext jc) {
 			return jc.getIterables();
 		}
@@ -105,7 +109,8 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 	     	super(type, desc);
 	     	fMasterName= master;
 	    }
-	    protected String[] resolveAll(TemplateContext context) {
+	    @Override
+		protected String[] resolveAll(TemplateContext context) {
 	        JavaContext jc= (JavaContext) context;
 	        Variable[] iterables= getLocalVariables(jc);
 	        String[] types= new String[iterables.length];
@@ -119,6 +124,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 		/*
 		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
 		 */
+		@Override
 		public void resolve(TemplateVariable variable, TemplateContext context) {
 			if (variable instanceof MultiVariable) {
 				JavaContext jc= (JavaContext) context;
@@ -155,6 +161,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 		public ArrayType() {
 			super("array_type", JavaTemplateMessages.JavaContextType_variable_description_array_type, "array");  //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		@Override
 		protected Variable[] getLocalVariables(JavaContext jc) {
 			return jc.getArrays();
 		}
@@ -164,6 +171,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 		public IterableType() {
 	     	super("iterable_type", JavaTemplateMessages.JavaContextType_variable_description_iterable_type, "iterable");  //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		@Override
 		protected Variable[] getLocalVariables(JavaContext jc) {
 			return jc.getIterables();
 		}
@@ -177,7 +185,8 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 	     	fMasterName= master;
 	    }
 
-	    protected String[] resolveAll(TemplateContext context) {
+	    @Override
+		protected String[] resolveAll(TemplateContext context) {
 	        JavaContext jc= (JavaContext) context;
 	        Variable[] iterables= getLocalVariables(jc);
 	        String[] elements= new String[iterables.length];
@@ -195,6 +204,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 		/*
 		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
 		 */
+		@Override
 		public void resolve(TemplateVariable variable, TemplateContext context) {
 			if (variable instanceof MultiVariable) {
 				JavaContext jc= (JavaContext) context;
@@ -233,6 +243,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 		public ArrayElement() {
 			super("array_element", JavaTemplateMessages.JavaContextType_variable_description_array_element, "array");	 //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		@Override
 		protected Variable[] getLocalVariables(JavaContext jc) {
 			return jc.getArrays();
 		}
@@ -242,6 +253,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 		public IterableElement() {
 	     	super("iterable_element", JavaTemplateMessages.JavaContextType_variable_description_iterable_element, "iterable");	 //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		@Override
 		protected Variable[] getLocalVariables(JavaContext jc) {
 			return jc.getIterables();
 		}
@@ -276,6 +288,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 		public Todo() {
 			super("todo", JavaTemplateMessages.JavaContextType_variable_description_todo);  //$NON-NLS-1$
 		}
+		@Override
 		protected String resolve(TemplateContext context) {
 			JavaContext javaContext= (JavaContext) context;
 			ICompilationUnit compilationUnit= javaContext.getCompilationUnit();
@@ -312,7 +325,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 		// global
 		addResolver(new GlobalTemplateVariables.Cursor());
 		addResolver(new GlobalTemplateVariables.WordSelection());
-		addResolver(new GlobalTemplateVariables.LineSelection());
+		addResolver(new SurroundWithLineSelection());
 		addResolver(new GlobalTemplateVariables.Dollar());
 		addResolver(new GlobalTemplateVariables.Date());
 		addResolver(new GlobalTemplateVariables.Year());
@@ -346,6 +359,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, int, int, org.eclipse.jdt.core.ICompilationUnit)
 	 */
+	@Override
 	public CompilationUnitContext createContext(IDocument document, int offset, int length, ICompilationUnit compilationUnit) {
 		JavaContext javaContext= new JavaContext(this, document, offset, length, compilationUnit);
 		initializeContext(javaContext);
@@ -355,6 +369,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.Position, org.eclipse.jdt.core.ICompilationUnit)
 	 */
+	@Override
 	public CompilationUnitContext createContext(IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
 		JavaContext javaContext= new JavaContext(this, document, completionPosition, compilationUnit);
 		initializeContext(javaContext);
@@ -364,7 +379,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 	/**
 	 * Hook to initialize the context
 	 *
-	 * @param context
+	 * @param context the context
 	 */
 	protected void initializeContext(JavaContext context) {
 	}

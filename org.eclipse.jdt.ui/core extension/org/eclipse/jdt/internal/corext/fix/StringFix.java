@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -107,9 +107,9 @@ public class StringFix implements IProposableFix {
 		if (!cu.isStructureKnown())
 			return null; //[clean up] 'Remove unnecessary $NLS-TAGS$' removes necessary ones in case of syntax errors: https://bugs.eclipse.org/bugs/show_bug.cgi?id=285814 : 
 		
-		List result= new ArrayList();
+		List<CategorizedTextEditGroup> result= new ArrayList<CategorizedTextEditGroup>();
 
-		List missingNLSProblems= new ArrayList();
+		List<IProblemLocation> missingNLSProblems= new ArrayList<IProblemLocation>();
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= problems[i];
 			if (addNLSTag && problem.getProblemId() == IProblem.NonExternalizedStringLiteral) {
@@ -129,8 +129,8 @@ public class StringFix implements IProposableFix {
 		if (!missingNLSProblems.isEmpty()) {
 			int[] positions= new int[missingNLSProblems.size()];
 			int i=0;
-			for (Iterator iter= missingNLSProblems.iterator(); iter.hasNext();) {
-				IProblemLocation problem= (IProblemLocation)iter.next();
+			for (Iterator<IProblemLocation> iter= missingNLSProblems.iterator(); iter.hasNext();) {
+				IProblemLocation problem= iter.next();
 				positions[i]= problem.getOffset();
 				i++;
 			}
@@ -145,7 +145,7 @@ public class StringFix implements IProposableFix {
 		if (result.isEmpty())
 			return null;
 
-		return new StringFix("", compilationUnit, (TextEditGroup[])result.toArray(new TextEditGroup[result.size()])); //$NON-NLS-1$
+		return new StringFix("", compilationUnit, result.toArray(new TextEditGroup[result.size()])); //$NON-NLS-1$
 	}
 
 	private static ReplaceEdit getReplace(int offset, int length, IBuffer buffer, boolean removeLeadingIndents) {

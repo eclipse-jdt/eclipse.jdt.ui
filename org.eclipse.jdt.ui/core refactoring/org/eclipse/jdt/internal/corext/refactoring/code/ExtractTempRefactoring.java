@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -84,6 +85,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -128,6 +130,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
@@ -142,11 +145,11 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private static final class ForStatementChecker extends ASTVisitor {
 
-		private final Collection fForInitializerVariables;
+		private final Collection<IVariableBinding> fForInitializerVariables;
 
 		private boolean fReferringToForVariable= false;
 
-		public ForStatementChecker(Collection forInitializerVariables) {
+		public ForStatementChecker(Collection<IVariableBinding> forInitializerVariables) {
 			Assert.isNotNull(forInitializerVariables);
 			fForInitializerVariables= forInitializerVariables;
 		}
@@ -155,6 +158,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			return fReferringToForVariable;
 		}
 
+		@Override
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
 			if (binding != null && fForInitializerVariables.contains(binding)) {
@@ -212,10 +216,10 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	// return List<IVariableBinding>
-	private static List getForInitializedVariables(VariableDeclarationExpression variableDeclarations) {
-		List forInitializerVariables= new ArrayList(1);
-		for (Iterator iter= variableDeclarations.fragments().iterator(); iter.hasNext();) {
-			VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
+	private static List<IVariableBinding> getForInitializedVariables(VariableDeclarationExpression variableDeclarations) {
+		List<IVariableBinding> forInitializerVariables= new ArrayList<IVariableBinding>(1);
+		for (Iterator<VariableDeclarationFragment> iter= variableDeclarations.fragments().iterator(); iter.hasNext();) {
+			VariableDeclarationFragment fragment= iter.next();
 			IVariableBinding binding= fragment.resolveBinding();
 			if (binding != null)
 				forInitializerVariables.add(binding);
@@ -243,13 +247,13 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private static ASTNode[] getParents(ASTNode node) {
 		ASTNode current= node;
-		List parents= new ArrayList();
+		List<ASTNode> parents= new ArrayList<ASTNode>();
 		do {
 			parents.add(current.getParent());
 			current= current.getParent();
 		} while (current.getParent() != null);
 		Collections.reverse(parents);
-		return (ASTNode[]) parents.toArray(new ASTNode[parents.size()]);
+		return parents.toArray(new ASTNode[parents.size()]);
 	}
 
 	private static boolean isLeftValue(ASTNode node) {
@@ -283,9 +287,9 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (parent instanceof ForStatement) {
 				ForStatement forStmt= (ForStatement) parent;
 				if (forStmt.initializers().contains(current) || forStmt.updaters().contains(current) || forStmt.getExpression() == current) {
-					List initializers= forStmt.initializers();
+					List<Expression> initializers= forStmt.initializers();
 					if (initializers.size() == 1 && initializers.get(0) instanceof VariableDeclarationExpression) {
-						List forInitializerVariables= getForInitializedVariables((VariableDeclarationExpression) initializers.get(0));
+						List<IVariableBinding> forInitializerVariables= getForInitializedVariables((VariableDeclarationExpression) initializers.get(0));
 						ForStatementChecker checker= new ForStatementChecker(forInitializerVariables);
 						expression.accept(checker);
 						if (checker.isReferringToForVariable())
@@ -313,12 +317,12 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private static IASTFragment[] retainOnlyReplacableMatches(IASTFragment[] allMatches) {
-		List result= new ArrayList(allMatches.length);
+		List<IASTFragment> result= new ArrayList<IASTFragment>(allMatches.length);
 		for (int i= 0; i < allMatches.length; i++) {
 			if (canReplace(allMatches[i]))
 				result.add(allMatches[i]);
 		}
-		return (IASTFragment[]) result.toArray(new IASTFragment[result.size()]);
+		return result.toArray(new IASTFragment[result.size()]);
 	}
 
 	private CompilationUnit fCompilationUnitNode;
@@ -412,7 +416,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		IASTFragment[] fragmentsToReplace= retainOnlyReplacableMatches(getMatchingFragments());
 		//TODO: should not have to prune duplicates here...
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
-		HashSet seen= new HashSet();
+		HashSet<IASTFragment> seen= new HashSet<IASTFragment>();
 		for (int i= 0; i < fragmentsToReplace.length; i++) {
 			IASTFragment fragment= fragmentsToReplace[i];
 			if (! seen.add(fragment))
@@ -439,12 +443,13 @@ public class ExtractTempRefactoring extends Refactoring {
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_assignment);
 				else
 					return null;
-
 			} else if (selectedExpression instanceof SimpleName) {
 				if ((((SimpleName) selectedExpression)).isDeclaration())
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_names_in_declarations);
 				if (parent instanceof QualifiedName && selectedExpression.getLocationInParent() == QualifiedName.NAME_PROPERTY || parent instanceof FieldAccess && selectedExpression.getLocationInParent() == FieldAccess.NAME_PROPERTY)
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_select_expression);
+			} else if (selectedExpression instanceof VariableDeclarationExpression && parent instanceof TryStatement) {
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_resource_in_try_with_resources);
 			}
 		}
 
@@ -475,6 +480,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		return binding;
 	}
 
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 4);
@@ -505,7 +511,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private final ExtractLocalDescriptor createRefactoringDescriptor() {
-		final Map arguments= new HashMap();
+		final Map<String, String> arguments= new HashMap<String, String>();
 		String project= null;
 		IJavaProject javaProject= fCu.getJavaProject();
 		if (javaProject != null)
@@ -551,7 +557,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private void checkNewSource(SubProgressMonitor monitor, RefactoringStatus result) throws CoreException {
 		String newCuSource= fChange.getPreviewContent(new NullProgressMonitor());
-		CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, fCu, true, true, monitor);
+		CompilationUnit newCUNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(newCuSource, fCu, true, true, monitor);
 		IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCompilationUnitNode);
 		for (int i= 0; i < newProblems.length; i++) {
 			IProblem problem= newProblems[i];
@@ -560,6 +566,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 	}
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 6); //$NON-NLS-1$
@@ -613,11 +620,11 @@ public class ExtractTempRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_explicit_constructor);
 			pm.worked(1);
 
-			if (getEnclosingBodyNode() == null)
+			ASTNode associatedNode= selectedExpression.getAssociatedNode();
+			if (getEnclosingBodyNode() == null || ASTNodes.getParent(associatedNode, Annotation.class) != null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_expr_in_method_or_initializer);
 			pm.worked(1);
 
-			ASTNode associatedNode= selectedExpression.getAssociatedNode();
 			if (associatedNode instanceof Name && associatedNode.getParent() instanceof ClassInstanceCreation && associatedNode.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_name_in_new);
 			pm.worked(1);
@@ -732,6 +739,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		listRewrite.insertBefore(declaration, target, groupDescription);
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 1);
@@ -762,8 +770,8 @@ public class ExtractTempRefactoring extends Refactoring {
 		for (int i= 0; i < matchNodes.length; i++) {
 			matchingNodesParents[i]= getParents(matchNodes[i]);
 		}
-		List l= Arrays.asList(getLongestArrayPrefix(matchingNodesParents));
-		return (ASTNode[]) l.toArray(new ASTNode[l.size()]);
+		List<Object> l= Arrays.asList(getLongestArrayPrefix(matchingNodesParents));
+		return l.toArray(new ASTNode[l.size()]);
 	}
 
 	private Block getEnclosingBodyNode() throws JavaModelException {
@@ -804,10 +812,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		IASTFragment[] nodesToReplace= retainOnlyReplacableMatches(getMatchingFragments());
 		if (nodesToReplace.length == 0)
 			return getSelectedExpression();
-		Comparator comparator= new Comparator() {
+		Comparator<IASTFragment> comparator= new Comparator<IASTFragment>() {
 
-			public int compare(Object o1, Object o2) {
-				return ((IASTFragment) o1).getStartPosition() - ((IASTFragment) o2).getStartPosition();
+			public int compare(IASTFragment o1, IASTFragment o2) {
+				return o1.getStartPosition() - o2.getStartPosition();
 			}
 		};
 		Arrays.sort(nodesToReplace, comparator);
@@ -830,6 +838,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		return result;
 	}
 
+	@Override
 	public String getName() {
 		return RefactoringCoreMessages.ExtractTempRefactoring_name;
 	}
@@ -869,7 +878,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		AST ast= rewrite.getAST();
 
-		if (expression instanceof ClassInstanceCreation) {
+		if (expression instanceof ClassInstanceCreation && (typeBinding == null || typeBinding.getTypeArguments().length == 0)) {
 			resultingType= (Type) rewrite.createCopyTarget(((ClassInstanceCreation) expression).getType());
 		} else if (expression instanceof CastExpression) {
 			resultingType= (Type) rewrite.createCopyTarget(((CastExpression) expression).getType());

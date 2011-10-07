@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,6 +73,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
@@ -83,6 +84,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 	 * @param selection the Java text selection
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isInlineTempAvailable(selection));
@@ -94,6 +96,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		if (!ActionUtil.isEditable(fEditor))
@@ -104,6 +107,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		//do nothing
 	}
@@ -111,6 +115,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(false);
 	}

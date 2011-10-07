@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -70,6 +69,7 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.OverrideMethodDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
@@ -156,7 +156,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 
 			workingCopy.getBuffer().setContents(workingCopyContents.toString());
 
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			parser.setResolveBindings(true);
 			parser.setStatementsRecovery(true);
 			parser.setSource(workingCopy);
@@ -202,12 +202,12 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 				dialog.setElementPositionEnabled(false);
 				if (dialog.open() == Window.OK) {
 					Object[] selection= dialog.getResult();
-					ArrayList result= new ArrayList(selection.length);
+					ArrayList<Object> result= new ArrayList<Object>(selection.length);
 					for (int i= 0; i < selection.length; i++) {
 						if (selection[i] instanceof IMethodBinding)
 							result.add(selection[i]);
 					}
-					methodsToOverride= (IMethodBinding[]) result.toArray(new IMethodBinding[result.size()]);
+					methodsToOverride= result.toArray(new IMethodBinding[result.size()]);
 					settings.createComments= dialog.getGenerateComment();
 				} else {
 					// cancelled
@@ -217,13 +217,13 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 				}
 			} else {
 				settings.createComments= false;
-				List result= new ArrayList();
+				List<IMethodBinding> result= new ArrayList<IMethodBinding>();
 				for (int i= 0; i < bindings.length; i++) {
 					IMethodBinding curr= bindings[i];
 					if (Modifier.isAbstract(curr.getModifiers()))
 						result.add(curr);
 				}
-				methodsToOverride= (IMethodBinding[]) result.toArray(new IMethodBinding[result.size()]);
+				methodsToOverride= result.toArray(new IMethodBinding[result.size()]);
 			}
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 			ITrackedNodePosition trackedDeclaration= rewrite.track(declaration);
@@ -280,6 +280,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isOffsetValid(int)
 	 * @since 3.5
 	 */
+	@Override
 	protected boolean isOffsetValid(int offset) {
 		CompletionProposal coreProposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
 		if (coreProposal.getKind() != CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION)
@@ -292,6 +293,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getPrefixCompletionStart(org.eclipse.jface.text.IDocument, int)
 	 * @since 3.5
 	 */
+	@Override
 	public int getPrefixCompletionStart(IDocument document, int completionOffset) {
 		CompletionProposal coreProposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
 		if (coreProposal.getKind() != CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION)
@@ -304,6 +306,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal#getPrefixCompletionText(org.eclipse.jface.text.IDocument, int)
 	 * @since 3.5
 	 */
+	@Override
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		CompletionProposal coreProposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
 		if (coreProposal.getKind() != CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION)
@@ -316,6 +319,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getPrefix(org.eclipse.jface.text.IDocument, int)
 	 * @since 3.5
 	 */
+	@Override
 	protected String getPrefix(IDocument document, int offset) {
 		CompletionProposal coreProposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
 		if (coreProposal.getKind() != CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION)
@@ -337,6 +341,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal#isValidPrefix(java.lang.String)
 	 * @since 3.5
 	 */
+	@Override
 	protected boolean isValidPrefix(String prefix) {
 		CompletionProposal coreProposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
 		if (coreProposal.getKind() != CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION)
@@ -349,6 +354,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal#apply(org.eclipse.jface.text.IDocument, char, int)
 	 * @since 3.5
 	 */
+	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 		super.apply(document, trigger, offset);
 		LinkedModeModel.closeAllModels(document);
@@ -358,6 +364,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal#updateReplacementString(org.eclipse.jface.text.IDocument, char, int, org.eclipse.jdt.core.dom.rewrite.ImportRewrite)
 	 */
+	@Override
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportRewrite impRewrite) throws CoreException, BadLocationException {
 		fImportRewrite= impRewrite;
 		String newBody= createNewBody(impRewrite);
@@ -381,11 +388,22 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		IRegion lineInfo= document.getLineInformationOfOffset(getReplacementOffset());
 		int indent= Strings.computeIndentUnits(document.get(lineInfo.getOffset(), lineInfo.getLength()), project);
 
-		Map options= project != null ? project.getOptions(true) : JavaCore.getOptions();
+		@SuppressWarnings("unchecked")
+		Map<String, String> options= project != null ? project.getOptions(true) : JavaCore.getOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, DefaultCodeFormatterConstants.TRUE);
 		String replacementString= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, buf.toString(), 0, lineDelim, options);
 
-		if (document.getChar(offset) != ')')
+		int lineEndOffset= lineInfo.getOffset() + lineInfo.getLength();
+
+		int p= offset;
+		char ch= document.getChar(p);
+		while (p < lineEndOffset) {
+			if (ch == '(' || ch == ')' || ch == ';' || ch == ',')
+				break;
+			ch= document.getChar(++p);
+		}
+
+		if (ch != ';' && ch != ',' && ch != ')')
 			replacementString= replacementString + ';';
 
 		replacementString= Strings.changeIndent(replacementString, 0, project, CodeFormatterUtil.createIndentString(indent, project), lineDelim);
@@ -395,18 +413,14 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			beginIndex++;
 		replacementString= replacementString.substring(beginIndex);
 
-		int lineEndOffset= lineInfo.getOffset() + lineInfo.getLength();
 		int pos= offset;
-		while (pos < lineEndOffset && Character.isWhitespace(document.getChar(pos))) {
-			pos++;
-		}
-
 		if (isAnonymousConstructorInvoc && (insertCompletion() ^ isInsertModeToggled())) {
 			// Keep existing code
 			int endPos= pos;
-			while (endPos < lineEndOffset && document.getChar(endPos) != '(' && document.getChar(endPos) != ')') {
-				endPos++;
-			}
+			ch= document.getChar(endPos);
+			while (endPos < lineEndOffset && ch != '(' && ch != ')' && ch != ';' && ch != ',' && !Character.isWhitespace(ch))
+				ch= document.getChar(++endPos);
+
 			int keepLength= endPos - pos;
 			if (keepLength > 0) {
 				String keepStr= document.get(pos, keepLength);
@@ -432,6 +446,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	 * @see ICompletionProposalExtension#getContextInformationPosition()
 	 * @since 3.4
 	 */
+	@Override
 	public int getContextInformationPosition() {
 		if (!fIsContextInformationComputed)
 			setContextInformation(computeContextInformation());
@@ -443,6 +458,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	 * @see ICompletionProposal#getContextInformation()
 	 * @since 3.4
 	 */
+	@Override
 	public final IContextInformation getContextInformation() {
 		if (!fIsContextInformationComputed)
 			setContextInformation(computeContextInformation());
@@ -485,6 +501,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#createLazyJavaTypeCompletionProposal(org.eclipse.jdt.core.CompletionProposal, org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
 	 * @since 3.5
 	 */
+	@Override
 	protected LazyJavaCompletionProposal createRequiredTypeCompletionProposal(CompletionProposal completionProposal, JavaContentAssistInvocationContext invocationContext) {
 		LazyJavaCompletionProposal proposal= super.createRequiredTypeCompletionProposal(completionProposal, invocationContext);
 		if (proposal instanceof LazyJavaTypeCompletionProposal)

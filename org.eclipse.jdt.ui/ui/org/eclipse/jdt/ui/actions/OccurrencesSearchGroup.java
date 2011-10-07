@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -173,6 +173,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 	/*
 	 * Method declared on ActionGroup.
 	 */
+	@Override
 	public void fillContextMenu(IMenuManager manager) {
 		String menuText= SearchMessages.group_occurrences;
 		MenuManager javaSearchMM= new MenuManager(menuText, IContextMenuConstants.GROUP_SEARCH);
@@ -190,6 +191,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 				addAction(fBreakContinueTargetOccurrencesAction, mm);
 				if (mm.isEmpty()) {
 					mm.add(new Action(SearchMessages.group_occurrences_quickMenu_noEntriesAvailable) {
+						@Override
 						public boolean isEnabled() {
 							return false;
 						}
@@ -227,6 +229,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 	/*
 	 * Method declared on ActionGroup.
 	 */
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		Assert.isNotNull(actionBars);
 		super.fillActionBars(actionBars);
@@ -237,6 +240,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 	/*
 	 * Method declared on ActionGroup.
 	 */
+	@Override
 	public void dispose() {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		if (provider != null) {

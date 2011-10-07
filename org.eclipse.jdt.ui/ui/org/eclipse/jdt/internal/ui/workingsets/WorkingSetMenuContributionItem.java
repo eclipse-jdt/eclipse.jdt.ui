@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,6 +57,7 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 	/*
 	 * Overrides method from ContributionItem.
 	 */
+	@Override
 	public void fill(Menu menu, int index) {
 		MenuItem mi= new MenuItem(menu, SWT.RADIO, index);
 
@@ -71,6 +72,7 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 		mi.setImage(fImage);
 		mi.setSelection(fWorkingSet.equals(fActionGroup.getWorkingSet()));
 		mi.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 				fActionGroup.setWorkingSet(fWorkingSet, true);
@@ -83,6 +85,7 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 	 * @see org.eclipse.jface.action.ContributionItem#dispose()
 	 * @since 3.0
 	 */
+	@Override
 	public void dispose() {
 		if (fImage != null && !fImage.isDisposed())
 			fImage.dispose();
@@ -94,6 +97,7 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 	/*
 	 * @see org.eclipse.jface.action.IContributionItem#isDynamic()
 	 */
+	@Override
 	public boolean isDynamic() {
 		return true;
 	}

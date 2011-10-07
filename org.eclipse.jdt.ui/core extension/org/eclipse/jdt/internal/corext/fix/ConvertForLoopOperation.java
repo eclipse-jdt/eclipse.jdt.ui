@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NumberLiteral;
@@ -47,7 +48,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -86,6 +86,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		fMakeFinal= makeFinal;
 	}
 
+	@Override
 	public IStatus satisfiesPreconditions() {
 		ForStatement statement= getForStatement();
 		CompilationUnit ast= (CompilationUnit)statement.getRoot();
@@ -122,11 +123,11 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	 * </ul>
 	 */
 	private boolean validateInitializers(ForStatement statement) {
-		List initializers= statement.initializers();
+		List<Expression> initializers= statement.initializers();
 		if (initializers.size() != 1)
 			return false;
 
-		Expression expression= (Expression)initializers.get(0);
+		Expression expression= initializers.get(0);
 		if (!(expression instanceof VariableDeclarationExpression))
 			return false;
 
@@ -141,25 +142,25 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		if (!PrimitiveType.INT.toString().equals(declarationBinding.getQualifiedName()))
 			return false;
 
-		List fragments= declaration.fragments();
+		List<VariableDeclarationFragment> fragments= declaration.fragments();
 		if (fragments.size() == 1) {
-			IVariableBinding indexBinding= getIndexBindingFromFragment((VariableDeclarationFragment)fragments.get(0));
+			IVariableBinding indexBinding= getIndexBindingFromFragment(fragments.get(0));
 			if (indexBinding == null)
 				return false;
 
 			fIndexBinding= indexBinding;
 			return true;
 		} else if (fragments.size() == 2) {
-			IVariableBinding indexBinding= getIndexBindingFromFragment((VariableDeclarationFragment)fragments.get(0));
+			IVariableBinding indexBinding= getIndexBindingFromFragment(fragments.get(0));
 			if (indexBinding == null) {
-				indexBinding= getIndexBindingFromFragment((VariableDeclarationFragment)fragments.get(1));
+				indexBinding= getIndexBindingFromFragment(fragments.get(1));
 				if (indexBinding == null)
 					return false;
 
-				if (!validateLengthFragment((VariableDeclarationFragment)fragments.get(0)))
+				if (!validateLengthFragment(fragments.get(0)))
 					return false;
 			} else {
-				if (!validateLengthFragment((VariableDeclarationFragment)fragments.get(1)))
+				if (!validateLengthFragment(fragments.get(1)))
 					return false;
 			}
 
@@ -329,11 +330,11 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	 * <ul>
 	 */
 	private boolean validateUpdaters(ForStatement statement) {
-		List updaters= statement.updaters();
+		List<Expression> updaters= statement.updaters();
 		if (updaters.size() != 1)
 			return false;
 
-		Expression updater= (Expression)updaters.get(0);
+		Expression updater= updaters.get(0);
 		if (updater instanceof PostfixExpression) {
 			PostfixExpression postfix= (PostfixExpression)updater;
 
@@ -402,6 +403,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 				/**
 				 * {@inheritDoc}
 				 */
+				@Override
 				protected boolean visitNode(ASTNode node) {
 					if (node instanceof Name) {
 						Name name= (Name)node;
@@ -468,6 +470,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 					return false;
 				}
 
+				@Override
 				public boolean visit(ArrayAccess node) {
 					if (fElementDeclaration != null)
 						return super.visit(node);
@@ -502,6 +505,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		return null;
 	}
 
+	@Override
 	public String getIntroducedVariableName() {
 		if (fElementDeclaration != null) {
 			return fElementDeclaration.getName().getIdentifier();
@@ -516,6 +520,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel positionGroups) throws CoreException {
 		TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, cuRewrite);
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -533,6 +538,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		rewrite.replace(getForStatement(), statement, group);
 	}
 
+	@Override
 	protected Statement convert(CompilationUnitRewrite cuRewrite, TextEditGroup group, LinkedProposalModel positionGroups) throws CoreException {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
@@ -576,6 +582,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		final AST ast= body.getAST();
 
 		body.accept(new GenericVisitor() {
+			@Override
 			public boolean visit(ArrayAccess node) {
 				IBinding binding= getBinding(node.getArray());
 				if (arrayBinding.equals(binding)) {

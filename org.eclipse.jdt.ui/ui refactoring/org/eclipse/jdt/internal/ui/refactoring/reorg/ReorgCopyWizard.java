@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ public class ReorgCopyWizard extends RefactoringWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#addUserInputPages()
 	 */
+	@Override
 	protected void addUserInputPages() {
 		addPage(new CopyInputPage(fProcessor));
 	}
@@ -56,22 +57,27 @@ public class ReorgCopyWizard extends RefactoringWizard {
 			return fProcessor;
 		}
 
+		@Override
 		protected Object getInitiallySelectedElement() {
 			return getCopyProcessor().getCommonParentForInputElements();
 		}
 
+		@Override
 		protected IJavaElement[] getJavaElements() {
 			return getCopyProcessor().getJavaElements();
 		}
 
+		@Override
 		protected IResource[] getResources() {
 			return getCopyProcessor().getResources();
 		}
 
+		@Override
 		protected IReorgDestinationValidator getDestinationValidator() {
 			return getCopyProcessor();
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(Object selected) throws JavaModelException{
 			return getCopyProcessor().setDestination(ReorgDestinationFactory.createDestination(selected));
 		}

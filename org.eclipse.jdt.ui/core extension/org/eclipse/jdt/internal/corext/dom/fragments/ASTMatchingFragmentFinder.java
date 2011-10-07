@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ class ASTMatchingFragmentFinder extends GenericVisitor {
 	}
 
 	private ASTFragment fFragmentToMatch;
-	private Set fMatches= new HashSet();
+	private Set<IASTFragment> fMatches= new HashSet<IASTFragment>();
 
 	private ASTMatchingFragmentFinder(ASTFragment toMatch) {
 		super(true);
@@ -37,13 +37,15 @@ class ASTMatchingFragmentFinder extends GenericVisitor {
 		return getMatches();
 	}
 	private IASTFragment[] getMatches() {
-		return (IASTFragment[]) fMatches.toArray(new IASTFragment[fMatches.size()]);
+		return fMatches.toArray(new IASTFragment[fMatches.size()]);
 	}
 
+	@Override
 	public boolean visit(Javadoc node) {
 		return false;
 	}
 
+	@Override
 	protected boolean visitNode(ASTNode node) {
 		IASTFragment[] localMatches= fFragmentToMatch.getMatchingFragmentsWithNode(node);
 		for(int i= 0; i < localMatches.length; i++) {

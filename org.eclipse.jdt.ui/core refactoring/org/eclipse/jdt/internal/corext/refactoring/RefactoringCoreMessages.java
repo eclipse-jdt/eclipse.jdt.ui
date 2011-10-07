@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -148,6 +148,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ChangeTypeRefactoring_descriptor_description_short;
 
 	public static String ChangeTypeRefactoring_enumsNotSupported;
+
+	public static String ChangeTypeRefactoring_uniontypeNotSupported;
 
 	public static String ChangeTypeRefactoring_insideLocalTypesNotSupported;
 
@@ -535,6 +537,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodAnalyzer_cannot_extract_for_updater;
 
+	public static String ExtractMethodAnalyzer_cannot_extract_from_annotation;
+
 	public static String ExtractMethodAnalyzer_cannot_extract_method_name_reference;
 
 	public static String ExtractMethodAnalyzer_cannot_extract_part_of_qualified_name;
@@ -560,6 +564,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractMethodAnalyzer_only_method_body;
 
 	public static String ExtractMethodAnalyzer_parent_mismatch;
+
+	public static String ExtractMethodAnalyzer_resource_in_try_with_resources;
 
 	public static String ExtractMethodAnalyzer_single_expression_or_set;
 
@@ -682,6 +688,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractTempRefactoring_replace;
 
 	public static String ExtractTempRefactoring_replace_occurrences;
+
+	public static String ExtractTempRefactoring_resource_in_try_with_resources;
 
 	public static String ExtractTempRefactoring_select_expression;
 
@@ -858,6 +866,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineTempRefactoring_preview;
 
 	public static String InlineTempRefactoring_remove_edit_name;
+
+	public static String InlineTempRefactoring_resource_in_try_with_resources;
 
 	public static String InlineTempRefactoring_select_temp;
 
@@ -2314,6 +2324,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String SurroundWithTryCatchAnalyzer_onlyStatements;
 
 	public static String SurroundWithTryCatchRefactoring_name;
+
+	public static String SurroundWithTryCatchRefactoring_notMultipleexceptions;
 
 	public static String TargetProvider_cannot_local_method_in_binary;
 

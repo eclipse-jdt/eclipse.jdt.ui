@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,14 +26,22 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 
+
+/**
+ * A type environment comprises a set of {@link TType}s that stand for Java {@link ITypeBinding}s.
+ * In contrast to type bindings, TTypes of the same type environment also work across project boundaries and
+ * across compiler environments, i.e. a type environment can handle bindings from multiple {@link ASTParser} sessions.
+ * 
+ * @see TType
+ */
 public class TypeEnvironment {
 
 	private static class ProjectKeyPair {
@@ -44,6 +53,7 @@ public class TypeEnvironment {
 			fBindingKey= bindingKey;
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			if (this == other)
 				return true;
@@ -53,6 +63,7 @@ public class TypeEnvironment {
 			return fProject.equals(otherPair.fProject) && fBindingKey.equals(otherPair.fBindingKey);
 		}
 
+		@Override
 		public int hashCode() {
 			return fProject.hashCode() + fBindingKey.hashCode();
 		}
@@ -94,21 +105,22 @@ public class TypeEnvironment {
 
 	private TType OBJECT_TYPE= null;
 
-	private Map/*<TType, ArrayType>*/[]          fArrayTypes= new Map[] { new HashMap() };
-	private Map/*<IJavaElement, StandardType>*/  fStandardTypes= new HashMap();
-	private Map/*<IJavaElement, GenericType>*/   fGenericTypes= new HashMap();
-	private Map/*<ProjectKeyPair, ParameterizedType>*/ fParameterizedTypes= new HashMap();
-	private Map/*<IJavaElement, RawType>*/       fRawTypes= new HashMap();
-	private Map/*<IJavaElement, TypeVariable>*/  fTypeVariables= new HashMap();
-	private Map/*<ProjectKeyPair, CaptureType>*/ fCaptureTypes= new HashMap();
-	private Map/*<TType, ExtendsWildcardType>*/  fExtendsWildcardTypes= new HashMap();
-	private Map/*<TType, SuperWildcardType>*/    fSuperWildcardTypes= new HashMap();
+	private List<Map<TType, ArrayType>>      fArrayTypes= new ArrayList<Map<TType, ArrayType>>();
+	private Map<IJavaElement, StandardType>  fStandardTypes= new HashMap<IJavaElement, StandardType>();
+	private Map<IJavaElement, GenericType>   fGenericTypes= new HashMap<IJavaElement, GenericType>();
+	private Map<ProjectKeyPair, ParameterizedType> fParameterizedTypes= new HashMap<ProjectKeyPair, ParameterizedType>();
+	private Map<IJavaElement, RawType>       fRawTypes= new HashMap<IJavaElement, RawType>();
+	private Map<IJavaElement, TypeVariable>  fTypeVariables= new HashMap<IJavaElement, TypeVariable>();
+	private Map<ProjectKeyPair, CaptureType> fCaptureTypes= new HashMap<ProjectKeyPair, CaptureType>();
+	private Map<TType, ExtendsWildcardType>  fExtendsWildcardTypes= new HashMap<TType, ExtendsWildcardType>();
+	private Map<TType, SuperWildcardType>    fSuperWildcardTypes= new HashMap<TType, SuperWildcardType>();
 	private UnboundWildcardType fUnboundWildcardType= null;
 
 	private static final int MAX_ENTRIES= 1024;
-	private Map/*<TypeTuple, Boolean>*/ fSubTypeCache= new LinkedHashMap(50, 0.75f, true) {
+	private Map<TypeTuple, Boolean> fSubTypeCache= new LinkedHashMap<TypeTuple, Boolean>(50, 0.75f, true) {
 		private static final long serialVersionUID= 1L;
-		protected boolean removeEldestEntry(Map.Entry eldest) {
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<TypeTuple, Boolean> eldest) {
 			return size() > MAX_ENTRIES;
 		}
 	};
@@ -117,22 +129,28 @@ public class TypeEnvironment {
 	 * Map from TType to its known subtypes, or <code>null</code> iff subtype
 	 * information was not requested in the constructor.
 	 */
-	private Map/*<TType, List<TType>>*/ fSubTypes;
+	private Map<TType, ArrayList<TType>> fSubTypes;
+	/**
+	 * If <code>true</code>, replace all capture types by their wildcard type.
+	 * @since 3.7
+	 */
+	private final boolean fRemoveCapures;
 
 	public static ITypeBinding[] createTypeBindings(TType[] types, IJavaProject project) {
-		final Map mapping= new HashMap();
-		List keys= new ArrayList();
+		final Map<String, Object> mapping= new HashMap<String, Object>();
+		List<String> keys= new ArrayList<String>();
 		for (int i= 0; i < types.length; i++) {
 			TType type= types[i];
 			String bindingKey= type.getBindingKey();
 			mapping.put(bindingKey, type);
 			keys.add(bindingKey);
 		}
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setProject(project);
 		parser.setResolveBindings(true);
-		parser.createASTs(new ICompilationUnit[0], (String[])keys.toArray(new String[keys.size()]),
+		parser.createASTs(new ICompilationUnit[0], keys.toArray(new String[keys.size()]),
 			new ASTRequestor() {
+				@Override
 				public void acceptBinding(String bindingKey, IBinding binding) {
 					mapping.put(bindingKey, binding);
 				}
@@ -154,12 +172,17 @@ public class TypeEnvironment {
 	}
 
 	public TypeEnvironment(boolean rememberSubtypes) {
+		this(rememberSubtypes, false);
+	}
+	
+	public TypeEnvironment(boolean rememberSubtypes, boolean removeCapures) {
 		if (rememberSubtypes) {
-			fSubTypes= new HashMap();
+			fSubTypes= new HashMap<TType, ArrayList<TType>>();
 		}
+		fRemoveCapures= removeCapures;
 	}
 
-	Map/*<TypeTuple, Boolean>*/ getSubTypeCache() {
+	Map<TypeTuple, Boolean> getSubTypeCache() {
 		return fSubTypeCache;
 	}
 
@@ -185,7 +208,11 @@ public class TypeEnvironment {
 				return createSuperWildCardType(binding);
 			}
 		} else if (binding.isCapture()) {
-			return createCaptureType(binding);
+			if (fRemoveCapures) {
+				return create(binding.getWildcard());
+			} else {
+				return createCaptureType(binding);
+			}
 		}
 		if ("null".equals(binding.getName())) //$NON-NLS-1$
 			return NULL;
@@ -233,10 +260,10 @@ public class TypeEnvironment {
 		String fullyQualifiedName= BOXED_PRIMITIVE_NAMES[type.getId()];
 		try {
 			IType javaElementType= focus.findType(fullyQualifiedName);
-			StandardType result= (StandardType)fStandardTypes.get(javaElementType);
+			StandardType result= fStandardTypes.get(javaElementType);
 			if (result != null)
 				return result;
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			parser.setProject(focus);
 			IBinding[] bindings= parser.createBindings(new IJavaElement[] {javaElementType} , null);
 			return createStandardType((ITypeBinding)bindings[0]);
@@ -246,7 +273,7 @@ public class TypeEnvironment {
 		return null;
 	}
 
-	Map/*<TType, List<TType>>*/ getSubTypes() {
+	Map<TType, ArrayList<TType>> getSubTypes() {
 		return fSubTypes;
 	}
 
@@ -256,9 +283,9 @@ public class TypeEnvironment {
 		if (supertype == null)
 			supertype= OBJECT_TYPE;
 
-		ArrayList subtypes= (ArrayList) fSubTypes.get(supertype);
+		ArrayList<TType> subtypes= fSubTypes.get(supertype);
 		if (subtypes == null) {
-			subtypes= new ArrayList(5);
+			subtypes= new ArrayList<TType>(5);
 			fSubTypes.put(supertype, subtypes);
 		} else {
 			Assert.isTrue(! subtypes.contains(result));
@@ -287,8 +314,8 @@ public class TypeEnvironment {
 	private ArrayType createArrayType(ITypeBinding binding) {
 		int index= binding.getDimensions() - 1;
 		TType elementType= create(binding.getElementType());
-		Map/*<TType, ArrayType>*/ arrayTypes= getArrayTypesMap(index);
-		ArrayType result= (ArrayType)arrayTypes.get(elementType);
+		Map<TType, ArrayType> arrayTypes= getArrayTypesMap(index);
+		ArrayType result= arrayTypes.get(elementType);
 		if (result != null)
 			return result;
 		result= new ArrayType(this);
@@ -303,8 +330,8 @@ public class TypeEnvironment {
 		Assert.isTrue(dimensions > 0);
 
 		int index= dimensions - 1;
-		Map arrayTypes= getArrayTypesMap(index);
-		ArrayType result= (ArrayType)arrayTypes.get(elementType);
+		Map<TType, ArrayType> arrayTypes= getArrayTypesMap(index);
+		ArrayType result= arrayTypes.get(elementType);
 		if (result != null)
 			return result;
 		result= new ArrayType(this, BindingKey.createArrayTypeBindingKey(elementType.getBindingKey(), dimensions));
@@ -313,24 +340,22 @@ public class TypeEnvironment {
 		return result;
 	}
 
-	private Map/*<TType, ArrayType>*/ getArrayTypesMap(int index) {
-		int oldLength= fArrayTypes.length;
+	private Map<TType, ArrayType> getArrayTypesMap(int index) {
+		int oldLength= fArrayTypes.size();
 		if (index >= oldLength) {
-			Map[] newArray= new Map[index + 1];
-			System.arraycopy(fArrayTypes, 0, newArray, 0, oldLength);
-			fArrayTypes= newArray;
+			fArrayTypes.addAll(Collections.<Map<TType,ArrayType>>nCopies(index + 1 - oldLength, null));
 		}
-		Map arrayTypes= fArrayTypes[index];
+		Map<TType, ArrayType> arrayTypes= fArrayTypes.get(index);
 		if (arrayTypes == null) {
-			arrayTypes= new HashMap();
-			fArrayTypes[index]= arrayTypes;
+			arrayTypes= new HashMap<TType, ArrayType>();
+			fArrayTypes.set(index, arrayTypes);
 		}
 		return arrayTypes;
 	}
 
 	private StandardType createStandardType(ITypeBinding binding) {
 		IJavaElement javaElement= binding.getJavaElement();
-		StandardType result= (StandardType)fStandardTypes.get(javaElement);
+		StandardType result= fStandardTypes.get(javaElement);
 		if (result != null)
 			return result;
 		result= new StandardType(this);
@@ -343,7 +368,7 @@ public class TypeEnvironment {
 
 	private GenericType createGenericType(ITypeBinding binding) {
 		IJavaElement javaElement= binding.getJavaElement();
-		GenericType result= (GenericType)fGenericTypes.get(javaElement);
+		GenericType result= fGenericTypes.get(javaElement);
 		if (result != null)
 			return result;
 		result= new GenericType(this);
@@ -358,7 +383,7 @@ public class TypeEnvironment {
 		IJavaProject javaProject= binding.getJavaElement().getJavaProject();
 		String bindingKey= binding.getKey();
 		ProjectKeyPair pair= new ProjectKeyPair(javaProject, bindingKey);
-		ParameterizedType result= (ParameterizedType)fParameterizedTypes.get(pair);
+		ParameterizedType result= fParameterizedTypes.get(pair);
 		if (result != null)
 			return result;
 		result= new ParameterizedType(this);
@@ -371,7 +396,7 @@ public class TypeEnvironment {
 
 	private RawType createRawType(ITypeBinding binding) {
 		IJavaElement javaElement= binding.getJavaElement();
-		RawType result= (RawType)fRawTypes.get(javaElement);
+		RawType result= fRawTypes.get(javaElement);
 		if (result != null)
 			return result;
 		result= new RawType(this);
@@ -392,7 +417,7 @@ public class TypeEnvironment {
 
 	private TType createExtendsWildCardType(ITypeBinding binding) {
 		TType bound= create(binding.getBound());
-		ExtendsWildcardType result= (ExtendsWildcardType)fExtendsWildcardTypes.get(bound);
+		ExtendsWildcardType result= fExtendsWildcardTypes.get(bound);
 		if (result != null)
 			return result;
 		result= new ExtendsWildcardType(this);
@@ -403,7 +428,7 @@ public class TypeEnvironment {
 
 	private TType createSuperWildCardType(ITypeBinding binding) {
 		TType bound= create(binding.getBound());
-		SuperWildcardType result= (SuperWildcardType)fSuperWildcardTypes.get(bound);
+		SuperWildcardType result= fSuperWildcardTypes.get(bound);
 		if (result != null)
 			return result;
 		result= new SuperWildcardType(this);
@@ -414,7 +439,7 @@ public class TypeEnvironment {
 
 	private TypeVariable createTypeVariable(ITypeBinding binding) {
 		IJavaElement javaElement= binding.getJavaElement();
-		TypeVariable result= (TypeVariable)fTypeVariables.get(javaElement);
+		TypeVariable result= fTypeVariables.get(javaElement);
 		if (result != null)
 			return result;
 		result= new TypeVariable(this);
@@ -427,7 +452,7 @@ public class TypeEnvironment {
 		IJavaProject javaProject= binding.getDeclaringClass().getJavaElement().getJavaProject();
 		String bindingKey= binding.getKey();
 		ProjectKeyPair pair= new ProjectKeyPair(javaProject, bindingKey);
-		CaptureType result= (CaptureType)fCaptureTypes.get(pair);
+		CaptureType result= fCaptureTypes.get(pair);
 		if (result != null)
 			return result;
 		result= new CaptureType(this);

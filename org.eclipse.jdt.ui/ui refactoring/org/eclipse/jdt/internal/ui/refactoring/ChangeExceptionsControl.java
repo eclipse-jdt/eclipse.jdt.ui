@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,17 +69,18 @@ public class ChangeExceptionsControl extends Composite {
 //TODO: cleanup, adapt NLS strings
 
 	private static class ExceptionInfoContentProvider implements IStructuredContentProvider {
+		@SuppressWarnings("unchecked")
 		public Object[] getElements(Object inputElement) {
-			return removeMarkedAsDeleted((List) inputElement);
+			return removeMarkedAsDeleted((List<ExceptionInfo>) inputElement);
 		}
-		private ExceptionInfo[] removeMarkedAsDeleted(List exceptionInfos){
-			List result= new ArrayList(exceptionInfos.size());
-			for (Iterator iter= exceptionInfos.iterator(); iter.hasNext();) {
-				ExceptionInfo info= (ExceptionInfo) iter.next();
+		private ExceptionInfo[] removeMarkedAsDeleted(List<ExceptionInfo> exceptionInfos){
+			List<ExceptionInfo> result= new ArrayList<ExceptionInfo>(exceptionInfos.size());
+			for (Iterator<ExceptionInfo> iter= exceptionInfos.iterator(); iter.hasNext();) {
+				ExceptionInfo info= iter.next();
 				if (! info.isDeleted())
 					result.add(info);
 			}
-			return (ExceptionInfo[]) result.toArray(new ExceptionInfo[result.size()]);
+			return result.toArray(new ExceptionInfo[result.size()]);
 		}
 		public void dispose() {
 			// do nothing
@@ -111,7 +112,7 @@ public class ChangeExceptionsControl extends Composite {
 
 	private TableViewer fTableViewer;
 	private Button fRemoveButton;
-	private List fExceptionInfos;
+	private List<ExceptionInfo> fExceptionInfos;
 
 	public ChangeExceptionsControl(Composite parent, int style, IExceptionListChangeListener listener, IJavaProject project) {
 		super(parent, style);
@@ -129,7 +130,7 @@ public class ChangeExceptionsControl extends Composite {
 		createButtonComposite(this);
 	}
 
-	public void setInput(List exceptionInfos) {
+	public void setInput(List<ExceptionInfo> exceptionInfos) {
 		Assert.isNotNull(exceptionInfos);
 		fExceptionInfos= exceptionInfos;
 		fTableViewer.setInput(fExceptionInfos);
@@ -160,8 +161,8 @@ public class ChangeExceptionsControl extends Composite {
 		if (!(selection instanceof IStructuredSelection))
 			return new ExceptionInfo[0];
 
-		List selected= ((IStructuredSelection) selection).toList();
-		return (ExceptionInfo[]) selected.toArray(new ExceptionInfo[selected.size()]);
+		List<?> selected= ((IStructuredSelection) selection).toList();
+		return selected.toArray(new ExceptionInfo[selected.size()]);
 	}
 
 	// ---- Button bar --------------------------------------------------------------------------------------
@@ -203,6 +204,7 @@ public class ChangeExceptionsControl extends Composite {
 		SWTUtil.setButtonDimensionHint(button);
 		button.setEnabled(true);
 		button.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				doAddException();
 			}
@@ -280,8 +282,8 @@ public class ChangeExceptionsControl extends Composite {
 	}
 
 	private ExceptionInfo findExceptionInfo(IType exception) {
-		for (Iterator iter= fExceptionInfos.iterator(); iter.hasNext(); ) {
-			ExceptionInfo info= (ExceptionInfo) iter.next();
+		for (Iterator<ExceptionInfo> iter= fExceptionInfos.iterator(); iter.hasNext(); ) {
+			ExceptionInfo info= iter.next();
 			if (info.getElement().equals(exception))
 				return info;
 		}
@@ -294,6 +296,7 @@ public class ChangeExceptionsControl extends Composite {
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				int index= getTable().getSelectionIndices()[0];
 				ExceptionInfo[] selected= getSelectedItems();

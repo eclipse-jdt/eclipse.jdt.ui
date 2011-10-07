@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 	/*
 	 * @see IAction#actionPerformed
 	 */
+	@Override
 	public void run() {
 		ITextEditor editor= getTextEditor();
 		if (editor == null)
@@ -68,6 +69,7 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 	/*
 	 * @see TextEditorAction#update
 	 */
+	@Override
 	public void update() {
 		boolean showHover= fStore != null &&  fStore.getBoolean(PreferenceConstants.EDITOR_SHOW_HOVER);
 		setChecked(showHover);
@@ -77,6 +79,7 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 	/*
 	 * @see TextEditorAction#setEditor(ITextEditor)
 	 */
+	@Override
 	public void setEditor(ITextEditor editor) {
 		super.setEditor(editor);
 		if (editor != null) {

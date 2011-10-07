@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
-
 
 
 /**
@@ -65,9 +64,14 @@ public final class TypingRun {
 		private final boolean fIsModification;
 		private final String fName;
 
-		/** Private ctor for type safe enumeration. */
-		private ChangeType(boolean isRunPart, String name) {
-			fIsModification= isRunPart;
+		/**
+		 * Private constructor for type safe enumeration.
+		 * 
+		 * @param isModification the flag indicating whether it is a modification
+		 * @param name the name
+		 */
+		private ChangeType(boolean isModification, String name) {
+			fIsModification= isModification;
 			fName= name;
 		}
 
@@ -84,6 +88,7 @@ public final class TypingRun {
 		/*
 		 * @see java.lang.Object#toString()
 		 */
+		@Override
 		public String toString() {
 			return fName;
 		}

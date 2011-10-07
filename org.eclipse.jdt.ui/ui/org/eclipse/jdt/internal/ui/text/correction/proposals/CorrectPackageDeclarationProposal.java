@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,7 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
 	 */
+	@Override
 	protected void addEdits(IDocument doc, TextEdit root) throws CoreException {
 		super.addEdits(doc, root);
 
@@ -77,6 +78,7 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal#getName()
 	 */
+	@Override
 	public String getName() {
 		ICompilationUnit cu= getCompilationUnit();
 		IPackageFragment parentPack= (IPackageFragment) cu.getParent();

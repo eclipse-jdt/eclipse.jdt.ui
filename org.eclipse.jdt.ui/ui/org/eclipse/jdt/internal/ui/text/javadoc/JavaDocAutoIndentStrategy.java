@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -302,7 +302,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	private boolean isFirstComment(IDocument document, DocumentCommand command, IMember member, boolean ignoreNonJavadoc) throws BadLocationException, JavaModelException {
 		IRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset, false);
 		ISourceRange sourceRange= member.getSourceRange();
-		if (sourceRange == null || sourceRange.getOffset() != partition.getOffset())
+		if (sourceRange == null)
 			return false;
 		int srcOffset= sourceRange.getOffset();
 		int srcLength= sourceRange.getLength();
@@ -387,6 +387,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	/*
 	 * @see IAutoIndentStrategy#customizeDocumentCommand
 	 */
+	@Override
 	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
 
 		if (!isSmartMode())

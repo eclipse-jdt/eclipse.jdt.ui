@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,7 @@ public abstract class BuildPathWizard extends NewElementWizard {
 	private final CPListElement fEntryToEdit;
 	private IPackageFragmentRoot fPackageFragmentRoot;
 	private IPath fOutputLocation;
-	private final ArrayList fExistingEntries;
+	private final ArrayList<CPListElement> fExistingEntries;
 
 	public BuildPathWizard(CPListElement[] existingEntries, CPListElement newEntry, IPath outputLocation, String titel, ImageDescriptor image) {
 		fOutputLocation= outputLocation;
@@ -47,13 +47,14 @@ public abstract class BuildPathWizard extends NewElementWizard {
 		setWindowTitle(titel);
 
 		fEntryToEdit= newEntry;
-		fExistingEntries= new ArrayList(Arrays.asList(existingEntries));
+		fExistingEntries= new ArrayList<CPListElement>(Arrays.asList(existingEntries));
 		fDoFlushChange= true;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		if (fDoFlushChange) {
 			IJavaProject javaProject= getEntryToEdit().getJavaProject();
@@ -71,6 +72,7 @@ public abstract class BuildPathWizard extends NewElementWizard {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IJavaElement getCreatedElement() {
 		return fPackageFragmentRoot;
 	}
@@ -79,7 +81,7 @@ public abstract class BuildPathWizard extends NewElementWizard {
 		fDoFlushChange= b;
 	}
 
-	public ArrayList getExistingEntries() {
+	public ArrayList<CPListElement> getExistingEntries() {
 		return fExistingEntries;
 	}
 
@@ -95,16 +97,16 @@ public abstract class BuildPathWizard extends NewElementWizard {
 		return fEntryToEdit;
 	}
 
-	public List/*<CPListElement>*/ getInsertedElements() {
-		return new ArrayList();
+	public List<CPListElement> getInsertedElements() {
+		return new ArrayList<CPListElement>();
 	}
 
-	public List/*<CPListElement>*/ getRemovedElements() {
-		return new ArrayList();
+	public List<CPListElement> getRemovedElements() {
+		return new ArrayList<CPListElement>();
 	}
 
-	public List/*<CPListElement>*/ getModifiedElements() {
-		ArrayList result= new ArrayList(1);
+	public List<CPListElement> getModifiedElements() {
+		ArrayList<CPListElement> result= new ArrayList<CPListElement>(1);
 		result.add(fEntryToEdit);
 		return result;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -297,10 +297,10 @@ public final class BuildPathDialogAccess {
 			throw new IllegalArgumentException();
 		}
 
-		Class[] acceptedClasses= new Class[] { IFile.class };
+		Class<?>[] acceptedClasses= new Class[] { IFile.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 
-		ArrayList usedJars= new ArrayList(usedEntries.length);
+		ArrayList<IResource> usedJars= new ArrayList<IResource>(usedEntries.length);
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		for (int i= 0; i < usedEntries.length; i++) {
 			IPath curr= usedEntries[i];
@@ -348,9 +348,9 @@ public final class BuildPathDialogAccess {
 			throw new IllegalArgumentException();
 		}
 
-		Class[] acceptedClasses= new Class[] { IFile.class };
+		Class<?>[] acceptedClasses= new Class[] { IFile.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
-		ArrayList usedJars= new ArrayList(usedEntries.length);
+		ArrayList<IResource> usedJars= new ArrayList<IResource>(usedEntries.length);
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		for (int i= 0; i < usedEntries.length; i++) {
 			IResource resource= root.findMember(usedEntries[i]);
@@ -558,9 +558,9 @@ public final class BuildPathDialogAccess {
 
 
 	private static IPath[] internalChooseFolderEntry(Shell shell, IPath initialSelection, IPath[] usedEntries, String title, String message) {
-		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
+		Class<?>[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
 
-		ArrayList usedContainers= new ArrayList(usedEntries.length);
+		ArrayList<IResource> usedContainers= new ArrayList<IResource>(usedEntries.length);
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		for (int i= 0; i < usedEntries.length; i++) {
 			IResource resource= root.findMember(usedEntries[i]);

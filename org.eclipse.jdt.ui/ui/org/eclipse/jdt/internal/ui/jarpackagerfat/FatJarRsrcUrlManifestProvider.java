@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,7 @@ public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
 	}
 
 	private void setManifestRsrcClasspath(Manifest ownManifest, JarPackageData jarPackage) {
-		Set jarNames= new HashSet();
+		Set<String> jarNames= new HashSet<String>();
 		Object[] elements= jarPackage.getElements();
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];
@@ -54,11 +54,11 @@ public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
 		ownManifest.getMainAttributes().putValue(JIJConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME, manifestRsrcClasspath); 
 	}
 
-	public String getManifestRsrcClasspath(Set jarNames) {
+	public String getManifestRsrcClasspath(Set<String> jarNames) {
 		StringBuffer result= new StringBuffer();
 		result.append(JIJConstants.CURRENT_DIR); 
-		for (Iterator iterator= jarNames.iterator(); iterator.hasNext();) {
-			String jarName= (String) iterator.next();
+		for (Iterator<String> iterator= jarNames.iterator(); iterator.hasNext();) {
+			String jarName= iterator.next();
 			try {
 				jarName= URLEncoder.encode(jarName, "UTF-8"); //$NON-NLS-1$
 			} catch (UnsupportedEncodingException e) {
@@ -75,6 +75,7 @@ public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
 	 * @param	manifest	the manifest to which the entries should be added
 	 * @param	jarPackage	the JAR package specification
 	 */
+	@Override
 	protected void putAdditionalEntries(Manifest manifest, JarPackageData jarPackage) {
 		setManifestRsrcClasspath(manifest, jarPackage);
 		putMainClass(manifest, jarPackage);

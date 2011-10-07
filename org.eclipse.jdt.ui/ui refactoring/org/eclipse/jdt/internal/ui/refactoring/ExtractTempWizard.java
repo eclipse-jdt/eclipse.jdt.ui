@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */
+	@Override
 	protected void addUserInputPages(){
 		addPage(new ExtractTempInputPage(getExtractTempRefactoring().guessTempNames()));
 	}
@@ -120,6 +121,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
 			getExtractTempRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
 			checkBox.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fSettings.put(REPLACE_ALL, checkBox.getSelection());
 					getExtractTempRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
@@ -133,6 +135,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
 			getExtractTempRefactoring().setDeclareFinal(checkBox.getSelection());
 			checkBox.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fSettings.put(DECLARE_FINAL, checkBox.getSelection());
 					getExtractTempRefactoring().setDeclareFinal(checkBox.getSelection());
@@ -143,6 +146,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#textModified(java.lang.String)
 		 */
+		@Override
 		protected void textModified(String text) {
 			getExtractTempRefactoring().setTempName(text);
 			super.textModified(text);
@@ -152,6 +156,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#validateTextField(String)
 		 */
+		@Override
 		protected RefactoringStatus validateTextField(String text) {
 			return getExtractTempRefactoring().checkTempName(text);
 		}
@@ -171,6 +176,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isInitialInputValid()
 		 */
+		@Override
 		protected boolean isInitialInputValid() {
 			return fInitialValid;
 		}

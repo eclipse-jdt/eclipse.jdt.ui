@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,6 +69,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 		return moveProcessor.isTextualMove();
 	}
 
+	@Override
 	protected void addUserInputPages() {
 		addPage(new MoveInputPage(fMoveProcessor));
 	}
@@ -96,26 +97,32 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			return fMoveProcessor;
 		}
 
+		@Override
 		protected Object getInitiallySelectedElement() {
 			return getJavaMoveProcessor().getCommonParentForInputElements();
 		}
 
+		@Override
 		protected IJavaElement[] getJavaElements() {
 			return getJavaMoveProcessor().getJavaElements();
 		}
 
+		@Override
 		protected IResource[] getResources() {
 			return getJavaMoveProcessor().getResources();
 		}
 
+		@Override
 		protected IReorgDestinationValidator getDestinationValidator() {
 			return getJavaMoveProcessor();
 		}
 
+		@Override
 		protected boolean performFinish() {
 			return super.performFinish() || getJavaMoveProcessor().wasCanceled(); //close the dialog if canceled
 		}
 
+		@Override
 		protected RefactoringStatus verifyDestination(Object selected) throws JavaModelException{
 			JavaMoveProcessor processor= getJavaMoveProcessor();
 			final RefactoringStatus refactoringStatus= processor.setDestination(ReorgDestinationFactory.createDestination(selected));
@@ -172,6 +179,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			fReferenceCheckbox.setSelection(processor.getUpdateReferences());
 
 			fReferenceCheckbox.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					processor.setUpdateReferences(((Button)e.widget).getSelection());
 					updateUIStatus();
@@ -197,6 +205,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			updateQualifiedNameUpdating(processor, processor.getUpdateQualifiedNames());
 
 			fQualifiedNameCheckbox.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					boolean enabled= ((Button)e.widget).getSelection();
 					updateQualifiedNameUpdating(processor, enabled);
@@ -212,6 +221,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			updateUIStatus();
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			Composite result;
 
@@ -234,6 +244,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			Dialog.applyDialogFont(result);
 		}
 
+		@Override
 		protected Control addLabel(Composite parent) {
 			if (fCreateTargetQuery != null) {
 				Composite firstLine= new Composite(parent, SWT.NONE);
@@ -258,6 +269,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 				gd.widthHint = SWTUtil.getButtonWidthHint(newButton);
 				newButton.setLayoutData(gd);
 				newButton.addSelectionListener(new SelectionAdapter() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						doNewButtonPressed();
 					}
@@ -284,6 +296,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 		 */
+		@Override
 		public void dispose() {
 			super.dispose();
 

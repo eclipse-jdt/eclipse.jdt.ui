@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,7 +74,7 @@ public class MoveCuUpdateCreator {
 	private ICompilationUnit[] fCus;
 	private IPackageFragment fDestination;
 
-	private Map fImportRewrites; //ICompilationUnit -> ImportEdit
+	private Map<ICompilationUnit, ImportRewrite> fImportRewrites; //ICompilationUnit -> ImportEdit
 
 	public MoveCuUpdateCreator(ICompilationUnit cu, IPackageFragment pack){
 		this(new ICompilationUnit[]{cu}, pack);
@@ -85,7 +85,7 @@ public class MoveCuUpdateCreator {
 		Assert.isNotNull(pack);
 		fCus= cus;
 		fDestination= pack;
-		fImportRewrites= new HashMap();
+		fImportRewrites= new HashMap<ICompilationUnit, ImportRewrite>();
 		fNewPackage= fDestination.isDefaultPackage() ? "" : fDestination.getElementName() + '.'; //$NON-NLS-1$
 	}
 
@@ -107,9 +107,9 @@ public class MoveCuUpdateCreator {
 	}
 
 	private void addImportRewriteUpdates(TextChangeManager changeManager) throws CoreException {
-		for (Iterator iter= fImportRewrites.keySet().iterator(); iter.hasNext();) {
-			ICompilationUnit cu= (ICompilationUnit) iter.next();
-			ImportRewrite importRewrite= (ImportRewrite) fImportRewrites.get(cu);
+		for (Iterator<ICompilationUnit> iter= fImportRewrites.keySet().iterator(); iter.hasNext();) {
+			ICompilationUnit cu= iter.next();
+			ImportRewrite importRewrite= fImportRewrites.get(cu);
 			if (importRewrite != null && importRewrite.hasRecordedChanges()) {
 				TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.MoveCuUpdateCreator_update_imports, importRewrite.rewriteImports(null));
 			}
@@ -145,7 +145,7 @@ public class MoveCuUpdateCreator {
 	}
 
 	private void addReferenceUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException, CoreException {
-		List cuList= Arrays.asList(fCus);
+		List<ICompilationUnit> cuList= Arrays.asList(fCus);
 		SearchResultGroup[] references= getReferences(movedUnit, pm, status);
 		for (int i= 0; i < references.length; i++) {
 			SearchResultGroup searchResultGroup= references[i];
@@ -228,18 +228,18 @@ public class MoveCuUpdateCreator {
 	}
 
 	private IType[] getDestinationPackageTypes() throws JavaModelException {
-		List types= new ArrayList();
+		List<IType> types= new ArrayList<IType>();
 		if (fDestination.exists()) {
 			ICompilationUnit[] cus= fDestination.getCompilationUnits();
 			for (int i= 0; i < cus.length; i++) {
 				types.addAll(Arrays.asList(cus[i].getAllTypes()));
 			}
 		}
-		return (IType[]) types.toArray(new IType[types.size()]);
+		return types.toArray(new IType[types.size()]);
 	}
 
 	private void addImportToSourcePackageTypes(ICompilationUnit movedUnit, IProgressMonitor pm) throws CoreException{
-		List cuList= Arrays.asList(fCus);
+		List<ICompilationUnit> cuList= Arrays.asList(fCus);
 		IType[] allCuTypes= movedUnit.getAllTypes();
 		IType[] referencedTypes= ReferenceFinderUtil.getTypesReferencedIn(allCuTypes, pm);
 		ImportRewrite importEdit= getImportRewrite(movedUnit);
@@ -259,13 +259,13 @@ public class MoveCuUpdateCreator {
 
 	private ImportRewrite getImportRewrite(ICompilationUnit cu) throws CoreException{
 		if (fImportRewrites.containsKey(cu))
-			return (ImportRewrite)fImportRewrites.get(cu);
+			return fImportRewrites.get(cu);
 		ImportRewrite importEdit= StubUtility.createImportRewrite(cu, true);
 		fImportRewrites.put(cu, importEdit);
 		return importEdit;
 	}
 
-	private boolean simpleReferencesNeedNewImport(ICompilationUnit movedUnit, ICompilationUnit referencingCu, List cuList) {
+	private boolean simpleReferencesNeedNewImport(ICompilationUnit movedUnit, ICompilationUnit referencingCu, List<ICompilationUnit> cuList) {
 		if (referencingCu.equals(movedUnit))
 			return false;
 		if (cuList.contains(referencingCu))
@@ -328,6 +328,7 @@ public class MoveCuUpdateCreator {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor#acceptSearchMatch(SearchMatch)
 		 */
+		@Override
 		public void acceptSearchMatch(SearchMatch match) throws CoreException {
 			if (filterMatch(match))
 				return;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ public interface IDefaultValueAdvisor {
 	 * @param cuRewrite the CompilationUnitRewrite to use for rewrite, imports etc..
 	 * @return a new Expression to be used as argument for the new parameter
 	 */
-	Expression createDefaultExpression(List/*<Expression>*/ invocationArguments, ParameterInfo addedInfo, List/*<ParameterInfo>*/ parameterInfos, MethodDeclaration enclosingMethod, boolean isRecursive, CompilationUnitRewrite cuRewrite);
+	Expression createDefaultExpression(List<Expression> invocationArguments, ParameterInfo addedInfo, List<ParameterInfo> parameterInfos, MethodDeclaration enclosingMethod, boolean isRecursive, CompilationUnitRewrite cuRewrite);
 
 	/**
 	 * Create a type for the added parameter.

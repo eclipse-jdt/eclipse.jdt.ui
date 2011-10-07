@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -480,8 +480,9 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	 */
 	protected IPackageFragmentRoot chooseContainer() {
 		IJavaElement initElement= getPackageFragmentRoot();
-		Class[] acceptedClasses= new Class[] { IPackageFragmentRoot.class, IJavaProject.class };
+		Class<?>[] acceptedClasses= new Class[] { IPackageFragmentRoot.class, IJavaProject.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false) {
+			@Override
 			public boolean isSelectedValid(Object element) {
 				try {
 					if (element instanceof IJavaProject) {
@@ -501,6 +502,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 
 		acceptedClasses= new Class[] { IJavaModel.class, IPackageFragmentRoot.class, IJavaProject.class };
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses) {
+			@Override
 			public boolean select(Viewer viewer, Object parent, Object element) {
 				if (element instanceof IPackageFragmentRoot) {
 					try {

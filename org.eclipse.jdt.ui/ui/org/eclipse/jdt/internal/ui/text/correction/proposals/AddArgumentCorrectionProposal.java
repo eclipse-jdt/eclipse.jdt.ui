@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,7 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
+	@Override
 	protected ASTRewrite getRewrite() {
 		AST ast= fCallerNode.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
@@ -67,9 +68,9 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 	}
 
 	private ChildListPropertyDescriptor getProperty() {
-		List list= fCallerNode.structuralPropertiesForType();
+		List<StructuralPropertyDescriptor> list= fCallerNode.structuralPropertiesForType();
 		for (int i= 0; i < list.size(); i++) {
-			StructuralPropertyDescriptor curr= (StructuralPropertyDescriptor) list.get(i);
+			StructuralPropertyDescriptor curr= list.get(i);
 			if (curr.isChildListProperty() && "arguments".equals(curr.getId())) { //$NON-NLS-1$
 				return (ChildListPropertyDescriptor) curr;
 			}

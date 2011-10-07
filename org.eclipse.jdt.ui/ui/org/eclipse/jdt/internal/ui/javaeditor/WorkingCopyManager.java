@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,7 +35,7 @@ import org.eclipse.jdt.ui.IWorkingCopyManagerExtension;
 public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyManagerExtension {
 
 	private ICompilationUnitDocumentProvider fDocumentProvider;
-	private Map fMap;
+	private Map<IEditorInput, ICompilationUnit> fMap;
 	private boolean fIsShuttingDown;
 
 	/**
@@ -103,7 +103,7 @@ public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyMana
 	 * @since 3.2
 	 */
 	public ICompilationUnit getWorkingCopy(IEditorInput input, boolean primaryOnly) {
-		ICompilationUnit unit= fMap == null ? null : (ICompilationUnit) fMap.get(input);
+		ICompilationUnit unit= fMap == null ? null : fMap.get(input);
 		if (unit == null)
 			unit= fDocumentProvider.getWorkingCopy(input);
 		if (unit != null && (!primaryOnly || JavaModelUtil.isPrimary(unit)))
@@ -117,7 +117,7 @@ public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyMana
 	public void setWorkingCopy(IEditorInput input, ICompilationUnit workingCopy) {
 		if (fDocumentProvider.getDocument(input) != null) {
 			if (fMap == null)
-				fMap= new HashMap();
+				fMap= new HashMap<IEditorInput, ICompilationUnit>();
 			fMap.put(input, workingCopy);
 		}
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -84,6 +84,7 @@ public class DeleteAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		if (ReorgUtils.containsOnlyProjects(selection.toList())) {
 			setEnabled(createWorkbenchAction(selection).isEnabled());
@@ -116,6 +117,7 @@ public class DeleteAction extends SelectionDispatchAction {
 					 * @see org.eclipse.jface.dialogs.MessageDialog#createButton(org.eclipse.swt.widgets.Composite, int, java.lang.String, boolean)
 					 * @since 3.5
 					 */
+					@Override
 					protected Button createButton(Composite parent, int id, String label, boolean defaultButton) {
 						Button button= super.createButton(parent, id, label, defaultButton);
 					if (id == REMOVE_BUTTON && IWorkingSetIDs.OTHERS.equals(workingSetID))
@@ -132,7 +134,7 @@ public class DeleteAction extends SelectionDispatchAction {
 
 		int dialogResponse= dialog.open();
 		if (dialogResponse == REMOVE_BUTTON) {
-			Iterator iter= selection.iterator();
+			Iterator<?> iter= selection.iterator();
 			IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 			while (iter.hasNext()) {
 				IWorkingSet workingSet= (IWorkingSet)iter.next();
@@ -146,9 +148,9 @@ public class DeleteAction extends SelectionDispatchAction {
 				if (activePart instanceof PackageExplorerPart) {
 					PackageExplorerPart packagePart= (PackageExplorerPart)activePart;
 					WorkingSetModel model= packagePart.getWorkingSetModel();
-					List activeWorkingSets= new ArrayList(Arrays.asList(model.getActiveWorkingSets()));
+					List<IWorkingSet> activeWorkingSets= new ArrayList<IWorkingSet>(Arrays.asList(model.getActiveWorkingSets()));
 					activeWorkingSets.removeAll(SelectionUtil.toList(selection));
-					model.setActiveWorkingSets((IWorkingSet[])activeWorkingSets.toArray(new IWorkingSet[activeWorkingSets.size()]));
+					model.setActiveWorkingSets(activeWorkingSets.toArray(new IWorkingSet[activeWorkingSets.size()]));
 				}
 			}
 		}
@@ -157,6 +159,7 @@ public class DeleteAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		if (ReorgUtils.containsOnlyProjects(selection.toList())) {
 			createWorkbenchAction(selection).run();

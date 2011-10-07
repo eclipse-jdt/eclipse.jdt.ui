@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,12 +54,13 @@ public abstract class FormatterTabPage extends ModifyDialogTabPage {
 	private final IDialogSettings fDialogSettings;
 	private Button fShowInvisibleButton;
 
-	public FormatterTabPage(IModifyDialogTabPage.IModificationListener modifyListener, Map workingValues) {
+	public FormatterTabPage(IModifyDialogTabPage.IModificationListener modifyListener, Map<String, String> workingValues) {
 		super(modifyListener, workingValues);
 
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 	}
 
+	@Override
 	protected Composite doCreatePreviewPane(Composite composite, int numColumns) {
 
 		createLabel(numColumns - 1, composite, FormatterMessages.ModifyDialogTabPage_preview_label_text);
@@ -68,6 +69,7 @@ public abstract class FormatterTabPage extends ModifyDialogTabPage {
 		fShowInvisibleButton.setText(FormatterMessages.FormatterTabPage_ShowInvisibleCharacters_label);
 		fShowInvisibleButton.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
 		fShowInvisibleButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fPreview.showInvisibleCharacters(fShowInvisibleButton.getSelection());
 				fDialogSettings.put(SHOW_INVISIBLE_PREFERENCE_KEY, fShowInvisibleButton.getSelection());
@@ -92,6 +94,7 @@ public abstract class FormatterTabPage extends ModifyDialogTabPage {
 		return fDialogSettings.getBoolean(SHOW_INVISIBLE_PREFERENCE_KEY);
 	}
 
+	@Override
 	protected void doUpdatePreview() {
 		boolean showInvisible= isShowInvisible();
 		fPreview.showInvisibleCharacters(showInvisible);

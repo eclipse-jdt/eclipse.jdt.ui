@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,10 +31,10 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
-import org.eclipse.jface.text.link.LinkedPosition;
-import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
+import org.eclipse.jface.text.link.LinkedPosition;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
 
 import org.eclipse.ui.IEditorPart;
 
@@ -144,10 +144,10 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			}
 
 			// sort for iteration order, starting with the node @ offset
-			Arrays.sort(sameNodes, new Comparator() {
+			Arrays.sort(sameNodes, new Comparator<ASTNode>() {
 
-				public int compare(Object o1, Object o2) {
-					return rank((ASTNode) o1) - rank((ASTNode) o2);
+				public int compare(ASTNode o1, ASTNode o2) {
+					return rank(o1) - rank(o2);
 				}
 
 				/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Andre Soereng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
+ *     Björn Michael <b.michael@gmx.de> - [syntax highlighting] Syntax coloring for abstract classes - https://bugs.eclipse.org/331311
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
@@ -183,6 +184,13 @@ public class SemanticHighlightings {
 	public static final String NUMBER="number"; //$NON-NLS-1$
 
 	/**
+	 * A named preference part that controls the highlighting of abstract classes.
+	 *
+	 * @since 3.7
+	 */
+	public static final String ABSTRACT_CLASS="abstractClass"; //$NON-NLS-1$
+
+	/**
 	 * Semantic highlightings
 	 */
 	private static SemanticHighlighting[] fgSemanticHighlightings;
@@ -195,6 +203,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return STATIC_FINAL_FIELD;
 		}
@@ -202,6 +211,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(0, 0, 0);
 		}
@@ -209,6 +219,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -216,6 +227,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -223,6 +235,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -230,6 +243,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_staticFinalField;
 		}
@@ -237,6 +251,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 			IBinding binding= token.getBinding();
 			return binding != null && binding.getKind() == IBinding.VARIABLE && ((IVariableBinding)binding).isField() && (binding.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) == (Modifier.FINAL | Modifier.STATIC);
@@ -251,6 +266,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return STATIC_FIELD;
 		}
@@ -258,6 +274,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(0, 0, 192);
 		}
@@ -265,6 +282,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -272,6 +290,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return true;
 		}
@@ -279,6 +298,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return true;
 		}
@@ -286,6 +306,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_staticField;
 		}
@@ -293,6 +314,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 			IBinding binding= token.getBinding();
 			return binding != null && binding.getKind() == IBinding.VARIABLE && ((IVariableBinding)binding).isField() && (binding.getModifiers() & Modifier.STATIC) == Modifier.STATIC;
@@ -307,6 +329,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return FIELD;
 		}
@@ -314,6 +337,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(0, 0, 192);
 		}
@@ -321,6 +345,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -328,6 +353,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -335,6 +361,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return true;
 		}
@@ -342,6 +369,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_field;
 		}
@@ -349,6 +377,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 			IBinding binding= token.getBinding();
 			return binding != null && binding.getKind() == IBinding.VARIABLE && ((IVariableBinding)binding).isField();
@@ -363,6 +392,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return AUTOBOXING;
 		}
@@ -370,6 +400,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(171, 48, 0);
 		}
@@ -377,6 +408,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -384,6 +416,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -391,6 +424,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -398,6 +432,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_autoboxing;
 		}
@@ -405,6 +440,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumesLiteral(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumesLiteral(SemanticToken token) {
 			return isAutoUnBoxing(token.getLiteral());
 		}
@@ -412,6 +448,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 			return isAutoUnBoxing(token.getNode());
 		}
@@ -460,6 +497,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return METHOD_DECLARATION;
 		}
@@ -467,6 +505,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(0, 0, 0);
 		}
@@ -474,6 +513,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return true;
 		}
@@ -481,6 +521,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -488,6 +529,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -495,6 +537,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_methodDeclaration;
 		}
@@ -502,6 +545,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#isMatched(org.eclipse.jdt.core.dom.ASTNode)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 			StructuralPropertyDescriptor location= token.getNode().getLocationInParent();
 			return location == MethodDeclaration.NAME_PROPERTY || location == AnnotationTypeMemberDeclaration.NAME_PROPERTY;
@@ -516,6 +560,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return STATIC_METHOD_INVOCATION;
 		}
@@ -523,6 +568,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(0, 0, 0);
 		}
@@ -530,6 +576,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -537,6 +584,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return true;
 		}
@@ -544,6 +592,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return true;
 		}
@@ -551,6 +600,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_staticMethodInvocation;
 		}
@@ -558,6 +608,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#isMatched(org.eclipse.jdt.core.dom.ASTNode)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 			SimpleName node= token.getNode();
 			if (node.isDeclaration())
@@ -577,6 +628,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return ANNOTATION_ELEMENT_REFERENCE;
 		}
@@ -584,6 +636,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(0, 0, 0);
 		}
@@ -591,6 +644,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -598,6 +652,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -605,6 +660,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -612,6 +668,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_annotationElementReference;
 		}
@@ -619,6 +676,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#isMatched(org.eclipse.jdt.core.dom.ASTNode)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 			SimpleName node= token.getNode();
 			if (node.getParent() instanceof MemberValuePair) {
@@ -640,6 +698,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return ABSTRACT_METHOD_INVOCATION;
 		}
@@ -647,6 +706,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(0, 0, 0);
 		}
@@ -654,6 +714,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -661,6 +722,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -668,6 +730,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -675,6 +738,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_abstractMethodInvocation;
 		}
@@ -682,6 +746,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#isMatched(org.eclipse.jdt.core.dom.ASTNode)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 			SimpleName node= token.getNode();
 			if (node.isDeclaration())
@@ -711,6 +776,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return INHERITED_METHOD_INVOCATION;
 		}
@@ -718,6 +784,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(0, 0, 0);
 		}
@@ -725,6 +792,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -732,6 +800,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -739,6 +808,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -746,6 +816,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_inheritedMethodInvocation;
 		}
@@ -753,6 +824,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#isMatched(org.eclipse.jdt.core.dom.ASTNode)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 			SimpleName node= token.getNode();
 			if (node.isDeclaration())
@@ -779,6 +851,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return METHOD;
 		}
@@ -786,6 +859,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(0, 0, 0);
 		}
@@ -793,6 +867,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -800,6 +875,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -807,6 +883,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -814,6 +891,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_method;
 		}
@@ -821,6 +899,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#isMatched(org.eclipse.jdt.core.dom.ASTNode)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 			IBinding binding= getMethodBinding(token);
 			return binding != null && binding.getKind() == IBinding.METHOD;
@@ -880,6 +959,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return LOCAL_VARIABLE_DECLARATION;
 		}
@@ -887,6 +967,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(0, 0, 0);
 		}
@@ -894,6 +975,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -901,6 +983,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -908,6 +991,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -915,6 +999,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_localVariableDeclaration;
 		}
@@ -922,6 +1007,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 			SimpleName node= token.getNode();
 			StructuralPropertyDescriptor location= node.getLocationInParent();
@@ -944,6 +1030,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return LOCAL_VARIABLE;
 		}
@@ -951,6 +1038,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(0, 0, 0);
 		}
@@ -958,6 +1046,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -965,6 +1054,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -972,6 +1062,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -979,6 +1070,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_localVariable;
 		}
@@ -986,6 +1078,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 			IBinding binding= token.getBinding();
 			if (binding != null && binding.getKind() == IBinding.VARIABLE && !((IVariableBinding) binding).isField()) {
@@ -1004,6 +1097,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return PARAMETER_VARIABLE;
 		}
@@ -1011,6 +1105,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(0, 0, 0);
 		}
@@ -1018,6 +1113,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -1025,6 +1121,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -1032,6 +1129,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -1039,6 +1137,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_parameterVariable;
 		}
@@ -1046,6 +1145,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 			IBinding binding= token.getBinding();
 			if (binding != null && binding.getKind() == IBinding.VARIABLE && !((IVariableBinding) binding).isField()) {
@@ -1064,6 +1164,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return DEPRECATED_MEMBER;
 		}
@@ -1071,6 +1172,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(0, 0, 0);
 		}
@@ -1078,6 +1180,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -1085,6 +1188,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -1093,6 +1197,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isStrikethroughByDefault()
 		 * @since 3.1
 		 */
+		@Override
 		public boolean isStrikethroughByDefault() {
 			return true;
 		}
@@ -1100,6 +1205,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return true;
 		}
@@ -1107,6 +1213,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_deprecatedMember;
 		}
@@ -1114,9 +1221,28 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 			IBinding binding= getMethodBinding(token);
-			return binding != null ? binding.isDeprecated() : false;
+			if (binding != null) {
+				if (binding.isDeprecated())
+					return true;
+				if (binding instanceof IMethodBinding) {
+					IMethodBinding methodBinding= (IMethodBinding) binding;
+					if (methodBinding.isConstructor() && methodBinding.getJavaElement() == null) {
+						ITypeBinding declaringClass= methodBinding.getDeclaringClass();
+						if (declaringClass.isAnonymous()) {
+							ITypeBinding[] interfaces= declaringClass.getInterfaces();
+							if (interfaces.length > 0)
+								return interfaces[0].isDeprecated();
+							else
+								return declaringClass.getSuperclass().isDeprecated();
+						}
+						return declaringClass.isDeprecated();
+					}
+				}
+			}
+			return false;
 		}
 
 		/**
@@ -1174,6 +1300,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return TYPE_VARIABLE;
 		}
@@ -1181,6 +1308,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(100, 70, 50);
 		}
@@ -1188,6 +1316,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return true;
 		}
@@ -1195,6 +1324,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -1202,6 +1332,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -1209,6 +1340,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_typeVariables;
 		}
@@ -1216,6 +1348,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 
 			// 1: match types in type parameter lists
@@ -1239,6 +1372,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return CLASS;
 		}
@@ -1246,6 +1380,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(0, 80, 50);
 		}
@@ -1253,6 +1388,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -1260,6 +1396,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -1267,6 +1404,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -1274,6 +1412,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_classes;
 		}
@@ -1281,6 +1420,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 
 			// 1: match types
@@ -1311,6 +1451,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return ENUM;
 		}
@@ -1318,6 +1459,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(100, 70, 50);
 		}
@@ -1325,6 +1467,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -1332,6 +1475,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -1339,6 +1483,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -1346,6 +1491,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_enums;
 		}
@@ -1353,6 +1499,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 
 			// 1: match types
@@ -1384,6 +1531,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return INTERFACE;
 		}
@@ -1391,6 +1539,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(50, 63, 112);
 		}
@@ -1398,6 +1547,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -1405,6 +1555,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -1412,6 +1563,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -1419,6 +1571,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_interfaces;
 		}
@@ -1426,6 +1579,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 
 			// 1: match types
@@ -1456,6 +1610,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return ANNOTATION;
 		}
@@ -1463,6 +1618,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(100, 100, 100);
 		}
@@ -1470,6 +1626,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -1477,6 +1634,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -1484,6 +1642,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return true; // as it replaces the syntax based highlighting which is always enabled
 		}
@@ -1491,6 +1650,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_annotations;
 		}
@@ -1498,6 +1658,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 
 			// 1: match types
@@ -1529,6 +1690,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return TYPE_ARGUMENT;
 		}
@@ -1536,6 +1698,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(13, 100, 0);
 		}
@@ -1543,6 +1706,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -1550,6 +1714,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -1557,6 +1722,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -1564,6 +1730,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_typeArguments;
 		}
@@ -1571,6 +1738,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 
 			// 1: match types
@@ -1598,6 +1766,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
+		@Override
 		public String getPreferenceKey() {
 			return NUMBER;
 		}
@@ -1605,6 +1774,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
+		@Override
 		public RGB getDefaultDefaultTextColor() {
 			return new RGB(42, 0, 255);
 		}
@@ -1612,6 +1782,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
+		@Override
 		public boolean isBoldByDefault() {
 			return false;
 		}
@@ -1619,6 +1790,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
+		@Override
 		public boolean isItalicByDefault() {
 			return false;
 		}
@@ -1626,6 +1798,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
+		@Override
 		public boolean isEnabledByDefault() {
 			return false;
 		}
@@ -1633,6 +1806,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
+		@Override
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_numbers;
 		}
@@ -1640,6 +1814,7 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumes(SemanticToken token) {
 			return false;
 		}
@@ -1647,9 +1822,95 @@ public class SemanticHighlightings {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumesLiteral(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
+		@Override
 		public boolean consumesLiteral(SemanticToken token) {
 			Expression expr= token.getLiteral();
 			return expr != null && expr.getNodeType() == ASTNode.NUMBER_LITERAL;
+		}
+	}
+
+	/**
+	 * Semantic highlighting for classes.
+	 * @since 3.7
+	 */
+	private static final class AbstractClassHighlighting extends SemanticHighlighting {
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		@Override
+		public String getPreferenceKey() {
+			return ABSTRACT_CLASS;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		@Override
+		public RGB getDefaultDefaultTextColor() {
+			return new RGB(139, 136, 22);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		@Override
+		public boolean isBoldByDefault() {
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		@Override
+		public boolean isItalicByDefault() {
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		@Override
+		public boolean isEnabledByDefault() {
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		@Override
+		public String getDisplayName() {
+			return JavaEditorMessages.SemanticHighlighting_abstractClasses;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
+		 */
+		@Override
+		public boolean consumes(SemanticToken token) {
+
+			// 1: match types
+			SimpleName name= token.getNode();
+			ASTNode node= name.getParent();
+			int nodeType= node.getNodeType();
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.THIS_EXPRESSION && nodeType != ASTNode.QUALIFIED_TYPE  && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.TYPE_DECLARATION && nodeType != ASTNode.METHOD_INVOCATION)
+				return false;
+			while (nodeType == ASTNode.QUALIFIED_NAME) {
+				node= node.getParent();
+				nodeType= node.getNodeType();
+				if (nodeType == ASTNode.IMPORT_DECLARATION)
+					return false;
+			}
+
+			// 2: match classes
+			IBinding binding= token.getBinding();
+			if (binding instanceof ITypeBinding) {
+				ITypeBinding typeBinding= (ITypeBinding) binding;
+				// see also ClassHighlighting
+				return typeBinding.isClass() && (typeBinding.getModifiers() & Modifier.ABSTRACT) != 0;
+			}
+
+			return false;
 		}
 	}
 
@@ -1737,6 +1998,7 @@ public class SemanticHighlightings {
 				new TypeVariableHighlighting(), // before type arguments!
 				new MethodHighlighting(), // before types to get ctors
 				new TypeArgumentHighlighting(), // before other types
+				new AbstractClassHighlighting(), // before classes
 				new ClassHighlighting(),
 				new EnumHighlighting(),
 				new AnnotationHighlighting(), // before interfaces

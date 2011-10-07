@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IJavaElement;
@@ -45,6 +46,7 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer#createCollector(org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
 	 */
+	@Override
 	protected CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context) {
 		CompletionProposalCollector collector= super.createCollector(context);
 		collector.setIgnored(CompletionProposal.TYPE_REF, false);
@@ -54,8 +56,9 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
-		List types= super.computeCompletionProposals(context, monitor);
+	@Override
+	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
+		List<ICompletionProposal> types= super.computeCompletionProposals(context, monitor);
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
 			try {
@@ -66,8 +69,8 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 
 						// compute minmimum relevance and already proposed list
 						int relevance= Integer.MAX_VALUE;
-						Set proposed= new HashSet();
-						for (Iterator it= types.iterator(); it.hasNext();) {
+						Set<String> proposed= new HashSet<String>();
+						for (Iterator<ICompletionProposal> it= types.iterator(); it.hasNext();) {
 							AbstractJavaCompletionProposal p= (AbstractJavaCompletionProposal) it.next();
 							IJavaElement element= p.getJavaElement();
 							if (element instanceof IType)
@@ -76,10 +79,10 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 						}
 
 						// insert history types
-						List history= JavaPlugin.getDefault().getContentAssistHistory().getHistory(expectedType.getFullyQualifiedName()).getTypes();
+						List<String> history= JavaPlugin.getDefault().getContentAssistHistory().getHistory(expectedType.getFullyQualifiedName()).getTypes();
 						relevance-= history.size() + 1;
-						for (Iterator it= history.iterator(); it.hasNext();) {
-							String type= (String) it.next();
+						for (Iterator<String> it= history.iterator(); it.hasNext();) {
+							String type= it.next();
 							if (proposed.contains(type))
 								continue;
 
@@ -141,6 +144,7 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 		return sourceVersion != null && JavaCore.VERSION_1_5.compareTo(sourceVersion) <= 0;
 	}
 
+	@Override
 	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
 		final int contextPosition= context.getInvocationOffset();
 

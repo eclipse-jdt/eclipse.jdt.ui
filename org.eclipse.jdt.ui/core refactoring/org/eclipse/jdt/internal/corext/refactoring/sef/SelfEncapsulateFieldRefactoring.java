@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -111,6 +111,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
@@ -143,8 +144,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private boolean fEncapsulateDeclaringClass;
 	private boolean fGenerateJavadoc;
 
-	private List fUsedReadNames;
-	private List fUsedModifyNames;
+	private List<IMethodBinding> fUsedReadNames;
+	private List<IMethodBinding> fUsedModifyNames;
 	private boolean fConsiderVisibility=true;
 
 	private static final String NO_NAME= ""; //$NON-NLS-1$
@@ -229,6 +230,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 
 	//----activation checking ----------------------------------------------------------
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		if (fVisibility < 0)
 			fVisibility= (fField.getFlags() & (Flags.AccPublic | Flags.AccProtected | Flags.AccPrivate));
@@ -236,7 +238,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		result.merge(Checks.checkAvailability(fField));
 		if (result.hasFatalError())
 			return result;
-		fRoot= new RefactoringASTParser(AST.JLS3).parse(fField.getCompilationUnit(), true, pm);
+		fRoot= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(fField.getCompilationUnit(), true, pm);
 		ISourceRange sourceRange= fField.getNameRange();
 		ASTNode node= NodeFinder.perform(fRoot, sourceRange.getOffset(), sourceRange.getLength());
 		if (node == null) {
@@ -292,7 +294,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return result;
 	}
 
-	private static void checkName(RefactoringStatus status, String name, List usedNames, IType type, boolean reUseExistingField, IField field) {
+	private static void checkName(RefactoringStatus status, String name, List<IMethodBinding> usedNames, IType type, boolean reUseExistingField, IField field) {
 		if ("".equals(name)) { //$NON-NLS-1$
 			status.addFatalError(RefactoringCoreMessages.Checks_Choose_name);
 			return;
@@ -303,8 +305,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		} catch (JavaModelException e) {
 		}
 		status.merge(Checks.checkMethodName(name, field));
-		for (Iterator iter= usedNames.iterator(); iter.hasNext(); ) {
-			IMethodBinding method= (IMethodBinding)iter.next();
+		for (Iterator<IMethodBinding> iter= usedNames.iterator(); iter.hasNext(); ) {
+			IMethodBinding method= iter.next();
 			String selector= method.getName();
 			if (selector.equals(name)) {
 				if (!reUseExistingField) {
@@ -326,6 +328,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				new String[] { BasicElementLabels.getJavaElementName(name), BasicElementLabels.getJavaElementName(type.getElementName())}));
 	}
 
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(NO_NAME, 12);
 		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_checking_preconditions);
@@ -358,7 +361,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		IVariableBinding fieldIdentifier= fFieldDeclaration.resolveBinding();
 		ITypeBinding declaringClass=
 			((AbstractTypeDeclaration)ASTNodes.getParent(fFieldDeclaration, AbstractTypeDeclaration.class)).resolveBinding();
-		List ownerDescriptions= new ArrayList();
+		List<TextEditGroup> ownerDescriptions= new ArrayList<TextEditGroup>();
 		ICompilationUnit owner= fField.getCompilationUnit();
 		fImportRewrite= StubUtility.createImportRewrite(fRoot, true);
 
@@ -368,16 +371,16 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			CompilationUnit root= null;
 			ASTRewrite rewriter= null;
 			ImportRewrite importRewrite;
-			List descriptions;
+			List<TextEditGroup> descriptions;
 			if (owner.equals(unit)) {
 				root= fRoot;
 				rewriter= fRewriter;
 				importRewrite= fImportRewrite;
 				descriptions= ownerDescriptions;
 			} else {
-				root= new RefactoringASTParser(AST.JLS3).parse(unit, true);
+				root= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, true);
 				rewriter= ASTRewrite.create(root.getAST());
-				descriptions= new ArrayList();
+				descriptions= new ArrayList<TextEditGroup>();
 				importRewrite= StubUtility.createImportRewrite(root, true);
 			}
 			checkCompileErrors(result, root, unit);
@@ -409,19 +412,20 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return result;
 	}
 
-	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List groups, ImportRewrite importRewrite) throws CoreException {
+	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List<TextEditGroup> groups, ImportRewrite importRewrite) throws CoreException {
 		TextChange change= fChangeManager.get(unit);
 		MultiTextEdit root= new MultiTextEdit();
 		change.setEdit(root);
 		root.addChild(importRewrite.rewriteImports(null));
 		root.addChild(rewriter.rewriteAST());
-		for (Iterator iter= groups.iterator(); iter.hasNext();) {
-			change.addTextEditGroup((TextEditGroup)iter.next());
+		for (Iterator<TextEditGroup> iter= groups.iterator(); iter.hasNext();) {
+			change.addTextEditGroup(iter.next());
 		}
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		final Map arguments= new HashMap();
+		final Map<String, String> arguments= new HashMap<String, String>();
 		String project= null;
 		IJavaProject javaProject= fField.getJavaProject();
 		if (javaProject != null)
@@ -470,6 +474,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return result;
 	}
 
+	@Override
 	public String getName() {
 		return RefactoringCoreMessages.SelfEncapsulateField_name;
 	}
@@ -535,8 +540,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 
 	private void computeUsedNames() {
-		fUsedReadNames= new ArrayList(0);
-		fUsedModifyNames= new ArrayList(0);
+		fUsedReadNames= new ArrayList<IMethodBinding>(0);
+		fUsedModifyNames= new ArrayList<IMethodBinding>(0);
 		IVariableBinding binding= fFieldDeclaration.resolveBinding();
 		ITypeBinding type= binding.getType();
 		IMethodBinding[] methods= binding.getDeclaringClass().getDeclaredMethods();
@@ -551,15 +556,15 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 	}
 
-	private List addGetterSetterChanges(CompilationUnit root, ASTRewrite rewriter, String lineDelimiter, boolean usingLocalSetter, boolean usingLocalGetter) throws CoreException {
-		List result= new ArrayList(2);
+	private List<TextEditGroup> addGetterSetterChanges(CompilationUnit root, ASTRewrite rewriter, String lineDelimiter, boolean usingLocalSetter, boolean usingLocalGetter) throws CoreException {
+		List<TextEditGroup> result= new ArrayList<TextEditGroup>(2);
 		AST ast= root.getAST();
 		FieldDeclaration decl= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, ASTNode.FIELD_DECLARATION);
 		int position= 0;
 		int numberOfMethods= 0;
-		List members= ASTNodes.getBodyDeclarations(decl.getParent());
-		for (Iterator iter= members.iterator(); iter.hasNext();) {
-			BodyDeclaration element= (BodyDeclaration)iter.next();
+		List<BodyDeclaration> members= ASTNodes.getBodyDeclarations(decl.getParent());
+		for (Iterator<BodyDeclaration> iter= members.iterator(); iter.hasNext();) {
+			BodyDeclaration element= iter.next();
 			if (element.getNodeType() == ASTNode.METHOD_DECLARATION) {
 				if (fInsertionIndex == -1) {
 					break;
@@ -573,15 +578,15 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 		TextEditGroup description;
 		ListRewrite rewrite= fRewriter.getListRewrite(decl.getParent(), getBodyDeclarationsProperty(decl.getParent()));
+		if (!usingLocalGetter) {
+			description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_add_getter);
+			result.add(description);
+			rewrite.insertAt(createGetterMethod(ast, rewriter, lineDelimiter), position++, description);
+		}
 		if (!JdtFlags.isFinal(fField) && !usingLocalSetter) {
 			description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_add_setter);
 			result.add(description);
-			rewrite.insertAt(createSetterMethod(ast, rewriter, lineDelimiter), position++, description);
-		}
-		if (!usingLocalGetter){
-			description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_add_getter);
-			result.add(description);
-			rewrite.insertAt(createGetterMethod(ast, rewriter, lineDelimiter), position, description);
+			rewrite.insertAt(createSetterMethod(ast, rewriter, lineDelimiter), position, description);
 		}
 		if (!JdtFlags.isPrivate(fField))
 			result.add(makeDeclarationPrivate(rewriter, decl));
@@ -821,9 +826,9 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return checkName(fSetterName, fUsedModifyNames);
 	}
 
-	private static boolean checkName(String name, List usedNames) {
-		for (Iterator iter= usedNames.iterator(); iter.hasNext(); ) {
-			IMethodBinding method= (IMethodBinding)iter.next();
+	private static boolean checkName(String name, List<IMethodBinding> usedNames) {
+		for (Iterator<IMethodBinding> iter= usedNames.iterator(); iter.hasNext(); ) {
+			IMethodBinding method= iter.next();
 			String selector= method.getName();
 			if (selector.equals(name)) {
 				return true;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,11 +56,12 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 			fIsDeepFiltering= deepFiltering;
 		}
 
+		@Override
 		public void setPattern(String patternString) {
 			super.setPattern(patternString);
 			fMatchers= null;
 			if (patternString != null && patternString.length() > 0) {
-				ArrayList res= new ArrayList();
+				ArrayList<StringMatcher> res= new ArrayList<StringMatcher>();
 				StringTokenizer tok= new StringTokenizer(patternString, ",;"); //$NON-NLS-1$
 				int tokenCount= tok.countTokens();
 				for (int i= 0; i < tokenCount; i++) {
@@ -70,11 +71,12 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 					}
 				}
 				if (!res.isEmpty()) {
-					fMatchers= (StringMatcher[]) res.toArray(new StringMatcher[res.size()]);
+					fMatchers= res.toArray(new StringMatcher[res.size()]);
 				}
 			}
 		}
 
+		@Override
 		protected boolean wordMatches(String text) {
 			if (text != null) {
 				if (fMatchers == null || fMatchers.length == 0) {
@@ -93,6 +95,7 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 		 * @see org.eclipse.ui.dialogs.PatternFilter#isElementVisible(org.eclipse.jface.viewers.Viewer, java.lang.Object)
 		 * @since 3.5
 		 */
+		@Override
 		public boolean isElementVisible(Viewer viewer, Object element) {
 			boolean hasChildren= ((ITreeContentProvider) ((AbstractTreeViewer) viewer).getContentProvider()).hasChildren(element);
 			if (fIsDeepFiltering) {
@@ -126,6 +129,7 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 
 		}
 
+		@Override
 		protected void textChanged() {
 			narrowingDown= previousFilterText == null || getFilterString().startsWith(previousFilterText);
 			previousFilterText= getFilterString();
@@ -133,10 +137,12 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 		}
 
 		// This is a copy of the super method, but without auto-expansion.
+		@Override
 		protected WorkbenchJob doCreateRefreshJob() {
 			return new WorkbenchJob("Refresh Filter") {//$NON-NLS-1$
 
 
+				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
 					if (treeViewer.getControl().isDisposed()) {
 						return Status.CANCEL_STATUS;
@@ -213,6 +219,7 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 		fInitialFilter= initialFilter;
 	}
 
+	@Override
 	protected TreeViewer doCreateTreeViewer(Composite parent, int style) {
 		FilteredTree tree= new FilteredTreeWithFilter(parent, style, fInitialFilter, fIsDeepFiltering);
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));

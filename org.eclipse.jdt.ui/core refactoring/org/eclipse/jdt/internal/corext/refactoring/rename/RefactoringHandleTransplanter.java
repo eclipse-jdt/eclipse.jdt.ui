@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,18 +41,18 @@ public class RefactoringHandleTransplanter {
 
 	private final IType fOldType;
 	private final IType fNewType;
-	private final Map/*<IJavaElement, String>*/ fRefactoredSimilarElements;
+	private final Map<IJavaElement, String> fRefactoredSimilarElements;
 
 	/**
 	 * @param oldType old type
 	 * @param newType renamed type
 	 * @param refactoredSimilarElements map from similar element (IJavaElement) to new name (String), or <code>null</code>
 	 */
-	public RefactoringHandleTransplanter(IType oldType, IType newType, Map/*<IJavaElement, String>*/ refactoredSimilarElements) {
+	public RefactoringHandleTransplanter(IType oldType, IType newType, Map<IJavaElement, String> refactoredSimilarElements) {
 		fOldType= oldType;
 		fNewType= newType;
 		if (refactoredSimilarElements == null)
-			fRefactoredSimilarElements= Collections.EMPTY_MAP;
+			fRefactoredSimilarElements= Collections.emptyMap();
 		else
 			fRefactoredSimilarElements= refactoredSimilarElements;
 	}
@@ -69,18 +69,18 @@ public class RefactoringHandleTransplanter {
 		/*
 		 * Create a list of handles from top-level type to the handle
 		 */
-		final LinkedList oldElements= new LinkedList();
+		final LinkedList<IMember> oldElements= new LinkedList<IMember>();
 		addElements(handle, oldElements);
 
 		/*
 		 * Step through the elements and re-locate them in the new parents.
 		 */
-		final IMember[] newElements= convertElements((IMember[]) oldElements.toArray(new IMember[0]));
+		final IMember[] newElements= convertElements(oldElements.toArray(new IMember[0]));
 
 		return newElements[newElements.length - 1];
 	}
 
-	private void addElements(IMember element, LinkedList chain) {
+	private void addElements(IMember element, LinkedList<IMember> chain) {
 		chain.addFirst(element);
 		IJavaElement parent= element.getParent();
 		if (parent instanceof IMember)
@@ -197,7 +197,7 @@ public class RefactoringHandleTransplanter {
 	}
 
 	private String resolveElementName(IJavaElement element) {
-		final String newName= (String) fRefactoredSimilarElements.get(element);
+		final String newName= fRefactoredSimilarElements.get(element);
 		if (newName != null)
 			return newName;
 		else

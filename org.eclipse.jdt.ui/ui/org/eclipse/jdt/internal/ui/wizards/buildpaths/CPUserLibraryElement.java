@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,12 +62,12 @@ public class CPUserLibraryElement {
 
 
 	private String fName;
-	private List fChildren;
+	private List<CPListElement> fChildren;
 	private boolean fIsSystemLibrary;
 
 	public CPUserLibraryElement(String name, IClasspathContainer container, IJavaProject project) {
 		fName= name;
-		fChildren= new ArrayList();
+		fChildren= new ArrayList<CPListElement>();
 		if (container != null) {
 			IClasspathEntry[] entries= container.getClasspathEntries();
 			CPListElement[] res= new CPListElement[entries.length];
@@ -84,11 +84,21 @@ public class CPUserLibraryElement {
 		}
 	}
 
+	/**
+	 * Creates a new user library element with the given name and children and sets itself as the
+	 * parent container to each given child element.
+	 * 
+	 * @param name the name of the library element
+	 * @param isSystemLibrary <code>true</code> if the library is a system library,
+	 *            <code>false</code> otherwise
+	 * @param children the children elements of the library element or <code>null</code>
+	 */
 	public CPUserLibraryElement(String name, boolean isSystemLibrary, CPListElement[] children) {
 		fName= name;
-		fChildren= new ArrayList();
+		fChildren= new ArrayList<CPListElement>();
 		if (children != null) {
 			for (int i= 0; i < children.length; i++) {
+				children[i].setParentContainer(this);
 				fChildren.add(children[i]);
 			}
 		}
@@ -96,7 +106,7 @@ public class CPUserLibraryElement {
 	}
 
 	public CPListElement[] getChildren() {
-		return (CPListElement[]) fChildren.toArray(new CPListElement[fChildren.size()]);
+		return fChildren.toArray(new CPListElement[fChildren.size()]);
 	}
 
 	public String getName() {
@@ -117,12 +127,12 @@ public class CPUserLibraryElement {
 		}
 	}
 
-	private List moveUp(List elements, List move) {
+	private List<CPListElement> moveUp(List<CPListElement> elements, List<CPListElement> move) {
 		int nElements= elements.size();
-		List res= new ArrayList(nElements);
-		Object floating= null;
+		List<CPListElement> res= new ArrayList<CPListElement>(nElements);
+		CPListElement floating= null;
 		for (int i= 0; i < nElements; i++) {
-			Object curr= elements.get(i);
+			CPListElement curr= elements.get(i);
 			if (move.contains(curr)) {
 				res.add(curr);
 			} else {
@@ -138,13 +148,13 @@ public class CPUserLibraryElement {
 		return res;
 	}
 
-	public void moveUp(List toMoveUp) {
+	public void moveUp(List<CPListElement> toMoveUp) {
 		if (toMoveUp.size() > 0) {
 			fChildren= moveUp(fChildren, toMoveUp);
 		}
 	}
 
-	public void moveDown(List toMoveDown) {
+	public void moveDown(List<CPListElement> toMoveDown) {
 		if (toMoveDown.size() > 0) {
 			Collections.reverse(fChildren);
 			fChildren= moveUp(fChildren, toMoveDown);
@@ -186,7 +196,7 @@ public class CPUserLibraryElement {
 			return true;
 		}
 		for (int i= 0; i < oldEntries.length; i++) {
-			CPListElement child= (CPListElement) fChildren.get(i);
+			CPListElement child= fChildren.get(i);
 			if (!child.getClasspathEntry().equals(oldEntries[i])) {
 				return true;
 			}

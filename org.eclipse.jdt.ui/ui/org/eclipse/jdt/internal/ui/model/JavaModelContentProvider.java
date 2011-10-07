@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,13 +45,14 @@ public final class JavaModelContentProvider extends StandardJavaElementContentPr
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Object[] getChildren(final Object element) {
 		if (element instanceof ICompilationUnit)
 			return NO_CHILDREN;
 		else if (element instanceof RefactoringHistory)
 			return ((RefactoringHistory) element).getDescriptors();
 		else if (element instanceof IJavaProject) {
-			final List elements= new ArrayList();
+			final List<Object> elements= new ArrayList<Object>();
 			elements.add(((IJavaProject) element).getProject().getFolder(NAME_SETTINGS_FOLDER));
 			final Object[] children= super.getChildren(element);
 			for (int index= 0; index < children.length; index++) {
@@ -73,6 +74,7 @@ public final class JavaModelContentProvider extends StandardJavaElementContentPr
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean hasChildren(final Object element) {
 		if (element instanceof ICompilationUnit)
 			return false;

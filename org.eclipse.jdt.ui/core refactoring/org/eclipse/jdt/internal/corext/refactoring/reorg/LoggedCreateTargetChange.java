@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,6 +57,7 @@ public final class LoggedCreateTargetChange extends ResourceChange {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected IResource getModifiedResource() {
 		return null;
 	}
@@ -64,6 +65,7 @@ public final class LoggedCreateTargetChange extends ResourceChange {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getName() {
 		return RefactoringCoreMessages.LoggedCreateTargetChange_change_name;
 	}
@@ -71,6 +73,7 @@ public final class LoggedCreateTargetChange extends ResourceChange {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public RefactoringStatus isValid(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		if (fSelection instanceof IJavaElement) {
 			final IJavaElement element= (IJavaElement) fSelection;
@@ -87,6 +90,7 @@ public final class LoggedCreateTargetChange extends ResourceChange {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Change perform(IProgressMonitor monitor) throws CoreException {
 		fQueries.createNewPackageQuery().getCreatedTarget(fSelection);
 		return null;

@@ -8,11 +8,11 @@ public class TestThisExpression {
 		new TestThisExpression().setField(11);
 	}
 
-	void setField(int field) {
-		this.field = field;
-	}
-
 	int getField() {
 		return field;
+	}
+
+	void setField(int field) {
+		this.field = field;
 	}
 }

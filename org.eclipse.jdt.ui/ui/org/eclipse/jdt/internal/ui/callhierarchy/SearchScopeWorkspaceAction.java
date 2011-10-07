@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,26 +16,31 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 
 
 class SearchScopeWorkspaceAction extends SearchScopeAction {
+	private JavaSearchScopeFactory fFactory= JavaSearchScopeFactory.getInstance();
 	public SearchScopeWorkspaceAction(SearchScopeActionGroup group) {
 		super(group, CallHierarchyMessages.SearchScopeActionGroup_workspace_text);
 		setToolTipText(CallHierarchyMessages.SearchScopeActionGroup_workspace_tooltip);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
 	}
 
-	public IJavaSearchScope getSearchScope() {
-		return SearchEngine.createWorkspaceScope();
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getSearchScope(int)
+	 */
+	@Override
+	public IJavaSearchScope getSearchScope(int includeMask) {
+		return fFactory.createWorkspaceScope(includeMask);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeActionGroup.SearchScopeAction#getSearchScopeType()
 	 */
+	@Override
 	public int getSearchScopeType() {
 		return SearchScopeActionGroup.SEARCH_SCOPE_TYPE_WORKSPACE;
 	}
@@ -43,8 +48,8 @@ class SearchScopeWorkspaceAction extends SearchScopeAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
 	 */
-	public String getFullDescription() {
-		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
-		return factory.getWorkspaceScopeDescription(true);
+	@Override
+	public String getFullDescription(int includeMask) {
+		return fFactory.getWorkspaceScopeDescription(includeMask);
 	}
 }

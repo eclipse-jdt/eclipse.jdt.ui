@@ -14,7 +14,7 @@ public class A {
 				+ p.A.getCount() + A.getCount() + getCount2();
 		int ii= Consts.I + Consts.I + q.Consts.I
 				+ p.A.getCount() + A.getCount() + getCount2();
-		return (I + Consts.I + q.Consts.I
-				+ p.A.getCount() + A.getCount() + getCount2()) + i + ii;
+		return I + Consts.I + q.Consts.I
+				+ p.A.getCount() + A.getCount() + getCount2() + i + ii;
 	}
 }

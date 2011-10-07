@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,6 +61,7 @@ public class JavaElementReferenceConverter extends AbstractParameterValueConvert
 
 	private static final char PARAM_END_CHAR= Signature.C_PARAM_END;
 
+	@Override
 	public Object convertToObject(String parameterValue) throws ParameterValueConversionException {
 
 		assertWellFormed(parameterValue != null);
@@ -147,6 +148,7 @@ public class JavaElementReferenceConverter extends AbstractParameterValueConvert
 		}
 	}
 
+	@Override
 	public String convertToString(Object parameterValue) throws ParameterValueConversionException {
 
 		if (!(parameterValue instanceof IJavaElement)) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -158,7 +159,7 @@ public class Checks {
 	 */
 	public static RefactoringStatus checkMethodName(String name, IJavaElement context) {
 		RefactoringStatus status= checkName(name, JavaConventionsUtil.validateMethodName(name, context));
-		if (status.isOK() && startsWithUpperCase(name))
+		if (status.isOK() && !startsWithLowerCase(name))
 			return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.Checks_method_names_lowercase);
 		else
 			return status;
@@ -217,16 +218,6 @@ public class Checks {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.Checks_cu_name_used, BasicElementLabels.getResourceName(newCUName)));
 		else
 			return new RefactoringStatus();
-	}
-
-	public static boolean startsWithUpperCase(String s) {
-		if (s == null)
-			return false;
-		else if ("".equals(s)) //$NON-NLS-1$
-			return false;
-		else
-			//workaround for JDK bug (see 26529)
-			return s.charAt(0) == Character.toUpperCase(s.charAt(0));
 	}
 
 	public static boolean startsWithLowerCase(String s){
@@ -401,7 +392,7 @@ public class Checks {
 			return false;
 		if (node instanceof Name) {
 			IBinding binding= ((Name) node).resolveBinding();
-			return !(binding instanceof ITypeBinding);
+			return binding == null || binding instanceof IVariableBinding;
 		}
 		return true;
 	}
@@ -572,7 +563,7 @@ public class Checks {
 	 * @throws JavaModelException
 	 */
 	public static SearchResultGroup[] excludeCompilationUnits(SearchResultGroup[] grouped, RefactoringStatus status) throws JavaModelException{
-		List result= new ArrayList();
+		List<SearchResultGroup> result= new ArrayList<SearchResultGroup>();
 		boolean wasEmpty= grouped.length == 0;
 		for (int i= 0; i < grouped.length; i++){
 			IResource resource= grouped[i].getResource();
@@ -591,7 +582,7 @@ public class Checks {
 		if ((!wasEmpty) && result.isEmpty())
 			status.addFatalError(RefactoringCoreMessages.Checks_all_excluded);
 
-		return (SearchResultGroup[])result.toArray(new SearchResultGroup[result.size()]);
+		return result.toArray(new SearchResultGroup[result.size()]);
 	}
 
 	public static RefactoringStatus checkCompileErrorsInAffectedFiles(SearchResultGroup[] grouped) throws JavaModelException {
@@ -850,11 +841,14 @@ public class Checks {
 	 *          Checks.NOT_RVALUE_MISC  	if e is not an rvalue for some other reason
 	 */
 	public static int checkExpressionIsRValue(Expression e) {
-		if(e instanceof Name) {
+		if (e instanceof Name) {
 			if(!(((Name) e).resolveBinding() instanceof IVariableBinding)) {
 				return NOT_RVALUE_MISC;
 			}
 		}
+		if (e instanceof Annotation)
+			return NOT_RVALUE_MISC;
+			
 
 		ITypeBinding tb= e.resolveTypeBinding();
 		boolean guessingRequired= false;
@@ -870,7 +864,7 @@ public class Checks {
 		return guessingRequired ? IS_RVALUE_GUESSED : IS_RVALUE;
 	}
 
-	public static boolean isDeclaredIn(VariableDeclaration tempDeclaration, Class astNodeClass) {
+	public static boolean isDeclaredIn(VariableDeclaration tempDeclaration, Class<? extends ASTNode> astNodeClass) {
 		ASTNode initializer= ASTNodes.getParent(tempDeclaration, astNodeClass);
 		if (initializer == null)
 			return false;

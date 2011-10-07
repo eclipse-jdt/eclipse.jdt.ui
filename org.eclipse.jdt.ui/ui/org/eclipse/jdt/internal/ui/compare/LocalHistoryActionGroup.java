@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,6 +62,7 @@ public class LocalHistoryActionGroup extends ActionGroup {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(fAddFrom, IJavaHelpContextIds.ADD_FROM_HISTORY_ACTION);
 	}
 
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 		IMenuManager localMenu= new MenuManager(CompareMessages.LocalHistoryActionGroup_menu_local_history);

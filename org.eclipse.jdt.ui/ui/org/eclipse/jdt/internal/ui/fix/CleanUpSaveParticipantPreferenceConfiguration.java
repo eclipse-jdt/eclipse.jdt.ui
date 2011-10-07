@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,7 +70,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	private static final int INDENT= 10;
 
 	private IScopeContext fContext;
-	private Map fSettings;
+	private Map<String, String> fSettings;
 	private BulletListBlock fSelectedActionsText;
 	private Button fFormatCodeButton;
 	private Button fFormatChangedOnlyButton;
@@ -89,6 +89,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void createConfigControl(final Composite parent, IPreferencePageContainer container) {
 		fContainer= container;
 		fShell= parent.getShell();
@@ -109,6 +110,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 			/**
 			 * {@inheritDoc}
 			 */
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				changeSettingsValue(CleanUpConstants.FORMAT_SOURCE_CODE, fFormatCodeButton.getSelection());
 			}
@@ -131,6 +133,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 			/**
 			 * {@inheritDoc}
 			 */
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				changeSettingsValue(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY, !fFormatAllButton.getSelection());
 			}
@@ -144,6 +147,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 			/**
 			 * {@inheritDoc}
 			 */
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				changeSettingsValue(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY, fFormatChangedOnlyButton.getSelection());
 			}
@@ -166,6 +170,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 			/**
 			 * {@inheritDoc}
 			 */
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				changeSettingsValue(CleanUpConstants.ORGANIZE_IMPORTS, fOrganizeImportsButton.getSelection());
 			}
@@ -186,6 +191,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 			/**
 			 * {@inheritDoc}
 			 */
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				changeSettingsValue(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, fAdditionalActionButton.getSelection());
 			}
@@ -214,8 +220,9 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 			/**
 			 * {@inheritDoc}
 			 */
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Hashtable workingValues= new Hashtable(fSettings);
+				Hashtable<String, String> workingValues= new Hashtable<String, String>(fSettings);
 				SaveActionSelectionDialog dialog= new SaveActionSelectionDialog(parent.getShell(), workingValues);
 				if (dialog.open() == Window.OK) {
 					fSettings= workingValues;
@@ -231,6 +238,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void initialize(final IScopeContext context, IAdaptable element) {
 		fContext= context;
 		fSettings= CleanUpPreferenceUtil.loadSaveParticipantOptions(context);
@@ -257,6 +265,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void performDefaults() {
 		if (ProjectScope.SCOPE.equals(fContext.getName()) && !hasSettingsInScope(fContext))
 			return;
@@ -276,6 +285,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void performOk() {
 		super.performOk();
 
@@ -286,6 +296,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void enableProjectSettings() {
 		super.enableProjectSettings();
 
@@ -295,14 +306,15 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void disableProjectSettings() {
 		super.disableProjectSettings();
 
 		IEclipsePreferences node= fContext.getNode(JavaUI.ID_PLUGIN);
 
-		Set keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS).getKeys();
-		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
-			String key= (String)iterator.next();
+		Set<String> keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS).getKeys();
+		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
+			String key= iterator.next();
 			node.remove(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + key);
 		}
 	}
@@ -310,6 +322,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected String getPostSaveListenerId() {
 		return CleanUpPostSaveListener.POSTSAVELISTENER_ID;
 	}
@@ -317,6 +330,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected String getPostSaveListenerName() {
 		return SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_CleanUpActionsTopNodeName_Checkbox;
 	}
@@ -324,6 +338,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void enabled(boolean isEnabled) {
 		if (isEnabled) {
 			if (fControlEnableState == null)
@@ -359,7 +374,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		fSelectedActionsText.setEnabled(additionalEnabled);
 		fConfigureButton.setEnabled(additionalEnabled);
 
-		Map settings= new HashMap(fSettings);
+		Map<String, String> settings= new HashMap<String, String>(fSettings);
 		settings.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpOptions.FALSE);
 		settings.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpOptions.FALSE);
 		CleanUpOptions options= new MapCleanUpOptions(settings);
@@ -389,6 +404,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 
 	private void configurePreferenceLink(Link link, final IJavaProject javaProject, final String preferenceId, final String propertyId) {
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (fContainer instanceof IWorkbenchPreferenceContainer) {
 					IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer)fContainer;

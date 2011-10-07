@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,11 +82,13 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 		}
 	}
 
+	@Override
 	public String getName() {
 		String rootName= JavaElementLabels.getElementLabel(getRoot(), JavaElementLabels.ALL_DEFAULT);
 		return Messages.format(RefactoringCoreMessages.DeletePackageFragmentRootChange_delete, rootName);
 	}
 
+	@Override
 	public Object getModifiedElement() {
 		return getRoot();
 	}
@@ -94,6 +96,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
 	 */
+	@Override
 	protected IResource getModifiedResource() {
 		return getRoot().getResource();
 	}
@@ -102,6 +105,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 		return (IPackageFragmentRoot)JavaCore.create(fHandle);
 	}
 
+	@Override
 	protected Change doDelete(IProgressMonitor pm) throws CoreException {
 		if (! confirmDeleteIfReferenced())
 			return new NullChange();
@@ -115,7 +119,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 
 		ResourceDescription rootDescription = ResourceDescription.fromResource(rootResource);
 		IJavaProject[] referencingProjects= JavaElementUtil.getReferencingProjects(root);
-		HashMap/*<IFile, String>*/ classpathFilesContents= new HashMap();
+		HashMap<IFile, String> classpathFilesContents= new HashMap<IFile, String>();
 		for (int i= 0; i < referencingProjects.length; i++) {
 			IJavaProject javaProject= referencingProjects[i];
 			IFile classpathFile= javaProject.getProject().getFile(".classpath"); //$NON-NLS-1$
@@ -127,10 +131,10 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 		root.delete(resourceUpdateFlags, jCoreUpdateFlags, new SubProgressMonitor(pm, 1));
 
 		rootDescription.recordStateFromHistory(rootResource, new SubProgressMonitor(pm, 1));
-		for (Iterator iterator= classpathFilesContents.entrySet().iterator(); iterator.hasNext();) {
-			Entry entry= (Entry) iterator.next();
-			IFile file= (IFile) entry.getKey();
-			String contents= (String) entry.getValue();
+		for (Iterator<Entry<IFile, String>> iterator= classpathFilesContents.entrySet().iterator(); iterator.hasNext();) {
+			Entry<IFile, String> entry= iterator.next();
+			IFile file= entry.getKey();
+			String contents= entry.getValue();
 			//Restore time stamps? This should probably be some sort of UndoTextFileChange.
 			TextFileChange classpathUndo= new TextFileChange(Messages.format(RefactoringCoreMessages.DeletePackageFragmentRootChange_restore_file, BasicElementLabels.getPathLabel(file.getFullPath(), true)), file);
 			classpathUndo.setEdit(new ReplaceEdit(0, getFileLength(file), contents));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -141,10 +141,10 @@ public class SearchUtil {
 
 	private static void saveState(IDialogSettings settingsStore) {
 		IWorkingSet[] workingSets;
-		Iterator iter= fgLRUWorkingSets.iterator();
+		Iterator<IWorkingSet[]> iter= fgLRUWorkingSets.iterator();
 		int i= 0;
 		while (iter.hasNext()) {
-			workingSets= (IWorkingSet[])iter.next();
+			workingSets= iter.next();
 			String[] names= new String[workingSets.length];
 			for (int j= 0; j < workingSets.length; j++)
 				names[j]= workingSets[j].getName();
@@ -168,7 +168,7 @@ public class SearchUtil {
 		for (int i= LRU_WORKINGSET_LIST_SIZE - 1; i >= 0; i--) {
 			String[] lruWorkingSetNames= settingsStore.getArray(STORE_LRU_WORKING_SET_NAMES + i);
 			if (lruWorkingSetNames != null) {
-				Set workingSets= new HashSet(2);
+				Set<IWorkingSet> workingSets= new HashSet<IWorkingSet>(2);
 				for (int j= 0; j < lruWorkingSetNames.length; j++) {
 					IWorkingSet workingSet= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(lruWorkingSetNames[j]);
 					if (workingSet != null) {
@@ -177,7 +177,7 @@ public class SearchUtil {
 				}
 				foundLRU= true;
 				if (!workingSets.isEmpty())
-					fgLRUWorkingSets.add((IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()]));
+					fgLRUWorkingSets.add(workingSets.toArray(new IWorkingSet[workingSets.size()]));
 			}
 		}
 		if (!foundLRU)
@@ -213,7 +213,7 @@ public class SearchUtil {
 	}
 
 	public static void warnIfBinaryConstant(IJavaElement element, Shell shell) {
-		if (isBinaryPrimitiveConstantOrString(element))
+		if (isPrimitiveConstantOrString(element))
 			OptionalMessageDialog.open(
 				BIN_PRIM_CONST_WARN_DIALOG_ID,
 				shell,
@@ -225,7 +225,7 @@ public class SearchUtil {
 				0);
 	}
 
-	private static boolean isBinaryPrimitiveConstantOrString(IJavaElement element) {
+	private static boolean isPrimitiveConstantOrString(IJavaElement element) {
 		if (element != null && element.getElementType() == IJavaElement.FIELD) {
 			IField field= (IField)element;
 			int flags;
@@ -234,7 +234,7 @@ public class SearchUtil {
 			} catch (JavaModelException ex) {
 				return false;
 			}
-			return field.isBinary() && Flags.isStatic(flags) && Flags.isFinal(flags) && isPrimitiveOrString(field);
+			return Flags.isStatic(flags) && Flags.isFinal(flags) && isPrimitiveOrString(field);
 		}
 		return false;
 	}
@@ -248,6 +248,7 @@ public class SearchUtil {
 		}
 		char first= fieldType.charAt(0);
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED && first != Signature.C_ARRAY)
-			|| (first == Signature.C_RESOLVED && fieldType.substring(1, fieldType.length() - 1).equals(String.class.getName()));
+			|| ((first == Signature.C_RESOLVED || first == Signature.C_UNRESOLVED) && fieldType.substring(1, fieldType.length() - 1).equals(String.class.getName())
+			|| (first == Signature.C_UNRESOLVED && fieldType.substring(1, fieldType.length() - 1).equals("String"))); //$NON-NLS-1$
 	}
 }

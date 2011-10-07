@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,14 +55,16 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getDetailedDescription() {
 	    return null;
 	}
 
+	@Override
 	public void run() {
 		IProject project= null;
 		Object firstElement= getSelectedElements().get(0);
-		HashMap data= new HashMap();
+		HashMap<Object, IClasspathEntry> data= new HashMap<Object, IClasspathEntry>();
 
 		if (firstElement instanceof IJavaElement) {
 			IJavaElement element= (IJavaElement) firstElement;
@@ -86,6 +88,7 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 		PreferencesUtil.createPropertyDialogOn(getShell(), project, BuildPathsPropertyPage.PROP_ID, null, data).open();
 	}
 
+	@Override
 	protected boolean canHandle(IStructuredSelection elements) {
 		if (elements.size() != 1)
 			return false;

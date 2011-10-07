@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefact
 
 public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 
+	private static final Class clazz= IntroduceParameterTests.class;
+
 	private static final String SLASH_OUT= "/out";
 	public IntroduceParameterTests(String name) {
 		super(name);
@@ -38,14 +40,7 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	}
 
 	public static Test suite() {
-		if (true) {
-			return new RefactoringTestSetup(new TestSuite(IntroduceParameterTests.class));
-		} else {
-			System.err.println("*** Running only parts of IntroduceParameterTests!");
-			TestSuite suite= new TestSuite();
-			suite.addTest(new IntroduceParameterTests("testSimple_StaticGetter1"));
-			return new RefactoringTestSetup(suite);
-		}
+		return setUpTest(new TestSuite(clazz));
 	}
 
 	protected String getResourceLocation() {
@@ -72,15 +67,15 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 		return result;
 	}
 
-	private void performOK() throws Exception {
+	protected void performOK() throws Exception {
 		perform(RefactoringStatus.OK, RefactoringStatus.OK);
 	}
 
-	private void performInvalidSelection() throws Exception {
+	protected void performInvalidSelection() throws Exception {
 		perform(RefactoringStatus.FATAL, RefactoringStatus.FATAL);
 	}
 
-	private void perform(int expectedActivationStatus, int expectedInputStatus) throws Exception {
+	protected void perform(int expectedActivationStatus, int expectedInputStatus) throws Exception {
 		String packageName= adaptPackage(getName());
 		IPackageFragment packageFragment= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment(packageName, true , null);
 		ICompilationUnit cu= createCU(packageFragment, getName());
@@ -150,6 +145,26 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	}
 
 	public void testSimple_ConstantExpression2() throws Exception {
+		performOK();
+	}
+
+	public void testSimple_Expression1() throws Exception {
+		performOK();
+	}
+
+	public void testSimple_Expression2() throws Exception {
+		performOK();
+	}
+
+	public void testSimple_Expression3() throws Exception {
+		performOK();
+	}
+
+	public void testSimple_Expression4() throws Exception {
+		performOK();
+	}
+
+	public void testSimple_Expression5() throws Exception {
 		performOK();
 	}
 

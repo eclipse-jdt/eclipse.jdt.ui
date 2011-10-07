@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -63,6 +62,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashOperation;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
@@ -85,12 +85,12 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 
 		private final IJavaProject fProject;
 		private final ICompilationUnit[] fCompilationUnits;
-		private final Hashtable /*<bindingKey, Long>*/ fIdsTable;
+		private final Hashtable<String, Long> fIdsTable;
 
 		public SerialVersionHashContext(IJavaProject project, ICompilationUnit[] compilationUnits) {
 			fProject= project;
 			fCompilationUnits= compilationUnits;
-			fIdsTable= new Hashtable();
+			fIdsTable= new Hashtable<String, Long>();
         }
 
 		public RefactoringStatus initialize(IProgressMonitor monitor) throws CoreException {
@@ -110,7 +110,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 					throw new OperationCanceledException();
 
 				result= new RefactoringStatus();
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 				parser.setProject(fProject);
 				IBinding[] bindings= parser.createBindings(types, new SubProgressMonitor(monitor, 1));
 				for (int i= 0; i < bindings.length; i++) {
@@ -141,7 +141,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 		 * {@inheritDoc}
 		 */
 		public Long getSerialVersionId(ITypeBinding binding) {
-			return (Long) fIdsTable.get(binding.getKey());
+			return fIdsTable.get(binding.getKey());
 		}
 
 		protected void setSerialVersionId(ITypeBinding binding, Long id) {
@@ -154,13 +154,13 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 
 				IType serializable= project.findType(SERIALIZABLE_NAME);
 
-				List types= new ArrayList();
+				List<IType> types= new ArrayList<IType>();
 
 				if (compilationUnits.length > 500) {
 					//500 is a guess. Building the type hierarchy on serializable is very expensive
 					//depending on how many subtypes exit in the project.
 
-					HashSet cus= new HashSet();
+					HashSet<ICompilationUnit> cus= new HashSet<ICompilationUnit>();
 					for (int i= 0; i < compilationUnits.length; i++) {
 						cus.add(compilationUnits[i]);
 					}
@@ -179,13 +179,13 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
                     }
 				}
 
-				return (IType[])types.toArray(new IType[types.size()]);
+				return types.toArray(new IType[types.size()]);
 			} finally {
 				monitor.done();
 			}
 		}
 
-		private void addTypes(IType[] allSubtypes, HashSet cus, List types) throws JavaModelException {
+		private void addTypes(IType[] allSubtypes, HashSet<ICompilationUnit> cus, List<IType> types) throws JavaModelException {
 			for (int i= 0; i < allSubtypes.length; i++) {
 				IType type= allSubtypes[i];
 
@@ -198,7 +198,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 			}
 		}
 
-		private void collectChildrenWithMissingSerialVersionId(IJavaElement[] children, IType serializable, List result) throws JavaModelException {
+		private void collectChildrenWithMissingSerialVersionId(IJavaElement[] children, IType serializable, List<IType> result) throws JavaModelException {
 			for (int i= 0; i < children.length; i++) {
 				IJavaElement child= children[i];
 				if (child instanceof IType) {
@@ -240,6 +240,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		protected boolean addInitializer(VariableDeclarationFragment fragment, ASTNode declarationNode) {
 			ITypeBinding typeBinding= getTypeBinding(declarationNode);
 			if (typeBinding == null)
@@ -256,6 +257,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		protected void addLinkedPositions(ASTRewrite rewrite, VariableDeclarationFragment fragment, LinkedProposalModel positionGroups) {}
 
 	}
@@ -347,7 +349,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 			if (unit == null)
 				return null;
 
-			List declarationNodes= new ArrayList();
+			List<ASTNode> declarationNodes= new ArrayList<ASTNode>();
 			for (int i= 0; i < problems.length; i++) {
 				if (problems[i].getProblemId() == IProblem.MissingSerialVersion) {
 					final SimpleName simpleName= getSelectedName(compilationUnit, problems[i]);
@@ -362,11 +364,11 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 			if (declarationNodes.size() == 0)
 				return null;
 
-			for (Iterator iter= declarationNodes.iterator(); iter.hasNext();) {
-	            ASTNode declarationNode= (ASTNode) iter.next();
+			for (Iterator<ASTNode> iter= declarationNodes.iterator(); iter.hasNext();) {
+	            ASTNode declarationNode= iter.next();
 	            ITypeBinding binding= getTypeBinding(declarationNode);
 	            if (fCurrentContext.getSerialVersionId(binding) != null) {
-	            	SerialVersionHashBatchOperation op= new SerialVersionHashBatchOperation(unit, (ASTNode[])declarationNodes.toArray(new ASTNode[declarationNodes.size()]), fCurrentContext);
+	            	SerialVersionHashBatchOperation op= new SerialVersionHashBatchOperation(unit, declarationNodes.toArray(new ASTNode[declarationNodes.size()]), fCurrentContext);
 	    			return new PotentialProgrammingProblemsFix(FixMessages.PotentialProgrammingProblemsFix_add_id_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 	            }
             }

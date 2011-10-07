@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,8 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 
 	/**
 	 * Constructor for ProblemTableViewer.
-	 * @param parent
+	 * 
+	 * @param parent the parent composite
 	 */
 	public ProblemTableViewer(Composite parent) {
 		super(parent);
@@ -47,8 +48,9 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 
 	/**
 	 * Constructor for ProblemTableViewer.
-	 * @param parent
-	 * @param style
+	 * 
+	 * @param parent the parent composite
+	 * @param style the style
 	 */
 	public ProblemTableViewer(Composite parent, int style) {
 		super(parent, style);
@@ -57,7 +59,8 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 
 	/**
 	 * Constructor for ProblemTableViewer.
-	 * @param table
+	 * 
+	 * @param table the table
 	 */
 	public ProblemTableViewer(Table table) {
 		super(table);
@@ -78,6 +81,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 	/*
 	 * @see StructuredViewer#mapElement(Object, Widget)
 	 */
+	@Override
 	protected void mapElement(Object element, Widget item) {
 		super.mapElement(element, item);
 		if (item instanceof Item) {
@@ -88,6 +92,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 	/*
 	 * @see StructuredViewer#unmapElement(Object, Widget)
 	 */
+	@Override
 	protected void unmapElement(Object element, Widget item) {
 		if (item instanceof Item) {
 			fResourceToItemsMapper.removeFromMap(element, (Item) item);
@@ -98,6 +103,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 	/*
 	 * @see StructuredViewer#unmapAllElements()
 	 */
+	@Override
 	protected void unmapAllElements() {
 		fResourceToItemsMapper.clearMap();
 		super.unmapAllElements();
@@ -106,6 +112,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 	/*
 	 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 	 */
+	@Override
 	protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
 		if (event instanceof ProblemsLabelChangedEvent) {
 			ProblemsLabelChangedEvent e= (ProblemsLabelChangedEvent) event;
@@ -116,7 +123,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 
 		Object[] changed= event.getElements();
 		if (changed != null && !fResourceToItemsMapper.isEmpty()) {
-			ArrayList others= new ArrayList(changed.length);
+			ArrayList<Object> others= new ArrayList<Object>(changed.length);
 			for (int i= 0; i < changed.length; i++) {
 				Object curr= changed[i];
 				if (curr instanceof IResource) {

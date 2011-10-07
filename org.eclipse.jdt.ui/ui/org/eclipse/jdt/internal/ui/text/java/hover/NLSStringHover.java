@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,6 +72,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractJavaEditorTextHover#getHoverRegion(org.eclipse.jface.text.ITextViewer, int)
 	 */
+	@Override
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
 		if (!(getEditor() instanceof JavaEditor))
 			return null;
@@ -108,6 +109,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 	/*
 	 * @see org.eclipse.jface.text.ITextHoverExtension2#getHoverInfo2(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 */
+	@Override
 	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
 		return internalGetHoverInfo(textViewer, hoverRegion);
 	}
@@ -158,22 +160,6 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		if (ref == null)
 			return null;
 
-		IStorage propertiesFile;
-		try {
-			propertiesFile= NLSHintHelper.getResourceBundle(je.getJavaProject(), ref);
-			if (propertiesFile == null)
-				return new NLSHoverControlInput(toHtml(JavaHoverMessages.NLSStringHover_NLSStringHover_PropertiesFileNotDetectedWarning, ""), (IStorage)null, "", getEditor()); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (JavaModelException ex) {
-			return null;
-		}
-
-		final String propertiesFileName= propertiesFile.getName();
-		Properties properties= NLSHintHelper.getProperties(propertiesFile);
-		if (properties == null)
-			return null;
-		if (properties.isEmpty())
-			return new NLSHoverControlInput(toHtml(propertiesFileName, JavaHoverMessages.NLSStringHover_NLSStringHover_missingKeyWarning), propertiesFile, "", getEditor()); //$NON-NLS-1$
-
 		String identifier= null;
 		if (node instanceof StringLiteral) {
 			identifier= ((StringLiteral)node).getLiteralValue();
@@ -199,22 +185,55 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		if (identifier == null)
 			return null;
 
-		String value= properties.getProperty(identifier, null);
-		if (value != null)
-			value= HTMLPrinter.convertToHTMLContent(value);
-		else
-			value= JavaHoverMessages.NLSStringHover_NLSStringHover_missingKeyWarning;
+		IStorage propertiesFile;
+		try {
+			propertiesFile= NLSHintHelper.getResourceBundle(je.getJavaProject(), ref);
+			if (propertiesFile == null)
+				return new NLSHoverControlInput(toHtml(JavaHoverMessages.NLSStringHover_NLSStringHover_PropertiesFileNotDetectedWarning, "", null, false), (IStorage)null, "", getEditor()); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (JavaModelException ex) {
+			return null;
+		}
 
-		String buffer= toHtml(propertiesFileName, value);
+		final String propertiesFileName= propertiesFile.getName();
+		Properties properties= null;
+		try {
+			properties= NLSHintHelper.getProperties(propertiesFile);
+		} catch (IllegalArgumentException e) {
+			return new NLSHoverControlInput(toHtml(propertiesFileName, JavaHoverMessages.NLSStringHover_NLSStringHover_PropertiesFileCouldNotBeReadWarning, e.getLocalizedMessage(), false),
+					propertiesFile, identifier, getEditor());
+		}
+		if (properties == null)
+			return null;
+		if (properties.isEmpty())
+			return new NLSHoverControlInput(toHtml(propertiesFileName, JavaHoverMessages.NLSStringHover_NLSStringHover_missingKeyWarning, null, false), propertiesFile, "", getEditor()); //$NON-NLS-1$
+
+		String value= properties.getProperty(identifier, null);
+		String buffer= toHtml(propertiesFileName, value, null, true);
 		return new NLSHoverControlInput(buffer, propertiesFile, identifier, getEditor());
 	}
 
-	private String toHtml(String header, String string) {
-
+	private String toHtml(String header, String string, String errorString, boolean addPreFormatted) {
 		StringBuffer buffer= new StringBuffer();
-
 		HTMLPrinter.addSmallHeader(buffer, header);
-		HTMLPrinter.addParagraph(buffer, string);
+
+		if (string != null) {
+			if (addPreFormatted) {
+				HTMLPrinter.addParagraph(buffer, ""); //$NON-NLS-1$
+				String preFormatted= HTMLPrinter.convertToHTMLContent(string);
+				buffer.append("<pre>"); //$NON-NLS-1$
+				buffer.append(preFormatted);
+				buffer.append("</pre>"); //$NON-NLS-1$
+
+			} else {
+				HTMLPrinter.addParagraph(buffer, string);
+			}
+			if (errorString != null) {
+				HTMLPrinter.addParagraph(buffer, errorString);
+			}
+		} else {
+			HTMLPrinter.addParagraph(buffer, JavaHoverMessages.NLSStringHover_NLSStringHover_missingKeyWarning);
+		}
+
 		HTMLPrinter.insertPageProlog(buffer, 0);
 		HTMLPrinter.addPageEpilog(buffer);
 		return buffer.toString();
@@ -247,7 +266,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 			fActiveEditor= editor;
 		}
 	}
-	
+
 	/**
 	 * The NLS hover control.
 	 * 
@@ -312,6 +331,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
+		@Override
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			ToolBarManager tbm= new ToolBarManager(SWT.FLAT);
 			NLSHoverControl iControl= new NLSHoverControl(parent, tbm);
@@ -346,11 +366,13 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
+		@Override
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			return new NLSHoverControl(parent, EditorsUI.getTooltipAffordanceString()) {
 				/*
 				 * @see org.eclipse.jface.text.IInformationControlExtension5#getInformationPresenterControlCreator()
 				 */
+				@Override
 				public IInformationControlCreator getInformationPresenterControlCreator() {
 					return fPresenterControlCreator;
 				}
@@ -376,6 +398,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 	 * @see ITextHoverExtension#getHoverControlCreator()
 	 * @since 3.5
 	 */
+	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		if (fHoverControlCreator == null)
 			fHoverControlCreator= new HoverControlCreator(getInformationPresenterControlCreator());
@@ -383,9 +406,10 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.ITextHoverExtension2#getInformationPresenterControlCreator()
+	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 * @since 3.5
 	 */
+	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		if (fPresenterControlCreator == null)
 			fPresenterControlCreator= new PresenterControlCreator();
@@ -419,6 +443,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
+		@Override
 		public void run() {
 			NLSHoverControlInput input= fControl.getInput();
 			NLSKeyHyperlink.openKeyInPropertiesFile(input.fKeyName, input.fpropertiesFile, input.fActiveEditor);

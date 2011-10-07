@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,7 +71,7 @@ public interface ISpellChecker {
 	 *                   sentence, <code>false</code> otherwise
 	 * @return Set of ranked proposals for the word
 	 */
-	Set getProposals(String word, boolean sentence);
+	Set<RankedWordProposal> getProposals(String word, boolean sentence);
 
 	/**
 	 * Ignores the specified word until calling <code>checkWord(String)</code>.

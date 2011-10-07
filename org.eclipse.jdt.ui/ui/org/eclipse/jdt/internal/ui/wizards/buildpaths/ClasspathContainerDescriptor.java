@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -105,7 +105,7 @@ public class ClasspathContainerDescriptor {
 	}
 
 	public static ClasspathContainerDescriptor[] getDescriptors() {
-		ArrayList containers= new ArrayList();
+		ArrayList<ClasspathContainerDescriptor> containers= new ArrayList<ClasspathContainerDescriptor>();
 
 		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(JavaUI.ID_PLUGIN, ATT_EXTENSION);
 		if (extensionPoint != null) {
@@ -132,7 +132,7 @@ public class ClasspathContainerDescriptor {
 				containers.add(defaultPage);
 			}
 		}
-		return (ClasspathContainerDescriptor[]) containers.toArray(new ClasspathContainerDescriptor[containers.size()]);
+		return containers.toArray(new ClasspathContainerDescriptor[containers.size()]);
 	}
 
 }

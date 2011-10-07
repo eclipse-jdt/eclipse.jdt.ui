@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -135,7 +135,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 
 	public static IClasspathEntry[] decodeJRELibraryClasspathEntries(String encoded) {
 		StringTokenizer tok= new StringTokenizer(encoded, " "); //$NON-NLS-1$
-		ArrayList res= new ArrayList();
+		ArrayList<IClasspathEntry> res= new ArrayList<IClasspathEntry>();
 		while (tok.hasMoreTokens()) {
 			try {
 				tok.nextToken(); // desc: ignore
@@ -169,7 +169,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, e));
 			}
 		}
-		return (IClasspathEntry[]) res.toArray(new IClasspathEntry[res.size()]);
+		return res.toArray(new IClasspathEntry[res.size()]);
 	}
 
 
@@ -214,9 +214,9 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	}
 
 
-	private ArrayList fCheckBoxes;
-	private ArrayList fRadioButtons;
-	private ArrayList fTextControls;
+	private ArrayList<Button> fCheckBoxes;
+	private ArrayList<Button> fRadioButtons;
+	private ArrayList<Text> fTextControls;
 
 	private SelectionListener fSelectionListener;
 	private ModifyListener fModifyListener;
@@ -240,9 +240,9 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		// title used when opened programatically
 		setTitle(PreferencesMessages.NewJavaProjectPreferencePage_title);
 
-		fRadioButtons= new ArrayList();
-		fCheckBoxes= new ArrayList();
-		fTextControls= new ArrayList();
+		fRadioButtons= new ArrayList<Button>();
+		fCheckBoxes= new ArrayList<Button>();
+		fTextControls= new ArrayList<Text>();
 
 		fSelectionListener= new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {}
@@ -297,6 +297,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	/**
 	 * @see PreferencePage#createControl(Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.NEW_JAVA_PROJECT_PREFERENCE_PAGE);
@@ -338,6 +339,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	}
 
 
+	@Override
 	protected Control createContents(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -466,20 +468,21 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
+	@Override
 	protected void performDefaults() {
 		IPreferenceStore store= getPreferenceStore();
 		for (int i= 0; i < fCheckBoxes.size(); i++) {
-			Button button= (Button) fCheckBoxes.get(i);
+			Button button= fCheckBoxes.get(i);
 			String key= (String) button.getData();
 			button.setSelection(store.getDefaultBoolean(key));
 		}
 		for (int i= 0; i < fRadioButtons.size(); i++) {
-			Button button= (Button) fRadioButtons.get(i);
+			Button button= fRadioButtons.get(i);
 			String[] info= (String[]) button.getData();
 			button.setSelection(info[1].equals(store.getDefaultString(info[0])));
 		}
 		for (int i= 0; i < fTextControls.size(); i++) {
-			Text text= (Text) fTextControls.get(i);
+			Text text= fTextControls.get(i);
 			String key= (String) text.getData();
 			text.setText(store.getDefaultString(key));
 		}
@@ -494,22 +497,23 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	/*
 	 * @see IPreferencePage#performOk()
 	 */
+	@Override
 	public boolean performOk() {
 		IPreferenceStore store= getPreferenceStore();
 		for (int i= 0; i < fCheckBoxes.size(); i++) {
-			Button button= (Button) fCheckBoxes.get(i);
+			Button button= fCheckBoxes.get(i);
 			String key= (String) button.getData();
 			store.setValue(key, button.getSelection());
 		}
 		for (int i= 0; i < fRadioButtons.size(); i++) {
-			Button button= (Button) fRadioButtons.get(i);
+			Button button= fRadioButtons.get(i);
 			if (button.getSelection()) {
 				String[] info= (String[]) button.getData();
 				store.setValue(info[0], info[1]);
 			}
 		}
 		for (int i= 0; i < fTextControls.size(); i++) {
-			Text text= (Text) fTextControls.get(i);
+			Text text= fTextControls.get(i);
 			String key= (String) text.getData();
 			store.setValue(key, text.getText());
 		}
@@ -518,18 +522,18 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 			store.setValue(CLASSPATH_JRELIBRARY_INDEX, fJRECombo.getSelectionIndex());
 		}
 
-		JavaPlugin.getDefault().savePluginPreferences();
+		JavaPlugin.flushInstanceScope();
 		return super.performOk();
 	}
 
 	private String[] getJRENames() {
 		String prefString= getPreferenceStore().getString(CLASSPATH_JRELIBRARY_LIST);
-		ArrayList list= new ArrayList();
+		ArrayList<String> list= new ArrayList<String>();
 		StringTokenizer tok= new StringTokenizer(prefString, ";"); //$NON-NLS-1$
 		while (tok.hasMoreTokens()) {
 			list.add(decodeJRELibraryDescription(tok.nextToken()));
 		}
-		return (String[]) list.toArray(new String[list.size()]);
+		return list.toArray(new String[list.size()]);
 	}
 
 }

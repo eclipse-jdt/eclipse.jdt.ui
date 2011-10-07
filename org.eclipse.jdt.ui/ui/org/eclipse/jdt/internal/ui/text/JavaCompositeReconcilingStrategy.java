@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,6 +72,7 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	/*
 	 * @see org.eclipse.jface.text.reconciler.CompositeReconcilingStrategy#reconcile(org.eclipse.jface.text.reconciler.DirtyRegion, org.eclipse.jface.text.IRegion)
 	 */
+	@Override
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
 		try {
 			IProblemRequestorExtension e= getProblemRequestorExtension();
@@ -93,6 +94,7 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	/*
 	 * @see org.eclipse.jface.text.reconciler.CompositeReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
 	 */
+	@Override
 	public void reconcile(IRegion partition) {
 		try {
 			IProblemRequestorExtension e= getProblemRequestorExtension();
@@ -124,6 +126,7 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	/*
 	 * @see org.eclipse.jface.text.reconciler.CompositeReconcilingStrategy#initialReconcile()
 	 */
+	@Override
 	public void initialReconcile() {
 		try {
 			IProblemRequestorExtension e= getProblemRequestorExtension();

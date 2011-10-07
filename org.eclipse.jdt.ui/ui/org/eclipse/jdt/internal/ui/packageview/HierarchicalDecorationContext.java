@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,7 @@ public class HierarchicalDecorationContext {
 		/* (non-Javadoc)
 		 * @see org.eclipse.team.ui.mapping.SynchronizationStateTester#getState(java.lang.Object, int, org.eclipse.core.runtime.IProgressMonitor)
 		 */
+		@Override
 		public int getState(Object element, int stateMask, IProgressMonitor monitor) throws CoreException {
 			if (element instanceof JavaElementResourceMapping) {
 				JavaElementResourceMapping mapping= (JavaElementResourceMapping) element;
@@ -72,12 +73,15 @@ public class HierarchicalDecorationContext {
 			Assert.isNotNull(fragment);
 			fPack= fragment;
 		}
+		@Override
 		public Object getModelObject() {
 			return fPack;
 		}
+		@Override
 		public IProject[] getProjects() {
 			return new IProject[] {fPack.getJavaProject().getProject() };
 		}
+		@Override
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 			return new ResourceTraversal[] {
 				new ResourceTraversal(new IResource[] {fPack.getResource()}, IResource.DEPTH_INFINITE, 0)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,11 +72,11 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	public static final String DEFAULT= "D";  //$NON-NLS-1$
 
 	private boolean fUseVisibilitySort;
-	private ListDialogField fSortOrderList;
-	private ListDialogField fVisibilityOrderList;
+	private ListDialogField<String> fSortOrderList;
+	private ListDialogField<String> fVisibilityOrderList;
 	private SelectionButtonDialogField fUseVisibilitySortField;
 
-	private static boolean isValidEntries(List entries, String entryString) {
+	private static boolean isValidEntries(List<String> entries, String entryString) {
 		StringTokenizer tokenizer= new StringTokenizer(entryString, ","); //$NON-NLS-1$
 		int i= 0;
 		for (; tokenizer.hasMoreTokens(); i++) {
@@ -100,12 +100,12 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 
 		// category sort
 
-		fSortOrderList= new ListDialogField(null,  new String[] { upLabel, downLabel }, new MemberSortLabelProvider());
+		fSortOrderList= new ListDialogField<String>(null,  new String[] { upLabel, downLabel }, new MemberSortLabelProvider());
 		fSortOrderList.setDownButtonIndex(1);
 		fSortOrderList.setUpButtonIndex(0);
 
 		//validate entries stored in store, false get defaults
-		List entries= parseList(memberSortString);
+		List<String> entries= parseList(memberSortString);
 		if (!isValidEntries(entries, ALL_SORTMEMBER_ENTRIES)) {
 			memberSortString= getPreferenceStore().getDefaultString(PREF_OUTLINE_SORT_OPTION);
 			entries= parseList(memberSortString);
@@ -122,7 +122,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		upLabel= PreferencesMessages.MembersOrderPreferencePage_visibility_button_up;
 		downLabel= PreferencesMessages.MembersOrderPreferencePage_visibility_button_down;
 
-		fVisibilityOrderList= new ListDialogField(null, new String[] { upLabel, downLabel }, new VisibilitySortLabelProvider());
+		fVisibilityOrderList= new ListDialogField<String>(null, new String[] { upLabel, downLabel }, new VisibilitySortLabelProvider());
 		fVisibilityOrderList.setDownButtonIndex(1);
 		fVisibilityOrderList.setUpButtonIndex(0);
 
@@ -135,10 +135,10 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		fVisibilityOrderList.setElements(entries);
 	}
 
-	private static List parseList(String string) {
+	private static List<String> parseList(String string) {
 		StringTokenizer tokenizer= new StringTokenizer(string, ","); //$NON-NLS-1$
-		List entries= new ArrayList();
-		for (int i= 0; tokenizer.hasMoreTokens(); i++) {
+		List<String> entries= new ArrayList<String>();
+		while (tokenizer.hasMoreTokens()) {
 			String token= tokenizer.nextToken();
 			entries.add(token);
 		}
@@ -148,6 +148,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	/*
 	 * @see PreferencePage#createControl(Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.SORT_ORDER_PREFERENCE_PAGE);
@@ -156,6 +157,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	/*
 	 * @see org.eclipse.jface.preference.PreferencePage#createContents(Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		// Create both the dialog lists
 		Composite sortComposite= new Composite(parent, SWT.NONE);
@@ -193,7 +195,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	}
 
 
-	private void createListDialogField(Composite composite, ListDialogField dialogField) {
+	private void createListDialogField(Composite composite, ListDialogField<String> dialogField) {
 		Control list= dialogField.getListControl(composite);
 		GridData gd= new GridData();
 		gd.horizontalAlignment= GridData.FILL;
@@ -223,6 +225,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	/*
 	 * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
 	 */
+	@Override
 	protected void performDefaults() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		String str= prefs.getDefaultString(PREF_OUTLINE_SORT_OPTION);
@@ -246,6 +249,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
 	//reorders elements in the Outline based on selection
+	@Override
 	public boolean performOk() {
 
 		//save preferences for both dialog lists
@@ -255,16 +259,16 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 
 		//update the button setting
 		store.setValue(PREF_USE_VISIBILITY_SORT_OPTION, fUseVisibilitySortField.isSelected());
-		JavaPlugin.getDefault().savePluginPreferences();
+		JavaPlugin.flushInstanceScope();
 
 		return true;
 	}
 
-	private void updateList(IPreferenceStore store, ListDialogField list, String str) {
+	private void updateList(IPreferenceStore store, ListDialogField<String> list, String str) {
 		StringBuffer buf= new StringBuffer();
-		List curr= list.getElements();
-		for (Iterator iter= curr.iterator(); iter.hasNext();) {
-			String s= (String) iter.next();
+		List<String> curr= list.getElements();
+		for (Iterator<String> iter= curr.iterator(); iter.hasNext();) {
+			String s= iter.next();
 			buf.append(s);
 			buf.append(',');
 		}
@@ -279,6 +283,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		/*
 		* @see org.eclipse.jface.viewers.ILabelProvider#getImage(Object)
 		*/
+		@Override
 		public Image getImage(Object element) {
 			//access to image registry
 			ImageDescriptorRegistry registry= JavaPlugin.getImageDescriptorRegistry();
@@ -322,6 +327,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		/*
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(Object)
 		 */
+		@Override
 		public String getText(Object element) {
 
 			if (element instanceof String) {
@@ -357,6 +363,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		/*
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(Object)
 		 */
+		@Override
 		public Image getImage(Object element) {
 			//access to image registry
 			ImageDescriptorRegistry registry= JavaPlugin.getImageDescriptorRegistry();
@@ -381,6 +388,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		/*
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(Object)
 		 */
+		@Override
 		public String getText(Object element) {
 			if (element instanceof String) {
 				String s= (String) element;

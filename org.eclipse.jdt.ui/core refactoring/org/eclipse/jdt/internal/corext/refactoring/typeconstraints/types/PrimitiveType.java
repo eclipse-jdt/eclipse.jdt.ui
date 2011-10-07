@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,18 +53,22 @@ public final class PrimitiveType extends TType {
 		return fId;
 	}
 
+	@Override
 	public int getKind() {
 		return PRIMITIVE_TYPE;
 	}
 
+	@Override
 	protected boolean doEquals(TType type) {
 		return fId == ((PrimitiveType)type).fId;
 	}
 
+	@Override
 	public int hashCode() {
 		return fId;
 	}
 	
+	@Override
 	protected boolean doCanAssignTo(TType lhs) {
 		if (lhs.getKind() != PRIMITIVE_TYPE) {
 			if (lhs.getKind() == STANDARD_TYPE) {
@@ -127,10 +131,12 @@ public final class PrimitiveType extends TType {
 		return false;
 	}
 
+	@Override
 	public String getName() {
 		return NAMES[fId];
 	}
 
+	@Override
 	protected String getPlainPrettySignature() {
 		return NAMES[fId];
 	}

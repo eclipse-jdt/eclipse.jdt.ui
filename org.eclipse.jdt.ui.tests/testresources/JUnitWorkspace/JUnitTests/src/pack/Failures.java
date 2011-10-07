@@ -1,8 +1,20 @@
 package pack;
 
-import junit.framework.TestCase;
+import junit.framework.*;
 
 public class Failures extends TestCase {
+	
+	public static Test suite() {
+		TestSuite suite= new TestSuite(Failures.class.getName());
+		suite.addTest(new Failures("testNasty"));
+		suite.addTest(new Failures("testError"));
+		suite.addTest(new Failures("testCompare"));
+		suite.addTest(new Failures("testCompareNull"));
+		return suite;
+	}
+	public Failures(String name) {
+		super(name);
+	}
 
 	public void testNasty() throws Exception {
 		fail("</failure>");

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,10 +11,14 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import com.ibm.icu.text.Collator;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -75,6 +79,7 @@ import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.ui.ActiveShellExpression;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.IHandlerActivation;
 import org.eclipse.ui.handlers.IHandlerService;
 
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -143,6 +148,7 @@ public class EditTemplateDialog extends StatusDialog {
 		/**
 		 * @see Action#run()
 		 */
+		@Override
 		public void run() {
 			if (fOperationCode != -1 && fOperationTarget != null) {
 				fOperationTarget.doOperation(fOperationCode);
@@ -162,8 +168,8 @@ public class EditTemplateDialog extends StatusDialog {
 
 	private StatusInfo fValidationStatus;
 	private boolean fSuppressError= true; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=4354
-	private Map fGlobalActions= new HashMap(10);
-	private List fSelectionActions = new ArrayList(3);
+	private Map<String, TextViewerAction> fGlobalActions= new HashMap<String, TextViewerAction>(10);
+	private List<String> fSelectionActions = new ArrayList<String>(3);
 	private String[][] fContextTypes;
 
 	private ContextTypeRegistry fContextTypeRegistry;
@@ -192,15 +198,21 @@ public class EditTemplateDialog extends StatusDialog {
 
 		String delim= new Document().getLegalLineDelimiters()[0];
 
-		List contexts= new ArrayList();
-		for (Iterator it= registry.contextTypes(); it.hasNext();) {
-			TemplateContextType type= (TemplateContextType) it.next();
+		List<String[]> contexts= new ArrayList<String[]>();
+		for (Iterator<TemplateContextType> it= registry.contextTypes(); it.hasNext();) {
+			TemplateContextType type= it.next();
 			if (type.getId().equals("javadoc")) //$NON-NLS-1$
 				contexts.add(new String[] { type.getId(), type.getName(), "/**" + delim }); //$NON-NLS-1$
 			else
 				contexts.add(0, new String[] { type.getId(), type.getName(), "" }); //$NON-NLS-1$
 		}
-		fContextTypes= (String[][]) contexts.toArray(new String[contexts.size()][]);
+		Collections.sort(contexts, new Comparator<String[]>() {
+			Collator fCollator= Collator.getInstance();
+			public int compare(String[] o1, String[] o2) {
+				return fCollator.compare(o1[1], o2[1]);
+			}
+		});
+		fContextTypes= contexts.toArray(new String[contexts.size()][]);
 
 		fValidationStatus= new StatusInfo();
 
@@ -214,6 +226,7 @@ public class EditTemplateDialog extends StatusDialog {
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
@@ -221,6 +234,7 @@ public class EditTemplateDialog extends StatusDialog {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.dialogs.StatusDialog#create()
 	 */
+	@Override
 	public void create() {
 		super.create();
 		updateStatusAndButtons();
@@ -230,6 +244,7 @@ public class EditTemplateDialog extends StatusDialog {
 	/*
 	 * @see Dialog#createDialogArea(Composite)
 	 */
+	@Override
 	protected Control createDialogArea(Composite ancestor) {
 		Composite parent= new Composite(ancestor, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -464,7 +479,7 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 
 	private void initializeActions() {
-		final ArrayList handlerActivations= new ArrayList(3);
+		final ArrayList<IHandlerActivation> handlerActivations= new ArrayList<IHandlerActivation>(3);
 		final IHandlerService handlerService= (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
 		final Expression expression= new ActiveShellExpression(fPatternEditor.getControl().getShell());
 
@@ -479,11 +494,11 @@ public class EditTemplateDialog extends StatusDialog {
 				handlerService.deactivateHandlers(handlerActivations);
 			}
 			public void focusGained(FocusEvent e) {
-				IAction action= (IAction)fGlobalActions.get(ITextEditorActionConstants.REDO);
+				IAction action= fGlobalActions.get(ITextEditorActionConstants.REDO);
 				handlerActivations.add(handlerService.activateHandler(IWorkbenchCommandConstants.EDIT_REDO, new ActionHandler(action), expression));
-				action= (IAction)fGlobalActions.get(ITextEditorActionConstants.UNDO);
+				action= fGlobalActions.get(ITextEditorActionConstants.UNDO);
 				handlerActivations.add(handlerService.activateHandler(IWorkbenchCommandConstants.EDIT_UNDO, new ActionHandler(action), expression));
-				action= (IAction)fGlobalActions.get(ITextEditorActionConstants.CONTENT_ASSIST);
+				action= fGlobalActions.get(ITextEditorActionConstants.CONTENT_ASSIST);
 				handlerActivations.add(handlerService.activateHandler(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, new ActionHandler(action), expression));
 			}
 		});
@@ -537,28 +552,28 @@ public class EditTemplateDialog extends StatusDialog {
 
 	private void fillContextMenu(IMenuManager menu) {
 		menu.add(new GroupMarker(ITextEditorActionConstants.GROUP_UNDO));
-		menu.appendToGroup(ITextEditorActionConstants.GROUP_UNDO, (IAction) fGlobalActions.get(ITextEditorActionConstants.UNDO));
-		menu.appendToGroup(ITextEditorActionConstants.GROUP_UNDO, (IAction) fGlobalActions.get(ITextEditorActionConstants.REDO));
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_UNDO, fGlobalActions.get(ITextEditorActionConstants.UNDO));
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_UNDO, fGlobalActions.get(ITextEditorActionConstants.REDO));
 
 		menu.add(new Separator(ITextEditorActionConstants.GROUP_EDIT));
-		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, (IAction) fGlobalActions.get(ITextEditorActionConstants.CUT));
-		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, (IAction) fGlobalActions.get(ITextEditorActionConstants.COPY));
-		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, (IAction) fGlobalActions.get(ITextEditorActionConstants.PASTE));
-		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, (IAction) fGlobalActions.get(ITextEditorActionConstants.SELECT_ALL));
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, fGlobalActions.get(ITextEditorActionConstants.CUT));
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, fGlobalActions.get(ITextEditorActionConstants.COPY));
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, fGlobalActions.get(ITextEditorActionConstants.PASTE));
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, fGlobalActions.get(ITextEditorActionConstants.SELECT_ALL));
 
 		menu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
-		menu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, (IAction) fGlobalActions.get("ContentAssistProposal")); //$NON-NLS-1$
+		menu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fGlobalActions.get("ContentAssistProposal")); //$NON-NLS-1$
 	}
 
 
 	protected void updateSelectionDependentActions() {
-		Iterator iterator= fSelectionActions.iterator();
+		Iterator<String> iterator= fSelectionActions.iterator();
 		while (iterator.hasNext())
-			updateAction((String)iterator.next());
+			updateAction(iterator.next());
 	}
 
 	protected void updateAction(String actionId) {
-		IAction action= (IAction) fGlobalActions.get(actionId);
+		IAction action= fGlobalActions.get(actionId);
 		if (action instanceof IUpdate)
 			((IUpdate) action).update();
 	}
@@ -576,6 +591,7 @@ public class EditTemplateDialog extends StatusDialog {
 		return -1;
 	}
 
+	@Override
 	protected void okPressed() {
 		String name= fNameText == null ? fTemplate.getName() : fNameText.getText();
 		boolean isAutoInsertable= fAutoInsertCheckbox != null && fAutoInsertCheckbox.getSelection();
@@ -632,6 +648,7 @@ public class EditTemplateDialog extends StatusDialog {
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.EDIT_TEMPLATE_DIALOG);
@@ -661,6 +678,7 @@ public class EditTemplateDialog extends StatusDialog {
 	 * @see org.eclipse.jface.dialogs.Dialog#getDialogBoundsSettings()
 	 * @since 3.2
 	 */
+	@Override
 	protected IDialogSettings getDialogBoundsSettings() {
 		String sectionName= getClass().getName() + "_dialogBounds"; //$NON-NLS-1$
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();

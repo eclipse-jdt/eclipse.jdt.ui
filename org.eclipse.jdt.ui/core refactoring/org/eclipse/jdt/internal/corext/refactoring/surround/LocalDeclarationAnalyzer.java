@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,19 +27,20 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 public class LocalDeclarationAnalyzer extends ASTVisitor {
 
 	private Selection fSelection;
-	private List fAffectedLocals;
+	private List<VariableDeclaration> fAffectedLocals;
 
 	public static VariableDeclaration[] perform(BodyDeclaration parent, Selection selection) {
 		LocalDeclarationAnalyzer analyzer= new LocalDeclarationAnalyzer(selection);
 		parent.accept(analyzer);
-		return (VariableDeclaration[]) analyzer.fAffectedLocals.toArray(new VariableDeclaration[analyzer.fAffectedLocals.size()]);
+		return analyzer.fAffectedLocals.toArray(new VariableDeclaration[analyzer.fAffectedLocals.size()]);
 	}
 
 	private LocalDeclarationAnalyzer(Selection selection) {
 		fSelection= selection;
-		fAffectedLocals= new ArrayList(1);
+		fAffectedLocals= new ArrayList<VariableDeclaration>(1);
 	}
 
+	@Override
 	public boolean visit(SimpleName node) {
 		IVariableBinding binding= null;
 		if (node.isDeclaration() || !considerNode(node) || (binding= ASTNodes.getLocalVariableBinding(node)) == null)

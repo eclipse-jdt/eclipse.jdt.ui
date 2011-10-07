@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,12 +54,8 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 		return new PerfTestSuite(FileBufferPerformanceTest.class);
 	}
 
-	public static Test setUpTest(Test test) {
-		return new PerformanceTestSetup(test);
-	}
-
-
 	protected void setUp() throws Exception {
+		super.setUp();
 		fProject= ResourceHelper.createProject("project");
 		fManager= FileBuffers.getTextFileBufferManager();
 		fProject= ResourceHelper.createProject("project");
@@ -74,6 +70,7 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 	protected void tearDown() throws Exception {
 		ResourceHelper.deleteProject("project");
 		fTempFile.delete();
+		super.tearDown();
 	}
 
 	protected IPath createPath(IProject project) throws Exception {

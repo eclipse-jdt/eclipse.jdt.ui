@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 	}
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof AbstractTextSearchResult) {
-			Set filteredElements= new HashSet();
+			Set<Object> filteredElements= new HashSet<Object>();
 			Object[] rawElements= ((AbstractTextSearchResult)inputElement).getElements();
 			int limit= getPage().getElementLimit().intValue();
 			for (int i= 0; i < rawElements.length; i++) {
@@ -41,18 +41,17 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 		return EMPTY_ARR;
 	}
 
+	@Override
 	public void elementsChanged(Object[] updatedElements) {
 		if (getSearchResult() == null)
 			return;
 
-		int addCount= 0;
-		int removeCount= 0;
 		int addLimit= getAddLimit();
 
 		TableViewer viewer= (TableViewer) getPage().getViewer();
-		Set updated= new HashSet();
-		Set added= new HashSet();
-		Set removed= new HashSet();
+		Set<Object> updated= new HashSet<Object>();
+		Set<Object> added= new HashSet<Object>();
+		Set<Object> removed= new HashSet<Object>();
 		for (int i= 0; i < updatedElements.length; i++) {
 			if (getPage().getDisplayedMatchCount(updatedElements[i]) > 0) {
 				if (viewer.testFindItem(updatedElements[i]) != null)
@@ -61,12 +60,10 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 					if (addLimit > 0) {
 						added.add(updatedElements[i]);
 						addLimit--;
-						addCount++;
 					}
 				}
 			} else {
 				removed.add(updatedElements[i]);
-				removeCount++;
 			}
 		}
 
@@ -88,6 +85,7 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 		return Integer.MAX_VALUE;
 	}
 
+	@Override
 	public void clear() {
 		getPage().getViewer().refresh();
 	}

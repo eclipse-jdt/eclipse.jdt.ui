@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,6 +70,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		return FileTransfer.getInstance();
 	}
 
+	@Override
 	public void dragStart(DragSourceEvent event) {
 		event.doit= isDragable(fProvider.getSelection());
 	}
@@ -78,7 +79,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		if (!(s instanceof IStructuredSelection))
 			return false;
 		IStructuredSelection selection= (IStructuredSelection)s;
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IJavaElement) {
 				IJavaElement jElement= (IJavaElement)element;
@@ -95,12 +96,13 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 				return false;
 			}
 		}
-		List resources= convertIntoResources(selection);
+		List<IResource> resources= convertIntoResources(selection);
 		return resources.size() == selection.size();
 	}
 
+	@Override
 	public void dragSetData(DragSourceEvent event){
-		List elements= getResources();
+		List<IResource> elements= getResources();
 		if (elements == null || elements.size() == 0) {
 			event.data= null;
 			return;
@@ -109,10 +111,11 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		event.data= getResourceLocations(elements);
 	}
 
-	private static String[] getResourceLocations(List resources) {
-		return Resources.getLocationOSStrings((IResource[]) resources.toArray(new IResource[resources.size()]));
+	private static String[] getResourceLocations(List<IResource> resources) {
+		return Resources.getLocationOSStrings(resources.toArray(new IResource[resources.size()]));
 	}
 
+	@Override
 	public void dragFinished(DragSourceEvent event) {
 		if (!event.doit)
 			return;
@@ -126,18 +129,19 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 	}
 
 	/* package */ void handleDropMove() {
-		final List elements= getResources();
+		final List<IResource> elements= getResources();
 		if (elements == null || elements.size() == 0)
 			return;
 
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
+			@Override
 			public void execute(IProgressMonitor monitor) throws CoreException {
 				try {
 					monitor.beginTask(PackagesMessages.DragAdapter_deleting, elements.size());
 					MultiStatus status= createMultiStatus();
-					Iterator iter= elements.iterator();
+					Iterator<IResource> iter= elements.iterator();
 					while(iter.hasNext()) {
-						IResource resource= (IResource)iter.next();
+						IResource resource= iter.next();
 						try {
 							monitor.subTask(BasicElementLabels.getPathLabel(resource.getFullPath(), true));
 							resource.delete(true, null);
@@ -160,16 +164,17 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 	}
 
 	private void handleRefresh() {
-		final Set roots= collectRoots(getResources());
+		final Set<IResource> roots= collectRoots(getResources());
 
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
+			@Override
 			public void execute(IProgressMonitor monitor) throws CoreException {
 				try {
 					monitor.beginTask(PackagesMessages.DragAdapter_refreshing, roots.size());
 					MultiStatus status= createMultiStatus();
-					Iterator iter= roots.iterator();
+					Iterator<IResource> iter= roots.iterator();
 					while (iter.hasNext()) {
-						IResource r= (IResource)iter.next();
+						IResource r= iter.next();
 						try {
 							r.refreshLocal(IResource.DEPTH_ONE, new SubProgressMonitor(monitor, 1));
 						} catch (CoreException e) {
@@ -188,12 +193,12 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		runOperation(op, true, false);
 	}
 
-	protected Set collectRoots(final List elements) {
-		final Set roots= new HashSet(10);
+	protected Set<IResource> collectRoots(final List<IResource> elements) {
+		final Set<IResource> roots= new HashSet<IResource>(10);
 
-		Iterator iter= elements.iterator();
+		Iterator<IResource> iter= elements.iterator();
 		while (iter.hasNext()) {
-			IResource resource= (IResource)iter.next();
+			IResource resource= iter.next();
 			IResource parent= resource.getParent();
 			if (parent == null) {
 				roots.add(resource);
@@ -204,7 +209,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		return roots;
 	}
 
-	private List getResources() {
+	private List<IResource> getResources() {
 		ISelection s= fProvider.getSelection();
 		if (!(s instanceof IStructuredSelection))
 			return null;
@@ -212,9 +217,9 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		return convertIntoResources((IStructuredSelection)s);
 	}
 
-	private List convertIntoResources(IStructuredSelection selection) {
-		List result= new ArrayList(selection.size());
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+	private List<IResource> convertIntoResources(IStructuredSelection selection) {
+		List<IResource> result= new ArrayList<IResource>(selection.size());
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object o= iter.next();
 			IResource r= null;
 			if (o instanceof IResource) {

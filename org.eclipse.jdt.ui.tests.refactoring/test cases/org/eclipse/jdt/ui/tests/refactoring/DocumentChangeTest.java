@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -181,6 +181,32 @@ public class DocumentChangeTest extends RefactoringTest {
 			
 			editor.doSave(new NullProgressMonitor());
 			
+			contents= getContents(file);
+			assertEquals(prolog + epilog, contents);
+			
+			
+			// redo after closing file:
+			
+			JavaPlugin.getActivePage().closeEditor(editor, true);
+			
+			runnable= new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					try {
+						RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
+					} catch (Exception e) {
+						throw new InvocationTargetException(e);
+					}
+				}
+			};
+			JavaPlugin.getActiveWorkbenchWindow().run(true, true, runnable);
+			
+			editor.doSave(new NullProgressMonitor());
+			
+			contents= document.get();
+			assertEquals(prolog + insertion + epilog, contents);
+			
+			// Only document content has changed, but file content hasn't
+			// (since closing the editor has disconnected the file buffer):
 			contents= getContents(file);
 			assertEquals(prolog + epilog, contents);
 			

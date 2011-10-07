@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -138,14 +138,14 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 *                   The list of locales
 	 * @return Array of locale codes for the list
 	 */
-	protected static String[] getDictionaryCodes(final Set locales) {
+	protected static String[] getDictionaryCodes(final Set<Locale> locales) {
 
 		int index= 0;
 		Locale locale= null;
 
 		final String[] codes= new String[locales.size() + 1];
-		for (final Iterator iterator= locales.iterator(); iterator.hasNext();) {
-			locale= (Locale)iterator.next();
+		for (final Iterator<Locale> iterator= locales.iterator(); iterator.hasNext();) {
+			locale= iterator.next();
 			codes[index++]= locale.toString();
 		}
 		codes[index++]= PREF_VALUE_NO_LOCALE;
@@ -159,15 +159,15 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 *                   The list of locales
 	 * @return Array of display labels for the list
 	 */
-	protected static String[] getDictionaryLabels(final Set locales) {
+	protected static String[] getDictionaryLabels(final Set<Locale> locales) {
 
 		int index= 0;
 		Locale locale= null;
 
 		final String[] labels= new String[locales.size() + 1];
-		for (final Iterator iterator= locales.iterator(); iterator.hasNext();) {
+		for (final Iterator<Locale> iterator= locales.iterator(); iterator.hasNext();) {
 
-			locale= (Locale)iterator.next();
+			locale= iterator.next();
 			labels[index++]= locale.getDisplayName();
 		}
 		labels[index++]= PreferencesMessages.SpellingPreferencePage_dictionary_none;
@@ -291,6 +291,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 			setValue(PREF_SPELLING_LOCALE, SpellCheckEngine.getDefaultLocale().toString());
 	}
 
+	@Override
 	protected Combo addComboBox(Composite parent, String label, Key key, String[] values, String[] valueLabels, int indent) {
 		ControlData data= new ControlData(key, values);
 
@@ -328,12 +329,13 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#createContents(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createContents(final Composite parent) {
 
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 
-		List allControls= new ArrayList();
+		List<Control> allControls= new ArrayList<Control>();
 		final PixelConverter converter= new PixelConverter(parent);
 
 		final String[] trueFalse= new String[] { IPreferenceStore.TRUE, IPreferenceStore.FALSE };
@@ -380,7 +382,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES, trueFalse, 0);
 		allControls.add(slave);
 
-		final Set locales= SpellCheckEngine.getLocalesWithInstalledDictionaries();
+		final Set<Locale> locales= SpellCheckEngine.getLocalesWithInstalledDictionaries();
 		boolean hasPlaformDictionaries= locales.size() > 0;
 
 		final Group engine= new Group(composite, SWT.NONE);
@@ -418,6 +420,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		button.setText(PreferencesMessages.SpellingPreferencePage_browse_label);
 		button.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(final SelectionEvent event) {
 				handleBrowseButtonSelected();
 			}
@@ -430,6 +433,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		button.setText(PreferencesMessages.SpellingPreferencePage_variables);
 		button.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleVariablesButtonSelected();
 			}
@@ -477,7 +481,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 			allControls.add(button);
 		}
 
-		fAllControls= (Control[]) allControls.toArray(new Control[allControls.size()]);
+		fAllControls= allControls.toArray(new Control[allControls.size()]);
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.SPELLING_CONFIGURATION_BLOCK);
 		return composite;
@@ -490,7 +494,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 * @param allControls list with all controls
 	 * @since 3.3
 	 */
-	private void createEncodingFieldEditor(Composite composite, List allControls) {
+	private void createEncodingFieldEditor(Composite composite, List<Control> allControls) {
 		Label filler= new Label(composite, SWT.NONE);
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 4;
@@ -525,6 +529,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		DialogPage fakePage= new DialogPage() {
 			public void createControl(Composite c) {
 			}
+			@Override
 			public void setErrorMessage(String newMessage) {
 				StatusInfo status= new StatusInfo();
 				if (newMessage != null)
@@ -552,6 +557,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#getFullBuildDialogStrings(boolean)
 	 */
+	@Override
 	protected final String[] getFullBuildDialogStrings(final boolean workspace) {
 		return null;
 	}
@@ -560,6 +566,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performOk()
 	 * @since 3.3
 	 */
+	@Override
 	public boolean performOk() {
 		fEncodingEditor.store();
 		if (fEncodingEditor.presentsDefaultValue())
@@ -573,6 +580,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performApply()
 	 * @since 3.3
 	 */
+	@Override
 	public boolean performApply() {
 		fEncodingEditor.store();
 		if (fEncodingEditor.presentsDefaultValue())
@@ -586,6 +594,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performDefaults()
 	 * @since 3.3
 	 */
+	@Override
 	public void performDefaults() {
 		super.performDefaults();
 
@@ -620,6 +629,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String,java.lang.String)
 	 */
+	@Override
 	protected void validateSettings(final Key key, final String oldValue, final String newValue) {
 		if (key == null || PREF_SPELLING_PROPOSAL_THRESHOLD.equals(key))
 			fThresholdStatus= validatePositiveNumber(getValue(PREF_SPELLING_PROPOSAL_THRESHOLD));
@@ -641,6 +651,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateCheckBox(org.eclipse.swt.widgets.Button)
 	 * @since 3.1
 	 */
+	@Override
 	protected void updateCheckBox(Button curr) {
 		super.updateCheckBox(curr);
 		Event event= new Event();
@@ -665,7 +676,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 			fEnabledControls= null;
 		}
 		if (!enabled && fEnabledControls == null) {
-			List enabledControls= new ArrayList();
+			List<Control> enabledControls= new ArrayList<Control>();
 			for (int i= fAllControls.length - 1; i >= 0; i--) {
 				Control control= fAllControls[i];
 				if (control.isEnabled()) {
@@ -673,7 +684,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 					control.setEnabled(false);
 				}
 			}
-			fEnabledControls= (Control[]) enabledControls.toArray(new Control[enabledControls.size()]);
+			fEnabledControls= enabledControls.toArray(new Control[enabledControls.size()]);
 		}
 	}
 

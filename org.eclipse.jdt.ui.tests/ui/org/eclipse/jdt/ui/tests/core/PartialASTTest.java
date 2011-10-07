@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -43,9 +42,11 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class PartialASTTest extends CoreTests {
 
@@ -59,18 +60,12 @@ public class PartialASTTest extends CoreTests {
 	}
 
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
 	}
 
-	public static Test suite() {
-		if (true) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new PartialASTTest("testPartialCU1"));
-			return new ProjectTestSetup(suite);
-		}
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 
 
@@ -514,7 +509,7 @@ public class PartialASTTest extends CoreTests {
 	}
 
 	private CompilationUnit getPartialCompilationUnit(ICompilationUnit cu, int offset) {
-		ASTParser p= ASTParser.newParser(AST.JLS3);
+		ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		p.setSource(cu);
 		p.setFocalPosition(offset);
 		p.setResolveBindings(true);

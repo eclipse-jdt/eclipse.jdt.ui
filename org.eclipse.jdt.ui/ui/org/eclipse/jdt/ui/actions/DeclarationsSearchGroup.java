@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -150,6 +150,7 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 	/* (non-Javadoc)
 	 * Method declared on ActionGroup.
 	 */
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		Assert.isNotNull(actionBars);
 		super.fillActionBars(actionBars);
@@ -177,6 +178,7 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 	/* (non-Javadoc)
 	 * Method declared on ActionGroup.
 	 */
+	@Override
 	public void fillContextMenu(IMenuManager manager) {
 		IMenuManager javaSearchMM= new MenuManager(MENU_TEXT, IContextMenuConstants.GROUP_SEARCH);
 		addAction(fFindDeclarationsAction, javaSearchMM);
@@ -185,9 +187,9 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 
 		javaSearchMM.add(new Separator());
 
-		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
+		Iterator<IWorkingSet[]> iter= SearchUtil.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
-			addWorkingSetAction((IWorkingSet[]) iter.next(), javaSearchMM);
+			addWorkingSetAction(iter.next(), javaSearchMM);
 		}
 		addAction(fFindDeclarationsInWorkingSetAction, javaSearchMM);
 
@@ -198,6 +200,7 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 	/*
 	 * Method declared on ActionGroup.
 	 */
+	@Override
 	public void dispose() {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		if (provider != null) {

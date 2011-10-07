@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,10 +30,11 @@ public abstract class AbstractMultiFix extends AbstractCleanUp implements IMulti
 	protected AbstractMultiFix() {
 	}
 
-	protected AbstractMultiFix(Map settings) {
+	protected AbstractMultiFix(Map<String, String> settings) {
 		super(settings);
 	}
 
+	@Override
 	public final ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit unit= context.getAST();
 		if (unit == null)
@@ -96,7 +97,7 @@ public abstract class AbstractMultiFix extends AbstractCleanUp implements IMulti
 	 * @return problem locations
 	 */
 	protected static IProblemLocation[] filter(IProblemLocation[] problems, int[] problemIds) {
-		ArrayList result= new ArrayList();
+		ArrayList<IProblemLocation> result= new ArrayList<IProblemLocation>();
 
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= problems[i];
@@ -105,12 +106,12 @@ public abstract class AbstractMultiFix extends AbstractCleanUp implements IMulti
 			}
 		}
 
-		return (IProblemLocation[]) result.toArray(new IProblemLocation[result.size()]);
+		return result.toArray(new IProblemLocation[result.size()]);
 	}
 
-	private static boolean contains(ArrayList problems, IProblemLocation problem) {
+	private static boolean contains(ArrayList<IProblemLocation> problems, IProblemLocation problem) {
 		for (int i= 0; i < problems.size(); i++) {
-			IProblemLocation existing= (IProblemLocation) problems.get(i);
+			IProblemLocation existing= problems.get(i);
 			if (existing.getProblemId() == problem.getProblemId() && existing.getOffset() == problem.getOffset() && existing.getLength() == problem.getLength()) {
 				return true;
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ public class VariablePosition extends ProposalPosition {
 	/*
 	 * @see org.eclipse.jface.text.link.ProposalPosition#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object o) {
 		if (o instanceof VariablePosition && super.equals(o)) {
 			return fGuess.equals(((VariablePosition) o).fGuess);
@@ -52,6 +53,7 @@ public class VariablePosition extends ProposalPosition {
 	/*
 	 * @see org.eclipse.jface.text.link.ProposalPosition#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return super.hashCode() | fGuess.hashCode();
 	}
@@ -59,6 +61,7 @@ public class VariablePosition extends ProposalPosition {
 	/*
 	 * @see org.eclipse.jface.text.link.ProposalPosition#getChoices()
 	 */
+	@Override
 	public ICompletionProposal[] getChoices() {
 		return fGuess.getProposals(fVariable, offset, length);
 	}

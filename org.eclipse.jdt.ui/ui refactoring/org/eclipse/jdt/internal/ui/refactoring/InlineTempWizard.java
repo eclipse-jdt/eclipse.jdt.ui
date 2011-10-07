@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,10 +29,12 @@ public class InlineTempWizard extends RefactoringWizard {
 		setDefaultPageTitle(RefactoringMessages.InlineTempWizard_defaultPageTitle);
 	}
 
+	@Override
 	protected void addUserInputPages() {
 		addPage(new InlineTempInputPage());
 	}
 
+	@Override
 	public int getMessageLineWidthInChars() {
 		return 0;
 	}
@@ -45,11 +47,13 @@ public class InlineTempWizard extends RefactoringWizard {
 			super(PAGE_NAME, true, MessageWizardPage.STYLE_QUESTION);
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			super.createControl(parent);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INLINE_TEMP_WIZARD_PAGE);
 		}
 
+		@Override
 		protected String getMessageString() {
 			InlineTempRefactoring refactoring= (InlineTempRefactoring) getRefactoring();
 			int occurrences= refactoring.getReferences().length;

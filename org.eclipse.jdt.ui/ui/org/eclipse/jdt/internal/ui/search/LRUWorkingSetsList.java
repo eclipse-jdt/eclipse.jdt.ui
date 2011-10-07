@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,13 +22,13 @@ import org.eclipse.ui.PlatformUI;
 
 public class LRUWorkingSetsList {
 
-	private final ArrayList fLRUList;
+	private final ArrayList<IWorkingSet[]> fLRUList;
 	private final int fSize;
 	private final  WorkingSetsComparator fComparator= new WorkingSetsComparator();
 
 	public LRUWorkingSetsList(int size) {
 		fSize= size;
-		fLRUList= new ArrayList(size);
+		fLRUList= new ArrayList<IWorkingSet[]>(size);
 	}
 
 	public void add(IWorkingSet[] workingSets) {
@@ -42,22 +42,22 @@ public class LRUWorkingSetsList {
 
 	}
 
-	public Iterator iterator() {
+	public Iterator<IWorkingSet[]> iterator() {
 		removeDeletedWorkingSets();
 		return fLRUList.iterator();
 	}
 
-	public Iterator sortedIterator() {
+	public Iterator<IWorkingSet[]> sortedIterator() {
 		removeDeletedWorkingSets();
-		ArrayList sortedList= new ArrayList(fLRUList);
+		ArrayList<IWorkingSet[]> sortedList= new ArrayList<IWorkingSet[]>(fLRUList);
 		Collections.sort(sortedList, fComparator);
 		return sortedList.iterator();
 	}
 
 	private void removeDeletedWorkingSets() {
-		Iterator iter= new ArrayList(fLRUList).iterator();
+		Iterator<IWorkingSet[]> iter= new ArrayList<IWorkingSet[]>(fLRUList).iterator();
 		while (iter.hasNext()) {
-			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
+			IWorkingSet[] workingSets= iter.next();
 			for (int i= 0; i < workingSets.length; i++) {
 				if (PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSets[i].getName()) == null) {
 					fLRUList.remove(workingSets);
@@ -67,12 +67,12 @@ public class LRUWorkingSetsList {
 		}
 	}
 
-	private IWorkingSet[] find(ArrayList list, IWorkingSet[] workingSets) {
-		Set workingSetList= new HashSet(Arrays.asList(workingSets));
-		Iterator iter= list.iterator();
+	private IWorkingSet[] find(ArrayList<IWorkingSet[]> list, IWorkingSet[] workingSets) {
+		Set<IWorkingSet> workingSetList= new HashSet<IWorkingSet>(Arrays.asList(workingSets));
+		Iterator<IWorkingSet[]> iter= list.iterator();
 		while (iter.hasNext()) {
-			IWorkingSet[] lruWorkingSets= (IWorkingSet[])iter.next();
-			Set lruWorkingSetList= new HashSet(Arrays.asList(lruWorkingSets));
+			IWorkingSet[] lruWorkingSets= iter.next();
+			Set<IWorkingSet> lruWorkingSetList= new HashSet<IWorkingSet>(Arrays.asList(lruWorkingSets));
 			if (lruWorkingSetList.equals(workingSetList))
 				return lruWorkingSets;
 		}

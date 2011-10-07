@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,10 +56,12 @@ public final class CompilationUnitRange {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return "(" + fSourceRange.toString() + " in " + fCompilationUnit.getElementName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -69,6 +71,7 @@ public final class CompilationUnitRange {
 		return fCompilationUnit.equals(other.fCompilationUnit) && fSourceRange.equals(other.fSourceRange);
 	}
 
+	@Override
 	public int hashCode() {
 		return (37 * fCompilationUnit.hashCode()) ^ fSourceRange.hashCode();
 	}

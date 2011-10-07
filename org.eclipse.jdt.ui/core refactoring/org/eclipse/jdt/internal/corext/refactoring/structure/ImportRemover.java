@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,15 +54,15 @@ public class ImportRemover {
 		}
 	}
 
-	private Set/* <String> */fAddedImports= new HashSet();
+	private Set<String> fAddedImports= new HashSet<String>();
 
-	private Set/* <StaticImportData> */fAddedStaticImports= new HashSet();
+	private Set<StaticImportData> fAddedStaticImports= new HashSet<StaticImportData>();
 
 	private final IJavaProject fProject;
 
-	private List/* <ASTNode> */fRemovedNodes= new ArrayList();
+	private List<ASTNode> fRemovedNodes= new ArrayList<ASTNode>();
 
-	private List/* <ImportDeclaration> */fInlinedStaticImports= new ArrayList();
+	private List<ImportDeclaration> fInlinedStaticImports= new ArrayList<ImportDeclaration>();
 
 	private final CompilationUnit fRoot;
 
@@ -71,63 +71,63 @@ public class ImportRemover {
 		fRoot= root;
 	}
 
-	private void divideTypeRefs(List/* <SimpleName> */importNames, List/* <SimpleName> */staticNames, List/* <SimpleName> */removedRefs, List/* <SimpleName> */unremovedRefs) {
+	private void divideTypeRefs(List<SimpleName> importNames, List<SimpleName> staticNames, List<SimpleName> removedRefs, List<SimpleName> unremovedRefs) {
 		int[] removedStartsEnds= new int[2 * fRemovedNodes.size()];
 		for (int index= 0; index < fRemovedNodes.size(); index++) {
-			ASTNode node= (ASTNode) fRemovedNodes.get(index);
+			ASTNode node= fRemovedNodes.get(index);
 			int start= node.getStartPosition();
 			removedStartsEnds[2 * index]= start;
 			removedStartsEnds[2 * index + 1]= start + node.getLength();
 		}
-		for (Iterator iterator= importNames.iterator(); iterator.hasNext();) {
-			SimpleName name= (SimpleName) iterator.next();
+		for (Iterator<SimpleName> iterator= importNames.iterator(); iterator.hasNext();) {
+			SimpleName name= iterator.next();
 			if (isInRemoved(name, removedStartsEnds))
 				removedRefs.add(name);
 			else
 				unremovedRefs.add(name);
 		}
-		for (Iterator iterator= staticNames.iterator(); iterator.hasNext();) {
-			SimpleName name= (SimpleName) iterator.next();
+		for (Iterator<SimpleName> iterator= staticNames.iterator(); iterator.hasNext();) {
+			SimpleName name= iterator.next();
 			if (isInRemoved(name, removedStartsEnds))
 				removedRefs.add(name);
 			else
 				unremovedRefs.add(name);
 		}
-		for (Iterator iterator= fInlinedStaticImports.iterator(); iterator.hasNext(); ) {
-			ImportDeclaration importDecl= (ImportDeclaration) iterator.next();
+		for (Iterator<ImportDeclaration> iterator= fInlinedStaticImports.iterator(); iterator.hasNext(); ) {
+			ImportDeclaration importDecl= iterator.next();
 			Name name= importDecl.getName();
 			if (name instanceof QualifiedName)
 				name= ((QualifiedName) name).getName();
-			removedRefs.add(name);
+			removedRefs.add((SimpleName) name);
 		}
 	}
 
 	public IBinding[] getImportsToRemove() {
-		ArrayList/* <SimpleName> */importNames= new ArrayList();
-		ArrayList/* <SimpleName> */staticNames= new ArrayList();
+		ArrayList<SimpleName> importNames= new ArrayList<SimpleName>();
+		ArrayList<SimpleName> staticNames= new ArrayList<SimpleName>();
 
 		ImportReferencesCollector.collect(fRoot, fProject, null, importNames, staticNames);
 
-		List/* <SimpleName> */removedRefs= new ArrayList();
-		List/* <SimpleName> */unremovedRefs= new ArrayList();
+		List<SimpleName> removedRefs= new ArrayList<SimpleName>();
+		List<SimpleName> unremovedRefs= new ArrayList<SimpleName>();
 		divideTypeRefs(importNames, staticNames, removedRefs, unremovedRefs);
 		if (removedRefs.size() == 0)
 			return new IBinding[0];
 
-		HashMap/* <String, IBinding> */potentialRemoves= getPotentialRemoves(removedRefs);
-		for (Iterator iterator= unremovedRefs.iterator(); iterator.hasNext();) {
-			SimpleName name= (SimpleName) iterator.next();
+		HashMap<String, IBinding>potentialRemoves= getPotentialRemoves(removedRefs);
+		for (Iterator<SimpleName> iterator= unremovedRefs.iterator(); iterator.hasNext();) {
+			SimpleName name= iterator.next();
 			potentialRemoves.remove(name.getIdentifier());
 		}
 
-		Collection importsToRemove= potentialRemoves.values();
-		return (IBinding[]) importsToRemove.toArray(new IBinding[importsToRemove.size()]);
+		Collection<IBinding> importsToRemove= potentialRemoves.values();
+		return importsToRemove.toArray(new IBinding[importsToRemove.size()]);
 	}
 
-	private HashMap getPotentialRemoves(List removedRefs) {
-		HashMap/* <String, IBinding> */potentialRemoves= new HashMap();
-		for (Iterator iterator= removedRefs.iterator(); iterator.hasNext();) {
-			SimpleName name= (SimpleName) iterator.next();
+	private HashMap<String, IBinding> getPotentialRemoves(List<SimpleName> removedRefs) {
+		HashMap<String, IBinding>potentialRemoves= new HashMap<String, IBinding>();
+		for (Iterator<SimpleName> iterator= removedRefs.iterator(); iterator.hasNext();) {
+			SimpleName name= iterator.next();
 			if (fAddedImports.contains(name.getIdentifier()) || hasAddedStaticImport(name))
 				continue;
 			IBinding binding= name.resolveBinding();
@@ -151,8 +151,8 @@ public class ImportRemover {
 
 	private boolean hasAddedStaticImport(String qualifier, String member, boolean field) {
 		StaticImportData data= null;
-		for (final Iterator iterator= fAddedStaticImports.iterator(); iterator.hasNext();) {
-			data= (StaticImportData) iterator.next();
+		for (final Iterator<StaticImportData> iterator= fAddedStaticImports.iterator(); iterator.hasNext();) {
+			data= iterator.next();
 			if (data.fQualifier.equals(qualifier) && data.fMember.equals(member) && data.fField == field)
 				return true;
 		}
@@ -188,16 +188,19 @@ public class ImportRemover {
 				fAddedImports.add(name.getIdentifier());
 			}
 
+			@Override
 			public boolean visit(QualifiedName node) {
 				addName(node.getName());
 				return false;
 			}
 
+			@Override
 			public boolean visit(QualifiedType node) {
 				addName(node.getName());
 				return false;
 			}
 
+			@Override
 			public boolean visit(SimpleName node) {
 				addName(node);
 				return false;

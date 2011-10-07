@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,6 +70,7 @@ public class JavadocLinkRef {
 		}
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj != null && obj.getClass().equals(getClass())) {
 			JavadocLinkRef other= (JavadocLinkRef) obj;
@@ -77,12 +78,15 @@ public class JavadocLinkRef {
 				return false;
 			}
 			if (!isProjectRef()) {
-				return !fClasspathEntry.equals(other.fClasspathEntry);
+				return fClasspathEntry.equals(other.fClasspathEntry);
+			} else {
+				return true;
 			}
 		}
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		if (isProjectRef()) {
 			return fProject.hashCode();

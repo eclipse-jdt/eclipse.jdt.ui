@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -102,6 +102,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		/*
 		 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 		 */
+		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			StringMatcher matcher= getMatcher();
 			if (matcher == null || !(viewer instanceof TreeViewer))
@@ -159,7 +160,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * The initially selected type.
 	 * @since 3.5
 	 */
-	private IType fInitiallySelectedType;
+	protected IType fInitiallySelectedType;
 
 	/**
 	 * Creates a tree information control with the given shell as parent. The given
@@ -202,6 +203,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * @return The control representing the main content.
 	 * @since 3.2
 	 */
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		fTreeViewer= createTreeViewer(parent, fTreeStyle);
 
@@ -232,6 +234,9 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			public void mouseMove(MouseEvent e) {
 				if (tree.equals(e.getSource())) {
 					Object o= tree.getItem(new Point(e.x, e.y));
+					if (fLastItem == null ^ o == null) {
+						tree.setCursor(o == null ? null : tree.getDisplay().getSystemCursor(SWT.CURSOR_HAND));
+					}
 					if (o instanceof TreeItem) {
 						Rectangle clientArea = tree.getClientArea();
 						if (!o.equals(fLastItem)) {
@@ -254,12 +259,15 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 								tree.setSelection(new TreeItem[] { fLastItem });
 							}
 						}
+					} else if (o == null) {
+						fLastItem= null;
 					}
 				}
 			}
 		});
 
 		tree.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseUp(MouseEvent e) {
 
 				if (tree.getSelectionCount() < 1)
@@ -567,6 +575,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * @see org.eclipse.jface.dialogs.PopupDialog#fillDialogMenu(IMenuManager)
 	 * @since 3.2
 	 */
+	@Override
 	protected void fillDialogMenu(IMenuManager dialogMenu) {
 		super.fillDialogMenu(dialogMenu);
 		fillViewMenu(dialogMenu);
@@ -574,7 +583,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 	protected void inputChanged(Object newInput, Object newSelection) {
 		fFilterText.setText(""); //$NON-NLS-1$
-		fTreeViewer.setInput(newInput);
 		fInitiallySelectedType= null;
 		if (newSelection instanceof IJavaElement) {
 			IJavaElement javaElement= ((IJavaElement)newSelection);
@@ -583,6 +591,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			else
 				fInitiallySelectedType= (IType)javaElement.getAncestor(IJavaElement.TYPE);
 		}
+		fTreeViewer.setInput(newInput);
 		if (newSelection != null)
 			fTreeViewer.setSelection(new StructuredSelection(newSelection));
 	}
@@ -604,6 +613,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * @see org.eclipse.jface.dialogs.PopupDialog#open()
 	 * @since 3.3
 	 */
+	@Override
 	public int open() {
 		addHandlerAndKeyBindingSupport();
 		return super.open();
@@ -767,11 +777,11 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	final protected KeySequence[] getInvokingCommandKeySequences() {
 		if (fInvokingCommandKeySequences == null) {
 			if (getInvokingCommand() != null) {
-				List list= getInvokingCommand().getKeySequenceBindings();
+				List<IKeySequenceBinding> list= getInvokingCommand().getKeySequenceBindings();
 				if (!list.isEmpty()) {
 					fInvokingCommandKeySequences= new KeySequence[list.size()];
 					for (int i= 0; i < fInvokingCommandKeySequences.length; i++) {
-						fInvokingCommandKeySequences[i]= ((IKeySequenceBinding) list.get(i)).getKeySequence();
+						fInvokingCommandKeySequences[i]= list.get(i).getKeySequence();
 					}
 					return fInvokingCommandKeySequences;
 				}
@@ -783,6 +793,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	/*
 	 * @see org.eclipse.jface.dialogs.PopupDialog#getDialogSettings()
 	 */
+	@Override
 	protected IDialogSettings getDialogSettings() {
 		String sectionName= getId();
 
@@ -798,6 +809,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 *
 	 * @since 3.2
 	 */
+	@Override
 	protected Control createTitleMenuArea(Composite parent) {
 		fViewMenuButtonComposite= (Composite) super.createTitleMenuArea(parent);
 
@@ -813,6 +825,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			/*
 			 * @see org.eclipse.jface.action.Action#run()
 			 */
+			@Override
 			public void run() {
 				showDialogMenu();
 			}
@@ -828,6 +841,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * if there is no header specified.
 	 * @since 3.2
 	 */
+	@Override
 	protected Control createTitleControl(Composite parent) {
 		if (hasHeader()) {
 			return super.createTitleControl(parent);
@@ -839,6 +853,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	/*
 	 * @see org.eclipse.jface.dialogs.PopupDialog#setTabOrder(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected void setTabOrder(Composite composite) {
 		if (hasHeader()) {
 			composite.setTabList(new Control[] { fFilterText, fTreeViewer.getTree() });

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,7 +33,8 @@ public class PropertiesFileSpellCheckIterator extends SpellCheckIterator {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.SpellCheckIterator#next()
 	 */
-	public final Object next() {
+	@Override
+	public final String next() {
 		int previous= -1;
 		String token= nextToken();
 		while (fSuccessor != BreakIterator.DONE && (token == null || fContent.charAt(fNext) == '&')) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,7 +68,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 	private Button fEnableUserDefinedPatterns;
 	private Text fUserDefinedPatterns;
 
-	private Stack fFilterDescriptorChangeHistory;
+	private Stack<FilterDescriptor> fFilterDescriptorChangeHistory;
 
 
 	/**
@@ -98,9 +98,10 @@ public class CustomFiltersDialog extends SelectionDialog {
 		fEnabledFilterIds= enabledFilterIds;
 
 		fBuiltInFilters= FilterDescriptor.getFilterDescriptors(fViewId);
-		fFilterDescriptorChangeHistory= new Stack();
+		fFilterDescriptorChangeHistory= new Stack<FilterDescriptor>();
 	}
 
+	@Override
 	protected void configureShell(Shell shell) {
 		setTitle(FilterMessages.CustomFiltersDialog_title);
 		setMessage(FilterMessages.CustomFiltersDialog_filterList_label);
@@ -113,6 +114,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 	 *
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(Composite)
 	 */
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		initializeDialogUnits(parent);
 		// create a composite with standard margins and spacing
@@ -150,6 +152,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		fUserDefinedPatterns.setEnabled(fEnablePatterns);
 		info.setEnabled(fEnablePatterns);
 		fEnableUserDefinedPatterns.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean state= fEnableUserDefinedPatterns.getSelection();
 				fUserDefinedPatterns.setEnabled(state);
@@ -185,7 +188,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		fCheckBoxList.setInput(fBuiltInFilters);
 		setInitialSelections(getEnabledFilterDescriptors());
 
-		List initialSelection= getInitialElementSelections();
+		List<Object[]> initialSelection= getInitialElementSelections();
 		if (initialSelection != null && !initialSelection.isEmpty())
 			checkInitialSelections();
 
@@ -216,7 +219,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 					// renew if already touched
 					if (fFilterDescriptorChangeHistory.contains(element))
 						fFilterDescriptorChangeHistory.remove(element);
-					fFilterDescriptorChangeHistory.push(element);
+					fFilterDescriptorChangeHistory.push((FilterDescriptor) element);
 				}
 			}});
 
@@ -237,6 +240,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		Button selectButton= createButton(buttonComposite, IDialogConstants.SELECT_ALL_ID, label, false);
 		SWTUtil.setButtonDimensionHint(selectButton);
 		SelectionListener listener= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fCheckBoxList.setAllChecked(true);
 				fFilterDescriptorChangeHistory.clear();
@@ -251,6 +255,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		Button deselectButton= createButton(buttonComposite, IDialogConstants.DESELECT_ALL_ID, label, false);
 		SWTUtil.setButtonDimensionHint(deselectButton);
 		listener= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fCheckBoxList.setAllChecked(false);
 				fFilterDescriptorChangeHistory.clear();
@@ -262,14 +267,15 @@ public class CustomFiltersDialog extends SelectionDialog {
 	}
 
 	private void checkInitialSelections() {
-		Iterator itemsToCheck= getInitialElementSelections().iterator();
+		Iterator<Object[]> itemsToCheck= getInitialElementSelections().iterator();
 		while (itemsToCheck.hasNext())
 			fCheckBoxList.setChecked(itemsToCheck.next(),true);
 	}
 
+	@Override
 	protected void okPressed() {
 		if (fBuiltInFilters != null) {
-			ArrayList result= new ArrayList();
+			ArrayList<FilterDescriptor> result= new ArrayList<FilterDescriptor>();
 			for (int i= 0; i < fBuiltInFilters.length; ++i) {
 				if (fCheckBoxList.getChecked(fBuiltInFilters[i]))
 					result.add(fBuiltInFilters[i]);
@@ -282,9 +288,11 @@ public class CustomFiltersDialog extends SelectionDialog {
 	private ILabelProvider createLabelPrivder() {
 		return
 			new LabelProvider() {
+				@Override
 				public Image getImage(Object element) {
 					return null;
 				}
+				@Override
 				public String getText(Object element) {
 					if (element instanceof FilterDescriptor)
 						return ((FilterDescriptor)element).getName();
@@ -296,6 +304,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 
 	// ---------- result handling ----------
 
+	@Override
 	protected void setResult(List newResult) {
 		super.setResult(newResult);
 		if (fUserDefinedPatterns.getText().length() > 0) {
@@ -320,10 +329,10 @@ public class CustomFiltersDialog extends SelectionDialog {
 	 */
 	public String[] getEnabledFilterIds() {
 		Object[] result= getResult();
-		Set enabledIds= new HashSet(result.length);
+		Set<String> enabledIds= new HashSet<String>(result.length);
 		for (int i= 0; i < result.length; i++)
 			enabledIds.add(((FilterDescriptor)result[i]).getId());
-		return (String[]) enabledIds.toArray(new String[enabledIds.size()]);
+		return enabledIds.toArray(new String[enabledIds.size()]);
 	}
 
 	/**
@@ -337,27 +346,27 @@ public class CustomFiltersDialog extends SelectionDialog {
 	 * @return a stack with the filter descriptor check history
 	 * @since 3.0
 	 */
-	public Stack getFilterDescriptorChangeHistory() {
+	public Stack<FilterDescriptor> getFilterDescriptorChangeHistory() {
 		return fFilterDescriptorChangeHistory;
 	}
 
 	private FilterDescriptor[] getEnabledFilterDescriptors() {
 		FilterDescriptor[] filterDescs= fBuiltInFilters;
-		List result= new ArrayList(filterDescs.length);
-		List enabledFilterIds= Arrays.asList(fEnabledFilterIds);
+		List<FilterDescriptor> result= new ArrayList<FilterDescriptor>(filterDescs.length);
+		List<String> enabledFilterIds= Arrays.asList(fEnabledFilterIds);
 		for (int i= 0; i < filterDescs.length; i++) {
 			String id= filterDescs[i].getId();
 			if (enabledFilterIds.contains(id))
 				result.add(filterDescs[i]);
 		}
-		return (FilterDescriptor[])result.toArray(new FilterDescriptor[result.size()]);
+		return result.toArray(new FilterDescriptor[result.size()]);
 	}
 
 
 	public static String[] convertFromString(String patterns, String separator) {
 		StringTokenizer tokenizer= new StringTokenizer(patterns, separator, true);
 		int tokenCount= tokenizer.countTokens();
-		List result= new ArrayList(tokenCount);
+		List<String> result= new ArrayList<String>(tokenCount);
 		boolean escape= false;
 		boolean append= false;
 		while (tokenizer.hasMoreTokens()) {
@@ -378,15 +387,15 @@ public class CustomFiltersDialog extends SelectionDialog {
 				escape= false;
 			}
 		}
-		return (String[])result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
-	private static void addPattern(List list, String pattern) {
+	private static void addPattern(List<String> list, String pattern) {
 		if (list.isEmpty())
 			list.add(pattern);
 		else {
 			int index= list.size() - 1;
-			list.set(index, ((String)list.get(index)) + pattern);
+			list.set(index, list.get(index) + pattern);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -142,12 +142,12 @@ public class AnnotationExpandHover implements IAnnotationHover, IAnnotationHover
 		if (model == null)
 			return null;
 
-		List exact= new ArrayList();
-		HashMap messagesAtPosition= new HashMap();
+		List<Annotation> exact= new ArrayList<Annotation>();
+		HashMap<Position, Object> messagesAtPosition= new HashMap<Position, Object>();
 
-		Iterator e= model.getAnnotationIterator();
+		Iterator<Annotation> e= model.getAnnotationIterator();
 		while (e.hasNext()) {
-			Annotation annotation= (Annotation) e.next();
+			Annotation annotation= e.next();
 			Position position= model.getPosition(annotation);
 			if (position == null)
 				continue;
@@ -169,7 +169,7 @@ public class AnnotationExpandHover implements IAnnotationHover, IAnnotationHover
 			setLastRulerMouseLocation(viewer, line);
 
 		AnnotationHoverInput input= new AnnotationHoverInput();
-		input.fAnnotations= (Annotation[]) exact.toArray(new Annotation[0]);
+		input.fAnnotations= exact.toArray(new Annotation[0]);
 		input.fViewer= viewer;
 		input.fRulerInfo= fCompositeRuler;
 		input.fAnnotationListener= fgListener;
@@ -179,16 +179,13 @@ public class AnnotationExpandHover implements IAnnotationHover, IAnnotationHover
 		return input;
 	}
 
-	protected void sort(List exact, final IAnnotationModel model) {
-		class AnnotationComparator implements Comparator {
+	protected void sort(List<Annotation> exact, final IAnnotationModel model) {
+		class AnnotationComparator implements Comparator<Annotation> {
 
 			/*
 			 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 			 */
-			public int compare(Object o1, Object o2) {
-				Annotation a1= (Annotation) o1;
-				Annotation a2= (Annotation) o2;
-
+			public int compare(Annotation a1, Annotation a2) {
 				Position p1= model.getPosition(a1);
 				Position p2= model.getPosition(a2);
 
@@ -213,7 +210,7 @@ public class AnnotationExpandHover implements IAnnotationHover, IAnnotationHover
 		return IAnnotationAccessExtension.DEFAULT_LAYER;
 	}
 
-	protected boolean isDuplicateMessage(Map messagesAtPosition, Position position, String message) {
+	protected boolean isDuplicateMessage(Map<Position, Object> messagesAtPosition, Position position, String message) {
 		if (message == null)
 			return false;
 
@@ -223,12 +220,13 @@ public class AnnotationExpandHover implements IAnnotationHover, IAnnotationHover
 				return true;
 
 			if (value instanceof List) {
-				List messages= (List)value;
+				@SuppressWarnings("unchecked")
+				List<String> messages= ((List<String>)value);
 				if  (messages.contains(message))
 					return true;
 				messages.add(message);
 			} else {
-				ArrayList messages= new ArrayList();
+				ArrayList<Object> messages= new ArrayList<Object>();
 				messages.add(value);
 				messages.add(message);
 				messagesAtPosition.put(position, messages);

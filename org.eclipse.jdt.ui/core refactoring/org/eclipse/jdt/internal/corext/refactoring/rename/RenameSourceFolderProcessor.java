@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,22 +73,27 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	}
 
 
+	@Override
 	public String getIdentifier() {
 		return IRefactoringProcessorIds.RENAME_SOURCE_FOLDER_PROCESSOR;
 	}
 
+	@Override
 	public boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isRenameAvailable(fSourceFolder);
 	}
 
+	@Override
 	public String getProcessorName() {
 		return RefactoringCoreMessages.RenameSourceFolderRefactoring_rename;
 	}
 
+	@Override
 	protected String[] getAffectedProjectNatures() throws CoreException {
 		return JavaProcessors.computeAffectedNatures(fSourceFolder);
 	}
 
+	@Override
 	public Object[] getElements() {
 		return new Object[] {fSourceFolder};
 	}
@@ -102,16 +107,19 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 		return null;
 	}
 
+	@Override
 	public int getSaveMode() {
 		return RefactoringSaveHelper.SAVE_ALL;
 	}
 
+	@Override
 	protected RenameModifications computeRenameModifications() throws CoreException {
 		RenameModifications result= new RenameModifications();
 		result.rename(fSourceFolder, new RenameArguments(getNewElementName(), getUpdateReferences()));
 		return result;
 	}
 
+	@Override
 	protected IFile[] getChangedFiles() throws CoreException {
 		return new IFile[0];
 	}
@@ -122,6 +130,7 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 		return fSourceFolder.getElementName();
 	}
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		return new RefactoringStatus();
 	}
@@ -157,6 +166,7 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 		return fSourceFolder.getPath().removeLastSegments(1).append(newName).toString();
 	}
 
+	@Override
 	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
@@ -170,6 +180,7 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 		return true;
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		monitor.beginTask(RefactoringCoreMessages.RenameTypeRefactoring_creating_change, 1);
 		try {

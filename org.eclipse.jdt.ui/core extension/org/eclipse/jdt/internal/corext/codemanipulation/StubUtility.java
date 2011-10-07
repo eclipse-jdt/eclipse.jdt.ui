@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.lang.reflect.Modifier;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -106,6 +107,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
 
@@ -113,9 +115,9 @@ public class StubUtility {
 
 	private static final String[] EMPTY= new String[0];
 
-	private static final Set VALID_TYPE_BODY_TEMPLATES;
+	private static final Set<String> VALID_TYPE_BODY_TEMPLATES;
 	static {
-		VALID_TYPE_BODY_TEMPLATES= new HashSet();
+		VALID_TYPE_BODY_TEMPLATES= new HashSet<String>();
 		VALID_TYPE_BODY_TEMPLATES.add(CodeTemplateContextType.CLASSBODY_ID);
 		VALID_TYPE_BODY_TEMPLATES.add(CodeTemplateContextType.INTERFACEBODY_ID);
 		VALID_TYPE_BODY_TEMPLATES.add(CodeTemplateContextType.ENUMBODY_ID);
@@ -324,7 +326,7 @@ public class StubUtility {
 	 */
 	private static String[] getParameterTypeNamesForSeeTag(IMethod overridden) {
 		try {
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			parser.setProject(overridden.getJavaProject());
 			IBinding[] bindings= parser.createBindings(new IJavaElement[] { overridden }, null);
 			if (bindings.length == 1 && bindings[0] instanceof IMethodBinding) {
@@ -476,7 +478,7 @@ public class StubUtility {
 		IDocument doc= new Document(buffer.getString());
 		int nLines= doc.getNumberOfLines();
 		MultiTextEdit edit= new MultiTextEdit();
-		HashSet removedLines= new HashSet();
+		HashSet<Integer> removedLines= new HashSet<Integer>();
 		for (int i= 0; i < variables.length; i++) {
 			TemplateVariable position= findVariable(buffer, variables[i]); // look if Javadoc tags have to be added
 			if (position == null || position.getLength() > 0) {
@@ -651,22 +653,22 @@ public class StubUtility {
 		}
 
 		IDocument textBuffer= new Document(str);
-		List typeParams= decl.typeParameters();
+		List<TypeParameter> typeParams= shouldGenerateMethodTypeParameterTags(cu.getJavaProject()) ? decl.typeParameters() : Collections.emptyList();
 		String[] typeParamNames= new String[typeParams.size()];
 		for (int i= 0; i < typeParamNames.length; i++) {
-			TypeParameter elem= (TypeParameter)typeParams.get(i);
+			TypeParameter elem= typeParams.get(i);
 			typeParamNames[i]= elem.getName().getIdentifier();
 		}
-		List params= decl.parameters();
+		List<SingleVariableDeclaration> params= decl.parameters();
 		String[] paramNames= new String[params.size()];
 		for (int i= 0; i < paramNames.length; i++) {
-			SingleVariableDeclaration elem= (SingleVariableDeclaration)params.get(i);
+			SingleVariableDeclaration elem= params.get(i);
 			paramNames[i]= elem.getName().getIdentifier();
 		}
-		List exceptions= decl.thrownExceptions();
+		List<Name> exceptions= decl.thrownExceptions();
 		String[] exceptionNames= new String[exceptions.size()];
 		for (int i= 0; i < exceptionNames.length; i++) {
-			exceptionNames[i]= ASTNodes.getSimpleNameIdentifier((Name)exceptions.get(i));
+			exceptionNames[i]= ASTNodes.getSimpleNameIdentifier(exceptions.get(i));
 		}
 
 		String returnType= null;
@@ -682,6 +684,10 @@ public class StubUtility {
 			}
 		}
 		return textBuffer.get();
+	}
+
+	public static boolean shouldGenerateMethodTypeParameterTags(IJavaProject project) {
+		return JavaCore.ENABLED.equals(project.getOption(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_METHOD_TYPE_PARAMETERS, true));
 	}
 
 	/**
@@ -906,8 +912,8 @@ public class StubUtility {
 
 	// --------------------------- name suggestions --------------------------
 
-	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, ITypeBinding expectedType, Expression assignedExpression, Collection excluded) {
-		LinkedHashSet res= new LinkedHashSet(); // avoid duplicates but keep order
+	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, ITypeBinding expectedType, Expression assignedExpression, Collection<String> excluded) {
+		LinkedHashSet<String> res= new LinkedHashSet<String>(); // avoid duplicates but keep order
 
 		if (assignedExpression != null) {
 			String nameFromExpression= getBaseNameFromExpression(project, assignedExpression, variableKind);
@@ -940,11 +946,11 @@ public class StubUtility {
 		if (res.isEmpty()) {
 			return getDefaultVariableNameSuggestions(variableKind, excluded);
 		}
-		return (String[])res.toArray(new String[res.size()]);
+		return res.toArray(new String[res.size()]);
 	}
 
-	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, Type expectedType, Expression assignedExpression, Collection excluded) {
-		LinkedHashSet res= new LinkedHashSet(); // avoid duplicates but keep order
+	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, Type expectedType, Expression assignedExpression, Collection<String> excluded) {
+		LinkedHashSet<String> res= new LinkedHashSet<String>(); // avoid duplicates but keep order
 
 		if (assignedExpression != null) {
 			String nameFromExpression= getBaseNameFromExpression(project, assignedExpression, variableKind);
@@ -966,10 +972,10 @@ public class StubUtility {
 		if (res.isEmpty()) {
 			return getDefaultVariableNameSuggestions(variableKind, excluded);
 		}
-		return (String[])res.toArray(new String[res.size()]);
+		return res.toArray(new String[res.size()]);
 	}
 
-	private static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, Type expectedType, Collection excluded, boolean evaluateDefault) {
+	private static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, Type expectedType, Collection<String> excluded, boolean evaluateDefault) {
 		int dim= 0;
 		if (expectedType.isArrayType()) {
 			ArrayType arrayType= (ArrayType)expectedType;
@@ -987,7 +993,7 @@ public class StubUtility {
 		return EMPTY;
 	}
 
-	private static String[] getDefaultVariableNameSuggestions(int variableKind, Collection excluded) {
+	private static String[] getDefaultVariableNameSuggestions(int variableKind, Collection<String> excluded) {
 		String prop= variableKind == NamingConventions.VK_STATIC_FINAL_FIELD ? "X" : "x"; //$NON-NLS-1$//$NON-NLS-2$
 		String name= prop;
 		int i= 1;
@@ -1019,24 +1025,24 @@ public class StubUtility {
 	 *         <code>evaluateDefault</code> is set to false, an empty array is returned if there is
 	 *         no good suggestion for the given base name.
 	 */
-	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, String baseName, int dimensions, Collection excluded, boolean evaluateDefault) {
+	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, String baseName, int dimensions, Collection<String> excluded, boolean evaluateDefault) {
 		return NamingConventions.suggestVariableNames(variableKind, NamingConventions.BK_TYPE_NAME, removeTypeArguments(baseName), project, dimensions, getExcludedArray(excluded), evaluateDefault);
 	}
 
-	private static String[] getExcludedArray(Collection excluded) {
+	private static String[] getExcludedArray(Collection<String> excluded) {
 		if (excluded == null) {
 			return null;
 		} else if (excluded instanceof ExcludedCollection) {
 			return ((ExcludedCollection)excluded).getExcludedArray();
 		}
-		return (String[])excluded.toArray(new String[excluded.size()]);
+		return excluded.toArray(new String[excluded.size()]);
 	}
 
 
 	private static final String[] KNOWN_METHOD_NAME_PREFIXES= { "get", "is", "to" }; //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-1$
 
 
-	private static void add(String[] names, Set result) {
+	private static void add(String[] names, Set<String> result) {
 		for (int i= 0; i < names.length; i++) {
 			result.add(names[i]);
 		}
@@ -1095,7 +1101,7 @@ public class StubUtility {
 		return name;
 	}
 
-	private static String getBaseNameFromLocationInParent(Expression assignedExpression, List arguments, IMethodBinding binding) {
+	private static String getBaseNameFromLocationInParent(Expression assignedExpression, List<Expression> arguments, IMethodBinding binding) {
 		if (binding == null)
 			return null;
 
@@ -1194,7 +1200,7 @@ public class StubUtility {
 
 	public static String[][] suggestArgumentNamesWithProposals(IJavaProject project, String[] paramNames) {
 		String[][] newNames= new String[paramNames.length][];
-		ArrayList takenNames= new ArrayList();
+		ArrayList<String> takenNames= new ArrayList<String>();
 
 		// Ensure that the code generation preferences are respected
 		for (int i= 0; i < paramNames.length; i++) {
@@ -1204,12 +1210,12 @@ public class StubUtility {
 			String[] proposedNames= getVariableNameSuggestions(NamingConventions.VK_PARAMETER, project, curr, 0, takenNames, true);
 			if (!curr.equals(baseName)) {
 				// make the existing name to favorite
-				LinkedHashSet updatedNames= new LinkedHashSet();
+				LinkedHashSet<String> updatedNames= new LinkedHashSet<String>();
 				updatedNames.add(curr);
 				for (int k= 0; k < proposedNames.length; k++) {
 					updatedNames.add(proposedNames[k]);
 				}
-				proposedNames= (String[])updatedNames.toArray(new String[updatedNames.size()]);
+				proposedNames= updatedNames.toArray(new String[updatedNames.size()]);
 			}
 			newNames[i]= proposedNames;
 			takenNames.add(proposedNames[0]);
@@ -1250,7 +1256,7 @@ public class StubUtility {
 					String[] paramNames= method.getParameterNames();
 					if (paramNames.length == nParams) {
 						String[] namesArray= EMPTY;
-						ArrayList newNames= new ArrayList(paramNames.length);
+						ArrayList<String> newNames= new ArrayList<String>(paramNames.length);
 						// Ensure that the code generation preferences are respected
 						for (int i= 0; i < paramNames.length; i++) {
 							String curr= paramNames[i];
@@ -1261,7 +1267,7 @@ public class StubUtility {
 							} else {
 								newNames.add(suggestArgumentName(project, curr, namesArray));
 							}
-							namesArray= (String[])newNames.toArray(new String[newNames.size()]);
+							namesArray= newNames.toArray(new String[newNames.size()]);
 						}
 						return namesArray;
 					}
@@ -1312,7 +1318,7 @@ public class StubUtility {
 		return NamingConventions.VK_STATIC_FINAL_FIELD;
 	}
 
-	private static class ExcludedCollection extends AbstractList {
+	private static class ExcludedCollection extends AbstractList<String> {
 		private String[] fExcluded;
 
 		public ExcludedCollection(String[] excluded) {
@@ -1323,14 +1329,17 @@ public class StubUtility {
 			return fExcluded;
 		}
 
+		@Override
 		public int size() {
 			return fExcluded.length;
 		}
 
-		public Object get(int index) {
+		@Override
+		public String get(int index) {
 			return fExcluded[index];
 		}
 
+		@Override
 		public int indexOf(Object o) {
 			if (o instanceof String) {
 				for (int i= 0; i < fExcluded.length; i++) {
@@ -1341,6 +1350,7 @@ public class StubUtility {
 			return -1;
 		}
 
+		@Override
 		public boolean contains(Object o) {
 			return indexOf(o) != -1;
 		}

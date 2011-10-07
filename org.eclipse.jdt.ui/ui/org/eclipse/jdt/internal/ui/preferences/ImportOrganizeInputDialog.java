@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,10 +77,10 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 
 	private StringButtonDialogField fNameDialogField;
 	private SelectionButtonDialogField fBrowseTypeButton;
-	private List fExistingEntries;
+	private List<ImportOrderEntry> fExistingEntries;
 	private final boolean fIsStatic;
 
-	public ImportOrganizeInputDialog(Shell parent, List/*<ImportOrderEntry>*/ existingEntries, boolean isStatic) {
+	public ImportOrganizeInputDialog(Shell parent, List<ImportOrderEntry> existingEntries, boolean isStatic) {
 		super(parent);
 		fIsStatic= isStatic;
 		fExistingEntries= existingEntries;
@@ -112,6 +112,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
@@ -134,6 +135,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		}
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
 		initializeDialogUnits(parent);
@@ -193,9 +195,6 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		}
 	}
 
-	/**
-	 * @param field
-	 */
 	final void doDialogFieldChanged(DialogField field) {
 		if (field == fBrowseTypeButton) {
 			doBrowseTypes();
@@ -231,7 +230,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 
 	private boolean doesExist(String name, boolean isStatic) {
 		for (int i= 0; i < fExistingEntries.size(); i++) {
-			ImportOrderEntry entry= (ImportOrderEntry) fExistingEntries.get(i);
+			ImportOrderEntry entry= fExistingEntries.get(i);
 			if (name.equals(entry.name) && isStatic == entry.isStatic) {
 				return true;
 			}
@@ -243,6 +242,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.IMPORT_ORGANIZE_INPUT_DIALOG);

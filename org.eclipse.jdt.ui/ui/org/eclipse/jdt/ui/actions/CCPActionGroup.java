@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,6 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.eclipse.ui.part.Page;
 
-
 import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CutAction;
@@ -33,7 +32,7 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
 
 /**
- * Action group that adds the copy, cut, paste actions to a view part's context
+ * Action group that adds copy, cut, paste, and delete actions to a view part's context
  * menu and installs handlers for the corresponding global menu actions.
  *
  * <p>
@@ -55,6 +54,21 @@ public class CCPActionGroup extends ActionGroup {
 	private final SelectionDispatchAction fCutAction;
 	private final ISelectionProvider fSelectionProvider;
 
+
+	/**
+	 * Creates a new <code>CCPActionGroup</code>. The group requires that the selection provided by
+	 * the view part's selection provider is of type
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * 
+	 * @param part the view part that owns this action group
+	 * @param includeOnlyCopyActions <code>true</code> if the group only includes the copy actions,
+	 *            <code>false</code> to include all actions
+	 * @since 3.7
+	 */
+	public CCPActionGroup(IViewPart part, boolean includeOnlyCopyActions) {
+		this(part.getSite(), null, includeOnlyCopyActions);
+	}
+
 	/**
 	 * Creates a new <code>CCPActionGroup</code>. The group requires that
 	 * the selection provided by the view part's selection provider is of type
@@ -63,7 +77,7 @@ public class CCPActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public CCPActionGroup(IViewPart  part) {
-		this(part.getSite(), null);
+		this(part.getSite(), null, false);
 	}
 
 	/**
@@ -74,7 +88,7 @@ public class CCPActionGroup extends ActionGroup {
 	 * @param page the page that owns this action group
 	 */
 	public CCPActionGroup(Page page) {
-		this(page.getSite(), null);
+		this(page.getSite(), null, false);
 	}
 
 	/**
@@ -89,10 +103,22 @@ public class CCPActionGroup extends ActionGroup {
 	 * @since 3.4
 	 */
 	public CCPActionGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider) {
-		fSelectionProvider= specialSelectionProvider == null ? site.getSelectionProvider() : specialSelectionProvider;
+		this(site, specialSelectionProvider, false);
+	}
 
-		fPasteAction= new PasteAction(site);
-		fPasteAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_PASTE);
+	/**
+	 * Creates a new <code>CCPActionGroup</code>. The group requires that the selection provided by
+	 * the given selection provider is of type {@link IStructuredSelection}.
+	 * 
+	 * @param site the site that will own the action group.
+	 * @param specialSelectionProvider the selection provider used instead of the sites selection
+	 *            provider.
+	 * @param includeOnlyCopyActions <code>true</code> if the group only included the copy actions,
+	 *            <code>false</code> otherwise
+	 * @since 3.7
+	 */
+	private CCPActionGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider, boolean includeOnlyCopyActions) {
+		fSelectionProvider= specialSelectionProvider == null ? site.getSelectionProvider() : specialSelectionProvider;
 
 		fCopyAction= new CopyToClipboardAction(site);
 		fCopyAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_COPY);
@@ -100,13 +126,22 @@ public class CCPActionGroup extends ActionGroup {
 		fCopyQualifiedNameAction= new CopyQualifiedNameAction(site);
 		fCopyQualifiedNameAction.setActionDefinitionId(CopyQualifiedNameAction.ACTION_DEFINITION_ID);
 
-		fCutAction= new CutAction(site);
-		fCutAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_CUT);
 
-		fDeleteAction= new DeleteAction(site);
-		fDeleteAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_DELETE);
+		if (!includeOnlyCopyActions) {
+			fPasteAction= new PasteAction(site);
+			fPasteAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_PASTE);
+			fDeleteAction= new DeleteAction(site);
+			fDeleteAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_DELETE);
+			fCutAction= new CutAction(site);
+			fCutAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_CUT);
+			fActions= new SelectionDispatchAction[] { fCutAction, fCopyAction, fCopyQualifiedNameAction, fPasteAction, fDeleteAction };
+		} else {
+			fPasteAction= null;
+			fDeleteAction= null;
+			fCutAction= null;
+			fActions= new SelectionDispatchAction[] { fCopyAction, fCopyQualifiedNameAction };
+		}
 
-		fActions= new SelectionDispatchAction[] { fCutAction, fCopyAction, fCopyQualifiedNameAction, fPasteAction, fDeleteAction };
 		if (specialSelectionProvider != null) {
 			for (int i= 0; i < fActions.length; i++) {
 				fActions[i].setSpecialSelectionProvider(specialSelectionProvider);
@@ -147,18 +182,23 @@ public class CCPActionGroup extends ActionGroup {
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
-		actionBars.setGlobalActionHandler(ActionFactory.DELETE.getId(), fDeleteAction);
+		if (fDeleteAction != null)
+			actionBars.setGlobalActionHandler(ActionFactory.DELETE.getId(), fDeleteAction);
 		actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
 		actionBars.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, fCopyQualifiedNameAction);
-		actionBars.setGlobalActionHandler(ActionFactory.CUT.getId(), fCutAction);
-		actionBars.setGlobalActionHandler(ActionFactory.PASTE.getId(), fPasteAction);
+		if (fCopyAction != null)
+			actionBars.setGlobalActionHandler(ActionFactory.CUT.getId(), fCutAction);
+		if (fPasteAction != null)
+			actionBars.setGlobalActionHandler(ActionFactory.PASTE.getId(), fPasteAction);
 	}
 
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 		for (int i= 0; i < fActions.length; i++) {
@@ -172,6 +212,7 @@ public class CCPActionGroup extends ActionGroup {
 	/*
 	 * @see ActionGroup#dispose()
 	 */
+	@Override
 	public void dispose() {
 		super.dispose();
 		deregisterActionsAsSelectionChangeListeners();

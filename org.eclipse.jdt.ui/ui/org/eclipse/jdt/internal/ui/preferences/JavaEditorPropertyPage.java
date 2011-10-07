@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ public class JavaEditorPropertyPage extends PropertyPage {
 
 	public JavaEditorPropertyPage() {}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		final Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -40,6 +41,7 @@ public class JavaEditorPropertyPage extends PropertyPage {
 		link.setLayoutData(data);
 		link.setText(PreferencesMessages.JavaEditorPropertyPage_SaveActionLink_Text);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer)getContainer();
 				container.openPage(SaveParticipantPreferencePage.PROPERTY_PAGE_ID, null);

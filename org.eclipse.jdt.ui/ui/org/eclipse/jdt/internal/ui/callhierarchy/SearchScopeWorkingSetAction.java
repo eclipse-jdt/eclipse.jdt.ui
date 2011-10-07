@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,8 +33,12 @@ class SearchScopeWorkingSetAction extends SearchScopeAction {
 		this.fWorkingSets = workingSets;
 	}
 
-	public IJavaSearchScope getSearchScope() {
-		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(fWorkingSets, true);
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getSearchScope(int)
+	 */
+	@Override
+	public IJavaSearchScope getSearchScope(int includeMask) {
+		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(fWorkingSets, includeMask);
 	}
 
 	/**
@@ -47,6 +51,7 @@ class SearchScopeWorkingSetAction extends SearchScopeAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeActionGroup.SearchScopeAction#getSearchScopeType()
 	 */
+	@Override
 	public int getSearchScopeType() {
 		return SearchScopeActionGroup.SEARCH_SCOPE_TYPE_WORKING_SET;
 	}
@@ -54,7 +59,8 @@ class SearchScopeWorkingSetAction extends SearchScopeAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
 	 */
-	public String getFullDescription() {
-		return JavaSearchScopeFactory.getInstance().getWorkingSetScopeDescription(fWorkingSets, true);
+	@Override
+	public String getFullDescription(int includeMask) {
+		return JavaSearchScopeFactory.getInstance().getWorkingSetScopeDescription(fWorkingSets, includeMask);
 	}
 }

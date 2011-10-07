@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -138,6 +138,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			return res;
 		}
 
+		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
 			Composite inner= new Composite(composite, SWT.NONE);
@@ -202,6 +203,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		/*
 		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 		 */
+		@Override
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
 			//PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.IMPORT_ORGANIZE_INPUT_DIALOG);
@@ -213,6 +215,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
 		 */
+		@Override
 		public Image getImage(Object element) {
 			return getColumnImage(element, 0);
 		}
@@ -220,6 +223,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
 		 */
+		@Override
 		public String getText(Object element) {
 			return getColumnText(element, 0);
 		}
@@ -273,21 +277,21 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		}
 	}
 
-	private class NameConventionAdapter implements IListAdapter, IDialogFieldListener {
+	private class NameConventionAdapter implements IListAdapter<NameConventionEntry>, IDialogFieldListener {
 
-		private boolean canEdit(ListDialogField field) {
+		private boolean canEdit(ListDialogField<?> field) {
 			return field.getSelectedElements().size() == 1;
 		}
 
-		public void customButtonPressed(ListDialogField field, int index) {
+		public void customButtonPressed(ListDialogField<NameConventionEntry> field, int index) {
 			doEditButtonPressed();
 		}
 
-		public void selectionChanged(ListDialogField field) {
+		public void selectionChanged(ListDialogField<NameConventionEntry> field) {
 			field.enableButton(0, canEdit(field));
 		}
 
-		public void doubleClicked(ListDialogField field) {
+		public void doubleClicked(ListDialogField<NameConventionEntry> field) {
 			if (canEdit(field)) {
 				doEditButtonPressed();
 			}
@@ -298,7 +302,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		}
 	}
 
-	private ListDialogField fNameConventionList;
+	private ListDialogField<NameConventionEntry> fNameConventionList;
 	private SelectionButtonDialogField fUseKeywordThisBox;
 	private SelectionButtonDialogField fUseIsForBooleanGettersBox;
 
@@ -312,7 +316,8 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		String[] buttons= new String[] {
 			PreferencesMessages.NameConventionConfigurationBlock_list_edit_button
 		};
-		fNameConventionList= new ListDialogField(adapter, buttons, new NameConventionLabelProvider()) {
+		fNameConventionList= new ListDialogField<NameConventionEntry>(adapter, buttons, new NameConventionLabelProvider()) {
+			@Override
 			protected int getListStyle() {
 				return super.getListStyle() & ~SWT.MULTI | SWT.SINGLE;
 			}
@@ -368,6 +373,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		};
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		setShell(parent.getShell());
 
@@ -407,6 +413,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String, java.lang.String)
 	 */
+	@Override
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		// no validation here
 	}
@@ -414,7 +421,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	protected final void updateModel(DialogField field) {
 		if (field == fNameConventionList) {
 			for (int i= 0; i < fNameConventionList.getSize(); i++) {
-				NameConventionEntry entry= (NameConventionEntry) fNameConventionList.getElement(i);
+				NameConventionEntry entry= fNameConventionList.getElement(i);
 				setValue(entry.suffixkey, entry.suffix);
 				setValue(entry.prefixkey, entry.prefix);
 			}
@@ -443,8 +450,9 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateControls()
 	 */
+	@Override
 	protected void updateControls() {
-		ArrayList list= new ArrayList(4);
+		ArrayList<NameConventionEntry> list= new ArrayList<NameConventionEntry>(4);
 		createEntry(list, PREF_FIELD_PREFIXES, PREF_FIELD_SUFFIXES, FIELD);
 		createEntry(list, PREF_STATIC_FIELD_PREFIXES, PREF_STATIC_FIELD_SUFFIXES, STATIC);
 		createEntry(list, PREF_STATIC_FINAL_FIELD_PREFIXES, PREF_STATIC_FINAL_FIELD_SUFFIXES, STATIC_FINAL);
@@ -461,11 +469,12 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#getFullBuildDialogStrings(boolean)
 	 */
+	@Override
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		return null; // no build required
 	}
 
-	private void createEntry(List list, Key prefixKey, Key suffixKey, int kind) {
+	private void createEntry(List<NameConventionEntry> list, Key prefixKey, Key suffixKey, int kind) {
 		NameConventionEntry entry= new NameConventionEntry();
 		entry.kind= kind;
 		entry.suffixkey= suffixKey;
@@ -485,7 +494,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	}
 
 	private void doEditButtonPressed() {
-		NameConventionEntry entry= (NameConventionEntry) fNameConventionList.getSelectedElements().get(0);
+		NameConventionEntry entry= fNameConventionList.getSelectedElements().get(0);
 
 		String title;
 		String message;

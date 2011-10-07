@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -118,6 +118,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		// none by default
 	}
 
+	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
 			INameUpdating nameUpdating= (INameUpdating)getRefactoring().getAdapter(INameUpdating.class);
@@ -152,6 +153,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		return true;
 	}
 
+	@Override
 	public void dispose() {
 		if (saveSettings()) {
 			saveBooleanSetting(RenameRefactoringWizard.UPDATE_TEXTUAL_MATCHES, fUpdateTextualMatches);
@@ -173,6 +175,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		fUpdateReferences= createCheckbox(result, title, defaultValue, layouter);
 		ref.setUpdateReferences(fUpdateReferences.getSelection());
 		fUpdateReferences.addSelectionListener(new SelectionAdapter(){
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ref.setUpdateReferences(fUpdateReferences.getSelection());
 			}
@@ -188,6 +191,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		fUpdateTextualMatches= createCheckbox(result, title, defaultValue, layouter);
 		refactoring.setUpdateTextualMatches(fUpdateTextualMatches.getSelection());
 		fUpdateTextualMatches.addSelectionListener(new SelectionAdapter(){
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				refactoring.setUpdateTextualMatches(fUpdateTextualMatches.getSelection());
 				updateForcePreview();
@@ -215,6 +219,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		updateQulifiedNameUpdating(ref, defaultSelection);
 
 		fUpdateQualifiedNames.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean enabled= ((Button)e.widget).getSelection();
 				updateQulifiedNameUpdating(ref, enabled);
@@ -235,6 +240,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		fLeaveDelegateCheckBox= createCheckbox(result, refactoring.getDelegateUpdatingTitle(false), DelegateUIHelper.loadLeaveDelegateSetting(refactoring), layouter);
 		refactoring.setDelegateUpdating(fLeaveDelegateCheckBox.getSelection());
 		fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				refactoring.setDelegateUpdating(fLeaveDelegateCheckBox.getSelection());
 			}
@@ -255,6 +261,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		layouter.perform(fDeprecateDelegateCheckBox);
 		refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
 		fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
 			}
@@ -262,6 +269,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		if (fLeaveDelegateCheckBox != null) {
 			fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
 			fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
 				}

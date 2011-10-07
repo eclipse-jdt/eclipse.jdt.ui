@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -99,6 +99,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	/*
 	 * @see org.eclipse.jface.preference.PreferencePage#createContents(Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		fPixelConverter= new PixelConverter(parent);
 		setShell(parent.getShell());
@@ -234,6 +235,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */
+	@Override
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		if (!areSettingsEnabled()) {
 			return;
@@ -259,6 +261,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	private void updateEnableStates() {
 	}
 
+	@Override
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		String title= PreferencesMessages.JavaBuildConfigurationBlock_needsbuild_title;
 		String message;
@@ -314,6 +317,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#dispose()
 	 */
+	@Override
 	public void dispose() {
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings().addNewSection(SETTINGS_SECTION_NAME);
 		storeSectionExpansionStates(settings);

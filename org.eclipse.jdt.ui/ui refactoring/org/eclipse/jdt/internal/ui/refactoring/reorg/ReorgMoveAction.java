@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,7 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
 	}
 
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		if (!selection.isEmpty()) {
 			if (ReorgUtils.containsOnlyProjects(selection.toList())) {
@@ -53,7 +54,7 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 				return;
 			}
 			try {
-				List elements= selection.toList();
+				List<?> elements= selection.toList();
 				IResource[] resources= ReorgUtils.getResources(elements);
 				IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 				if (elements.size() != resources.length + javaElements.length)
@@ -71,6 +72,7 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 			setEnabled(false);
 	}
 
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
@@ -82,6 +84,7 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isMoveAvailable(selection));
@@ -96,13 +99,14 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 		return action;
 	}
 
+	@Override
 	public void run(IStructuredSelection selection) {
 		if (ReorgUtils.containsOnlyProjects(selection.toList())) {
 			createWorkbenchAction(selection).run();
 			return;
 		}
 		try {
-			List elements= selection.toList();
+			List<?> elements= selection.toList();
 			IResource[] resources= ReorgUtils.getResources(elements);
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 			if (RefactoringAvailabilityTester.isMoveAvailable(resources, javaElements))

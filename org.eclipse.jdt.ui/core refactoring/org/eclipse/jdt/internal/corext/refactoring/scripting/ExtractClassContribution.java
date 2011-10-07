@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,14 +35,17 @@ public class ExtractClassContribution extends JavaUIRefactoringContribution {
 	public ExtractClassContribution() {
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) throws IllegalArgumentException {
 		return RefactoringSignatureDescriptorFactory.createExtractClassDescriptor(project, description, comment, arguments, flags);
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return RefactoringSignatureDescriptorFactory.createExtractClassDescriptor();
 	}
 
+	@Override
 	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		if (!(descriptor instanceof ExtractClassDescriptor)) {
 			status.addFatalError(RefactoringCoreMessages.ExtractClassContribution_error_unknown_descriptor);

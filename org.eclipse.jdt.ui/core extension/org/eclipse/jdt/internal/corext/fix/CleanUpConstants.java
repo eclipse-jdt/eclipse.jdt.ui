@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1025,7 +1025,7 @@ public class CleanUpConstants {
 	 * Following code snippet can load the profiles:
 	 * 
 	 * <pre>
-	 * List profiles= new ProfileStore(CLEANUP_PROFILES, new CleanUpVersioner()).readProfiles(new InstanceScope());
+	 * List profiles= new ProfileStore(CLEANUP_PROFILES, new CleanUpVersioner()).readProfiles(InstanceScope.INSTANCE);
 	 * </pre>
 	 * 
 	 * @since 3.3
@@ -1264,8 +1264,8 @@ public class CleanUpConstants {
 
 	public static void initDefaults(IPreferenceStore store) {
 		CleanUpOptions settings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
-		for (Iterator iterator= settings.getKeys().iterator(); iterator.hasNext();) {
-			String key= (String)iterator.next();
+		for (Iterator<String> iterator= settings.getKeys().iterator(); iterator.hasNext();) {
+			String key= iterator.next();
 			store.setDefault(key, settings.getValue(key));
 		}
 

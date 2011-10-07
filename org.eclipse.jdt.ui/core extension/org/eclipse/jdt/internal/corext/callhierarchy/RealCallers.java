@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ package org.eclipse.jdt.internal.corext.callhierarchy;
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#canHaveChildren()
 		 */
+		@Override
 		public boolean canHaveChildren() {
 			return true;
 	}
@@ -37,6 +38,7 @@ package org.eclipse.jdt.internal.corext.callhierarchy;
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#isRecursive()
 		 */
+		@Override
 		public boolean isRecursive() {
 			return false;
 		}

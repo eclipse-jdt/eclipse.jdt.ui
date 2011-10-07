@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,6 +63,7 @@ public class QualifiedNameFinder {
 			fNewValue= newValue;
 		}
 
+		@Override
 		public boolean acceptFile(IFile file) throws CoreException {
 			IJavaElement element= JavaCore.create(file);
 			if ((element != null && element.exists()))
@@ -80,6 +81,7 @@ public class QualifiedNameFinder {
 			return true;
 		}
 
+		@Override
 		public boolean acceptPatternMatch(TextSearchMatchAccess matchAccess) throws CoreException {
 			int start= matchAccess.getMatchOffset();
 			int length= matchAccess.getMatchLength();
@@ -135,10 +137,10 @@ public class QualifiedNameFinder {
 	}
 
 	private static TextSearchScope createScope(String filePatterns, IProject root) {
-		HashSet res= new HashSet();
+		HashSet<IProject> res= new HashSet<IProject>();
 		res.add(root);
 		addReferencingProjects(root, res);
-		IResource[] resArr= (IResource[]) res.toArray(new IResource[res.size()]);
+		IResource[] resArr= res.toArray(new IResource[res.size()]);
 		Pattern filePattern= getFilePattern(filePatterns);
 
 		return TextSearchScope.newSearchScope(resArr, filePattern, false);
@@ -154,7 +156,7 @@ public class QualifiedNameFinder {
 		return PatternConstructor.createPattern(filePatternArray, true, false);
 	}
 
-	private static void addReferencingProjects(IProject root, Set res) {
+	private static void addReferencingProjects(IProject root, Set<IProject> res) {
 		IProject[] projects= root.getReferencingProjects();
 		for (int i= 0; i < projects.length; i++) {
 			IProject project= projects[i];

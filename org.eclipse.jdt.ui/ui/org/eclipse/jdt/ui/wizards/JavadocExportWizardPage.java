@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -142,7 +142,7 @@ public abstract class JavadocExportWizardPage {
 	 * @param toolOptions A {@link List} of {@link String} with the Javadoc tool arguments.
 	 * See the <a href="http://java.sun.com/javase/6/docs/technotes/guides/javadoc/index.html"> Javadoc command specification</a> for the format of the arguments.
 	 */
-	public void updateArguments(List vmOptions, List toolOptions) {
+	public void updateArguments(List<String> vmOptions, List<String> toolOptions) {
 	}
 
 	/**

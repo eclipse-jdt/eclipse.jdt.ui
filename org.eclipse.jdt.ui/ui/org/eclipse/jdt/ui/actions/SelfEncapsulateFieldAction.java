@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,6 +86,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
@@ -96,6 +97,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 * @param selection the Java text selection
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection));
@@ -110,8 +112,11 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		try {
+			if (!ActionUtil.isEditable(fEditor))
+				return;
 			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 			if (elements.length != 1 || !(elements[0] instanceof IField)) {
 				MessageDialog.openInformation(getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_unavailable);
@@ -135,6 +140,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection));
@@ -150,10 +156,15 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 * (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
-			if (RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection))
-				run((IField) selection.getFirstElement());
+			IField firstElement= (IField)selection.getFirstElement();
+			if (!ActionUtil.isEditable(getShell(), firstElement))
+				return;
+			if (RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection)) {
+				run(firstElement);
+			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}

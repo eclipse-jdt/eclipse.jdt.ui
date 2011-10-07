@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -29,12 +30,12 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerResolution;
-import org.eclipse.ui.IMarkerResolutionGenerator;
 import org.eclipse.ui.IMarkerResolutionGenerator2;
 import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
 
@@ -64,7 +65,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 
 
-public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGenerator, IMarkerResolutionGenerator2 {
+public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGenerator2 {
 
 	public static class CorrectionMarkerResolution extends WorkbenchMarkerResolution {
 
@@ -125,6 +126,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void run(IMarker[] markers, IProgressMonitor monitor) {
 			if (markers.length == 1) {
 				run(markers[0]);
@@ -155,7 +157,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		}
 
 		private MultiFixTarget[] getCleanUpTargets(IMarker[] markers) {
-			Hashtable/*<ICompilationUnit, List<IProblemLocation>*/ problemLocations= new Hashtable();
+			Hashtable<ICompilationUnit, List<IProblemLocation>> problemLocations= new Hashtable<ICompilationUnit, List<IProblemLocation>>();
 			for (int i= 0; i < markers.length; i++) {
 				IMarker marker= markers[i];
 				ICompilationUnit cu= getCompilationUnit(marker);
@@ -164,9 +166,9 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 					IEditorInput input= EditorUtility.getEditorInput(cu);
 					IProblemLocation location= findProblemLocation(input, marker);
 					if (location != null) {
-						List l= (List)problemLocations.get(cu.getPrimary());
+						List<IProblemLocation> l= problemLocations.get(cu.getPrimary());
 						if (l == null) {
-							l= new ArrayList();
+							l= new ArrayList<IProblemLocation>();
 							problemLocations.put(cu.getPrimary(), l);
 						}
 						l.add(location);
@@ -176,11 +178,11 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 
 			MultiFixTarget[] result= new MultiFixTarget[problemLocations.size()];
 			int i= 0;
-			for (Iterator iterator= problemLocations.entrySet().iterator(); iterator.hasNext();) {
-				Map.Entry entry= (Map.Entry) iterator.next();
-				ICompilationUnit cu= (ICompilationUnit) entry.getKey();
-				List locations= (List) entry.getValue();
-				result[i]= new MultiFixTarget(cu, (IProblemLocation[]) locations.toArray(new IProblemLocation[locations.size()]));
+			for (Iterator<Map.Entry<ICompilationUnit, List<IProblemLocation>>> iterator= problemLocations.entrySet().iterator(); iterator.hasNext();) {
+				Map.Entry<ICompilationUnit, List<IProblemLocation>> entry= iterator.next();
+				ICompilationUnit cu= entry.getKey();
+				List<IProblemLocation> locations= entry.getValue();
+				result[i]= new MultiFixTarget(cu, locations.toArray(new IProblemLocation[locations.size()]));
 				i++;
 			}
 
@@ -204,6 +206,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public IMarker[] findOtherMarkers(IMarker[] markers) {
 			if (!(fProposal instanceof FixCorrectionProposal))
 				return NO_MARKERS;
@@ -215,23 +218,23 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 
 			IMultiFix multiFix= (IMultiFix) cleanUp;
 
-			final Hashtable fileMarkerTable= getMarkersForFiles(markers);
+			final Hashtable<IFile, List<IMarker>> fileMarkerTable= getMarkersForFiles(markers);
 			if (fileMarkerTable.isEmpty())
 				return NO_MARKERS;
 
-			final List result= new ArrayList();
+			final List<IMarker> result= new ArrayList<IMarker>();
 
-			for (Iterator iterator= fileMarkerTable.entrySet().iterator(); iterator.hasNext();) {
-				Map.Entry entry= (Map.Entry) iterator.next();
-				IFile file= (IFile) entry.getKey();
-				ArrayList fileMarkers= (ArrayList) entry.getValue();
+			for (Iterator<Entry<IFile, List<IMarker>>> iterator= fileMarkerTable.entrySet().iterator(); iterator.hasNext();) {
+				Map.Entry<IFile, List<IMarker>> entry= iterator.next();
+				IFile file= entry.getKey();
+				List<IMarker> fileMarkers= entry.getValue();
 
 				IJavaElement element= JavaCore.create(file);
 				if (element instanceof ICompilationUnit) {
 					ICompilationUnit unit= (ICompilationUnit) element;
 
 					for (int i= 0, size= fileMarkers.size(); i < size; i++) {
-						IMarker marker= (IMarker) fileMarkers.get(i);
+						IMarker marker= fileMarkers.get(i);
 						IProblemLocation problem= createFromMarker(marker, unit);
 						if (problem != null && multiFix.canFix(unit, problem)) {
 							result.add(marker);
@@ -243,7 +246,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			if (result.size() == 0)
 				return NO_MARKERS;
 
-			return (IMarker[])result.toArray(new IMarker[result.size()]);
+			return result.toArray(new IMarker[result.size()]);
 		}
 
 		/**
@@ -251,8 +254,8 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		 * @param markers the markers
 		 * @return mapping files to markers
 		 */
-		private Hashtable/*<IFile, List<IMarker>>*/ getMarkersForFiles(IMarker[] markers) {
-			final Hashtable result= new Hashtable();
+		private Hashtable<IFile, List<IMarker>> getMarkersForFiles(IMarker[] markers) {
+			final Hashtable<IFile, List<IMarker>> result= new Hashtable<IFile, List<IMarker>>();
 
 			String markerType;
 			try {
@@ -275,10 +278,10 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 					if (currMarkerType != null && currMarkerType.equals(markerType)) {
 						IResource res= marker.getResource();
 						if (res instanceof IFile && res.isAccessible()) {
-							List markerList= (List)result.get(res);
+							List<IMarker> markerList= result.get(res);
 							if (markerList == null) {
-								markerList= new ArrayList();
-								result.put(res, markerList);
+								markerList= new ArrayList<IMarker>();
+								result.put((IFile) res, markerList);
 							}
 							markerList.add(marker);
 						}
@@ -335,14 +338,14 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 					if (!hasProblem (context.getASTRoot().getProblems(), location))
 						return NO_RESOLUTIONS;
 
-					ArrayList proposals= new ArrayList();
+					ArrayList<IJavaCompletionProposal> proposals= new ArrayList<IJavaCompletionProposal>();
 					JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
 					Collections.sort(proposals, new CompletionProposalComparator());
 
 					int nProposals= proposals.size();
 					IMarkerResolution[] resolutions= new IMarkerResolution[nProposals];
 					for (int i= 0; i < nProposals; i++) {
-						resolutions[i]= new CorrectionMarkerResolution(context.getCompilationUnit(), location.getOffset(), location.getLength(), (IJavaCompletionProposal) proposals.get(i), marker);
+						resolutions[i]= new CorrectionMarkerResolution(context.getCompilationUnit(), location.getOffset(), location.getLength(), proposals.get(i), marker);
 					}
 					return resolutions;
 				}
@@ -373,9 +376,9 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 	private static IProblemLocation findProblemLocation(IEditorInput input, IMarker marker) {
 		IAnnotationModel model= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getAnnotationModel(input);
 		if (model != null) { // open in editor
-			Iterator iter= model.getAnnotationIterator();
+			Iterator<Annotation> iter= model.getAnnotationIterator();
 			while (iter.hasNext()) {
-				Object curr= iter.next();
+				Annotation curr= iter.next();
 				if (curr instanceof JavaMarkerAnnotation) {
 					JavaMarkerAnnotation annot= (JavaMarkerAnnotation) curr;
 					if (marker.equals(annot.getMarker())) {

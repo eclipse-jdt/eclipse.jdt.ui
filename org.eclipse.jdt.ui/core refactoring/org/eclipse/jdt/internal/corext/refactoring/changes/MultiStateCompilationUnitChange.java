@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,6 +50,7 @@ public final class MultiStateCompilationUnitChange extends MultiStateTextFileCha
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.Change#getAdapter(java.lang.Class)
 	 */
+	@Override
 	public final Object getAdapter(final Class adapter) {
 
 		if (ICompilationUnit.class.equals(adapter))
@@ -70,6 +71,7 @@ public final class MultiStateCompilationUnitChange extends MultiStateTextFileCha
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getName() {
 		return Messages.format(RefactoringCoreMessages.MultiStateCompilationUnitChange_name_pattern, new String[] { BasicElementLabels.getFileName(fUnit), BasicElementLabels.getPathLabel(fUnit.getParent().getPath(), false) });
 	}

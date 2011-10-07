@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,16 +60,12 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
 	private static final Class THIS= CodeCompletionPerformanceTest.class;
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
-	}
-
-	public static Test suite() {
-		return allTests();
 	}
 
 	private IJavaProject fJProject1;
@@ -243,7 +239,6 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		measureApplicationWithParamterNames(getNullPerformanceMeter(), getWarmUpRuns());
 		final PerformanceMeter performanceMeter= createPerformanceMeter();
 		measureApplicationWithParamterNames(performanceMeter, getMeasuredRuns());
-		explainDegradation("Performance slowed down because the code in the baseline was not working and got fixed in 3.6", performanceMeter);
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
@@ -295,7 +290,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 	public void testApplicationWithParamterGuesses() throws Exception {
 		measureApplicationWithParamterGuesses(getNullPerformanceMeter(), getWarmUpRuns());
 		PerformanceMeter performanceMeter= createPerformanceMeterForSummary("Java Editor: proposal insertion (param guessing)", Dimension.ELAPSED_PROCESS);
-		measureCompletionWithParamterNames(performanceMeter, getMeasuredRuns());
+		measureApplicationWithParamterGuesses(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
@@ -370,7 +365,6 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
 		measureApplicationWithParamterGuesses(getNullPerformanceMeter(), getWarmUpRuns());
 		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary("Java Editor: proposal insertion (param guessing)", Dimension.ELAPSED_PROCESS);
-		explainDegradation("Performance slowed down because the code in the baseline was not working and got fixed in 3.6", performanceMeter);
 		measureApplicationWithParamterGuesses(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();

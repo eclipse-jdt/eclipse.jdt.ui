@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Mateusz Matela and others.
+ * Copyright (c) 2008, 2011 Mateusz Matela and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,15 +73,15 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 	
 	private static final String METHODNAME_TO_STRING= "toString"; //$NON-NLS-1$
 	
-	private List fFields;
+	private List<IVariableBinding> fFields;
 
-	private List fInheritedFields;
+	private List<IVariableBinding> fInheritedFields;
 
-	private List fSelectedFields;
+	private List<IVariableBinding> fSelectedFields;
 
-	private List fMethods;
+	private List<IMethodBinding> fMethods;
 
-	private List fInheritedMethods;
+	private List<IMethodBinding> fInheritedMethods;
 
 	private GenerateToStringOperation operation;
 
@@ -136,16 +136,19 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 		setEnabled((fEditor != null && SelectionConverter.canOperateOn(fEditor)));
 	}
 
+	@Override
 	RefactoringStatus checkMember(Object object) {
 		// no conditions need to be checked 
 		return new RefactoringStatus();
 	}
 
+	@Override
 	RefactoringStatus checkGeneralConditions(IType type, CodeGenerationSettings settings, Object[] selected) {
 		return operation.checkConditions();
 	}
 
-	 RefactoringStatus checkSuperClass(ITypeBinding superclass) {
+	 @Override
+	RefactoringStatus checkSuperClass(ITypeBinding superclass) {
 		RefactoringStatus status= new RefactoringStatus();
 		if (new ToStringInfo(superclass).foundFinalToString) {
 			status.addError(Messages.format(ActionMessages.GenerateMethodAbstractAction_final_method_in_superclass_error, new String[] {
@@ -155,19 +158,22 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 		return status;
 	}
 
+	@Override
 	SourceActionDialog createDialog(Shell shell, IType type) throws JavaModelException {
-		IVariableBinding[] fieldBindings= (IVariableBinding[]) fFields.toArray(new IVariableBinding[0]);
-		IVariableBinding[] inheritedFieldBindings= (IVariableBinding[]) fInheritedFields.toArray(new IVariableBinding[0]);
-		IVariableBinding[] selectedFieldBindings= (IVariableBinding[]) fSelectedFields.toArray(new IVariableBinding[0]);
-		IMethodBinding[] methodBindings= (IMethodBinding[]) fMethods.toArray(new IMethodBinding[0]);
-		IMethodBinding[] inheritededMethodBindings= (IMethodBinding[]) fInheritedMethods.toArray(new IMethodBinding[0]);
+		IVariableBinding[] fieldBindings= fFields.toArray(new IVariableBinding[0]);
+		IVariableBinding[] inheritedFieldBindings= fInheritedFields.toArray(new IVariableBinding[0]);
+		IVariableBinding[] selectedFieldBindings= fSelectedFields.toArray(new IVariableBinding[0]);
+		IMethodBinding[] methodBindings= fMethods.toArray(new IMethodBinding[0]);
+		IMethodBinding[] inheritededMethodBindings= fInheritedMethods.toArray(new IMethodBinding[0]);
 		return new GenerateToStringDialog(shell, fEditor, type, fieldBindings, inheritedFieldBindings, selectedFieldBindings, methodBindings, inheritededMethodBindings);
 	}
 
+	@Override
 	IWorkspaceRunnable createOperation(Object[] selectedBindings, CodeGenerationSettings settings, boolean regenerate, IJavaElement type, IJavaElement elementPosition) {
 		return operation= GenerateToStringOperation.createOperation(fTypeBinding, selectedBindings, fUnit, elementPosition, (ToStringGenerationSettings)settings);
 	}
 	
+	@Override
 	CodeGenerationSettings createSettings(IType type, SourceActionDialog dialog) {
 		ToStringGenerationSettings settings= ((GenerateToStringDialog) dialog).getGenerationSettings();
 		super.createSettings(type, dialog).setSettings(settings);
@@ -179,10 +185,11 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 		return settings;
 	}
 
+	@Override
 	boolean generateCandidates() throws JavaModelException {
 		IVariableBinding[] candidateFields= fTypeBinding.getDeclaredFields();
-		HashMap fieldsToBindings= new HashMap();
-		HashMap selectedFieldsToBindings= new HashMap();
+		HashMap<IJavaElement, IVariableBinding> fieldsToBindings= new HashMap<IJavaElement, IVariableBinding>();
+		HashMap<IJavaElement, IVariableBinding> selectedFieldsToBindings= new HashMap<IJavaElement, IVariableBinding>();
 		for (int i= 0; i < candidateFields.length; i++) {
 			if (!Modifier.isStatic(candidateFields[i].getModifiers())) {
 				fieldsToBindings.put(candidateFields[i].getJavaElement(), candidateFields[i]);
@@ -192,24 +199,24 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 		}
 		IType type= (IType)fTypeBinding.getJavaElement();
 		IField[] allFields= type.getFields();
-		fFields= new ArrayList();
+		fFields= new ArrayList<IVariableBinding>();
 		populateMembers(fFields, allFields, fieldsToBindings);
-		fSelectedFields= new ArrayList();
+		fSelectedFields= new ArrayList<IVariableBinding>();
 		populateMembers(fSelectedFields, allFields, selectedFieldsToBindings);
 
 		IMethodBinding[] candidateMethods= fTypeBinding.getDeclaredMethods();
-		HashMap methodsToBindings= new HashMap();
+		HashMap<IJavaElement, IMethodBinding> methodsToBindings= new HashMap<IJavaElement, IMethodBinding>();
 		for (int i= 0; i < candidateMethods.length; i++) {
 			if (!Modifier.isStatic(candidateMethods[i].getModifiers()) && candidateMethods[i].getParameterTypes().length == 0
 					&& !candidateMethods[i].getReturnType().getName().equals("void") && !candidateMethods[i].getName().equals("toString") && !candidateMethods[i].getName().equals("clone")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				methodsToBindings.put(candidateMethods[i].getJavaElement(), candidateMethods[i]);
 			}
 		}
-		fMethods= new ArrayList();
+		fMethods= new ArrayList<IMethodBinding>();
 		populateMembers(fMethods, type.getMethods(), methodsToBindings);
 
-		fInheritedFields= new ArrayList();
-		fInheritedMethods= new ArrayList();
+		fInheritedFields= new ArrayList<IVariableBinding>();
+		fInheritedMethods= new ArrayList<IMethodBinding>();
 		ITypeBinding typeBinding= fTypeBinding;
 		while ((typeBinding= typeBinding.getSuperclass()) != null) {
 			type = (IType)typeBinding.getJavaElement();
@@ -246,18 +253,18 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 	 * @param membersToBindings map from {@link IMember} to {@link IBinding}
 	 * @since 3.6
 	 */
-	private static void populateMembers(List result, IMember[] allMembers, HashMap membersToBindings) {
+	private static <T extends IBinding> void populateMembers(List<T> result, IMember[] allMembers, HashMap<IJavaElement, T> membersToBindings) {
 		for (int i= 0; i < allMembers.length; i++) {
-			Object memberBinding= membersToBindings.remove(allMembers[i]);
+			T memberBinding= membersToBindings.remove(allMembers[i]);
 			if (memberBinding != null) {
 				result.add(memberBinding);
 			}
 		}
 	}
 
-	private static boolean contains(List inheritedFields, Object member) {
-		for (Iterator iterator= inheritedFields.iterator(); iterator.hasNext();) {
-			Object object= iterator.next();
+	private static <T extends IBinding> boolean contains(List<T> inheritedFields, T member) {
+		for (Iterator<T> iterator= inheritedFields.iterator(); iterator.hasNext();) {
+			T object= iterator.next();
 			if (object instanceof IVariableBinding && member instanceof IVariableBinding)
 				if (((IVariableBinding) object).getName().equals(((IVariableBinding) member).getName()))
 					return true;
@@ -268,18 +275,22 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 		return false;
 	}
 
+	@Override
 	String getAlreadyImplementedErrorMethodName() {
 		return ActionMessages.GenerateToStringAction_tostring;
 	}
 
+	@Override
 	boolean isMethodAlreadyImplemented(ITypeBinding typeBinding) {
 		return new ToStringInfo(typeBinding).foundToString;
 	}
 
+	@Override
 	String getErrorCaption() {
 		return ActionMessages.GenerateToStringAction_error_caption;
 	}
 
+	@Override
 	String getNoMembersError() {
 		//no members error never occurs
 		return null;

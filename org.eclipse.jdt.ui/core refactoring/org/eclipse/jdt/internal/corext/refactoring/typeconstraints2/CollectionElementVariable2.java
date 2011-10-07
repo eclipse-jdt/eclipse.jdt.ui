@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,6 +50,7 @@ public final class CollectionElementVariable2 extends ConstraintVariable2 {
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return fParentCv.hashCode() ^ fTypeVariableKey.hashCode();
 	}
@@ -57,6 +58,7 @@ public final class CollectionElementVariable2 extends ConstraintVariable2 {
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object other) {
 		if (this == other)
 			return true;
@@ -85,6 +87,7 @@ public final class CollectionElementVariable2 extends ConstraintVariable2 {
 //			return ((CollectionElementVariable2) fElementCv).getCompilationUnit();
 	}
 
+	@Override
 	public String toString() {
 		return "Elem[" + fParentCv.toString() + ", " + fTypeVariableKey + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}

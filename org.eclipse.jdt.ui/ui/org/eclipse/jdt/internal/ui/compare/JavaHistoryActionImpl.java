@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,7 +57,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -71,6 +70,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
@@ -194,7 +194,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		return true;
 	}
 
-	void applyChanges(ASTRewrite rewriter, final IDocument document, final ITextFileBuffer textFileBuffer, Shell shell, boolean inEditor, Map options)
+	void applyChanges(ASTRewrite rewriter, final IDocument document, final ITextFileBuffer textFileBuffer, Shell shell, boolean inEditor, Map<String, String> options)
 							throws CoreException, InvocationTargetException, InterruptedException {
 
 
@@ -333,7 +333,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 			throw new IllegalArgumentException();
 		}
 		try {
-			ASTParser c= ASTParser.newParser(AST.JLS3);
+			ASTParser c= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			c.setSource(unit);
 			c.setFocalPosition(0);
 			c.setResolveBindings(false);

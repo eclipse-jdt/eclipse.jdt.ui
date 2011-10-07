@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 public class ClasspathContainerDefaultPage extends NewElementWizardPage implements IClasspathContainerPage, IClasspathContainerPageExtension {
 
 	private StringDialogField fEntryField;
-	private ArrayList fUsedPaths;
+	private ArrayList<IPath> fUsedPaths;
 
 	/**
 	 * Constructor for ClasspathContainerDefaultPage.
@@ -56,7 +56,7 @@ public class ClasspathContainerDefaultPage extends NewElementWizardPage implemen
 		setDescription(NewWizardMessages.ClasspathContainerDefaultPage_description);
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
 
-		fUsedPaths= new ArrayList();
+		fUsedPaths= new ArrayList<IPath>();
 
 		fEntryField= new StringDialogField();
 		fEntryField.setLabelText(NewWizardMessages.ClasspathContainerDefaultPage_path_label);

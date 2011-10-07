@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,11 +69,12 @@ public class ResetAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getDetailedDescription() {
 		if (!isEnabled())
 			return null;
 
-		Iterator iterator= getSelectedElements().iterator();
+		Iterator<?> iterator= getSelectedElements().iterator();
 		Object p= iterator.next();
 		while (iterator.hasNext()) {
 			Object q= iterator.next();
@@ -95,6 +96,7 @@ public class ResetAction extends BuildpathModifierAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void run() {
 		final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -109,7 +111,7 @@ public class ResetAction extends BuildpathModifierAction {
 						project= ((CPListElementAttribute)firstElement).getParent().getJavaProject();
 					}
 
-					List result= reset(getSelectedElements(), project, monitor);
+					List<Object> result= reset(getSelectedElements(), project, monitor);
 					selectAndReveal(new StructuredSelection(result));
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
@@ -128,13 +130,13 @@ public class ResetAction extends BuildpathModifierAction {
         }
 	}
 
-	private List reset(List selection, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	private List<Object> reset(List<?> selection, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 	    if (monitor == null)
         	monitor= new NullProgressMonitor();
         try {
         	monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Resetting, selection.size());
-        	List entries= ClasspathModifier.getExistingEntries(project);
-        	List result= new ArrayList();
+        	List<CPListElement> entries= ClasspathModifier.getExistingEntries(project);
+        	List<Object> result= new ArrayList<Object>();
         	for (int i= 0; i < selection.size(); i++) {
         		Object element= selection.get(i);
         		if (element instanceof IJavaElement) {
@@ -158,7 +160,7 @@ public class ResetAction extends BuildpathModifierAction {
         	ClasspathModifier.commitClassPath(entries, project, null);
 
         	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
-        	delta.setNewEntries((CPListElement[])entries.toArray(new CPListElement[entries.size()]));
+        	delta.setNewEntries(entries.toArray(new CPListElement[entries.size()]));
         	informListeners(delta);
 
         	return result;
@@ -167,9 +169,10 @@ public class ResetAction extends BuildpathModifierAction {
         }
     }
 
+	@Override
 	protected boolean canHandle(IStructuredSelection elements) {
 		try {
-	        for (Iterator iterator= elements.iterator(); iterator.hasNext();) {
+	        for (Iterator<?> iterator= elements.iterator(); iterator.hasNext();) {
 	            Object element= iterator.next();
 	            if (element instanceof IJavaProject) {
 	            	IJavaProject project= (IJavaProject)element;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -95,6 +95,7 @@ public final class JarRefactoringDialog extends TrayDialog {
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
@@ -102,18 +103,19 @@ public final class JarRefactoringDialog extends TrayDialog {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void buttonPressed(final int buttonId) {
 		if (buttonId == IDialogConstants.OK_ID) {
 			fData.setRefactoringAware(true);
 			final RefactoringDescriptorProxy[] descriptors= fHistoryControl.getCheckedDescriptors();
-			Set set= new HashSet();
+			Set<IProject> set= new HashSet<IProject>();
 			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 			for (int index= 0; index < descriptors.length; index++) {
 				final String project= descriptors[index].getProject();
 				if (project != null && !"".equals(project)) //$NON-NLS-1$
 					set.add(root.getProject(project));
 			}
-			fData.setRefactoringProjects((IProject[]) set.toArray(new IProject[set.size()]));
+			fData.setRefactoringProjects(set.toArray(new IProject[set.size()]));
 			fData.setRefactoringDescriptors(descriptors);
 			fData.setExportStructuralOnly(fExportStructural.getSelection());
 			final IDialogSettings settings= fSettings;
@@ -126,6 +128,7 @@ public final class JarRefactoringDialog extends TrayDialog {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void configureShell(final Shell shell) {
 		super.configureShell(shell);
 		shell.setText(JarPackagerMessages.JarRefactoringDialog_dialog_title);
@@ -135,6 +138,7 @@ public final class JarRefactoringDialog extends TrayDialog {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void create() {
 		super.create();
 		getButton(OK).setEnabled(!fHistory.isEmpty());
@@ -143,6 +147,7 @@ public final class JarRefactoringDialog extends TrayDialog {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Control createDialogArea(final Composite parent) {
 		final Composite container= (Composite) super.createDialogArea(parent);
 		initializeDialogUnits(container);
@@ -154,6 +159,7 @@ public final class JarRefactoringDialog extends TrayDialog {
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
 		final RefactoringHistoryControlConfiguration configuration= new RefactoringHistoryControlConfiguration(null, true, true) {
 
+			@Override
 			public final String getWorkspaceCaption() {
 				return JarPackagerMessages.JarRefactoringDialog_workspace_caption;
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,8 +48,10 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE);
 	}
 
+	@Override
 	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
 		return new RenameFieldInputWizardPage(message, IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE, initialSetting) {
+			@Override
 			protected RefactoringStatus validateTextField(String text) {
 				RefactoringStatus result= validateNewName(text);
 				updateGetterSetterLabels();
@@ -69,6 +71,7 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			super(message, contextHelpId, true, initialValue);
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			super.createControl(parent);
 			Composite parentComposite= (Composite)getControl();
@@ -93,6 +96,7 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			getRenameFieldProcessor().setRenameGetter(getterSelection);
 			fRenameGetter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fRenameGetter.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					getRenameFieldProcessor().setRenameGetter(fRenameGetter.getSelection());
 					updateLeaveDelegateCheckbox(getRenameFieldProcessor().getDelegateCount());
@@ -107,6 +111,7 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			getRenameFieldProcessor().setRenameSetter(setterSelection);
 			fRenameSetter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fRenameSetter.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					getRenameFieldProcessor().setRenameSetter(fRenameSetter.getSelection());
 					updateLeaveDelegateCheckbox(getRenameFieldProcessor().getDelegateCount());
@@ -118,6 +123,7 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			Dialog.applyDialogFont(composite);
 		}
 
+		@Override
 		public void dispose() {
 			if (saveSettings()) {
 				if (fRenameGetter.isEnabled())

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,9 +29,9 @@ public class TypedElementSelectionValidator implements ISelectionStatusValidator
 	private IStatus fgErrorStatus= new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 	private IStatus fgOKStatus= new StatusInfo();
 
-	private Class[] fAcceptedTypes;
+	private Class<?>[] fAcceptedTypes;
 	private boolean fAllowMultipleSelection;
-	private Collection fRejectedElements;
+	private Collection<?> fRejectedElements;
 
 	/**
 	 * @param acceptedTypes The types accepted by the validator
@@ -48,7 +48,7 @@ public class TypedElementSelectionValidator implements ISelectionStatusValidator
 	 * allows multiple selection.
 	 * @param rejectedElements A list of elements that are not accepted
 	 */
-	public TypedElementSelectionValidator(Class[] acceptedTypes, boolean allowMultipleSelection, Collection rejectedElements) {
+	public TypedElementSelectionValidator(Class<?>[] acceptedTypes, boolean allowMultipleSelection, Collection rejectedElements) {
 		Assert.isNotNull(acceptedTypes);
 		fAcceptedTypes= acceptedTypes;
 		fAllowMultipleSelection= allowMultipleSelection;

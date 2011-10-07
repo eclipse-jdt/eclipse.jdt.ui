@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 Dakshinamurthy Karra, IBM Corporation and others.
+ * Copyright (c) 2007, 2011 Dakshinamurthy Karra, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,6 +91,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	/*
 	 * @see org.eclipse.ui.texteditor.templates.AbstractTemplatesPage#insertTemplate(org.eclipse.jface.text.templates.Template, org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	protected void insertTemplate(Template template, IDocument document) {
 		if (!fJavaEditor.validateEditorInputState())
 			return;
@@ -150,6 +151,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.templates.AbstractTemplatesPage#getContextTypeRegistry()
 	 */
+	@Override
 	protected ContextTypeRegistry getContextTypeRegistry() {
 		return TEMPLATE_CONTEXT_REGISTRY;
 	}
@@ -157,6 +159,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.templates.AbstractTemplatesPage#getTemplatePreferenceStore()
 	 */
+	@Override
 	protected IPreferenceStore getTemplatePreferenceStore() {
 		return PREFERENCE_STORE;
 	}
@@ -164,6 +167,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.templates.AbstractTemplatesPage#getTemplateStore()
 	 */
+	@Override
 	public TemplateStore getTemplateStore() {
 		return TEMPLATE_STORE;
 	}
@@ -171,6 +175,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	/*
 	 * @see org.eclipse.ui.texteditor.templates.TextEditorTemplatesPage#isValidTemplate(org.eclipse.jface.text.templates.Template, int, int)
 	 */
+	@Override
 	protected boolean isValidTemplate(IDocument document, Template template, int offset, int length) {
 		String[] contextIds= getContextTypeIds(document, offset);
 		for (int i= 0; i < contextIds.length; i++) {
@@ -185,6 +190,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.templates.TextEditorTemplatesPage#createPatternViewer(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected SourceViewer createPatternViewer(Composite parent) {
 		IDocument document= new Document();
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
@@ -211,6 +217,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.templates.AbstractTemplatesPage#getImageForTemplate(org.eclipse.jface.text.templates.Template)
 	 */
+	@Override
 	protected Image getImage(Template template) {
 		String contextId= template.getContextTypeId();
 		if (SWTContextType.ID_ALL.equals(contextId) || SWTContextType.ID_STATEMENTS.equals(contextId) || SWTContextType.ID_MEMBERS.equals(contextId))
@@ -221,6 +228,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	/*
 	 * @see org.eclipse.ui.texteditor.templates.TextEditorTemplatesPage#editTemplate(org.eclipse.jface.text.templates.Template, boolean, boolean)
 	 */
+	@Override
 	protected Template editTemplate(Template template, boolean edit, boolean isNameModifiable) {
 		EditTemplateDialog dialog= new EditTemplateDialog(getSite().getShell(), template, edit, isNameModifiable, getContextTypeRegistry());
 		if (dialog.open() == Window.OK)
@@ -231,6 +239,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	/*
 	 * @see org.eclipse.ui.texteditor.templates.TextEditorTemplatesPage#updatePatternViewer(org.eclipse.jface.text.templates.Template)
 	 */
+	@Override
 	protected void updatePatternViewer(Template template) {
 		if (template == null) {
 			getPatternViewer().getDocument().set(""); //$NON-NLS-1$
@@ -256,6 +265,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.templates.AbstractTemplatesPage#getPreferencePageId()
 	 */
+	@Override
 	protected String getPreferencePageId() {
 		return PREFERENCE_PAGE_ID;
 	}
@@ -342,6 +352,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	 * @param offset the offset
 	 * @return an array of valid context id
 	 */
+	@Override
 	protected String[] getContextTypeIds(IDocument document, int offset) {
 		try {
 			String partition= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);

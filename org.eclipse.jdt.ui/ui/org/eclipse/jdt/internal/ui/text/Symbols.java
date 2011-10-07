@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
+
 
 /**
  * Symbols for the heuristic java scanner.
@@ -31,6 +32,8 @@ public interface Symbols {
 	int TokenEQUAL= 12;
 	int TokenLESSTHAN= 13;
 	int TokenGREATERTHAN= 14;
+	int TokenPLUS= 15;
+	int TokenAT= 16;
 	int TokenIF= 109;
 	int TokenDO= 1010;
 	int TokenFOR= 1011;
@@ -51,5 +54,6 @@ public interface Symbols {
 	int TokenCLASS= 1026;
 	int TokenINTERFACE= 1027;
 	int TokenENUM= 1028;
+	int TokenTHROWS= 1029;
 	int TokenIDENT= 2000;
 }

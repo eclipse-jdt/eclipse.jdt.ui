@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,10 +82,6 @@ public class OpenTextEditorStartupTest extends StartupPerformanceTestCase {
 
 	public void testTextEditorStartup() {
 		PerformanceMeter perfMeter= createPerformanceMeterForSummary(SHORT_NAME, Dimension.ELAPSED_PROCESS);
-		explainDegradation("The startup with open Text editor performance has been decreased due to general start-up time degradation. " +
-				"See the org.eclipse.core.tests.runtime.perf.UIStartupTest.testUIApplicationStartup performance test on the detailed org.eclipse.core " +
-				"performance results page.", perfMeter);
 		measureStartup(perfMeter);
-
 	}
 }

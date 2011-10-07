@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,13 +20,13 @@ import org.eclipse.core.resources.IProject;
 public class RefactoringProcessors {
 
 	public static String[] getNatures(IProject[] projects) throws CoreException {
-		Set result= new HashSet();
+		Set<String> result= new HashSet<String>();
 		for (int i= 0; i < projects.length; i++) {
 			String[] pns= projects[i].getDescription().getNatureIds();
 			for (int p = 0; p < pns.length; p++) {
 				result.add(pns[p]);
 			}
 		}
-		return (String[])result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 }

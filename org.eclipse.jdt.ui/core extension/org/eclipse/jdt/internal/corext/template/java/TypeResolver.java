@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,13 +42,14 @@ public class TypeResolver extends TemplateVariableResolver {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
 	 */
+	@Override
 	public void resolve(TemplateVariable variable, TemplateContext context) {
-		List params= variable.getVariableType().getParams();
+		List<String> params= variable.getVariableType().getParams();
 		String param;
 		if (params.size() == 0)
 			param= fDefaultType;
 		else
-			param= (String) params.get(0);
+			param= params.get(0);
 
 		JavaContext jc= (JavaContext) context;
 		MultiVariable mv= (MultiVariable) variable;

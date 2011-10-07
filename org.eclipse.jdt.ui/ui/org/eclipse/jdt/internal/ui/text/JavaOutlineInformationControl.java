@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -36,6 +37,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -77,6 +79,7 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.FocusDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
 
 /**
@@ -98,7 +101,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	private LexicalSortingAction fLexicalSortingAction;
 	private SortByDefiningTypeAction fSortByDefiningTypeAction;
 	private ShowOnlyMainTypeAction fShowOnlyMainTypeAction;
-	private Map fTypeHierarchies= new HashMap();
+	private Map<IType, ITypeHierarchy> fTypeHierarchies= new HashMap<IType, ITypeHierarchy>();
 
 	/**
 	 * Category filter action group.
@@ -112,12 +115,13 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		private boolean fShowDefiningType;
 
 		private OutlineLabelProvider() {
-			super(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE | JavaElementLabels.ALL_CATEGORY, AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
+			super(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE | JavaElementLabels.ALL_CATEGORY | JavaElementLabels.P_COMPRESSED, AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 		}
 
 		/*
 		 * @see ILabelProvider#getText
 		 */
+		@Override
 		public String getText(Object element) {
 			String text= super.getText(element);
 			if (fShowDefiningType) {
@@ -138,6 +142,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getForeground(java.lang.Object)
 		 */
+		@Override
 		public Color getForeground(Object element) {
 			if (fOutlineContentProvider.isShowingInheritedMembers()) {
 				if (element instanceof IJavaElement) {
@@ -181,6 +186,19 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			}
 			return res.getDeclaringType();
 		}
+
+		/*
+		 * @see ILabelProvider#getImage
+		 */
+		@Override
+		public Image getImage(Object element) {
+			if (element.equals(fInitiallySelectedType) || (element instanceof IMember && ((IMember)element).getDeclaringType() == null)) {
+				ImageDescriptor desc= fImageLabelProvider.getJavaImageDescriptor((IJavaElement)element, (evaluateImageFlags(element)));
+				Image image= JavaPlugin.getImageDescriptorRegistry().get(new FocusDescriptor(desc));
+				return decorateImage(image, element);
+			}
+			return super.getImage(element);
+		}
 	}
 
 
@@ -196,6 +214,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		protected Object[] getFilteredChildren(Object parent) {
 			Object[] result = getRawChildren(parent);
 			int unfilteredChildren= result.length;
@@ -211,6 +230,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		protected void internalExpandToLevel(Widget node, int level) {
 			if (!fIsFiltering && node instanceof TreeItem && getMatcher() == null) {
 				TreeItem treeItem= (TreeItem)node;
@@ -282,6 +302,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public Object[] getChildren(Object element) {
 			if (fShowOnlyMainType) {
 				if (element instanceof ITypeRoot) {
@@ -294,10 +315,10 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 			if (fShowInheritedMembers && element instanceof IType) {
 				IType type= (IType)element;
-				if (type.getDeclaringType() == null) {
+				if (type.getDeclaringType() == null || type.equals(fInitiallySelectedType)) {
 					ITypeHierarchy th= getSuperTypeHierarchy(type);
 					if (th != null) {
-						List children= new ArrayList();
+						List<Object> children= new ArrayList<Object>();
 						IType[] superClasses= th.getAllSupertypes(type);
 						children.addAll(Arrays.asList(super.getChildren(type)));
 						for (int i= 0, scLength= superClasses.length; i < scLength; i++)
@@ -312,6 +333,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			super.inputChanged(viewer, oldInput, newInput);
 			fTypeHierarchies.clear();
@@ -320,6 +342,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void dispose() {
 			super.dispose();
 			if (fCategoryFilterActionGroup != null) {
@@ -355,6 +378,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		/*
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
+		@Override
 		public void run() {
 			setTopLevelTypeOnly(!fShowOnlyMainType);
 		}
@@ -388,6 +412,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		 * @see org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter#getHierarchy(org.eclipse.jdt.core.IType)
 		 * @since 3.2
 		 */
+		@Override
 		protected ITypeHierarchy getHierarchy(IType type) {
 			return getSuperTypeHierarchy(type);
 		}
@@ -396,6 +421,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		 * @see org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter#isSortByDefiningType()
 		 * @since 3.2
 		 */
+		@Override
 		public boolean isSortByDefiningType() {
 			return fSortByDefiningTypeAction.isChecked();
 		}
@@ -404,6 +430,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		 * @see org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter#isSortAlphabetically()
 		 * @since 3.2
 		 */
+		@Override
 		public boolean isSortAlphabetically() {
 			return fLexicalSortingAction.isChecked();
 		}
@@ -430,6 +457,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LEXICAL_SORTING_BROWSING_ACTION);
 		}
 
+		@Override
 		public void run() {
 			valueChanged(isChecked(), true);
 		}
@@ -478,6 +506,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		/*
 		 * @see Action#actionPerformed
 		 */
+		@Override
 		public void run() {
 			BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
 				public void run() {
@@ -506,12 +535,13 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		private StringMatcher fMatcher1;
 		private StringMatcher fMatcher2;
 
-		private OrStringMatcher(String pattern1, String pattern2, boolean ignoreCase, boolean foo) {
+		private OrStringMatcher(String pattern1, String pattern2, boolean ignoreCase) {
 			super("", false, false); //$NON-NLS-1$
 			fMatcher1= new StringMatcher(pattern1, ignoreCase, false);
 			fMatcher2= new StringMatcher(pattern2, ignoreCase, false);
 		}
 
+		@Override
 		public boolean match(String text) {
 			return fMatcher2.match(text) || fMatcher1.match(text);
 		}
@@ -534,6 +564,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Text createFilterText(Composite parent) {
 		Text text= super.createFilterText(parent);
 		text.addKeyListener(getKeyAdapter());
@@ -543,6 +574,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected TreeViewer createTreeViewer(Composite parent, int style) {
 		Tree tree= new Tree(parent, SWT.SINGLE | (style & ~SWT.MULTI));
 		GridData gd= new GridData(GridData.FILL_BOTH);
@@ -583,6 +615,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected String getStatusFieldText() {
 		KeySequence[] sequences= getInvokingCommandKeySequences();
 		if (sequences == null || sequences.length == 0)
@@ -600,6 +633,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#getId()
 	 * @since 3.0
 	 */
+	@Override
 	protected String getId() {
 		return "org.eclipse.jdt.internal.ui.text.QuickOutline"; //$NON-NLS-1$
 	}
@@ -607,6 +641,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setInput(Object information) {
 		if (information == null || information instanceof String) {
 			inputChanged(null, null);
@@ -627,6 +662,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	private KeyAdapter getKeyAdapter() {
 		if (fKeyAdapter == null) {
 			fKeyAdapter= new KeyAdapter() {
+				@Override
 				public void keyPressed(KeyEvent e) {
 					int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
 					KeySequence keySequence = KeySequence.getInstance(SWTKeySupport.convertAcceleratorToKeyStroke(accelerator));
@@ -658,6 +694,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#fillViewMenu(org.eclipse.jface.action.IMenuManager)
 	 */
+	@Override
 	protected void fillViewMenu(IMenuManager viewMenu) {
 		super.fillViewMenu(viewMenu);
 		viewMenu.add(fShowOnlyMainTypeAction);
@@ -675,6 +712,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#setMatcherString(java.lang.String, boolean)
 	 * @since 3.2
 	 */
+	@Override
 	protected void setMatcherString(String pattern, boolean update) {
 		fPattern= pattern;
 		if (pattern.length() == 0 || !fSortByDefiningTypeAction.isChecked()) {
@@ -684,7 +722,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 		boolean ignoreCase= pattern.toLowerCase().equals(pattern);
 		String pattern2= "*" + JavaElementLabels.CONCAT_STRING + pattern; //$NON-NLS-1$
-		fStringMatcher= new OrStringMatcher(pattern, pattern2, ignoreCase, false);
+		fStringMatcher= new OrStringMatcher(pattern, pattern2, ignoreCase);
 
 		if (update)
 			stringMatcherUpdated();
@@ -721,7 +759,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	}
 
 	private ITypeHierarchy getSuperTypeHierarchy(IType type) {
-		ITypeHierarchy th= (ITypeHierarchy)fTypeHierarchies.get(type);
+		ITypeHierarchy th= fTypeHierarchies.get(type);
 		if (th == null) {
 			try {
 				th= SuperTypeHierarchyCache.getTypeHierarchy(type, getProgressMonitor());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Mateusz Matela and others.
+ * Copyright (c) 2008, 2011 Mateusz Matela and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,6 +77,7 @@ public class StringBuilderChainGenerator extends StringBuilderGenerator {
 		}
 	}
 
+	@Override
 	protected void addElement(Object element, Block block) {
 		if (block != temporaryBlock) {
 			flushTemporaryExpression();
@@ -90,6 +91,7 @@ public class StringBuilderChainGenerator extends StringBuilderGenerator {
 		}
 	}
 
+	@Override
 	protected void addMemberCheckNull(Object member, boolean addSeparator) {
 		IfStatement ifStatement= fAst.newIfStatement();
 		ifStatement.setExpression(createInfixExpression(createMemberAccessExpression(member, true, true), Operator.NOT_EQUALS, fAst.newNullLiteral()));
@@ -111,6 +113,7 @@ public class StringBuilderChainGenerator extends StringBuilderGenerator {
 		toStringMethod.getBody().statements().add(ifStatement);
 	}
 
+	@Override
 	protected void complete() throws CoreException {
 		flushTemporaryExpression();
 		super.complete();

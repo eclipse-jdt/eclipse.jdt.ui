@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -134,12 +134,14 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean close() {
 		getDialogSettings().put(SETTINGS_INSTANCEOF, fUseInstanceOf);
 		getDialogSettings().put(SETTINGS_BLOCKS, fUseBlocks);
 		return super.close();
 	}
 
+	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.GENERATE_HASHCODE_EQUALS_SELECTION_DIALOG);
@@ -148,6 +150,7 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Composite createCommentSelection(final Composite parent) {
 		final Composite composite= super.createCommentSelection(parent);
 
@@ -156,6 +159,7 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 
 		button.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				setUseInstanceOf((((Button) event.widget).getSelection()));
 			}
@@ -170,6 +174,7 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 		
 		button.addSelectionListener(new SelectionAdapter() {
 			
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				setUseBlocks((((Button) event.widget).getSelection()));
 			}

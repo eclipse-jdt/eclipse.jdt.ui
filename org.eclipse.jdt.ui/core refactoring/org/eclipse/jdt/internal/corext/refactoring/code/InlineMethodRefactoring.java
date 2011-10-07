@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,7 +49,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -82,6 +81,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
@@ -187,6 +187,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		return null;
 	}
 
+	@Override
 	public String getName() {
 		return RefactoringCoreMessages.InlineMethodRefactoring_name;
 	}
@@ -244,6 +245,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		return fTargetProvider.checkActivation();
 	}
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		if (fSourceProvider == null && Invocations.isInvocation(fInitialNode)) {
@@ -256,6 +258,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		return result;
 	}
 
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 20); //$NON-NLS-1$
 		fChangeManager= new TextChangeManager();
@@ -350,6 +353,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		return result;
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		if (fDeleteSource && fCurrentMode == Mode.INLINE_ALL) {
 			TextChange change= fChangeManager.get((ICompilationUnit) fSourceProvider.getTypeRoot());
@@ -369,7 +373,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			}
 			change.addTextEditGroup(description);
 		}
-		final Map arguments= new HashMap();
+		final Map<String, String> arguments= new HashMap<String, String>();
 		String project= null;
 		IJavaProject javaProject= fInitialTypeRoot.getJavaProject();
 		if (javaProject != null)
@@ -411,7 +415,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			CompilationUnit methodDeclarationAstRoot;
 			ICompilationUnit methodCu= method.getCompilationUnit();
 			if (methodCu != null) {
-				methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(methodCu, true);
+				methodDeclarationAstRoot= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(methodCu, true);
 			} else {
 				IClassFile classFile= method.getClassFile();
 				if (! JavaElementUtil.isSourceAvailable(classFile)) {
@@ -419,7 +423,7 @@ public class InlineMethodRefactoring extends Refactoring {
 					status.addFatalError(Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_error_classFile, methodLabel));
 					return null;
 				}
-				methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(classFile, true);
+				methodDeclarationAstRoot= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(classFile, true);
 			}
 			ASTNode node= methodDeclarationAstRoot.findDeclaringNode(methodBinding.getMethodDeclaration().getKey());
 			if (node instanceof MethodDeclaration) {
@@ -431,7 +435,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 
 	private IFile[] getFilesToBeModified(ICompilationUnit[] units) {
-		List result= new ArrayList(units.length + 1);
+		List<IFile> result= new ArrayList<IFile>(units.length + 1);
 		IFile file;
 		for (int i= 0; i < units.length; i++) {
 			file= getFile(units[i]);
@@ -443,7 +447,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			if (file != null && !result.contains(file))
 				result.add(file);
 		}
-		return (IFile[])result.toArray(new IFile[result.size()]);
+		return result.toArray(new IFile[result.size()]);
 	}
 
 	private IFile getFile(ICompilationUnit unit) {
@@ -514,12 +518,12 @@ public class InlineMethodRefactoring extends Refactoring {
 		for (int i= 0; i < invocations.length; i++) {
 			removeNestedCalls(status, unit, parents, invocations, i);
 		}
-		List result= new ArrayList();
+		List<ASTNode> result= new ArrayList<ASTNode>();
 		for (int i= 0; i < invocations.length; i++) {
 			if (invocations[i] != null)
 				result.add(invocations[i]);
 		}
-		return (ASTNode[])result.toArray(new ASTNode[result.size()]);
+		return result.toArray(new ASTNode[result.size()]);
 	}
 
 	private void removeNestedCalls(RefactoringStatus status, ICompilationUnit unit, ASTNode[] parents, ASTNode[] invocations, int index) {

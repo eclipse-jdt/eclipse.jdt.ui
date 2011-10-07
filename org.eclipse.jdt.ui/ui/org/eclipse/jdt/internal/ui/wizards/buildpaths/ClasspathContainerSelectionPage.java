@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 
 
 	private static class ClasspathContainerLabelProvider extends LabelProvider {
+		@Override
 		public String getText(Object element) {
 			return ((ClasspathContainerDescriptor) element).getName();
 		}
@@ -56,7 +57,8 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 
 	/**
 	 * Constructor for ClasspathContainerWizardPage.
-	 * @param containerPages
+	 * 
+	 * @param containerPages the array of container pages
 	 */
 	protected ClasspathContainerSelectionPage(ClasspathContainerDescriptor[] containerPages) {
 		super("ClasspathContainerWizardPage"); //$NON-NLS-1$
@@ -136,6 +138,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 	/* (non-Javadoc)
 	 * @see IWizardPage#canFlipToNextPage()
 	 */
+	@Override
 	public boolean canFlipToNextPage() {
 		return isPageComplete(); // avoid the getNextPage call to prevent potential plugin load
 	}
@@ -143,6 +146,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		if (!visible && fListViewer != null) {
 			fDialogSettings.put(DIALOGSTORE_CONTAINER_IDX, fListViewer.getList().getSelectionIndex());

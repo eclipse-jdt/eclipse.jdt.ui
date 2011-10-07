@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,12 +82,14 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		status.merge(initializeStatus);
 	}
 
+	@Override
 	public boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isRenameNonVirtualMethodAvailable(getMethod());
 	}
 
 	//----------- preconditions --------------
 
+	@Override
 	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext checkContext) throws CoreException {
 		try{
 			pm.beginTask("", 3); //$NON-NLS-1$
@@ -126,6 +128,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	/*
 	 * @see RenameMethodProcessor#addOccurrences(org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager, org.eclipse.core.runtime.IProgressMonitor, RefactoringStatus)
 	 */
+	@Override
 	protected void addOccurrences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		// declaration update must be registered first

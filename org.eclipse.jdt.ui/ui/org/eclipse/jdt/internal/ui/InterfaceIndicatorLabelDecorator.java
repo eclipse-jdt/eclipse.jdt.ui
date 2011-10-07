@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,10 @@ package org.eclipse.jdt.internal.ui;
 
 import java.util.List;
 
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Point;
+
+import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IDecoration;
 
@@ -34,45 +38,88 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDecorator {
 
+	private static class TypeIndicatorOverlay extends CompositeImageDescriptor {
+		private static Point fgSize;
+		
+		private final ImageDescriptor fType;
+		private final boolean fDeprecated;
+		private final boolean fPackageDefault;
+	
+		public TypeIndicatorOverlay(ImageDescriptor type, boolean deprecated, boolean packageDefault) {
+			fType= type;
+			fDeprecated= deprecated;
+			fPackageDefault= packageDefault;
+		}
+		
+		/*
+		 * @see org.eclipse.jface.resource.CompositeImageDescriptor#drawCompositeImage(int, int)
+		 */
+		@Override
+		protected void drawCompositeImage(int width, int height) {
+			if (fDeprecated) {
+				ImageData imageData= JavaPluginImages.DESC_OVR_DEPRECATED.getImageData();
+				drawImage(imageData, -1, 1); // looks better, esp. together with interface indicator
+			}
+			if (fType != null) { // on top of deprecated indicator
+				ImageData imageData= fType.getImageData();
+				drawImage(imageData, width - imageData.width, 0);
+			}
+			if (fPackageDefault) {
+				ImageData imageData= JavaPluginImages.DESC_OVR_DEFAULT.getImageData();
+				drawImage(imageData, width - imageData.width, height - imageData.height);
+			}
+		}
+		
+		/*
+		 * @see org.eclipse.jface.resource.CompositeImageDescriptor#getSize()
+		 */
+		@Override
+		protected Point getSize() {
+			if (fgSize == null) {
+				ImageData imageData= JavaPluginImages.DESC_OVR_DEPRECATED.getImageData();
+				fgSize= new Point(imageData.width, imageData.height);
+			}
+			return fgSize;
+		}
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void decorate(Object element, IDecoration decoration) {
 		try {
-			ImageDescriptor overlay= getOverlay(element);
-			if (overlay == null)
-				return;
-
-			decoration.addOverlay(overlay, IDecoration.TOP_RIGHT);
+			addOverlays(element, decoration);
 		} catch (JavaModelException e) {
 			return;
 		}
 	}
 
-	private ImageDescriptor getOverlay(Object element) throws JavaModelException {
+	private void addOverlays(Object element, IDecoration decoration) throws JavaModelException {
 		if (element instanceof ICompilationUnit) {
 			ICompilationUnit unit= (ICompilationUnit) element;
 			if (unit.isOpen()) {
 				IType mainType= unit.findPrimaryType();
 				if (mainType != null) {
-					return getOverlayFromFlags(mainType.getFlags());
+					addOverlaysFromFlags(mainType.getFlags(), decoration);
 				}
-				return null;
+				return;
 			}
 			String typeName= JavaCore.removeJavaLikeExtension(unit.getElementName());
-			return getOverlayWithSearchEngine(unit, typeName);
+			addOverlaysWithSearchEngine(unit, typeName, decoration);
+			
 		} else if (element instanceof IClassFile) {
 			IClassFile classFile= (IClassFile) element;
 			if (classFile.isOpen()) {
-				return getOverlayFromFlags(classFile.getType().getFlags());
+				addOverlaysFromFlags(classFile.getType().getFlags(), decoration);
+			} else {
+				String typeName= classFile.getType().getElementName();
+				addOverlaysWithSearchEngine(classFile, typeName, decoration);
 			}
-			String typeName= classFile.getType().getElementName();
-			return getOverlayWithSearchEngine(classFile, typeName);
 		}
-		return null;
 	}
 
-	private ImageDescriptor getOverlayWithSearchEngine(ITypeRoot element, String typeName) {
+	private void addOverlaysWithSearchEngine(ITypeRoot element, String typeName, IDecoration decoration) {
 		SearchEngine engine= new SearchEngine();
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element });
 
@@ -85,8 +132,9 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		}
 
 		TypeNameRequestor requestor= new TypeNameRequestor() {
+			@Override
 			public void acceptType(int modifiers, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
-				if (enclosingTypeNames.length == 0 && Flags.isPublic(modifiers)) {
+				if (enclosingTypeNames.length == 0 /*&& Flags.isPublic(modifiers)*/) {
 					throw new Result(modifiers);
 				}
 			}
@@ -97,28 +145,46 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 			int matchRule = SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
 			engine.searchAllTypeNames(packName.toCharArray(), matchRule, typeName.toCharArray(), matchRule, IJavaSearchConstants.TYPE, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH , null);
 		} catch (Result e) {
-			return getOverlayFromFlags(e.modifiers);
+			addOverlaysFromFlags(e.modifiers, decoration);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		return null;
 
 	}
-
-	private ImageDescriptor getOverlayFromFlags(int flags)  {
+	
+	private void addOverlaysFromFlags(int flags, IDecoration decoration) {
+		ImageDescriptor type;
 		if (Flags.isAnnotation(flags)) {
-			return JavaPluginImages.DESC_OVR_ANNOTATION;
+			type= JavaPluginImages.DESC_OVR_ANNOTATION;
 		} else if (Flags.isEnum(flags)) {
-			return JavaPluginImages.DESC_OVR_ENUM;
+			type= JavaPluginImages.DESC_OVR_ENUM;
 		} else if (Flags.isInterface(flags)) {
-			return JavaPluginImages.DESC_OVR_INTERFACE;
+			type= JavaPluginImages.DESC_OVR_INTERFACE;
 		} else if (/* is class */ Flags.isAbstract(flags)) {
-			return JavaPluginImages.DESC_OVR_ABSTRACT_CLASS;
+			type= JavaPluginImages.DESC_OVR_ABSTRACT_CLASS;
+		} else {
+			type= null;
 		}
-		return null;
+		
+		boolean deprecated= Flags.isDeprecated(flags);
+		boolean packageDefault= Flags.isPackageDefault(flags);
+		
+		/* Each decoration position can only be used once. Since we don't want to take all positions
+		 * away from other decorators, we confine ourselves to only use the top right position. */
+		
+		if (type != null && !deprecated && !packageDefault) {
+			decoration.addOverlay(type, IDecoration.TOP_RIGHT);
+			
+		} else if (type == null && deprecated && !packageDefault) {
+			decoration.addOverlay(JavaPluginImages.DESC_OVR_DEPRECATED, IDecoration.TOP_RIGHT);
+			
+		} else if (type != null || deprecated || packageDefault) {
+			decoration.addOverlay(new TypeIndicatorOverlay(type, deprecated, packageDefault), IDecoration.TOP_RIGHT);
+		}
 	}
 
-	protected void processDelta(IJavaElementDelta delta, List result) {
+	@Override
+	protected void processDelta(IJavaElementDelta delta, List<IJavaElement> result) {
 		IJavaElement elem= delta.getElement();
 
 		boolean isChanged= delta.getKind() == IJavaElementDelta.CHANGED;

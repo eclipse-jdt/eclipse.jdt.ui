@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IFile;
@@ -107,6 +108,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEscapes;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
@@ -174,7 +176,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 					return new Integer(substitution.getState());
 				}
 				if (res != null) {
-					return unwindEscapeChars(res);
+					return getEscapedAsciiString(res);
 				}
 				return ""; //$NON-NLS-1$
 			}
@@ -191,12 +193,22 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 					NLSSubstitution substitution= (NLSSubstitution) data;
 					if (PROPERTIES[KEY_PROP].equals(property)) {
 						String string = (String)value;
-						string = windEscapeChars(string);
+						try {
+							string= PropertiesFileEscapes.unescape(string);
+						} catch (CoreException e) {
+							setPageComplete(RefactoringStatus.create(e.getStatus()));
+							return;
+						}
 						substitution.setKey(string);
 					}
 					if (PROPERTIES[VAL_PROP].equals(property)) {
 						String string = (String)value;
-						string = windEscapeChars(string);
+						try {
+							string= PropertiesFileEscapes.unescape(string);
+						} catch (CoreException e) {
+							setPageComplete(RefactoringStatus.create(e.getStatus()));
+							return;
+						}
 						substitution.setValue(string);
 					}
 					if (PROPERTIES[STATE_PROP].equals(property)) {
@@ -233,7 +245,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 						columnText= substitution.getValue();
 					}
 			}
-			return unwindEscapeChars(columnText);
+			return getEscapedAsciiString(columnText);
 		}
 
 		public Image getColumnImage(Object element, int columnIndex) {
@@ -297,92 +309,35 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		}
 	}
 
-	private static String unwindEscapeChars(String s) {
+	private static String getEscapedAsciiString(String s) {
 		if (s != null) {
 			StringBuffer sb= new StringBuffer(s.length());
 			int length= s.length();
 			for (int i= 0; i < length; i++) {
 				char c= s.charAt(i);
-				sb.append(getUnwoundString(c));
+				sb.append(getEscapedAsciiString(c));
 			}
 			return sb.toString();
 		}
 		return null;
 	}
 
-	private static String getUnwoundString(char c) {
+	private static String getEscapedAsciiString(char c) {
 		switch (c) {
-			case '\b' :
+			case '\b':
 				return "\\b";//$NON-NLS-1$
-			case '\t' :
+			case '\t':
 				return "\\t";//$NON-NLS-1$
-			case '\n' :
+			case '\n':
 				return "\\n";//$NON-NLS-1$
-			case '\f' :
+			case '\f':
 				return "\\f";//$NON-NLS-1$
-			case '\r' :
+			case '\r':
 				return "\\r";//$NON-NLS-1$
-			case '\\' :
+			case '\\':
 				return "\\\\";//$NON-NLS-1$
 		}
 		return String.valueOf(c);
-	}
-
-	private static String windEscapeChars(String s) {
-		if (s == null)
-			return null;
-
-		char aChar;
-		int len= s.length();
-		StringBuffer outBuffer= new StringBuffer(len);
-
-		for (int x= 0; x < len;) {
-			aChar= s.charAt(x++);
-			if (aChar == '\\') {
-				aChar= s.charAt(x++);
-				if (aChar == 'u') {
-					// Read the xxxx
-					int value= 0;
-					for (int i= 0; i < 4; i++) {
-						aChar= s.charAt(x++);
-						switch (aChar) {
-							case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-								value= (value << 4) + aChar - '0';
-								break;
-							case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
-								value= (value << 4) + 10 + aChar - 'a';
-								break;
-							case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
-								value= (value << 4) + 10 + aChar - 'A';
-								break;
-							default:
-								throw new IllegalArgumentException("Malformed \\uxxxx encoding."); //$NON-NLS-1$
-						}
-					}
-					outBuffer.append((char) value);
-				} else {
-					if (aChar == 't') {
-						outBuffer.append('\t');
-					} else {
-						if (aChar == 'r') {
-							outBuffer.append('\r');
-						} else {
-							if (aChar == 'n') {
-								outBuffer.append('\n');
-							} else {
-								if (aChar == 'f') {
-									outBuffer.append('\f');
-								} else {
-									outBuffer.append(aChar);
-								}
-							}
-						}
-					}
-				}
-			} else
-				outBuffer.append(aChar);
-		}
-		return outBuffer.toString();
 	}
 
 	private class NLSInputDialog extends StatusDialog implements IDialogFieldListener {
@@ -427,6 +382,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			return res;
 		}
 
+		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
 
@@ -589,6 +545,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 
 		SelectionListener listener= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (e.widget instanceof Button) {
 					doConfigureButtonPressed();
@@ -657,8 +614,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				fNLSRefactoring.getResourceBundleName(),
 				fNLSRefactoring.getResourceBundlePackage());
 
-		ArrayList currChoices= new ArrayList();
-		ArrayList currLabels= new ArrayList();
+		ArrayList<AccessorDescription> currChoices= new ArrayList<AccessorDescription>();
+		ArrayList<String> currLabels= new ArrayList<String>();
 
 		currChoices.add(configured);
 		currLabels.add(configured.getLabel());
@@ -676,8 +633,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			}
 		}
 
-		String[] labels= (String[]) currLabels.toArray(new String[currLabels.size()]);
-		fAccessorChoices= (AccessorDescription[]) currChoices.toArray(new AccessorDescription[currChoices.size()]);
+		String[] labels= currLabels.toArray(new String[currLabels.size()]);
+		fAccessorChoices= currChoices.toArray(new AccessorDescription[currChoices.size()]);
 
 		fAccessorClassField.setItems(labels);
 		fAccessorClassField.select(0);
@@ -689,7 +646,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		if (section == null) {
 			return new AccessorDescription[0];
 		}
-		ArrayList res= new ArrayList();
+		ArrayList<AccessorDescription> res= new ArrayList<AccessorDescription>();
 		for (int i= 0; i < SETTINGS_MAX_ENTRIES; i++) {
 			IDialogSettings serializedDesc= section.getSection(String.valueOf(i));
 			if (serializedDesc != null) {
@@ -699,7 +656,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				}
 			}
 		}
-		return (AccessorDescription[]) res.toArray(new AccessorDescription[res.size()]);
+		return res.toArray(new AccessorDescription[res.size()]);
 	}
 
 
@@ -757,15 +714,17 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		 * behavior.
 		 */
 		fTableViewer= new TableViewer(fTable) {
+			@Override
 			protected void hookControl(Control control) {
 				super.hookControl(control);
 				((Table) control).addMouseListener(new MouseAdapter() {
+					@Override
 					public void mouseDoubleClick(MouseEvent e) {
 						if (getTable().getSelection().length == 0)
 							return;
 						TableItem item= getTable().getSelection()[0];
 						if (item.getBounds(STATE_PROP).contains(e.x, e.y)) {
-							List widgetSel= getSelectionFromWidget();
+							List<?> widgetSel= getSelectionFromWidget();
 							if (widgetSel == null || widgetSel.size() != 1)
 								return;
 							NLSSubstitution substitution= (NLSSubstitution) widgetSel.get(0);
@@ -795,6 +754,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			}
 		});
 		fTableViewer.addFilter(new ViewerFilter() {
+			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				if (!fFilterCheckBox.getSelection()) {
 					return true;
@@ -905,6 +865,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fIsEclipseNLS.setSelection(fNLSRefactoring.isEclipseNLS());
 			fIsEclipseNLS.setEnabled(willCreateAccessorClass());
 			fIsEclipseNLS.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					super.widgetDefaultSelected(e);
 					boolean isEclipseNLS= fIsEclipseNLS.getSelection();
@@ -1109,6 +1070,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		buttonComp.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 
 		SelectionAdapter adapter= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleButtonPressed(e.widget);
 			}
@@ -1151,7 +1113,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	 */
 	private void openRenameDialog() {
 		IStructuredSelection sel= (IStructuredSelection) fTableViewer.getSelection();
-		List elementsToRename= getExternalizedElements(sel);
+		List<NLSSubstitution> elementsToRename= getExternalizedElements(sel);
 		RenameKeysDialog dialog= new RenameKeysDialog(getShell(), elementsToRename);
 		if (dialog.open() == Window.OK) {
 			fTableViewer.refresh();
@@ -1160,8 +1122,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 
 	private void revertStateOfSelection() {
-		List selection= getSelectedTableEntries();
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		List<?> selection= getSelectedTableEntries();
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			NLSSubstitution substitution= (NLSSubstitution) iter.next();
 			substitution.revert();
 		}
@@ -1202,7 +1164,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		}
 	}
 
-	private List getSelectedTableEntries() {
+	private List<?> getSelectedTableEntries() {
 		ISelection sel= fTableViewer.getSelection();
 		if (sel instanceof IStructuredSelection)
 			return((IStructuredSelection) sel).toList();
@@ -1212,9 +1174,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private void setSelectedTasks(int state) {
 		Assert.isTrue(state == NLSSubstitution.EXTERNALIZED || state == NLSSubstitution.IGNORED || state == NLSSubstitution.INTERNALIZED);
-		List selected= getSelectedTableEntries();
+		List<?> selected= getSelectedTableEntries();
 		String[] props= new String[]{PROPERTIES[STATE_PROP]};
-		for (Iterator iter= selected.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selected.iterator(); iter.hasNext();) {
 			NLSSubstitution substitution= (NLSSubstitution) iter.next();
 			substitution.setState(state);
 			if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasStateChanged()) {
@@ -1268,7 +1230,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 
 	private boolean containsElementsWithChange(IStructuredSelection selection) {
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			NLSSubstitution substitution= (NLSSubstitution) iter.next();
 			if (substitution.hasPropertyFileChange() || substitution.hasSourceChange()) {
 				return true;
@@ -1277,9 +1239,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		return false;
 	}
 
-	private List getExternalizedElements(IStructuredSelection selection) {
-		ArrayList res= new ArrayList();
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+	private List<NLSSubstitution> getExternalizedElements(IStructuredSelection selection) {
+		ArrayList<NLSSubstitution> res= new ArrayList<NLSSubstitution>();
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			NLSSubstitution substitution= (NLSSubstitution) iter.next();
 			if (substitution.getState() == NLSSubstitution.EXTERNALIZED && !substitution.hasStateChanged()) {
 				res.add(substitution);
@@ -1289,7 +1251,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 
 	private boolean containsOnlyElementsOfSameState(int state, IStructuredSelection selection) {
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			NLSSubstitution substitution= (NLSSubstitution) iter.next();
 			if (substitution.getState() != state) {
 				return false;
@@ -1298,14 +1260,17 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		return true;
 	}
 
+	@Override
 	public boolean performFinish() {
 		return super.performFinish();
 	}
 
+	@Override
 	public IWizardPage getNextPage() {
 		return super.getNextPage();
 	}
 
+	@Override
 	public void dispose() {
 		storeAccessorDescriptions();
 		//widgets will be disposed. only need to null'em

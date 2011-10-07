@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -61,6 +60,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
@@ -91,6 +91,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	private boolean fCloseBrace;
 	private boolean fIsSmartMode;
 	private boolean fIsSmartTab;
+	private boolean fIsSmartIndentAfterNewline;
 
 	private String fPartitioning;
 	private final IJavaProject fProject;
@@ -520,7 +521,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 		CompilationUnit compilationUnit= null;
 		try {
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			parser.setSource(info.buffer);
 			compilationUnit= (CompilationUnit) parser.createAST(null);
 		} catch (ArrayIndexOutOfBoundsException x) {
@@ -679,6 +680,8 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			boolean isIndentDetected= false;
 			StringBuffer addition= new StringBuffer();
 			int insertLength= 0;
+			int firstLineInsertLength= 0;
+			int firstLineIndent= 0;
 			int first= document.computeNumberOfLines(prefix) + firstLine; // don't format first line
 			int lines= temp.getNumberOfLines();
 			int tabLength= getVisualTabLengthPreference();
@@ -701,8 +704,14 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 						return; // bail out
 
 					insertLength= subtractIndent(correct, current, addition, tabLength);
+					if (l == first) {
+						firstLineInsertLength= insertLength;
+						firstLineIndent= current.length();
+					}
 					if (l != first && temp.get(lineOffset, lineLength).trim().length() != 0) {
 						isIndentDetected= true;
+						if (firstLineIndent >= current.length())
+							insertLength= firstLineInsertLength;
 						if (insertLength == 0) {
 							 // no adjustment needed, bail out
 							if (firstLine == 0) {
@@ -714,7 +723,6 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 							}
 							return;
 						}
-						removeJavaStuff(temp);
 					} else {
 						changed= insertLength != 0;
 					}
@@ -728,6 +736,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 			}
 
+			removeJavaStuff(temp);
 			temp.stopRewriteSession(session);
 			newText= temp.get(prefix.length(), temp.getLength() - prefix.length());
 
@@ -1203,6 +1212,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	/*
 	 * @see org.eclipse.jface.text.IAutoIndentStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.DocumentCommand)
 	 */
+	@Override
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 		if (c.doit == false)
 			return;
@@ -1217,8 +1227,12 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		if (!fIsSmartTab && isRepresentingTab(c.text))
 			return;
 
-		if (c.length == 0 && c.text != null && isLineDelimiter(d, c.text))
-			smartIndentAfterNewLine(d, c);
+		if (c.length == 0 && c.text != null && isLineDelimiter(d, c.text)) {
+			if (fIsSmartIndentAfterNewline)
+				smartIndentAfterNewLine(d, c);
+			else
+				super.customizeDocumentCommand(d, c);
+		}
 		else if (c.text.length() == 1)
 			smartIndentOnKeypress(d, c);
 		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
@@ -1262,6 +1276,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
         IPreferenceStore preferenceStore= getPreferenceStore();
 		fCloseBrace= preferenceStore.getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACES);
 		fIsSmartTab= preferenceStore.getBoolean(PreferenceConstants.EDITOR_SMART_TAB);
+		fIsSmartIndentAfterNewline= preferenceStore.getBoolean(PreferenceConstants.EDITOR_SMART_INDENT_AFTER_NEWLINE);
 		fIsSmartMode= computeSmartMode();
 	}
 

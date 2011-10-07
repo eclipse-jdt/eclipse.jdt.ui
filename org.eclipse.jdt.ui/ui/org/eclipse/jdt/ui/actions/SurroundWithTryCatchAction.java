@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.LinkedProposalModelPresenter;
  */
 public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 
-	private CompilationUnitEditor fEditor;
+	CompilationUnitEditor fEditor;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -70,17 +70,18 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		super(editor.getEditorSite());
 		setText(RefactoringMessages.SurroundWithTryCatchAction_label);
 		fEditor= editor;
-		setEnabled((fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null));
+		setEnabled(isApplicable());
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SURROUND_WITH_TRY_CATCH_ACTION);
 	}
 
+	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;
 		ICompilationUnit cu= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		if (cu == null || !ElementValidator.checkValidateEdit(cu, getShell(), getDialogTitle()))
 			return;
-		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(cu, selection);
+		SurroundWithTryCatchRefactoring refactoring= createRefactoring(selection, cu);
 
 		if (refactoring == null)
 			return;
@@ -106,7 +107,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			PlatformUI.getWorkbench().getProgressService().runInUI(
 				new BusyIndicatorRunnableContext(), adapter, adapter.getSchedulingRule());
 
-			new LinkedProposalModelPresenter().enterLinkedMode(fEditor.getViewer(), fEditor, refactoring.getLinkedProposalModel());
+			new LinkedProposalModelPresenter().enterLinkedMode(fEditor.getViewer(), fEditor, false, refactoring.getLinkedProposalModel());
 
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.SurroundWithTryCatchAction_exception);
@@ -119,11 +120,20 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		}
 	}
 
-	public void selectionChanged(ITextSelection selection) {
-		setEnabled(selection.getLength() > 0 && (fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null));
+	SurroundWithTryCatchRefactoring createRefactoring(ITextSelection selection, ICompilationUnit cu) {
+		return SurroundWithTryCatchRefactoring.create(cu, selection);
 	}
 
-	private static String getDialogTitle() {
+	@Override
+	public void selectionChanged(ITextSelection selection) {
+		setEnabled(selection.getLength() > 0 && isApplicable());
+	}
+
+	boolean isApplicable() {
+		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+	}
+
+	String getDialogTitle() {
 		return RefactoringMessages.SurroundWithTryCatchAction_dialog_title;
 	}
 }

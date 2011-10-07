@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,7 @@ public final class JavaResourceMapping extends ResourceMapping {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Object getModelObject() {
 		return fResource;
 	}
@@ -50,6 +51,7 @@ public final class JavaResourceMapping extends ResourceMapping {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getModelProviderId() {
 		return JavaModelProvider.JAVA_MODEL_PROVIDER_ID;
 	}
@@ -57,6 +59,7 @@ public final class JavaResourceMapping extends ResourceMapping {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IProject[] getProjects() {
 		return new IProject[] { fResource.getProject() };
 	}
@@ -64,6 +67,7 @@ public final class JavaResourceMapping extends ResourceMapping {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public ResourceTraversal[] getTraversals(final ResourceMappingContext context, final IProgressMonitor monitor) {
 		return new ResourceTraversal[] { new ResourceTraversal(new IResource[] { fResource }, IResource.DEPTH_INFINITE, IResource.NONE) };
 	}

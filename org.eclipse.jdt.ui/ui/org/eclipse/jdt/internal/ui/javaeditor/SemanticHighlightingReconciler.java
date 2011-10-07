@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,6 +71,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		/*
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visitNode(org.eclipse.jdt.core.dom.ASTNode)
 		 */
+		@Override
 		protected boolean visitNode(ASTNode node) {
 			if ((node.getFlags() & ASTNode.MALFORMED) == ASTNode.MALFORMED) {
 				retainPositions(node.getStartPosition(), node.getLength());
@@ -82,6 +83,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		/*
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.BooleanLiteral)
 		 */
+		@Override
 		public boolean visit(BooleanLiteral node) {
 			return visitLiteral(node);
 		}
@@ -89,6 +91,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		/*
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.CharacterLiteral)
 		 */
+		@Override
 		public boolean visit(CharacterLiteral node) {
 			return visitLiteral(node);
 		}
@@ -96,6 +99,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		/*
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.NumberLiteral)
 		 */
+		@Override
 		public boolean visit(NumberLiteral node) {
 			return visitLiteral(node);
 		}
@@ -120,6 +124,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.ConstructorInvocation)
 		 * @since 3.5
 		 */
+		@Override
 		public boolean visit(ConstructorInvocation node) {
 			// XXX Hack for performance reasons (should loop over fJobSemanticHighlightings can call consumes(*))
 			if (fJobDeprecatedMemberHighlighting != null) {
@@ -138,6 +143,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.ConstructorInvocation)
 		 * @since 3.5
 		 */
+		@Override
 		public boolean visit(SuperConstructorInvocation node) {
 			// XXX Hack for performance reasons (should loop over fJobSemanticHighlightings can call consumes(*))
 			if (fJobDeprecatedMemberHighlighting != null) {
@@ -155,6 +161,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		/*
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SimpleName)
 		 */
+		@Override
 		public boolean visit(SimpleName node) {
 			fToken.update(node);
 			for (int i= 0, n= fJobSemanticHighlightings.length; i < n; i++) {
@@ -230,9 +237,9 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	private Highlighting[] fHighlightings;
 
 	/** Background job's added highlighted positions */
-	private List fAddedPositions= new ArrayList();
+	private List<Position> fAddedPositions= new ArrayList<Position>();
 	/** Background job's removed highlighted positions */
-	private List fRemovedPositions= new ArrayList();
+	private List<Position> fRemovedPositions= new ArrayList<Position>();
 	/** Number of removed positions */
 	private int fNOfRemovedPositions;
 
@@ -362,10 +369,10 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 
 		for (int i= 0, n= subtrees.length; i < n; i++)
 			subtrees[i].accept(fCollector);
-		List oldPositions= fRemovedPositions;
-		List newPositions= new ArrayList(fNOfRemovedPositions);
+		List<Position> oldPositions= fRemovedPositions;
+		List<Position> newPositions= new ArrayList<Position>(fNOfRemovedPositions);
 		for (int i= 0, n= oldPositions.size(); i < n; i ++) {
-			Object current= oldPositions.get(i);
+			Position current= oldPositions.get(i);
 			if (current != null)
 				newPositions.add(current);
 		}
@@ -379,7 +386,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * @param addedPositions the added positions
 	 * @param removedPositions the removed positions
 	 */
-	private void updatePresentation(TextPresentation textPresentation, List addedPositions, List removedPositions) {
+	private void updatePresentation(TextPresentation textPresentation, List<Position> addedPositions, List<Position> removedPositions) {
 		Runnable runnable= fJobPresenter.createUpdateRunnable(textPresentation, addedPositions, removedPositions);
 		if (runnable == null)
 			return;
@@ -472,6 +479,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 
 			if (element != null) {
 				fJob= new Job(JavaEditorMessages.SemanticHighlighting_job) {
+					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						if (oldJob != null) {
 							try {

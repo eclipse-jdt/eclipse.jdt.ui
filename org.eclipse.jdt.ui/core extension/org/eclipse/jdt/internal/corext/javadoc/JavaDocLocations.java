@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,6 +87,7 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
+
 public class JavaDocLocations {
 
 	private static final String JAR_PROTOCOL= "jar"; //$NON-NLS-1$
@@ -103,7 +104,7 @@ public class JavaDocLocations {
 	private static final QualifiedName PROJECT_JAVADOC= new QualifiedName(JavaUI.ID_PLUGIN, "project_javadoc_location"); //$NON-NLS-1$
 
 	public static void migrateToClasspathAttributes() {
-		final Map oldLocations= loadOldForCompatibility();
+		final Map<IPath, String> oldLocations= loadOldForCompatibility();
 		if (oldLocations.isEmpty()) {
 			IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
 			preferenceStore.setValue(PREF_JAVADOCLOCATIONS, ""); //$NON-NLS-1$
@@ -112,6 +113,7 @@ public class JavaDocLocations {
 		}
 
 		Job job= new Job(CorextMessages.JavaDocLocations_migratejob_name) {
+			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
@@ -134,14 +136,14 @@ public class JavaDocLocations {
 		job.schedule();
 	}
 
-	final static void updateClasspathEntries(Map oldLocationMap, IProgressMonitor monitor) throws JavaModelException {
+	final static void updateClasspathEntries(Map<IPath, String> oldLocationMap, IProgressMonitor monitor) throws JavaModelException {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		IJavaProject[] javaProjects= JavaCore.create(root).getJavaProjects();
 		try {
 			monitor.beginTask(CorextMessages.JavaDocLocations_migrate_operation, javaProjects.length);
 			for (int i= 0; i < javaProjects.length; i++) {
 				IJavaProject project= javaProjects[i];
-				String projectJavadoc= (String) oldLocationMap.get(project.getPath());
+				String projectJavadoc= oldLocationMap.get(project.getPath());
 				if (projectJavadoc != null) {
 					try {
 						setProjectJavadocLocation(project, projectJavadoc);
@@ -170,7 +172,7 @@ public class JavaDocLocations {
 		}
 	}
 
-	private static IClasspathEntry getConvertedEntry(IClasspathEntry entry, IJavaProject project, Map oldLocationMap) {
+	private static IClasspathEntry getConvertedEntry(IClasspathEntry entry, IJavaProject project, Map<IPath, String> oldLocationMap) {
 		IPath path= null;
 		switch (entry.getEntryKind()) {
 			case IClasspathEntry.CPE_SOURCE:
@@ -197,7 +199,7 @@ public class JavaDocLocations {
 				return null;
 			}
 		}
-		String libraryJavadocLocation= (String) oldLocationMap.get(path);
+		String libraryJavadocLocation= oldLocationMap.get(path);
 		if (libraryJavadocLocation != null) {
 			CPListElement element= CPListElement.createFromExisting(entry, project);
 			element.setAttribute(CPListElement.JAVADOC, libraryJavadocLocation);
@@ -206,7 +208,7 @@ public class JavaDocLocations {
 		return null;
 	}
 
-	private static void convertContainer(IClasspathEntry entry, IJavaProject project, Map oldLocationMap) {
+	private static void convertContainer(IClasspathEntry entry, IJavaProject project, Map<IPath, String> oldLocationMap) {
 		try {
 			IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), project);
 			if (container == null) {
@@ -327,8 +329,8 @@ public class JavaDocLocations {
 		return new JavaUIException(JavaUIStatus.createError(IStatus.ERROR, message, t));
 	}
 
-	private static Map/*<Path, String>*/ loadOldForCompatibility() {
-		HashMap resultingOldLocations= new HashMap();
+	private static Map<IPath, String> loadOldForCompatibility() {
+		HashMap<IPath, String> resultingOldLocations= new HashMap<IPath, String>();
 
 		// in 3.0, the javadoc locations were stored as one big string in the preferences
 		String string= PreferenceConstants.getPreferenceStore().getString(PREF_JAVADOCLOCATIONS);
@@ -409,7 +411,7 @@ public class JavaDocLocations {
 		return resultingOldLocations;
 	}
 
-	private static void loadFromStream(InputSource inputSource, Map/*<Path, String>*/ oldLocations) throws CoreException {
+	private static void loadFromStream(InputSource inputSource, Map<IPath, String> oldLocations) throws CoreException {
 		Element cpElement;
 		try {
 			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -547,8 +549,10 @@ public class JavaDocLocations {
 		IPackageFragment pack= type.getPackageFragment();
 		String packPath= pack.getElementName().replace('.', '/');
 		String typePath= type.getTypeQualifiedName('.');
-		buf.append(packPath);
-		buf.append('/');
+		if (packPath.length() > 0) {
+			buf.append(packPath);
+			buf.append('/');
+		}
 		buf.append(typePath);
 		buf.append(".html"); //$NON-NLS-1$
 	}
@@ -600,7 +604,10 @@ public class JavaDocLocations {
 				if (baseURL.getProtocol().equals(JAR_PROTOCOL)) {
 					// It's a JarURLConnection, which is not known to the browser widget.
 					// Let's start the help web server:
-					baseURL= PlatformUI.getWorkbench().getHelpSystem().resolve(baseURL.toExternalForm(), true);
+					URL baseURL2= PlatformUI.getWorkbench().getHelpSystem().resolve(baseURL.toExternalForm(), true);
+					if (baseURL2 != null) { // can be null if org.eclipse.help.ui is not available
+						baseURL= baseURL2;
+					}
 				}
 				return baseURL.toExternalForm();
 			}

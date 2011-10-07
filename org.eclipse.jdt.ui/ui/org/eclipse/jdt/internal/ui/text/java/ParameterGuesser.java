@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,6 +92,7 @@ public class ParameterGuesser {
 		/*
 		 * @see Object#toString()
 		 */
+		@Override
 		public String toString() {
 
 			StringBuffer buffer= new StringBuffer();
@@ -108,26 +109,26 @@ public class ParameterGuesser {
 
 	private static final char[] NO_TRIGGERS= new char[0];
 
-	private final Set fAlreadyMatchedNames;
+	private final Set<String> fAlreadyMatchedNames;
 	private final IJavaElement fEnclosingElement;
 
 	/**
 	 * Creates a parameter guesser
-	 *
-	 * @param enclosingElement
+	 * 
+	 * @param enclosingElement the enclosing Java element
 	 */
 	public ParameterGuesser(IJavaElement enclosingElement) {
 		fEnclosingElement= enclosingElement;
-		fAlreadyMatchedNames= new HashSet();
+		fAlreadyMatchedNames= new HashSet<String>();
 	}
 
-	private List /*Variable*/ evaluateVisibleMatches(String expectedType, IJavaElement[] suggestions) throws JavaModelException {
+	private List<Variable> evaluateVisibleMatches(String expectedType, IJavaElement[] suggestions) throws JavaModelException {
 		IType currentType= null;
 		if (fEnclosingElement != null) {
 			currentType= (IType) fEnclosingElement.getAncestor(IJavaElement.TYPE);
 		}
 
-		ArrayList res= new ArrayList();
+		ArrayList<Variable> res= new ArrayList<Variable>();
 		for (int i= 0; i < suggestions.length; i++) {
 			Variable variable= createVariable(suggestions[i], currentType, expectedType, i);
 			if (variable != null) {
@@ -283,24 +284,25 @@ public class ParameterGuesser {
 
 	/**
 	 * Returns the matches for the type and name argument, ordered by match quality.
-	 *
+	 * 
 	 * @param expectedType - the qualified type of the parameter we are trying to match
 	 * @param paramName - the name of the parameter (used to find similarly named matches)
-	 * @param pos
+	 * @param pos the position
 	 * @param suggestions the suggestions or <code>null</code>
-	 * @param fillBestGuess
+	 * @param fillBestGuess <code>true</code> if the best guess should be filled in
+	 * @param isLastParameter <code>true</code> iff this proposal is for the last parameter of a method
 	 * @return returns the name of the best match, or <code>null</code> if no match found
 	 * @throws JavaModelException if it fails
 	 */
-	public ICompletionProposal[] parameterProposals(String expectedType, String paramName, Position pos, IJavaElement[] suggestions, boolean fillBestGuess) throws JavaModelException {
-		List typeMatches= evaluateVisibleMatches(expectedType, suggestions);
+	public ICompletionProposal[] parameterProposals(String expectedType, String paramName, Position pos, IJavaElement[] suggestions, boolean fillBestGuess, boolean isLastParameter) throws JavaModelException {
+		List<Variable> typeMatches= evaluateVisibleMatches(expectedType, suggestions);
 		orderMatches(typeMatches, paramName);
 
 		boolean hasVarWithParamName= false;
 		ICompletionProposal[] ret= new ICompletionProposal[typeMatches.size()];
 		int i= 0; int replacementLength= 0;
-		for (Iterator it= typeMatches.iterator(); it.hasNext();) {
-			Variable v= (Variable)it.next();
+		for (Iterator<Variable> it= typeMatches.iterator(); it.hasNext();) {
+			Variable v= it.next();
 			if (i == 0) {
 				fAlreadyMatchedNames.add(v.name);
 				replacementLength= v.name.length();
@@ -309,40 +311,43 @@ public class ParameterGuesser {
 			String displayString= v.name;
 			hasVarWithParamName |= displayString.equals(paramName);
 
-			final char[] triggers= new char[v.triggerChars.length + 1];
-			System.arraycopy(v.triggerChars, 0, triggers, 0, v.triggerChars.length);
-			triggers[triggers.length - 1]= ';';
-
+			final char[] triggers;
+			if (isLastParameter) {
+				triggers= v.triggerChars;
+			} else {
+				triggers= new char[v.triggerChars.length + 1];
+				System.arraycopy(v.triggerChars, 0, triggers, 0, v.triggerChars.length);
+				triggers[triggers.length - 1]= ',';
+			}
+			
 			ret[i++]= new PositionBasedCompletionProposal(v.name, pos, replacementLength, getImage(v.descriptor), displayString, null, null, triggers);
 		}
 		if (!fillBestGuess && !hasVarWithParamName) {
 			// insert a proposal with the argument name
 			ICompletionProposal[] extended= new ICompletionProposal[ret.length + 1];
 			System.arraycopy(ret, 0, extended, 1, ret.length);
-			extended[0]= new PositionBasedCompletionProposal(paramName, pos, replacementLength, null, paramName, null, null, NO_TRIGGERS);
+			extended[0]= new PositionBasedCompletionProposal(paramName, pos, replacementLength, null, paramName, null, null, isLastParameter ? null : new char[] {','});
 			return extended;
 		}
 		return ret;
 	}
 
-	private static class MatchComparator implements Comparator {
+	private static class MatchComparator implements Comparator<Variable> {
 
 		private String fParamName;
 
 		MatchComparator(String paramName) {
 			fParamName= paramName;
 		}
-		public int compare(Object o1, Object o2) {
-			Variable one= (Variable)o1;
-			Variable two= (Variable)o2;
-
+		public int compare(Variable one, Variable two) {
 			return score(two) - score(one);
 		}
 
 		/**
-		 * The four order criteria as described below - put already used into bit 10, all others into
-		 * bits 0-9, 11-20, 21-30; 31 is sign - always 0
-		 * @param v
+		 * The four order criteria as described below - put already used into bit 10, all others
+		 * into bits 0-9, 11-20, 21-30; 31 is sign - always 0
+		 * 
+		 * @param v the variable
 		 * @return the score for <code>v</code>
 		 */
 		private int score(Variable v) {
@@ -384,7 +389,7 @@ public class ParameterGuesser {
 	 * @param typeMatches the list of type matches
 	 * @param paramName the parameter name
 	 */
-	private static void orderMatches(List typeMatches, String paramName) {
+	private static void orderMatches(List<Variable> typeMatches, String paramName) {
 		if (typeMatches != null) Collections.sort(typeMatches, new MatchComparator(paramName));
 	}
 

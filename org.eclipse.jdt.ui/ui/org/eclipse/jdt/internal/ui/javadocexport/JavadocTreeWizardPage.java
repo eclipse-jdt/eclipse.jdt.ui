@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -174,6 +174,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		SWTUtil.setButtonDimensionHint(javadocCommandBrowserButton);
 
 		javadocCommandBrowserButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				browseForJavadocCommand();
 			}
@@ -237,6 +238,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fDescriptionLabel.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 4, convertWidthInCharsToPixels(3) -  3)); // INDENT of CLabel
 
 		fPrivateVisibility.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PRIVATE;
@@ -245,6 +247,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			}
 		});
 		fPackageVisibility.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PACKAGE;
@@ -253,6 +256,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			}
 		});
 		fProtectedVisibility.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PROTECTED;
@@ -262,6 +266,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		});
 
 		fPublicVisibility.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PUBLIC;
@@ -347,17 +352,20 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		//Add Listeners
 		fCustomButton.addSelectionListener(new EnableSelectionAdapter(new Control[] { fDocletLabel, fDocletText, fDocletTypeLabel, fDocletTypeText }, new Control[] { fDestinationLabel, fDestinationText, fDestinationBrowserButton }));
 		fCustomButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				doValidation(CUSTOMSTATUS);
 			}
 		});
 		fStandardButton.addSelectionListener(new EnableSelectionAdapter(new Control[] { fDestinationLabel, fDestinationText, fDestinationBrowserButton }, new Control[] { fDocletLabel, fDocletText, fDocletTypeLabel, fDocletTypeText }));
 		fStandardButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				doValidation(STANDARDSTATUS);
 			}
 		});
 		fDestinationBrowserButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				String text= handleFolderBrowseButtonPressed(fDestinationText.getText(), JavadocExportMessages.JavadocTreeWizardPage_destinationbrowsedialog_title,
 				   		JavadocExportMessages.JavadocTreeWizardPage_destinationbrowsedialog_label);
@@ -423,7 +431,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	private IPath[] getSourcePath(IJavaProject[] projects) {
-		HashSet res= new HashSet();
+		HashSet<IPath> res= new HashSet<IPath>();
 		//loops through all projects and gets a list if of their source paths
 		for (int k= 0; k < projects.length; k++) {
 			IJavaProject iJavaProject= projects[k];
@@ -448,11 +456,11 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				JavaPlugin.log(e);
 			}
 		}
-		return (IPath[]) res.toArray(new IPath[res.size()]);
+		return res.toArray(new IPath[res.size()]);
 	}
 
 	private IPath[] getClassPath(IJavaProject[] javaProjects) {
-		HashSet res= new HashSet();
+		HashSet<IPath> res= new HashSet<IPath>();
 
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		for (int j= 0; j < javaProjects.length; j++) {
@@ -482,7 +490,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				JavaPlugin.log(e);
 			}
 		}
-		return (IPath[]) res.toArray(new IPath[res.size()]);
+		return res.toArray(new IPath[res.size()]);
 	}
 
 	/**
@@ -492,11 +500,11 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	 * @return source elements
 	 */
 	private IJavaElement[] getSourceElements(IJavaProject[] projects) {
-		ArrayList res= new ArrayList();
+		ArrayList<IJavaElement> res= new ArrayList<IJavaElement>();
 		try {
-			Set allChecked= fInputGroup.getAllCheckedTreeItems();
+			Set<Object> allChecked= fInputGroup.getAllCheckedTreeItems();
 
-			Set incompletePackages= new HashSet();
+			Set<String> incompletePackages= new HashSet<String>();
 			for (int h= 0; h < projects.length; h++) {
 				IJavaProject iJavaProject= projects[h];
 
@@ -520,7 +528,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				}
 			}
 
-			Iterator checkedElements= fInputGroup.getAllCheckedListItems();
+			Iterator<Object> checkedElements= fInputGroup.getAllCheckedListItems();
 			while (checkedElements.hasNext()) {
 				Object element= checkedElements.next();
 				if (element instanceof ICompilationUnit) {
@@ -531,7 +539,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				}
 			}
 
-			Set addedPackages= new HashSet();
+			Set<String> addedPackages= new HashSet<String>();
 
 			checkedElements= allChecked.iterator();
 			while (checkedElements.hasNext()) {
@@ -549,7 +557,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		return (IJavaElement[]) res.toArray(new IJavaElement[res.size()]);
+		return res.toArray(new IJavaElement[res.size()]);
 	}
 
 	private boolean isAccessibleLocation(IPath packageLocation, IPath rootLocation) {
@@ -575,7 +583,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fStore.setAccess(fVisibilitySelection);
 		fStore.setSelectedElements(getSourceElements(checkedProjects));
 
-		ArrayList commands= new ArrayList();
+		ArrayList<String> commands= new ArrayList<String>();
 		commands.add(fJavadocCommandText.getText()); // must be first
 		String[] items= fJavadocCommandText.getItems();
 		for (int i= 0; i < items.length; i++) {
@@ -584,11 +592,11 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				commands.add(curr);
 			}
 		}
-		fStore.setJavadocCommandHistory((String[]) commands.toArray(new String[commands.size()]));
+		fStore.setJavadocCommandHistory(commands.toArray(new String[commands.size()]));
 	}
 
 	public IJavaProject[] getCheckedProjects() {
-		ArrayList res= new ArrayList();
+		ArrayList<Object> res= new ArrayList<Object>();
 		TreeItem[] treeItems= fInputGroup.getTree().getItems();
 		for (int i= 0; i < treeItems.length; i++) {
 			if (treeItems[i].getChecked()) {
@@ -598,7 +606,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				}
 			}
 		}
-		return (IJavaProject[]) res.toArray(new IJavaProject[res.size()]);
+		return res.toArray(new IJavaProject[res.size()]);
 	}
 
 	protected void doValidation(int validate) {
@@ -682,7 +690,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		dialog.setFileName(dirName);
 		String selectedDirectory= dialog.open();
 		if (selectedDirectory != null) {
-			ArrayList newItems= new ArrayList();
+			ArrayList<String> newItems= new ArrayList<String>();
 			String[] items= fJavadocCommandText.getItems();
 			newItems.add(selectedDirectory);
 			for (int i= 0; i < items.length && newItems.size() < 5; i++) { // only keep the last 5 entries
@@ -691,7 +699,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 					newItems.add(curr);
 				}
 			}
-			fJavadocCommandText.setItems((String[]) newItems.toArray(new String[newItems.size()]));
+			fJavadocCommandText.setItems(newItems.toArray(new String[newItems.size()]));
 			fJavadocCommandText.select(0);
 		}
 	}
@@ -718,6 +726,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		updateStatus(new StatusInfo());
 	}
 
+	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
 			doValidation(STANDARDSTATUS);

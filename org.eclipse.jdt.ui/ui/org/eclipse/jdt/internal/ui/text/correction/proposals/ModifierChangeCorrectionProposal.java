@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,6 @@
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import org.eclipse.swt.graphics.Image;
-
-import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
@@ -29,6 +27,8 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.PositionInformation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
@@ -47,17 +47,15 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
 		fExcludedModifiers= excludedModifiers;
 	}
 
+	@Override
 	protected ASTRewrite getRewrite() {
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
 		ASTNode boundNode= astRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
 
-		TextEditGroup selectionDescription= null;
-
 		if (boundNode != null) {
 			declNode= boundNode; // is same CU
 		} else {
-			selectionDescription= new TextEditGroup("selection"); // in different CU, needs selection //$NON-NLS-1$
 			//setSelectionDescription(selectionDescription);
 			CompilationUnit newRoot= ASTResolving.createQuickFixAST(getCompilationUnit(), null);
 			declNode= newRoot.findDeclaringNode(fBinding.getKey());
@@ -72,13 +70,13 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
 				if (parent instanceof FieldDeclaration) {
 					FieldDeclaration fieldDecl= (FieldDeclaration) parent;
 					if (fieldDecl.fragments().size() > 1 && (fieldDecl.getParent() instanceof AbstractTypeDeclaration)) { // split
-						VariableDeclarationRewrite.rewriteModifiers(fieldDecl, new VariableDeclarationFragment[] {fragment}, fIncludedModifiers, fExcludedModifiers, rewrite, selectionDescription);
+						VariableDeclarationRewrite.rewriteModifiers(fieldDecl, new VariableDeclarationFragment[] {fragment}, fIncludedModifiers, fExcludedModifiers, rewrite, null);
 						return rewrite;
 					}
 				} else if (parent instanceof VariableDeclarationStatement) {
 					VariableDeclarationStatement varDecl= (VariableDeclarationStatement) parent;
 					if (varDecl.fragments().size() > 1 && (varDecl.getParent() instanceof Block)) { // split
-						VariableDeclarationRewrite.rewriteModifiers(varDecl, new VariableDeclarationFragment[] {fragment}, fIncludedModifiers, fExcludedModifiers, rewrite, selectionDescription);
+						VariableDeclarationRewrite.rewriteModifiers(varDecl, new VariableDeclarationFragment[] {fragment}, fIncludedModifiers, fExcludedModifiers, rewrite, null);
 						return rewrite;
 					}
 				} else if (parent instanceof VariableDeclarationExpression) {
@@ -87,7 +85,16 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
 				declNode= parent;
 			}
 			ModifierRewrite listRewrite= ModifierRewrite.create(rewrite, declNode);
-			listRewrite.setModifiers(fIncludedModifiers, fExcludedModifiers, selectionDescription);
+			PositionInformation trackedDeclNode= listRewrite.setModifiers(fIncludedModifiers, fExcludedModifiers, null);
+			
+			LinkedProposalPositionGroup positionGroup= new LinkedProposalPositionGroup("group"); //$NON-NLS-1$
+			positionGroup.addPosition(trackedDeclNode);
+			getLinkedProposalModel().addPositionGroup(positionGroup);
+			
+			if (boundNode != null) {
+				// only set end position if in same CU
+				setEndPosition(rewrite.track(fNode));
+			}
 			return rewrite;
 		}
 		return null;

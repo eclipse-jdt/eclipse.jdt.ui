@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isUniverse()
 	 */
+	@Override
 	public boolean isUniverse() {
 		return false;
 	}
@@ -49,6 +50,7 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
 	 */
+	@Override
 	public TypeSet makeClone() {
 		return new ArrayTypeSet(fElemTypeSet);
 	}
@@ -56,6 +58,7 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isEmpty()
 	 */
+	@Override
 	public boolean isEmpty() {
 		return fElemTypeSet.isEmpty();
 	}
@@ -63,6 +66,7 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#upperBound()
 	 */
+	@Override
 	public TypeSet upperBound() {
 		return new ArrayTypeSet(fElemTypeSet.upperBound());
 	}
@@ -70,6 +74,7 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#lowerBound()
 	 */
+	@Override
 	public TypeSet lowerBound() {
 		return new ArrayTypeSet(fElemTypeSet.lowerBound());
 	}
@@ -77,6 +82,7 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueLowerBound()
 	 */
+	@Override
 	public boolean hasUniqueLowerBound() {
 		return fElemTypeSet.hasUniqueLowerBound();
 	}
@@ -84,6 +90,7 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueUpperBound()
 	 */
+	@Override
 	public boolean hasUniqueUpperBound() {
 		return fElemTypeSet.hasUniqueUpperBound();
 	}
@@ -91,6 +98,7 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueLowerBound()
 	 */
+	@Override
 	public TType uniqueLowerBound() {
 		return TTypes.createArrayType(fElemTypeSet.uniqueLowerBound(), 1);
 	}
@@ -98,6 +106,7 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueUpperBound()
 	 */
+	@Override
 	public TType uniqueUpperBound() {
 		return TTypes.createArrayType(fElemTypeSet.uniqueUpperBound(), 1);
 	}
@@ -105,6 +114,7 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(TType)
 	 */
+	@Override
 	public boolean contains(TType t) {
 		if (!(t instanceof ArrayType))
 			return false;
@@ -115,14 +125,15 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#containsAll(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
 	 */
+	@Override
 	public boolean containsAll(TypeSet s) {
 		if (s instanceof ArrayTypeSet && !(s instanceof ArraySuperTypeSet)) {
 			ArrayTypeSet ats= (ArrayTypeSet) s;
 
 			return fElemTypeSet.containsAll(ats.fElemTypeSet);
 		}
-		for(Iterator iter= s.iterator(); iter.hasNext(); ) {
-			TType t= (TType) iter.next();
+		for(Iterator<TType> iter= s.iterator(); iter.hasNext(); ) {
+			TType t= iter.next();
 			if (!contains(t))
 				return false;
 		}
@@ -132,16 +143,17 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#iterator()
 	 */
-	public Iterator iterator() {
+	@Override
+	public Iterator<TType> iterator() {
 		if (fEnumCache != null) return fEnumCache.iterator();
 
-		return new Iterator() {
-			Iterator fElemIter= fElemTypeSet.iterator();
+		return new Iterator<TType>() {
+			Iterator<TType> fElemIter= fElemTypeSet.iterator();
 			public boolean hasNext() {
 				return fElemIter.hasNext();
 			}
-			public Object next() {
-				return TTypes.createArrayType(((TType) fElemIter.next()), 1);
+			public TType next() {
+				return TTypes.createArrayType(fElemIter.next(), 1);
 			}
 			public void remove() {
 				throw new UnsupportedOperationException();
@@ -154,12 +166,13 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#enumerate()
 	 */
+	@Override
 	public EnumeratedTypeSet enumerate() {
 		if (fEnumCache == null) {
 			fEnumCache= new EnumeratedTypeSet(getTypeSetEnvironment());
 
-			for(Iterator iter= fElemTypeSet.iterator(); iter.hasNext(); ) {
-				TType t= (TType) iter.next();
+			for(Iterator<TType> iter= fElemTypeSet.iterator(); iter.hasNext(); ) {
+				TType t= iter.next();
 				fEnumCache.add(TTypes.createArrayType(t, 1));
 			}
 			fEnumCache.initComplete();
@@ -170,6 +183,7 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isSingleton()
 	 */
+	@Override
 	public boolean isSingleton() {
 		return fElemTypeSet.isSingleton();
 	}
@@ -177,6 +191,7 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#anyMember()
 	 */
+	@Override
 	public TType anyMember() {
 		return TTypes.createArrayType(fElemTypeSet.anyMember(), 1);
 	}
@@ -184,6 +199,7 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#superTypes()
 	 */
+	@Override
 	public TypeSet superTypes() {
 		return new ArraySuperTypeSet(fElemTypeSet);
 	}
@@ -191,6 +207,7 @@ public class ArrayTypeSet extends TypeSet {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
 		if (obj instanceof ArrayTypeSet) {
@@ -201,10 +218,12 @@ public class ArrayTypeSet extends TypeSet {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		return fElemTypeSet.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return "{" + fID + ": array(" + fElemTypeSet + ")}"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}

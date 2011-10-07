@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ public final class CovariantTypeConstraint implements ITypeConstraint2 {
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public final boolean equals(final Object object) {
 		if (object.getClass() != CovariantTypeConstraint.class)
 			return false;
@@ -66,6 +67,7 @@ public final class CovariantTypeConstraint implements ITypeConstraint2 {
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public final int hashCode() {
 		return fDescendant.hashCode() ^ 35 * fAncestor.hashCode();
 	}
@@ -73,6 +75,7 @@ public final class CovariantTypeConstraint implements ITypeConstraint2 {
 	/*
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public final String toString() {
 		return fDescendant.toString() + " <<= " + fAncestor.toString(); //$NON-NLS-1$
 	}

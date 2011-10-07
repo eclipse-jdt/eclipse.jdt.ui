@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -48,7 +48,6 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -61,6 +60,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
@@ -145,6 +145,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		/*
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
+		@Override
 		public boolean equals(Object obj) {
 			if (obj instanceof ContextInformation) {
 				ContextInformation ci= (ContextInformation) obj;
@@ -157,6 +158,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		 * @see java.lang.Object#hashCode()
 		 * @since 3.1
 		 */
+		@Override
 		public int hashCode() {
 			int low= fContextDisplayString != null ? fContextDisplayString.hashCode() : 0;
 			return fPosition << 24 | fInformationDisplayString.hashCode() << 16 | low;
@@ -183,6 +185,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 			return fIsAmbiguous;
 		}
 
+		@Override
 		public String toString() {
 			return fProposal;
 		}
@@ -190,6 +193,8 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 
 	private IRegion fSelectedRegion; // initialized by apply()
 	private TypeArgumentProposal[] fTypeArgumentProposals;
+	private boolean fCanUseDiamond;
+
 
 	public LazyGenericTypeProposal(CompletionProposal typeProposal, JavaContentAssistInvocationContext context) {
 		super(typeProposal, context);
@@ -198,16 +203,29 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	/*
 	 * @see ICompletionProposalExtension#apply(IDocument, char)
 	 */
+	@Override
 	public void apply(IDocument document, char trigger, int offset) {
+		boolean onlyAppendArguments;
+		try {
+			onlyAppendArguments= fProposal.getCompletion().length == 0 && offset > 0 && document.getChar(offset - 1) == '<';
+		} catch (BadLocationException e) {
+			onlyAppendArguments= false;
+		}
 
-		if (shouldAppendArguments(document, offset, trigger)) {
+		if (onlyAppendArguments || shouldAppendArguments(document, offset, trigger)) {
 			try {
 				TypeArgumentProposal[] typeArgumentProposals= computeTypeArgumentProposals();
 				if (typeArgumentProposals.length > 0) {
 
 					int[] offsets= new int[typeArgumentProposals.length];
 					int[] lengths= new int[typeArgumentProposals.length];
-					StringBuffer buffer= createParameterList(typeArgumentProposals, offsets, lengths);
+					StringBuffer buffer;
+
+					if (canUseDiamond()) {
+						buffer= new StringBuffer(getReplacementString());
+						buffer.append("<>"); //$NON-NLS-1$
+					} else
+						buffer= createParameterList(typeArgumentProposals, offsets, lengths, onlyAppendArguments);
 
 					// set the generic type as replacement string
 					boolean insertClosingParenthesis= trigger == '(' && autocloseBrackets();
@@ -249,6 +267,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal#computeTriggerCharacters()
 	 */
+	@Override
 	protected char[] computeTriggerCharacters() {
 		return GENERIC_TYPE_TRIGGERS;
 	}
@@ -454,7 +473,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		if (!hierarchy.contains(superType))
 			return null; // no path
 
-		List path= new LinkedList();
+		List<IType> path= new LinkedList<IType>();
 		path.add(superType);
 		do {
 			// any sub type must be on a hierarchy chain from superType to subType
@@ -462,7 +481,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 			path.add(superType);
 		} while (!superType.equals(subType)); // since the equality case is handled above, we can spare one check
 
-		return (IType[]) path.toArray(new IType[path.size()]);
+		return path.toArray(new IType[path.size()]);
 	}
 
 	private NullProgressMonitor getProgressMonitor() {
@@ -595,13 +614,14 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 			keys[i]= String.valueOf(chKeys[0]);
 		}
 
-		final ASTParser parser= ASTParser.newParser(AST.JLS3);
+		final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setProject(fCompilationUnit.getJavaProject());
 		parser.setResolveBindings(true);
 		parser.setStatementsRecovery(true);
 
-		final Map bindings= new HashMap();
+		final Map<String, IBinding> bindings= new HashMap<String, IBinding>();
 		ASTRequestor requestor= new ASTRequestor() {
+			@Override
 			public void acceptBinding(String bindingKey, IBinding binding) {
 				bindings.put(bindingKey, binding);
 			}
@@ -657,16 +677,18 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		}
 	}
 
-	private StringBuffer createParameterList(TypeArgumentProposal[] typeArguments, int[] offsets, int[] lengths) {
+	private StringBuffer createParameterList(TypeArgumentProposal[] typeArguments, int[] offsets, int[] lengths, boolean onlyAppendArguments) {
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(getReplacementString());
 
 		FormatterPrefs prefs= getFormatterPrefs();
 		final char LESS= '<';
 		final char GREATER= '>';
-		if (prefs.beforeOpeningBracket)
-			buffer.append(SPACE);
-		buffer.append(LESS);
+		if (!onlyAppendArguments) {
+			if (prefs.beforeOpeningBracket)
+				buffer.append(SPACE);
+			buffer.append(LESS);
+		}
 		if (prefs.afterOpeningBracket)
 			buffer.append(SPACE);
 		StringBuffer separator= new StringBuffer(3);
@@ -686,7 +708,9 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		}
 		if (prefs.beforeClosingBracket)
 			buffer.append(SPACE);
-		buffer.append(GREATER);
+
+		if (!onlyAppendArguments)
+			buffer.append(GREATER);
 
 		return buffer;
 	}
@@ -758,6 +782,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	/*
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
+	@Override
 	public Point getSelection(IDocument document) {
 		if (fSelectedRegion == null)
 			return super.getSelection(document);
@@ -773,6 +798,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeContextInformation()
 	 */
+	@Override
 	protected IContextInformation computeContextInformation() {
 		try {
 			if (hasParameters()) {
@@ -785,6 +811,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		return super.computeContextInformation();
 	}
 
+	@Override
 	protected int computeCursorPosition() {
 		if (fSelectedRegion != null)
 			return fSelectedRegion.getOffset() - getReplacementOffset();
@@ -802,4 +829,27 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 			return false;
 		}
 	}
+
+	/**
+	 * Sets whether this proposal can use the diamond.
+	 * 
+	 * @param canUseDiamond <code>true</code> if a diamond can be inserted
+	 * @see CompletionProposal#canUseDiamond(org.eclipse.jdt.core.CompletionContext)
+	 * @since 3.7
+	 */
+	void canUseDiamond(boolean canUseDiamond) {
+		fCanUseDiamond= canUseDiamond;
+	}
+
+	/**
+	 * Tells whether this proposal can use the diamond.
+	 * 
+	 * @return <code>true</code> if a diamond can be used
+	 * @see CompletionProposal#canUseDiamond(org.eclipse.jdt.core.CompletionContext)
+	 * @since 3.7
+	 */
+	protected boolean canUseDiamond() {
+		return fCanUseDiamond;
+	}
+
 }

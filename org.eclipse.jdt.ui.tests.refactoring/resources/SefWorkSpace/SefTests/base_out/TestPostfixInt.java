@@ -8,11 +8,11 @@ public class TestPostfixInt {
 		setField(getField() - 1);
 	}
 
-	void setField(int field) {
-		this.field = field;
-	}
-
 	int getField() {
 		return field;
+	}
+
+	void setField(int field) {
+		this.field = field;
 	}
 }

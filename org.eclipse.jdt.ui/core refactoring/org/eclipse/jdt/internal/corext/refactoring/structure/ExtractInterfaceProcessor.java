@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,7 +57,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
@@ -125,6 +124,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
@@ -230,6 +230,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor,org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext)
 	 */
+	@Override
 	public final RefactoringStatus checkFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(context);
@@ -267,6 +268,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#checkInitialConditions(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public final RefactoringStatus checkInitialConditions(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		final RefactoringStatus status= new RefactoringStatus();
@@ -334,12 +336,13 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public final Change createChange(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
-			final Map arguments= new HashMap();
+			final Map<String, String> arguments= new HashMap<String, String>();
 			String project= null;
 			final IJavaProject javaProject= fSubType.getJavaProject();
 			if (javaProject != null)
@@ -425,7 +428,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					copy.getBuffer().setContents(fSuperSource);
 					JavaModelUtil.reconcile(copy);
 				}
-				final Set replacements= new HashSet();
+				final Set<String> replacements= new HashSet<String>();
 				if (fReplace)
 					rewriteTypeOccurrences(manager, sourceRewrite, copy, replacements, status, new SubProgressMonitor(monitor, 220));
 				createMethodComments(sourceRewrite, replacements);
@@ -440,6 +443,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor#createContraintSolver(org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsModel)
 	 */
+	@Override
 	protected final SuperTypeConstraintsSolver createContraintSolver(final SuperTypeConstraintsModel model) {
 		return new ExtractInterfaceConstraintsSolver(model, fSuperName);
 	}
@@ -469,8 +473,8 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		final ITrackedNodePosition position= rewrite.track(field);
 		final ListRewrite rewriter= rewrite.getListRewrite(field, FieldDeclaration.FRAGMENTS_PROPERTY);
 		VariableDeclarationFragment current= null;
-		for (final Iterator iterator= field.fragments().iterator(); iterator.hasNext();) {
-			current= (VariableDeclarationFragment) iterator.next();
+		for (final Iterator<VariableDeclarationFragment> iterator= field.fragments().iterator(); iterator.hasNext();) {
+			current= iterator.next();
 			if (!current.getName().getIdentifier().equals(fragment.getName().getIdentifier()))
 				rewriter.remove(current, null);
 		}
@@ -494,19 +498,16 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected final void createMemberDeclarations(final CompilationUnitRewrite sourceRewrite, final ASTRewrite targetRewrite, final AbstractTypeDeclaration targetDeclaration) throws CoreException {
 		Assert.isNotNull(sourceRewrite);
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(targetDeclaration);
-		Arrays.sort(fMembers, new Comparator() {
+		Arrays.sort(fMembers, new Comparator<IMember>() {
 
-			public final int compare(final Object first, final Object second) {
-				Assert.isNotNull(first);
-				Assert.isNotNull(second);
-				final ISourceReference predecessor= (ISourceReference) first;
-				final ISourceReference successor= (ISourceReference) second;
+			public final int compare(final IMember first, final IMember second) {
 				try {
-					return predecessor.getSourceRange().getOffset() - successor.getSourceRange().getOffset();
+					return first.getSourceRange().getOffset() - second.getSourceRange().getOffset();
 				} catch (JavaModelException exception) {
 					return first.hashCode() - second.hashCode();
 				}
@@ -543,7 +544,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @throws CoreException
 	 *             if an error occurs
 	 */
-	protected final void createMethodComment(final CompilationUnitRewrite sourceRewrite, final MethodDeclaration declaration, final Set replacements, final boolean javadoc) throws CoreException {
+	protected final void createMethodComment(final CompilationUnitRewrite sourceRewrite, final MethodDeclaration declaration, final Set<String> replacements, final boolean javadoc) throws CoreException {
 		Assert.isNotNull(sourceRewrite);
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(replacements);
@@ -593,7 +594,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @throws CoreException
 	 *             if an error occurs
 	 */
-	protected final void createMethodComments(final CompilationUnitRewrite sourceRewrite, final Set replacements) throws CoreException {
+	protected final void createMethodComments(final CompilationUnitRewrite sourceRewrite, final Set<String> replacements) throws CoreException {
 		Assert.isNotNull(sourceRewrite);
 		Assert.isNotNull(replacements);
 		if (fMembers.length > 0 && (fAnnotations || fComments)) {
@@ -650,8 +651,8 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		Modifier modifier= null;
 		Annotation annotation= null;
 		IExtendedModifier extended= null;
-		for (final Iterator iterator= declaration.modifiers().iterator(); iterator.hasNext();) {
-			extended= (IExtendedModifier) iterator.next();
+		for (final Iterator<IExtendedModifier> iterator= declaration.modifiers().iterator(); iterator.hasNext();) {
+			extended= iterator.next();
 			if (!extended.isAnnotation()) {
 				modifier= (Modifier) extended;
 				if (fPublic && modifier.getKeyword().equals(Modifier.ModifierKeyword.PUBLIC_KEYWORD)) {
@@ -747,6 +748,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getElements()
 	 */
+	@Override
 	public final Object[] getElements() {
 		return new Object[] { fSubType };
 	}
@@ -759,7 +761,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 *             if an error occurs
 	 */
 	public final IMember[] getExtractableMembers() throws JavaModelException {
-		final List list= new ArrayList();
+		final List<IJavaElement> list= new ArrayList<IJavaElement>();
 		IJavaElement[] children= fSubType.getChildren();
 		for (int index= 0; index < children.length; index++) {
 			if (children[index] instanceof IMember && isExtractableMember((IMember) children[index]))
@@ -779,7 +781,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 */
 	protected final IField[] getExtractedFields(final ICompilationUnit unit) {
 		Assert.isNotNull(unit);
-		final List list= new ArrayList();
+		final List<IJavaElement> list= new ArrayList<IJavaElement>();
 		for (int index= 0; index < fMembers.length; index++) {
 			if (fMembers[index] instanceof IField) {
 				final IJavaElement element= JavaModelUtil.findInCompilationUnit(unit, fMembers[index]);
@@ -801,7 +803,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 */
 	protected final IMethod[] getExtractedMethods(final ICompilationUnit unit) {
 		Assert.isNotNull(unit);
-		final List list= new ArrayList();
+		final List<IJavaElement> list= new ArrayList<IJavaElement>();
 		for (int index= 0; index < fMembers.length; index++) {
 			if (fMembers[index] instanceof IMethod) {
 				final IJavaElement element= JavaModelUtil.findInCompilationUnit(unit, fMembers[index]);
@@ -817,6 +819,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getIdentifier()
 	 */
+	@Override
 	public final String getIdentifier() {
 		return IDENTIFIER;
 	}
@@ -824,6 +827,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
+	@Override
 	public final String getProcessorName() {
 		return RefactoringCoreMessages.ExtractInterfaceProcessor_name;
 	}
@@ -909,7 +913,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
 		int count= 1;
-		final List elements= new ArrayList();
+		final List<IJavaElement> elements= new ArrayList<IJavaElement>();
 		String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
 		final RefactoringStatus status= new RefactoringStatus();
 		while ((handle= extended.getAttribute(attribute)) != null) {
@@ -921,7 +925,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			count++;
 			attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
 		}
-		fMembers= (IMember[]) elements.toArray(new IMember[elements.size()]);
+		fMembers= elements.toArray(new IMember[elements.size()]);
 		fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fSubType.getJavaProject());
 		if (!status.isOK())
 			return status;
@@ -931,6 +935,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#isApplicable()
 	 */
+	@Override
 	public final boolean isApplicable() throws CoreException {
 		return Checks.isAvailable(fSubType) && !fSubType.isBinary() && !fSubType.isReadOnly() && !fSubType.isAnnotation() && !fSubType.isAnonymous();
 	}
@@ -948,6 +953,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#loadParticipants(org.eclipse.ltk.core.refactoring.RefactoringStatus,org.eclipse.ltk.core.refactoring.participants.SharableParticipants)
 	 */
+	@Override
 	public final RefactoringParticipant[] loadParticipants(final RefactoringStatus status, final SharableParticipants sharedParticipants) throws CoreException {
 		return new RefactoringParticipant[0];
 	}
@@ -980,7 +986,8 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/**
 	 * {@inheritDoc}
 	 */
-	protected final void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements, final IProgressMonitor monitor) throws CoreException {
+	@Override
+	protected final void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set<String> replacements, final IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask("", 100); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
@@ -990,7 +997,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				currentRewrite= rewrite;
 			else
 				currentRewrite= new CompilationUnitRewrite(unit, node);
-			final Collection collection= (Collection) fTypeOccurrences.get(unit);
+			final Collection<ITypeConstraintVariable> collection= fTypeOccurrences.get(unit);
 			if (collection != null && !collection.isEmpty()) {
 				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 100);
 				try {
@@ -999,8 +1006,8 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					TType estimate= null;
 					ISourceConstraintVariable variable= null;
 					ITypeConstraintVariable constraint= null;
-					for (final Iterator iterator= collection.iterator(); iterator.hasNext();) {
-						variable= (ISourceConstraintVariable) iterator.next();
+					for (final Iterator<ITypeConstraintVariable> iterator= collection.iterator(); iterator.hasNext();) {
+						variable= iterator.next();
 						if (variable instanceof ITypeConstraintVariable) {
 							constraint= (ITypeConstraintVariable) variable;
 							estimate= (TType) constraint.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
@@ -1051,7 +1058,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @throws CoreException
 	 *             if an error occurs
 	 */
-	protected final void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit superUnit, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	protected final void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit superUnit, final Set<String> replacements, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(manager);
 		Assert.isNotNull(sourceRewrite);
 		Assert.isNotNull(superUnit);
@@ -1079,13 +1086,14 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			}
 			JavaModelUtil.reconcile(subUnit);
 			final IJavaProject project= subUnit.getJavaProject();
-			final ASTParser parser= ASTParser.newParser(AST.JLS3);
+			final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			parser.setWorkingCopyOwner(fOwner);
 			parser.setResolveBindings(true);
 			parser.setProject(project);
 			parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 			parser.createASTs(new ICompilationUnit[] { subUnit}, new String[0], new ASTRequestor() {
 
+				@Override
 				public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
 					try {
 						final IType subType= (IType) JavaModelUtil.findInCompilationUnit(unit, fSubType);
@@ -1135,6 +1143,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					}
 				}
 
+				@Override
 				public final void acceptBinding(final String key, final IBinding binding) {
 					// Do nothing
 				}

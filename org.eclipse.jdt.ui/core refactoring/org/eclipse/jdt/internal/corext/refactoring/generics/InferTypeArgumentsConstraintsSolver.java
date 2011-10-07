@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,13 +28,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.HierarchyType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.EnumeratedTypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.SingletonTypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet;
@@ -52,9 +50,9 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivale
 
 public class InferTypeArgumentsConstraintsSolver {
 
-	private static class TTypeComparator implements Comparator {
-		public int compare(Object o1, Object o2) {
-			return ((TType) o1).getPrettySignature().compareTo(((TType) o2).getPrettySignature());
+	private static class TTypeComparator implements Comparator<TType> {
+		public int compare(TType o1, TType o2) {
+			return o1.getPrettySignature().compareTo(o2.getPrettySignature());
 		}
 		public static TTypeComparator INSTANCE= new TTypeComparator();
 	}
@@ -69,14 +67,14 @@ public class InferTypeArgumentsConstraintsSolver {
 	 * nodes in the constraint graph that remain to be (re-)processed. Entries
 	 * are <code>ConstraintVariable2</code>s.
 	 */
-	private LinkedList/*<ConstraintVariable2>*/ fWorkList;
+	private LinkedList<ConstraintVariable2> fWorkList;
 
 	private InferTypeArgumentsUpdate fUpdate;
 
 
 	public InferTypeArgumentsConstraintsSolver(InferTypeArgumentsTCModel typeConstraintFactory) {
 		fTCModel= typeConstraintFactory;
-		fWorkList= new LinkedList();
+		fWorkList= new LinkedList<ConstraintVariable2>();
 	}
 
 	public InferTypeArgumentsUpdate solveConstraints(IProgressMonitor pm) {
@@ -89,23 +87,23 @@ public class InferTypeArgumentsConstraintsSolver {
 
 		fTypeSetEnvironment= new TypeSetEnvironment(fTCModel.getTypeEnvironment());
 		ParametricStructureComputer parametricStructureComputer= new ParametricStructureComputer(allConstraintVariables, fTCModel);
-		Collection/*<CollectionElementVariable2>*/ newVars= parametricStructureComputer.createElemConstraintVariables();
+		Collection<CollectionElementVariable2> newVars= parametricStructureComputer.createElemConstraintVariables();
 
-		ArrayList newAllConstraintVariables= new ArrayList();
+		ArrayList<ConstraintVariable2> newAllConstraintVariables= new ArrayList<ConstraintVariable2>();
 		newAllConstraintVariables.addAll(Arrays.asList(allConstraintVariables));
 		newAllConstraintVariables.addAll(newVars);
-		allConstraintVariables= (ConstraintVariable2[]) newAllConstraintVariables.toArray(new ConstraintVariable2[newAllConstraintVariables.size()]);
+		allConstraintVariables= newAllConstraintVariables.toArray(new ConstraintVariable2[newAllConstraintVariables.size()]);
 
 
 		//loop over all TypeEquivalenceSets and unify the elements from the fElemStructureEnv with the existing TypeEquivalenceSets
-		HashSet allTypeEquivalenceSets= new HashSet();
+		HashSet<TypeEquivalenceSet> allTypeEquivalenceSets= new HashSet<TypeEquivalenceSet>();
 		for (int i= 0; i < allConstraintVariables.length; i++) {
 			TypeEquivalenceSet typeEquivalenceSet= allConstraintVariables[i].getTypeEquivalenceSet();
 			if (typeEquivalenceSet != null)
 				allTypeEquivalenceSets.add(typeEquivalenceSet);
 		}
-		for (Iterator iter= allTypeEquivalenceSets.iterator(); iter.hasNext();) {
-			TypeEquivalenceSet typeEquivalenceSet= (TypeEquivalenceSet) iter.next();
+		for (Iterator<TypeEquivalenceSet> iter= allTypeEquivalenceSets.iterator(); iter.hasNext();) {
+			TypeEquivalenceSet typeEquivalenceSet= iter.next();
 			ConstraintVariable2[] contributingVariables= typeEquivalenceSet.getContributingVariables();
 			for (int i= 0; i < contributingVariables.length; i++) {
 				for (int j= i + 1; j < contributingVariables.length; j++) {
@@ -196,9 +194,9 @@ public class InferTypeArgumentsConstraintsSolver {
 		pm.beginTask("", fWorkList.size() * 3); //$NON-NLS-1$
 		while (! fWorkList.isEmpty()) {
 			// Get a variable whose type estimate has changed
-			ConstraintVariable2 cv= (ConstraintVariable2) fWorkList.removeFirst();
-			List/*<ITypeConstraint2>*/ usedIn= fTCModel.getUsedIn(cv);
-			processConstraints(usedIn, cv);
+			ConstraintVariable2 cv= fWorkList.removeFirst();
+			List<ITypeConstraint2> usedIn= fTCModel.getUsedIn(cv);
+			processConstraints(usedIn);
 			pm.worked(1);
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
@@ -214,14 +212,13 @@ public class InferTypeArgumentsConstraintsSolver {
 	 *
 	 * @param usedIn the <code>List</code> of <code>ITypeConstraint2</code>s
 	 * to process
-	 * @param changedCv the constraint variable whose type bound has changed
 	 */
-	private void processConstraints(List/*<ITypeConstraint2>*/ usedIn, ConstraintVariable2 changedCv) {
-		int i= 0;
-		for (Iterator iter= usedIn.iterator(); iter.hasNext(); i++) {
-			ITypeConstraint2 tc= (ITypeConstraint2) iter.next();
+	private void processConstraints(List<ITypeConstraint2> usedIn) {
+		Iterator<ITypeConstraint2> iter= usedIn.iterator();
+		while (iter.hasNext()) {
+			ITypeConstraint2 tc= iter.next();
 
-				maintainSimpleConstraint(changedCv, tc);
+				maintainSimpleConstraint(tc);
 				//TODO: prune tcs which cannot cause further changes
 				// Maybe these should be pruned after a special first loop over all ConstraintVariables,
 				// Since this can only happen once for every CV in the work list.
@@ -230,7 +227,7 @@ public class InferTypeArgumentsConstraintsSolver {
 		}
 	}
 
-	private void maintainSimpleConstraint(ConstraintVariable2 changedCv, ITypeConstraint2 stc) {
+	private void maintainSimpleConstraint(ITypeConstraint2 stc) {
 		ConstraintVariable2 left= stc.getLeft();
 		ConstraintVariable2 right= stc.getRight();
 
@@ -301,14 +298,14 @@ public class InferTypeArgumentsConstraintsSolver {
 
 		} else {
 			EnumeratedTypeSet lowerBound= typeEstimate.lowerBound().enumerate();
-			ArrayList/*<TType>*/ interfaceCandidates= null;
-			for (Iterator iter= lowerBound.iterator(); iter.hasNext();) {
-				TType type= (TType) iter.next();
+			ArrayList<TType> interfaceCandidates= null;
+			for (Iterator<TType> iter= lowerBound.iterator(); iter.hasNext();) {
+				TType type= iter.next();
 				if (! type.isInterface()) {
 					return type;
 				} else {
 					if (interfaceCandidates == null)
-						interfaceCandidates= new ArrayList(2);
+						interfaceCandidates= new ArrayList<TType>(2);
 					interfaceCandidates.add(type);
 				}
 			}
@@ -316,32 +313,33 @@ public class InferTypeArgumentsConstraintsSolver {
 			if (interfaceCandidates == null || interfaceCandidates.size() == 0) {
 				return null;
 			} else if (interfaceCandidates.size() == 1) {
-				return (TType) interfaceCandidates.get(0);
+				return interfaceCandidates.get(0);
 			} else {
-				ArrayList nontaggingCandidates= getNonTaggingInterfaces(interfaceCandidates);
+				ArrayList<TType> nontaggingCandidates= getNonTaggingInterfaces(interfaceCandidates);
 				if (nontaggingCandidates.size() != 0) {
-					return (TType) Collections.min(nontaggingCandidates, TTypeComparator.INSTANCE);
+					return Collections.min(nontaggingCandidates, TTypeComparator.INSTANCE);
 				} else {
-					return (TType) Collections.min(interfaceCandidates, TTypeComparator.INSTANCE);
+					return Collections.min(interfaceCandidates, TTypeComparator.INSTANCE);
 				}
 			}
 		}
 	}
 
 	private static final int MAX_CACHE= 1024;
-	private Map/*<TType, Boolean>*/ fInterfaceTaggingCache= new LinkedHashMap(MAX_CACHE, 0.75f, true) {
+	private Map<TType, Boolean> fInterfaceTaggingCache= new LinkedHashMap<TType, Boolean>(MAX_CACHE, 0.75f, true) {
 		private static final long serialVersionUID= 1L;
-		protected boolean removeEldestEntry(Map.Entry eldest) {
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<TType, Boolean> eldest) {
 			return size() > MAX_CACHE;
 		}
 	};
 
-	private ArrayList getNonTaggingInterfaces(ArrayList interfaceCandidates) {
-		ArrayList unresolvedTypes= new ArrayList();
-		ArrayList nonTagging= new ArrayList();
+	private ArrayList<TType> getNonTaggingInterfaces(ArrayList<TType> interfaceCandidates) {
+		ArrayList<TType> unresolvedTypes= new ArrayList<TType>();
+		ArrayList<TType> nonTagging= new ArrayList<TType>();
 
 		for (int i= 0; i < interfaceCandidates.size(); i++) {
-			TType interf= (TType) interfaceCandidates.get(i);
+			TType interf= interfaceCandidates.get(i);
 			Object isTagging= fInterfaceTaggingCache.get(interf);
 			if (isTagging == null)
 				unresolvedTypes.add(interf);
@@ -350,21 +348,30 @@ public class InferTypeArgumentsConstraintsSolver {
 		}
 
 		if (unresolvedTypes.size() != 0) {
-			TType[] interfaces= (TType[]) unresolvedTypes.toArray(new TType[unresolvedTypes.size()]);
-			HierarchyType firstInterface= (HierarchyType) interfaces[0];
-			IJavaProject javaProject= firstInterface.getJavaElementType().getJavaProject();
-			ITypeBinding[] interfaceBindings= TypeEnvironment.createTypeBindings(interfaces, javaProject); //expensive...
-			for (int i= 0; i < interfaceBindings.length; i++) {
-				if (interfaceBindings[i].getDeclaredMethods().length == 0) {
-					fInterfaceTaggingCache.put(interfaces[i], Boolean.TRUE);
+			TType[] interfaces= unresolvedTypes.toArray(new TType[unresolvedTypes.size()]);
+			for (int i= 0; i < interfaces.length; i++) {
+				TType interf= interfaces[i];
+				if (isTaggingInterface(interf)) {
+					fInterfaceTaggingCache.put(interf, Boolean.TRUE);
 				} else {
-					fInterfaceTaggingCache.put(interfaces[i], Boolean.FALSE);
-					nonTagging.add(interfaces[i]);
+					fInterfaceTaggingCache.put(interf, Boolean.FALSE);
+					nonTagging.add(interf);
 				}
 			}
 		}
 
 		return nonTagging;
+	}
+
+	private static boolean isTaggingInterface(TType interf) {
+		if (interf instanceof HierarchyType) {
+			try {
+				return ((HierarchyType) interf).getJavaElementType().getMethods().length == 0;
+			} catch (JavaModelException e) {
+				// assume it's not
+			}
+		}
+		return false;
 	}
 
 	private void findCastsToRemove(CastVariable2[] castVariables) {

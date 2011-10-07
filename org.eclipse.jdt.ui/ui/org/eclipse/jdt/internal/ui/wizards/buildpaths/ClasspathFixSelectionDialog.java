@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -148,6 +148,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 		fSelectedFix= null;
 	}
 
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
@@ -162,6 +163,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 	}
 
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
 
@@ -186,6 +188,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 			fFixSelectionTable.setContentProvider(new ArrayContentProvider());
 			fFixSelectionTable.setLabelProvider(new ClasspathFixLabelProvider());
 			fFixSelectionTable.setComparator(new ViewerComparator() {
+				@Override
 				public int category(Object element) {
 					return - ((ClasspathFixProposal) element).getRelevance();
 				}
@@ -218,7 +221,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 	protected final void configureBuildPathPressed() {
 		cancelPressed();
 		String id= BUILD_PATH_PAGE_ID;
-		Map input= new HashMap();
+		Map<Object, Boolean> input= new HashMap<Object, Boolean>();
 		input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
 		if (PreferencesUtil.createPropertyDialogOn(getShell(), fProject, id, new String[] { id }, input).open() != Window.OK) {
 			return;
@@ -269,6 +272,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 
 	private static class ClasspathFixLabelProvider extends LabelProvider {
 
+		@Override
 		public Image getImage(Object element) {
 			if (element instanceof ClasspathFixProposal) {
 				ClasspathFixProposal classpathFixProposal= (ClasspathFixProposal) element;
@@ -277,6 +281,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 			return null;
 		}
 
+		@Override
 		public String getText(Object element) {
 			if (element instanceof ClasspathFixProposal) {
 				ClasspathFixProposal classpathFixProposal= (ClasspathFixProposal) element;

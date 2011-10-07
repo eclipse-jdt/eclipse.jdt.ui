@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -117,6 +117,7 @@ public class FoldingActionGroup extends ActionGroup {
 		fViewer.addProjectionListener(fProjectionListener);
 
 		fToggle= new PreferenceAction(FoldingMessages.getResourceBundle(), "Projection.Toggle.", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+			@Override
 			public void run() {
 				IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 				boolean current= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
@@ -151,6 +152,7 @@ public class FoldingActionGroup extends ActionGroup {
 		editor.setAction("FoldingCollapse", fCollapse); //$NON-NLS-1$
 
 		fRestoreDefaults= new FoldingAction(FoldingMessages.getResourceBundle(), "Projection.Restore.") { //$NON-NLS-1$
+			@Override
 			public void run() {
 				if (editor instanceof JavaEditor) {
 					JavaEditor javaEditor= (JavaEditor) editor;
@@ -162,6 +164,7 @@ public class FoldingActionGroup extends ActionGroup {
 		editor.setAction("FoldingRestore", fRestoreDefaults); //$NON-NLS-1$
 
 		fCollapseMembers= new FoldingAction(FoldingMessages.getResourceBundle(), "Projection.CollapseMembers.") { //$NON-NLS-1$
+			@Override
 			public void run() {
 				if (editor instanceof JavaEditor) {
 					JavaEditor javaEditor= (JavaEditor) editor;
@@ -173,6 +176,7 @@ public class FoldingActionGroup extends ActionGroup {
 		editor.setAction("FoldingCollapseMembers", fCollapseMembers); //$NON-NLS-1$
 
 		fCollapseComments= new FoldingAction(FoldingMessages.getResourceBundle(), "Projection.CollapseComments.") { //$NON-NLS-1$
+			@Override
 			public void run() {
 				if (editor instanceof JavaEditor) {
 					JavaEditor javaEditor= (JavaEditor) editor;
@@ -199,6 +203,7 @@ public class FoldingActionGroup extends ActionGroup {
 	/*
 	 * @see org.eclipse.ui.actions.ActionGroup#dispose()
 	 */
+	@Override
 	public void dispose() {
 		if (isEnabled()) {
 			fViewer.removeProjectionListener(fProjectionListener);
@@ -246,6 +251,7 @@ public class FoldingActionGroup extends ActionGroup {
 	/*
 	 * @see org.eclipse.ui.actions.ActionGroup#updateActionBars()
 	 */
+	@Override
 	public void updateActionBars() {
 		update();
 	}

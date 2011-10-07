@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,13 +27,13 @@ public class ResourceUtil {
 	}
 
 	public static IFile[] getFiles(ICompilationUnit[] cus) {
-		List files= new ArrayList(cus.length);
+		List<IResource> files= new ArrayList<IResource>(cus.length);
 		for (int i= 0; i < cus.length; i++) {
 			IResource resource= cus[i].getResource();
 			if (resource != null && resource.getType() == IResource.FILE)
 				files.add(resource);
 		}
-		return (IFile[]) files.toArray(new IFile[files.size()]);
+		return files.toArray(new IFile[files.size()]);
 	}
 
 	public static IFile getFile(ICompilationUnit cu) {

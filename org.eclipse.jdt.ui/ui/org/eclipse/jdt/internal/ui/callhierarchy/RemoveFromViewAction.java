@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.swt.widgets.TreeItem;
 
@@ -16,11 +19,15 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -54,15 +61,54 @@ class RemoveFromViewAction extends Action{
 		setDescription(CallHierarchyMessages.RemoveFromViewAction_removeFromView_description);
 		setToolTipText(CallHierarchyMessages.RemoveFromViewAction_removeFromView_tooltip);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REMOVE_FROM_VIEW_ACTION);
+
+		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
+		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_ELCL_REMOVE_DISABLED));
+		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_ELCL_REMOVE));
+		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_ELCL_REMOVE));
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
+	@Override
 	public void run() {
+		IMember[] inputElements= fPart.getInputElements();
+		List<IMember> inputList= new ArrayList<IMember>(Arrays.asList(inputElements));
+		IMember[] selection= getSelectedElements();
+		for (int i= 0; i < selection.length; i++) {
+			if (inputList.contains(selection[i]))
+				inputList.remove(selection[i]);
+		}
+		if (inputList.size() > 0) {
+			fPart.updateInputHistoryAndDescription(inputElements, inputList.toArray(new IMember[inputList.size()]));
+		}
 		TreeItem[] items= fCallHierarchyViewer.getTree().getSelection();
 		for (int i= 0; i < items.length; i++)
 			items[i].dispose();
+	}
+
+	/**
+	 * Gets the elements selected in the call hierarchy view part.
+	 * 
+	 * @return the elements
+	 * @since 3.7
+	 */
+	private IMember[] getSelectedElements() {
+		ISelection selection= getSelection();
+		if (selection instanceof IStructuredSelection) {
+			List<IMember> members= new ArrayList<IMember>();
+			List<?> elements= ((IStructuredSelection)selection).toList();
+			for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
+				Object obj= iter.next();
+				if (obj instanceof MethodWrapper) {
+					MethodWrapper wrapper= (MethodWrapper)obj;
+					members.add((wrapper).getMember());
+				}
+			}
+			return members.toArray(new IMember[members.size()]);
+		}
+		return null;
 	}
 
 	/**
@@ -84,7 +130,7 @@ class RemoveFromViewAction extends Action{
 		if (selection.isEmpty())
 			return false;
 
-		Iterator iter= selection.iterator();
+		Iterator<?> iter= selection.iterator();
 		while (iter.hasNext()) {
 			Object element= iter.next();
 			if (!(element instanceof MethodWrapper))//takes care of '...' node

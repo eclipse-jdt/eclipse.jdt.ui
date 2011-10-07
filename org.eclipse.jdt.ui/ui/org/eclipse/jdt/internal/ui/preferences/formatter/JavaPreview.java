@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -37,8 +39,9 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
@@ -97,23 +100,24 @@ public abstract class JavaPreview {
 
 	protected final MarginPainter fMarginPainter;
 
-	protected Map fWorkingValues;
+	protected Map<String, String> fWorkingValues;
 
 	private int fTabSize= 0;
 	private WhitespaceCharacterPainter fWhitespaceCharacterPainter;
 
 
-	public JavaPreview(Map workingValues, Composite parent) {
+	public JavaPreview(Map<String, String> workingValues, Composite parent) {
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		fPreviewDocument= new Document();
 		fWorkingValues= workingValues;
 		tools.setupJavaDocumentPartitioner( fPreviewDocument, IJavaPartitions.JAVA_PARTITIONING);
 
 		PreferenceStore prioritizedSettings= new PreferenceStore();
-		prioritizedSettings.setValue(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
-		prioritizedSettings.setValue(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
-		prioritizedSettings.setValue(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
-		prioritizedSettings.setValue(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+		HashMap<String, String> complianceOptions= new HashMap<String, String>();
+		JavaModelUtil.setComplianceOptions(complianceOptions, JavaModelUtil.VERSION_LATEST);
+		for (Entry<String, String> complianceOption : complianceOptions.entrySet()) {
+			prioritizedSettings.setValue(complianceOption.getKey(), complianceOption.getValue());
+		}
 
 		IPreferenceStore[] chain= { prioritizedSettings, JavaPlugin.getDefault().getCombinedPreferenceStore() };
 		fPreferenceStore= new ChainedPreferenceStore(chain);
@@ -150,12 +154,12 @@ public abstract class JavaPreview {
 		}
 
 		// update the print margin
-		final String value= (String)fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT);
+		final String value= fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT);
 		final int lineWidth= getPositiveIntValue(value, 0);
 		fMarginPainter.setMarginRulerColumn(lineWidth);
 
 		// update the tab size
-		final int tabSize= getPositiveIntValue((String) fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE), 0);
+		final int tabSize= getPositiveIntValue(fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE), 0);
 		if (tabSize != fTabSize) fSourceViewer.getTextWidget().setTabs(tabSize);
 		fTabSize= tabSize;
 
@@ -202,12 +206,12 @@ public abstract class JavaPreview {
 
 
 
-	public Map getWorkingValues() {
+	public Map<String, String> getWorkingValues() {
 		return fWorkingValues;
 	}
 
 
-	public void setWorkingValues(Map workingValues) {
+	public void setWorkingValues(Map<String, String> workingValues) {
 		fWorkingValues= workingValues;
 	}
 

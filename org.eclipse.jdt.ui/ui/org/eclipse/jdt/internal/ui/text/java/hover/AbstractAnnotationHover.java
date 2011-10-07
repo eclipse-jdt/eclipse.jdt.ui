@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -171,6 +171,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		/*
 		 * @see org.eclipse.jface.text.IInformationControl#setInformation(java.lang.String)
 		 */
+		@Override
 		public void setInformation(String information) {
 			//replaced by IInformationControlExtension2#setInput
 		}
@@ -199,6 +200,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractAnnotationHover.AbstractInformationControl#setFocus()
 		 */
+		@Override
 		public void setFocus() {
 			super.setFocus();
 			if (fFocusControl != null)
@@ -208,6 +210,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		/*
 		 * @see org.eclipse.jface.text.AbstractInformationControl#setVisible(boolean)
 		 */
+		@Override
 		public final void setVisible(boolean visible) {
 			if (!visible)
 				disposeDeferredCreatedContent();
@@ -227,6 +230,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		/*
 		 * @see org.eclipse.jface.text.AbstractInformationControl#createContent(org.eclipse.swt.widgets.Composite)
 		 */
+		@Override
 		protected void createContent(Composite parent) {
 			fParent= parent;
 			GridLayout layout= new GridLayout(1, false);
@@ -239,6 +243,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		/*
 		 * @see org.eclipse.jface.text.AbstractInformationControl#computeSizeHint()
 		 */
+		@Override
 		public Point computeSizeHint() {
 			Point preferedSize= getShell().computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 
@@ -368,7 +373,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			layout.verticalSpacing= 2;
 			composite.setLayout(layout);
 			
-			List list= new ArrayList();
+			List<Link> list= new ArrayList<Link>();
 			for (int i= 0; i < proposals.length; i++) {
 				list.add(createCompletionProposalLink(composite, proposals[i], 1));// Original link for single fix, hence pass 1 for count
 
@@ -380,7 +385,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 					}
 				}
 			}
-			final Link[] links= (Link[])list.toArray(new Link[list.size()]);
+			final Link[] links= list.toArray(new Link[list.size()]);
 
 			scrolledComposite.setContent(composite);
 			setColorAndFont(scrolledComposite, parent.getForeground(), parent.getBackground(), JFaceResources.getDialogFont());
@@ -498,6 +503,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				/*
 				 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
 				 */
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					apply(proposal, fInput.viewer, fInput.position.offset, isMultiFix);
 				}
@@ -552,6 +558,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
+		@Override
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			return new AnnotationInformationControl(parent, new ToolBarManager(SWT.FLAT));
 		}
@@ -573,11 +580,13 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
+		@Override
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			return new AnnotationInformationControl(parent, EditorsUI.getTooltipAffordanceString()) {
 				/*
 				 * @see org.eclipse.jface.text.IInformationControlExtension5#getInformationPresenterControlCreator()
 				 */
+				@Override
 				public IInformationControlCreator getInformationPresenterControlCreator() {
 					return fPresenterControlCreator;
 				}
@@ -587,6 +596,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#canReuse(org.eclipse.jface.text.IInformationControl)
 		 */
+		@Override
 		public boolean canReuse(IInformationControl control) {
 			if (!super.canReuse(control))
 				return false;
@@ -620,6 +630,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		/*
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
+		@Override
 		public void run() {
 			Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 
@@ -667,6 +678,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractJavaEditorTextHover#getHoverInfo2(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 * @since 3.4
 	 */
+	@Override
 	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
 		IPath path;
 		IAnnotationModel model;
@@ -682,18 +694,18 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			return null;
 
 		try {
-			Iterator parent;
+			Iterator<Annotation> parent;
 			if (model instanceof IAnnotationModelExtension2)
 				parent= ((IAnnotationModelExtension2)model).getAnnotationIterator(hoverRegion.getOffset(), hoverRegion.getLength(), true, true);
 			else
 				parent= model.getAnnotationIterator();
-			Iterator e= new JavaAnnotationIterator(parent, fAllAnnotations);
+			Iterator<Annotation> e= new JavaAnnotationIterator(parent, fAllAnnotations);
 
 			int layer= -1;
 			Annotation annotation= null;
 			Position position= null;
 			while (e.hasNext()) {
-				Annotation a= (Annotation) e.next();
+				Annotation a= e.next();
 
 				AnnotationPreference preference= getAnnotationPreference(a);
 				if (preference == null || !(preference.getTextPreferenceKey() != null && fStore.getBoolean(preference.getTextPreferenceKey()) || (preference.getHighlightPreferenceKey() != null && fStore.getBoolean(preference.getHighlightPreferenceKey()))))
@@ -737,6 +749,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	 * @see ITextHoverExtension#getHoverControlCreator()
 	 * @since 3.4
 	 */
+	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		if (fHoverControlCreator == null)
 			fHoverControlCreator= new HoverControlCreator(getInformationPresenterControlCreator());
@@ -744,9 +757,10 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.ITextHoverExtension2#getInformationPresenterControlCreator()
+	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 * @since 3.4
 	 */
+	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		if (fPresenterControlCreator == null)
 			fPresenterControlCreator= new PresenterControlCreator();

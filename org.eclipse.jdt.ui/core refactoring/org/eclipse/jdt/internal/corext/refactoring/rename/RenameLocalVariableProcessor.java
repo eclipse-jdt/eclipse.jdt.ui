@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -131,6 +131,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#getAffectedProjectNatures()
 	 */
+	@Override
 	protected final String[] getAffectedProjectNatures() throws CoreException {
 		return JavaProcessors.computeAffectedNatures(fLocalVariable);
 	}
@@ -138,6 +139,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getElements()
 	 */
+	@Override
 	public Object[] getElements() {
 		return new Object[] { fLocalVariable };
 	}
@@ -145,6 +147,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getIdentifier()
 	 */
+	@Override
 	public String getIdentifier() {
 		return IDENTIFIER;
 	}
@@ -152,6 +155,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
+	@Override
 	public String getProcessorName() {
 		return RefactoringCoreMessages.RenameTempRefactoring_rename;
 	}
@@ -159,6 +163,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#isApplicable()
 	 */
+	@Override
 	public boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isRenameAvailable(fLocalVariable);
 	}
@@ -187,6 +192,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#getNewElementName()
 	 */
+	@Override
 	public String getNewElementName() {
 		return fNewName;
 	}
@@ -194,6 +200,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#setNewElementName(java.lang.String)
 	 */
+	@Override
 	public void setNewElementName(String newName) {
 		Assert.isNotNull(newName);
 		fNewName= newName;
@@ -206,6 +213,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		return null; //cannot create an ILocalVariable
 	}
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		initAST();
 		if (fTempDeclarationNode == null || fTempDeclarationNode.resolveBinding() == null)
@@ -233,20 +241,24 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		fCurrentName= fTempDeclarationNode.getName().getIdentifier();
 	}
 
+	@Override
 	protected RenameModifications computeRenameModifications() throws CoreException {
 		RenameModifications result= new RenameModifications();
 		result.rename(fLocalVariable, new RenameArguments(getNewElementName(), getUpdateReferences()));
 		return result;
 	}
 
+	@Override
 	protected IFile[] getChangedFiles() throws CoreException {
 		return new IFile[] {ResourceUtil.getFile(fCu)};
 	}
 
+	@Override
 	public int getSaveMode() {
 		return RefactoringSaveHelper.SAVE_NOTHING;
 	}
 
+	@Override
 	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context)
 			throws CoreException, OperationCanceledException {
 		try {
@@ -341,6 +353,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		return new ReplaceEdit(offset, fCurrentName.length(), fNewName);
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.RenameTypeProcessor_creating_changes, 1);

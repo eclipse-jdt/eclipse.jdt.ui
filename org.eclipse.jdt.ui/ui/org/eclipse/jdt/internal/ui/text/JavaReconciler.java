@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -121,6 +121,7 @@ public class JavaReconciler extends MonoReconciler {
 		/*
 		 * @see org.eclipse.swt.events.ShellListener#shellActivated(org.eclipse.swt.events.ShellEvent)
 		 */
+		@Override
 		public void shellActivated(ShellEvent e) {
 			if (!fControl.isDisposed() && fControl.isVisible()) {
 				if (hasJavaModelChanged())
@@ -132,6 +133,7 @@ public class JavaReconciler extends MonoReconciler {
 		/*
 		 * @see org.eclipse.swt.events.ShellListener#shellDeactivated(org.eclipse.swt.events.ShellEvent)
 		 */
+		@Override
 		public void shellDeactivated(ShellEvent e) {
 			if (!fControl.isDisposed() && fControl.getShell() == e.getSource()) {
 				setJavaModelChanged(false);
@@ -302,6 +304,7 @@ public class JavaReconciler extends MonoReconciler {
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconciler#install(org.eclipse.jface.text.ITextViewer)
 	 */
+	@Override
 	public void install(ITextViewer textViewer) {
 		super.install(textViewer);
 
@@ -335,6 +338,7 @@ public class JavaReconciler extends MonoReconciler {
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconciler#uninstall()
 	 */
+	@Override
 	public void uninstall() {
 
 		IWorkbenchPartSite site= fTextEditor.getSite();
@@ -363,6 +367,7 @@ public class JavaReconciler extends MonoReconciler {
 	/*
 	 * @see org.eclipse.jface.text.reconciler.AbstractReconciler#forceReconciling()
 	 */
+	@Override
 	protected void forceReconciling() {
 		if (!fIninitalProcessDone)
 			return;
@@ -376,6 +381,7 @@ public class JavaReconciler extends MonoReconciler {
 	 * @see org.eclipse.jface.text.reconciler.AbstractReconciler#aboutToReconcile()
 	 * @since 3.0
 	 */
+	@Override
 	protected void aboutToBeReconciled() {
 		JavaCompositeReconcilingStrategy strategy= (JavaCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
 		strategy.aboutToBeReconciled();
@@ -384,6 +390,7 @@ public class JavaReconciler extends MonoReconciler {
 	/*
 	 * @see org.eclipse.jface.text.reconciler.AbstractReconciler#reconcilerReset()
 	 */
+	@Override
 	protected void reconcilerReset() {
 		super.reconcilerReset();
         JavaCompositeReconcilingStrategy strategy= (JavaCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
@@ -393,6 +400,7 @@ public class JavaReconciler extends MonoReconciler {
 	/*
 	 * @see org.eclipse.jface.text.reconciler.MonoReconciler#initialProcess()
 	 */
+	@Override
 	protected void initialProcess() {
 		synchronized (fMutex) {
 			super.initialProcess();

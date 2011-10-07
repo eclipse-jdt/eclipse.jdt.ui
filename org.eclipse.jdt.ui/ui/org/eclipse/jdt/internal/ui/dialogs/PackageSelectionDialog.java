@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -102,8 +102,9 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 	/*
 	 * @see org.eclipse.jface.window.Window#open()
 	 */
+	@Override
 	public int open() {
-		final ArrayList packageList= new ArrayList();
+		final ArrayList<IJavaElement> packageList= new ArrayList<IJavaElement>();
 
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -114,11 +115,12 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 				monitor.beginTask(JavaUIMessages.PackageSelectionDialog_progress_search, hideEmpty ? 2 : 1);
 				try {
 					SearchRequestor requestor= new SearchRequestor() {
-						private HashSet fSet= new HashSet();
+						private HashSet<String> fSet= new HashSet<String>();
 						private final boolean fAddDefault= (fFlags & F_HIDE_DEFAULT_PACKAGE) == 0;
 						private final boolean fDuplicates= (fFlags & F_REMOVE_DUPLICATES) == 0;
 						private final boolean fIncludeParents= (fFlags & F_SHOW_PARENTS) != 0;
 
+						@Override
 						public void acceptSearchMatch(SearchMatch match) throws CoreException {
 							IJavaElement enclosingElement= (IJavaElement) match.getElement();
 							String name= enclosingElement.getElementName();
@@ -168,7 +170,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 			private void removeEmptyPackages(IProgressMonitor monitor) throws JavaModelException, InterruptedException {
 				monitor.beginTask(JavaUIMessages.PackageSelectionDialog_progress_findEmpty, packageList.size());
 				try {
-					ArrayList res= new ArrayList(packageList.size());
+					ArrayList<IPackageFragment> res= new ArrayList<IPackageFragment>(packageList.size());
 					for (int i= 0; i < packageList.size(); i++) {
 						IPackageFragment pkg= (IPackageFragment) packageList.get(i);
 						if (pkg.hasChildren() || !pkg.hasSubpackages()) {
@@ -213,6 +215,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.OPEN_PACKAGE_DIALOG);
@@ -221,6 +224,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 	/*
 	 * @see Window#close()
 	 */
+	@Override
 	public boolean close() {
 		writeSettings();
 		return super.close();
@@ -229,6 +233,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 	/*
 	 * @see org.eclipse.jface.window.Window#createContents(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		Control control= super.createContents(parent);
 		readSettings();
@@ -238,6 +243,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.window.Window#getInitialSize()
 	 */
+	@Override
 	protected Point getInitialSize() {
 		Point result= super.getInitialSize();
 		if (fSize != null) {
@@ -253,6 +259,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.window.Window#getInitialLocation(org.eclipse.swt.graphics.Point)
 	 */
+	@Override
 	protected Point getInitialLocation(Point initialSize) {
 		Point result= super.getInitialLocation(initialSize);
 		if (fLocation != null) {

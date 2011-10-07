@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,6 +98,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 	/*
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
+	@Override
 	public final  void run() {
 		ITextSelection selection= getTextSelection();
 		ISourceRange newRange= getNewSelectionRange(createSourceRange(selection), null);
@@ -191,7 +192,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 	}
 
 	private static Integer[] createOffsetArray(IType[] types) throws JavaModelException {
-		List result= new ArrayList();
+		List<Integer> result= new ArrayList<Integer>();
 		for (int i= 0; i < types.length; i++) {
 			IType iType= types[i];
 			addOffset(result, iType.getNameRange().getOffset());
@@ -200,10 +201,10 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 			addMemberOffsetList(result, iType.getFields());
 			addMemberOffsetList(result, iType.getInitializers());
 		}
-		return (Integer[]) result.toArray(new Integer[result.size()]);
+		return result.toArray(new Integer[result.size()]);
 	}
 
-	private static void addMemberOffsetList(List result, IMember[] members) throws JavaModelException {
+	private static void addMemberOffsetList(List<Integer> result, IMember[] members) throws JavaModelException {
 		for (int i= 0; i < members.length; i++) {
 			addOffset(result, getOffset(members[i]));
 		}
@@ -240,7 +241,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 		return new SourceRange(ts.getOffset(), ts.getLength());
 	}
 
-	private static void addOffset(List result, int offset) {
+	private static void addOffset(List<Integer> result, int offset) {
 		if (offset >= 0)
 			result.add(new Integer(offset));
 	}

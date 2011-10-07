@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -606,7 +606,7 @@ public class JavadocConfigurationBlock {
 
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
-		Class[] acceptedClasses= new Class[] { IFile.class };
+		Class<?>[] acceptedClasses= new Class[] { IFile.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
 
 		IResource initSel= null;
@@ -795,7 +795,7 @@ public class JavadocConfigurationBlock {
 
 			Object elem= fProvider.getRoot();
 			for (int i= 0; i < segments.length && elem != null; i++) {
-				List list= fProvider.getChildren(elem);
+				List<?> list= fProvider.getChildren(elem);
 				String name= segments[i];
 				elem= null;
 				for (int k= 0; k < list.size(); k++) {
@@ -833,7 +833,7 @@ public class JavadocConfigurationBlock {
 		 * @see ITreeContentProvider#hasChildren
 		 */
 		public boolean hasChildren(Object element) {
-			List list= fProvider.getChildren(element);
+			List<?> list= fProvider.getChildren(element);
 			if (list != null) {
 				for (int i= 0; i < list.size(); i++) {
 					if (fProvider.isFolder(list.get(i))) {
@@ -848,8 +848,8 @@ public class JavadocConfigurationBlock {
 		 * @see ITreeContentProvider#getChildren
 		 */
 		public Object[] getChildren(Object element) {
-			List list= fProvider.getChildren(element);
-			ArrayList res= new ArrayList();
+			List<?> list= fProvider.getChildren(element);
+			ArrayList<Object> res= new ArrayList<Object>();
 			if (list != null) {
 				for (int i= 0; i < list.size(); i++) {
 					Object curr= list.get(i);
@@ -888,6 +888,7 @@ public class JavadocConfigurationBlock {
 			fProvider= provider;
 		}
 
+		@Override
 		public Image getImage(Object element) {
 			if (element == fProvider.getRoot()) {
 				return IMG_JAR;
@@ -896,6 +897,7 @@ public class JavadocConfigurationBlock {
 			}
 		}
 
+		@Override
 		public String getText(Object element) {
 			if (element == fProvider.getRoot()) {
 				return BasicElementLabels.getResourceName(fProvider.getZipFile().getName());

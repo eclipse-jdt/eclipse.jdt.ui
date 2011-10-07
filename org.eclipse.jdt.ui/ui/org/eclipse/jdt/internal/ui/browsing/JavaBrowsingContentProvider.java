@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		JavaCore.addElementChangedListener(this);
 	}
 
+	@Override
 	public boolean hasChildren(Object element) {
 		startReadInDisplayThread();
 		try{
@@ -74,6 +75,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		}
 	}
 
+	@Override
 	public Object[] getChildren(Object element) {
 		if (!exists(element))
 			return NO_CHILDREN;
@@ -81,11 +83,11 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		startReadInDisplayThread();
 		try {
 			if (element instanceof Collection) {
-				Collection elements= (Collection)element;
+				Collection<?> elements= (Collection<?>)element;
 				if (elements.isEmpty())
 					return NO_CHILDREN;
 				Object[] result= new Object[0];
-				Iterator iter= ((Collection)element).iterator();
+				Iterator<?> iter= ((Collection<?>)element).iterator();
 				while (iter.hasNext()) {
 					Object[] children= getChildren(iter.next());
 					if (children != NO_CHILDREN)
@@ -116,13 +118,13 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		}
 		else {
 			IClassFile[] classFiles= fragment.getClassFiles();
-			List topLevelClassFile= new ArrayList();
+			List<IClassFile> topLevelClassFile= new ArrayList<IClassFile>();
 			for (int i= 0; i < classFiles.length; i++) {
 				IType type= classFiles[i].getType();
 				if (type != null && type.getDeclaringType() == null && !type.isAnonymous() && !type.isLocal())
 					topLevelClassFile.add(classFiles[i]);
 			}
-			sourceRefs= (ISourceReference[])topLevelClassFile.toArray(new ISourceReference[topLevelClassFile.size()]);
+			sourceRefs= topLevelClassFile.toArray(new ISourceReference[topLevelClassFile.size()]);
 		}
 
 		Object[] result= new Object[0];
@@ -132,7 +134,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	}
 
 	private Object[] removeImportAndPackageDeclarations(Object[] members) {
-		ArrayList tempResult= new ArrayList(members.length);
+		ArrayList<Object> tempResult= new ArrayList<Object>(members.length);
 		for (int i= 0; i < members.length; i++)
 			if (!(members[i] instanceof IImportContainer) && !(members[i] instanceof IPackageDeclaration))
 				tempResult.add(members[i]);
@@ -151,7 +153,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 
 		// Add import declarations
 		IJavaElement[] members= parent.getChildren();
-		ArrayList tempResult= new ArrayList(members.length);
+		ArrayList<IJavaElement> tempResult= new ArrayList<IJavaElement>(members.length);
 		for (int i= 0; i < members.length; i++)
 			if ((members[i] instanceof IImportContainer))
 				tempResult.add(members[i]);
@@ -159,18 +161,19 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		return tempResult.toArray();
 	}
 
+	@Override
 	protected Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
 		if (!project.getProject().isOpen())
 			return NO_CHILDREN;
 
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-		List list= new ArrayList(roots.length);
+		List<IJavaElement> list= new ArrayList<IJavaElement>(roots.length);
 		// filter out package fragments that correspond to projects and
 		// replace them with the package fragments directly
 		for (int i= 0; i < roots.length; i++) {
 			IPackageFragmentRoot root= roots[i];
 			if (!root.isExternal()) {
-				Object[] children= root.getChildren();
+				IJavaElement[] children= root.getChildren();
 				for (int k= 0; k < children.length; k++)
 					list.add(children[k]);
 			}
@@ -186,12 +189,13 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	/* (non-Javadoc)
 	 * Method declared on IContentProvider.
 	 */
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		super.inputChanged(viewer, oldInput, newInput);
 
 		if (newInput instanceof Collection) {
 			// Get a template object from the collection
-			Collection col= (Collection)newInput;
+			Collection<?> col= (Collection<?>)newInput;
 			if (!col.isEmpty())
 				newInput= col.iterator().next();
 			else
@@ -203,6 +207,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	/* (non-Javadoc)
 	 * Method declared on IContentProvider.
 	 */
+	@Override
 	public void dispose() {
 		super.dispose();
 		JavaCore.removeElementChangedListener(this);
@@ -430,7 +435,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 
 	private Object[] getNewElements(Object[] elements) {
 		int elementsLength= elements.length;
-		ArrayList result= new ArrayList(elementsLength);
+		ArrayList<Object> result= new ArrayList<Object>(elementsLength);
 		for (int i= 0; i < elementsLength; i++) {
 			Object element= elements[i];
 			if (fViewer.testFindItem(element) == null)
@@ -517,6 +522,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	 * returns the original element instead.
 	 * </p>
 	 */
+	@Override
 	protected Object internalGetParent(Object element) {
 		if (element instanceof IJavaProject) {
 			return ((IJavaProject)element).getJavaModel();

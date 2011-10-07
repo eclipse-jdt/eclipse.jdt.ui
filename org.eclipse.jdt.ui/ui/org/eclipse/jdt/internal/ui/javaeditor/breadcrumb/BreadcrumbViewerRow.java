@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#clone()
 	 */
+	@Override
 	public Object clone() {
 		return new BreadcrumbViewerRow(fViewer, fItem);
 	}
@@ -51,6 +52,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#getBackground(int)
 	 */
+	@Override
 	public Color getBackground(int columnIndex) {
 		return fBackground;
 	}
@@ -58,6 +60,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#getBounds(int)
 	 */
+	@Override
 	public Rectangle getBounds(int columnIndex) {
 		return getBounds();
 	}
@@ -65,6 +68,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#getBounds()
 	 */
+	@Override
 	public Rectangle getBounds() {
 		return fItem.getBounds();
 	}
@@ -72,6 +76,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#getColumnCount()
 	 */
+	@Override
 	public int getColumnCount() {
 		return 1;
 	}
@@ -79,6 +84,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#getControl()
 	 */
+	@Override
 	public Control getControl() {
 		return fViewer.getControl();
 	}
@@ -86,6 +92,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#getElement()
 	 */
+	@Override
 	public Object getElement() {
 		return fItem.getData();
 	}
@@ -93,6 +100,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#getFont(int)
 	 */
+	@Override
 	public Font getFont(int columnIndex) {
 		return fFont;
 	}
@@ -100,6 +108,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#getForeground(int)
 	 */
+	@Override
 	public Color getForeground(int columnIndex) {
 		return fForeground;
 	}
@@ -107,6 +116,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#getImage(int)
 	 */
+	@Override
 	public Image getImage(int columnIndex) {
 		return fItem.getImage();
 	}
@@ -114,6 +124,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#getItem()
 	 */
+	@Override
 	public Widget getItem() {
 		return fItem;
 	}
@@ -121,6 +132,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#getNeighbor(int, boolean)
 	 */
+	@Override
 	public ViewerRow getNeighbor(int direction, boolean sameLevel) {
 		return null;
 	}
@@ -128,6 +140,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#getText(int)
 	 */
+	@Override
 	public String getText(int columnIndex) {
 		return fItem.getText();
 	}
@@ -135,6 +148,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#getTreePath()
 	 */
+	@Override
 	public TreePath getTreePath() {
 		return new TreePath(new Object[] { getElement() });
 	}
@@ -142,6 +156,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#setBackground(int, org.eclipse.swt.graphics.Color)
 	 */
+	@Override
 	public void setBackground(int columnIndex, Color color) {
 		fBackground= color;
 	}
@@ -149,6 +164,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#setFont(int, org.eclipse.swt.graphics.Font)
 	 */
+	@Override
 	public void setFont(int columnIndex, Font font) {
 		fFont= font;
 	}
@@ -156,6 +172,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#setForeground(int, org.eclipse.swt.graphics.Color)
 	 */
+	@Override
 	public void setForeground(int columnIndex, Color color) {
 		fForeground= color;
 	}
@@ -163,6 +180,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#setImage(int, org.eclipse.swt.graphics.Image)
 	 */
+	@Override
 	public void setImage(int columnIndex, Image image) {
 		fItem.setImage(image);
 	}
@@ -170,6 +188,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerRow#setText(int, java.lang.String)
 	 */
+	@Override
 	public void setText(int columnIndex, String text) {
 		fItem.setText(text);
 	}

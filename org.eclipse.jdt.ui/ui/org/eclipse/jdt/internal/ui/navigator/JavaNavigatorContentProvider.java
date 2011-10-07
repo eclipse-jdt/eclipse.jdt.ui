@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,15 +92,18 @@ public class JavaNavigatorContentProvider extends
 		setProvideMembers(showCUChildren);
 	}
 
+	@Override
 	public void dispose() {
 		super.dispose();
 		fStateModel.removePropertyChangeListener(fLayoutPropertyListener);
 	}
 
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		super.inputChanged(viewer, oldInput, findInputElement(newInput));
 	}
 
+	@Override
 	public Object getParent(Object element) {
 		Object parent= super.getParent(element);
 		if (parent instanceof IJavaModel) {
@@ -112,6 +115,7 @@ public class JavaNavigatorContentProvider extends
 		return parent;
 	}
 
+	@Override
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof IWorkspaceRoot) {
 			IWorkspaceRoot root = (IWorkspaceRoot) inputElement;
@@ -125,6 +129,7 @@ public class JavaNavigatorContentProvider extends
 		return super.getElements(inputElement);
 	}
 
+	@Override
 	public boolean hasChildren(Object element) {
 		if (element instanceof IProject) {
 			return ((IProject) element).isAccessible();
@@ -132,6 +137,7 @@ public class JavaNavigatorContentProvider extends
 		return super.hasChildren(element);
 	}
 
+	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IWorkspaceRoot) {
 			IWorkspaceRoot root = (IWorkspaceRoot) parentElement;
@@ -194,8 +200,8 @@ public class JavaNavigatorContentProvider extends
 	}
 
 	private void deconvertJavaProjects(PipelinedShapeModification modification) {
-		Set convertedChildren = new LinkedHashSet();
-		for (Iterator iterator = modification.getChildren().iterator(); iterator.hasNext();) {
+		Set<IProject> convertedChildren = new LinkedHashSet<IProject>();
+		for (Iterator<IAdaptable> iterator = modification.getChildren().iterator(); iterator.hasNext();) {
 			Object added = iterator.next();
 			if(added instanceof IJavaProject) {
 				iterator.remove();
@@ -237,11 +243,11 @@ public class JavaNavigatorContentProvider extends
 	 *            The set of current children that would be contributed or refreshed in the viewer.
 	 * @return returns true if the conversion took place
 	 */
-	private boolean convertToJavaElements(Set currentChildren) {
+	private boolean convertToJavaElements(Set<Object> currentChildren) {
 
-		LinkedHashSet convertedChildren = new LinkedHashSet();
+		LinkedHashSet<Object> convertedChildren = new LinkedHashSet<Object>();
 		IJavaElement newChild;
-		for (Iterator childrenItr = currentChildren.iterator(); childrenItr
+		for (Iterator<Object> childrenItr = currentChildren.iterator(); childrenItr
 				.hasNext();) {
 			Object child = childrenItr.next();
 			// only convert IFolders and IFiles
@@ -270,9 +276,9 @@ public class JavaNavigatorContentProvider extends
 	 * @param javaElements the java elements
 	 * @param proposedChildren the proposed children
 	 */
-	private void customize(Object[] javaElements, Set proposedChildren) {
-		List elementList= Arrays.asList(javaElements);
-		for (Iterator iter= proposedChildren.iterator(); iter.hasNext();) {
+	private void customize(Object[] javaElements, Set<Object> proposedChildren) {
+		List<?> elementList= Arrays.asList(javaElements);
+		for (Iterator<?> iter= proposedChildren.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			IResource resource= null;
 			if (element instanceof IResource) {
@@ -313,7 +319,8 @@ public class JavaNavigatorContentProvider extends
 		return convertToJavaElements(updateSynchronization.getRefreshTargets());
 	}
 
-	protected void postAdd(final Object parent, final Object element, Collection runnables) {
+	@Override
+	protected void postAdd(final Object parent, final Object element, Collection<Runnable> runnables) {
 		if (parent instanceof IJavaModel)
 			super.postAdd(((IJavaModel) parent).getWorkspace().getRoot(), element, runnables);
 		else if (parent instanceof IJavaProject)
@@ -323,7 +330,8 @@ public class JavaNavigatorContentProvider extends
 	}
 
 
-	protected void postRefresh(final List toRefresh, final boolean updateLabels, Collection runnables) {
+	@Override
+	protected void postRefresh(final List<Object> toRefresh, final boolean updateLabels, Collection<Runnable> runnables) {
 		int size= toRefresh.size();
 		for (int i= 0; i < size; i++) {
 			Object element= toRefresh.get(i);
@@ -331,7 +339,7 @@ public class JavaNavigatorContentProvider extends
 				toRefresh.set(i, ((IJavaProject) element).getProject());
 			}
 		}
-		for (Iterator iter = toRefresh.iterator(); iter.hasNext();) {
+		for (Iterator<Object> iter = toRefresh.iterator(); iter.hasNext();) {
 			Object element = iter.next();
 			if (element instanceof IJavaModel) {
 				iter.remove();

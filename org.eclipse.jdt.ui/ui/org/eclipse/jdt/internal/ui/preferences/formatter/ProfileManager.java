@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,10 +44,10 @@ public abstract class ProfileManager extends Observable {
 
     public static final class KeySet {
 
-		private final List fKeys;
+		private final List<String> fKeys;
 		private final String fNodeName;
 
-		public KeySet(String nodeName, List keys) {
+		public KeySet(String nodeName, List<String> keys) {
 			fNodeName= nodeName;
 			fKeys= keys;
         }
@@ -56,7 +56,7 @@ public abstract class ProfileManager extends Observable {
 	        return fNodeName;
         }
 
-        public List getKeys() {
+        public List<String> getKeys() {
 	        return fKeys;
         }
     }
@@ -71,20 +71,20 @@ public abstract class ProfileManager extends Observable {
 	 * Represents a profile with a unique ID, a name and a map
 	 * containing the code formatter settings.
 	 */
-	public static abstract class Profile implements Comparable {
+	public static abstract class Profile implements Comparable<Profile> {
 
 		public abstract String getName();
 		public abstract Profile rename(String name, ProfileManager manager);
 
-		public abstract Map getSettings();
-		public abstract void setSettings(Map settings);
+		public abstract Map<String, String> getSettings();
+		public abstract void setSettings(Map<String, String> settings);
 
 		public abstract int getVersion();
 
-		public boolean hasEqualSettings(Map otherMap, Collection allKeys) {
-			Map settings= getSettings();
-			for (Iterator iter= allKeys.iterator(); iter.hasNext(); ){
-				String key= (String) iter.next();
+		public boolean hasEqualSettings(Map<String, String> otherMap, Collection<String> allKeys) {
+			Map<String, String> settings= getSettings();
+			for (Iterator<String> iter= allKeys.iterator(); iter.hasNext(); ){
+				String key= iter.next();
 				Object other= otherMap.get(key);
 				Object curr= settings.get(key);
 				if (other == null) {
@@ -118,12 +118,12 @@ public abstract class ProfileManager extends Observable {
 	public static final class BuiltInProfile extends Profile {
 		private final String fName;
 		private final String fID;
-		private final Map fSettings;
+		private final Map<String, String> fSettings;
 		private final int fOrder;
 		private final int fCurrentVersion;
 		private final String fProfileKind;
 
-		public BuiltInProfile(String ID, String name, Map settings, int order, int currentVersion, String profileKind) {
+		public BuiltInProfile(String ID, String name, Map<String, String> settings, int order, int currentVersion, String profileKind) {
 			fName= name;
 			fID= ID;
 			fSettings= settings;
@@ -132,10 +132,12 @@ public abstract class ProfileManager extends Observable {
 			fProfileKind= profileKind;
 		}
 
+		@Override
 		public String getName() {
 			return fName;
 		}
 
+		@Override
 		public Profile rename(String name, ProfileManager manager) {
 			final String trimmed= name.trim();
 		 	CustomProfile newProfile= new CustomProfile(trimmed, fSettings, fCurrentVersion, fProfileKind);
@@ -143,33 +145,39 @@ public abstract class ProfileManager extends Observable {
 			return newProfile;
 		}
 
-		public Map getSettings() {
+		@Override
+		public Map<String, String> getSettings() {
 			return fSettings;
 		}
 
-		public void setSettings(Map settings) {
+		@Override
+		public void setSettings(Map<String, String> settings) {
 		}
 
+		@Override
 		public String getID() {
 			return fID;
 		}
 
-		public final int compareTo(Object o) {
+		public final int compareTo(Profile o) {
 			if (o instanceof BuiltInProfile) {
 				return fOrder - ((BuiltInProfile)o).fOrder;
 			}
 			return -1;
 		}
 
+		@Override
 		public boolean isProfileToSave() {
 			return false;
 		}
 
+		@Override
 		public boolean isBuiltInProfile() {
 			return true;
 		}
 
-        public int getVersion() {
+        @Override
+		public int getVersion() {
 	        return fCurrentVersion;
         }
 
@@ -180,22 +188,24 @@ public abstract class ProfileManager extends Observable {
 	 */
 	public static class CustomProfile extends Profile {
 		private String fName;
-		private Map fSettings;
+		private Map<String, String> fSettings;
 		protected ProfileManager fManager;
 		private int fVersion;
 		private final String fKind;
 
-		public CustomProfile(String name, Map settings, int version, String kind) {
+		public CustomProfile(String name, Map<String, String> settings, int version, String kind) {
 			fName= name;
 			fSettings= settings;
 			fVersion= version;
 			fKind= kind;
 		}
 
+		@Override
 		public String getName() {
 			return fName;
 		}
 
+		@Override
 		public Profile rename(String name, ProfileManager manager) {
 			final String trimmed= name.trim();
 			if (trimmed.equals(getName()))
@@ -208,11 +218,13 @@ public abstract class ProfileManager extends Observable {
 			return this;
 		}
 
-		public Map getSettings() {
+		@Override
+		public Map<String, String> getSettings() {
 			return fSettings;
 		}
 
-		public void setSettings(Map settings) {
+		@Override
+		public void setSettings(Map<String, String> settings) {
 			if (settings == null)
 				throw new IllegalArgumentException();
 			fSettings= settings;
@@ -221,6 +233,7 @@ public abstract class ProfileManager extends Observable {
 			}
 		}
 
+		@Override
 		public String getID() {
 			return ID_PREFIX + fName;
 		}
@@ -233,6 +246,7 @@ public abstract class ProfileManager extends Observable {
 			return fManager;
 		}
 
+		@Override
 		public int getVersion() {
 			return fVersion;
 		}
@@ -241,16 +255,17 @@ public abstract class ProfileManager extends Observable {
 			fVersion= version;
 		}
 
-		public int compareTo(Object o) {
+		public int compareTo(Profile o) {
 			if (o instanceof SharedProfile) {
 				return -1;
 			}
 			if (o instanceof CustomProfile) {
-				return getName().compareToIgnoreCase(((Profile)o).getName());
+				return getName().compareToIgnoreCase(o.getName());
 			}
 			return 1;
 		}
 
+		@Override
 		public boolean isProfileToSave() {
 			return true;
 		}
@@ -263,29 +278,34 @@ public abstract class ProfileManager extends Observable {
 
 	public final class SharedProfile extends CustomProfile {
 
-		public SharedProfile(String oldName, Map options, int version, String profileKind) {
+		public SharedProfile(String oldName, Map<String, String> options, int version, String profileKind) {
 			super(oldName, options, version, profileKind);
 		}
 
+		@Override
 		public Profile rename(String name, ProfileManager manager) {
 			CustomProfile profile= new CustomProfile(name.trim(), getSettings(), getVersion(), getKind());
-
+			profile.setManager(manager);
 			manager.profileReplaced(this, profile);
 			return profile;
 		}
 
+		@Override
 		public String getID() {
 			return SHARED_PROFILE;
 		}
 
-		public final int compareTo(Object o) {
+		@Override
+		public final int compareTo(Profile o) {
 			return 1;
 		}
 
+		@Override
 		public boolean isProfileToSave() {
 			return false;
 		}
 
+		@Override
 		public boolean isSharedProfile() {
 			return true;
 		}
@@ -319,12 +339,12 @@ public abstract class ProfileManager extends Observable {
 	/**
 	 * A map containing the available profiles, using the IDs as keys.
 	 */
-	private final Map fProfiles;
+	private final Map<String, Profile> fProfiles;
 
 	/**
 	 * The available profiles, sorted by name.
 	 */
-	private final List fProfilesByName;
+	private final List<Profile> fProfilesByName;
 
 
 	/**
@@ -347,7 +367,7 @@ public abstract class ProfileManager extends Observable {
 	 * @param profileVersioner
 	 */
 	public ProfileManager(
-			List profiles,
+			List<Profile> profiles,
 			IScopeContext context,
 			PreferencesAccess preferencesAccess,
 			IProfileVersioner profileVersioner,
@@ -361,11 +381,11 @@ public abstract class ProfileManager extends Observable {
 		fProfileKey= profileKey;
 		fProfileVersionKey= profileVersionKey;
 
-		fProfiles= new HashMap();
-		fProfilesByName= new ArrayList();
+		fProfiles= new HashMap<String, Profile>();
+		fProfilesByName= new ArrayList<Profile>();
 
-		for (final Iterator iter = profiles.iterator(); iter.hasNext();) {
-			final Profile profile= (Profile) iter.next();
+		for (final Iterator<Profile> iter = profiles.iterator(); iter.hasNext();) {
+			final Profile profile= iter.next();
 			if (profile instanceof CustomProfile) {
 				((CustomProfile)profile).setManager(this);
 			}
@@ -377,17 +397,17 @@ public abstract class ProfileManager extends Observable {
 
 		String profileId= getSelectedProfileId(fPreferencesAccess.getInstanceScope());
 
-		Profile profile= (Profile) fProfiles.get(profileId);
+		Profile profile= fProfiles.get(profileId);
 		if (profile == null) {
 			profile= getDefaultProfile();
 		}
 		fSelected= profile;
 
 		if (context.getName() == ProjectScope.SCOPE && hasProjectSpecificSettings(context)) {
-			Map map= readFromPreferenceStore(context, profile);
+			Map<String, String> map= readFromPreferenceStore(context, profile);
 			if (map != null) {
 
-				List allKeys= new ArrayList();
+				List<String> allKeys= new ArrayList<String>();
 				for (int i= 0; i < fKeySets.length; i++) {
 			        allKeys.addAll(fKeySets[i].getKeys());
 		        }
@@ -397,14 +417,14 @@ public abstract class ProfileManager extends Observable {
 
 				String projProfileId= context.getNode(JavaUI.ID_PLUGIN).get(fProfileKey, null);
 				if (projProfileId != null) {
-					Profile curr= (Profile) fProfiles.get(projProfileId);
+					Profile curr= fProfiles.get(projProfileId);
 					if (curr != null && (curr.isBuiltInProfile() || curr.hasEqualSettings(map, allKeys))) {
 						matching= curr;
 					}
 				} else {
 					// old version: look for similar
-					for (final Iterator iter = fProfilesByName.iterator(); iter.hasNext();) {
-						Profile curr= (Profile) iter.next();
+					for (final Iterator<Profile> iter = fProfilesByName.iterator(); iter.hasNext();) {
+						Profile curr= iter.next();
 						if (curr.hasEqualSettings(map, allKeys)) {
 							matching= curr;
 							break;
@@ -458,8 +478,8 @@ public abstract class ProfileManager extends Observable {
 		for (int i= 0; i < keySets.length; i++) {
 	        KeySet keySet= keySets[i];
 	        IEclipsePreferences preferences= context.getNode(keySet.getNodeName());
-	        for (final Iterator keyIter= keySet.getKeys().iterator(); keyIter.hasNext();) {
-	            final String key= (String)keyIter.next();
+	        for (final Iterator<String> keyIter= keySet.getKeys().iterator(); keyIter.hasNext();) {
+	            final String key= keyIter.next();
 	            Object val= preferences.get(key, null);
 	            if (val != null) {
 	            	return true;
@@ -477,13 +497,13 @@ public abstract class ProfileManager extends Observable {
 	 * Only to read project specific settings to find out to what profile it matches.
 	 * @param context The project context
 	 */
-	private Map readFromPreferenceStore(IScopeContext context, Profile workspaceProfile) {
-		final Map profileOptions= new HashMap();
+	private Map<String, String> readFromPreferenceStore(IScopeContext context, Profile workspaceProfile) {
+		final Map<String, String> profileOptions= new HashMap<String, String>();
 		IEclipsePreferences uiPrefs= context.getNode(JavaUI.ID_PLUGIN);
 
 		int version= uiPrefs.getInt(fProfileVersionKey, fProfileVersioner.getFirstVersion());
 		if (version != fProfileVersioner.getCurrentVersion()) {
-			Map allOptions= new HashMap();
+			Map<String, String> allOptions= new HashMap<String, String>();
 			for (int i= 0; i < fKeySets.length; i++) {
 	            addAll(context.getNode(fKeySets[i].getNodeName()), allOptions);
             }
@@ -496,9 +516,9 @@ public abstract class ProfileManager extends Observable {
 		for (int i= 0; i < fKeySets.length; i++) {
 	        KeySet keySet= fKeySets[i];
 	        IEclipsePreferences preferences= context.getNode(keySet.getNodeName());
-	        for (final Iterator keyIter = keySet.getKeys().iterator(); keyIter.hasNext(); ) {
-				final String key= (String) keyIter.next();
-				Object val= preferences.get(key, null);
+	        for (final Iterator<String> keyIter = keySet.getKeys().iterator(); keyIter.hasNext(); ) {
+				final String key= keyIter.next();
+				String val= preferences.get(key, null);
 				if (val != null) {
 					hasValues= true;
 				} else {
@@ -521,7 +541,7 @@ public abstract class ProfileManager extends Observable {
 	 * @param uiPrefs
 	 * @param allOptions
 	 */
-	private void addAll(IEclipsePreferences uiPrefs, Map allOptions) {
+	private void addAll(IEclipsePreferences uiPrefs, Map<String, String> allOptions) {
 		try {
 			String[] keys= uiPrefs.keys();
 			for (int i= 0; i < keys.length; i++) {
@@ -537,12 +557,12 @@ public abstract class ProfileManager extends Observable {
 
 	}
 
-	private boolean updatePreferences(IEclipsePreferences prefs, List keys, Map profileOptions) {
+	private boolean updatePreferences(IEclipsePreferences prefs, List<String> keys, Map<String, String> profileOptions) {
 		boolean hasChanges= false;
-		for (final Iterator keyIter = keys.iterator(); keyIter.hasNext(); ) {
-			final String key= (String) keyIter.next();
+		for (final Iterator<String> keyIter = keys.iterator(); keyIter.hasNext(); ) {
+			final String key= keyIter.next();
 			final String oldVal= prefs.get(key, null);
-			final String val= (String) profileOptions.get(key);
+			final String val= profileOptions.get(key);
 			if (val == null) {
 				if (oldVal != null) {
 					prefs.remove(key);
@@ -562,7 +582,7 @@ public abstract class ProfileManager extends Observable {
 	 * @param profile The profile to write to the preference store
 	 */
 	private void writeToPreferenceStore(Profile profile, IScopeContext context) {
-		final Map profileOptions= profile.getSettings();
+		final Map<String, String> profileOptions= profile.getSettings();
 
 		for (int i= 0; i < fKeySets.length; i++) {
 	        updatePreferences(context.getNode(fKeySets[i].getNodeName()), fKeySets[i].getKeys(), profileOptions);
@@ -589,7 +609,7 @@ public abstract class ProfileManager extends Observable {
 	 *
 	 * @see #getSortedDisplayNames()
 	 */
-	public List getSortedProfiles() {
+	public List<Profile> getSortedProfiles() {
 		return Collections.unmodifiableList(fProfilesByName);
 	}
 
@@ -603,8 +623,8 @@ public abstract class ProfileManager extends Observable {
 	public String[] getSortedDisplayNames() {
 		final String[] sortedNames= new String[fProfilesByName.size()];
 		int i= 0;
-		for (final Iterator iter = fProfilesByName.iterator(); iter.hasNext();) {
-			Profile curr= (Profile) iter.next();
+		for (final Iterator<Profile> iter = fProfilesByName.iterator(); iter.hasNext();) {
+			Profile curr= iter.next();
 			sortedNames[i++]= curr.getName();
 		}
 		return sortedNames;
@@ -616,7 +636,7 @@ public abstract class ProfileManager extends Observable {
 	 * @return The profile with the given ID or <code>null</code>
 	 */
 	public Profile getProfile(String ID) {
-		return (Profile)fProfiles.get(ID);
+		return fProfiles.get(ID);
 	}
 
 	/**
@@ -631,7 +651,7 @@ public abstract class ProfileManager extends Observable {
 
 	public void clearAllSettings(IScopeContext context) {
 		for (int i= 0; i < fKeySets.length; i++) {
-	        updatePreferences(context.getNode(fKeySets[i].getNodeName()), fKeySets[i].getKeys(), Collections.EMPTY_MAP);
+	        updatePreferences(context.getNode(fKeySets[i].getNodeName()), fKeySets[i].getKeys(), Collections.<String, String>emptyMap());
         }
 
 		final IEclipsePreferences uiPrefs= context.getNode(JavaUI.ID_PLUGIN);
@@ -651,7 +671,7 @@ public abstract class ProfileManager extends Observable {
 	 * @param profile The profile to select
 	 */
 	public void setSelected(Profile profile) {
-		final Profile newSelected= (Profile)fProfiles.get(profile.getID());
+		final Profile newSelected= fProfiles.get(profile.getID());
 		if (newSelected != null && !newSelected.equals(fSelected)) {
 			fSelected= newSelected;
 			notifyObservers(SELECTION_CHANGED_EVENT);
@@ -665,8 +685,8 @@ public abstract class ProfileManager extends Observable {
 	 * @return Returns <code>true</code> if a profile with the given name exists
 	 */
 	public boolean containsName(String name) {
-		for (final Iterator iter = fProfilesByName.iterator(); iter.hasNext();) {
-			Profile curr= (Profile) iter.next();
+		for (final Iterator<Profile> iter = fProfilesByName.iterator(); iter.hasNext();) {
+			Profile curr= iter.next();
 			if (name.equals(curr.getName())) {
 				return true;
 			}
@@ -715,7 +735,7 @@ public abstract class ProfileManager extends Observable {
 
 		if (index >= fProfilesByName.size())
 			index--;
-		fSelected= (Profile) fProfilesByName.get(index);
+		fSelected= fProfilesByName.get(index);
 
 		if (!profile.isSharedProfile()) {
 			updateProfilesWithName(profile.getID(), null, false);
@@ -789,8 +809,8 @@ public abstract class ProfileManager extends Observable {
 		}
 	}
 
-	private static void setLatestCompliance(Map map) {
-		JavaModelUtil.set50ComplianceOptions(map);
+	private static void setLatestCompliance(Map<String, String> map) {
+		JavaModelUtil.setComplianceOptions(map, JavaModelUtil.VERSION_LATEST);
 	}
 
     public abstract Profile getDefaultProfile();

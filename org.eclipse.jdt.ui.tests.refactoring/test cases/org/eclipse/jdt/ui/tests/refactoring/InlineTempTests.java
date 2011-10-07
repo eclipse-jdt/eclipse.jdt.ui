@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,14 +45,14 @@ public class InlineTempTests extends RefactoringTest {
 		return new RefactoringTestSetup(test);
 	}
 
-	private String getSimpleTestFileName(boolean canInline, boolean input){
+	protected String getSimpleTestFileName(boolean canInline, boolean input){
 		String fileName = "A_" + getName();
 		if (canInline)
 			fileName += input ? "_in": "_out";
 		return fileName + ".java";
 	}
 
-	private String getTestFileName(boolean canInline, boolean input){
+	protected String getTestFileName(boolean canInline, boolean input){
 		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
 		fileName += (canInline ? "canInline/": "cannotInline/");
 		return fileName + getSimpleTestFileName(canInline, input);
@@ -83,13 +83,13 @@ public class InlineTempTests extends RefactoringTest {
 		assertEqualLines("incorrect inlining", getFileContents(getTestFileName(true, false)), newcu.getSource());
 	}
 
-	private void helper1(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
+	protected void helper1(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		helper1(cu, selection);
 	}
 
-	private void helper2() throws Exception{
+	protected void helper2() throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		helper2(cu, getSelection(cu));
 	}
@@ -104,7 +104,7 @@ public class InlineTempTests extends RefactoringTest {
 		}
 	}
 
-	private void helper2(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
+	protected void helper2(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		helper2(cu, selection);
@@ -277,7 +277,7 @@ public class InlineTempTests extends RefactoringTest {
 	
 	public void test36() throws Exception{
 		// parenthesize complex cast expression
-		helper1(8, 21, 8, 24);
+		helper1(6, 21, 6, 24);
 	}
 	
 	public void test37() throws Exception{
@@ -300,6 +300,41 @@ public class InlineTempTests extends RefactoringTest {
 		helper1(5, 43, 5, 46);
 	}
 	
+	public void test41() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
+		helper1(5, 13, 5, 14);
+	}
+
+	public void test42() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
+		helper1(5, 13, 5, 14);
+	}
+
+	public void test43() throws Exception {
+		// parenthesize complex cast expression https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
+		helper1(6, 21, 6, 24);
+	}
+
+	public void test44() throws Exception {
+		// don't add unnecessary cast to wildcard-parameterized type https://bugs.eclipse.org/bugs/show_bug.cgi?id=338271
+		helper1(7, 35, 7, 41);
+	}
+	
+	public void test45() throws Exception {
+		// don't delete comment right before the local variable declaration (bug 295200)
+		helper1(5, 18, 5, 22);
+	}
+
+	public void test46() throws Exception {
+		// don't delete comment right after the local variable declaration (bug 318471)
+		helper1(5, 16, 5, 17);
+	}
+
+	public void test47() throws Exception {
+		// don't delete comment right before and after the local variable declaration (bug 295200)
+		helper1(5, 18, 5, 22);
+	}
+
 	//------
 
 	public void testFail0() throws Exception{

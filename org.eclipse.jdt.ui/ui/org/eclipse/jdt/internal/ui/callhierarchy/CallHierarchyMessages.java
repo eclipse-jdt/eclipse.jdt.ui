@@ -38,8 +38,8 @@ public final class CallHierarchyMessages extends NLS {
 	public static String SelectFieldModeAction_write_accesses_description;
 	public static String HistoryDropDownAction_tooltip;
 	public static String HistoryAction_description;
+	public static String HistoryAction_inputElements_1;
 	public static String HistoryAction_inputElements_2;
-	public static String HistoryAction_inputElements_3;
 	public static String HistoryAction_inputElements_more;
 	public static String HistoryAction_tooltip;
 	public static String HistoryListDialog_title;
@@ -58,6 +58,8 @@ public final class CallHierarchyMessages extends NLS {
 	public static String ToggleOrientationAction_single_label;
 	public static String ToggleOrientationAction_single_tooltip;
 	public static String ToggleOrientationAction_single_description;
+	public static String ShowSearchInDialogAction_text;
+	public static String SearchInDialog_title;
 	public static String ShowExpandWithConstructorsDialogAction_text;
 	public static String ShowFilterDialogAction_text;
 	public static String FiltersDialog_filter;
@@ -80,12 +82,10 @@ public final class CallHierarchyMessages extends NLS {
 	public static String CallHierarchyViewPart_callsToFieldRead;
 	public static String CallHierarchyViewPart_callsToFieldWrite;
 	public static String CallHierarchyViewPart_callsToMembers_2;
-	public static String CallHierarchyViewPart_callsToMembers_3;
 	public static String CallHierarchyViewPart_callsToMembers_more;
 	public static String CallHierarchyViewPart_callsToMethod;
 	public static String CallHierarchyViewPart_callsFromConstructors;
 	public static String CallHierarchyViewPart_callsFromMembers_2;
-	public static String CallHierarchyViewPart_callsFromMembers_3;
 	public static String CallHierarchyViewPart_callsFromMembers_more;
 	public static String CallHierarchyViewPart_callsFromMethod;
 	public static String ExpandWithConstructorsConfigurationBlock_description;
@@ -117,8 +117,6 @@ public final class CallHierarchyMessages extends NLS {
 	public static String RefreshSingleElementAction_tooltip;
 	public static String RefreshSingleElementAction_description;
 	public static String SearchScopeActionGroup_searchScope;
-	public static String SearchScopeActionGroup_hierarchy_text;
-	public static String SearchScopeActionGroup_hierarchy_tooltip;
 	public static String SearchScopeActionGroup_project_text;
 	public static String SearchScopeActionGroup_project_tooltip;
 	public static String SearchScopeActionGroup_workingset_tooltip;
@@ -159,6 +157,8 @@ public final class CallHierarchyMessages extends NLS {
 	public static String ExpandWithConstructorsAction_expandWithConstructors_description;
 	public static String ExpandWithConstructorsAction_expandWithConstructors_tooltip;
 	public static String ExpandWithConstructorsDialog_title;
+	public static String PinCallHierarchyViewAction_label;
+	public static String PinCallHierarchyViewAction_tooltip;
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, CallHierarchyMessages.class);
 	}

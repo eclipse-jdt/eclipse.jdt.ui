@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,7 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 	private IPropertyChangeListener fColorRegistryListener;
 
 	public MethodsLabelProvider(TypeHierarchyLifeCycle lifeCycle, MethodsViewer methodsViewer) {
-		super(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS);
+		super(DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED, DEFAULT_IMAGEFLAGS);
 		fHierarchy= lifeCycle;
 		fShowDefiningType= false;
 		fMethodsViewer= methodsViewer;
@@ -92,6 +92,7 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getText
 	 */
+	@Override
 	public String getText(Object element) {
 		String text= super.getText(element);
 		String qualifier= getQualifier(element);
@@ -104,6 +105,7 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
+	@Override
 	public StyledString getStyledText(Object element) {
 		StyledString text= super.getStyledText(element);
 		String qualifier= getQualifier(element);
@@ -133,6 +135,7 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 	 */
+	@Override
 	public Color getForeground(Object element) {
 		if (fMethodsViewer.isShowInheritedMethods() && element instanceof IMethod) {
 			IMethod curr= (IMethod) element;
@@ -145,6 +148,7 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 		return null;
 	}
 
+	@Override
 	public void dispose() {
 		JFaceResources.getColorRegistry().removeListener(fColorRegistryListener);
 		fColorRegistryListener= null;

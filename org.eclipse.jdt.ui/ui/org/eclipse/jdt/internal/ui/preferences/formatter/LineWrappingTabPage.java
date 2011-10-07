@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -67,8 +67,8 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		public final String key;
 		public final String name;
 		public final String previewText;
-		public final List children;
-		public final List preferences;
+		public final List<Category> children;
+		public final List<Preference> preferences;
 
 		public int index;
 
@@ -76,8 +76,8 @@ public class LineWrappingTabPage extends FormatterTabPage {
 			this.key= _key;
 			this.name= _name;
 			this.previewText= _previewText != null ? createPreviewHeader(_name) + _previewText : null;
-			children= new ArrayList();
-			preferences= new ArrayList();
+			children= new ArrayList<Category>();
+			preferences= new ArrayList<Preference>();
 		}
 
 		/**
@@ -87,6 +87,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		    this(null, null, _name);
 		}
 
+		@Override
 		public String toString() {
 			return name;
 		}
@@ -96,7 +97,12 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		}
 
 		public Preference[] getSpecificPreferences() {
-			return (Preference[])preferences.toArray(new Preference[preferences.size()]);
+			return preferences.toArray(new Preference[preferences.size()]);
+		}
+
+		public void setEnabled(boolean state) {
+			for (Preference preference : preferences)
+				preference.setEnabled(state);
 		}
 	}
 
@@ -106,18 +112,18 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 	private final class CategoryListener implements ISelectionChangedListener, IDoubleClickListener {
 
-		private final List fCategoriesList;
+		private final List<Category> fCategoriesList;
 
 		private int fIndex= 0;
 
-		public CategoryListener(List categoriesTree) {
-			fCategoriesList= new ArrayList();
+		public CategoryListener(List<Category> categoriesTree) {
+			fCategoriesList= new ArrayList<Category>();
 			flatten(fCategoriesList, categoriesTree);
 		}
 
-		private void flatten(List categoriesList, List categoriesTree) {
-			for (final Iterator iter= categoriesTree.iterator(); iter.hasNext(); ) {
-				final Category category= (Category) iter.next();
+		private void flatten(List<Category> categoriesList, List<Category> categoriesTree) {
+			for (final Iterator<Category> iter= categoriesTree.iterator(); iter.hasNext(); ) {
+				final Category category= iter.next();
 				category.index= fIndex++;
 				categoriesList.add(category);
 				flatten(categoriesList, category.children);
@@ -175,7 +181,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 			if (index < 0 || index > fCategoriesList.size() - 1) {
 				index= 1; // In order to select a category with preview initially
 			}
-			final Category category= (Category)fCategoriesList.get(index);
+			final Category category= fCategoriesList.get(index);
 			fCategoriesViewer.setSelection(new StructuredSelection(new Category[] {category}));
 		}
 
@@ -189,13 +195,13 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	}
 
 	private class SelectionState {
-	    private List fElements= new ArrayList();
+	    private List<Category> fElements= new ArrayList<Category>();
 	    private boolean fRequiresRelayout;
 
 	    public void refreshState(IStructuredSelection selection) {
-	        Map wrappingStyleMap= new HashMap();
-		    Map indentStyleMap= new HashMap();
-		    Map forceWrappingMap= new HashMap();
+	        Map<Object, Integer> wrappingStyleMap= new HashMap<Object, Integer>();
+		    Map<Object, Integer> indentStyleMap= new HashMap<Object, Integer>();
+		    Map<Object, Integer> forceWrappingMap= new HashMap<Object, Integer>();
 		    fRequiresRelayout= false;
 		    showSpecificControls(false);
 	        fElements.clear();
@@ -205,16 +211,16 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	        refreshControls(wrappingStyleMap, indentStyleMap, forceWrappingMap);
 	    }
 
-		public List getElements() {
+		public List<Category> getElements() {
 	        return fElements;
 	    }
 
-	    private void evaluateElements(Iterator iterator) {
+	    private void evaluateElements(Iterator<Category> iterator) {
             Category category;
             String value;
             while (iterator.hasNext()) {
-                category= (Category) iterator.next();
-                value= (String)fWorkingValues.get(category.key);
+                category= iterator.next();
+                value= fWorkingValues.get(category.key);
                 if (value != null) {
                     if (!fElements.contains(category))
                         fElements.add(category);
@@ -225,25 +231,25 @@ public class LineWrappingTabPage extends FormatterTabPage {
             }
         }
 
-	    private void evaluateMaps(Map wrappingStyleMap, Map indentStyleMap, Map forceWrappingMap) {
-	        Iterator iterator= fElements.iterator();
+	    private void evaluateMaps(Map<Object, Integer> wrappingStyleMap, Map<Object, Integer> indentStyleMap, Map<Object, Integer> forceWrappingMap) {
+	        Iterator<Category> iterator= fElements.iterator();
             while (iterator.hasNext()) {
-                insertIntoMap(wrappingStyleMap, indentStyleMap, forceWrappingMap, (Category)iterator.next());
+                insertIntoMap(wrappingStyleMap, indentStyleMap, forceWrappingMap, iterator.next());
             }
 	    }
 
         private String getPreviewText() {
-            Iterator iterator= fElements.iterator();
+            Iterator<Category> iterator= fElements.iterator();
             String previewText= ""; //$NON-NLS-1$
             while (iterator.hasNext()) {
-                Category category= (Category)iterator.next();
+                Category category= iterator.next();
                 previewText= previewText + category.previewText + "\n\n"; //$NON-NLS-1$
             }
             return previewText;
         }
 
-        private void insertIntoMap(Map wrappingMap, Map indentMap, Map forceMap, Category category) {
-            final String value= (String)fWorkingValues.get(category.key);
+        private void insertIntoMap(Map<Object, Integer> wrappingMap, Map<Object, Integer> indentMap, Map<Object, Integer> forceMap, Category category) {
+            final String value= fWorkingValues.get(category.key);
             Integer wrappingStyle;
             Integer indentStyle;
             Boolean forceWrapping;
@@ -263,19 +269,19 @@ public class LineWrappingTabPage extends FormatterTabPage {
             increaseMapEntry(forceMap, forceWrapping);
         }
 
-        private void increaseMapEntry(Map map, Object type) {
-            Integer count= (Integer)map.get(type);
+        private void increaseMapEntry(Map<Object, Integer> map, Object type) {
+            Integer count= map.get(type);
             if (count == null) // not in map yet -> count == 0
                 map.put(type, new Integer(1));
             else
                 map.put(type, new Integer(count.intValue() + 1));
         }
 
-        private void refreshControls(Map wrappingStyleMap, Map indentStyleMap, Map forceWrappingMap) {
+        private void refreshControls(Map<Object, Integer> wrappingStyleMap, Map<Object, Integer> indentStyleMap, Map<Object, Integer> forceWrappingMap) {
             updateCombos(wrappingStyleMap, indentStyleMap);
             updateButton(forceWrappingMap);
             Integer wrappingStyleMax= getWrappingStyleMax(wrappingStyleMap);
-			boolean isInhomogeneous= (fElements.size() != ((Integer)wrappingStyleMap.get(wrappingStyleMax)).intValue());
+			boolean isInhomogeneous= (fElements.size() != wrappingStyleMap.get(wrappingStyleMax).intValue());
 			updateControlEnablement(isInhomogeneous, wrappingStyleMax.intValue());
 			showSpecificControls(true);
 			if (fRequiresRelayout) {
@@ -289,7 +295,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
         	if (fElements.size() != 1)
         		return;
 
-        	Preference[] preferences= ((Category)fElements.get(0)).getSpecificPreferences();
+        	Preference[] preferences= fElements.get(0).getSpecificPreferences();
 	    	if (preferences.length == 0)
 	    		return;
 
@@ -302,10 +308,10 @@ public class LineWrappingTabPage extends FormatterTabPage {
 			}
 		}
 
-		private Integer getWrappingStyleMax(Map wrappingStyleMap) {
+		private Integer getWrappingStyleMax(Map<Object, Integer> wrappingStyleMap) {
             int maxCount= 0, maxStyle= 0;
             for (int i=0; i<WRAPPING_NAMES.length; i++) {
-                Integer count= (Integer)wrappingStyleMap.get(new Integer(i));
+                Integer count= wrappingStyleMap.get(new Integer(i));
                 if (count == null)
                     continue;
                 if (count.intValue() > maxCount) {
@@ -316,9 +322,9 @@ public class LineWrappingTabPage extends FormatterTabPage {
             return new Integer(maxStyle);
         }
 
-        private void updateButton(Map forceWrappingMap) {
-            Integer nrOfTrue= (Integer)forceWrappingMap.get(Boolean.TRUE);
-            Integer nrOfFalse= (Integer)forceWrappingMap.get(Boolean.FALSE);
+        private void updateButton(Map<Object, Integer> forceWrappingMap) {
+            Integer nrOfTrue= forceWrappingMap.get(Boolean.TRUE);
+            Integer nrOfFalse= forceWrappingMap.get(Boolean.FALSE);
 
             if (nrOfTrue == null || nrOfFalse == null)
                 fForceSplit.setSelection(nrOfTrue != null);
@@ -346,17 +352,17 @@ public class LineWrappingTabPage extends FormatterTabPage {
             return nrOfFalse.intValue();
         }
 
-        private void updateCombos(Map wrappingStyleMap, Map indentStyleMap) {
+        private void updateCombos(Map<Object, Integer> wrappingStyleMap, Map<Object, Integer> indentStyleMap) {
             updateCombo(fWrappingStyleCombo, wrappingStyleMap, WRAPPING_NAMES);
             updateCombo(fIndentStyleCombo, indentStyleMap, INDENT_NAMES);
         }
 
-        private void updateCombo(Combo combo, Map map, final String[] items) {
+        private void updateCombo(Combo combo, Map<Object, Integer> map, final String[] items) {
             String[] newItems= new String[items.length];
             int maxCount= 0, maxStyle= 0;
 
             for(int i = 0; i < items.length; i++) {
-                Integer count= (Integer) map.get(new Integer(i));
+                Integer count= map.get(new Integer(i));
                 int val= (count == null) ? 0 : count.intValue();
                 if (val > maxCount) {
                     maxCount= val;
@@ -395,6 +401,29 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	    "}}", //$NON-NLS-1$
 	    FormatterMessages.LineWrappingTabPage_compact_if_else
 	);
+
+	private final Category fTryCategory= new Category(
+			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_RESOURCES_IN_TRY,
+			"class Example {" + //$NON-NLS-1$
+			"void foo() {" + //$NON-NLS-1$
+			"try (FileReader reader1 = new FileReader(\"file1\"); " + //$NON-NLS-1$
+			"  FileReader reader2 = new FileReader(\"file2\")) {" + //$NON-NLS-1$
+			"}" + //$NON-NLS-1$
+			"}}", //$NON-NLS-1$
+			FormatterMessages.LineWrappingTabPage_try
+			);
+
+	private final Category fCatchCategory= new Category(
+			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_UNION_TYPE_IN_MULTICATCH,
+			"class Example {" + //$NON-NLS-1$
+			"void foo() {" + //$NON-NLS-1$
+			"try {" + //$NON-NLS-1$
+			"} catch (IllegalArgumentException | NullPointerException | ClassCastException e) {" + //$NON-NLS-1$
+			"  e.printStackTrace();" + //$NON-NLS-1$
+			"}" + //$NON-NLS-1$
+			"}}", //$NON-NLS-1$
+			FormatterMessages.LineWrappingTabPage_catch
+			);
 
 
 	private final Category fTypeDeclarationSuperclassCategory= new Category(
@@ -571,7 +600,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	 * A collection containing the categories tree. This is used as model for the tree viewer.
 	 * @see TreeViewer
 	 */
-	private final List fCategories;
+	private final List<Category> fCategories;
 
 	/**
 	 * The category listener which makes the selection persistent.
@@ -591,7 +620,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	/**
 	 * A special options store wherein the preview line width is kept.
 	 */
-	protected final Map fPreviewPreferences;
+	protected final Map<String, String> fPreviewPreferences;
 
 	/**
 	 * The key for the preview line width.
@@ -607,14 +636,14 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	 * @param modifyDialog the modify dialog
 	 * @param workingValues the values
 	 */
-	public LineWrappingTabPage(ModifyDialog modifyDialog, Map workingValues) {
+	public LineWrappingTabPage(ModifyDialog modifyDialog, Map<String, String> workingValues) {
 		super(modifyDialog, workingValues);
 
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 
 		final String previewLineWidth= fDialogSettings.get(PREF_PREVIEW_LINE_WIDTH);
 
-		fPreviewPreferences= new HashMap();
+		fPreviewPreferences= new HashMap<String, String>();
 		fPreviewPreferences.put(LINE_SPLIT, previewLineWidth != null ? previewLineWidth : Integer.toString(DEFAULT_PREVIEW_WINDOW_LINE_WIDTH));
 
 		fCategories= createCategories();
@@ -624,7 +653,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	/**
 	 * @return Create the categories tree.
 	 */
-	protected List createCategories() {
+	protected List<Category> createCategories() {
 
 		final Category annotations = new Category(FormatterMessages.LineWrappingTabPage_annotations);
 		annotations.children.add(fAnnotationArgumentsCategory);
@@ -662,8 +691,10 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 		final Category statements= new Category(FormatterMessages.LineWrappingTabPage_statements);
 		statements.children.add(fCompactIfCategory);
+		statements.children.add(fTryCategory);
+		statements.children.add(fCatchCategory);
 
-		final List root= new ArrayList();
+		final List<Category> root= new ArrayList<Category>();
 		root.add(annotations);
 		root.add(classDeclarations);
 		root.add(constructorDeclarations);
@@ -676,6 +707,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		return root;
 	}
 
+	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 
 		fOptionsComposite= composite;
@@ -691,7 +723,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		fCategoriesViewer= new TreeViewer(composite /*categoryGroup*/, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL );
 		fCategoriesViewer.setContentProvider(new ITreeContentProvider() {
 			public Object[] getElements(Object inputElement) {
-				return ((Collection)inputElement).toArray();
+				return ((Collection<?>)inputElement).toArray();
 			}
 			public Object[] getChildren(Object parentElement) {
 				return ((Category)parentElement).children.toArray();
@@ -740,6 +772,17 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		layoutData.grabExcessHorizontalSpace= false;
 		fBinaryExpressionCategory.addPreference(expressionWrapPositionPreference);
 		
+		// button "Wrap before '|' operator" in multi-catch
+		Preference expressionWrapMulticatchPositionPreference= createCheckboxPref(fOptionsGroup, 1, FormatterMessages.LineWrappingTabPage_multicatch_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_OR_OPERATOR_MULTICATCH, FALSE_TRUE);
+		control= expressionWrapMulticatchPositionPreference.getControl();
+		control.setVisible(false);
+		layoutData= (GridData)control.getLayoutData();
+		layoutData.exclude= true;
+		layoutData.horizontalAlignment= SWT.BEGINNING;
+		layoutData.horizontalSpan= numColumns - 1;
+		layoutData.grabExcessHorizontalSpace= false;
+		fCatchCategory.addPreference(expressionWrapMulticatchPositionPreference);
+		
 		// label "Select indentation style:"
 		fIndentStylePolicy= createLabel(numColumns, fOptionsGroup, FormatterMessages.LineWrappingTabPage_indentation_policy_label_text);
 
@@ -755,6 +798,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	}
 
 
+	@Override
 	protected Composite doCreatePreviewPane(Composite composite, int numColumns) {
 
 		super.doCreatePreviewPane(composite, numColumns);
@@ -768,7 +812,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		previewLineWidth.addObserver(fUpdater);
 		previewLineWidth.addObserver(new Observer() {
 			public void update(Observable o, Object arg) {
-				fDialogSettings.put(PREF_PREVIEW_LINE_WIDTH, (String)fPreviewPreferences.get(LINE_SPLIT));
+				fDialogSettings.put(PREF_PREVIEW_LINE_WIDTH, fPreviewPreferences.get(LINE_SPLIT));
 			}
 		});
 
@@ -778,28 +822,33 @@ public class LineWrappingTabPage extends FormatterTabPage {
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
      */
-    protected JavaPreview doCreateJavaPreview(Composite parent) {
+    @Override
+	protected JavaPreview doCreateJavaPreview(Composite parent) {
         fPreview= new CompilationUnitPreview(fWorkingValues, parent);
         return fPreview;
     }
 
 
+	@Override
 	protected void initializePage() {
 
 		fCategoriesViewer.addSelectionChangedListener(fCategoryListener);
 		fCategoriesViewer.addDoubleClickListener(fCategoryListener);
 
 		fForceSplit.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				forceSplitChanged(fForceSplit.getSelection());
 			}
 		});
 		fIndentStyleCombo.addSelectionListener( new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				indentStyleChanged(((Combo)e.widget).getSelectionIndex());
 			}
 		});
 		fWrappingStyleCombo.addSelectionListener( new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				wrappingStyleChanged(((Combo)e.widget).getSelectionIndex());
 			}
@@ -813,26 +862,27 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		fDefaultFocusManager.add(fForceSplit);
 	}
 
+	@Override
 	protected void doUpdatePreview() {
 		super.doUpdatePreview();
-		final Object normalSetting= fWorkingValues.get(LINE_SPLIT);
+		final String normalSetting= fWorkingValues.get(LINE_SPLIT);
 		fWorkingValues.put(LINE_SPLIT, fPreviewPreferences.get(LINE_SPLIT));
 		fPreview.update();
 		fWorkingValues.put(LINE_SPLIT, normalSetting);
 	}
 
 	protected void setPreviewText(String text) {
-		final Object normalSetting= fWorkingValues.get(LINE_SPLIT);
+		final String normalSetting= fWorkingValues.get(LINE_SPLIT);
 		fWorkingValues.put(LINE_SPLIT, fPreviewPreferences.get(LINE_SPLIT));
 		fPreview.setPreviewText(text);
 		fWorkingValues.put(LINE_SPLIT, normalSetting);
 	}
 
 	protected void forceSplitChanged(boolean forceSplit) {
-	    Iterator iterator= fSelectionState.fElements.iterator();
+	    Iterator<Category> iterator= fSelectionState.fElements.iterator();
 	    String currentKey;
         while (iterator.hasNext()) {
-            currentKey= ((Category)iterator.next()).key;
+            currentKey= iterator.next().key;
             try {
                 changeForceSplit(currentKey, forceSplit);
             } catch (IllegalArgumentException e) {
@@ -845,7 +895,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	}
 
 	private void changeForceSplit(String currentKey, boolean forceSplit) throws IllegalArgumentException{
-		String value= (String)fWorkingValues.get(currentKey);
+		String value= fWorkingValues.get(currentKey);
 		value= DefaultCodeFormatterConstants.setForceWrapping(value, forceSplit);
 		if (value == null)
 		    throw new IllegalArgumentException();
@@ -853,10 +903,10 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	}
 
 	protected void wrappingStyleChanged(int wrappingStyle) {
-	       Iterator iterator= fSelectionState.fElements.iterator();
+	       Iterator<Category> iterator= fSelectionState.fElements.iterator();
 	       String currentKey;
 	        while (iterator.hasNext()) {
-	        	currentKey= ((Category)iterator.next()).key;
+	        	currentKey= iterator.next().key;
 	        	try {
 	        	    changeWrappingStyle(currentKey, wrappingStyle);
 	        	} catch (IllegalArgumentException e) {
@@ -869,7 +919,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	}
 
 	private void changeWrappingStyle(String currentKey, int wrappingStyle) throws IllegalArgumentException {
-	    String value= (String)fWorkingValues.get(currentKey);
+	    String value= fWorkingValues.get(currentKey);
 		value= DefaultCodeFormatterConstants.setWrappingStyle(value, wrappingStyle);
 		if (value == null)
 		    throw new IllegalArgumentException();
@@ -877,10 +927,10 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	}
 
 	protected void indentStyleChanged(int indentStyle) {
-	    Iterator iterator= fSelectionState.fElements.iterator();
+	    Iterator<Category> iterator= fSelectionState.fElements.iterator();
 	    String currentKey;
         while (iterator.hasNext()) {
-            currentKey= ((Category)iterator.next()).key;
+            currentKey= iterator.next().key;
         	try {
             	changeIndentStyle(currentKey, indentStyle);
         	} catch (IllegalArgumentException e) {
@@ -893,7 +943,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	}
 
 	private void changeIndentStyle(String currentKey, int indentStyle) throws IllegalArgumentException{
-		String value= (String)fWorkingValues.get(currentKey);
+		String value= fWorkingValues.get(currentKey);
 		value= DefaultCodeFormatterConstants.setIndentStyle(value, indentStyle);
 		if (value == null)
 		    throw new IllegalArgumentException();
@@ -903,7 +953,11 @@ public class LineWrappingTabPage extends FormatterTabPage {
     protected void updateControlEnablement(boolean inhomogenous, int wrappingStyle) {
 	    boolean doSplit= wrappingStyle != DefaultCodeFormatterConstants.WRAP_NO_SPLIT;
 	    fIndentStylePolicy.setEnabled(true);
-	    fIndentStyleCombo.setEnabled(inhomogenous || doSplit);
-	    fForceSplit.setEnabled(inhomogenous || doSplit);
+
+		boolean isEnabled= inhomogenous || doSplit;
+		fIndentStyleCombo.setEnabled(isEnabled);
+		fForceSplit.setEnabled(isEnabled);
+		fBinaryExpressionCategory.setEnabled(isEnabled);
+		fCatchCategory.setEnabled(isEnabled);
 	}
 }

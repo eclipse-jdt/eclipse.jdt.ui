@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,7 +49,7 @@ class OpenLocationAction extends SelectionDispatchAction {
             return false;
         }
 
-        for (Iterator iter = selection.iterator(); iter.hasNext();) {
+        for (Iterator<?> iter = selection.iterator(); iter.hasNext();) {
             Object element = iter.next();
 
             if (element instanceof MethodWrapper) {
@@ -67,18 +67,20 @@ class OpenLocationAction extends SelectionDispatchAction {
     /* (non-Javadoc)
      * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#getSelection()
      */
-    public ISelection getSelection() {
+    @Override
+	public ISelection getSelection() {
         return fPart.getSelection();
     }
 
     /* (non-Javadoc)
      * Method declared on SelectionDispatchAction.
      */
-    public void run(IStructuredSelection selection) {
+    @Override
+	public void run(IStructuredSelection selection) {
         if (!checkEnabled(selection))
             return;
 
-        for (Iterator iter= selection.iterator(); iter.hasNext();) {
+        for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 	        boolean noError= CallHierarchyUI.openInEditor(iter.next(), getShell(), OpenStrategy.activateOnOpen());
 	        if (! noError)
 	        	return;

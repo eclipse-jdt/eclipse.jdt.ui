@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Andre Soereng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
+ *     Björn Michael <b.michael@gmx.de> - [syntax highlighting] Syntax coloring for abstract classes - https://bugs.eclipse.org/331311
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -80,6 +81,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedRange;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
+import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore.OverlayKey;
 import org.eclipse.jdt.internal.ui.text.JavaColorManager;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
@@ -216,6 +218,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		/*
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
 		 */
+		@Override
 		public String getText(Object element) {
 			if (element instanceof String)
 				return (String) element;
@@ -342,7 +345,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * Highlighting color list
 	 * @since  3.0
 	 */
-	private final java.util.List fListModel= new ArrayList();
+	private final java.util.List<HighlightingColorListItem> fListModel= new ArrayList<HighlightingColorListItem>();
 	/**
 	 * Highlighting color tree viewer
 	 * @since  3.0
@@ -395,10 +398,10 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 
-		ArrayList overlayKeys= new ArrayList();
+		ArrayList<OverlayKey> overlayKeys= new ArrayList<OverlayKey>();
 
 		for (int i= 0, n= fListModel.size(); i < n; i++) {
-			HighlightingColorListItem item= (HighlightingColorListItem) fListModel.get(i);
+			HighlightingColorListItem item= fListModel.get(i);
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, item.getColorKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getBoldKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getItalicKey()));
@@ -474,6 +477,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
         return Dialog.convertHeightInCharsToPixels(fFontMetrics, chars);
     }
 
+	@Override
 	public void initialize() {
 		super.initialize();
 
@@ -481,6 +485,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		fTreeViewer.setSelection(new StructuredSelection(fJavaCategory));
 	}
 
+	@Override
 	public void performDefaults() {
 		super.performDefaults();
 
@@ -495,6 +500,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#dispose()
 	 */
+	@Override
 	public void dispose() {
 		uninstallSemanticHighlighting();
 		fColorManager.dispose();
@@ -553,13 +559,14 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		Link link= new Link(colorComposite, SWT.NONE);
 		link.setText(PreferencesMessages.JavaEditorColoringConfigurationBlock_link);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(parent.getShell(), e.text, null, null);
+				if ("org.eclipse.ui.preferencePages.GeneralTextEditor".equals(e.text)) //$NON-NLS-1$
+					PreferencesUtil.createPreferenceDialogOn(parent.getShell(), e.text, null, null);
+				else if ("org.eclipse.ui.preferencePages.ColorsAndFonts".equals(e.text)) //$NON-NLS-1$
+					PreferencesUtil.createPreferenceDialogOn(parent.getShell(), e.text, null, "selectFont:org.eclipse.jdt.ui.editors.textfont"); //$NON-NLS-1$
 			}
 		});
-		// TODO replace by link-specific tooltips when
-		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
-//		link.setToolTipText(PreferencesMessages.JavaEditorColoringConfigurationBlock_link_tooltip);
 
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint= 150; // only expand further if anyone else requires it
@@ -586,6 +593,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		fTreeViewer.setLabelProvider(new ColorListLabelProvider());
 		fTreeViewer.setContentProvider(new ColorListContentProvider());
 		fTreeViewer.setComparator(new ViewerComparator() {
+			@Override
 			public int category(Object element) {
 				// don't sort the top level categories
 				if (fJavaCategory.equals(element))
@@ -603,8 +611,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, true);
 		gd.heightHint= convertHeightInCharsToPixels(9);
 		int maxWidth= 0;
-		for (Iterator it= fListModel.iterator(); it.hasNext();) {
-			HighlightingColorListItem item= (HighlightingColorListItem) it.next();
+		for (Iterator<HighlightingColorListItem> it= fListModel.iterator(); it.hasNext();) {
+			HighlightingColorListItem item= it.next();
 			maxWidth= Math.max(maxWidth, convertWidthInCharsToPixels(item.getDisplayName().length()));
 		}
 		ScrollBar vBar= ((Scrollable) fTreeViewer.getControl()).getVerticalBar();
@@ -889,28 +897,31 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		return new SemanticHighlightingManager.HighlightedRange[][] {
 			{ createHighlightedRange( 6, 13,  9, SemanticHighlightings.DEPRECATED_MEMBER), createHighlightedRange( 6, 13,  9, SemanticHighlightings.CLASS),  },
 			{ createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_VARIABLE), createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_ARGUMENT), },
-			{ createHighlightedRange( 6, 37,  13, SemanticHighlightings.INTERFACE) },
+			{ createHighlightedRange( 6, 37, 13, SemanticHighlightings.INTERFACE) },
 			{ createHighlightedRange( 6, 51,  6, SemanticHighlightings.TYPE_ARGUMENT), createHighlightedRange( 6, 51,  6, SemanticHighlightings.CLASS) },
 			{ createHighlightedRange( 7,  6,  5, SemanticHighlightings.ENUM), },
-			{ createHighlightedRange( 7, 14, 3, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(7, 14, 3, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 14, 3, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange( 7, 19, 5, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(7, 19, 5, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 19, 5, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange( 7, 26, 4, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(7, 26, 4, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 26, 4, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange( 9, 8, 6, SemanticHighlightings.CLASS), },
-			{ createHighlightedRange( 9, 15, 11, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(9, 15, 11, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange( 7, 14,  3, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange( 7, 14,  3, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 14, 3, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange( 7, 19,  5, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange( 7, 19,  5, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 19, 5, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange( 7, 26,  4, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange( 7, 26,  4, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 26, 4, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange( 9,  8,  6, SemanticHighlightings.CLASS), },
+			{ createHighlightedRange( 9, 15, 11, SemanticHighlightings.STATIC_FIELD), createHighlightedRange( 9, 15, 11, SemanticHighlightings.FIELD) },
 			{ createHighlightedRange(11,  9,  1, SemanticHighlightings.TYPE_VARIABLE) },
 			{ createHighlightedRange(11, 11,  5, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange(13, 2,  16, SemanticHighlightings.ANNOTATION) },
-			{ createHighlightedRange(13, 19,  5, SemanticHighlightings.ANNOTATION_ELEMENT_REFERENCE) },
-			{ createHighlightedRange(14, 12,  3, SemanticHighlightings.METHOD_DECLARATION), createHighlightedRange(14, 12,  3, SemanticHighlightings.METHOD) },
-			{ createHighlightedRange(14, 24,  9, SemanticHighlightings.PARAMETER_VARIABLE) },
-			{ createHighlightedRange(15,  2, 14, SemanticHighlightings.ABSTRACT_METHOD_INVOCATION), createHighlightedRange(15,  2, 14, SemanticHighlightings.METHOD) },
-			{ createHighlightedRange(16,  6,  5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
-			{ createHighlightedRange(16, 13, 2, SemanticHighlightings.NUMBER) },
-			{ createHighlightedRange(16, 16,  8, SemanticHighlightings.INHERITED_METHOD_INVOCATION), createHighlightedRange(16, 16,  8, SemanticHighlightings.METHOD) },
-			{ createHighlightedRange(17,  2, 12, SemanticHighlightings.STATIC_METHOD_INVOCATION), createHighlightedRange(17,  2, 12, SemanticHighlightings.METHOD) },
-			{ createHighlightedRange(18, 9,  3, SemanticHighlightings.METHOD) },
-			{ createHighlightedRange(18, 13,  5, SemanticHighlightings.LOCAL_VARIABLE) },
-			{ createHighlightedRange(18, 22,  9, SemanticHighlightings.AUTOBOXING) },
+			{ createHighlightedRange(12,  9, 17, SemanticHighlightings.ABSTRACT_CLASS), createHighlightedRange(12,  9, 17, SemanticHighlightings.CLASS) },
+			{ createHighlightedRange(12, 27,  6, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange(14,  2, 16, SemanticHighlightings.ANNOTATION) },
+			{ createHighlightedRange(14, 19,  5, SemanticHighlightings.ANNOTATION_ELEMENT_REFERENCE) },
+			{ createHighlightedRange(15, 12,  3, SemanticHighlightings.METHOD_DECLARATION), createHighlightedRange(15, 12,  3, SemanticHighlightings.METHOD) },
+			{ createHighlightedRange(15, 16,  7, SemanticHighlightings.CLASS) },
+			{ createHighlightedRange(15, 24,  9, SemanticHighlightings.PARAMETER_VARIABLE) },
+			{ createHighlightedRange(16,  2, 14, SemanticHighlightings.ABSTRACT_METHOD_INVOCATION), createHighlightedRange(16,  2, 14, SemanticHighlightings.METHOD) },
+			{ createHighlightedRange(17,  6,  5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
+			{ createHighlightedRange(17, 13,  2, SemanticHighlightings.NUMBER) },
+			{ createHighlightedRange(17, 16,  8, SemanticHighlightings.INHERITED_METHOD_INVOCATION), createHighlightedRange(17, 16,  8, SemanticHighlightings.METHOD) },
+			{ createHighlightedRange(18,  2, 12, SemanticHighlightings.STATIC_METHOD_INVOCATION), createHighlightedRange(18,  2, 12, SemanticHighlightings.METHOD) },
+			{ createHighlightedRange(19,  9,  3, SemanticHighlightings.METHOD) },
+			{ createHighlightedRange(19, 13,  5, SemanticHighlightings.LOCAL_VARIABLE) },
+			{ createHighlightedRange(19, 22,  9, SemanticHighlightings.AUTOBOXING) },
 		};
 	}
 

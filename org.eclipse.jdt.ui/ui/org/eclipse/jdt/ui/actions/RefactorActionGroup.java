@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -177,7 +177,7 @@ public class RefactorActionGroup extends ActionGroup {
 
 	private UndoRedoActionGroup fUndoRedoActionGroup;
 
-	private final List fActions= new ArrayList();
+	private final List<SelectionDispatchAction> fActions= new ArrayList<SelectionDispatchAction>();
 
 	private static final String QUICK_MENU_ID= "org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"; //$NON-NLS-1$
 
@@ -430,6 +430,7 @@ public class RefactorActionGroup extends ActionGroup {
 		fHandlerService= (IHandlerService)fSite.getService(IHandlerService.class);
 		if (fHandlerService != null) {
 			IHandler handler= new JDTQuickMenuCreator(fEditor) {
+				@Override
 				protected void fillMenu(IMenuManager menu) {
 					fillQuickMenu(menu);
 				}
@@ -465,6 +466,7 @@ public class RefactorActionGroup extends ActionGroup {
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		if (!fBinary) {
@@ -511,6 +513,7 @@ public class RefactorActionGroup extends ActionGroup {
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 		addRefactorSubmenu(menu);
@@ -519,6 +522,7 @@ public class RefactorActionGroup extends ActionGroup {
 	/*
 	 * @see ActionGroup#dispose()
 	 */
+	@Override
 	public void dispose() {
 		if (!fBinary) {
 			disposeAction(fSelfEncapsulateField, fSelectionProvider);
@@ -576,8 +580,8 @@ public class RefactorActionGroup extends ActionGroup {
 			}
 		} else {
 			ISelection selection= fSelectionProvider.getSelection();
-			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
-				((SelectionDispatchAction)iter.next()).update(selection);
+			for (Iterator<SelectionDispatchAction> iter= fActions.iterator(); iter.hasNext(); ) {
+				iter.next().update(selection);
 			}
 			if (fillRefactorMenu(refactorSubmenu) > 0)
 				menu.appendToGroup(fGroupName, refactorSubmenu);
@@ -636,6 +640,7 @@ public class RefactorActionGroup extends ActionGroup {
 		// addRefactorSubmenu.
 		Menu menu= ((MenuManager)refactorSubmenu).getMenu();
 		menu.addMenuListener(new MenuAdapter() {
+			@Override
 			public void menuHidden(MenuEvent e) {
 				refactorMenuHidden();
 			}
@@ -643,8 +648,8 @@ public class RefactorActionGroup extends ActionGroup {
 		ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
 		JavaTextSelection javaSelection= new JavaTextSelection(getEditorInput(), getDocument(), textSelection.getOffset(), textSelection.getLength());
 
-		for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
-			SelectionDispatchAction action= (SelectionDispatchAction)iter.next();
+		for (Iterator<SelectionDispatchAction> iter= fActions.iterator(); iter.hasNext(); ) {
+			SelectionDispatchAction action= iter.next();
 			action.update(javaSelection);
 		}
 		refactorSubmenu.removeAll();
@@ -654,8 +659,8 @@ public class RefactorActionGroup extends ActionGroup {
 
 	private void refactorMenuHidden() {
 		ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
-		for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
-			SelectionDispatchAction action= (SelectionDispatchAction)iter.next();
+		for (Iterator<SelectionDispatchAction> iter= fActions.iterator(); iter.hasNext(); ) {
+			SelectionDispatchAction action= iter.next();
 			action.update(textSelection);
 		}
 	}
@@ -681,18 +686,18 @@ public class RefactorActionGroup extends ActionGroup {
 			ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
 			JavaTextSelection javaSelection= new JavaTextSelection(element, getDocument(), textSelection.getOffset(), textSelection.getLength());
 
-			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
-				((SelectionDispatchAction)iter.next()).update(javaSelection);
+			for (Iterator<SelectionDispatchAction> iter= fActions.iterator(); iter.hasNext(); ) {
+				iter.next().update(javaSelection);
 			}
 			fillRefactorMenu(menu);
-			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
-				((SelectionDispatchAction)iter.next()).update(textSelection);
+			for (Iterator<SelectionDispatchAction> iter= fActions.iterator(); iter.hasNext(); ) {
+				iter.next().update(textSelection);
 			}
 
 		} else {
 			ISelection selection= fSelectionProvider.getSelection();
-			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
-				((SelectionDispatchAction)iter.next()).update(selection);
+			for (Iterator<SelectionDispatchAction> iter= fActions.iterator(); iter.hasNext(); ) {
+				iter.next().update(selection);
 			}
 			fillRefactorMenu(menu);
 		}

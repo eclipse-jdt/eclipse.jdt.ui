@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,7 @@ public class ExtractSupertypeMethodPage extends PullUpMethodPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_SUPERTYPE_WIZARD_PAGE);
@@ -57,6 +58,7 @@ public class ExtractSupertypeMethodPage extends PullUpMethodPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setVisible(final boolean visible) {
 		if (visible) {
 			final ExtractSupertypeProcessor processor= getProcessor();

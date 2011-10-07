@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,6 +66,7 @@ public class JavaChangeHover extends LineChangeHover  {
 	/*
 	 * @see org.eclipse.ui.internal.editors.text.LineChangeHover#formatSource(java.lang.String)
 	 */
+	@Override
 	protected String formatSource(String content) {
 		return content;
 	}
@@ -73,6 +74,7 @@ public class JavaChangeHover extends LineChangeHover  {
 	/*
 	 * @see org.eclipse.jface.text.source.IAnnotationHoverExtension#getHoverControlCreator()
 	 */
+	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
@@ -87,6 +89,7 @@ public class JavaChangeHover extends LineChangeHover  {
 	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 * @since 3.2
 	 */
+	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
@@ -100,6 +103,7 @@ public class JavaChangeHover extends LineChangeHover  {
 	/*
 	 * @see org.eclipse.jface.text.source.LineChangeHover#computeLineRange(org.eclipse.jface.text.source.ISourceViewer, int, int, int)
 	 */
+	@Override
 	protected Point computeLineRange(ISourceViewer viewer, int line, int first, int number) {
 		Point lineRange= super.computeLineRange(viewer, line, first, number);
 		if (lineRange != null) {
@@ -142,6 +146,7 @@ public class JavaChangeHover extends LineChangeHover  {
 	/*
 	 * @see org.eclipse.jface.text.source.LineChangeHover#getTabReplacement()
 	 */
+	@Override
 	protected String getTabReplacement() {
 		return Character.toString('\t');
 	}

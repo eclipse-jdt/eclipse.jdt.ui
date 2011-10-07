@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,6 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -59,6 +58,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
@@ -82,6 +82,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 			return (OverrideMethodContentProvider) getContentProvider();
 		}
 
+		@Override
 		public void run() {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=39264
 			Object[] elementList= getOverrideContentProvider().getViewer().getCheckedElements();
@@ -135,7 +136,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		 */
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof ITypeBinding) {
-				ArrayList result= new ArrayList(fMethods.length);
+				ArrayList<IMethodBinding> result= new ArrayList<IMethodBinding>(fMethods.length);
 				for (int index= 0; index < fMethods.length; index++) {
 					if (fMethods[index].getDeclaringClass().isEqualTo((IBinding) parentElement))
 						result.add(fMethods[index]);
@@ -215,6 +216,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		/*
 		 * @see ViewerSorter#compare(Viewer, Object, Object)
 		 */
+		@Override
 		public int compare(Viewer viewer, Object first, Object second) {
 			if (first instanceof ITypeBinding && second instanceof ITypeBinding) {
 				final ITypeBinding left= (ITypeBinding) first;
@@ -283,21 +285,21 @@ public class OverrideMethodDialog extends SourceActionDialog {
 
 	public OverrideMethodDialog(Shell shell, CompilationUnitEditor editor, IType type, boolean isSubType) throws JavaModelException {
 		super(shell, new BindingLabelProvider(), new OverrideMethodContentProvider(), editor, type, false);
-		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
+		RefactoringASTParser parser= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL);
 		fUnit= parser.parse(type.getCompilationUnit(), true);
 		final ITypeBinding binding= ASTNodes.getTypeBinding(fUnit, type);
-		List toImplement= new ArrayList();
+		List<IMethodBinding> toImplement= new ArrayList<IMethodBinding>();
 		IMethodBinding[] overridable= null;
 		if (binding != null) {
 			final IPackageBinding pack= binding.getPackage();
 			final IMethodBinding[] methods= StubUtility2.getOverridableMethods(fUnit.getAST(), binding, false);
-			List list= new ArrayList(methods.length);
+			List<IMethodBinding> list= new ArrayList<IMethodBinding>(methods.length);
 			for (int index= 0; index < methods.length; index++) {
 				final IMethodBinding cur= methods[index];
 				if (Bindings.isVisibleInHierarchy(cur, pack))
 					list.add(cur);
 			}
-			overridable= (IMethodBinding[]) list.toArray(new IMethodBinding[list.size()]);
+			overridable= list.toArray(new IMethodBinding[list.size()]);
 		} else
 			overridable= new IMethodBinding[] {};
 		for (int i= 0; i < overridable.length; i++) {
@@ -318,20 +320,20 @@ public class OverrideMethodDialog extends SourceActionDialog {
 			}
 		}
 
-		IMethodBinding[] toImplementArray= (IMethodBinding[]) toImplement.toArray(new IMethodBinding[toImplement.size()]);
+		IMethodBinding[] toImplementArray= toImplement.toArray(new IMethodBinding[toImplement.size()]);
 		setInitialSelections(toImplementArray);
 
-		HashSet expanded= new HashSet(toImplementArray.length);
+		HashSet<ITypeBinding> expanded= new HashSet<ITypeBinding>(toImplementArray.length);
 		for (int i= 0; i < toImplementArray.length; i++) {
 			expanded.add(toImplementArray[i].getDeclaringClass());
 		}
 
-		HashSet types= new HashSet(overridable.length);
+		HashSet<ITypeBinding> types= new HashSet<ITypeBinding>(overridable.length);
 		for (int i= 0; i < overridable.length; i++) {
 			types.add(overridable[i].getDeclaringClass());
 		}
 
-		ITypeBinding[] typesArrays= (ITypeBinding[]) types.toArray(new ITypeBinding[types.size()]);
+		ITypeBinding[] typesArrays= types.toArray(new ITypeBinding[types.size()]);
 		OverrideMethodComparator comparator= new OverrideMethodComparator(binding);
 		if (expanded.isEmpty() && typesArrays.length > 0) {
 			comparator.sort(null, typesArrays);
@@ -357,6 +359,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.OVERRIDE_TREE_SELECTION_DIALOG);
@@ -365,10 +368,12 @@ public class OverrideMethodDialog extends SourceActionDialog {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createLinkControl(Composite composite) {
 		Link link= new Link(composite, SWT.WRAP);
 		link.setText(JavaUIMessages.OverrideMethodDialog_link_message);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				openCodeTempatePage(CodeTemplateContextType.OVERRIDECOMMENT_ID);
 			}
@@ -384,6 +389,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 	/*
 	 * @see CheckedTreeSelectionDialog#createTreeViewer(Composite)
 	 */
+	@Override
 	protected CheckboxTreeViewer createTreeViewer(Composite composite) {
 		initializeDialogUnits(composite);
 		ViewerPane pane= new ViewerPane(composite, SWT.BORDER | SWT.FLAT);

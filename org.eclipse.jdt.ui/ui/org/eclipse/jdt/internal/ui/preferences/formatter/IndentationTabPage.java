@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,10 +62,11 @@ public class IndentationTabPage extends FormatterTabPage {
 	private CompilationUnitPreview fPreview;
 	private String fOldTabChar= null;
 
-	public IndentationTabPage(ModifyDialog modifyDialog, Map workingValues) {
+	public IndentationTabPage(ModifyDialog modifyDialog, Map<String, String> workingValues) {
 		super(modifyDialog, workingValues);
 	}
 
+	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 
 		final Group generalGroup= createGroup(numColumns, composite, FormatterMessages.IndentationTabPage_general_group_title);
@@ -81,7 +82,7 @@ public class IndentationTabPage extends FormatterTabPage {
 		final NumberPreference indentSize= createNumberPref(generalGroup, numColumns, FormatterMessages.IndentationTabPage_general_group_option_indent_size, DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, 32);
 		final NumberPreference tabSize= createNumberPref(generalGroup, numColumns, FormatterMessages.IndentationTabPage_general_group_option_tab_size, DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, 32);
 
-		String tabchar= (String) fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
+		String tabchar= fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
 		updateTabPreferences(tabchar, tabSize, indentSize, onlyForLeading);
 		tabPolicy.addObserver(new Observer() {
 			public void update(Observable o, Object arg) {
@@ -117,6 +118,7 @@ public class IndentationTabPage extends FormatterTabPage {
         createCheckboxPref(classGroup, numColumns, FormatterMessages.IndentationTabPage_indent_empty_lines, DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, FALSE_TRUE);
 	}
 
+	@Override
 	public void initializePage() {
 	    fPreview.setPreviewText(PREVIEW);
 	}
@@ -124,7 +126,8 @@ public class IndentationTabPage extends FormatterTabPage {
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
      */
-    protected JavaPreview doCreateJavaPreview(Composite parent) {
+    @Override
+	protected JavaPreview doCreateJavaPreview(Composite parent) {
         fPreview= new CompilationUnitPreview(fWorkingValues, parent);
         return fPreview;
     }
@@ -132,7 +135,8 @@ public class IndentationTabPage extends FormatterTabPage {
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doUpdatePreview()
      */
-    protected void doUpdatePreview() {
+    @Override
+	protected void doUpdatePreview() {
     	super.doUpdatePreview();
         fPreview.update();
     }
@@ -178,8 +182,8 @@ public class IndentationTabPage extends FormatterTabPage {
 	}
 
 	private void swapTabValues() {
-		Object tabSize= fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
-		Object indentSize= fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE);
+		String tabSize= fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+		String indentSize= fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE);
 		fWorkingValues.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, indentSize);
 		fWorkingValues.put(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, tabSize);
 	}

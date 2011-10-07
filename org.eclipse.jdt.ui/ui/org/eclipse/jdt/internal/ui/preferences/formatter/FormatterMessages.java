@@ -1,15 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     istvan@benedek-home.de - 103706 [formatter] indent empty lines
  *     Aaron Luchko, aluchko@redhat.com - 105926 [Formatter] Exporting Unnamed profile fails silently
  *     Brock Janiczak <brockj@tpg.com.au> - [formatter] Add  option: "add new line after label" - https://bugs.eclipse.org/bugs/show_bug.cgi?id=150741
+ *     Ray V. (voidstar@gmail.com) - Contribution for bug 282988
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
@@ -81,7 +82,8 @@ final class FormatterMessages extends NLS {
 	public static String WhiteSpaceTabPage_switch_before_default_colon;
 	public static String WhiteSpaceTabPage_do;
 	public static String WhiteSpaceTabPage_synchronized;
-	public static String WhiteSpaceTabPage_try;
+	public static String WhiteSpaceTabPage_catch;
+	public static String WhiteSpaceTabPage_tryWithResources;
 	public static String WhiteSpaceTabPage_if;
 	public static String WhiteSpaceTabPage_assert;
 	public static String WhiteSpaceTabPage_for;
@@ -166,6 +168,7 @@ final class FormatterMessages extends NLS {
 	public static String WhiteSpaceOptions_postfix_operator;
 	public static String WhiteSpaceOptions_opening_paren;
 	public static String WhiteSpaceOptions_catch;
+	public static String WhiteSpaceOptions_try;
 	public static String WhiteSpaceOptions_for;
 	public static String WhiteSpaceOptions_if;
 	public static String WhiteSpaceOptions_switch;
@@ -261,6 +264,7 @@ final class FormatterMessages extends NLS {
 	public static String WhiteSpaceOptions_after_ellipsis;
 	public static String WhiteSpaceOptions_return_with_parenthesized_expression;
 	public static String WhiteSpaceOptions_throw_with_parenthesized_expression;
+	public static String LineWrappingTabPage_catch;
 	public static String LineWrappingTabPage_compact_if_else;
 	public static String LineWrappingTabPage_declaration;
 	public static String LineWrappingTabPage_extends_clause;
@@ -271,6 +275,7 @@ final class FormatterMessages extends NLS {
 	public static String LineWrappingTabPage_arguments;
 	public static String LineWrappingTabPage_qualified_invocations;
 	public static String LineWrappingTabPage_throws_clause;
+	public static String LineWrappingTabPage_try;
 	public static String LineWrappingTabPage_object_allocation;
 	public static String LineWrappingTabPage_qualified_object_allocation;
 	public static String LineWrappingTabPage_array_init;
@@ -310,6 +315,7 @@ final class FormatterMessages extends NLS {
 	public static String LineWrappingTabPage_enum_superinterfaces;
 	public static String LineWrappingTabPage_assignment_alignment;
 	public static String LineWrappingTabPage_binary_expression_wrap_operator;
+	public static String LineWrappingTabPage_multicatch_wrap_operator;
 	public static String LineWrappingTabPage_annotations;
 	public static String LineWrappingTabPage_annotations_arguments;
 	public static String LineWrappingTabPage_wrap_outer_expressions_when_nested;
@@ -356,6 +362,7 @@ final class FormatterMessages extends NLS {
 	public static String commentsTabPage_enable_javadoc_comment_formatting;
 	public static String CommentsTabPage_enable_line_comment_formatting;
 	public static String CommentsTabPage_enable_block_comment_formatting;
+	public static String CommentsTabPage_preserve_white_space_before_line_comment;
 	public static String CommentsTabPage_format_header;
 	public static String CommentsTabPage_format_html;
 	public static String CommentsTabPage_format_code_snippets;
@@ -442,8 +449,11 @@ final class FormatterMessages extends NLS {
 	public static String NewLinesTabPage_array_group_option_after_opening_brace_of_array_initializer;
 	public static String NewLinesTabPage_array_group_option_before_closing_brace_of_array_initializer;
 	public static String NewLinesTabPage_annotations_group_local_variables;
-	public static String NewLinesTabPage_annotations_group_members;
 	public static String NewLinesTabPage_annotations_group_paramters;
+	public static String NewLinesTabPage_annotations_group_packages;
+	public static String NewLinesTabPage_annotations_group_types;
+	public static String NewLinesTabPage_annotations_group_fields;
+	public static String NewLinesTabPage_annotations_group_methods;
 	public static String NewLinesTabPage_annotations_group_title;
 	public static String ProfileManager_default_profile_name;
 	public static String ProfileManager_eclipse_profile_name;

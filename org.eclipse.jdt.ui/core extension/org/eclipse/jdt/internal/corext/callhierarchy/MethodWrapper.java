@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,14 +36,14 @@ import org.eclipse.jdt.internal.ui.callhierarchy.MethodWrapperWorkbenchAdapter;
  *
  */
 public abstract class MethodWrapper extends PlatformObject {
-    private Map fElements = null;
+    private Map<String, MethodCall> fElements = null;
 
     /*
      * A cache of previously found methods. This cache should be searched
      * before adding a "new" method object reference to the list of elements.
      * This way previously found methods won't be searched again.
      */
-    private Map fMethodCache;
+    private Map<String, Map<String, MethodCall>> fMethodCache;
     private final MethodCall fMethodCall;
     private final MethodWrapper fParent;
     private int fLevel;
@@ -57,7 +57,7 @@ public abstract class MethodWrapper extends PlatformObject {
         Assert.isNotNull(methodCall);
 
         if (parent == null) {
-            setMethodCache(new HashMap());
+            setMethodCache(new HashMap<String, Map<String, MethodCall>>());
             fLevel = 1;
         } else {
             setMethodCache(parent.getMethodCache());
@@ -68,7 +68,8 @@ public abstract class MethodWrapper extends PlatformObject {
         this.fParent = parent;
     }
 
-    public Object getAdapter(Class adapter) {
+    @Override
+	public Object getAdapter(Class adapter) {
 		if (adapter == IJavaElement.class) {
 	        return getMember();
 	    } else if (adapter == IWorkbenchAdapter.class){
@@ -86,7 +87,7 @@ public abstract class MethodWrapper extends PlatformObject {
         MethodWrapper[] result = new MethodWrapper[fElements.size()];
         int i = 0;
 
-        for (Iterator iter = fElements.keySet().iterator(); iter.hasNext();) {
+        for (Iterator<String> iter = fElements.keySet().iterator(); iter.hasNext();) {
             MethodCall methodCall = getMethodCallFromMap(fElements, iter.next());
             result[i++] = createMethodWrapper(methodCall);
         }
@@ -135,7 +136,8 @@ public abstract class MethodWrapper extends PlatformObject {
 		fFieldSearchMode= fieldSearchMode;
 	}
 
-    public boolean equals(Object oth) {
+    @Override
+	public boolean equals(Object oth) {
         if (this == oth) {
             return true;
         }
@@ -178,7 +180,8 @@ public abstract class MethodWrapper extends PlatformObject {
         return true;
     }
 
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         final int PRIME = 1000003;
         int result = 0;
 
@@ -193,14 +196,14 @@ public abstract class MethodWrapper extends PlatformObject {
         return result;
     }
 
-    private void setMethodCache(Map methodCache) {
+    private void setMethodCache(Map<String, Map<String, MethodCall>> methodCache) {
         fMethodCache = methodCache;
     }
 
     protected abstract String getTaskName();
 
     private void addCallToCache(MethodCall methodCall) {
-        Map cachedCalls = lookupMethod(this.getMethodCall());
+        Map<String, MethodCall> cachedCalls = lookupMethod(this.getMethodCall());
         cachedCalls.put(methodCall.getKey(), methodCall);
     }
 
@@ -213,10 +216,10 @@ public abstract class MethodWrapper extends PlatformObject {
     protected abstract MethodWrapper createMethodWrapper(MethodCall methodCall);
 
     private void doFindChildren(IProgressMonitor progressMonitor) {
-        Map existingResults = lookupMethod(getMethodCall());
+        Map<String, MethodCall> existingResults = lookupMethod(getMethodCall());
 
         if (existingResults != null && !existingResults.isEmpty()) {
-            fElements = new HashMap();
+            fElements = new HashMap<String, MethodCall>();
             fElements.putAll(existingResults);
         } else {
             initCalls();
@@ -273,14 +276,14 @@ public abstract class MethodWrapper extends PlatformObject {
      *
      * @return a map from handle identifier ({@link String}) to {@link MethodCall}
      */
-    protected abstract Map findChildren(IProgressMonitor progressMonitor);
+    protected abstract Map<String, MethodCall> findChildren(IProgressMonitor progressMonitor);
 
-    private Map getMethodCache() {
+    private Map<String, Map<String, MethodCall>> getMethodCache() {
         return fMethodCache;
     }
 
     private void initCalls() {
-        this.fElements = new HashMap();
+        this.fElements = new HashMap<String, MethodCall>();
 
         initCacheForMethod();
     }
@@ -290,14 +293,14 @@ public abstract class MethodWrapper extends PlatformObject {
      * @param methodCall the method call
      * @return the List of previously found search results
      */
-    private Map lookupMethod(MethodCall methodCall) {
-        return (Map) getMethodCache().get(methodCall.getKey());
+    private Map<String, MethodCall> lookupMethod(MethodCall methodCall) {
+        return getMethodCache().get(methodCall.getKey());
     }
 
     private void performSearch(IProgressMonitor progressMonitor) {
         fElements = findChildren(progressMonitor);
 
-        for (Iterator iter = fElements.keySet().iterator(); iter.hasNext();) {
+        for (Iterator<String> iter = fElements.keySet().iterator(); iter.hasNext();) {
             checkCanceled(progressMonitor);
 
             MethodCall methodCall = getMethodCallFromMap(fElements, iter.next());
@@ -305,12 +308,12 @@ public abstract class MethodWrapper extends PlatformObject {
         }
     }
 
-    private MethodCall getMethodCallFromMap(Map elements, Object key) {
-        return (MethodCall) elements.get(key);
+    private MethodCall getMethodCallFromMap(Map<String, MethodCall> elements, String key) {
+        return elements.get(key);
     }
 
     private void initCacheForMethod() {
-        Map cachedCalls = new HashMap();
+        Map<String, MethodCall> cachedCalls = new HashMap<String, MethodCall>();
         getMethodCache().put(this.getMethodCall().getKey(), cachedCalls);
     }
 

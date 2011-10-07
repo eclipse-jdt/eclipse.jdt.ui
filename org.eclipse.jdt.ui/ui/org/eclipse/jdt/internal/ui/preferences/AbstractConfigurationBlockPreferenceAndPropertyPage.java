@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ public abstract class AbstractConfigurationBlockPreferenceAndPropertyPage extend
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), getHelpId());
@@ -64,6 +65,7 @@ public abstract class AbstractConfigurationBlockPreferenceAndPropertyPage extend
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Control createPreferenceContent(Composite parent) {
 
 		IPreferencePageContainer container= getContainer();
@@ -95,6 +97,7 @@ public abstract class AbstractConfigurationBlockPreferenceAndPropertyPage extend
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean performOk() {
 		fConfigurationBlock.performOk();
 
@@ -110,6 +113,7 @@ public abstract class AbstractConfigurationBlockPreferenceAndPropertyPage extend
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void performDefaults() {
 		fConfigurationBlock.performDefaults();
 		super.performDefaults();
@@ -118,6 +122,7 @@ public abstract class AbstractConfigurationBlockPreferenceAndPropertyPage extend
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void dispose() {
 		fConfigurationBlock.dispose();
 		super.dispose();
@@ -126,6 +131,7 @@ public abstract class AbstractConfigurationBlockPreferenceAndPropertyPage extend
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
 		super.enableProjectSpecificSettings(useProjectSpecificSettings);
 		if (useProjectSpecificSettings) {

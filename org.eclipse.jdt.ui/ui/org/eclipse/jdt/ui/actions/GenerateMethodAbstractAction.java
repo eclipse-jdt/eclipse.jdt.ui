@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,7 +49,6 @@ import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -73,6 +72,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
@@ -160,6 +160,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 		return null;
 	}
 
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			checkAndRun(getSelectedType(selection));
@@ -169,6 +170,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 	}
 
 
+	@Override
 	public void run(ITextSelection selection) {
 		try {
 			checkAndRun(SelectionConverter.getTypeAtOffset(fEditor));
@@ -392,7 +394,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 	}
 
 	void initialize(IType type) throws JavaModelException {
-		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
+		RefactoringASTParser parser= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL);
 		fUnit= parser.parse(type.getCompilationUnit(), true);
 		fTypeBinding= null;
 		// type cannot be anonymous
@@ -402,6 +404,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 			fTypeBinding= declaration.resolveBinding();
 	}
 
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(canEnable(selection));
@@ -412,6 +415,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 		}
 	}
 
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		// Do nothing
 	}

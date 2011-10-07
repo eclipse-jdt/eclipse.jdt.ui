@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,7 @@ public class QualifiedTypeNameHistory extends History {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void setAttributes(Object object, Element element) {
 		element.setAttribute(NODE_NAME, (String)object);
 	}
@@ -43,6 +44,7 @@ public class QualifiedTypeNameHistory extends History {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Object createFromElement(Element element) {
 		return element.getAttribute(NODE_NAME);
 	}
@@ -50,6 +52,7 @@ public class QualifiedTypeNameHistory extends History {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Object getKey(Object object) {
 		return object;
 	}

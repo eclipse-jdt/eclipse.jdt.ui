@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,6 +81,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	/*
 	 * @see StructuredViewer#mapElement(Object, Widget)
 	 */
+	@Override
 	protected void mapElement(Object element, Widget item) {
 		super.mapElement(element, item);
 		if (item instanceof Item) {
@@ -91,6 +92,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	/*
 	 * @see StructuredViewer#unmapElement(Object, Widget)
 	 */
+	@Override
 	protected void unmapElement(Object element, Widget item) {
 		if (item instanceof Item) {
 			fResourceToItemsMapper.removeFromMap(element, (Item) item);
@@ -101,6 +103,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	/*
 	 * @see StructuredViewer#unmapAllElements()
 	 */
+	@Override
 	protected void unmapAllElements() {
 		fResourceToItemsMapper.clearMap();
 		super.unmapAllElements();
@@ -112,6 +115,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#addFilter(org.eclipse.jface.viewers.ViewerFilter)
 	 */
+	@Override
 	public void addFilter(ViewerFilter filter) {
 		if (filter instanceof JavaViewerFilter) {
 			((JavaViewerFilter) filter).filteringStart();
@@ -122,6 +126,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#removeFilter(org.eclipse.jface.viewers.ViewerFilter)
 	 */
+	@Override
 	public void removeFilter(ViewerFilter filter) {
 		super.removeFilter(filter);
 		if (filter instanceof JavaViewerFilter) {
@@ -132,6 +137,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#setFilters(org.eclipse.jface.viewers.ViewerFilter[])
 	 */
+	@Override
 	public void setFilters(ViewerFilter[] filters) {
 		ViewerFilter[] oldFilters= getFilters();
 		for (int i= 0; i < filters.length; i++) {
@@ -147,6 +153,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#resetFilters()
 	 */
+	@Override
 	public void resetFilters() {
     	endFilterSessions(getFilters());
 		super.resetFilters();
@@ -174,7 +181,8 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#handleDispose(org.eclipse.swt.events.DisposeEvent)
 	 */
-    protected void handleDispose(DisposeEvent event) {
+    @Override
+	protected void handleDispose(DisposeEvent event) {
     	endFilterSessions(getFilters());
     	super.handleDispose(event);
     }
@@ -183,6 +191,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	/*
 	 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 	 */
+	@Override
 	protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
 		if (event instanceof ProblemsLabelChangedEvent) {
 			ProblemsLabelChangedEvent e= (ProblemsLabelChangedEvent) event;
@@ -193,7 +202,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		Object[] changed= addAditionalProblemParents(event.getElements());
 
 		if (changed != null && !fResourceToItemsMapper.isEmpty()) {
-			ArrayList others= new ArrayList();
+			ArrayList<Object> others= new ArrayList<Object>();
 			for (int i= 0; i < changed.length; i++) {
 				Object curr= changed[i];
 				if (curr instanceof IResource) {
@@ -238,6 +247,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#isExpandable(java.lang.Object)
 	 */
+	@Override
 	public boolean isExpandable(Object parent) {
 		if (hasFilters() && evaluateExpandableWithFilters(parent)) {
 			// workaround for 65762
@@ -259,6 +269,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#getFilteredChildren(java.lang.Object)
 	 */
+	@Override
 	protected final Object[] getFilteredChildren(Object parent) {
 		return filter(getRawChildren(parent), parent);
 	}
@@ -267,7 +278,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		if (!hasFilters() || elements.length == 0) {
 			return elements;
 		}
-		List list= new ArrayList(elements.length);
+		List<Object> list= new ArrayList<Object>(elements.length);
 		ViewerFilter[] filters = getFilters();
 		for (int i = 0; i < elements.length; i++) {
 			Object object = elements[i];
@@ -316,6 +327,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object[])
 	 */
+	@Override
 	protected final Object[] filter(Object[] elements) {
 		return filter(elements, getRoot());
 	}

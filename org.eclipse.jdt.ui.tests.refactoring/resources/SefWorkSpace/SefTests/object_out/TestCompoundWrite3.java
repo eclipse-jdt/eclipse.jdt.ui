@@ -8,11 +8,11 @@ public class TestCompoundWrite3 {
 		a.a.setField(a.a.getField() + "d");
 	}
 
-	void setField(String field) {
-		this.field = field;
-	}
-
 	String getField() {
 		return field;
+	}
+
+	void setField(String field) {
+		this.field = field;
 	}
 }

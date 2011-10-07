@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import java.util.Map;
  */
 public final class CreateTargetExecutionLog {
 
-	private Map fCreations= new LinkedHashMap(2);
+	private Map<Object, Object> fCreations= new LinkedHashMap<Object, Object>(2);
 
 	/**
 	 * Returns the element which got created for the given selection.

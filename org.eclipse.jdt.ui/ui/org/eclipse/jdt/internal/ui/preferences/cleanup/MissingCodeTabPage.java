@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,10 +30,12 @@ public final class MissingCodeTabPage extends AbstractCleanUpTabPage {
 		super();
 	}
 
-	protected AbstractCleanUp[] createPreviewCleanUps(Map values) {
+	@Override
+	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] { new Java50CleanUp(values), new PotentialProgrammingProblemsCleanUp(values), new UnimplementedCodeCleanUp(values) };
 	}
 
+	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 
     	Group annotationsGroup= createGroup(numColumns, composite, CleanUpMessages.MissingCodeTabPage_GroupName_Annotations);

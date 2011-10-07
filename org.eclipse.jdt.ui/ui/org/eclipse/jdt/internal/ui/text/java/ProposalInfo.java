@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
-
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -93,7 +92,7 @@ public class ProposalInfo {
 	 */
 	private String extractJavadoc(IMember member, IProgressMonitor monitor) throws JavaModelException {
 		if (member != null) {
-			return JavadocContentAccess2.getHTMLContent(member, true, true);
+			return JavadocContentAccess2.getHTMLContent(member, true);
 		}
 		return null;
 	}

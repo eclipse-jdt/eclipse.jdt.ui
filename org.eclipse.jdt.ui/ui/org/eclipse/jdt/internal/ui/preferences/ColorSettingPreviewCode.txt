@@ -10,6 +10,7 @@ public class ClassName<E> implements InterfaceName<String> {
 	static Object staticField;
 	// This comment may span only this line
 	private E field;
+	private AbstractClassName field2;
 	// TASK: refactor
 	@SuppressWarnings(value="all")
 	public int foo(Integer parameter) {

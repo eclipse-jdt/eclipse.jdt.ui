@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,13 +43,13 @@ public class RecentSettingsStore {
 
 
 	//list of hrefs in string format
-	private Map fPerProjectSettings;
+	private Map<IJavaProject, ProjectData> fPerProjectSettings;
 
 	/**
 	 * @param settings the settings to load from
 	 */
 	public RecentSettingsStore(IDialogSettings settings) {
-		fPerProjectSettings= new HashMap();
+		fPerProjectSettings= new HashMap<IJavaProject, ProjectData>();
 		if (settings != null) {
 			load(settings);
 		}
@@ -121,10 +121,10 @@ public class RecentSettingsStore {
 		IDialogSettings projectsSection= settings.addNewSection(SECTION_PROJECTS);
 
 		//Write all project information to DialogSettings.
-		Set keys= fPerProjectSettings.keySet();
-		for (Iterator iter= keys.iterator(); iter.hasNext();) {
+		Set<IJavaProject> keys= fPerProjectSettings.keySet();
+		for (Iterator<IJavaProject> iter= keys.iterator(); iter.hasNext();) {
 
-			IJavaProject curr= (IJavaProject) iter.next();
+			IJavaProject curr= iter.next();
 
 			IDialogSettings proj= projectsSection.addNewSection(curr.getElementName());
 			if (!keys.contains(curr)) {
@@ -132,7 +132,7 @@ public class RecentSettingsStore {
 				proj.put(DESTINATION, ""); //$NON-NLS-1$
 				proj.put(ANTPATH, ""); //$NON-NLS-1$
 			} else {
-				ProjectData data= (ProjectData) fPerProjectSettings.get(curr);
+				ProjectData data= fPerProjectSettings.get(curr);
 				proj.put(HREF, data.getHRefs());
 				proj.put(DESTINATION, data.getDestination());
 				proj.put(ANTPATH, data.getAntPath());
@@ -142,7 +142,7 @@ public class RecentSettingsStore {
 	}
 
 	public void setProjectSettings(IJavaProject project, String destination, String antpath, String[] hrefs) {
-		ProjectData data= (ProjectData) fPerProjectSettings.get(project);
+		ProjectData data= fPerProjectSettings.get(project);
 		if (data == null) {
 			data= new ProjectData();
 		}
@@ -172,7 +172,7 @@ public class RecentSettingsStore {
 
 
 	public String[] getHRefs(IJavaProject project) {
-		ProjectData data= (ProjectData) fPerProjectSettings.get(project);
+		ProjectData data= fPerProjectSettings.get(project);
 		if (data != null) {
 			String refs= data.getHRefs();
 			return getRefTokens(refs);
@@ -184,7 +184,7 @@ public class RecentSettingsStore {
 	//feild will be empty,
 	public String getDestination(IJavaProject project) {
 
-		ProjectData data= (ProjectData) fPerProjectSettings.get(project);
+		ProjectData data= fPerProjectSettings.get(project);
 		if (data != null)
 			return data.getDestination();
 		else
@@ -192,7 +192,7 @@ public class RecentSettingsStore {
 	}
 
 	public String getAntpath(IJavaProject project) {
-		ProjectData data= (ProjectData) fPerProjectSettings.get(project);
+		ProjectData data= fPerProjectSettings.get(project);
 		if (data != null)
 			return data.getAntPath();
 		else

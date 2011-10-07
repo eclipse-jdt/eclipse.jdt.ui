@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,18 +49,13 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 		super(name);
 	}
 
-	public static Test allTests() {
+	public static Test suite() {
 		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
 	}
-
-	public static Test suite() {
-		return allTests();
-	}
-
 
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getDefaultOptions();
@@ -143,8 +138,38 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 		expected[0]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
-		}
+	}
 
+	public void testInferDiamondArguments() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("import java.util.*;\n");
+		buf.append("public class A {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        List<String> a= new ArrayList<>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("import java.util.*;\n");
+		buf.append("public class A {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        List<String> a= new ArrayList<String>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
 
 
 }

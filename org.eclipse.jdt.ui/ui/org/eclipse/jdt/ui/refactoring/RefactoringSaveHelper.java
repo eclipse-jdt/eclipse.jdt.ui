@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -198,6 +198,7 @@ public class RefactoringSaveHelper {
 			{
 				setShellStyle(getShellStyle() | SWT.APPLICATION_MODAL);
 			}
+			@Override
 			protected Control createDialogArea(Composite parent) {
 				Composite result= (Composite) super.createDialogArea(parent);
 				if (canSaveAutomatically) {
@@ -205,6 +206,7 @@ public class RefactoringSaveHelper {
 					check.setText(RefactoringMessages.RefactoringStarter_always_save);
 					check.setSelection(RefactoringSavePreferences.getSaveAllEditors());
 					check.addSelectionListener(new SelectionAdapter() {
+						@Override
 						public void widgetSelected(SelectionEvent e) {
 							RefactoringSavePreferences.setSaveAllEditors(check.getSelection());
 						}
@@ -224,9 +226,11 @@ public class RefactoringSaveHelper {
 
 	private ILabelProvider createDialogLabelProvider() {
 		return new LabelProvider() {
+			@Override
 			public Image getImage(Object element) {
 				return ((IEditorPart) element).getTitleImage();
 			}
+			@Override
 			public String getText(Object element) {
 				return ((IEditorPart) element).getTitle();
 			}

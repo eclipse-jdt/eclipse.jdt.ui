@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,8 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -25,11 +27,10 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
 
 
 public class JavaElementLabelsTest extends CoreTests {
@@ -42,18 +43,8 @@ public class JavaElementLabelsTest extends CoreTests {
 		super(name);
 	}
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
-	}
-
 	public static Test suite() {
-		if (true) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new JavaElementLabelsTest("testOrganizeImportOnRange2"));
-			return new ProjectTestSetup(suite);
-		}
+		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
@@ -70,6 +61,11 @@ public class JavaElementLabelsTest extends CoreTests {
 
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+	}
+
+	private static void assertExpectedLabel(IJavaElement element, String expectedLabel, long flags) {
+		String lab= JavaElementLabels.getTextLabel(element, flags);
+		assertEqualString(lab, expectedLabel);
 	}
 
 	public void testTypeLabelOuter() throws Exception {
@@ -475,18 +471,18 @@ public class JavaElementLabelsTest extends CoreTests {
 			assertExpectedLabel(packOrgTestLongname, "org.te*.longname", JavaElementLabels.P_COMPRESSED);
 
 
-			store.setValue(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES, true);
+			store.setValue(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES, true);
 			
 			assertExpectedLabel(packOrgTestLongname, "org.te*.longname", JavaElementLabels.P_COMPRESSED);
 			
-			store.setValue(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, "#com=@C\norg=@O");
+			store.setValue(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, "#com=@C\norg=@O");
 			
 			assertExpectedLabel(packDefault, "(default package)", JavaElementLabels.P_COMPRESSED);
 			assertExpectedLabel(packOrg, "@O", JavaElementLabels.P_COMPRESSED);
 			assertExpectedLabel(packOrgTest, "@O.test", JavaElementLabels.P_COMPRESSED);
 			assertExpectedLabel(packOrgTestLongname, "@O.te*.longname", JavaElementLabels.P_COMPRESSED);
 			
-			store.setValue(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, "org=@O\n\norg.test=@OT\n");
+			store.setValue(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, "org=@O\n\norg.test=@OT\n");
 			
 			assertExpectedLabel(packDefault, "(default package)", JavaElementLabels.P_COMPRESSED);
 			assertExpectedLabel(packOrg, "@O", JavaElementLabels.P_COMPRESSED);
@@ -496,14 +492,124 @@ public class JavaElementLabelsTest extends CoreTests {
 		} finally {
 			store.setToDefault(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW);
 			store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
-			store.setToDefault(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW);
-			store.setValue(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES, false);
+			store.setToDefault(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW);
+			store.setValue(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES, false);
 		}
 	}
 
-	private void assertExpectedLabel(IJavaElement element, String expectedLabel, long flags) {
-		String lab= JavaElementLabels.getTextLabel(element, flags);
-		assertEqualString(lab, expectedLabel);
+	public void testMethodLabelVarargsDeclaration() throws Exception {
+		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("public class Varargs {\n");
+		buf.append("    public void foo(int i, String... varargs) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("Varargs.java", content, false, null);
+
+		IJavaElement elem= cu.getElementAt(content.indexOf("foo"));
+		
+		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.ALL_DEFAULT);
+		assertEqualString(lab, "foo(int, String...)");
+
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_NAMES);
+		assertEqualString(lab, "foo(i, varargs)");
+
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES);
+		assertEqualString(lab, "foo(int, String...)");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PARAMETER_TYPES);
+		assertEqualString(lab, "foo(int i, String... varargs)");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
+		assertEqualString(lab, "foo(int, String...)");
 	}
 
+	public void testMethodLabelVarargsReference0() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("public class Varargs {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Arrays.asList();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("Varargs.java", content, false, null);
+		
+		IJavaElement elem= cu.codeSelect(content.indexOf("asList"), 0)[0];
+		
+		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.ALL_DEFAULT);
+		assertEqualString(lab, "asList(T...) <T>");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_NAMES);
+		assertEqualString(lab, "asList(arg0)");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES);
+		assertEqualString(lab, "asList(T...)");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PARAMETER_TYPES);
+		assertEqualString(lab, "asList(T... arg0)");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.USE_RESOLVED);
+		assertEqualString(lab, "asList(Object...) <Object>");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
+		assertEqualString(lab, "asList(Object...)");
+	}
+
+	public void testMethodLabelVarargsReference1() throws Exception {
+		assertMethodLabelVarargsReference("1");
+	}
+	
+	public void testMethodLabelVarargsReference2() throws Exception {
+		assertMethodLabelVarargsReference("1, 2");
+	}
+	
+	public void testMethodLabelVarargsReference3() throws Exception {
+		assertMethodLabelVarargsReference("1, 2, new Integer(3)");
+	}
+	
+	private void assertMethodLabelVarargsReference(String args) throws CoreException, JavaModelException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("public class Varargs {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Arrays.asList(" + args + ");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("Varargs.java", content, false, null);
+
+		IJavaElement elem= cu.codeSelect(content.indexOf("asList"), 0)[0];
+		
+		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.ALL_DEFAULT);
+		assertEqualString(lab, "asList(T...) <T>");
+
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_NAMES);
+		assertEqualString(lab, "asList(arg0)");
+
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES);
+		assertEqualString(lab, "asList(T...)");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PARAMETER_TYPES);
+		assertEqualString(lab, "asList(T... arg0)");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.USE_RESOLVED);
+		assertEqualString(lab, "asList(Integer...) <Integer>");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
+		assertEqualString(lab, "asList(Integer...)");
+	}
 }

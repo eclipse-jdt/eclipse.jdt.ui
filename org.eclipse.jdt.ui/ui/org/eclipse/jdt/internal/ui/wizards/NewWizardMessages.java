@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -209,6 +209,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewJavaProjectWizardPageOne_NoJREFound_link;
 	public static String NewJavaProjectWizardPageOne_LayoutGroup_link_description;
 	public static String NewJavaProjectWizardPageOne_LayoutGroup_option_oneFolder;
+	public static String NewJavaProjectWizardPageOne_DetectGroup_java17_message;
 	public static String NewJavaProjectWizardPageOne_DetectGroup_differendWorkspaceCC_message;
 	public static String NewJavaProjectWizardPageOne_Message_invalidProjectNameForWorkspaceRoot;
 	public static String NewJavaProjectWizardPageOne_Message_cannotCreateAtExternalLocation;
@@ -599,17 +600,9 @@ public final class NewWizardMessages extends NLS {
 
 	public static String NewFolderDialog_linkTargetNonExistent;
 	public static String NewFolderDialog_linkTargetNotFolder;
-	public static String NewFolderDialog_folderNameEmpty;
 	public static String NewFolderDialog_folderNameEmpty_alreadyExists;
-	public static String NewFolderDialog_errorTitle;
-	public static String NewFolderDialog_internalError;
-	public static String NewFolderDialog_progress;
 	public static String NewFolderDialog_createIn;
 
-	public static String LinkFolderDialog_title;
-	public static String LinkFolderDialog_createIn;
-	public static String LinkFolderDialog_directory_message;
-	public static String LinkFolderDialog_folderNameGroup_label;
 	public static String LinkFolderDialog_dependenciesGroup_locationLabel_desc;
 	public static String LinkFolderDialog_dependenciesGroup_browseButton_desc;
 	public static String LinkFolderDialog_dependenciesGroup_variables_desc;

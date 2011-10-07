@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,10 +64,11 @@ public class BlankLinesTabPage extends FormatterTabPage {
 	 *
 	 * @param workingValues The values wherein the options are stored.
 	 */
-	public BlankLinesTabPage(ModifyDialog modifyDialog, Map workingValues) {
+	public BlankLinesTabPage(ModifyDialog modifyDialog, Map<String, String> workingValues) {
 		super(modifyDialog, workingValues);
 	}
 
+	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 
 	    Group group;
@@ -92,6 +93,7 @@ public class BlankLinesTabPage extends FormatterTabPage {
 		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_blank_lines_option_empty_lines_to_preserve, DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE);
 	}
 
+	@Override
 	protected void initializePage() {
 	    fPreview.setPreviewText(PREVIEW);
 	}
@@ -106,7 +108,8 @@ public class BlankLinesTabPage extends FormatterTabPage {
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
      */
-    protected JavaPreview doCreateJavaPreview(Composite parent) {
+    @Override
+	protected JavaPreview doCreateJavaPreview(Composite parent) {
         fPreview= new CompilationUnitPreview(fWorkingValues, parent);
         return fPreview;
     }
@@ -114,7 +117,8 @@ public class BlankLinesTabPage extends FormatterTabPage {
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doUpdatePreview()
      */
-    protected void doUpdatePreview() {
+    @Override
+	protected void doUpdatePreview() {
     	super.doUpdatePreview();
         fPreview.update();
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -202,9 +202,9 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 	private DocumentReplaceCommand fReplaceCmd= new DocumentReplaceCommand();
 	private ApplyTextEditCommand fTextEditCmd= new ApplyTextEditCommand();
 
-	private Set fLegalLineDelimiters;
+	private Set<String> fLegalLineDelimiters;
 
-	private List fBufferListeners= new ArrayList(3);
+	private List<IBufferChangedListener> fBufferListeners= new ArrayList<IBufferChangedListener>(3);
 
 	/** @since 3.2 */
 	private IPath fPath;
@@ -510,7 +510,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 
 		if (fLegalLineDelimiters == null) {
 			// collect all line delimiters in the document
-			HashSet existingDelimiters= new HashSet();
+			HashSet<String> existingDelimiters= new HashSet<String>();
 
 			for (int i= fDocument.getNumberOfLines() - 1; i >= 0; i-- ) {
 				try {
@@ -571,9 +571,9 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 
 	private void fireBufferChanged(BufferChangedEvent event) {
 		if (fBufferListeners != null && fBufferListeners.size() > 0) {
-			Iterator e= new ArrayList(fBufferListeners).iterator();
+			Iterator<IBufferChangedListener> e= new ArrayList<IBufferChangedListener>(fBufferListeners).iterator();
 			while (e.hasNext())
-				((IBufferChangedListener) e.next()).bufferChanged(event);
+				e.next().bufferChanged(event);
 		}
 	}
 

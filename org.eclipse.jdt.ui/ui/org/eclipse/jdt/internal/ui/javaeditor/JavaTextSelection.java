@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -58,6 +59,20 @@ public class JavaTextSelection extends TextSelection {
 
 	private boolean fInVariableInitializerRequested;
 	private boolean fInVariableInitializer;
+
+	/**
+	 * Indicates whether the selection node has been checked to be of type <code>Annotation</code>.
+	 * 
+	 * @since 3.7
+	 */
+	private boolean fInAnnotationRequested;
+
+	/**
+	 * Indicates whether selection node is of type <code>Annotation</code>.
+	 * 
+	 * @since 3.7
+	 */
+	private boolean fInAnnotation;
 
 	/**
 	 * Creates a new text selection at the given offset and length.
@@ -211,6 +226,30 @@ public class JavaTextSelection extends TextSelection {
 			node= node.getParent();
 		}
 		return fInVariableInitializer;
+	}
+
+	/**
+	 * Resolves the selected nodes and returns <code>true</code> if the node or any of its ancestors
+	 * is of type <code>Annotation</code>, <code>false</code> otherwise.
+	 * 
+	 * @return <code>true</code> if the node or any of its ancestors is of type
+	 *         <code>Annotation</code>, <code>false</code> otherwise
+	 * @since 3.7
+	 */
+	public boolean resolveInAnnotation() {
+		if (fInAnnotationRequested)
+			return fInAnnotation;
+		fInAnnotationRequested= true;
+		resolveSelectedNodes();
+		ASTNode node= getStartNode();
+		while (node != null) {
+			if (node instanceof Annotation) {
+				fInAnnotation= true;
+				break;
+			}
+			node= node.getParent();
+		}
+		return fInAnnotation;
 	}
 
 	private ASTNode getStartNode() {

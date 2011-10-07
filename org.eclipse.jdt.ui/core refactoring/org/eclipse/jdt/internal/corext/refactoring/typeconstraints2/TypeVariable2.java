@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,7 @@ public final class TypeVariable2 extends ConstraintVariable2 implements ITypeCon
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return getRange().hashCode() ^ getType().hashCode();
 	}
@@ -46,6 +47,7 @@ public final class TypeVariable2 extends ConstraintVariable2 implements ITypeCon
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object other) {
 		//TODO: unique per construction?  //return this == other;
 		if (this == other)
@@ -66,6 +68,7 @@ public final class TypeVariable2 extends ConstraintVariable2 implements ITypeCon
 		return fRange.getCompilationUnit();
 	}
 
+	@Override
 	public String toString() {
 		return super.toString() + " [" + fRange.getSourceRange().getOffset() + '+' + fRange.getSourceRange().getLength() + ']'; //$NON-NLS-1$
 	}

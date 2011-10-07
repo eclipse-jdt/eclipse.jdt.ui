@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,10 +22,15 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.commands.common.EventManager;
+
+import org.eclipse.core.runtime.ListenerList;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 
-import org.eclipse.jface.util.Util;
+import org.eclipse.text.tests.Accessor;
+
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 
@@ -36,7 +41,12 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.IHandlerService;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
+import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -51,6 +61,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditor;
+import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
@@ -66,13 +78,7 @@ public class JavaLeakTest extends LeakTestCase {
 	}
 
 	public static Test suite() {
-		if (true) {
-			return new LeakTestSetup(new TestSuite(THIS));
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new JavaLeakTest("testJavaEditorActionDelegate"));
-			return new LeakTestSetup(suite);
-		}
+		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
@@ -109,6 +115,38 @@ public class JavaLeakTest extends LeakTestCase {
 	public void testTextEditorCloseAll() throws Exception {
 		IFile file= createTestFile("Test.txt");
 		internalTestEditorClose(file, TextEditor.class, true);
+	}
+
+	public void testPropertiesEditorClose() throws Exception {
+		IFile file= createTestFile("Test.properties");
+		internalTestEditorClose(file, PropertiesFileEditor.class, false);
+	}
+
+	public void testPropertiesEditorCloseOneOfTwo() throws Exception {
+		IFile file1= createTestFile("Test1.properties");
+		IEditorPart editor1= EditorUtility.openInEditor(file1);
+		assertEquals(editor1.getClass(), PropertiesFileEditor.class);
+		assertInstanceCount(PropertiesFileEditor.class, 1);
+
+		IFile file2= createTestFile("Test2.properties");
+		IEditorPart editor2= EditorUtility.openInEditor(file2);
+		assertEquals(editor2.getClass(), PropertiesFileEditor.class);
+		assertInstanceCount(PropertiesFileEditor.class, 2);
+
+		assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor2, false));
+		editor2= null;
+
+		assertInstanceCount(PropertiesFileEditor.class, 1);
+
+		assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor1, false));
+		editor1= null;
+
+		assertInstanceCount(PropertiesFileEditor.class, 0);
+	}
+
+	public void testPropertiesEditorCloseAll() throws Exception {
+		IFile file= createTestFile("Test.properties");
+		internalTestEditorClose(file, PropertiesFileEditor.class, true);
 	}
 
 	public void testJavaEditorClose() throws Exception {
@@ -262,7 +300,9 @@ public class JavaLeakTest extends LeakTestCase {
 			activateBreadcrumb((JavaEditor) part);
 		}
 
-		// can't close and assert abandonment in a separate method, since that would leave 'part' as a stack-local reference
+		ListenerList listenerList= getPreferenceStoreListeners(part);
+
+		// Can't close and assert abandonment in a separate method, since that would leave 'part' as a stack-local reference.
 		boolean res;
 		if (closeAll)
 			res= JavaPlugin.getActivePage().closeAllEditors(false);
@@ -271,8 +311,48 @@ public class JavaLeakTest extends LeakTestCase {
 		part= null;
 		assertTrue("Could not close editor", res);
 
-		// verify that the editor instance is gone
+
+		// Check for listener leaks in the editor's preference store.
+		assertEmptyListenerList(listenerList);
+
+		// Check for listener leaks in Editors UI preference store.
+		Accessor storeAccessor= new Accessor(EditorsUI.getPreferenceStore(), EventManager.class);
+		listenerList= (ListenerList)storeAccessor.get("listenerList");
+		assertEmptyListenerList(listenerList);
+
+		// Verify that the editor instance is gone.
 		assertInstanceCount(clazz, 0);
+	}
+
+	private static ListenerList getPreferenceStoreListeners(IEditorPart part) {
+		if (part instanceof AbstractTextEditor) {
+			Accessor editorAccessor= new Accessor(part, AbstractTextEditor.class);
+			Object store= editorAccessor.get("fPreferenceStore");
+			if (store instanceof ChainedPreferenceStore) {
+				Accessor storeAccessor= new Accessor(store, ChainedPreferenceStore.class);
+				return (ListenerList)storeAccessor.get("fClientListeners");
+			} else if (store instanceof ScopedPreferenceStore) {
+				Accessor storeAccessor= new Accessor(store, EventManager.class);
+				return (ListenerList)storeAccessor.get("listenerList");
+			}
+		}
+		return null;
+	}
+
+	private static void assertEmptyListenerList(ListenerList listenerList) {
+		if (listenerList == null)
+			return;
+
+		String message= null;
+		Object[] listeners= listenerList.getListeners();
+		for (int i= 0; i < listeners.length; i++) {
+			if (listeners[i] instanceof SpellCheckEngine)
+				continue; // The SpellCheckEngine instance adds one listener when the first editor is created.
+
+			message= "\n" + listeners[i];
+		}
+		if (message != null)
+			fail("Property listeners leaked:" + message);
 	}
 
 	private void activateBreadcrumb(JavaEditor editor) {
@@ -328,9 +408,6 @@ public class JavaLeakTest extends LeakTestCase {
 	}
 
 	public void testJavaEditorContextMenu() throws Exception {
-		if (Util.isCocoa()) // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=322253
-			return;
-
 		//regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=166761
 
 		ICompilationUnit cu= createTestCU("Test");

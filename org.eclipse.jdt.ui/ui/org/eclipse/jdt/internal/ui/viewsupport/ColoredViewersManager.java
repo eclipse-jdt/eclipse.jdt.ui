@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,10 +34,10 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 
 	private static ColoredViewersManager fgInstance= new ColoredViewersManager();
 
-	private Set fManagedLabelProviders;
+	private Set<ColoringLabelProvider> fManagedLabelProviders;
 
 	public ColoredViewersManager() {
-		fManagedLabelProviders= new HashSet();
+		fManagedLabelProviders= new HashSet<ColoringLabelProvider>();
 	}
 
 	public void installColoredLabels(ColoringLabelProvider labelProvider) {
@@ -82,8 +82,8 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 	}
 
 	protected final void updateAllViewers() {
-		for (Iterator iterator= fManagedLabelProviders.iterator(); iterator.hasNext();) {
-			ColoringLabelProvider lp= (ColoringLabelProvider) iterator.next();
+		for (Iterator<ColoringLabelProvider> iterator= fManagedLabelProviders.iterator(); iterator.hasNext();) {
+			ColoringLabelProvider lp= iterator.next();
 			lp.update();
 		}
 	}

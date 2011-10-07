@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,19 +43,25 @@ public class BindingLabelProvider extends LabelProvider {
 
 	private static int getAdornmentFlags(IBinding binding) {
 		int adornments= 0;
-		if (binding instanceof IMethodBinding && ((IMethodBinding) binding).isConstructor())
-			adornments|= JavaElementImageDescriptor.CONSTRUCTOR;
 		final int modifiers= binding.getModifiers();
 		if (Modifier.isAbstract(modifiers))
 			adornments|= JavaElementImageDescriptor.ABSTRACT;
 		if (Modifier.isFinal(modifiers))
 			adornments|= JavaElementImageDescriptor.FINAL;
-		if (Modifier.isSynchronized(modifiers))
-			adornments|= JavaElementImageDescriptor.SYNCHRONIZED;
 		if (Modifier.isStatic(modifiers))
 			adornments|= JavaElementImageDescriptor.STATIC;
+		
 		if (binding.isDeprecated())
 			adornments|= JavaElementImageDescriptor.DEPRECATED;
+		
+		if (binding instanceof IMethodBinding) {
+			if (((IMethodBinding) binding).isConstructor())
+				adornments|= JavaElementImageDescriptor.CONSTRUCTOR;
+			if (Modifier.isSynchronized(modifiers))
+				adornments|= JavaElementImageDescriptor.SYNCHRONIZED;
+			if (Modifier.isNative(modifiers))
+				adornments|= JavaElementImageDescriptor.NATIVE;
+		}
 		if (binding instanceof IVariableBinding && ((IVariableBinding) binding).isField()) {
 			if (Modifier.isTransient(modifiers))
 				adornments|= JavaElementImageDescriptor.TRANSIENT;
@@ -504,6 +510,7 @@ public class BindingLabelProvider extends LabelProvider {
 	/*
 	 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
 	 */
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof IBinding) {
 			ImageDescriptor baseImage= getBindingImageDescriptor((IBinding) element, fImageFlags);
@@ -523,6 +530,7 @@ public class BindingLabelProvider extends LabelProvider {
 	/*
 	 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
 	 */
+	@Override
 	public String getText(Object element) {
 		if (element instanceof IBinding) {
 			return getBindingLabel((IBinding) element, fTextFlags);

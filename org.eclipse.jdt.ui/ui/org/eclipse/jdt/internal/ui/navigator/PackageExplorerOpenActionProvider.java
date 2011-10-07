@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ public class PackageExplorerOpenActionProvider extends CommonActionProvider {
 
 	private boolean fInViewPart = false;
 
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		if (fInViewPart) {
 			fOpenGroup.fillActionBars(actionBars);
@@ -45,6 +46,7 @@ public class PackageExplorerOpenActionProvider extends CommonActionProvider {
 
 	}
 
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 
 		if (fInViewPart) {
@@ -54,6 +56,7 @@ public class PackageExplorerOpenActionProvider extends CommonActionProvider {
 		}
 	}
 
+	@Override
 	public void init(ICommonActionExtensionSite site) {
 
 		ICommonViewerWorkbenchSite workbenchSite = null;
@@ -73,6 +76,7 @@ public class PackageExplorerOpenActionProvider extends CommonActionProvider {
 		}
 	}
 
+	@Override
 	public void setContext(ActionContext context) {
 		super.setContext(context);
 		if (fInViewPart) {
@@ -84,6 +88,7 @@ public class PackageExplorerOpenActionProvider extends CommonActionProvider {
 	 * @see org.eclipse.ui.actions.ActionGroup#dispose()
 	 * @since 3.5
 	 */
+	@Override
 	public void dispose() {
 		if (fOpenGroup != null)
 			fOpenGroup.dispose();

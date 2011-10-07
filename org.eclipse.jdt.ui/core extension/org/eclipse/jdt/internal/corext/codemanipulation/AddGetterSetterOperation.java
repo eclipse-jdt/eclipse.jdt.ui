@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -314,9 +314,9 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 			fSkipAllExisting= (fSkipExistingQuery == null);
 			
-			Set accessors = new HashSet(Arrays.asList(fAccessorFields));
-			Set getters = new HashSet(Arrays.asList(fGetterFields));
-			Set setters= new HashSet(Arrays.asList(fSetterFields));
+			Set<IField> accessors = new HashSet<IField>(Arrays.asList(fAccessorFields));
+			Set<IField> getters = new HashSet<IField>(Arrays.asList(fGetterFields));
+			Set<IField> setters= new HashSet<IField>(Arrays.asList(fSetterFields));
 			IField[] fields= fType.getFields(); // generate methods in order of field declarations
 			if (!fSort) {
 				for (int i= 0; i < fields.length; i++) {

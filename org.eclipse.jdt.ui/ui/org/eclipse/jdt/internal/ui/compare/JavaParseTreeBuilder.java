@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 class JavaParseTreeBuilder extends ASTVisitor {
 
     private char[] fBuffer;
-    private Stack fStack= new Stack();
+    private Stack<JavaNode> fStack= new Stack<JavaNode>();
     private JavaNode fImportContainer;
     private boolean fShowCU;
 
@@ -49,78 +49,94 @@ class JavaParseTreeBuilder extends ASTVisitor {
         fStack.push(root);
     }
 
-    public boolean visit(PackageDeclaration node) {
+    @Override
+	public boolean visit(PackageDeclaration node) {
         new JavaNode(getCurrentContainer(), JavaNode.PACKAGE, null, node.getStartPosition(), node.getLength());
         return false;
     }
 
-    public boolean visit(CompilationUnit node) {
+    @Override
+	public boolean visit(CompilationUnit node) {
         if (fShowCU)
             push(JavaNode.CU, null, node.getStartPosition(), node.getLength());
         return true;
     }
 
-    public void endVisit(CompilationUnit node) {
+    @Override
+	public void endVisit(CompilationUnit node) {
         if (fShowCU)
             pop();
     }
 
-    public boolean visit(TypeDeclaration node) {
+    @Override
+	public boolean visit(TypeDeclaration node) {
         push(node.isInterface() ? JavaNode.INTERFACE : JavaNode.CLASS, node.getName().toString(), node.getStartPosition(), node.getLength());
         return true;
     }
 
-    public void endVisit(TypeDeclaration node) {
+    @Override
+	public void endVisit(TypeDeclaration node) {
         pop();
     }
 
-    public boolean visit(EnumDeclaration node) {
+    @Override
+	public boolean visit(EnumDeclaration node) {
         push(JavaNode.ENUM, node.getName().toString(), node.getStartPosition(), node.getLength());
         return true;
     }
 
-    public void endVisit(EnumDeclaration node) {
+    @Override
+	public void endVisit(EnumDeclaration node) {
         pop();
     }
 
+	@Override
 	public boolean visit(AnnotationTypeDeclaration node) {
 		push(JavaNode.ANNOTATION, node.getName().toString(), node.getStartPosition(), node.getLength());
         return true;
 	}
 
+	@Override
 	public void endVisit(AnnotationTypeDeclaration node) {
 		pop();
 	}
 
+	@Override
 	public boolean visit(AnnotationTypeMemberDeclaration node) {
         push(JavaNode.METHOD, getSignature(node), node.getStartPosition(), node.getLength());
         return true;
 	}
 
+	@Override
 	public void endVisit(AnnotationTypeMemberDeclaration node) {
 		pop();
 	}
 
-    public boolean visit(MethodDeclaration node) {
+    @Override
+	public boolean visit(MethodDeclaration node) {
         String signature= getSignature(node);
         push(node.isConstructor() ? JavaNode.CONSTRUCTOR : JavaNode.METHOD, signature, node.getStartPosition(), node.getLength());
         return false;
     }
 
-    public void endVisit(MethodDeclaration node) {
+    @Override
+	public void endVisit(MethodDeclaration node) {
         pop();
     }
 
-    public boolean visit(Initializer node) {
+    @Override
+	public boolean visit(Initializer node) {
         push(JavaNode.INIT, getCurrentContainer().getInitializerCount(), node.getStartPosition(), node.getLength());
         return false;
     }
 
-    public void endVisit(Initializer node) {
+    @Override
+	public void endVisit(Initializer node) {
         pop();
     }
 
-    public boolean visit(ImportDeclaration node) {
+    @Override
+	public boolean visit(ImportDeclaration node) {
         int s= node.getStartPosition();
         int l= node.getLength();
         int declarationEnd= s + l;
@@ -135,23 +151,27 @@ class JavaParseTreeBuilder extends ASTVisitor {
         return false;
     }
 
-    public boolean visit(VariableDeclarationFragment node) {
+    @Override
+	public boolean visit(VariableDeclarationFragment node) {
         String name= getFieldName(node);
         ASTNode parent= node.getParent();
         push(JavaNode.FIELD, name, parent.getStartPosition(), parent.getLength());
         return false;
     }
 
-    public void endVisit(VariableDeclarationFragment node) {
+    @Override
+	public void endVisit(VariableDeclarationFragment node) {
         pop();
     }
 
-    public boolean visit(EnumConstantDeclaration node) {
+    @Override
+	public boolean visit(EnumConstantDeclaration node) {
         push(JavaNode.FIELD, node.getName().toString(), node.getStartPosition(), node.getLength());
         return false;
     }
 
-    public void endVisit(EnumConstantDeclaration node) {
+    @Override
+	public void endVisit(EnumConstantDeclaration node) {
         pop();
     }
 
@@ -189,7 +209,7 @@ class JavaParseTreeBuilder extends ASTVisitor {
     }
 
     private JavaNode getCurrentContainer() {
-        return (JavaNode) fStack.peek();
+        return fStack.peek();
     }
 
     private String getFieldName(VariableDeclarationFragment node) {
@@ -209,18 +229,15 @@ class JavaParseTreeBuilder extends ASTVisitor {
         buffer.append(node.getName().toString());
         buffer.append('(');
         boolean first= true;
-        Iterator iterator= node.parameters().iterator();
+        Iterator<SingleVariableDeclaration> iterator= node.parameters().iterator();
         while (iterator.hasNext()) {
-            Object parameterDecl= iterator.next();
-            if (parameterDecl instanceof SingleVariableDeclaration) {
-                SingleVariableDeclaration svd= (SingleVariableDeclaration) parameterDecl;
-                if (!first)
-                    buffer.append(", "); //$NON-NLS-1$
-                buffer.append(getType(svd.getType()));
-                if (svd.isVarargs())
-                    buffer.append("..."); //$NON-NLS-1$
-                first= false;
-            }
+        	SingleVariableDeclaration svd= iterator.next();
+            if (!first)
+                buffer.append(", "); //$NON-NLS-1$
+            buffer.append(getType(svd.getType()));
+            if (svd.isVarargs())
+                buffer.append("..."); //$NON-NLS-1$
+            first= false;
         }
         buffer.append(')');
         return buffer.toString();

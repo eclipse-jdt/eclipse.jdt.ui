@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 		super(labelProvider, decorator, decorationContext);
 	}
 
+	@Override
 	public void initialize(ColumnViewer viewer, ViewerColumn column) {
 		ColoredViewersManager.install(this);
 		setOwnerDrawEnabled(ColoredViewersManager.showColoredLabels());
@@ -45,6 +46,7 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 		super.initialize(viewer, column);
 	}
 
+	@Override
 	public void dispose() {
 		super.dispose();
 		ColoredViewersManager.uninstall(this);
@@ -71,6 +73,7 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 		}
 	}
 
+	@Override
 	protected StyleRange prepareStyleRange(StyleRange styleRange, boolean applyColors) {
 		if (!applyColors && styleRange.background != null) {
 			styleRange= super.prepareStyleRange(styleRange, applyColors);

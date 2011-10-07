@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,6 +92,7 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 		fWorkingSet= workingSets;
 	}
 
+	@Override
 	void init() {
 		setText(SearchMessages.Search_FindDeclarationsInWorkingSetAction_label);
 		setToolTipText(SearchMessages.Search_FindDeclarationsInWorkingSetAction_tooltip);
@@ -99,6 +100,7 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKING_SET_ACTION);
 	}
 
+	@Override
 	QuerySpecification createQuery(IJavaElement element) throws JavaModelException, InterruptedException {
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 

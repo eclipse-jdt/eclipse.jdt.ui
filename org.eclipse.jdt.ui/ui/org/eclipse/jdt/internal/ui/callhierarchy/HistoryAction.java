@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -32,9 +31,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 class HistoryAction extends Action {
 
-	private static long LABEL_FLAGS= JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.T_TYPE_PARAMETERS;
-	private static long LABEL_MULTI_FLAGS= 0L;
-
+	private static long LABEL_FLAGS= JavaElementLabels.ALL_POST_QUALIFIED
+			| JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_APP_RETURNTYPE
+			| JavaElementLabels.T_TYPE_PARAMETERS
+			| JavaElementLabels.P_COMPRESSED
+			| JavaElementLabels.COLORIZE;
 	private CallHierarchyViewPart fView;
 	private IMember[] fMembers;
 
@@ -54,27 +55,21 @@ class HistoryAction extends Action {
 	}
 
 	private static ImageDescriptor getImageDescriptor(IMember[] members) {
-		if (members.length == 1) {
-			JavaElementImageProvider imageProvider= new JavaElementImageProvider();
-			ImageDescriptor desc= imageProvider.getBaseImageDescriptor(members[0], 0);
-			imageProvider.dispose();
-			return desc;
-		} else {
-			return null;
-		}
+		JavaElementImageProvider imageProvider= new JavaElementImageProvider();
+		ImageDescriptor desc= imageProvider.getBaseImageDescriptor(members[0], 0);
+		imageProvider.dispose();
+		return desc;
+
 	}
 
 	/*
 	 * @see Action#run()
 	 */
+	@Override
 	public void run() {
 		fView.gotoHistoryEntry(fMembers);
 	}
 
-	static StyledString getSingleElementLabel(IMember member) {
-		return JavaElementLabels.getStyledElementLabel(member, LABEL_FLAGS | JavaElementLabels.COLORIZE);
-	}
-	
 	static String getElementLabel(IMember[] members) {
 		switch (members.length) {
         	case 0:
@@ -82,23 +77,20 @@ class HistoryAction extends Action {
         		return null;
 
         	case 1:
-        		return JavaElementLabels.getElementLabel(members[0], LABEL_FLAGS);
+				return Messages.format(CallHierarchyMessages.HistoryAction_inputElements_1,
+						new String[] { getShortLabel(members[0]) });
 
         	case 2:
         		return Messages.format(CallHierarchyMessages.HistoryAction_inputElements_2,
         				new String[] { getShortLabel(members[0]), getShortLabel(members[1]) });
 
-        	case 3:
-        		return Messages.format(CallHierarchyMessages.HistoryAction_inputElements_3,
-        				new String[] { getShortLabel(members[0]), getShortLabel(members[1]), getShortLabel(members[2]) });
-
         	default:
         		return Messages.format(CallHierarchyMessages.HistoryAction_inputElements_more,
-        				new String[] { getShortLabel(members[0]), getShortLabel(members[1]), getShortLabel(members[2]) });
+						new String[] { getShortLabel(members[0]), getShortLabel(members[1]) });
 		}
     }
 
 	private static String getShortLabel(IMember member) {
-		return JavaElementLabels.getElementLabel(member, LABEL_MULTI_FLAGS);
+		return JavaElementLabels.getElementLabel(member, LABEL_FLAGS);
 	}
 }

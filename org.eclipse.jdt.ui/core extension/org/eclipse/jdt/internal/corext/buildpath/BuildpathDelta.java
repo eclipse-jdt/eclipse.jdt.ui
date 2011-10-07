@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,19 +23,19 @@ public class BuildpathDelta {
 
 	private final String fOperationDescription;
 	private CPListElement[] fNewEntries;
-	private final List fCreatedResources;
+	private final List<IResource> fCreatedResources;
 	private IPath fOutputLocation;
-	private final List fDeletedResources;
-	private final List fAddedEntries;
-	private final ArrayList fRemovedEntries;
+	private final List<IResource> fDeletedResources;
+	private final List<CPListElement> fAddedEntries;
+	private final ArrayList<CPListElement> fRemovedEntries;
 
 	public BuildpathDelta(String operationDescription) {
 		fOperationDescription= operationDescription;
 
-		fCreatedResources= new ArrayList();
-		fDeletedResources= new ArrayList();
-		fAddedEntries= new ArrayList();
-		fRemovedEntries= new ArrayList();
+		fCreatedResources= new ArrayList<IResource>();
+		fDeletedResources= new ArrayList<IResource>();
+		fAddedEntries= new ArrayList<CPListElement>();
+		fRemovedEntries= new ArrayList<CPListElement>();
     }
 
 	public String getOperationDescription() {
@@ -47,11 +47,11 @@ public class BuildpathDelta {
 	}
 
 	public IResource[] getCreatedResources() {
-		return (IResource[])fCreatedResources.toArray(new IResource[fCreatedResources.size()]);
+		return fCreatedResources.toArray(new IResource[fCreatedResources.size()]);
 	}
 
 	public IResource[] getDeletedResources() {
-		return (IResource[])fDeletedResources.toArray(new IResource[fDeletedResources.size()]);
+		return fDeletedResources.toArray(new IResource[fDeletedResources.size()]);
 	}
 
 	public IPath getDefaultOutputLocation() {
@@ -74,7 +74,7 @@ public class BuildpathDelta {
 		fDeletedResources.add(resource);
     }
 
-    public List getAddedEntries() {
+    public List<CPListElement> getAddedEntries() {
 	    return fAddedEntries;
     }
 
@@ -82,7 +82,7 @@ public class BuildpathDelta {
     	fAddedEntries.add(entry);
     }
 
-    public List getRemovedEntries() {
+    public List<CPListElement> getRemovedEntries() {
     	return fRemovedEntries;
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,9 +75,10 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	protected final class SectionManager {
 		/** The preference setting for keeping no section open. */
 		private static final String __NONE= "__none"; //$NON-NLS-1$
-		private Set fSections= new HashSet();
+		private Set<ExpandableComposite> fSections= new HashSet<ExpandableComposite>();
 		private boolean fIsBeingManaged= false;
 		private ExpansionAdapter fListener= new ExpansionAdapter() {
+			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
 				ExpandableComposite source= (ExpandableComposite) e.getSource();
 				updateSectionStyle(source);
@@ -86,8 +87,8 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 				if (e.getState()) {
 					try {
 						fIsBeingManaged= true;
-						for (Iterator iter= fSections.iterator(); iter.hasNext();) {
-							ExpandableComposite composite= (ExpandableComposite) iter.next();
+						for (Iterator<ExpandableComposite> iter= fSections.iterator(); iter.hasNext();) {
+							ExpandableComposite composite= iter.next();
 							if (composite != source)
 								composite.setExpanded(false);
 						}
@@ -207,26 +208,26 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	protected static final int INDENT= 20;
 	private OverlayPreferenceStore fStore;
 
-	private Map fCheckBoxes= new HashMap();
+	private Map<Button, String> fCheckBoxes= new HashMap<Button, String>();
 	private SelectionListener fCheckBoxListener= new SelectionListener() {
 		public void widgetDefaultSelected(SelectionEvent e) {
 		}
 		public void widgetSelected(SelectionEvent e) {
 			Button button= (Button) e.widget;
-			fStore.setValue((String) fCheckBoxes.get(button), button.getSelection());
+			fStore.setValue(fCheckBoxes.get(button), button.getSelection());
 		}
 	};
 
 
-	private Map fTextFields= new HashMap();
+	private Map<Text, String> fTextFields= new HashMap<Text, String>();
 	private ModifyListener fTextFieldListener= new ModifyListener() {
 		public void modifyText(ModifyEvent e) {
 			Text text= (Text) e.widget;
-			fStore.setValue((String) fTextFields.get(text), text.getText());
+			fStore.setValue(fTextFields.get(text), text.getText());
 		}
 	};
 
-	private ArrayList fNumberFields= new ArrayList();
+	private ArrayList<Text> fNumberFields= new ArrayList<Text>();
 	private ModifyListener fNumberFieldListener= new ModifyListener() {
 		public void modifyText(ModifyEvent e) {
 			numberFieldChanged((Text) e.widget);
@@ -239,7 +240,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	 * @see #createDependency(Button, Control)
 	 * @since 3.0
 	 */
-	private ArrayList fMasterSlaveListeners= new ArrayList();
+	private ArrayList<SelectionListener> fMasterSlaveListeners= new ArrayList<SelectionListener>();
 
 	private StatusInfo fStatus;
 	private final PreferencePage fMainPage;
@@ -381,24 +382,24 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 
 	private void initializeFields() {
 
-		Iterator iter= fCheckBoxes.keySet().iterator();
+		Iterator<Button> iter= fCheckBoxes.keySet().iterator();
 		while (iter.hasNext()) {
-			Button b= (Button) iter.next();
-			String key= (String) fCheckBoxes.get(b);
+			Button b= iter.next();
+			String key= fCheckBoxes.get(b);
 			b.setSelection(fStore.getBoolean(key));
 		}
 
-		iter= fTextFields.keySet().iterator();
-		while (iter.hasNext()) {
-			Text t= (Text) iter.next();
-			String key= (String) fTextFields.get(t);
+		Iterator<Text> iter2= fTextFields.keySet().iterator();
+		while (iter2.hasNext()) {
+			Text t= iter2.next();
+			String key= fTextFields.get(t);
 			t.setText(fStore.getString(key));
 		}
 
         // Update slaves
-        iter= fMasterSlaveListeners.iterator();
-        while (iter.hasNext()) {
-            SelectionListener listener= (SelectionListener)iter.next();
+        Iterator<SelectionListener> iter3= fMasterSlaveListeners.iterator();
+        while (iter3.hasNext()) {
+            SelectionListener listener= iter3.next();
             listener.widgetSelected(null);
         }
 
@@ -429,7 +430,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		String number= textControl.getText();
 		IStatus status= validatePositiveNumber(number);
 		if (!status.matches(IStatus.ERROR))
-			fStore.setValue((String) fTextFields.get(textControl), number);
+			fStore.setValue(fTextFields.get(textControl), number);
 		updateStatus(status);
 	}
 

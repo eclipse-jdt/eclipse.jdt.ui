@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,7 +108,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		/**
 		 * The list of previously existing entries.
 		 */
-		private List fExistingEntries;
+		private List<String> fExistingEntries;
 
 		/**
 		 * Tells whether it is an member or type.
@@ -122,7 +122,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		 * @param existingEntries the existing list of types and members
 		 * @param isEditingMember <code>true</code if its a member, <code>false</code> otherwise
 		 */
-		public CallHierarchyTypesOrMembersDialog(Shell parent, List existingEntries, boolean isEditingMember) {
+		public CallHierarchyTypesOrMembersDialog(Shell parent, List<String> existingEntries, boolean isEditingMember) {
 			super(parent);
 			fIsEditingMember= isEditingMember;
 			fExistingEntries= existingEntries;
@@ -149,6 +149,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		/*
 		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()		 *
 		 */
+		@Override
 		protected boolean isResizable() {
 			return true;
 		}
@@ -181,6 +182,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		/*
 		 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 		 */
+		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite)super.createDialogArea(parent);
 			initializeDialogUnits(composite);
@@ -263,7 +265,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		 */
 		private boolean doesExist(String name) {
 			for (int i= 0; i < fExistingEntries.size(); i++) {
-				String entry= (String)fExistingEntries.get(i);
+				String entry= fExistingEntries.get(i);
 				if (name.equals(entry)) {
 					return true;
 				}
@@ -275,6 +277,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		/*
 		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 		 */
+		@Override
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.CALL_HIERARCHY_EXPAND_WITH_CONSTRUCTORS_DIALOG);
@@ -285,6 +288,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performOk()
 	 */
+	@Override
 	public boolean performOk() {
 		setValue(ANONYMOUS_EXPAND_WITH_CONSTRUCTORS, fIsAnonymous);
 		return super.performOk();
@@ -310,6 +314,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		/*
 		 * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
 		 */
+		@Override
 		public Image getImage(Object element) {
 			return ((String)element).endsWith(WILDCARD) ? CLASS_ICON : MEMBER_ICON;
 		}
@@ -317,6 +322,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		/*
 		 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
 		 */
+		@Override
 		public String getText(Object element) {
 			return BasicElementLabels.getJavaElementName((String)element);
 		}
@@ -326,7 +332,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 	/**
 	 * The change listener for <code>ListDialogField</code>.
 	 */
-	private class ListAdapter implements IListAdapter, IDialogFieldListener {
+	private class ListAdapter implements IListAdapter<String>, IDialogFieldListener {
 
 		/**
 		 * Checks if field can be edited.
@@ -334,22 +340,22 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		 * @param field the list dialog field
 		 * @return <code>true</code> if it can be edited, <code>false</code> otherwise
 		 */
-		private boolean canEdit(ListDialogField field) {
-			List selected= field.getSelectedElements();
+		private boolean canEdit(ListDialogField<String> field) {
+			List<String> selected= field.getSelectedElements();
 			return selected.size() == 1;
 		}
 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#customButtonPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField, int)
 		 */
-		public void customButtonPressed(ListDialogField field, int index) {
+		public void customButtonPressed(ListDialogField<String> field, int index) {
 			doButtonPressed(index);
 		}
 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#selectionChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
-		public void selectionChanged(ListDialogField field) {
+		public void selectionChanged(ListDialogField<String> field) {
 			fList.enableButton(IDX_EDIT, canEdit(field));
 			fList.enableButton(IDX_REMOVE, canRemove(field));
 		}
@@ -360,8 +366,8 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		 * @param field the list dialog field
 		 * @return <code>true</code> if it can be removed, <code>false</code> otherwise
 		 */
-		private boolean canRemove(ListDialogField field) {
-			List selected= field.getSelectedElements();
+		private boolean canRemove(ListDialogField<String> field) {
+			List<String> selected= field.getSelectedElements();
 			return selected.size() != 0;
 		}
 
@@ -375,7 +381,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		/*
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#doubleClicked(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
-		public void doubleClicked(ListDialogField field) {
+		public void doubleClicked(ListDialogField<String> field) {
 			if (canEdit(field)) {
 				doButtonPressed(IDX_EDIT);
 			}
@@ -390,7 +396,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 	private static final int IDX_REMOVE= 3;
 	private static final int IDX_RESTORE_DEFAULTS= 4;
 
-	private ListDialogField fList;
+	private ListDialogField<String> fList;
 
 	private Button fAnonymousButton;
 
@@ -429,6 +435,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#createContents(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		Composite control= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -445,6 +452,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		fAnonymousButton.setSelection(fIsAnonymous);
 		fAnonymousButton.setLayoutData(new GridData(SWT.LEAD, SWT.TOP, false, false));
 		fAnonymousButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fIsAnonymous= fAnonymousButton.getSelection();
 			}
@@ -474,7 +482,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 
 		ListAdapter adapter= new ListAdapter();
 
-		fList= new ListDialogField(adapter, buttonLabels, new ListLabelProvider());
+		fList= new ListDialogField<String>(adapter, buttonLabels, new ListLabelProvider());
 		fList.setDialogFieldListener(adapter);
 		fList.setLabelText(CallHierarchyMessages.ExpandWithConstructorsConfigurationBlock_description);
 		fList.setRemoveButtonIndex(IDX_REMOVE);
@@ -505,6 +513,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performDefaults()
 	 */
+	@Override
 	public void performDefaults() {
 		String str= PreferenceConstants.getPreferenceStore().getDefaultString(PreferenceConstants.PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS_MEMBERS);
 		fList.setElements(Arrays.asList(deserializeMembers(str)));
@@ -516,6 +525,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#getFullBuildDialogStrings(boolean)
 	 */
+	@Override
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		return null;
 	}
@@ -523,6 +533,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key, java.lang.String, java.lang.String)
 	 */
+	@Override
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 
 	}
@@ -535,19 +546,19 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 	 */
 	private void doButtonPressed(int index) {
 		if (index == IDX_NEW_TYPE || index == IDX_NEW_MEMBER) { // add new
-			List existing= fList.getElements();
+			List<String> existing= fList.getElements();
 			CallHierarchyTypesOrMembersDialog dialog= new CallHierarchyTypesOrMembersDialog(getShell(), existing, index == IDX_NEW_MEMBER);
 			if (dialog.open() == Window.OK) {
 				fList.addElement(dialog.getResult());
 			}
 		} else if (index == IDX_EDIT) { // edit
-			List selected= fList.getSelectedElements();
+			List<String> selected= fList.getSelectedElements();
 			if (selected.isEmpty())
 				return;
 
-			String editedEntry= (String)selected.get(0);
+			String editedEntry= selected.get(0);
 
-			List existing= fList.getElements();
+			List<String> existing= fList.getElements();
 			existing.remove(editedEntry);
 			boolean isType= editedEntry.endsWith(WILDCARD);
 			CallHierarchyTypesOrMembersDialog dialog= new CallHierarchyTypesOrMembersDialog(getShell(), existing, !isType);
@@ -605,11 +616,11 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 	 * @param list the input list of types and/or methods
 	 * @return the single output string from the list of strings using a delimiter
 	 */
-	public static String serializeMembers(List list) {
+	public static String serializeMembers(List<String> list) {
 		int size= list.size();
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < size; i++) {
-			buf.append((String)list.get(i));
+			buf.append(list.get(i));
 			if (i < size - 1)
 				buf.append(';');
 		}

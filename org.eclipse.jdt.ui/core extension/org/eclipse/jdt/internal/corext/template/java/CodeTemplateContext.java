@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,11 +48,12 @@ public class CodeTemplateContext extends TemplateContext {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.TemplateContext#evaluate(org.eclipse.jdt.internal.corext.template.Template)
 	 */
+	@Override
 	public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException {
 		// test that all variables are defined
-		Iterator iterator= getContextType().resolvers();
+		Iterator<TemplateVariableResolver> iterator= getContextType().resolvers();
 		while (iterator.hasNext()) {
-			TemplateVariableResolver var= (TemplateVariableResolver) iterator.next();
+			TemplateVariableResolver var= iterator.next();
 			if (var instanceof CodeTemplateContextType.CodeTemplateVariableResolver) {
 				Assert.isNotNull(getVariable(var.getType()), "Variable " + var.getType() + "not defined"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
@@ -97,6 +98,7 @@ public class CodeTemplateContext extends TemplateContext {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.template.TemplateContext#canEvaluate(org.eclipse.jdt.internal.corext.template.Template)
 	 */
+	@Override
 	public boolean canEvaluate(Template template) {
 		return true;
 	}

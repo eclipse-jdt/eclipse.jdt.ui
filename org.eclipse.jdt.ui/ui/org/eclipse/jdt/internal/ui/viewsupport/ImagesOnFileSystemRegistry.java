@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,13 +35,13 @@ public class ImagesOnFileSystemRegistry {
 
 	private static final String IMAGE_DIR= "jdt-images"; //$NON-NLS-1$
 
-	private HashMap fURLMap;
+	private HashMap<ImageDescriptor, URL> fURLMap;
 	private final File fTempDir;
 	private final JavaElementImageProvider fImageProvider;
 	private int fImageCount;
 
 	public ImagesOnFileSystemRegistry() {
-		fURLMap= new HashMap();
+		fURLMap= new HashMap<ImageDescriptor, URL>();
 		fTempDir= getTempDir();
 		fImageProvider= new JavaElementImageProvider();
 		fImageCount= 0;
@@ -89,7 +89,7 @@ public class ImagesOnFileSystemRegistry {
 		if (fTempDir == null)
 			return null;
 
-		URL url= (URL) fURLMap.get(descriptor);
+		URL url= fURLMap.get(descriptor);
 		if (url != null)
 			return url;
 

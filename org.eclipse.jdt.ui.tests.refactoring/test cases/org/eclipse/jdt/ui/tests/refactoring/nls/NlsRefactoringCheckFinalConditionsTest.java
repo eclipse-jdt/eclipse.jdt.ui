@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 
+	private static final Class THIS= NlsRefactoringCheckFinalConditionsTest.class;
+
 	//private IPath fPropertyFilePath;
 	private IPackageFragment fAccessorPackage;
 	private String fAccessorClassName;
@@ -53,12 +55,12 @@ public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 		super(name);
 	}
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(NlsRefactoringCheckFinalConditionsTest.class));
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
 	}
 
-	public static Test suite() {
-		return allTests();
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 
 	protected void setUp() throws Exception {

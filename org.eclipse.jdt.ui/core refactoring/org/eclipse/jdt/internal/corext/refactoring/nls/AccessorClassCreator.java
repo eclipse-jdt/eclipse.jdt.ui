@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -221,8 +221,8 @@ public class AccessorClassCreator {
 	}
 
 	private String createStaticFields() {
-		HashSet added= new HashSet();
-		List subs= new ArrayList();
+		HashSet<String> added= new HashSet<String>();
+		List<NLSSubstitution> subs= new ArrayList<NLSSubstitution>();
 		for (int i= 0; i < fNLSSubstitutions.length; i++) {
 			NLSSubstitution substitution= fNLSSubstitutions[i];
 			int newState= substitution.getState();
@@ -231,17 +231,15 @@ public class AccessorClassCreator {
 					subs.add(substitution);
 			}
 		}
-		Collections.sort(subs, new Comparator() {
+		Collections.sort(subs, new Comparator<NLSSubstitution>() {
 			private Collator fCollator= Collator.getInstance();
-			public int compare(Object o1, Object o2) {
-				NLSSubstitution s0= (NLSSubstitution)o1;
-				NLSSubstitution s1= (NLSSubstitution)o2;
+			public int compare(NLSSubstitution s0, NLSSubstitution s1) {
 				return fCollator.compare(s0.getKey(), s1.getKey());
 			}
 		});
 		StringBuffer buf= new StringBuffer();
-		for (Iterator iter= subs.iterator(); iter.hasNext();) {
-			NLSSubstitution element= (NLSSubstitution)iter.next();
+		for (Iterator<NLSSubstitution> iter= subs.iterator(); iter.hasNext();) {
+			NLSSubstitution element= iter.next();
 			appendStaticField(buf, element);
 		}
 		return buf.toString();

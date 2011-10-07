@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,24 +68,27 @@ import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 public class ReferencesInBinaryStatusContextViewer implements IStatusContextViewer {
 
 	private static class ContentProvider extends StandardJavaElementContentProvider {
-		private Map fChildren= new HashMap();
-		private Set fRoots= new HashSet();
+		private Map<Object, Object> fChildren= new HashMap<Object, Object>();
+		private Set<Object> fRoots= new HashSet<Object>();
 
+		@Override
 		public Object[] getChildren(Object parentElement) {
 			Object children= fChildren.get(parentElement);
 			if (children == null) {
 				return new Object[0];
 			} else if (children instanceof Set) {
-				return ((Set) children).toArray();
+				return ((Set<?>) children).toArray();
 			} else {
 				return new Object[] { children };
 			}
 		}
 
+		@Override
 		public boolean hasChildren(Object element) {
 			return getChildren(element).length > 0;
 		}
 
+		@Override
 		public Object[] getElements(Object inputElement) {
 			return fRoots.toArray();
 		}
@@ -102,10 +105,12 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 					if (element.equals(oldChildren)) {
 						return;
 					} else if (oldChildren instanceof Set) {
-						((Set) oldChildren).add(element);
+						@SuppressWarnings("unchecked")
+						Set<Object> oldChildrenSet= (Set<Object>) oldChildren;
+						oldChildrenSet.add(element);
 						return;
 					} else if (oldChildren != null) {
-						Set newChildren= new HashSet(4);
+						Set<Object> newChildren= new HashSet<Object>(4);
 						newChildren.add(oldChildren);
 						newChildren.add(element);
 						fChildren.put(parent, newChildren);
@@ -134,9 +139,9 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 		ContentProvider contentProvider= new ContentProvider();
 
 		ReferencesInBinaryContext binariesContext= (ReferencesInBinaryContext) input;
-		List matches= binariesContext.getMatches();
-		for (Iterator iter= matches.iterator(); iter.hasNext();) {
-			SearchMatch match= (SearchMatch) iter.next();
+		List<SearchMatch> matches= binariesContext.getMatches();
+		for (Iterator<SearchMatch> iter= matches.iterator(); iter.hasNext();) {
+			SearchMatch match= iter.next();
 			Object element= match.getElement();
 			if (element != null)
 				contentProvider.add(element);
@@ -176,6 +181,7 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 		fTreeViewer.setLabelProvider(new DelegatingStyledCellLabelProvider(labelProvider));
 		fTreeViewer.setComparator(new ViewerComparator() {
 			private Collator fCollator= Collator.getInstance();
+			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				String l1= labelProvider.getText(e1);
 				String l2= labelProvider.getText(e2);
@@ -190,6 +196,7 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 		layoutData.widthHint= SWTUtil.getButtonWidthHint(fButton);
 		fButton.setLayoutData(layoutData);
 		fButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fillInSearchView();
 			}
@@ -242,14 +249,14 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 
 		public IStatus run(IProgressMonitor monitor) throws OperationCanceledException {
 			fResult.removeAll();
-			List matches= fContext.getMatches();
+			List<SearchMatch> matches= fContext.getMatches();
 
 			NewSearchResultCollector collector= new NewSearchResultCollector(fResult, false);
 			collector.beginReporting();
 
-			for (Iterator iter= matches.iterator(); iter.hasNext();) {
+			for (Iterator<SearchMatch> iter= matches.iterator(); iter.hasNext();) {
 				try {
-					collector.acceptSearchMatch((SearchMatch) iter.next());
+					collector.acceptSearchMatch(iter.next());
 				} catch (CoreException e) {
 					// ignore
 				}

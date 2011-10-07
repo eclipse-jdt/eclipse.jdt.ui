@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -68,39 +69,40 @@ public class InferTypeArgumentsTCModel {
 	private static final String ARRAY_ELEMENT= "ArrayElement"; //$NON-NLS-1$
 	private static final String USED_IN= "UsedIn"; //$NON-NLS-1$
 	private static final String METHOD_RECEIVER= "MethodReceiver"; //$NON-NLS-1$
-	private static final Map EMPTY_COLLECTION_ELEMENT_VARIABLES_MAP= Collections.EMPTY_MAP;
+	private static final Map<String, CollectionElementVariable2> EMPTY_COLLECTION_ELEMENT_VARIABLES_MAP= Collections.emptyMap();
 
 	protected static boolean fStoreToString= DEBUG;
 
 	/**
 	 * Map from a {@link ConstraintVariable2} to itself.
 	 */
-	private HashMap/*<ConstraintVariable2, ConstraintVariable2>*/ fConstraintVariables;
+	private HashMap<ConstraintVariable2, ConstraintVariable2> fConstraintVariables;
 	/**
 	 * Map from a {@link ITypeConstraint2} to itself.
 	 */
-	private HashMap/*<ITypeConstraint2, ITypeConstraint2>*/ fTypeConstraints;
-	private Collection/*CastVariable2*/ fCastVariables;
+	private HashMap<ITypeConstraint2, ITypeConstraint2> fTypeConstraints;
+	private Collection<CastVariable2> fCastVariables;
 
-	private HashSet fCuScopedConstraintVariables;
+	private HashSet<ConstraintVariable2> fCuScopedConstraintVariables;
 
 	private TypeEnvironment fTypeEnvironment;
 
 	private static final int MAX_TTYPE_CACHE= 1024;
-	private Map/*<String, TType>*/ fTTypeCache= new LinkedHashMap(MAX_TTYPE_CACHE, 0.75f, true) {
+	private Map<String, TType> fTTypeCache= new LinkedHashMap<String, TType>(MAX_TTYPE_CACHE, 0.75f, true) {
 		private static final long serialVersionUID= 1L;
-		protected boolean removeEldestEntry(Map.Entry eldest) {
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<String, TType> eldest) {
 			return size() > MAX_TTYPE_CACHE;
 		}
 	};
 
 
 	public InferTypeArgumentsTCModel() {
-		fTypeConstraints= new HashMap();
-		fConstraintVariables= new LinkedHashMap(); // make iteration independent of hashCode() implementation
-		fCastVariables= new ArrayList();
+		fTypeConstraints= new HashMap<ITypeConstraint2, ITypeConstraint2>();
+		fConstraintVariables= new LinkedHashMap<ConstraintVariable2, ConstraintVariable2>(); // make iteration independent of hashCode() implementation
+		fCastVariables= new ArrayList<CastVariable2>();
 
-		fCuScopedConstraintVariables= new HashSet();
+		fCuScopedConstraintVariables= new HashSet<ConstraintVariable2>();
 
 		fTypeEnvironment= new TypeEnvironment(true);
 	}
@@ -144,14 +146,15 @@ public class InferTypeArgumentsTCModel {
 	 * @param cv
 	 * @return a List of ITypeConstraint2s where cv is used
 	 */
-	public List/*<ITypeConstraint2>*/ getUsedIn(ConstraintVariable2 cv) {
+	@SuppressWarnings("unchecked")
+	public List<ITypeConstraint2> getUsedIn(ConstraintVariable2 cv) {
 		Object usedIn= cv.getData(USED_IN);
 		if (usedIn == null)
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		else if (usedIn instanceof ArrayList)
-			return Collections.unmodifiableList((ArrayList) usedIn);
+			return Collections.unmodifiableList((ArrayList<ITypeConstraint2>) usedIn);
 		else
-			return Collections.singletonList(usedIn);
+			return Collections.singletonList((ITypeConstraint2) usedIn);
 	}
 
 	public void newCu() {
@@ -161,8 +164,8 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	private void pruneUnusedCuScopedCvs() {
-		for (Iterator iter= fCuScopedConstraintVariables.iterator(); iter.hasNext();) {
-			ConstraintVariable2 cv= (ConstraintVariable2) iter.next();
+		for (Iterator<ConstraintVariable2> iter= fCuScopedConstraintVariables.iterator(); iter.hasNext();) {
+			ConstraintVariable2 cv= iter.next();
 			pruneCvIfUnused(cv);
 		}
 	}
@@ -180,9 +183,9 @@ public class InferTypeArgumentsTCModel {
 		if (arrayElementVariable != null && ! pruneCvIfUnused(arrayElementVariable))
 			return false;
 
-		Map elementVariables= getElementVariables(cv);
-		for (Iterator iter= elementVariables.values().iterator(); iter.hasNext();) {
-			CollectionElementVariable2 elementVariable= (CollectionElementVariable2) iter.next();
+		Map<String, CollectionElementVariable2> elementVariables= getElementVariables(cv);
+		for (Iterator<CollectionElementVariable2> iter= elementVariables.values().iterator(); iter.hasNext();) {
+			CollectionElementVariable2 elementVariable= iter.next();
 			if (! pruneCvIfUnused(elementVariable))
 				return false;
 		}
@@ -194,18 +197,18 @@ public class InferTypeArgumentsTCModel {
 	public ConstraintVariable2[] getAllConstraintVariables() {
 		ConstraintVariable2[] result= new ConstraintVariable2[fConstraintVariables.size()];
 		int i= 0;
-		for (Iterator iter= fConstraintVariables.keySet().iterator(); iter.hasNext(); i++)
-			result[i]= (ConstraintVariable2) iter.next();
+		for (Iterator<ConstraintVariable2> iter= fConstraintVariables.keySet().iterator(); iter.hasNext(); i++)
+			result[i]= iter.next();
 		return result;
 	}
 
 	public ITypeConstraint2[] getAllTypeConstraints() {
-		Set typeConstraints= fTypeConstraints.keySet();
-		return (ITypeConstraint2[]) typeConstraints.toArray(new ITypeConstraint2[typeConstraints.size()]);
+		Set<ITypeConstraint2> typeConstraints= fTypeConstraints.keySet();
+		return typeConstraints.toArray(new ITypeConstraint2[typeConstraints.size()]);
 	}
 
 	public CastVariable2[] getCastVariables() {
-		return (CastVariable2[]) fCastVariables.toArray(new CastVariable2[fCastVariables.size()]);
+		return fCastVariables.toArray(new CastVariable2[fCastVariables.size()]);
 	}
 
 	/**
@@ -252,11 +255,12 @@ public class InferTypeArgumentsTCModel {
 		if (usedIn == null) {
 			storedCv.setData(USED_IN, typeConstraint);
 		} else if (usedIn instanceof ArrayList) {
-			ArrayList usedInList= (ArrayList) usedIn;
+			@SuppressWarnings("unchecked")
+			ArrayList<ITypeConstraint2> usedInList= (ArrayList<ITypeConstraint2>) usedIn;
 			usedInList.add(typeConstraint);
 		} else {
-			ArrayList usedInList= new ArrayList(2);
-			usedInList.add(usedIn);
+			ArrayList<ITypeConstraint2> usedInList= new ArrayList<ITypeConstraint2>(2);
+			usedInList.add((ITypeConstraint2) usedIn);
 			usedInList.add(typeConstraint);
 			storedCv.setData(USED_IN, usedInList);
 		}
@@ -294,7 +298,7 @@ public class InferTypeArgumentsTCModel {
 
 	public TType createTType(ITypeBinding typeBinding) {
 		String key= typeBinding.getKey();
-		TType cached= (TType) fTTypeCache.get(key);
+		TType cached= fTTypeCache.get(key);
 		if (cached != null)
 			return cached;
 		TType type= fTypeEnvironment.create(typeBinding);
@@ -530,14 +534,14 @@ public class InferTypeArgumentsTCModel {
 
 	public CollectionElementVariable2 getElementVariable(ConstraintVariable2 constraintVariable, ITypeBinding typeVariable) {
 		Assert.isTrue(typeVariable.isTypeVariable()); // includes null check
-		HashMap typeVarToElementVars= (HashMap) constraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
+		HashMap<String, CollectionElementVariable2> typeVarToElementVars= (HashMap<String, CollectionElementVariable2>) constraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
 		if (typeVarToElementVars == null)
 			return null;
-		return (CollectionElementVariable2) typeVarToElementVars.get(typeVariable.getKey());
+		return typeVarToElementVars.get(typeVariable.getKey());
 	}
 
-	public Map/*<String typeVariableKey, CollectionElementVariable2>*/ getElementVariables(ConstraintVariable2 constraintVariable) {
-		Map elementVariables= (Map) constraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
+	public Map<String, CollectionElementVariable2> getElementVariables(ConstraintVariable2 constraintVariable) {
+		Map<String, CollectionElementVariable2> elementVariables= (Map<String, CollectionElementVariable2>) constraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
 		if (elementVariables == null)
 			return EMPTY_COLLECTION_ELEMENT_VARIABLES_MAP;
 		else
@@ -703,7 +707,7 @@ public class InferTypeArgumentsTCModel {
 	 * @param referenceCv the type constraint variable of a type reference
 	 * @param reference the declared type reference
 	 */
-	public void createTypeVariablesEqualityConstraints(ConstraintVariable2 expressionCv, Map/*<String, IndependentTypeVariable2>*/ methodTypeVariables, ConstraintVariable2 referenceCv, TType reference) {
+	public void createTypeVariablesEqualityConstraints(ConstraintVariable2 expressionCv, Map<String, IndependentTypeVariable2> methodTypeVariables, ConstraintVariable2 referenceCv, TType reference) {
 		if (reference.isParameterizedType() || reference.isRawType()) {
 			TType[] referenceTypeArguments= null;
 			if (reference.isParameterizedType()) {
@@ -761,9 +765,9 @@ public class InferTypeArgumentsTCModel {
 		}
 	}
 
-	private ConstraintVariable2 getElementTypeCv(TType elementType, ConstraintVariable2 expressionCv, Map methodTypeVariables) {
+	private ConstraintVariable2 getElementTypeCv(TType elementType, ConstraintVariable2 expressionCv, Map<String, IndependentTypeVariable2> methodTypeVariables) {
 		if (elementType.isTypeVariable()) {
-			ConstraintVariable2 elementTypeCv= (ConstraintVariable2) methodTypeVariables.get(elementType.getBindingKey());
+			ConstraintVariable2 elementTypeCv= methodTypeVariables.get(elementType.getBindingKey());
 			if (elementTypeCv != null)
 				return elementTypeCv;
 			if (expressionCv != null)
@@ -787,10 +791,10 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	private void setElementVariable(ConstraintVariable2 typeConstraintVariable, CollectionElementVariable2 elementVariable, TypeVariable typeVariable) {
-		HashMap keyToElementVar= (HashMap) typeConstraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
+		HashMap<String, CollectionElementVariable2> keyToElementVar= (HashMap<String, CollectionElementVariable2>) typeConstraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
 		String key= typeVariable.getBindingKey();
 		if (keyToElementVar == null) {
-			keyToElementVar= new HashMap();
+			keyToElementVar= new HashMap<String, CollectionElementVariable2>();
 			typeConstraintVariable.setData(INDEXED_COLLECTION_ELEMENTS, keyToElementVar);
 		} else {
 			Object existingElementVar= keyToElementVar.get(key);
@@ -803,10 +807,10 @@ public class InferTypeArgumentsTCModel {
 
 	public CollectionElementVariable2 getElementVariable(ConstraintVariable2 constraintVariable, TypeVariable typeVariable) {
 		Assert.isTrue(typeVariable.isTypeVariable()); // includes null check
-		HashMap typeVarToElementVars= (HashMap) constraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
+		HashMap<String, CollectionElementVariable2> typeVarToElementVars= (HashMap<String, CollectionElementVariable2>) constraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
 		if (typeVarToElementVars == null)
 			return null;
-		return (CollectionElementVariable2) typeVarToElementVars.get(typeVariable.getBindingKey());
+		return typeVarToElementVars.get(typeVariable.getBindingKey());
 	}
 
 	public void createElementEqualsConstraints(ConstraintVariable2 cv, ConstraintVariable2 initializerCv) {
@@ -821,14 +825,14 @@ public class InferTypeArgumentsTCModel {
 		if (cv == null || initializerCv == null)
 			return;
 
-		Map leftElements= getElementVariables(cv);
-		Map rightElements= getElementVariables(initializerCv);
-		for (Iterator leftIter= leftElements.entrySet().iterator(); leftIter.hasNext();) {
-			Map.Entry leftEntry= (Map.Entry) leftIter.next();
-			String leftTypeVariableKey= (String) leftEntry.getKey();
-			CollectionElementVariable2 rightElementVariable= (CollectionElementVariable2) rightElements.get(leftTypeVariableKey);
+		Map<String, CollectionElementVariable2> leftElements= getElementVariables(cv);
+		Map<String, CollectionElementVariable2> rightElements= getElementVariables(initializerCv);
+		for (Iterator<Entry<String, CollectionElementVariable2>> leftIter= leftElements.entrySet().iterator(); leftIter.hasNext();) {
+			Entry<String, CollectionElementVariable2> leftEntry= leftIter.next();
+			String leftTypeVariableKey= leftEntry.getKey();
+			CollectionElementVariable2 rightElementVariable= rightElements.get(leftTypeVariableKey);
 			if (rightElementVariable != null) {
-				CollectionElementVariable2 leftElementVariable= (CollectionElementVariable2) leftEntry.getValue();
+				CollectionElementVariable2 leftElementVariable= leftEntry.getValue();
 				createEqualsConstraint(leftElementVariable, rightElementVariable);
 				internalCreateElementEqualsConstraints(leftElementVariable, rightElementVariable, false); // recursive
 			}

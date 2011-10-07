@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#showMatch(org.eclipse.search.ui.text.Match,
 	 *      int, int)
 	 */
+	@Override
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
 		IEditorPart editor= fEditorOpener.openMatch(match);
 		if (editor != null && activate)
@@ -57,6 +58,7 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#elementsChanged(java.lang.Object[])
 	 */
+	@Override
 	protected void elementsChanged(Object[] objects) {
 		if (fContentProvider != null)
 			fContentProvider.elementsChanged(objects);
@@ -65,6 +67,7 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#clear()
 	 */
+	@Override
 	protected void clear() {
 		if (fContentProvider != null)
 			fContentProvider.clear();
@@ -73,6 +76,7 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#configureTreeViewer(org.eclipse.jface.viewers.TreeViewer)
 	 */
+	@Override
 	protected void configureTreeViewer(TreeViewer viewer) {
 		throw new IllegalStateException("Doesn't support tree mode."); //$NON-NLS-1$
 	}
@@ -80,8 +84,10 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#configureTableViewer(org.eclipse.jface.viewers.TableViewer)
 	 */
+	@Override
 	protected void configureTableViewer(TableViewer viewer) {
 		viewer.setComparator(new ViewerComparator() {
+			@Override
 			public int category(Object element) {
 				if (element instanceof FileEntry) {
 					return 0;

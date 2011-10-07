@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,10 +68,12 @@ public class FindReferencesInHierarchyAction extends FindReferencesAction {
 		super(editor);
 	}
 
-	Class[] getValidTypes() {
+	@Override
+	Class<?>[] getValidTypes() {
 		return new Class[] { ICompilationUnit.class, IType.class, IMethod.class, IField.class, ILocalVariable.class, ITypeParameter.class };
 	}
 
+	@Override
 	void init() {
 		setText(SearchMessages.Search_FindHierarchyReferencesAction_label);
 		setToolTipText(SearchMessages.Search_FindHierarchyReferencesAction_tooltip);
@@ -79,6 +81,7 @@ public class FindReferencesInHierarchyAction extends FindReferencesAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
 	}
 
+	@Override
 	QuerySpecification createQuery(IJavaElement element) throws JavaModelException, InterruptedException {
 		IType type= getType(element);
 		if (type == null) {

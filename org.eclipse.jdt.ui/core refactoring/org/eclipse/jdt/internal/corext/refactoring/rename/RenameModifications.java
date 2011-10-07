@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,14 +58,14 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.RefactoringModification
 
 public class RenameModifications extends RefactoringModifications {
 
-	private List fRename;
-	private List fRenameArguments;
-	private List fParticipantDescriptorFilter;
+	private List<Object> fRename;
+	private List<RefactoringArguments> fRenameArguments;
+	private List<IParticipantDescriptorFilter> fParticipantDescriptorFilter;
 
 	public RenameModifications() {
-		fRename= new ArrayList();
-		fRenameArguments= new ArrayList();
-		fParticipantDescriptorFilter= new ArrayList();
+		fRename= new ArrayList<Object>();
+		fRenameArguments= new ArrayList<RefactoringArguments>();
+		fParticipantDescriptorFilter= new ArrayList<IParticipantDescriptorFilter>();
 	}
 
 	public void rename(IResource resource, RenameArguments args) {
@@ -161,6 +161,7 @@ public class RenameModifications extends RefactoringModifications {
 		add(typeParameter, arguments, null);
 	}
 
+	@Override
 	public void buildDelta(IResourceChangeDescriptionFactory builder) {
 		for (int i= 0; i < fRename.size(); i++) {
 			Object element= fRename.get(i);
@@ -171,8 +172,9 @@ public class RenameModifications extends RefactoringModifications {
 		getResourceModifications().buildDelta(builder);
 	}
 
+	@Override
 	public void buildValidateEdits(ValidateEditChecker checker) {
-		for (Iterator iter= fRename.iterator(); iter.hasNext();) {
+		for (Iterator<Object> iter= fRename.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof ICompilationUnit) {
 				ICompilationUnit unit= (ICompilationUnit)element;
@@ -184,17 +186,18 @@ public class RenameModifications extends RefactoringModifications {
 		}
 	}
 
+	@Override
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {
-		List result= new ArrayList();
+		List<RefactoringParticipant> result= new ArrayList<RefactoringParticipant>();
 		for (int i= 0; i < fRename.size(); i++) {
 			result.addAll(Arrays.asList(ParticipantManager.loadRenameParticipants(status,
 				owner, fRename.get(i),
 				(RenameArguments) fRenameArguments.get(i),
-				(IParticipantDescriptorFilter) fParticipantDescriptorFilter.get(i),
+				fParticipantDescriptorFilter.get(i),
 				natures, shared)));
 		}
 		result.addAll(Arrays.asList(getResourceModifications().getParticipants(status, owner, natures, shared)));
-		return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
+		return result.toArray(new RefactoringParticipant[result.size()]);
 	}
 
 	private void add(Object element, RefactoringArguments args, IParticipantDescriptorFilter filter) {
@@ -232,14 +235,14 @@ public class RenameModifications extends RefactoringModifications {
 		createIncludingParents(target);
 		MoveArguments arguments= new MoveArguments(target, args.getUpdateReferences());
 		IResource[] resourcesToMove= collectResourcesOfInterest(pack);
-		Set allMembers= new HashSet(Arrays.asList(container.members()));
+		Set<IResource> allMembers= new HashSet<IResource>(Arrays.asList(container.members()));
 		for (int i= 0; i < resourcesToMove.length; i++) {
 			IResource toMove= resourcesToMove[i];
 			getResourceModifications().addMove(toMove, arguments);
 			allMembers.remove(toMove);
 		}
-		for (Iterator iter= allMembers.iterator(); iter.hasNext();) {
-			IResource element= (IResource) iter.next();
+		for (Iterator<IResource> iter= allMembers.iterator(); iter.hasNext();) {
+			IResource element= iter.next();
 			if (element instanceof IFile) {
 				getResourceModifications().addDelete(element);
 				iter.remove();
@@ -260,14 +263,14 @@ public class RenameModifications extends RefactoringModifications {
 		IJavaElement[] allPackages= root.getChildren();
 		if (pack.isDefaultPackage())
 			return new IPackageFragment[0];
-		ArrayList result= new ArrayList();
+		ArrayList<IPackageFragment> result= new ArrayList<IPackageFragment>();
 		String prefix= pack.getElementName() + '.';
 		for (int i= 0; i < allPackages.length; i++) {
 			IPackageFragment currentPackage= (IPackageFragment) allPackages[i];
 			if (currentPackage.getElementName().startsWith(prefix))
 				result.add(currentPackage);
 		}
-		return (IPackageFragment[]) result.toArray(new IPackageFragment[result.size()]);
+		return result.toArray(new IPackageFragment[result.size()]);
 	}
 
 	private IFolder computeTargetFolder(IPackageFragment rootPackage, RenameArguments args, IPackageFragment pack) {

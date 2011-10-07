@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ public final class RawType extends HierarchyType {
 		super(environment);
 	}
 
+	@Override
 	protected void initialize(ITypeBinding binding, IType javaElementType) {
 		Assert.isTrue(binding.isRawType());
 		super.initialize(binding, javaElementType);
@@ -31,22 +32,27 @@ public final class RawType extends HierarchyType {
 		fTypeDeclaration= (HierarchyType)environment.create(binding.getTypeDeclaration());
 	}
 
+	@Override
 	public int getKind() {
 		return RAW_TYPE;
 	}
 
+	@Override
 	public boolean doEquals(TType type) {
 		return getJavaElementType().equals(((RawType)type).getJavaElementType());
 	}
 
+	@Override
 	public int hashCode() {
 		return getJavaElementType().hashCode();
 	}
 
+	@Override
 	public TType getTypeDeclaration() {
 		return fTypeDeclaration;
 	}
 
+	@Override
 	public TType getErasure() {
 		return fTypeDeclaration;
 	}
@@ -55,6 +61,7 @@ public final class RawType extends HierarchyType {
 		return fTypeDeclaration;
 	}
 
+	@Override
 	protected boolean doCanAssignTo(TType lhs) {
 		int targetType= lhs.getKind();
 		switch (targetType) {
@@ -81,6 +88,7 @@ public final class RawType extends HierarchyType {
 		return false;
 	}
 
+	@Override
 	protected boolean isTypeEquivalentTo(TType other) {
 		int otherElementType= other.getKind();
 		if (otherElementType == PARAMETERIZED_TYPE || otherElementType == GENERIC_TYPE)
@@ -88,10 +96,12 @@ public final class RawType extends HierarchyType {
 		return super.isTypeEquivalentTo(other);
 	}
 
+	@Override
 	public String getName() {
 		return getJavaElementType().getElementName();
 	}
 
+	@Override
 	protected String getPlainPrettySignature() {
 		return getJavaElementType().getFullyQualifiedName('.');
 	}

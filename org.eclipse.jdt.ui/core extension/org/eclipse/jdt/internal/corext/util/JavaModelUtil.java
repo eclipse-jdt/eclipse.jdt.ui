@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,7 +39,6 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -65,10 +64,19 @@ import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 public final class JavaModelUtil {
 	
 	/**
-	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=309163
-	 * @since 3.6
+	 * The latest available {@link JavaCore}{@code #VERSION_*} level.
+	 * @since 3.7
 	 */
-	public static final boolean HIDE_VERSION_1_7= true;
+	public static final String VERSION_LATEST;
+	static {
+		VERSION_LATEST= JavaCore.VERSION_1_7; // make sure it is not inlined
+	}
+	
+	/**
+	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=309163
+	 * @since 3.7
+	 */
+	public static final boolean HIDE_VERSION_1_7= Boolean.FALSE.booleanValue();
 
 	/**
 	 * Only use this suffix for creating new .java files.
@@ -457,6 +465,19 @@ public final class JavaModelUtil {
 		return cu.getOwner() == null;
 	}
 
+	/**
+	 * Checks whether the given type signature is from a primitive type.
+	 * 
+	 * @param typeSignature the type signature string to check
+	 * @return <code>true</code> if the type is a primitive type, <code> false</code> otherwise
+	 * @throws JavaModelException if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource.
+	 * @since 3.7
+	 */
+	public static boolean isPrimitive(String typeSignature) throws JavaModelException {
+		return Signature.getTypeSignatureKind(Signature.getElementType(typeSignature)) == Signature.BASE_TYPE_SIGNATURE;
+	}
+
 	/*
      * Don't log not-exists exceptions
      *
@@ -531,7 +552,7 @@ public final class JavaModelUtil {
 	 *
 	 * @see IClasspathEntry#getExclusionPatterns
 	 */
-	public final static boolean isExcluded(IPath resourcePath, char[][] exclusionPatterns) {
+	public static boolean isExcluded(IPath resourcePath, char[][] exclusionPatterns) {
 		if (exclusionPatterns == null) return false;
 		char[] path = resourcePath.toString().toCharArray();
 		for (int i = 0, length = exclusionPatterns.length; i < length; i++)
@@ -630,14 +651,14 @@ public final class JavaModelUtil {
 	 *             accessing its corresponding resource
 	 */
 	public static ICompilationUnit[] getAllCompilationUnits(IJavaElement[] javaElements) throws JavaModelException {
-		HashSet result= new HashSet();
+		HashSet<ICompilationUnit> result= new HashSet<ICompilationUnit>();
 		for (int i= 0; i < javaElements.length; i++) {
 			addAllCus(result, javaElements[i]);
 		}
-		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
+		return result.toArray(new ICompilationUnit[result.size()]);
 	}
 
-	private static void addAllCus(HashSet/*<ICompilationUnit>*/ collector, IJavaElement javaElement) throws JavaModelException {
+	private static void addAllCus(HashSet<ICompilationUnit> collector, IJavaElement javaElement) throws JavaModelException {
 		switch (javaElement.getElementType()) {
 			case IJavaElement.JAVA_PROJECT:
 				IJavaProject javaProject= (IJavaProject) javaElement;
@@ -661,30 +682,22 @@ public final class JavaModelUtil {
 				return;
 
 			case IJavaElement.COMPILATION_UNIT:
-				collector.add(javaElement);
+				collector.add((ICompilationUnit) javaElement);
 				return;
 
 			default:
 				IJavaElement cu= javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
 				if (cu != null)
-					collector.add(cu);
+					collector.add((ICompilationUnit) cu);
 		}
 	}
 
 
-	/**
-	 * Sets all compliance settings in the given map to 5.0
-	 * @param map the map to update
-	 */
-	public static void set50ComplianceOptions(Map map) {
-		setComplianceOptions(map, JavaCore.VERSION_1_5);
-	}
-
-	public static void setComplianceOptions(Map map, String compliance) {
+	public static void setComplianceOptions(Map<String, String> map, String compliance) {
 		JavaCore.setComplianceOptions(compliance, map);
 	}
 
-	public static void setDefaultClassfileOptions(Map map, String compliance) {
+	public static void setDefaultClassfileOptions(Map<String, String> map, String compliance) {
 		map.put(JavaCore.COMPILER_CODEGEN_INLINE_JSR_BYTECODE, is50OrHigher(compliance) ? JavaCore.ENABLED : JavaCore.DISABLED);
 		map.put(JavaCore.COMPILER_LOCAL_VARIABLE_ATTR, JavaCore.GENERATE);
 		map.put(JavaCore.COMPILER_LINE_NUMBER_ATTR, JavaCore.GENERATE);
@@ -711,12 +724,16 @@ public final class JavaModelUtil {
 	public static boolean is50OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_5);
 	}
+	
+	public static boolean is17OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_1_7);
+	}
 
 	/**
-	 * Checks if the given project or workspace has source compliance 5.0 or greater.
+	 * Checks if the given project or workspace has source compliance 1.5 or greater.
 	 *
 	 * @param project the project to test or <code>null</code> to test the workspace settings
-	 * @return <code>true</code> if the given project or workspace has source compliance 5.0 or greater.
+	 * @return <code>true</code> if the given project or workspace has source compliance 1.5 or greater.
 	 */
 	public static boolean is50OrHigher(IJavaProject project) {
 		String source= project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
@@ -724,12 +741,23 @@ public final class JavaModelUtil {
 	}
 
 	/**
-	 * Checks if the JRE of the given project or workspace default JRE have source compliance 5.0 or
+	 * Checks if the given project or workspace has source compliance 1.7 or greater.
+	 *
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 1.7 or greater.
+	 */
+	public static boolean is17OrHigher(IJavaProject project) {
+		String source= project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
+		return is17OrHigher(source);
+	}
+	
+	/**
+	 * Checks if the JRE of the given project or workspace default JRE have source compliance 1.5 or
 	 * greater.
 	 *
 	 * @param project the project to test or <code>null</code> to test the workspace JRE
 	 * @return <code>true</code> if the JRE of the given project or workspace default JRE have
-	 *         source compliance 5.0 or greater.
+	 *         source compliance 1.5 or greater.
 	 * @throws CoreException if unable to determine the project's VM install
 	 */
 	public static boolean is50OrHigherJRE(IJavaProject project) throws CoreException {
@@ -740,11 +768,11 @@ public final class JavaModelUtil {
 			vmInstall= JavaRuntime.getVMInstall(project);
 		}
 		if (!(vmInstall instanceof IVMInstall2))
-			return true; // assume 5.0.
+			return true; // assume 1.5.
 
 		String compliance= getCompilerCompliance((IVMInstall2) vmInstall, null);
 		if (compliance == null)
-			return true; // assume 5.0
+			return true; // assume 1.5
 		return compliance.startsWith(JavaCore.VERSION_1_5)
 				|| compliance.startsWith(JavaCore.VERSION_1_6)
 				|| compliance.startsWith(JavaCore.VERSION_1_7);
@@ -773,7 +801,7 @@ public final class JavaModelUtil {
 	}
 
 	public static String getExecutionEnvironmentCompliance(IExecutionEnvironment executionEnvironment) {
-		Map complianceOptions= executionEnvironment.getComplianceOptions();
+		Map<String, String> complianceOptions= executionEnvironment.getComplianceOptions();
 		if (complianceOptions != null) {
 			Object compliance= complianceOptions.get(JavaCore.COMPILER_COMPLIANCE);
 			if (compliance instanceof String)
@@ -867,30 +895,6 @@ public final class JavaModelUtil {
 	}
 
 	/**
-	 * Returns true iff the given local variable is a parameter of its declaring method.
-	 *
-	 * TODO replace this method with new API when available:
-	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=48420
-	 *
-	 * @param currentLocal the local variable to test
-	 *
-	 * @return returns true if the variable is a parameter
-	 * @throws JavaModelException if getting the method parameter names fails
-	 */
-	public static boolean isParameter(ILocalVariable currentLocal) throws JavaModelException {
-
-		final IJavaElement parent= currentLocal.getParent();
-		if (parent instanceof IMethod) {
-			final String[] params= ((IMethod) parent).getParameterNames();
-			for (int i= 0; i < params.length; i++) {
-				if (params[i].equals(currentLocal.getElementName()))
-					return true;
-			}
-		}
-		return false;
-	}
-
-	/**
 	 * Tells whether the given CU is the package-info.java.
 	 *
 	 * @param cu the compilation unit to test
@@ -899,6 +903,10 @@ public final class JavaModelUtil {
 	 */
 	public static boolean isPackageInfo(ICompilationUnit cu) {
 		return "package-info.java".equals(cu.getElementName()); //$NON-NLS-1$
+	}
+
+	public static boolean isPolymorphicSignature(IMethod method) {
+		return method.getAnnotation("java.lang.invoke.MethodHandle$PolymorphicSignature").exists(); //$NON-NLS-1$
 	}
 
 }

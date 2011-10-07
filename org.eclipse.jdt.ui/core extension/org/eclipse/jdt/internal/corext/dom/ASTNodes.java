@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -57,6 +56,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -73,13 +73,10 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
-import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
-import org.eclipse.jdt.core.dom.SwitchCase;
-import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -88,7 +85,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -122,7 +118,7 @@ public class ASTNodes {
 		return flattener.getResult();
 	}
 
-	public static String asFormattedString(ASTNode node, int indent, String lineDelim, Map options) {
+	public static String asFormattedString(ASTNode node, int indent, String lineDelim, Map<String, String> options) {
 		String unformatted= asString(node);
 		TextEdit edit= CodeFormatterUtil.format2(node, unformatted, indent, lineDelim, options);
 		if (edit != null) {
@@ -177,10 +173,10 @@ public class ASTNodes {
      * @param node the node in question
      * @return the list that contains the node or <code>null</code>
      */
-    public static List getContainingList(ASTNode node) {
+    public static List<? extends ASTNode> getContainingList(ASTNode node) {
     	StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
     	if (locationInParent != null && locationInParent.isChildListProperty()) {
-    		return (List) node.getParent().getStructuralProperty(locationInParent);
+    		return (List<? extends ASTNode>) node.getParent().getStructuralProperty(locationInParent);
     	}
     	return null;
     }
@@ -190,22 +186,23 @@ public class ASTNodes {
 	 * @param node the node to get the children for
 	 * @return the children
 	 */
-	public static List getChildren(ASTNode node) {
+	public static List<ASTNode> getChildren(ASTNode node) {
 		ChildrenCollector visitor= new ChildrenCollector();
 		node.accept(visitor);
 		return visitor.result;
 	}
 
 	private static class ChildrenCollector extends GenericVisitor {
-		public List result;
+		public List<ASTNode> result;
 
 		public ChildrenCollector() {
 			super(true);
 			result= null;
 		}
+		@Override
 		protected boolean visitNode(ASTNode node) {
 			if (result == null) { // first visitNode: on the node's parent: do nothing, return true
-				result= new ArrayList();
+				result= new ArrayList<ASTNode>();
 				return true;
 			}
 			result.add(node);
@@ -285,7 +282,7 @@ public class ASTNodes {
 		return dim;
 	}
 
-	public static List getModifiers(VariableDeclaration declaration) {
+	public static List<IExtendedModifier> getModifiers(VariableDeclaration declaration) {
 		Assert.isNotNull(declaration);
 		if (declaration instanceof SingleVariableDeclaration) {
 			return ((SingleVariableDeclaration)declaration).modifiers();
@@ -296,7 +293,7 @@ public class ASTNodes {
 			else if (parent instanceof VariableDeclarationStatement)
 				return ((VariableDeclarationStatement)parent).modifiers();
 		}
-		return new ArrayList(0);
+		return new ArrayList<IExtendedModifier>(0);
 	}
 
 	public static boolean isSingleDeclaration(VariableDeclaration declaration) {
@@ -329,7 +326,7 @@ public class ASTNodes {
 		return Modifier.isStatic(declaration.getModifiers());
 	}
 
-	public static List getBodyDeclarations(ASTNode node) {
+	public static List<BodyDeclaration> getBodyDeclarations(ASTNode node) {
 		if (node instanceof AbstractTypeDeclaration) {
 			return ((AbstractTypeDeclaration)node).bodyDeclarations();
 		} else if (node instanceof AnonymousClassDeclaration) {
@@ -340,6 +337,13 @@ public class ASTNodes {
 		return null;
 	}
 
+	/**
+	 * Returns the structural property descriptor for the "bodyDeclarations" property
+	 * of this node (element type: {@link BodyDeclaration}).
+	 * 
+	 * @param node the node, either an {@link AbstractTypeDeclaration} or an {@link AnonymousClassDeclaration}
+	 * @return the property descriptor
+	 */
 	public static ChildListPropertyDescriptor getBodyDeclarationsProperty(ASTNode node) {
 		if (node instanceof AbstractTypeDeclaration) {
 			return ((AbstractTypeDeclaration)node).getBodyDeclarationsProperty();
@@ -354,18 +358,22 @@ public class ASTNodes {
 	public static String getTypeName(Type type) {
 		final StringBuffer buffer= new StringBuffer();
 		ASTVisitor visitor= new ASTVisitor() {
+			@Override
 			public boolean visit(PrimitiveType node) {
 				buffer.append(node.getPrimitiveTypeCode().toString());
 				return false;
 			}
+			@Override
 			public boolean visit(SimpleName node) {
 				buffer.append(node.getIdentifier());
 				return false;
 			}
+			@Override
 			public boolean visit(QualifiedName node) {
 				buffer.append(node.getName().getIdentifier());
 				return false;
 			}
+			@Override
 			public void endVisit(ArrayType node) {
 				buffer.append("[]"); //$NON-NLS-1$
 			}
@@ -429,63 +437,11 @@ public class ASTNodes {
 			|| locationInParent == DoStatement.BODY_PROPERTY;
 	}
 
-	public static boolean needsParentheses(Expression expression) {
-		int type= expression.getNodeType();
-		return type == ASTNode.INFIX_EXPRESSION || type == ASTNode.CONDITIONAL_EXPRESSION ||
-			type == ASTNode.PREFIX_EXPRESSION || type == ASTNode.POSTFIX_EXPRESSION ||
-			type == ASTNode.CAST_EXPRESSION || type == ASTNode.INSTANCEOF_EXPRESSION;
-	}
-
-	/**
-	 * Checks whether <code>substitute</code> must be parenthesized when used to replace
-	 * <code>location</code>.
-	 * 
-	 * @param substitute substitute expression
-	 * @param location expression to be replaced
-	 * @return <code>true</code> iff <code>substitute</code> must be parenthesized when used to
-	 *         replace <code>location</code>
-	 */
-	public static boolean substituteMustBeParenthesized(Expression substitute, Expression location) {
-		if (substitute instanceof Assignment) //for esthetic reasons
-			return true;
-
-    	if (!needsParentheses(substitute))
-    		return false;
-
-    	ASTNode parent= location.getParent();
-    	StructuralPropertyDescriptor locationInParent= location.getLocationInParent();
-		if (locationInParent instanceof ChildListPropertyDescriptor && locationInParent != InfixExpression.EXTENDED_OPERANDS_PROPERTY) {
-			// e.g. argument lists of MethodInvocation, ClassInstanceCreation, ...
-   			return false;
-    	} else if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-   			return false;
-    	} else if (locationInParent == SingleVariableDeclaration.INITIALIZER_PROPERTY) {
-    		return false;
-    	} else if (locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
-    		return false;
-    	} else if (locationInParent == EnhancedForStatement.EXPRESSION_PROPERTY) {
-    		return false;
-    	} else if (locationInParent == SwitchStatement.EXPRESSION_PROPERTY) {
-    		return false;
-    	} else if (locationInParent == SwitchCase.EXPRESSION_PROPERTY) {
-    		return false;
-    	} else if (locationInParent == ArrayAccess.INDEX_PROPERTY) {
-    		return false;
-    	} else if (parent instanceof Expression) {
-			int substitutePrecedence= OperatorPrecedence.getExpressionPrecedence(substitute);
-			int locationPrecedence= OperatorPrecedence.getExpressionPrecedence((Expression)parent);
-			if (substitutePrecedence > locationPrecedence)
-				return false;
-		}
-
-        return true;
-	}
-
 	/**
 	 * Returns the type to which an inlined variable initializer should be cast, or
 	 * <code>null</code> if no cast is necessary.
 	 * 
-	 * @param initializer the initializer expression of the variable to inline 
+	 * @param initializer the initializer expression of the variable to inline
 	 * @param reference the reference to the variable (which is to be inlined)
 	 * @return a type binding to which the initializer should be cast, or <code>null</code> iff no cast is necessary
 	 * @since 3.6
@@ -496,16 +452,28 @@ public class ASTNodes {
 		if (initializerType == null || referenceType == null)
 			return null;
 		
-		if (initializerType.isPrimitive() && referenceType.isPrimitive() && ! referenceType.isEqualTo(initializerType))
+		if (initializerType.isPrimitive() && referenceType.isPrimitive() && ! referenceType.isEqualTo(initializerType)) {
 			return referenceType;
-		else if (initializerType.isPrimitive() && ! referenceType.isPrimitive()) { // initializer is autoboxed
+			
+		} else if (initializerType.isPrimitive() && ! referenceType.isPrimitive()) { // initializer is autoboxed
 			ITypeBinding unboxedReferenceType= Bindings.getUnboxedTypeBinding(referenceType, reference.getAST());
-			if (unboxedReferenceType != initializerType)
+			if (!unboxedReferenceType.isEqualTo(initializerType))
 				return unboxedReferenceType;
 			else if (needsExplicitBoxing(reference))
 				return referenceType;
-		} else if (! TypeRules.canAssign(initializerType, referenceType))
-			return referenceType;
+			
+		} else if (! initializerType.isPrimitive() && referenceType.isPrimitive()) { // initializer is autounboxed
+			ITypeBinding unboxedInitializerType= Bindings.getUnboxedTypeBinding(initializerType, reference.getAST());
+			if (!unboxedInitializerType.isEqualTo(referenceType))
+				return referenceType;
+			
+		} else if (initializerType.isRawType() && referenceType.isParameterizedType()) {
+			return referenceType; // don't lose the unchecked conversion
+			
+		} else if (! TypeRules.canAssign(initializerType, referenceType)) {
+			if (!Bindings.containsTypeVariables(referenceType))
+				return referenceType;
+		}
 		
 		return null;
 	}
@@ -541,7 +509,7 @@ public class ASTNodes {
 	 * @param parentClass the class of the sought ancestor node
 	 * @return the closest ancestor of <code>node</code> that is an instance of <code>parentClass</code>, or <code>null</code> if none
 	 */
-	public static ASTNode getParent(ASTNode node, Class parentClass) {
+	public static ASTNode getParent(ASTNode node, Class<? extends ASTNode> parentClass) {
 		do {
 			node= node.getParent();
 		} while (node != null && !parentClass.isInstance(node));
@@ -704,7 +672,7 @@ public class ASTNodes {
 		if (root == node)
 			return problems;
 		final int iterations= computeIterations(scope);
-		List result= new ArrayList(5);
+		List<IProblem> result= new ArrayList<IProblem>(5);
 		for (int i= 0; i < problems.length; i++) {
 			IProblem problem= problems[i];
 			boolean consider= false;
@@ -729,7 +697,7 @@ public class ASTNodes {
 				} while ((temp= temp.getParent()) != null && count > 0);
 			}
 		}
-		return (IProblem[]) result.toArray(new IProblem[result.size()]);
+		return result.toArray(new IProblem[result.size()]);
 	}
 
 	public static Message[] getMessages(ASTNode node, int flags) {
@@ -740,7 +708,7 @@ public class ASTNodes {
 		if (root == node)
 			return messages;
 		final int iterations= computeIterations(flags);
-		List result= new ArrayList(5);
+		List<Message> result= new ArrayList<Message>(5);
 		for (int i= 0; i < messages.length; i++) {
 			Message message= messages[i];
 			ASTNode temp= node;
@@ -756,7 +724,7 @@ public class ASTNodes {
 				}
 			} while ((temp= temp.getParent()) != null && count > 0);
 		}
-		return (Message[]) result.toArray(new Message[result.size()]);
+		return result.toArray(new Message[result.size()]);
 	}
 
 	private static int computeIterations(int flags) {
@@ -818,7 +786,7 @@ public class ASTNodes {
 	 * @param container a list containing objects of type <code>BodyDeclaration</code>
 	 * @return the insertion index to be used
 	 */
-	public static int getInsertionIndex(BodyDeclaration member, List container) {
+	public static int getInsertionIndex(BodyDeclaration member, List<? extends BodyDeclaration> container) {
 		int containerSize= container.size();
 
 		MembersOrderPreferenceCache orderStore= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
@@ -829,7 +797,7 @@ public class ASTNodes {
 		int insertPosOrderIndex= -1;
 
 		for (int i= containerSize - 1; i >= 0; i--) {
-			int currOrderIndex= getOrderPreference((BodyDeclaration) container.get(i), orderStore);
+			int currOrderIndex= getOrderPreference(container.get(i), orderStore);
 			if (orderIndex == currOrderIndex) {
 				if (insertPosOrderIndex != orderIndex) { // no perfect match yet
 					insertPos= i + 1; // after a same kind
@@ -856,6 +824,7 @@ public class ASTNodes {
 		} else {
 			final SimpleName[] result= new SimpleName[1];
 			ASTVisitor visitor= new ASTVisitor() {
+				@Override
 				public boolean visit(QualifiedName qualifiedName) {
 					Name left= qualifiedName.getQualifier();
 					if (left instanceof SimpleName)
@@ -873,6 +842,7 @@ public class ASTNodes {
 	public static SimpleType getLeftMostSimpleType(QualifiedType type) {
 		final SimpleType[] result= new SimpleType[1];
 		ASTVisitor visitor= new ASTVisitor() {
+			@Override
 			public boolean visit(QualifiedType qualifiedType) {
 				Type left= qualifiedType.getQualifier();
 				if (left instanceof SimpleType)
@@ -913,6 +883,7 @@ public class ASTNodes {
 	 */
 	public static void setFlagsToAST(ASTNode root, final int flags) {
 		root.accept(new GenericVisitor(true) {
+			@Override
 			protected boolean visitNode(ASTNode node) {
 				node.setFlags(node.getFlags() | flags);
 				return true;
@@ -943,7 +914,7 @@ public class ASTNodes {
 		}
 	}
 
-	public static Modifier findModifierNode(int flag, List modifiers) {
+	public static Modifier findModifierNode(int flag, List<IExtendedModifier> modifiers) {
 		for (int i= 0; i < modifiers.size(); i++) {
 			Object curr= modifiers.get(i);
 			if (curr instanceof Modifier && ((Modifier) curr).getKeyword().toFlagValue() == flag) {

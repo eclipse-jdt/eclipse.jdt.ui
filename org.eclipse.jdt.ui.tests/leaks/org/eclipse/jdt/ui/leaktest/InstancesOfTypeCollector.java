@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,17 +24,12 @@ import org.eclipse.jdt.ui.leaktest.reftracker.ReferencedObject;
 public class InstancesOfTypeCollector extends ReferenceVisitor {
 
 	private final ArrayList fResults;
-	private int fMatchCount= 0;
-	private long fInstanceCount= 0;
 	private final boolean fIncludeSubtypes;
 	private final String fRequestedTypeName;
 
 	public InstancesOfTypeCollector(String requestedTypeName, boolean includeSubtypes) {
 		fIncludeSubtypes= includeSubtypes;
 		fResults= new ArrayList();
-
-		fMatchCount= 0;
-
 		fRequestedTypeName= requestedTypeName;
 	}
 
@@ -59,9 +54,7 @@ public class InstancesOfTypeCollector extends ReferenceVisitor {
 
 	public boolean visit(ReferencedObject reference, Class clazz, boolean firstVisit) {
 		if (firstVisit) {
-			fInstanceCount++;
 			if (isMatchingType(clazz)) {
-				fMatchCount++;
 				fResults.add(new ReferenceInfo(reference));
 			}
 		}

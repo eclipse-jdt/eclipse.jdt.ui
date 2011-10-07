@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-
-import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -101,19 +99,6 @@ public class MockPluginView extends PackageExplorerPart {
 		return fViewer;
 	}
 
-
-	protected IJavaElement findElementToSelect(IJavaElement je) {
-		return null;
-	}
-
-	protected String getHelpContextId() {
-		return null;
-	}
-
-	protected boolean isValidInput(Object element) {
-		return false;
-	}
-
 	private class TestProblemTreeViewer extends ProblemTreeViewer{
 
 		public TestProblemTreeViewer(Composite parent, int flag){
@@ -143,8 +128,10 @@ public class MockPluginView extends PackageExplorerPart {
 	}
 
 	/**
-	 * Returns the refreshed object.
-	 * @return Object
+	 * Returns whether the given object was refreshed.
+	 * 
+	 * @param c the object to test
+	 * @return <code>true</code> if the object was refreshed
 	 */
 	public boolean wasObjectRefreshed(Object c) {
 		return fRefreshedObjects.contains(c);
@@ -203,7 +190,8 @@ public class MockPluginView extends PackageExplorerPart {
 
 	/**
 	 * Sets the folding preference.
-	 * @param fold
+	 * 
+	 * @param fold <code>true</code> to enable folding, <code>false</code> otherwise
 	 */
 	public void setFolding(boolean fold) {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fold);

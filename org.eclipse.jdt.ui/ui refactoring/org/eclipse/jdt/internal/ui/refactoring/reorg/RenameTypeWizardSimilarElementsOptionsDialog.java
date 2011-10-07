@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
@@ -65,6 +66,7 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 	 *
 	 * @see org.eclipse.jface.dialogs.IconAndMessageDialog#createMessageArea(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createMessageArea(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -157,6 +159,7 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 	}
 
 
+	@Override
 	protected boolean customShouldTakeFocus() {
 		return true;
 	}

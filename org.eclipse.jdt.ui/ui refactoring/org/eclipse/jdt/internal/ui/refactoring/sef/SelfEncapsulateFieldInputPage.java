@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,7 +66,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 
 	private SelfEncapsulateFieldRefactoring fRefactoring;
 	private IDialogSettings fSettings;
-	private List fEnablements;
+	private List<Control> fEnablements;
 
 	private Text fGetterName;
 	private Text fSetterName;
@@ -85,7 +85,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	public void createControl(Composite parent) {
 		fRefactoring= (SelfEncapsulateFieldRefactoring)getRefactoring();
 
-		fEnablements= new ArrayList();
+		fEnablements= new ArrayList<Control>();
 		loadSettings();
 
 		Composite result= new Composite(parent, SWT.NONE);
@@ -145,6 +145,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		Link link= new Link(nameComposite, SWT.NONE);
 		link.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_configure_link);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				doOpenPreference();
 			}
@@ -167,6 +168,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		SWTUtil.setDefaultVisibleItemCount(combo);
 		fillWithPossibleInsertPositions(combo, fRefactoring.getField());
 		combo.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				fRefactoring.setInsertionIndex(combo.getSelectionIndex() - 1);
 			}
@@ -180,6 +182,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		checkBox.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_generateJavadocComment);
 		checkBox.setSelection(fRefactoring.getGenerateJavadoc());
 		checkBox.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				setGenerateJavadoc(((Button)e.widget).getSelection());
 			}
@@ -208,8 +211,8 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 
 	private void updateEnablements() {
 		boolean enable=!(fRefactoring.isUsingLocalSetter()&&fRefactoring.isUsingLocalGetter());
-		for (Iterator iter= fEnablements.iterator(); iter.hasNext();) {
-			Control control= (Control) iter.next();
+		for (Iterator<Control> iter= fEnablements.iterator(); iter.hasNext();) {
+			Control control= iter.next();
 			control.setEnabled(enable);
 		}
 	}
@@ -261,6 +264,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 			if (iData == visibility)
 				radio.setSelection(true);
 			radio.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent event) {
 					fRefactoring.setVisibility(((Integer)event.widget.getData()).intValue());
 				}
@@ -286,6 +290,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		radio.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_use_setter_getter);
 		radio.setSelection(true);
 		radio.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fRefactoring.setEncapsulateDeclaringClass(true);
 			}
@@ -295,6 +300,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		radio= new Button(group, SWT.RADIO);
 		radio.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_keep_references);
 		radio.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fRefactoring.setEncapsulateDeclaringClass(false);
 			}

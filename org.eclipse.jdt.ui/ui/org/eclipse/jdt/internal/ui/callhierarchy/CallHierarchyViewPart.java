@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -64,7 +65,9 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchPartSite;
@@ -74,6 +77,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.PageBook;
@@ -81,6 +85,7 @@ import org.eclipse.ui.part.PluginTransfer;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -115,7 +120,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.FileTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.PluginTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
@@ -139,6 +143,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.typehierarchy.SelectionProviderMediator#getSelection()
 		 */
+		@Override
 		public ISelection getSelection() {
 			ISelection selection= super.getSelection();
 			if (!selection.isEmpty()) {
@@ -157,19 +162,22 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			super(viewer);
 		}
 
+		@Override
 		protected void activate(ISelection selection) {
 			final Object selectedElement= SelectionUtil.getSingleElement(selection);
 			if (selectedElement != null)
 				CallHierarchyUI.openInEditor(selectedElement, getSite().getShell(), true);
 		}
 
+		@Override
 		protected void linkToEditor(ISelection selection) {
 			// not supported by this part
 		}
 
+		@Override
 		protected void open(ISelection selection, boolean activate) {
 			if (selection instanceof IStructuredSelection) {
-				for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
+				for (Iterator<?> iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
 					boolean noError= CallHierarchyUI.openInEditor(iter.next(), getSite().getShell(), OpenStrategy.activateOnOpen());
 					if (!noError)
 						return;
@@ -212,7 +220,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private IMemento fMemento;
     private IMember[] fInputElements;
     private CallHierarchySelectionProvider fSelectionProviderMediator;
-    private final List/*<IMember[]>*/ fMethodHistory;
     private LocationViewer fLocationViewer;
     private SashForm fHierarchyLocationSplitter;
     private Clipboard fClipboard;
@@ -231,11 +238,14 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private CancelSearchAction fCancelSearchAction;
     private ExpandWithConstructorsAction fExpandWithConstructorsAction;
     private RemoveFromViewAction fRemoveFromViewAction;
+    private ShowSearchInDialogAction fShowSearchInDialogAction;
     private CompositeActionGroup fActionGroups;
     private CallHierarchyViewer fCallHierarchyViewer;
     private boolean fShowCallDetails;
 	protected Composite fParent;
 	private IPartListener2 fPartListener;
+	private boolean fIsPinned;
+	private PinCallHierarchyViewAction fPinViewAction;
 
 
     public CallHierarchyViewPart() {
@@ -243,10 +253,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         fDialogSettings = JavaPlugin.getDefault().getDialogSettings();
 
-        fMethodHistory = new ArrayList();
+        fIsPinned= false;
     }
 
-    public void setFocus() {
+    @Override
+	public void setFocus() {
         fPagebook.setFocus();
     }
 
@@ -255,10 +266,10 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @param entries the new history entries
      */
     public void setHistoryEntries(IMember[][] entries) {
-        fMethodHistory.clear();
+        getMethodHistory().clear();
 
         for (int i = 0; i < entries.length; i++) {
-            fMethodHistory.add(entries[i]);
+            getMethodHistory().add(entries[i]);
         }
 
         updateHistoryEntries();
@@ -269,11 +280,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @return all history entries
      */
     public IMember[][] getHistoryEntries() {
-        if (fMethodHistory.size() > 0) {
+        if (getMethodHistory().size() > 0) {
             updateHistoryEntries();
         }
 
-        return (IMember[][]) fMethodHistory.toArray(new IMember[fMethodHistory.size()][]);
+        return getMethodHistory().toArray(new IMember[getMethodHistory().size()][]);
     }
 
     public void setInputElements(IMember[] members) {
@@ -387,8 +398,15 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         }
     }
 
-    public IJavaSearchScope getSearchScope() {
-        return fSearchScopeActions.getSearchScope();
+	/**
+	 * Fetches the search scope with the appropriate include mask.
+	 * 
+	 * @param includeMask the include mask
+	 * @return the search scope with the appropriate include mask
+	 * @since 3.7
+	 */
+    public IJavaSearchScope getSearchScope(int includeMask) {
+        return fSearchScopeActions.getSearchScope(includeMask);
     }
 
     public void setShowCallDetails(boolean show) {
@@ -424,6 +442,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance(), ResourceTransfer.getInstance(), FileTransfer.getInstance()};
 
 		DelegatingDragAdapter dragAdapter= new DelegatingDragAdapter() {
+			@Override
 			public void dragStart(DragSourceEvent event) {
 				IStructuredSelection selection= (IStructuredSelection) fSelectionProviderMediator.getSelection();
 				if (selection.isEmpty()) {
@@ -441,7 +460,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		viewer.addDragSupport(ops, transfers, dragAdapter);
 	}
 
-    public void createPartControl(Composite parent) {
+    @Override
+	public void createPartControl(Composite parent) {
     	fParent= parent;
     	addResizeListener(parent);
         fPagebook = new PageBook(parent, SWT.NONE);
@@ -510,23 +530,56 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		}
 	}
 
+	/**
+	 * Tells whether the given part reference references this view.
+	 * 
+	 * @param partRef the workbench part reference
+	 * @return <code>true</code> if the given part reference references this view
+	 * @since 3.7
+	 */
+	private boolean isThisView(IWorkbenchPartReference partRef) {
+		if (!ID_CALL_HIERARCHY.equals(partRef.getId()))
+			return false;
+		String partRefSecondaryId= ((IViewReference)partRef).getSecondaryId();
+		String thisSecondaryId= getViewSite().getSecondaryId();
+		return thisSecondaryId == null && partRefSecondaryId == null || thisSecondaryId != null && thisSecondaryId.equals(partRefSecondaryId);
+	}
+
 	private void addPartListener() {
 		fPartListener= new IPartListener2() {
-					public void partActivated(IWorkbenchPartReference partRef) { }
-					public void partBroughtToTop(IWorkbenchPartReference partRef) { }
-					public void partClosed(IWorkbenchPartReference partRef) {
-						if (ID_CALL_HIERARCHY.equals(partRef.getId()))
-							saveViewSettings();
-					}
-					public void partDeactivated(IWorkbenchPartReference partRef) {
-						if (ID_CALL_HIERARCHY.equals(partRef.getId()))
-							saveViewSettings();
-					}
-					public void partOpened(IWorkbenchPartReference partRef) { }
-					public void partHidden(IWorkbenchPartReference partRef) { }
-					public void partVisible(IWorkbenchPartReference partRef) { }
-					public void partInputChanged(IWorkbenchPartReference partRef) { }
-				};
+			/* (non-Javadoc)
+			 * @see org.eclipse.ui.IPartListener2#partActivated(org.eclipse.ui.IWorkbenchPartReference)
+			 */
+			public void partActivated(IWorkbenchPartReference partRef) {
+				if (isThisView(partRef))
+					CallHierarchyUI.getDefault().callHierarchyViewActivated(CallHierarchyViewPart.this);
+			}
+
+			public void partBroughtToTop(IWorkbenchPartReference partRef) { }
+
+			/* (non-Javadoc)
+			 * @see org.eclipse.ui.IPartListener2#partClosed(org.eclipse.ui.IWorkbenchPartReference)
+			 */
+			public void partClosed(IWorkbenchPartReference partRef) {
+				if (isThisView(partRef)) {
+					CallHierarchyUI.getDefault().callHierarchyViewClosed(CallHierarchyViewPart.this);
+					saveViewSettings();
+				}
+			}
+
+			/* (non-Javadoc)
+			 * @see org.eclipse.ui.IPartListener2#partDeactivated(org.eclipse.ui.IWorkbenchPartReference)
+			 */
+			public void partDeactivated(IWorkbenchPartReference partRef) {
+				if (isThisView(partRef))
+					saveViewSettings();
+			}
+
+			public void partOpened(IWorkbenchPartReference partRef) { }
+			public void partHidden(IWorkbenchPartReference partRef) { }
+			public void partVisible(IWorkbenchPartReference partRef) { }
+			public void partInputChanged(IWorkbenchPartReference partRef) { }
+		};
 		getViewSite().getPage().addPartListener(fPartListener);
 	}
 
@@ -567,9 +620,17 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private void showPage(int page) {
 		boolean isEmpty= page == PAGE_EMPTY;
 		Control control= isEmpty ? (Control) fNoHierarchyShownLabel : fHierarchyLocationSplitter;
+		if (isEmpty) {
+			setContentDescription(""); //$NON-NLS-1$
+			setTitleToolTip(getPartName());
+			getViewSite().getActionBars().getStatusLineManager().setMessage(""); //$NON-NLS-1$
+			getViewer().clearViewer();
+		}
 		fPagebook.showPage(control);
 		if (fRefreshViewAction != null)
 			fRefreshViewAction.setEnabled(!isEmpty);
+		if (fRefreshSingleElementAction != null)
+			fRefreshSingleElementAction.setEnabled(!isEmpty);
     }
 
     /**
@@ -666,32 +727,31 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         	fieldSubMenu.add(fToggleFieldModeActions[i]);
         }
         viewMenu.add(fieldSubMenu);
+        viewMenu.add(fShowSearchInDialogAction);
     }
 
-    /**
-     *
-     */
-    public void dispose() {
-        if (fActionGroups != null)
-            fActionGroups.dispose();
+	@Override
+	public void dispose() {
+		if (fActionGroups != null)
+			fActionGroups.dispose();
 
 		if (fClipboard != null)
-	        fClipboard.dispose();
+			fClipboard.dispose();
 
 		if (fPartListener != null) {
 			getViewSite().getPage().removePartListener(fPartListener);
 			fPartListener= null;
 		}
-        super.dispose();
-    }
+		super.dispose();
+	}
 
     /**
      * Goes to the selected entry, without updating the order of history entries.
      * @param entry the history entry
      */
     public void gotoHistoryEntry(IMember[] entry) {
-    	for (Iterator iter= fMethodHistory.iterator(); iter.hasNext(); ) {
-			if (Arrays.equals(entry, (IMember[]) iter.next())) {
+    	for (Iterator<IMember[]> iter= getMethodHistory().iterator(); iter.hasNext(); ) {
+			if (Arrays.equals(entry, iter.next())) {
 				setInputElements(entry);
 				return;
 			}
@@ -701,7 +761,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     /* (non-Javadoc)
      * Method declared on IViewPart.
      */
-    public void init(IViewSite site, IMemento memento)
+    @Override
+	public void init(IViewSite site, IMemento memento)
         throws PartInitException {
         super.init(site, memento);
         fMemento = memento;
@@ -717,7 +778,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         updateView();
     }
 
-    public void saveState(IMemento memento) {
+    @Override
+	public void saveState(IMemento memento) {
         if (fPagebook == null) {
             // part has not been created
             if (fMemento != null) { //Keep the old state;
@@ -801,7 +863,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     /**
 	 * {@inheritDoc}
 	 */
-    public Object getAdapter(Class adapter) {
+    @Override
+	public Object getAdapter(Class adapter) {
     	if (adapter == IShowInSource.class) {
     		return getShowInSource();
     	}
@@ -845,9 +908,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         JavaPlugin.createStandardGroups(menu);
 
         menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fOpenLocationAction);
-		if (fRefreshSingleElementAction.canActionBeAdded()) {
-			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshSingleElementAction);
-		}
+		menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshSingleElementAction);
         menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fLocationCopyAction);
     }
 
@@ -893,13 +954,38 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @param entry the entry to add
      */
     private void addHistoryEntry(IMember[] entry) {
-    	for (Iterator iter= fMethodHistory.iterator(); iter.hasNext(); ) {
-			if (Arrays.equals(entry, (IMember[]) iter.next())) {
+
+		updateHistoryEntries(entry, entry);
+    }
+
+	/**
+	 * Updates the input, history and description for the new input.
+	 * 
+	 * @param currentInput the current input
+	 * @param entry the new input elements
+	 * @since 3.7
+	 */
+	void updateInputHistoryAndDescription(IMember[] currentInput, IMember[] entry) {
+		updateHistoryEntries(currentInput, entry);
+		fInputElements= entry;
+		setContentDescription(getIncludeMask());
+	}
+
+	/**
+	 * Updates the history with the latest input.
+	 * 
+	 * @param currentInput the current input
+	 * @param entry the new input elements
+	 * @since 3.7
+	 */
+	private void updateHistoryEntries(IMember[] currentInput, IMember[] entry) {
+		for (Iterator<IMember[]> iter= getMethodHistory().iterator(); iter.hasNext();) {
+			if (Arrays.equals(currentInput, iter.next())) {
 				iter.remove();
 			}
 		}
 
-        fMethodHistory.add(0, entry);
+        getMethodHistory().add(0, entry);
         fHistoryDropDownAction.setEnabled(true);
     }
 
@@ -927,9 +1013,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     protected void fillCallHierarchyViewerContextMenu(IMenuManager menu) {
         JavaPlugin.createStandardGroups(menu);
 
-		if (fRefreshSingleElementAction.canActionBeAdded()) {
-			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshSingleElementAction);
-		}
+		menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshSingleElementAction);
         menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, new Separator(GROUP_FOCUS));
 
         if (fFocusOnSelectionAction.canActionBeAdded()) {
@@ -948,13 +1032,14 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fActionGroups.setContext(null);
 
 		if (fCopyAction.canActionBeAdded()) {
-			menu.insertBefore(PasteAction.ID, fCopyAction);
+			menu.appendToGroup(ICommonMenuConstants.GROUP_EDIT, fCopyAction);
 		}
     }
 
     private void fillActionBars() {
         IActionBars actionBars = getActionBars();
 		actionBars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fRefreshSingleElementAction);
+		actionBars.setGlobalActionHandler(ActionFactory.DELETE.getId(), fRemoveFromViewAction);
 
         IToolBarManager toolBar = actionBars.getToolBarManager();
 
@@ -966,11 +1051,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
             toolBar.add(fToggleCallModeActions[i]);
         }
         toolBar.add(fHistoryDropDownAction);
+        toolBar.add(fPinViewAction);
     }
 
-    /**
-     *
-     */
     private void makeActions() {
         fRefreshViewAction = new RefreshViewAction(this);
         fRefreshSingleElementAction= new RefreshElementAction(fCallHierarchyViewer);
@@ -983,6 +1066,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fFocusOnSelectionAction = new FocusOnSelectionAction(this);
         fCopyAction= new CopyCallHierarchyAction(this, fClipboard, fCallHierarchyViewer);
         fSearchScopeActions = new SearchScopeActionGroup(this, fDialogSettings);
+        fShowSearchInDialogAction= new ShowSearchInDialogAction(this, fCallHierarchyViewer);
         fFiltersActionGroup = new CallHierarchyFiltersActionGroup(this,
                 fCallHierarchyViewer);
         fHistoryDropDownAction = new HistoryDropDownAction(this);
@@ -991,12 +1075,14 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         setCancelEnabled(false);
         fExpandWithConstructorsAction= new ExpandWithConstructorsAction(this, fCallHierarchyViewer);
         fRemoveFromViewAction= new RemoveFromViewAction(this, fCallHierarchyViewer);
+        fPinViewAction= new PinCallHierarchyViewAction(this);
         fToggleOrientationActions = new ToggleOrientationAction[] {
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_VERTICAL),
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL),
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_AUTOMATIC),
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_SINGLE)
             };
+		fRemoveFromViewAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_DELETE);
         fToggleCallModeActions = new ToggleCallModeAction[] {
                 new ToggleCallModeAction(this, CALL_MODE_CALLERS),
                 new ToggleCallModeAction(this, CALL_MODE_CALLEES)
@@ -1009,7 +1095,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fActionGroups = new CompositeActionGroup(new ActionGroup[] {
                     new OpenEditorActionGroup(this),
                     new OpenViewActionGroup(this),
-                    new CCPActionGroup(this),
+					new CCPActionGroup(this, true),
                     new GenerateActionGroup(this),
                     new RefactorActionGroup(this),
                     new JavaSearchActionGroup(this),
@@ -1034,31 +1120,33 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     }
 
     private void updateHistoryEntries() {
-        for (int i = fMethodHistory.size() - 1; i >= 0; i--) {
-            IMember[] members = (IMember[]) fMethodHistory.get(i);
+        for (int i = getMethodHistory().size() - 1; i >= 0; i--) {
+            IMember[] members = getMethodHistory().get(i);
             for (int j= 0; j < members.length; j++) {
 				IMember member= members[j];
 				if (! member.exists()) {
-					fMethodHistory.remove(i);
+					getMethodHistory().remove(i);
 					break;
 				}
 			}
         }
 
-        fHistoryDropDownAction.setEnabled(!fMethodHistory.isEmpty());
+        fHistoryDropDownAction.setEnabled(!getMethodHistory().isEmpty());
     }
 
 	private void updateView() {
 		if (fInputElements != null) {
 			showPage(PAGE_VIEWER);
 
-			CallHierarchy.getDefault().setSearchScope(getSearchScope());
+			int includeMask= getIncludeMask();
+			CallHierarchy.getDefault().setSearchScope(getSearchScope(includeMask));
 
 			// set input to null so that setComparator does not cause a refresh on the old contents:
 			fCallHierarchyViewer.setInput(null);
 			if (fCurrentCallMode == CALL_MODE_CALLERS) {
 				// sort caller hierarchy alphabetically (bug 111423) and make RealCallers the last in 'Expand With Constructors' mode
 				fCallHierarchyViewer.setComparator(new ViewerComparator() {
+					@Override
 					public int category(Object element) {
 						return element instanceof RealCallers ? 1 : 0;
 					}
@@ -1068,13 +1156,42 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 				fCallHierarchyViewer.setComparator(null);
 				fCallHierarchyViewer.setMethodWrappers(getCalleeRoots());
 			}
-			setContentDescription(computeContentDescription());
+			setContentDescription(includeMask);
 		}
     }
 
-	private String computeContentDescription() {
+	/**
+	 * Sets the content description.
+	 * 
+	 * @param includeMask the include mask
+	 * @since 3.7
+	 */
+	private void setContentDescription(int includeMask) {
+		setContentDescription(computeContentDescription(includeMask));
+	}
+
+
+
+	/**
+	 * Gets the include mask.
+	 * 
+	 * @return the include mask
+	 * @since 3.7
+	 */
+	private int getIncludeMask() {
+		return fShowSearchInDialogAction.getSearchInDialog().getIncludeMask();
+	}
+
+	/**
+	 * Computes the content description for the call hierarchy computation.
+	 * 
+	 * @param includeMask the include mask
+	 * @return the content description
+	 * @since 3.7
+	 */
+	private String computeContentDescription(int includeMask) {
 		// see also HistoryAction.getElementLabel(IMember[])
-		String scopeDescription= fSearchScopeActions.getFullDescription();
+		String scopeDescription= fSearchScopeActions.getFullDescription(includeMask);
 
 		if (fInputElements.length == 1) {
 			IMember element= fInputElements[0];
@@ -1120,13 +1237,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_2,
 		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
 
-		        	case 3:
-		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_3,
-		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
-
 		        	default:
 		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_more,
-		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
+		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
 				}
 			} else {
 				switch (fInputElements.length) {
@@ -1137,13 +1250,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_2,
 								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
 
-					case 3:
-						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_3,
-								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
-
 					default:
 						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_more,
-								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
+								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
 				}
 			}
 		}
@@ -1200,5 +1309,121 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	 */
 	protected LocationViewer getLocationViewer() {
 		return fLocationViewer;
+	}
+
+	/**
+	 * Marks the view as pinned.
+	 * 
+	 * @param pinned if <code>true</code> the view is marked as pinned
+	 * @since 3.7
+	 */
+	void setPinned(boolean pinned) {
+		fIsPinned= pinned;
+	}
+
+	/**
+	 * Indicates whether the Call Hierarchy view is pinned.
+	 * 
+	 * @return <code>true</code> if the view is pinned, <code>false</code> otherwise
+	 * @since 3.7
+	 */
+	boolean isPinned() {
+		return fIsPinned;
+	}
+
+	/**
+	 * Returns the method history.
+	 * 
+	 * @return the method history
+	 * @since 3.7
+	 */
+	private List<IMember[]>getMethodHistory() {
+		return CallHierarchyUI.getDefault().getMethodHistory();
+	}
+
+	/*
+	 * @see org.eclipse.ui.part.WorkbenchPart#showBusy(boolean)
+	 * @since 3.7
+	 */
+	@Override
+	public void showBusy(boolean busy) {
+		super.showBusy(busy);
+		if (!busy)
+			getProgressService().warnOfContentChange();
+	}
+
+	/**
+	 * Fetches the progress service for the workbench part site.
+	 * 
+	 * @return the progress service for the workbench part site
+	 * @since 3.7
+	 */
+	private IWorkbenchSiteProgressService getProgressService() {
+		IWorkbenchSiteProgressService service= null;
+		Object siteService= getSite().getAdapter(IWorkbenchSiteProgressService.class);
+		if (siteService != null)
+			service= (IWorkbenchSiteProgressService)siteService;
+		return service;
+	}
+
+	/**
+	 * Adds the new input elements to the current list.
+	 * 
+	 * @param newElements the new input elements to add
+	 * @since 3.7
+	 */
+	void addInputElements(IMember[] newElements) {
+		// Caveat: RemoveFromViewAction#run() disposes TreeItems. When we add a previously removed element,
+		// we have to consider the real Tree state, not only fInputElements.
+		
+		List<IMember> inputElements= Arrays.asList(fInputElements);
+		List<IMember> treeElements= new ArrayList<IMember>();
+		TreeItem[] treeItems= fCallHierarchyViewer.getTree().getItems();
+		for (int i= 0; i < treeItems.length; i++) {
+			Object data= treeItems[i].getData();
+			if (data instanceof MethodWrapper)
+				treeElements.add(((MethodWrapper) data).getMember());
+		}
+		
+		List<IMember> newInput= new ArrayList<IMember>();
+		newInput.addAll(inputElements);
+		List<IMember> addedElements= new ArrayList<IMember>();
+		
+		for (int i= 0; i < newElements.length; i++) {
+			IMember newElement= newElements[i];
+			if (! inputElements.contains(newElement))
+				newInput.add(newElement);
+			if (! treeElements.contains(newElement))
+				addedElements.add(newElement);
+		}
+		if (treeElements.size() == 0)
+			updateInputHistoryAndDescription(fInputElements, newElements);
+		else if (newInput.size() > fInputElements.length)
+			updateInputHistoryAndDescription(fInputElements, newInput.toArray(new IMember[newInput.size()]));
+		if (addedElements.size() > 0)
+			updateViewWithAddedElements(addedElements.toArray(new IMember[addedElements.size()]));
+	}
+
+	/**
+	 * Updates the view with the newly added input elements.
+	 * 
+	 * @param newElements the newly added elements
+	 * @since 3.7
+	 */
+	private void updateViewWithAddedElements(IMember[] newElements) {
+		setCalleeRoots(null);
+		setCallerRoots(null);
+		MethodWrapper[] roots;
+		if (getCallMode() == CALL_MODE_CALLERS)
+			roots= CallHierarchy.getDefault().getCallerRoots(newElements);
+		else
+			roots= CallHierarchy.getDefault().getCalleeRoots(newElements);
+		CallHierarchyViewer hierarchyViewer= getViewer();		
+		TreeRoot treeRoot= hierarchyViewer.getTreeRoot(roots, true);
+		hierarchyViewer.add(treeRoot, roots);
+		for (int i= 0; i < roots.length; i++) {
+			hierarchyViewer.setExpandedState(roots[i], true);
+		}
+		hierarchyViewer.setSelection(new StructuredSelection(roots), true);
 	}
 }

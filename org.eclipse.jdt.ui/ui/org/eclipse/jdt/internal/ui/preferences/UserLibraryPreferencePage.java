@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -138,9 +138,9 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		private SelectionButtonDialogField fIsSystemField;
 
 		private CPUserLibraryElement fElementToEdit;
-		private List fExistingLibraries;
+		private List<CPUserLibraryElement> fExistingLibraries;
 
-		public LibraryNameDialog(Shell parent, CPUserLibraryElement elementToEdit, List existingLibraries) {
+		public LibraryNameDialog(Shell parent, CPUserLibraryElement elementToEdit, List<CPUserLibraryElement> existingLibraries) {
 			super(parent);
 			if (elementToEdit == null) {
 				setTitle(PreferencesMessages.UserLibraryPreferencePage_LibraryNameDialog_new_title);
@@ -170,6 +170,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 		 */
+		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
 			LayoutUtil.doDefaultLayout(composite, new DialogField[] { fNameField, fIsSystemField }, true, SWT.DEFAULT, SWT.DEFAULT);
@@ -197,7 +198,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				return new StatusInfo(IStatus.ERROR, PreferencesMessages.UserLibraryPreferencePage_LibraryNameDialog_name_error_entername);
 			}
 			for (int i= 0; i < fExistingLibraries.size(); i++) {
-				CPUserLibraryElement curr= (CPUserLibraryElement) fExistingLibraries.get(i);
+				CPUserLibraryElement curr= fExistingLibraries.get(i);
 				if (curr != fElementToEdit && name.equals(curr.getName())) {
 					return new StatusInfo(IStatus.ERROR, Messages.format(PreferencesMessages.UserLibraryPreferencePage_LibraryNameDialog_name_error_exists, name));
 				}
@@ -219,7 +220,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 
 	}
 
-	public static class LoadSaveDialog extends StatusDialog implements IStringButtonAdapter, IDialogFieldListener, IListAdapter {
+	public static class LoadSaveDialog extends StatusDialog implements IStringButtonAdapter, IDialogFieldListener, IListAdapter<CPUserLibraryElement> {
 
 
 		private static final String VERSION1= "1"; //$NON-NLS-1$ // using OS strings for archive path and source attachment
@@ -243,17 +244,17 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		private static final String PREF_LASTPATH= JavaUI.ID_PLUGIN + ".lastuserlibrary"; //$NON-NLS-1$
 		private static final String PREF_USER_LIBRARY_LOADSAVE_SIZE= "UserLibraryLoadSaveDialog.size"; //$NON-NLS-1$
 
-		private List fExistingLibraries;
+		private List<CPUserLibraryElement> fExistingLibraries;
 		private IDialogSettings fSettings;
 
 		private File fLastFile;
 
 		private StringButtonDialogField fLocationField;
-		private CheckedListDialogField fExportImportList;
+		private CheckedListDialogField<CPUserLibraryElement> fExportImportList;
 		private Point fInitialSize;
 		private final boolean fIsSave;
 
-		public LoadSaveDialog(Shell shell, boolean isSave, List existingLibraries, IDialogSettings dialogSettings) {
+		public LoadSaveDialog(Shell shell, boolean isSave, List<CPUserLibraryElement> existingLibraries, IDialogSettings dialogSettings) {
 			super(shell);
 			initializeDialogUnits(shell);
 
@@ -286,7 +287,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_list_selectall_button,
 					PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_list_deselectall_button
 			};
-			fExportImportList= new CheckedListDialogField(this, buttonNames, new CPListLabelProvider());
+			fExportImportList= new CheckedListDialogField<CPUserLibraryElement>(this, buttonNames, new CPListLabelProvider());
 			fExportImportList.setCheckAllButtonIndex(0);
 			fExportImportList.setUncheckAllButtonIndex(1);
 			fExportImportList.setViewerComparator(new CPListElementSorter());
@@ -310,10 +311,12 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 		 * @since 3.4
 		 */
+		@Override
 		protected boolean isResizable() {
 			return true;
 		}
 
+		@Override
 		protected Point getInitialSize() {
 			return fInitialSize;
 		}
@@ -325,6 +328,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 		 */
+		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
 			DialogField[] fields;
@@ -382,7 +386,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				if (!file.equals(fLastFile)) {
 					fLastFile= file;
 					try {
-						List elements= loadLibraries(file);
+						List<CPUserLibraryElement> elements= loadLibraries(file);
 						fExportImportList.setElements(elements);
 						fExportImportList.checkAll(true);
 						fExportImportList.setEnabled(true);
@@ -417,22 +421,22 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#customButtonPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField, int)
 		 */
-		public void customButtonPressed(ListDialogField field, int index) {
+		public void customButtonPressed(ListDialogField<CPUserLibraryElement> field, int index) {
 		}
 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#selectionChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
-		public void selectionChanged(ListDialogField field) {
+		public void selectionChanged(ListDialogField<CPUserLibraryElement> field) {
 		}
 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#doubleClicked(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
-		public void doubleClicked(ListDialogField field) {
-			List selectedElements= fExportImportList.getSelectedElements();
+		public void doubleClicked(ListDialogField<CPUserLibraryElement> field) {
+			List<CPUserLibraryElement> selectedElements= fExportImportList.getSelectedElements();
 			if (selectedElements.size() == 1) {
-				Object elem= selectedElements.get(0);
+				CPUserLibraryElement elem= selectedElements.get(0);
 				fExportImportList.setChecked(elem, !fExportImportList.isChecked(elem));
 			}
 		}
@@ -440,6 +444,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
 		 */
+		@Override
 		protected void okPressed() {
 			if (isSave()) {
 				final File file= new File(fLocationField.getText());
@@ -465,7 +470,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 							}
 						}
 					}
-					final List elements= fExportImportList.getCheckedElements();
+					final List<CPUserLibraryElement> elements= fExportImportList.getCheckedElements();
 					final String charset= encoding;
 					IRunnableContext context= PlatformUI.getWorkbench().getProgressService();
 					try {
@@ -495,15 +500,15 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					JavaPlugin.log(exception);
 				}
 			} else {
-				HashSet map= new HashSet(fExistingLibraries.size());
+				HashSet<String> map= new HashSet<String>(fExistingLibraries.size());
 				for (int k= 0; k < fExistingLibraries.size(); k++) {
-					CPUserLibraryElement elem= (CPUserLibraryElement) fExistingLibraries.get(k);
+					CPUserLibraryElement elem= fExistingLibraries.get(k);
 					map.add(elem.getName());
 				}
 				int nReplaced= 0;
-				List elements= getLoadedLibraries();
+				List<CPUserLibraryElement> elements= getLoadedLibraries();
 				for (int i= 0; i < elements.size(); i++) {
-					CPUserLibraryElement curr= (CPUserLibraryElement) elements.get(i);
+					CPUserLibraryElement curr= elements.get(i);
 					if (map.contains(curr.getName())) {
 						nReplaced++;
 					}
@@ -527,6 +532,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.dialogs.Dialog#close()
 		 */
+		@Override
 		public boolean close() {
 			Point point= getShell().getSize();
 			fSettings.put(PREF_USER_LIBRARY_LOADSAVE_SIZE, StringConverter.asString(point));
@@ -562,7 +568,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			return new StatusInfo();
 		}
 
-		protected static void saveLibraries(List libraries, File file, String encoding, IProgressMonitor monitor) throws IOException {
+		protected static void saveLibraries(List<CPUserLibraryElement> libraries, File file, String encoding, IProgressMonitor monitor) throws IOException {
 			OutputStream stream= new FileOutputStream(file);
 			try {
 				DocumentBuilder docBuilder= null;
@@ -581,7 +587,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					Element libraryElement= document.createElement(TAG_LIBRARY);
 					rootElement.appendChild(libraryElement);
 
-					CPUserLibraryElement curr= (CPUserLibraryElement) libraries.get(i);
+					CPUserLibraryElement curr= libraries.get(i);
 					libraryElement.setAttribute(TAG_NAME, curr.getName());
 					libraryElement.setAttribute(TAG_SYSTEMLIBRARY, String.valueOf(curr.isSystemLibrary()));
 
@@ -647,7 +653,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			}
 		}
 
-		private static List loadLibraries(File file) throws IOException {
+		private static List<CPUserLibraryElement> loadLibraries(File file) throws IOException {
 			InputStream stream= new FileInputStream(file);
 			Element cpElement;
 			try {
@@ -673,7 +679,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 
 			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 
-			ArrayList result= new ArrayList(length);
+			ArrayList<CPUserLibraryElement> result= new ArrayList<CPUserLibraryElement>(length);
 			for (int i= 0; i < length; i++) {
 				Node lib= libList.item(i);
 				if (!(lib instanceof Element)) {
@@ -725,7 +731,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 						NodeList ruleElements= ruleParentElement.getElementsByTagName(TAG_ACCESSRULE);
 						int nRuleElements= ruleElements.getLength();
 						if (nRuleElements > 0) {
-							ArrayList resultingRules= new ArrayList(nRuleElements);
+							ArrayList<IAccessRule> resultingRules= new ArrayList<IAccessRule>(nRuleElements);
 							for (int n= 0; n < nRuleElements; n++) {
 								Node node= ruleElements.item(n);
 								if (node instanceof Element) {
@@ -747,13 +753,13 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			return result;
 		}
 
-		public List getLoadedLibraries() {
+		public List<CPUserLibraryElement> getLoadedLibraries() {
 			return fExportImportList.getCheckedElements();
 		}
 	}
 
 	private IDialogSettings fDialogSettings;
-	private TreeListDialogField fLibraryList;
+	private TreeListDialogField<CPUserLibraryElement> fLibraryList;
 	private IJavaProject fDummyProject;
 	private ClasspathAttributeConfigurationDescriptors fAttributeDescriptors;
 
@@ -797,11 +803,11 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				PreferencesMessages.UserLibraryPreferencePage_libraries_save_button
 		};
 
-		fLibraryList= new TreeListDialogField(adapter, buttonLabels, new CPListLabelProvider());
+		fLibraryList= new TreeListDialogField<CPUserLibraryElement>(adapter, buttonLabels, new CPListLabelProvider());
 		fLibraryList.setLabelText(PreferencesMessages.UserLibraryPreferencePage_libraries_label);
 
 		String[] names= JavaCore.getUserLibraryNames();
-		ArrayList elements= new ArrayList();
+		ArrayList<CPUserLibraryElement> elements= new ArrayList<CPUserLibraryElement>();
 
 		for (int i= 0; i < names.length; i++) {
 			IPath path= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(names[i]);
@@ -835,15 +841,17 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
 	 */
+	@Override
 	public void applyData(Object data) {
 		if (data instanceof Map) {
-			Map map= (Map) data;
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map= (Map<String, Object>) data;
 			Object selectedLibrary= map.get(DATA_LIBRARY_TO_SELECT);
 			boolean createIfNotExists= Boolean.TRUE.equals(map.get(DATA_DO_CREATE));
 			if (selectedLibrary instanceof String) {
 				int nElements= fLibraryList.getSize();
 				for (int i= 0; i < nElements; i++) {
-					CPUserLibraryElement curr= (CPUserLibraryElement) fLibraryList.getElement(i);
+					CPUserLibraryElement curr= fLibraryList.getElement(i);
 					if (curr.getName().equals(selectedLibrary)) {
 						fLibraryList.selectElements(new StructuredSelection(curr));
 						fLibraryList.expandElement(curr, 1);
@@ -864,6 +872,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CP_USERLIBRARIES_PREFERENCE_PAGE);
@@ -872,6 +881,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	/*
 	 * @see PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
@@ -890,6 +900,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
+	@Override
 	protected void performDefaults() {
 		super.performDefaults();
 	}
@@ -897,6 +908,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	/*
 	 * @see PreferencePage#performOk()
 	 */
+	@Override
 	public boolean performOk() {
 		try {
 			PlatformUI.getWorkbench().getProgressService().run(true, true, new IRunnableWithProgress() {
@@ -926,13 +938,13 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 
 
 	private void updateUserLibararies(IProgressMonitor monitor) throws CoreException {
-		List list= fLibraryList.getElements();
-		HashSet oldNames= new HashSet(Arrays.asList(JavaCore.getUserLibraryNames()));
+		List<CPUserLibraryElement> list= fLibraryList.getElements();
+		HashSet<String> oldNames= new HashSet<String>(Arrays.asList(JavaCore.getUserLibraryNames()));
 		int nExisting= list.size();
 
-		HashSet newEntries= new HashSet(list.size());
+		HashSet<CPUserLibraryElement> newEntries= new HashSet<CPUserLibraryElement>(list.size());
 		for (int i= 0; i < nExisting; i++) {
-			CPUserLibraryElement element= (CPUserLibraryElement) list.get(i);
+			CPUserLibraryElement element= list.get(i);
 			boolean contained= oldNames.remove(element.getName());
 			if (!contained) {
 				newEntries.add(element);
@@ -947,7 +959,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		IJavaProject jproject= fDummyProject;
 
 		for (int i= 0; i < nExisting; i++) {
-			CPUserLibraryElement element= (CPUserLibraryElement) list.get(i);
+			CPUserLibraryElement element= list.get(i);
 			IPath path= element.getPath();
 			if (newEntries.contains(element) || element.hasChanges(JavaCore.getClasspathContainer(path, jproject))) {
 				IClasspathContainer updatedContainer= element.getUpdatedContainer();
@@ -960,9 +972,9 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			monitor.worked(1);
 		}
 
-		Iterator iter= oldNames.iterator();
+		Iterator<String> iter= oldNames.iterator();
 		while (iter.hasNext()) {
-			String name= (String) iter.next();
+			String name= iter.next();
 
 			IPath path= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(name);
 			try {
@@ -978,7 +990,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		}
 	}
 
-	private CPUserLibraryElement getSingleSelectedLibrary(List selected) {
+	private CPUserLibraryElement getSingleSelectedLibrary(List<Object> selected) {
 		if (selected.size() == 1 && selected.get(0) instanceof CPUserLibraryElement) {
 			return (CPUserLibraryElement) selected.get(0);
 		}
@@ -988,18 +1000,19 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	private void editAttributeEntry(CPListElementAttribute elem) {
 		String key= elem.getKey();
 		CPListElement selElement= elem.getParent();
+		Object parentContainer= selElement.getParentContainer();
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
 			IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(getShell(), selElement.getClasspathEntry());
 			if (result != null) {
 				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, result.getSourceAttachmentPath());
-				fLibraryList.refresh(elem);
+				fLibraryList.refresh(parentContainer);
 				fLibraryList.update(selElement);
 			}
 		} else if (key.equals(CPListElement.ACCESSRULES)) {
 			AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement, null, false);
 			if (dialog.open() == Window.OK) {
 				selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
-				fLibraryList.refresh(elem);
+				fLibraryList.refresh(parentContainer);
 				fLibraryList.expandElement(elem, 2);
 			}
 		} else if (!elem.isBuiltIn()) {
@@ -1008,14 +1021,14 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				IClasspathAttribute result= config.performEdit(getShell(), elem.getClasspathAttributeAccess());
 				if (result != null) {
 					elem.setValue(result.getValue());
-					fLibraryList.refresh(elem);
+					fLibraryList.refresh(parentContainer);
 				}
 			}
 		}
 	}
 
-	protected void doSelectionChanged(TreeListDialogField field) {
-		List list= field.getSelectedElements();
+	protected void doSelectionChanged(TreeListDialogField<CPUserLibraryElement> field) {
+		List<Object> list= field.getSelectedElements();
 		field.enableButton(IDX_REMOVE, canRemove(list));
 		field.enableButton(IDX_EDIT, canEdit(list));
 		field.enableButton(IDX_ADD, canAdd(list));
@@ -1024,7 +1037,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		field.enableButton(IDX_SAVE, field.getSize() > 0);
 	}
 
-	protected void doCustomButtonPressed(TreeListDialogField field, int index) {
+	protected void doCustomButtonPressed(TreeListDialogField<CPUserLibraryElement> field, int index) {
 		if (index == IDX_NEW) {
 			editUserLibraryElement(null);
 		} else if (index == IDX_ADD) {
@@ -1044,23 +1057,23 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		}
 	}
 
-	protected void doDoubleClicked(TreeListDialogField field) {
-		List selected= field.getSelectedElements();
+	protected void doDoubleClicked(TreeListDialogField<CPUserLibraryElement> field) {
+		List<Object> selected= field.getSelectedElements();
 		if (canEdit(selected)) {
 			doEdit(field.getSelectedElements());
 		}
 	}
 
-	protected void doKeyPressed(TreeListDialogField field, KeyEvent event) {
+	protected void doKeyPressed(TreeListDialogField<CPUserLibraryElement> field, KeyEvent event) {
 		if (event.character == SWT.DEL && event.stateMask == 0) {
-			List selection= field.getSelectedElements();
+			List<Object> selection= field.getSelectedElements();
 			if (canRemove(selection)) {
 				doRemove(selection);
 			}
 		}
 	}
 
-	private void doEdit(List selected) {
+	private void doEdit(List<Object> selected) {
 		if (selected.size() == 1) {
 			Object curr= selected.get(0);
 			if (curr instanceof CPListElementAttribute) {
@@ -1106,12 +1119,12 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	}
 
 
-	private void doRemove(List selected) {
+	private void doRemove(List<Object> selected) {
 		Object selectionAfter= null;
 		for (int i= 0; i < selected.size(); i++) {
 			Object curr= selected.get(i);
 			if (curr instanceof CPUserLibraryElement) {
-				fLibraryList.removeElement(curr);
+				fLibraryList.removeElement((CPUserLibraryElement) curr);
 			} else if (curr instanceof CPListElement) {
 				Object parent= ((CPListElement) curr).getParentContainer();
 				if (parent instanceof CPUserLibraryElement) {
@@ -1122,6 +1135,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				}
 			} else if (curr instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) curr;
+				Object parentContainer= attrib.getParent().getParentContainer();
 				if (attrib.isBuiltIn()) {
 					Object value= null;
 					String key= attrib.getKey();
@@ -1129,14 +1143,14 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 						value= new IAccessRule[0];
 					}
 					attrib.getParent().setAttribute(key, value);
-					fLibraryList.refresh(attrib);
+					fLibraryList.refresh(parentContainer);
 				} else {
 					ClasspathAttributeConfiguration config= fAttributeDescriptors.get(attrib.getKey());
 					if (config != null) {
 						IClasspathAttribute result= config.performRemove(attrib.getClasspathAttributeAccess());
 						if (result != null) {
 							attrib.setValue(result.getValue());
-							fLibraryList.refresh(attrib);
+							fLibraryList.refresh(parentContainer);
 						}
 					}
 				}
@@ -1153,7 +1167,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		}
 	}
 
-	private void doAdd(List list) {
+	private void doAdd(List<Object> list) {
 		if (canAdd(list)) {
 			CPUserLibraryElement element= getSingleSelectedLibrary(list);
 			editArchiveElement(null, element);
@@ -1161,19 +1175,19 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	}
 
 	private void doLoad() {
-		List existing= fLibraryList.getElements();
+		List<CPUserLibraryElement> existing= fLibraryList.getElements();
 		LoadSaveDialog dialog= new LoadSaveDialog(getShell(), false, existing, fDialogSettings);
 		if (dialog.open() == Window.OK) {
-			HashMap map= new HashMap(existing.size());
+			HashMap<String, CPUserLibraryElement> map= new HashMap<String, CPUserLibraryElement>(existing.size());
 			for (int k= 0; k < existing.size(); k++) {
-				CPUserLibraryElement elem= (CPUserLibraryElement) existing.get(k);
+				CPUserLibraryElement elem= existing.get(k);
 				map.put(elem.getName(), elem);
 			}
 
-			List list= dialog.getLoadedLibraries();
+			List<CPUserLibraryElement> list= dialog.getLoadedLibraries();
 			for (int i= 0; i < list.size(); i++) {
-				CPUserLibraryElement elem= (CPUserLibraryElement) list.get(i);
-				CPUserLibraryElement found= (CPUserLibraryElement) map.get(elem.getName());
+				CPUserLibraryElement elem= list.get(i);
+				CPUserLibraryElement found= map.get(elem.getName());
 				if (found == null) {
 					existing.add(elem);
 					map.put(elem.getName(), elem);
@@ -1191,11 +1205,11 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		dialog.open();
 	}
 
-	private boolean canAdd(List list) {
+	private boolean canAdd(List<Object> list) {
 		return getSingleSelectedLibrary(list) != null;
 	}
 
-	private boolean canEdit(List list) {
+	private boolean canEdit(List<Object> list) {
 		if (list.size() != 1)
 			return false;
 
@@ -1212,7 +1226,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		return true;
 	}
 
-	private boolean canRemove(List list) {
+	private boolean canRemove(List<Object> list) {
 		if (list.size() == 0) {
 			return false;
 		}
@@ -1247,7 +1261,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		return true;
 	}
 
-	private CPUserLibraryElement getCommonParent(List list) {
+	private CPUserLibraryElement getCommonParent(List<?> list) {
 		CPUserLibraryElement parent= null;
 		for (int i= 0, len= list.size(); i < len; i++) {
 			Object curr= list.get(i);
@@ -1269,26 +1283,30 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		return parent;
 	}
 
-	private void doMoveUp(List list) {
+	private void doMoveUp(List<?> list) {
 		CPUserLibraryElement parent= getCommonParent(list);
 		if (parent != null) {
-			parent.moveUp(list);
+			@SuppressWarnings("unchecked")
+			List<CPListElement> cpElementList= (List<CPListElement>) list;
+			parent.moveUp(cpElementList);
 			fLibraryList.refresh(parent);
 			doSelectionChanged(fLibraryList);
 		}
 	}
 
-	private void doMoveDown(List list) {
+	private void doMoveDown(List<?> list) {
 		CPUserLibraryElement parent= getCommonParent(list);
 		if (parent != null) {
-			parent.moveDown(list);
+			@SuppressWarnings("unchecked")
+			List<CPListElement> cpElementList= (List<CPListElement>) list;
+			parent.moveDown(cpElementList);
 			fLibraryList.refresh(parent);
 			doSelectionChanged(fLibraryList);
 		}
 	}
 
 
-	private boolean canMoveUp(List list) {
+	private boolean canMoveUp(List<?> list) {
 		CPUserLibraryElement parent= getCommonParent(list);
 		if (parent != null) {
 			CPListElement[] children= parent.getChildren();
@@ -1301,7 +1319,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		return false;
 	}
 
-	private boolean canMoveDown(List list) {
+	private boolean canMoveDown(List<?> list) {
 		CPUserLibraryElement parent= getCommonParent(list);
 		if (parent != null) {
 			CPListElement[] children= parent.getChildren();
@@ -1365,27 +1383,27 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	}
 
 
-	private class UserLibraryAdapter implements ITreeListAdapter {
+	private class UserLibraryAdapter implements ITreeListAdapter<CPUserLibraryElement> {
 
 		private final Object[] EMPTY= new Object[0];
 
-		public void customButtonPressed(TreeListDialogField field, int index) {
+		public void customButtonPressed(TreeListDialogField<CPUserLibraryElement> field, int index) {
 			doCustomButtonPressed(field, index);
 		}
 
-		public void selectionChanged(TreeListDialogField field) {
+		public void selectionChanged(TreeListDialogField<CPUserLibraryElement> field) {
 			doSelectionChanged(field);
 		}
 
-		public void doubleClicked(TreeListDialogField field) {
+		public void doubleClicked(TreeListDialogField<CPUserLibraryElement> field) {
 			doDoubleClicked(field);
 		}
 
-		public void keyPressed(TreeListDialogField field, KeyEvent event) {
+		public void keyPressed(TreeListDialogField<CPUserLibraryElement> field, KeyEvent event) {
 			doKeyPressed(field, event);
 		}
 
-		public Object[] getChildren(TreeListDialogField field, Object element) {
+		public Object[] getChildren(TreeListDialogField<CPUserLibraryElement> field, Object element) {
 			if (element instanceof CPUserLibraryElement) {
 				CPUserLibraryElement elem= (CPUserLibraryElement) element;
 				return elem.getChildren();
@@ -1400,7 +1418,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			return EMPTY;
 		}
 
-		public Object getParent(TreeListDialogField field, Object element) {
+		public Object getParent(TreeListDialogField<CPUserLibraryElement> field, Object element) {
 			if (element instanceof CPListElementAttribute) {
 				return ((CPListElementAttribute) element).getParent();
 			} else if (element instanceof CPListElement) {
@@ -1409,7 +1427,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			return null;
 		}
 
-		public boolean hasChildren(TreeListDialogField field, Object element) {
+		public boolean hasChildren(TreeListDialogField<CPUserLibraryElement> field, Object element) {
 			return getChildren(field, element).length > 0;
 		}
 

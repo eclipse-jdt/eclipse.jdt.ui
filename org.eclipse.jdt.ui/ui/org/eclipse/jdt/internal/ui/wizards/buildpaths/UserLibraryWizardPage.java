@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Konstantin Komissarchik <konstantin.komissarchik@oracle.com> - [build path] editing user library properties drops classpath entry attributes - http://bugs.eclipse.org/311603
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
@@ -63,30 +64,30 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
  */
 public class UserLibraryWizardPage extends NewElementWizardPage implements IClasspathContainerPage, IClasspathContainerPageExtension, IClasspathContainerPageExtension2  {
 
-	private CheckedListDialogField fLibrarySelector;
+	private CheckedListDialogField<CPUserLibraryElement> fLibrarySelector;
 	private CPUserLibraryElement fEditResult;
-	private Set fUsedPaths;
+	private Set<IPath> fUsedPaths;
 	private boolean fIsEditMode;
 	private IJavaProject fProject;
-	private boolean fIsExported;
+	private IClasspathEntry fOldClasspathEntry;
 
 	public UserLibraryWizardPage() {
 		super("UserLibraryWizardPage"); //$NON-NLS-1$
 		setTitle(NewWizardMessages.UserLibraryWizardPage_title);
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
 		updateDescription(null);
-		fUsedPaths= new HashSet();
+		fUsedPaths= new HashSet<IPath>();
 		fProject= createPlaceholderProject();
 
 		LibraryListAdapter adapter= new LibraryListAdapter();
 		String[] buttonLabels= new String[] {
 				NewWizardMessages.UserLibraryWizardPage_list_config_button
 		};
-		fLibrarySelector= new CheckedListDialogField(adapter, buttonLabels, new CPListLabelProvider());
+		fLibrarySelector= new CheckedListDialogField<CPUserLibraryElement>(adapter, buttonLabels, new CPListLabelProvider());
 		fLibrarySelector.setDialogFieldListener(adapter);
 		fLibrarySelector.setLabelText(NewWizardMessages.UserLibraryWizardPage_list_label);
 		fEditResult= null;
-		updateStatus(validateSetting(Collections.EMPTY_LIST));
+		updateStatus(validateSetting(Collections.<CPUserLibraryElement>emptyList()));
 	}
 
     private static IJavaProject createPlaceholderProject() {
@@ -109,24 +110,24 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		}
 	}
 
-	private List updateLibraryList() {
-		HashSet oldNames= new HashSet();
-		HashSet oldCheckedNames= new HashSet();
-		List oldElements= fLibrarySelector.getElements();
+	private List<CPUserLibraryElement> updateLibraryList() {
+		HashSet<String> oldNames= new HashSet<String>();
+		HashSet<String> oldCheckedNames= new HashSet<String>();
+		List<CPUserLibraryElement> oldElements= fLibrarySelector.getElements();
 		for (int i= 0; i < oldElements.size(); i++) {
-			CPUserLibraryElement curr= (CPUserLibraryElement) oldElements.get(i);
+			CPUserLibraryElement curr= oldElements.get(i);
 			oldNames.add(curr.getName());
 			if (fLibrarySelector.isChecked(curr)) {
 				oldCheckedNames.add(curr.getName());
 			}
 		}
 
-		ArrayList entriesToCheck= new ArrayList();
+		ArrayList<CPUserLibraryElement> entriesToCheck= new ArrayList<CPUserLibraryElement>();
 
 		String[] names= JavaCore.getUserLibraryNames();
 		Arrays.sort(names, Collator.getInstance());
 
-		ArrayList elements= new ArrayList(names.length);
+		ArrayList<CPUserLibraryElement> elements= new ArrayList<CPUserLibraryElement>(names.length);
 		for (int i= 0; i < names.length; i++) {
 			String curr= names[i];
 			IPath path= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(curr);
@@ -154,25 +155,25 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 
 	private void doDialogFieldChanged(DialogField field) {
 		if (field == fLibrarySelector) {
-			List list= fLibrarySelector.getCheckedElements();
+			List<CPUserLibraryElement> list= fLibrarySelector.getCheckedElements();
 			if (fIsEditMode) {
 				if (list.size() > 1) {
 					if (fEditResult != null && list.remove(fEditResult)) {
 						fLibrarySelector.setCheckedWithoutUpdate(fEditResult, false);
 					}
-					fEditResult= (CPUserLibraryElement) list.get(0); // take the first
+					fEditResult= list.get(0); // take the first
 					for (int i= 1; i < list.size(); i++) { // uncheck the rest
 						fLibrarySelector.setCheckedWithoutUpdate(list.get(i), false);
 					}
 				} else if (list.size() == 1) {
-					fEditResult= (CPUserLibraryElement) list.get(0);
+					fEditResult= list.get(0);
 				}
 			}
 			updateStatus(validateSetting(list));
 		}
 	}
 
-	private IStatus validateSetting(List selected) {
+	private IStatus validateSetting(List<CPUserLibraryElement> selected) {
 		int nSelected= selected.size();
 		if (nSelected == 0) {
 			return new StatusInfo(IStatus.ERROR, NewWizardMessages.UserLibraryWizardPage_error_selectentry);
@@ -180,7 +181,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 			return new StatusInfo(IStatus.ERROR, NewWizardMessages.UserLibraryWizardPage_error_selectonlyone);
 		}
 		for (int i= 0; i < selected.size(); i++) {
-			CPUserLibraryElement curr= (CPUserLibraryElement) selected.get(i);
+			CPUserLibraryElement curr= selected.get(i);
 			if (fUsedPaths.contains(curr.getPath())) {
 				return new StatusInfo(IStatus.ERROR, NewWizardMessages.UserLibraryWizardPage_error_alreadyoncp);
 			}
@@ -190,14 +191,14 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 
 	private void doButtonPressed(int index) {
 		if (index == 0) {
-			HashMap data= new HashMap(3);
+			HashMap<String, String> data= new HashMap<String, String>(3);
 			if (fEditResult != null) {
 				data.put(UserLibraryPreferencePage.DATA_LIBRARY_TO_SELECT, fEditResult.getName());
 			}
 			String id= UserLibraryPreferencePage.ID;
 			PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, data).open();
 
-			List newEntries= updateLibraryList();
+			List<CPUserLibraryElement> newEntries= updateLibraryList();
 			if (newEntries.size() > 0) {
 				if (fIsEditMode) {
 					fLibrarySelector.setChecked(newEntries.get(0), true);
@@ -210,11 +211,11 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		}
 	}
 
-	private void doDoubleClicked(ListDialogField field) {
+	private void doDoubleClicked(ListDialogField<CPUserLibraryElement> field) {
 		if (field == fLibrarySelector) {
-			List list= fLibrarySelector.getSelectedElements();
+			List<CPUserLibraryElement> list= fLibrarySelector.getSelectedElements();
 			if (list.size() == 1) {
-				Object elem= list.get(0);
+				CPUserLibraryElement elem= list.get(0);
 				boolean state= fLibrarySelector.isChecked(elem);
 				if (!state || !fIsEditMode) {
 					fLibrarySelector.setChecked(elem, !state);
@@ -236,6 +237,18 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		setControl(composite);
 	}
 
+	/*
+	 * @see org.eclipse.jdt.ui.wizards.NewElementWizardPage#setVisible(boolean)
+	 * @since 3.7
+	 */
+	@Override
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		if (visible) {
+			fLibrarySelector.setFocus();
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPage#finish()
 	 */
@@ -248,7 +261,11 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	 */
 	public IClasspathEntry getSelection() {
 		if (fEditResult != null) {
-			return JavaCore.newContainerEntry(fEditResult.getPath(), fIsExported);
+			if (fOldClasspathEntry != null && fOldClasspathEntry.getPath().equals(fEditResult.getPath())) {
+				return JavaCore.newContainerEntry(fEditResult.getPath(), fOldClasspathEntry.getAccessRules(), fOldClasspathEntry.getExtraAttributes(), fOldClasspathEntry.isExported());
+			} else {
+				return JavaCore.newContainerEntry(fEditResult.getPath(), false);
+			}
 		}
 		return null;
 	}
@@ -257,11 +274,11 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension2#getNewContainers()
 	 */
 	public IClasspathEntry[] getNewContainers() {
-		List selected= fLibrarySelector.getCheckedElements();
+		List<CPUserLibraryElement> selected= fLibrarySelector.getCheckedElements();
 		IClasspathEntry[] res= new IClasspathEntry[selected.size()];
 		for (int i= 0; i < res.length; i++) {
-			CPUserLibraryElement curr= (CPUserLibraryElement) selected.get(i);
-			res[i]= JavaCore.newContainerEntry(curr.getPath(), fIsExported);
+			CPUserLibraryElement curr= selected.get(i);
+			res[i]= JavaCore.newContainerEntry(curr.getPath(), false);
 		}
 		return res;
 	}
@@ -270,7 +287,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPage#setSelection(org.eclipse.jdt.core.IClasspathEntry)
 	 */
 	public void setSelection(IClasspathEntry containerEntry) {
-		fIsExported= containerEntry != null && containerEntry.isExported();
+		fOldClasspathEntry= containerEntry;
 
 		updateDescription(containerEntry);
 		fIsEditMode= (containerEntry != null);
@@ -286,9 +303,9 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		}
 		updateLibraryList();
 		if (selected != null) {
-			List elements= fLibrarySelector.getElements();
+			List<CPUserLibraryElement> elements= fLibrarySelector.getElements();
 			for (int i= 0; i < elements.size(); i++) {
-				CPUserLibraryElement curr= (CPUserLibraryElement) elements.get(i);
+				CPUserLibraryElement curr= elements.get(i);
 				if (curr.getName().equals(selected)) {
 					fLibrarySelector.setChecked(curr, true);
 					return;
@@ -297,7 +314,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		}
 	}
 
-	private class LibraryListAdapter implements IListAdapter, IDialogFieldListener {
+	private class LibraryListAdapter implements IListAdapter<CPUserLibraryElement>, IDialogFieldListener {
 
 		public LibraryListAdapter() {
 		}
@@ -306,14 +323,14 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 			doDialogFieldChanged(field);
 		}
 
-		public void customButtonPressed(ListDialogField field, int index) {
+		public void customButtonPressed(ListDialogField<CPUserLibraryElement> field, int index) {
 			doButtonPressed(index);
 		}
 
-		public void selectionChanged(ListDialogField field) {
+		public void selectionChanged(ListDialogField<CPUserLibraryElement> field) {
 		}
 
-		public void doubleClicked(ListDialogField field) {
+		public void doubleClicked(ListDialogField<CPUserLibraryElement> field) {
 			doDoubleClicked(field);
 		}
 	}

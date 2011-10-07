@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
@@ -51,6 +52,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -100,6 +102,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
@@ -190,6 +193,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		fLinkedProposalModel= linkedProposalModel;
 	}
 
+	@Override
 	public String getName() {
 		return RefactoringCoreMessages.ExtractConstantRefactoring_name;
 	}
@@ -258,8 +262,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 		if (fExcludedVariableNames == null) {
 			try {
 				IExpressionFragment expr= getSelectedExpression();
-				Collection takenNames= new ScopeAnalyzer(fCuRewrite.getRoot()).getUsedVariableNames(expr.getStartPosition(), expr.getLength());
-				fExcludedVariableNames= (String[]) takenNames.toArray(new String[takenNames.size()]);
+				Collection<String> takenNames= new ScopeAnalyzer(fCuRewrite.getRoot()).getUsedVariableNames(expr.getStartPosition(), expr.getLength());
+				fExcludedVariableNames= takenNames.toArray(new String[takenNames.size()]);
 			} catch (JavaModelException e) {
 				fExcludedVariableNames= new String[0];
 			}
@@ -267,6 +271,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return fExcludedVariableNames;
 	}
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 7); //$NON-NLS-1$
@@ -290,8 +295,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 			if (isLiteralNodeSelected())
 				fReplaceAllOccurrences= false;
 
+			if (isInTypeDeclarationAnnotation(getSelectedExpression().getAssociatedNode())) {
+				fVisibility= JdtFlags.VISIBILITY_STRING_PACKAGE;
+			}
+			
 			ITypeBinding targetType= getContainingTypeBinding();
-			if (targetType.isAnnotation() || targetType.isInterface()) {
+			if (targetType.isInterface()) {
 				fTargetIsInterface= true;
 				fVisibility= JdtFlags.VISIBILITY_STRING_PUBLIC;
 			}
@@ -442,6 +451,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.ExtractConstantRefactoring_checking_preconditions, 2);
 
@@ -472,7 +482,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	private void checkSource(SubProgressMonitor monitor, RefactoringStatus result) throws CoreException {
 		String newCuSource= fChange.getPreviewContent(new NullProgressMonitor());
-		CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, fCu, true, true, monitor);
+		CompilationUnit newCUNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(newCuSource, fCu, true, true, monitor);
 
 		IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCuRewrite.getRoot());
 		for (int i= 0; i < newProblems.length; i++) {
@@ -486,12 +496,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 		Type type= getConstantType();
 
 		IExpressionFragment fragment= getSelectedExpression();
-		String initializerSource= fCu.getBuffer().getText(fragment.getStartPosition(), fragment.getLength());
+		Expression initializer= getSelectedExpression().createCopyTarget(fCuRewrite.getASTRewrite(), true);
 
 		AST ast= fCuRewrite.getAST();
 		VariableDeclarationFragment variableDeclarationFragment= ast.newVariableDeclarationFragment();
 		variableDeclarationFragment.setName(ast.newSimpleName(fConstantName));
-		variableDeclarationFragment.setInitializer((Expression) fCuRewrite.getASTRewrite().createStringPlaceholder(initializerSource, ASTNode.SIMPLE_NAME));
+		variableDeclarationFragment.setInitializer(initializer);
 
 		FieldDeclaration fieldDeclaration= ast.newFieldDeclaration(variableDeclarationFragment);
 		fieldDeclaration.setType(type);
@@ -560,6 +570,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return fConstantTypeCache;
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		ExtractConstantDescriptor descriptor= createRefactoringDescriptor();
 		fChange.setDescriptor(new RefactoringChangeDescriptor(descriptor));
@@ -567,7 +578,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private ExtractConstantDescriptor createRefactoringDescriptor() {
-		final Map arguments= new HashMap();
+		final Map<String, String> arguments= new HashMap<String, String>();
 		String project= null;
 		IJavaProject javaProject= fCu.getJavaProject();
 		if (javaProject != null)
@@ -608,10 +619,18 @@ public class ExtractConstantRefactoring extends Refactoring {
 		IASTFragment[] fragmentsToReplace= getFragmentsToReplace();
 		for (int i= 0; i < fragmentsToReplace.length; i++) {
 			IASTFragment fragment= fragmentsToReplace[i];
+			ASTNode node= fragment.getAssociatedNode();
+			boolean inTypeDeclarationAnnotation= isInTypeDeclarationAnnotation(node);
+			if (inTypeDeclarationAnnotation && JdtFlags.VISIBILITY_STRING_PRIVATE == getVisibility())
+				continue;
 
 			SimpleName ref= ast.newSimpleName(fConstantName);
 			Name replacement= ref;
-			if (qualifyReferencesWithDeclaringClassName()) {
+			boolean qualifyReference= qualifyReferencesWithDeclaringClassName();
+			if (!qualifyReference) {
+				qualifyReference= inTypeDeclarationAnnotation;
+			}
+			if (qualifyReference) {
 				replacement= ast.newQualifiedName(ast.newSimpleName(getContainingTypeBinding().getName()), ref);
 			}
 			TextEditGroup description= fCuRewrite.createGroupDescription(RefactoringCoreMessages.ExtractConstantRefactoring_replace);
@@ -622,15 +641,20 @@ public class ExtractConstantRefactoring extends Refactoring {
 		}
 	}
 
+	private boolean isInTypeDeclarationAnnotation(ASTNode node) throws JavaModelException {
+		ASTNode enclosingAnnotation= ASTNodes.getParent(node, Annotation.class);
+		return enclosingAnnotation != null && enclosingAnnotation.getParent() == getContainingTypeDeclarationNode();
+	}
+
 	private void computeConstantDeclarationLocation() throws JavaModelException {
 		if (isDeclarationLocationComputed())
 			return;
 
 		BodyDeclaration lastStaticDependency= null;
-		Iterator decls= getContainingTypeDeclarationNode().bodyDeclarations().iterator();
+		Iterator<BodyDeclaration> decls= getContainingTypeDeclarationNode().bodyDeclarations().iterator();
 
 		while (decls.hasNext()) {
-			BodyDeclaration decl= (BodyDeclaration) decls.next();
+			BodyDeclaration decl= decls.next();
 
 			int modifiers;
 			if (decl instanceof FieldDeclaration)
@@ -670,8 +694,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 		if(bd instanceof FieldDeclaration) {
 			FieldDeclaration fieldDecl = (FieldDeclaration) bd;
-			for(Iterator fragments = fieldDecl.fragments().iterator(); fragments.hasNext();) {
-				VariableDeclarationFragment fragment = (VariableDeclarationFragment) fragments.next();
+			for(Iterator<VariableDeclarationFragment> fragments = fieldDecl.fragments().iterator(); fragments.hasNext();) {
+				VariableDeclarationFragment fragment = fragments.next();
 				SimpleName staticFieldName = fragment.getName();
 				if(selected.getSubFragmentsMatching(ASTFragmentFactory.createFragmentForFullSubtree(staticFieldName)).length != 0)
 					return true;
@@ -721,13 +745,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	/*
-	 * Elements returned by next() are BodyDeclaration
-	 * instances.
+	 * Elements returned by next() are BodyDeclaration or Annotation instances.
 	 */
-	private Iterator getReplacementScope() throws JavaModelException {
+	private Iterator<ASTNode> getReplacementScope() throws JavaModelException {
 		boolean declPredecessorReached= false;
 
-		Collection scope= new ArrayList();
+		Collection<ASTNode> scope= new ArrayList<ASTNode>();
 
 		AbstractTypeDeclaration containingType= getContainingTypeDeclarationNode();
 		if (containingType instanceof EnumDeclaration) {
@@ -735,9 +758,16 @@ public class ExtractConstantRefactoring extends Refactoring {
 			EnumDeclaration enumDeclaration= (EnumDeclaration) containingType;
 			scope.addAll(enumDeclaration.enumConstants());
 		}
+		
+		for (Iterator<IExtendedModifier> iter= containingType.modifiers().iterator(); iter.hasNext();) {
+			IExtendedModifier modifier= iter.next();
+			if (modifier instanceof Annotation) {
+				scope.add((ASTNode) modifier);
+			}
+		}
 
-		for (Iterator bodyDeclarations = containingType.bodyDeclarations().iterator(); bodyDeclarations.hasNext();) {
-		    BodyDeclaration bodyDeclaration= (BodyDeclaration) bodyDeclarations.next();
+		for (Iterator<BodyDeclaration> bodyDeclarations = containingType.bodyDeclarations().iterator(); bodyDeclarations.hasNext();) {
+		    BodyDeclaration bodyDeclaration= bodyDeclarations.next();
 
 		    if(bodyDeclaration == getNodeToInsertConstantDeclarationAfter())
 		    	declPredecessorReached= true;
@@ -749,29 +779,29 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private IASTFragment[] getFragmentsToReplace() throws JavaModelException {
-		List toReplace = new ArrayList();
+		List<IASTFragment> toReplace = new ArrayList<IASTFragment>();
 		if (fReplaceAllOccurrences) {
-			Iterator replacementScope = getReplacementScope();
+			Iterator<ASTNode> replacementScope = getReplacementScope();
 			while(replacementScope.hasNext()) {
-				BodyDeclaration bodyDecl = (BodyDeclaration) replacementScope.next();
-				IASTFragment[] allMatches= ASTFragmentFactory.createFragmentForFullSubtree(bodyDecl).getSubFragmentsMatching(getSelectedExpression());
+				ASTNode scope= replacementScope.next();
+				IASTFragment[] allMatches= ASTFragmentFactory.createFragmentForFullSubtree(scope).getSubFragmentsMatching(getSelectedExpression());
 				IASTFragment[] replaceableMatches = retainOnlyReplacableMatches(allMatches);
 				for(int i = 0; i < replaceableMatches.length; i++)
 					toReplace.add(replaceableMatches[i]);
 			}
 		} else if (canReplace(getSelectedExpression()))
 			toReplace.add(getSelectedExpression());
-		return (IASTFragment[]) toReplace.toArray(new IASTFragment[toReplace.size()]);
+		return toReplace.toArray(new IASTFragment[toReplace.size()]);
 	}
 
 	// !! - like one in ExtractTempRefactoring
 	private static IASTFragment[] retainOnlyReplacableMatches(IASTFragment[] allMatches) {
-		List result= new ArrayList(allMatches.length);
+		List<IASTFragment> result= new ArrayList<IASTFragment>(allMatches.length);
 		for (int i= 0; i < allMatches.length; i++) {
 			if (canReplace(allMatches[i]))
 				result.add(allMatches[i]);
 		}
-		return (IASTFragment[]) result.toArray(new IASTFragment[result.size()]);
+		return result.toArray(new IASTFragment[result.size()]);
 	}
 
 	// !! - like one in ExtractTempRefactoring

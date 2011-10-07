@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,8 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 
+import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -39,6 +41,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -50,19 +53,20 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -86,7 +90,7 @@ public class ParameterObjectFactory {
 	private boolean fCreateSetter;
 	private String fEnclosingType;
 	private String fPackage;
-	private List fVariables;
+	private List<ParameterInfo> fVariables;
 
 	public ParameterObjectFactory() {
 		super();
@@ -181,9 +185,9 @@ public class ParameterObjectFactory {
 			listener= new CreationListener();
 		TypeDeclaration typeDeclaration= ast.newTypeDeclaration();
 		typeDeclaration.setName(ast.newSimpleName(fClassName));
-		List body= typeDeclaration.bodyDeclarations();
-		for (Iterator iter= fVariables.iterator(); iter.hasNext();) {
-			ParameterInfo pi= (ParameterInfo) iter.next();
+		List<BodyDeclaration> body= typeDeclaration.bodyDeclarations();
+		for (Iterator<ParameterInfo> iter= fVariables.iterator(); iter.hasNext();) {
+			ParameterInfo pi= iter.next();
 			if (isValidField(pi)) {
 				FieldDeclaration declaration= createField(pi, cuRewrite);
 				listener.fieldCreated(cuRewrite, declaration, pi);
@@ -193,8 +197,8 @@ public class ParameterObjectFactory {
 		MethodDeclaration constructor= createConstructor(declaringType, cuRewrite, listener);
 		listener.constructorCreated(cuRewrite, constructor);
 		body.add(constructor);
-		for (Iterator iter= fVariables.iterator(); iter.hasNext();) {
-			ParameterInfo pi= (ParameterInfo) iter.next();
+		for (Iterator<ParameterInfo> iter= fVariables.iterator(); iter.hasNext();) {
+			ParameterInfo pi= iter.next();
 			if (fCreateGetter && isValidField(pi) && listener.isCreateGetter(pi)) {
 				MethodDeclaration getter= createGetter(pi, declaringType, cuRewrite);
 				listener.getterCreated(cuRewrite, getter, pi);
@@ -227,21 +231,21 @@ public class ParameterObjectFactory {
 				methodDeclaration.setJavadoc(doc);
 			}
 		}
-		List parameters= methodDeclaration.parameters();
+		List<SingleVariableDeclaration> parameters= methodDeclaration.parameters();
 		Block block= ast.newBlock();
 		methodDeclaration.setBody(block);
-		List statements= block.statements();
-		List validParameter= new ArrayList();
-		for (Iterator iter= fVariables.iterator(); iter.hasNext();) {
-			ParameterInfo pi= (ParameterInfo) iter.next();
+		List<Statement> statements= block.statements();
+		List<ParameterInfo> validParameter= new ArrayList<ParameterInfo>();
+		for (Iterator<ParameterInfo> iter= fVariables.iterator(); iter.hasNext();) {
+			ParameterInfo pi= iter.next();
 			if (isValidField(pi) && listener.isUseInConstructor(pi)) {
 					validParameter.add(pi);
 			}
 		}
 
-		ArrayList usedParameter= new ArrayList();
-		for (Iterator iter= validParameter.iterator(); iter.hasNext();) {
-			ParameterInfo pi= (ParameterInfo) iter.next();
+		ArrayList<String> usedParameter= new ArrayList<String>();
+		for (Iterator<ParameterInfo> iter= validParameter.iterator(); iter.hasNext();) {
+			ParameterInfo pi= iter.next();
 			SingleVariableDeclaration svd= ast.newSingleVariableDeclaration();
 			ITypeBinding typeBinding= pi.getNewTypeBinding();
 			if (!iter.hasNext() && typeBinding.isArray() && pi.isOldVarargs()) {
@@ -278,7 +282,7 @@ public class ParameterObjectFactory {
 		return methodDeclaration;
 	}
 
-	private String getParameterName(ParameterInfo pi, IJavaProject project, ArrayList usedParameter) {
+	private String getParameterName(ParameterInfo pi, IJavaProject project, ArrayList<String> usedParameter) {
 		String fieldName= pi.getNewName();
 		String strippedName= NamingConventions.getBaseName(NamingConventions.VK_INSTANCE_FIELD, fieldName, project);
 		String[] suggestions= StubUtility.getVariableNameSuggestions(NamingConventions.VK_PARAMETER, project, strippedName, 0, usedParameter, true);
@@ -313,7 +317,7 @@ public class ParameterObjectFactory {
 				declaration.setJavadoc(doc);
 			}
 		}
-		List modifiers= new ArrayList();
+		List<Modifier> modifiers= new ArrayList<Modifier>();
 		if (fCreateGetter) {
 			modifiers.add(ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD));
 		} else {
@@ -419,7 +423,7 @@ public class ParameterObjectFactory {
 		IVariableBinding variable= pi.getOldBinding();
 		declaration.setType(importBinding(pi.getNewTypeBinding(), cuRewrite));
 		int modifiers= variable.getModifiers();
-		List newModifiers= ast.newModifiers(modifiers);
+		List<Modifier> newModifiers= ast.newModifiers(modifiers);
 		declaration.modifiers().addAll(newModifiers);
 		return ast.newExpressionStatement(declaration);
 	}
@@ -472,6 +476,7 @@ public class ParameterObjectFactory {
 
 	ContextSensitiveImportRewriteContext createParameterClassAwareContext(final boolean asTopLevelClass, final CompilationUnitRewrite cuRewrite, int position) {
 		ContextSensitiveImportRewriteContext context= new ContextSensitiveImportRewriteContext(cuRewrite.getRoot(), position, cuRewrite.getImportRewrite()) {
+			@Override
 			public int findInContext(String qualifier, String name, int kind) {
 				String parameterClassName= getClassName();
 				if (kind == ImportRewriteContext.KIND_TYPE && parameterClassName.equals(name)) {
@@ -509,8 +514,8 @@ public class ParameterObjectFactory {
 	}
 
 	public ParameterInfo getParameterInfo(String identifier) {
-		for (Iterator iter= fVariables.iterator(); iter.hasNext();) {
-			ParameterInfo pi= (ParameterInfo) iter.next();
+		for (Iterator<ParameterInfo> iter= fVariables.iterator(); iter.hasNext();) {
+			ParameterInfo pi= iter.next();
 			if (pi.getOldName().equals(identifier))
 				return pi;
 		}
@@ -539,11 +544,11 @@ public class ParameterObjectFactory {
 		int idx= fVariables.indexOf(selected);
 		Assert.isTrue(idx >= 0 && idx < fVariables.size() - 1);
 		int nextIdx= idx + 1;
-		ParameterInfo next= (ParameterInfo) fVariables.get(nextIdx);
+		ParameterInfo next= fVariables.get(nextIdx);
 		if (next.isAdded()) {
 			nextIdx++;
 			Assert.isTrue(nextIdx <= fVariables.size() - 1);
-			next= (ParameterInfo) fVariables.get(nextIdx);
+			next= fVariables.get(nextIdx);
 		}
 		fVariables.set(idx, next);
 		fVariables.set(nextIdx, selected);
@@ -553,11 +558,11 @@ public class ParameterObjectFactory {
 		int idx= fVariables.indexOf(selected);
 		Assert.isTrue(idx > 0);
 		int prevIdx= idx - 1;
-		ParameterInfo prev= (ParameterInfo) fVariables.get(prevIdx);
+		ParameterInfo prev= fVariables.get(prevIdx);
 		if (prev.isAdded()) {
 			prevIdx--;
 			Assert.isTrue(prevIdx >= 0);
-			prev= (ParameterInfo) fVariables.get(prevIdx);
+			prev= fVariables.get(prevIdx);
 		}
 		fVariables.set(idx, prev);
 		fVariables.set(prevIdx, selected);
@@ -583,7 +588,7 @@ public class ParameterObjectFactory {
 		fPackage= typeQualifier;
 	}
 
-	public void setVariables(List parameters) {
+	public void setVariables(List<ParameterInfo> parameters) {
 		fVariables= parameters;
 	}
 
@@ -595,8 +600,8 @@ public class ParameterObjectFactory {
 	 */
 	public void updateParameterPosition(ParameterInfo parameterObjectReference) {
 		fVariables.remove(parameterObjectReference);
-		for (ListIterator iterator= fVariables.listIterator(); iterator.hasNext();) {
-			ParameterInfo pi= (ParameterInfo) iterator.next();
+		for (ListIterator<ParameterInfo> iterator= fVariables.listIterator(); iterator.hasNext();) {
+			ParameterInfo pi= iterator.next();
 			if (isValidField(pi)) {
 				iterator.add(parameterObjectReference);
 				return;
@@ -609,8 +614,8 @@ public class ParameterObjectFactory {
 	}
 
 
-	public List/*<Change>*/createTopLevelParameterObject(IPackageFragmentRoot packageFragmentRoot, CreationListener listener) throws CoreException {
-		List changes= new ArrayList();
+	public List<ResourceChange> createTopLevelParameterObject(IPackageFragmentRoot packageFragmentRoot, CreationListener listener) throws CoreException {
+		List<ResourceChange> changes= new ArrayList<ResourceChange>();
 		IPackageFragment packageFragment= packageFragmentRoot.getPackageFragment(getPackage());
 		if (!packageFragment.exists()) {
 			changes.add(new CreatePackageChange(packageFragment));
@@ -665,7 +670,7 @@ public class ParameterObjectFactory {
 		return changes;
 	}
 
-	public List/*<Change>*/createTopLevelParameterObject(IPackageFragmentRoot packageFragmentRoot) throws CoreException {
+	public List<ResourceChange> createTopLevelParameterObject(IPackageFragmentRoot packageFragmentRoot) throws CoreException {
 		return createTopLevelParameterObject(packageFragmentRoot, null);
 	}
 

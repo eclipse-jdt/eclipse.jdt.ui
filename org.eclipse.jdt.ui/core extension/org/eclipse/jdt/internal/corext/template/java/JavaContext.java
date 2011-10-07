@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,11 +98,11 @@ public class JavaContext extends CompilationUnitContext {
 	 * The list of used local names.
 	 * @since 3.3
 	 */
-	private Set fUsedNames= new HashSet();
-	private Map fVariables= new HashMap();
+	private Set<String> fUsedNames= new HashSet<String>();
+	private Map<String, MultiVariable> fVariables= new HashMap<String, MultiVariable>();
 	private ImportRewrite fImportRewrite;
 
-	private Set fCompatibleContextTypeIds;
+	private Set<String> fCompatibleContextTypeIds;
 
 	/**
 	 * Creates a java template context.
@@ -137,7 +137,7 @@ public class JavaContext extends CompilationUnitContext {
 	 */
 	public void addCompatibleContextType(String contextTypeId) {
 		if (fCompatibleContextTypeIds == null)
-			fCompatibleContextTypeIds= new HashSet();
+			fCompatibleContextTypeIds= new HashSet<String>();
 		fCompatibleContextTypeIds.add(contextTypeId);
 	}
 
@@ -163,6 +163,7 @@ public class JavaContext extends CompilationUnitContext {
 	/*
 	 * @see TemplateContext#evaluate(Template template)
 	 */
+	@Override
 	public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException {
 		clear();
 
@@ -170,6 +171,7 @@ public class JavaContext extends CompilationUnitContext {
 			throw new TemplateException(JavaTemplateMessages.Context_error_cannot_evaluate);
 
 		TemplateTranslator translator= new TemplateTranslator() {
+			@Override
 			protected TemplateVariable createVariable(TemplateVariableType type, String name, int[] offsets) {
 //				TemplateVariableResolver resolver= getContextType().getResolver(type.getName());
 //				return resolver.createVariable();
@@ -205,6 +207,7 @@ public class JavaContext extends CompilationUnitContext {
 	/*
 	 * @see TemplateContext#canEvaluate(Template templates)
 	 */
+	@Override
 	public boolean canEvaluate(Template template) {
 		if (!hasCompatibleContextType(template))
 			return false;
@@ -224,9 +227,9 @@ public class JavaContext extends CompilationUnitContext {
 		if (fCompatibleContextTypeIds == null)
 			return false;
 
-		Iterator iter= fCompatibleContextTypeIds.iterator();
+		Iterator<String> iter= fCompatibleContextTypeIds.iterator();
 		while (iter.hasNext()) {
-			if (template.matches(key, (String)iter.next()))
+			if (template.matches(key, iter.next()))
 				return true;
 		}
 
@@ -236,6 +239,7 @@ public class JavaContext extends CompilationUnitContext {
 	/*
 	 * @see DocumentTemplateContext#getCompletionPosition();
 	 */
+	@Override
 	public int getStart() {
 
 		if (fIsManaged && getCompletionLength() > 0)
@@ -266,6 +270,7 @@ public class JavaContext extends CompilationUnitContext {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.DocumentTemplateContext#getEnd()
 	 */
+	@Override
 	public int getEnd() {
 
 		if (fIsManaged || getCompletionLength() == 0)
@@ -290,6 +295,7 @@ public class JavaContext extends CompilationUnitContext {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.DocumentTemplateContext#getKey()
 	 */
+	@Override
 	public String getKey() {
 
 		if (getCompletionLength() == 0)
@@ -378,9 +384,9 @@ public class JavaContext extends CompilationUnitContext {
 	 * @since 3.3
 	 */
 	private void arrange(Variable[] variables) {
-		Arrays.sort(variables, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				return rank((Variable) o1) - rank((Variable) o2);
+		Arrays.sort(variables, new Comparator<Variable>() {
+			public int compare(Variable o1, Variable o2) {
+				return rank(o1) - rank(o2);
 			}
 
 			private int rank(Variable l) {
@@ -652,20 +658,20 @@ public class JavaContext extends CompilationUnitContext {
 			typeKinds= ASTResolving.getPossibleTypeKinds(nameNode, is50OrHigher);
 		}
 
-		ArrayList typeInfos= new ArrayList();
+		ArrayList<TypeNameMatch> typeInfos= new ArrayList<TypeNameMatch>();
 		TypeNameMatchCollector requestor= new TypeNameMatchCollector(typeInfos);
 		new SearchEngine().searchAllTypeNames(null, 0, simpleTypeName.toCharArray(), SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, getSearchForConstant(typeKinds), searchScope, requestor, IJavaSearchConstants.FORCE_IMMEDIATE_SEARCH, monitor);
 
-		ArrayList typeRefsFound= new ArrayList(typeInfos.size());
+		ArrayList<TypeNameMatch> typeRefsFound= new ArrayList<TypeNameMatch>(typeInfos.size());
 		for (int i= 0, len= typeInfos.size(); i < len; i++) {
-			TypeNameMatch curr= (TypeNameMatch) typeInfos.get(i);
+			TypeNameMatch curr= typeInfos.get(i);
 			if (curr.getPackageName().length() > 0) { // do not suggest imports from the default package
 				if (isOfKind(curr, typeKinds, is50OrHigher) && isVisible(curr, cu)) {
 					typeRefsFound.add(curr);
 				}
 			}
 		}
-		return (TypeNameMatch[]) typeRefsFound.toArray(new TypeNameMatch[typeRefsFound.size()]);
+		return typeRefsFound.toArray(new TypeNameMatch[typeRefsFound.size()]);
 	}
 
 	private int getSearchForConstant(int typeKinds) {
@@ -742,7 +748,7 @@ public class JavaContext extends CompilationUnitContext {
 	}
 
 	TemplateVariable getTemplateVariable(String name) {
-		TemplateVariable variable= (TemplateVariable) fVariables.get(name);
+		TemplateVariable variable= fVariables.get(name);
 		if (variable != null && !variable.isResolved())
 			getContextType().resolve(variable, this);
 		return variable;

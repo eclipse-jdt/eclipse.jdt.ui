@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -135,6 +135,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	/*
 	 * Method declared on IDialogPage.
 	 */
+	@Override
 	public void createControl(final Composite parent) {
 
 		initializeDialogUnits(parent);
@@ -181,6 +182,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 *
 	 *	@param parent org.eclipse.swt.widgets.Composite
 	 */
+	@Override
 	protected void createOptionsGroup(Composite parent) {
 		Composite optionsGroup= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -207,7 +209,8 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 *
 	 * @return an iterator over the collection of elements currently selected for export
 	 */
-	protected Iterator getSelectedResourcesIterator() {
+	@Override
+	protected Iterator<Object> getSelectedResourcesIterator() {
 		return fInputGroup.getAllCheckedListItems();
 	}
 
@@ -217,6 +220,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 * settings for their controls should extend the hook method
 	 * <code>internalSaveWidgetValues</code>.
 	 */
+	@Override
 	public final void saveWidgetValues() {
 		super.saveWidgetValues();
 		// update directory names history
@@ -239,6 +243,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	/**
 	 * Hook method for subclasses to persist their settings.
 	 */
+	@Override
 	protected void internalSaveWidgetValues() {
 	}
 
@@ -246,6 +251,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 *	Hook method for restoring widget values to the values that they held
 	 *	last time this wizard was used to completion.
 	 */
+	@Override
 	protected void restoreWidgetValues() {
 		if (!((JarPackageWizard)getWizard()).isInitializingFromJarPackage())
 			initializeJarPackage();
@@ -267,6 +273,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	/**
 	 *	Initializes the JAR package from last used wizard page values.
 	 */
+	@Override
 	protected void initializeJarPackage() {
 		super.initializeJarPackage();
 
@@ -289,6 +296,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	/**
 	 *	Stores the widget values in the JAR package.
 	 */
+	@Override
 	protected void updateModel() {
 		if (getControl() == null)
 			return;
@@ -341,6 +349,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 						| JavaElementLabelProvider.SHOW_SMALL_ICONS;
 		ITreeContentProvider treeContentProvider=
 			new StandardJavaElementContentProvider() {
+				@Override
 				public boolean hasChildren(Object element) {
 					// prevent the + from being shown in front of packages
 					return !(element instanceof IPackageFragment) && super.hasChildren(element);
@@ -358,6 +367,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 					SIZING_SELECTION_WIDGET_WIDTH,
 					SIZING_SELECTION_WIDGET_HEIGHT) {
 
+						@Override
 						protected void setTreeChecked(final Object element, final boolean state) {
 							if (fInitiallySelecting && element instanceof IResource) {
 								final IResource resource= (IResource) element;
@@ -372,6 +382,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fInputGroup.setListComparator(new JavaElementComparator());
 		fInputGroup.addTreeFilter(new ContainerFilter(ContainerFilter.FILTER_NON_CONTAINERS));
 		fInputGroup.addTreeFilter(new ViewerFilter() {
+			@Override
 			public boolean select(Viewer viewer, Object p, Object element) {
 				if (element instanceof IPackageFragmentRoot) {
 					IPackageFragmentRoot root= (IPackageFragmentRoot) element;
@@ -436,6 +447,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fRefactoringLink.setText(JarPackagerMessages.JarPackageWizardPage_configure_label);
 		fRefactoringLink.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				openRefactoringDialog();
 			}
@@ -447,6 +459,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 		fExportRefactoringsCheckbox.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				fRefactoringLink.setEnabled(fExportRefactoringsCheckbox.getSelection());
 			}
@@ -461,7 +474,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		final IRefactoringHistoryService service= RefactoringCore.getHistoryService();
 		try {
 			service.connect();
-			final Set set= new HashSet();
+			final Set<IProject> set= new HashSet<IProject>();
 			final Object[] elements= fJarPackage.getElements();
 			for (int index= 0; index < elements.length; index++) {
 				if (elements[index] instanceof IAdaptable) {
@@ -475,7 +488,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 				getContainer().run(false, true, new IRunnableWithProgress() {
 
 					public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						history[0]= service.getRefactoringHistory((IProject[]) set.toArray(new IProject[set.size()]), 0, Long.MAX_VALUE, JavaRefactoringDescriptor.JAR_MIGRATION, monitor);
+						history[0]= service.getRefactoringHistory(set.toArray(new IProject[set.size()]), 0, Long.MAX_VALUE, JavaRefactoringDescriptor.JAR_MIGRATION, monitor);
 					}
 				});
 			} catch (InvocationTargetException exception) {
@@ -494,6 +507,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	/**
 	 * Updates the enablement of this page's controls. Subclasses may extend.
 	 */
+	@Override
 	protected void updateWidgetEnablements() {
 		if (fExportRefactoringsCheckbox != null) {
 			final boolean selection= fExportRefactoringsCheckbox.getSelection();
@@ -508,6 +522,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	/*
 	 * Overrides method from IJarPackageWizardPage
 	 */
+	@Override
 	public boolean isPageComplete() {
 		boolean complete= validateSourceGroup();
 		complete= validateDestinationGroup() && complete;
@@ -517,6 +532,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		return complete;
 	}
 
+	@Override
 	protected void updatePageCompletion() {
 		boolean pageComplete= isPageComplete();
 		setPageComplete(pageComplete);
@@ -537,6 +553,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	/*
 	 * Overrides method from WizardDataTransferPage
 	 */
+	@Override
 	protected boolean validateOptionsGroup() {
 		return true;
 	}
@@ -544,6 +561,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	/*
 	 * Overrides method from WizardDataTransferPage
 	 */
+	@Override
 	protected boolean validateSourceGroup() {
 		if (!(fExportClassFilesCheckbox.getSelection() || fExportOutputFoldersCheckbox.getSelection() || fExportJavaFilesCheckbox.getSelection())) {
 			setErrorMessage(JarPackagerMessages.JarPackageWizardPage_error_noExportTypeChecked);
@@ -559,7 +577,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			return true;
 
 		// Source file only export - check if there are source files
-		Iterator iter= getSelectedResourcesIterator();
+		Iterator<Object> iter= getSelectedResourcesIterator();
 		while (iter.hasNext()) {
 			Object element= iter.next();
 			if (element instanceof IClassFile) {
@@ -603,8 +621,9 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	/*
 	 * Overrides method from WizardExportResourcePage
 	 */
+	@Override
 	protected void setupBasedOnInitialSelections() {
-		Iterator iterator= fInitialSelection.iterator();
+		Iterator<?> iterator= fInitialSelection.iterator();
 		while (iterator.hasNext()) {
 			Object selectedElement= iterator.next();
 
@@ -645,6 +664,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	/*
 	 * Method declared on IWizardPage.
 	 */
+	@Override
 	public void setPreviousPage(IWizardPage page) {
 		super.setPreviousPage(page);
 		if (getControl() != null)
@@ -652,15 +672,15 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	}
 
 	Object[] getSelectedElementsWithoutContainedChildren() {
-		Set closure= removeContainedChildren(fInputGroup.getWhiteCheckedTreeItems());
+		Set<Object> closure= removeContainedChildren(fInputGroup.getWhiteCheckedTreeItems());
 		closure.addAll(getExportedNonContainers());
 		return closure.toArray();
 	}
 
-	private Set removeContainedChildren(Set elements) {
-		Set newList= new HashSet(elements.size());
-		Set javaElementResources= getCorrespondingContainers(elements);
-		Iterator iter= elements.iterator();
+	private Set<Object> removeContainedChildren(Set<Object> elements) {
+		Set<Object> newList= new HashSet<Object>(elements.size());
+		Set<Object> javaElementResources= getCorrespondingContainers(elements);
+		Iterator<Object> iter= elements.iterator();
 		boolean removedOne= false;
 		while (iter.hasNext()) {
 			Object element= iter.next();
@@ -695,11 +715,11 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			return newList;
 	}
 
-	private Set getExportedNonContainers() {
-		Set whiteCheckedTreeItems= fInputGroup.getWhiteCheckedTreeItems();
-		Set exportedNonContainers= new HashSet(whiteCheckedTreeItems.size());
-		Set javaElementResources= getCorrespondingContainers(whiteCheckedTreeItems);
-		Iterator iter= fInputGroup.getAllCheckedListItems();
+	private Set<Object> getExportedNonContainers() {
+		Set<Object> whiteCheckedTreeItems= fInputGroup.getWhiteCheckedTreeItems();
+		Set<Object> exportedNonContainers= new HashSet<Object>(whiteCheckedTreeItems.size());
+		Set<Object> javaElementResources= getCorrespondingContainers(whiteCheckedTreeItems);
+		Iterator<Object> iter= fInputGroup.getAllCheckedListItems();
 		while (iter.hasNext()) {
 			Object element= iter.next();
 			Object parent= null;
@@ -717,9 +737,9 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 * Create a list with the folders / projects that correspond
 	 * to the Java elements (Java project, package, package root)
 	 */
-	private Set getCorrespondingContainers(Set elements) {
-		Set javaElementResources= new HashSet(elements.size());
-		Iterator iter= elements.iterator();
+	private Set<Object> getCorrespondingContainers(Set<Object> elements) {
+		Set<Object> javaElementResources= new HashSet<Object>(elements.size());
+		Iterator<Object> iter= elements.iterator();
 		while (iter.hasNext()) {
 			Object element= iter.next();
 			if (element instanceof IJavaElement) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,20 +75,22 @@ public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperati
 	}
 
 	protected String[] getUsedVariableNames() {
-		final List results= new ArrayList();
+		final List<String> results= new ArrayList<String>();
 
 		ForStatement forStatement= getForStatement();
 		CompilationUnit root= (CompilationUnit)forStatement.getRoot();
 
-		Collection variableNames= new ScopeAnalyzer(root).getUsedVariableNames(forStatement.getStartPosition(), forStatement.getLength());
+		Collection<String> variableNames= new ScopeAnalyzer(root).getUsedVariableNames(forStatement.getStartPosition(), forStatement.getLength());
 		results.addAll(variableNames);
 
 		forStatement.accept(new GenericVisitor() {
+			@Override
 			public boolean visit(SingleVariableDeclaration node) {
 				results.add(node.getName().getIdentifier());
 				return super.visit(node);
 			}
 
+			@Override
 			public boolean visit(VariableDeclarationFragment fragment) {
 				results.add(fragment.getName().getIdentifier());
 				return super.visit(fragment);
@@ -97,7 +99,7 @@ public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperati
 
 		results.addAll(Arrays.asList(fUsedNames));
 
-		return (String[])results.toArray(new String[results.size()]);
+		return results.toArray(new String[results.size()]);
 	}
 
 }

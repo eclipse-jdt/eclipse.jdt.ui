@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,6 +63,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
+	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		CompilationUnit astRoot= fContext.getASTRoot();
 
@@ -79,9 +80,9 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 		return rewrite;
 	}
 
-	private AbstractTypeDeclaration findTypeDeclaration(List types, String name) {
-		for (Iterator iter= types.iterator(); iter.hasNext();) {
-			AbstractTypeDeclaration decl= (AbstractTypeDeclaration) iter.next();
+	private AbstractTypeDeclaration findTypeDeclaration(List<AbstractTypeDeclaration> types, String name) {
+		for (Iterator<AbstractTypeDeclaration> iter= types.iterator(); iter.hasNext();) {
+			AbstractTypeDeclaration decl= iter.next();
 			if (name.equals(decl.getName().getIdentifier())) {
 				return decl;
 			}

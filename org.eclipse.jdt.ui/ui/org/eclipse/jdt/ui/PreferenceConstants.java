@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,7 +53,6 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
 
 
 /**
@@ -139,26 +138,25 @@ public class PreferenceConstants {
 	 * A named preference that defines the patterns used for package name abbreviation.
 	 * <p>
 	 * Value is of type <code>String</code>. Value is a newline separated list of
-	 * packagePrefix=abbreviation pairs. For example, a pattern of
-	 * 'javax.management=&lt;JMX&gt;' will abbreviate 'javax.management.monitor' to
-	 * '&lt;JMX&gt;.monitor'. A '#' at the beginning of a line disables an entry.
+	 * packagePrefix=abbreviation pairs. For example, a pattern of 'javax.management=&lt;JMX&gt;'
+	 * will abbreviate 'javax.management.monitor' to '&lt;JMX&gt;.monitor'. A '#' at the beginning
+	 * of a line disables an entry.
 	 * </p>
-	 * @since 3.6
+	 * 
+	 * @since 3.7
 	 */
-	//TODO: make API in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
-	static final String APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW;
+	public static final String APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= "org.eclipse.jdt.ui.pkgNameAbbreviationPatternForPackagesView"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if package name abbreviation is turned on or off.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 *
+	 * 
 	 * @see #APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW
-	 * @since 3.6
+	 * @since 3.7
 	 */
-	//TODO: make API in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
-	static final String APPEARANCE_ABBREVIATE_PACKAGE_NAMES= JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES;
+	public static final String APPEARANCE_ABBREVIATE_PACKAGE_NAMES= "org.eclipse.jdt.ui.abbreviatepackagenames"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if empty inner packages are folded in
@@ -1131,6 +1129,15 @@ public class PreferenceConstants {
 	public final static String EDITOR_SMART_PASTE= "smartPaste"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether on Enter key the indentation should be smart or the same as previous line.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.7
+	 */
+	public final static String EDITOR_SMART_INDENT_AFTER_NEWLINE= "smartIndentAfterNewline"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls whether 'paste' should update the imports.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -1216,7 +1223,7 @@ public class PreferenceConstants {
 
 	/**
 	 * A named preference that holds the color used as the text foreground.
-	 * This value has not effect if the system default color is used.
+	 * This value has no effect if the system default color is used.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
 	 * using class <code>PreferenceConverter</code>
@@ -1240,7 +1247,7 @@ public class PreferenceConstants {
 
 	/**
 	 * A named preference that holds the color used as the text background.
-	 * This value has not effect if the system default color is used.
+	 * This value has no effect if the system default color is used.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
 	 * using class <code>PreferenceConverter</code>
@@ -3794,6 +3801,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_ESCAPE_STRINGS, false);
 		store.setDefault(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_FORMAT_JAVADOCS, false);
+		store.setDefault(PreferenceConstants.EDITOR_SMART_INDENT_AFTER_NEWLINE, true);
 
 		int sourceHoverModifier= SWT.MOD2;
 		String sourceHoverModifierName= Action.findModifierString(sourceHoverModifier);	// Shift

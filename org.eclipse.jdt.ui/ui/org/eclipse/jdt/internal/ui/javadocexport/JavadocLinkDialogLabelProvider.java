@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 public class JavadocLinkDialogLabelProvider extends LabelProvider {
 
+	@Override
 	public String getText(Object element) {
 		if (element instanceof JavadocLinkRef) {
 			JavadocLinkRef ref= (JavadocLinkRef) element;
@@ -48,6 +49,7 @@ public class JavadocLinkDialogLabelProvider extends LabelProvider {
 		return super.getText(element);
 	}
 
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof JavadocLinkRef) {
 			JavadocLinkRef ref= (JavadocLinkRef) element;

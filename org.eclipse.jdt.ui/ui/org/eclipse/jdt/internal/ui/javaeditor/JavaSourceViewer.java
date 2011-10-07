@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.Assert;
@@ -55,6 +56,8 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
@@ -150,12 +153,13 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * @see org.eclipse.jface.text.source.SourceViewer#createFormattingContext()
 	 * @since 3.0
 	 */
+	@Override
 	public IFormattingContext createFormattingContext() {
 
 		// it's ok to use instance preferences here as subclasses replace
 		// with project dependent versions (see CompilationUnitEditor.AdaptedSourceViewer)
 		IFormattingContext context= new JavaFormattingContext();
-		Map map= new HashMap(JavaCore.getOptions());
+		Map<String, String> map= new HashMap<String, String>(JavaCore.getOptions());
 		context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, map);
 
 		return context;
@@ -164,6 +168,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	/*
 	 * @see ITextOperationTarget#doOperation(int)
 	 */
+	@Override
 	public void doOperation(int operation) {
 		if (getTextWidget() == null)
 			return;
@@ -189,6 +194,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	/*
 	 * @see ITextOperationTarget#canDoOperation(int)
 	 */
+	@Override
 	public boolean canDoOperation(int operation) {
 		if (operation == SHOW_OUTLINE)
 			return fOutlinePresenter != null;
@@ -203,6 +209,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	/*
 	 * @see ISourceViewer#configure(SourceViewerConfiguration)
 	 */
+	@Override
 	public void configure(SourceViewerConfiguration configuration) {
 
 		/*
@@ -324,11 +331,40 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 
         return null;
     }
+    
+	/**
+	 * Sets the viewer's background color to the given control's background color.
+	 * The background color is <em>only</em> set if it's visibly distinct from the
+	 * default Java source text color.
+	 * 
+	 * @param control the control with the default background color
+	 * @since 3.7
+	 */
+	public void adaptBackgroundColor(Control control) {
+		// workaround for dark editor background color, see https://bugs.eclipse.org/330680
+		
+		Color defaultColor= control.getBackground();
+		float[] defaultBgHSB= defaultColor.getRGB().getHSB();
+		
+		Color javaDefaultColor= JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_DEFAULT);
+		RGB javaDefaultRGB= javaDefaultColor != null ? javaDefaultColor.getRGB() : new RGB(255, 255, 255);
+		float[] javaDefaultHSB= javaDefaultRGB.getHSB();
+		
+		if (Math.abs(defaultBgHSB[2] - javaDefaultHSB[2]) >= 0.5f) {
+			getTextWidget().setBackground(defaultColor);
+			if (fBackgroundColor != null) {
+				fBackgroundColor.dispose();
+				fBackgroundColor= null;
+			}
+		}
+	}
+
 
 	/*
 	 * @see org.eclipse.jface.text.source.ISourceViewerExtension2#unconfigure()
 	 * @since 3.0
 	 */
+	@Override
 	public void unconfigure() {
 		if (fOutlinePresenter != null) {
 			fOutlinePresenter.uninstall();
@@ -362,6 +398,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewer#rememberSelection()
 	 */
+	@Override
 	public Point rememberSelection() {
 		return super.rememberSelection();
 	}
@@ -369,6 +406,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewer#restoreSelection()
 	 */
+	@Override
 	public void restoreSelection() {
 		super.restoreSelection();
 	}
@@ -413,6 +451,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewer#createControl(org.eclipse.swt.widgets.Composite, int)
 	 */
+	@Override
 	protected void createControl(Composite parent, int styles) {
 
 		// Use LEFT_TO_RIGHT unless otherwise specified.
@@ -454,6 +493,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewer#handleDispose()
 	 */
+	@Override
 	protected void handleDispose() {
 		if (fBackspaceManager != null) {
 			fBackspaceManager.uninstall();
@@ -476,7 +516,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		Assert.isNotNull(listener);
 
 		if (fTextPresentationListeners == null)
-			fTextPresentationListeners= new ArrayList();
+			fTextPresentationListeners= new ArrayList<ITextPresentationListener>();
 
 		fTextPresentationListeners.remove(listener);
 		fTextPresentationListeners.add(0, listener);
@@ -628,6 +668,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * @see #prepareDelayedProjection()
 	 * @since 3.1
 	 */
+	@Override
 	protected void setVisibleDocument(IDocument document) {
 		if (fIsSetVisibleDocumentDelayed) {
 			fIsSetVisibleDocumentDelayed= false;
@@ -650,6 +691,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * untouched we reuse the given range as return value.
 	 * </p>
 	 */
+	@Override
 	protected StyleRange modelStyleRange2WidgetStyleRange(StyleRange range) {
 		IRegion region= modelRange2WidgetRange(new Region(range.start, range.length));
 		if (region != null) {
@@ -661,11 +703,4 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		return null;
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.TextViewer#getEmptySelectionChangedEventDelay()
-	 * @since 3.5
-	 */
-	protected int getEmptySelectionChangedEventDelay() {
-		return super.getEmptySelectionChangedEventDelay();
-	}
 }

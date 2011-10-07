@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,8 +39,9 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static final int VERSION_9= 9; // after storing project profile names in preferences
 	private static final int VERSION_10= 10; // splitting options for annotation types
 	private static final int VERSION_11= 11; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=49412
+	private static final int VERSION_12= 12; // https://bugs.eclipse.org/318010
 
-	private static final int CURRENT_VERSION= VERSION_11;
+	private static final int CURRENT_VERSION= VERSION_12;
 
 	public int getFirstVersion() {
 	    return VERSION_1;
@@ -58,14 +59,14 @@ public class ProfileVersioner implements IProfileVersioner {
     }
 
 	public void update(CustomProfile profile) {
-		final Map oldSettings= profile.getSettings();
-		Map newSettings= updateAndComplete(oldSettings, profile.getVersion());
+		final Map<String, String> oldSettings= profile.getSettings();
+		Map<String, String> newSettings= updateAndComplete(oldSettings, profile.getVersion());
 		profile.setVersion(CURRENT_VERSION);
 		profile.setSettings(newSettings);
 	}
 
-	private static Map updateAndComplete(Map oldSettings, int version) {
-		final Map newSettings= FormatterProfileManager.getDefaultSettings();
+	private static Map<String, String> updateAndComplete(Map<String, String> oldSettings, int version) {
+		final Map<String, String> newSettings= FormatterProfileManager.getDefaultSettings();
 
 		switch (version) {
 
@@ -95,13 +96,16 @@ public class ProfileVersioner implements IProfileVersioner {
 		case VERSION_10 :
 			version10to11(oldSettings);
 			//$FALL-THROUGH$
+		case VERSION_11 :
+			version11to12(oldSettings);
+			//$FALL-THROUGH$
 		default:
-		    for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
-		        final String key= (String)iter.next();
+		    for (final Iterator<String> iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
+		        final String key= iter.next();
 		        if (!newSettings.containsKey(key))
 		            continue;
 
-		        final String value= (String)oldSettings.get(key);
+		        final String value= oldSettings.get(key);
 		        if (value != null) {
 		            newSettings.put(key, value);
 		        }
@@ -116,11 +120,11 @@ public class ProfileVersioner implements IProfileVersioner {
 	 * Updates the map to use the latest the source compliance
 	 * @param map The map to update
 	 */
-	public static void setLatestCompliance(Map map) {
-		JavaModelUtil.set50ComplianceOptions(map);
+	public static void setLatestCompliance(Map<String, String> map) {
+		JavaModelUtil.setComplianceOptions(map, JavaModelUtil.VERSION_LATEST);
 	}
 
-	private static void version1to2(final Map oldSettings) {
+	private static void version1to2(final Map<String, String> oldSettings) {
 		checkAndReplace(oldSettings,
 			FORMATTER_INSERT_SPACE_WITHIN_MESSAGE_SEND,
 			FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_MESSAGE_SEND,
@@ -154,13 +158,13 @@ public class ProfileVersioner implements IProfileVersioner {
 	}
 
 
-	private static void mapOldValueRangeToNew(Map settings, String oldKey, String [] oldValues,
+	private static void mapOldValueRangeToNew(Map<String, String> settings, String oldKey, String [] oldValues,
 		String newKey, String [] newValues) {
 
 		if (!settings.containsKey(oldKey))
 			return;
 
-		final String value= ((String)settings.get(oldKey));
+		final String value= settings.get(oldKey);
 
 		if (value == null)
 			return;
@@ -173,23 +177,19 @@ public class ProfileVersioner implements IProfileVersioner {
 
 	}
 
-	private static void duplicate(Map settings, String existingKey, String newKey) {
-		checkAndReplace(settings, existingKey, new String [] {newKey});
-	}
-
-	private static void checkAndReplace(Map settings, String oldKey, String newKey) {
+	private static void checkAndReplace(Map<String, String> settings, String oldKey, String newKey) {
 		checkAndReplace(settings, oldKey, new String [] {newKey});
 	}
 
-	private static void checkAndReplace(Map settings, String oldKey, String newKey1, String newKey2) {
+	private static void checkAndReplace(Map<String, String> settings, String oldKey, String newKey1, String newKey2) {
 		checkAndReplace(settings, oldKey, new String [] {newKey1, newKey2});
 	}
 
-	private static void checkAndReplace(Map settings, String oldKey, String [] newKeys) {
+	private static void checkAndReplace(Map<String, String> settings, String oldKey, String [] newKeys) {
 		if (!settings.containsKey(oldKey))
 			return;
 
-		final String value= (String)settings.get(oldKey);
+		final String value= settings.get(oldKey);
 
 		if (value == null)
 			return;
@@ -199,11 +199,11 @@ public class ProfileVersioner implements IProfileVersioner {
 		}
 	}
 
-	private static void checkAndReplaceBooleanWithINSERT(Map settings, String oldKey, String newKey) {
+	private static void checkAndReplaceBooleanWithINSERT(Map<String, String> settings, String oldKey, String newKey) {
 		if (!settings.containsKey(oldKey))
 			return;
 
-		String value= (String)settings.get(oldKey);
+		String value= settings.get(oldKey);
 
 		if (value == null)
 			return;
@@ -217,7 +217,7 @@ public class ProfileVersioner implements IProfileVersioner {
 	}
 
 
-	private static void version2to3(Map oldSettings) {
+	private static void version2to3(Map<String, String> oldSettings) {
 
 		checkAndReplace(oldSettings,
 			FORMATTER_ARRAY_INITIALIZER_CONTINUATION_INDENTATION,
@@ -525,7 +525,7 @@ public class ProfileVersioner implements IProfileVersioner {
 
 	}
 
-	private static void version3to4(Map oldSettings) {
+	private static void version3to4(Map<String, String> oldSettings) {
 		checkAndReplace(oldSettings,
 			"org.eclipse.jdt.core.align_type_members_on_columns", //$NON-NLS-1$
 			DefaultCodeFormatterConstants.FORMATTER_ALIGN_TYPE_MEMBERS_ON_COLUMNS);
@@ -543,13 +543,13 @@ public class ProfileVersioner implements IProfileVersioner {
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_INVOCATION);
 	}
 
-	private static void version4to5(Map oldSettings) {
+	private static void version4to5(Map<String, String> oldSettings) {
 		checkAndReplace(oldSettings,
 			"org.eclipse.jdt.core.formatter.indent_block_statements", //$NON-NLS-1$
 			new String[] { DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BODY, DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BLOCK });
 	}
 
-	private static void version5to6(Map oldSettings) {
+	private static void version5to6(Map<String, String> oldSettings) {
 		checkAndReplace(oldSettings,
 			"org.eclipse.jdt.core.formatter.insert_new_line_in_control_statements", //$NON-NLS-1$
 			new String[] {
@@ -560,7 +560,7 @@ public class ProfileVersioner implements IProfileVersioner {
 				});
 	}
 
-	private static void version6to7(Map oldSettings) {
+	private static void version6to7(Map<String, String> oldSettings) {
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMAT, FORMATTER_COMMENT_FORMAT2);
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMATHEADER, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER);
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMATSOURCE, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE);
@@ -574,16 +574,16 @@ public class ProfileVersioner implements IProfileVersioner {
 		checkAndReplaceBooleanWithINSERT(oldSettings, FORMATTER_COMMENT_SEPARATEROOTTAGS, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS);
 	}
 
-	private static void version9to10(Map oldSettings) {
-		duplicate(oldSettings,
+	private static void version9to10(Map<String, String> oldSettings) {
+		checkAndReplace(oldSettings,
 				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_TYPE_DECLARATION,
 				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANNOTATION_DECLARATION);
-		duplicate(oldSettings,
+		checkAndReplace(oldSettings,
 				DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_TYPE_HEADER,
 				DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_ANNOTATION_DECLARATION_HEADER);
 	}
 
-	private static void version10to11(Map oldSettings) {
+	private static void version10to11(Map<String, String> oldSettings) {
 		checkAndReplace(oldSettings,
 				FORMATTER_COMMENT_FORMAT2,
 				new String[] {
@@ -598,7 +598,25 @@ public class ProfileVersioner implements IProfileVersioner {
 				});
 	}
 
-
+	private static void version11to12(Map<String, String> oldSettings) {
+		checkAndReplace(oldSettings,
+				FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION,
+				new String[] {
+						FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER,
+						DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE,
+						DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PARAMETER
+		});
+		checkAndReplace(oldSettings,
+				FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER,
+				new String[] {
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_FIELD,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PACKAGE,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_TYPE
+		});
+	}
+	
+	
 	/* old format constant values */
 
     private static final String FORMATTER_METHOD_DECLARATION_ARGUMENTS_ALIGNMENT = JavaCore.PLUGIN_ID + ".formatter.method_declaration_arguments_alignment"; //$NON-NLS-1$
@@ -690,6 +708,18 @@ public class ProfileVersioner implements IProfileVersioner {
 	 *             {@link DefaultCodeFormatterConstants#FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_JAVADOC_COMMENT}
 	 */
 	private static final String FORMATTER_COMMENT_CLEAR_BLANK_LINES= DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES;
+
+	/**
+	 * @deprecated see https://bugs.eclipse.org/318010
+	 * @since 3.7
+	 */
+	private static final String FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER= DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER;
+
+	/**
+	 * @deprecated see https://bugs.eclipse.org/318010
+	 * @since 3.7
+	 */
+	private static final String FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION= DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION;
 
 	// Old comment formatter constants
 	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_SOURCE} */

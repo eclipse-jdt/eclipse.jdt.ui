@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,22 +76,27 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 		status.merge(initializeStatus);
 	}
 
+	@Override
 	public String getIdentifier() {
 		return IRefactoringProcessorIds.RENAME_JAVA_PROJECT_PROCESSOR;
 	}
 
+	@Override
 	public boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isRenameAvailable(fProject);
 	}
 
+	@Override
 	public String getProcessorName() {
 		return RefactoringCoreMessages.RenameJavaProjectRefactoring_rename;
 	}
 
+	@Override
 	protected String[] getAffectedProjectNatures() throws CoreException {
 		return JavaProcessors.computeAffectedNatures(fProject);
 	}
 
+	@Override
 	public Object[] getElements() {
 		return new Object[] {fProject};
 	}
@@ -101,12 +106,14 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 		return JavaCore.create(ResourcesPlugin.getWorkspace().getRoot().findMember(newPath));
 	}
 
+	@Override
 	protected RenameModifications computeRenameModifications() throws CoreException {
 		RenameModifications result= new RenameModifications();
 		result.rename(fProject, new RenameArguments(getNewElementName(), getUpdateReferences()));
 		return result;
 	}
 
+	@Override
 	protected IFile[] getChangedFiles() throws CoreException {
 		IFile projectFile= fProject.getProject().getFile(".project"); //$NON-NLS-1$
 		if (projectFile != null && projectFile.exists()) {
@@ -115,6 +122,7 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 		return new IFile[0];
 	}
 
+	@Override
 	public int getSaveMode() {
 		return RefactoringSaveHelper.SAVE_ALL;
 	}
@@ -135,6 +143,7 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 		return fProject.getElementName();
 	}
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		return new RefactoringStatus();
 	}
@@ -153,6 +162,7 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 		return new RefactoringStatus();
 	}
 
+	@Override
 	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
@@ -185,6 +195,7 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 		return newProjectStore.fetchInfo().exists();
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -122,12 +122,12 @@ public class Implementors {
     }
 
     private IType[] findImplementingTypes(IType type, IProgressMonitor progressMonitor) {
-        Collection implementingTypes = new ArrayList();
+        Collection<IType> implementingTypes = new ArrayList<IType>();
 
         IImplementorFinder[] finders = getImplementorFinders();
 
         for (int i = 0; (i < finders.length) && !progressMonitor.isCanceled(); i++) {
-            Collection types = finders[i].findImplementingTypes(type,
+            Collection<IType> types = finders[i].findImplementingTypes(type,
                     new SubProgressMonitor(progressMonitor, 10,
                         SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 
@@ -136,16 +136,16 @@ public class Implementors {
             }
         }
 
-        return (IType[]) implementingTypes.toArray(new IType[implementingTypes.size()]);
+        return implementingTypes.toArray(new IType[implementingTypes.size()]);
     }
 
     private IType[] findInterfaces(IType type, IProgressMonitor progressMonitor) {
-        Collection interfaces = new ArrayList();
+        Collection<IType> interfaces = new ArrayList<IType>();
 
         IImplementorFinder[] finders = getImplementorFinders();
 
         for (int i = 0; (i < finders.length) && !progressMonitor.isCanceled(); i++) {
-            Collection types = finders[i].findInterfaces(type,
+            Collection<IType> types = finders[i].findInterfaces(type,
                     new SubProgressMonitor(progressMonitor, 10,
                         SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 
@@ -154,7 +154,7 @@ public class Implementors {
             }
         }
 
-        return (IType[]) interfaces.toArray(new IType[interfaces.size()]);
+        return interfaces.toArray(new IType[interfaces.size()]);
     }
 
     /**
@@ -168,7 +168,7 @@ public class Implementors {
      */
     private IJavaElement[] findMethods(IMethod method, IType[] types,
         IProgressMonitor progressMonitor) {
-        Collection foundMethods = new ArrayList();
+        Collection<IMethod> foundMethods = new ArrayList<IMethod>();
 
         SubProgressMonitor subProgressMonitor = new SubProgressMonitor(progressMonitor,
                 10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
@@ -191,6 +191,6 @@ public class Implementors {
             subProgressMonitor.done();
         }
 
-        return (IJavaElement[]) foundMethods.toArray(new IJavaElement[foundMethods.size()]);
+        return foundMethods.toArray(new IJavaElement[foundMethods.size()]);
     }
 }

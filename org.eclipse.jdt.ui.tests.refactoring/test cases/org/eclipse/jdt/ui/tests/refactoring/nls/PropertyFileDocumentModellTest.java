@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,8 +48,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 
 		for (int i= 0; i < pairs.length; i++) {
 			KeyValuePair pair= pairs[i];
-			pair.setValue(PropertyFileDocumentModel.unwindValue(pair.getValue()) + model.getLineDelimiter());
-			pair.setKey(PropertyFileDocumentModel.unwindEscapeChars(pair.getKey()));
+			pair.setValue(PropertyFileDocumentModel.escape(pair.getValue(), true) + model.getLineDelimiter());
+			pair.setKey(PropertyFileDocumentModel.escape(pair.getKey(), false));
 		}
 
 		DocumentChange change= new DocumentChange("", document);
@@ -322,12 +322,56 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"key=value1\\nvalue2\\r\n", props.get());
 	}
 
+	public void testEscapingOfTab() throws Exception {
+		Document props= new Document();
+
+		insert(props, "key", "value1\tvalue2");
+
+		RefactoringTest.assertEqualLines(
+				"key=value1\\tvalue2\n", props.get());
+	}
+
+	public void testEscapingOfFormFeed() throws Exception {
+		Document props= new Document();
+
+		insert(props, "key", "value1\fvalue2");
+
+		RefactoringTest.assertEqualLines(
+				"key=value1\\fvalue2\n", props.get());
+	}
+
+	public void testEscapingOfBackspace() throws Exception {
+		Document props= new Document();
+
+		insert(props, "key", "value1\bvalue2");
+
+		RefactoringTest.assertEqualLines(
+				"key=value1\\u0008value2\n", props.get());
+	}
+
+	public void testEscapingOfEscapes() throws Exception {
+		Document props= new Document();
+
+		insert(props, "key", "c:\\demo\\demo.java");
+
+		RefactoringTest.assertEqualLines(
+				"key=c:\\\\demo\\\\demo.java\n", props.get());
+	}
+
+	public void testEscapingOfISO8859() throws Exception {
+		Document props= new Document();
+
+		insert(props, "key", "\u00e4");
+
+		RefactoringTest.assertEqualLines("key=ä\n", props.get());
+	}
+
 	public void testEscapingOfUniCode() throws Exception {
 		Document props= new Document();
 
-		insert(props, "key", "\u00ea");
+		insert(props, "key", "\u0926");
 
-		RefactoringTest.assertEqualLines("key=\\u00EA\n", props.get());
+		RefactoringTest.assertEqualLines("key=\\u0926\n", props.get());
 	}
 
 	public void testEscapingOfLeadingWhiteSpaces() throws Exception {

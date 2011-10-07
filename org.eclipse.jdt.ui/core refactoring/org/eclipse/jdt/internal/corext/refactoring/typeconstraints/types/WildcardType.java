@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ public abstract class WildcardType extends TType {
 		super(environment);
 	}
 
+	@Override
 	protected void initialize(ITypeBinding binding) {
 		Assert.isTrue(binding.isWildcardType());
 		super.initialize(binding);
@@ -35,10 +36,12 @@ public abstract class WildcardType extends TType {
 		return fBound;
 	}
 
+	@Override
 	public TType[] getSubTypes() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public boolean doEquals(TType type) {
 		WildcardType other= (WildcardType)type;
 		if (fBound == null)
@@ -46,6 +49,7 @@ public abstract class WildcardType extends TType {
 		return fBound.equals(other.fBound);
 	}
 
+	@Override
 	public int hashCode() {
 		if (fBound == null)
 			return 123;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -506,6 +506,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 
 	public void test123() throws Exception {
+		invalidSelectionTest();
+	}
+
+	public void test124() throws Exception {
 		invalidSelectionTest();
 	}
 
@@ -1433,6 +1437,34 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		expressionTest();
 	}
 
+	public void test623() throws Exception {
+		expressionTest();
+	}
+
+	public void test624() throws Exception {
+		expressionTest();
+	}
+
+	public void test625() throws Exception {
+		expressionTest();
+	}
+
+	public void test626() throws Exception {
+		expressionTest();
+	}
+
+	public void test627() throws Exception {
+		expressionTest();
+	}
+
+	public void test628() throws Exception {
+		expressionTest();
+	}
+
+	public void test629() throws Exception {
+		expressionTest();
+	}
+
 	//---- Test nested methods and constructor
 
 	public void test650() throws Exception {
@@ -1578,7 +1610,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		returnTest();
 	}
 
-	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519	
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
 	public void test730() throws Exception {
 		returnTest();
 	}
@@ -1588,17 +1620,17 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		returnTest();
 	}
 
-	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519	
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
 	public void test732() throws Exception {
 		returnTest();
 	}
 
-	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413	
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413
 	public void test733() throws Exception {
 		returnTest();
 	}
 	
-	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413	
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413
 	public void test734() throws Exception {
 		returnTest();
 	}
@@ -1903,6 +1935,31 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=152004
 	public void test1053() throws Exception {
 		destinationTest(1);
+	}
+	
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=318127
+	public void test1054() throws Exception {
+		destinationTest(1);
+	}
+
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=318127
+	public void test1055() throws Exception {
+		destinationTest(2);
+	}
+
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=318127
+	public void test1056() throws Exception {
+		destinationTest(2);
+	}
+
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=318127
+	public void test1057() throws Exception {
+		destinationTest(1);
+	}
+
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=318609
+	public void test1058() throws Exception {
+		destinationTest(2);
 	}
 	
 	//---- Test Generics --------------------------------------------------

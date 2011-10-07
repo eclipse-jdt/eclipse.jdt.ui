@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,18 +31,18 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class LineComparator implements IRangeComparator {
 
 	private final IDocument fDocument;
-	private final ArrayList fHashes;
+	private final ArrayList<Integer> fHashes;
 
     /**
 	 * Create a line comparator for the given document.
-	 *
-	 * @param document
+	 * 
+	 * @param document the document
 	 */
 	public LineComparator(IDocument document) {
 		fDocument= document;
 
-		Object[] nulls= new Object[fDocument.getNumberOfLines()];
-		fHashes= new ArrayList(Arrays.asList(nulls));
+		Integer[] nulls= new Integer[fDocument.getNumberOfLines()];
+		fHashes= new ArrayList<Integer>(Arrays.asList(nulls));
     }
 
 	/*
@@ -77,7 +77,7 @@ public class LineComparator implements IRangeComparator {
 	 * @throws BadLocationException if the line number is invalid
 	 */
 	private Integer getHash(int line) throws BadLocationException {
-		Integer hash= (Integer) fHashes.get(line);
+		Integer hash= fHashes.get(line);
 		if (hash == null) {
 			IRegion lineRegion= fDocument.getLineInformation(line);
 			String lineContents= fDocument.get(lineRegion.getOffset(), lineRegion.getLength());

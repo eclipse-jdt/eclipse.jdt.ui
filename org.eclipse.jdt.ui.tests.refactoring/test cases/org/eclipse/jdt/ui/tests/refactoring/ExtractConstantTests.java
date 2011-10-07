@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,14 +61,14 @@ public class ExtractConstantTests extends RefactoringTest {
 		return new RefactoringTestSetup(test);
 	}
 
-	private String getSimpleTestFileName(boolean canInline, boolean input){
+	protected String getSimpleTestFileName(boolean canInline, boolean input) {
 		String fileName = "A_" + getName();
 		if (canInline)
 			fileName += input ? "_in": "_out";
 		return fileName + ".java";
 	}
 
-	private String getTestFileName(boolean canExtract, boolean input){
+	protected String getTestFileName(boolean canExtract, boolean input) {
 		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
 		fileName += (canExtract ? "canExtract/": "cannotExtract/");
 		return fileName + getSimpleTestFileName(canExtract, input);
@@ -139,11 +139,11 @@ public class ExtractConstantTests extends RefactoringTest {
 		assertEqualLines(getFileContents(getTestFileName(true, false)), newcu.getSource());
 	}
 
-	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName, String guessedConstantName) throws Exception{
+	protected void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName, String guessedConstantName) throws Exception {
 		helper1(startLine, startColumn, endLine, endColumn, replaceAll, allowLoadtime, false, constantName, guessedConstantName);
 	}
 
-	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName) throws Exception {
+	protected void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName) throws Exception {
 		failHelper1(startLine, startColumn, endLine, endColumn, replaceAll, allowLoadtime, constantName, 0, false);
 	}
 
@@ -319,6 +319,30 @@ public class ExtractConstantTests extends RefactoringTest {
 
 	public void test37() throws Exception { // bug 307758
 		helper1(6, 17, 6, 24, true, false, "INT", "INT");
+	}
+	
+	public void test38() throws Exception { // bug 317224
+		helper1(3, 19, 3, 24, true, false, "S_ALL", "ALL");
+	}
+
+	public void test39() throws Exception { // bug 335173
+		helper1(5, 21, 5, 26, false, false, "CONSTANT", "INT");
+	}
+
+	public void test40() throws Exception { // bug 335173
+		helper1(5, 20, 5, 27, false, false, "CONSTANT", "INT");
+	}
+
+	public void test41() throws Exception { // bug 335173
+		helper1(5, 22, 5, 27, false, false, "CONSTANT", "INT");
+	}
+
+	public void test42() throws Exception { // bug 335173
+		helper1(5, 21, 5, 28, false, false, "CONSTANT", "INT");
+	}
+
+	public void test43() throws Exception { // bug 335173
+		helper1(5, 20, 5, 29, false, false, "CONSTANT", "INT");
 	}
 
 	public void testZeroLengthSelection0() throws Exception {

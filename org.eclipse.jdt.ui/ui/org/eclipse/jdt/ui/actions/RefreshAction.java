@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,25 +79,26 @@ public class RefreshAction extends SelectionDispatchAction {
 			super(provider);
 		}
 
-		protected List getSelectedResources() {
-			List selectedResources= super.getSelectedResources();
+		@Override
+		protected List<IResource> getSelectedResources() {
+			List<IResource> selectedResources= super.getSelectedResources();
 			if (!getStructuredSelection().isEmpty() && selectedResources.size() == 1 && selectedResources.get(0) instanceof IWorkspaceRoot) {
-				selectedResources= Collections.EMPTY_LIST; // Refresh action refreshes root when it can't find any resources in selection
+				selectedResources= Collections.emptyList(); // Refresh action refreshes root when it can't find any resources in selection
 			}
 
-			ArrayList allResources= new ArrayList(selectedResources);
+			ArrayList<IResource> allResources= new ArrayList<IResource>(selectedResources);
 			addWorkingSetResources(allResources);
 			return allResources;
 		}
 
-		private void addWorkingSetResources(List selectedResources) {
+		private void addWorkingSetResources(List<IResource> selectedResources) {
 			Object[] elements= getStructuredSelection().toArray();
 			for (int i= 0; i < elements.length; i++) {
 				Object curr= elements[i];
 				if (curr instanceof IWorkingSet) {
 					IAdaptable[] members= ((IWorkingSet) curr).getElements();
 					for (int k= 0; k < members.length; k++) {
-						Object adapted= members[k].getAdapter(IResource.class);
+						IResource adapted= (IResource) members[k].getAdapter(IResource.class);
 						if (adapted != null) {
 							selectedResources.add(adapted);
 						}
@@ -135,13 +136,14 @@ public class RefreshAction extends SelectionDispatchAction {
 		super(site);
 		setText(ActionMessages.RefreshAction_label);
 		setToolTipText(ActionMessages.RefreshAction_toolTip);
-		JavaPluginImages.setLocalImageDescriptors(this, "refresh_nav.gif");//$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "refresh.gif");//$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.REFRESH_ACTION);
 	}
 
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}
@@ -149,7 +151,7 @@ public class RefreshAction extends SelectionDispatchAction {
 	private boolean checkEnabled(IStructuredSelection selection) {
 		if (selection.isEmpty())
 			return true;
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IWorkingSet) {
 				// don't inspect working sets any deeper.
@@ -173,6 +175,7 @@ public class RefreshAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
+	@Override
 	public void run(final IStructuredSelection selection) {
 		IWorkspaceRunnable operation= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
@@ -193,34 +196,26 @@ public class RefreshAction extends SelectionDispatchAction {
 
 	private void refreshJavaElements(IStructuredSelection selection, IProgressMonitor monitor) throws JavaModelException {
 		Object[] selectedElements= selection.toArray();
-		ArrayList javaElements= new ArrayList();
+		ArrayList<IJavaElement> javaElements= new ArrayList<IJavaElement>();
 		for (int i= 0; i < selectedElements.length; i++) {
 			Object curr= selectedElements[i];
-			if (curr instanceof IJavaElement) {
-				javaElements.add(curr);
+			if (curr instanceof IPackageFragmentRoot) {
+				javaElements.add((IPackageFragmentRoot) curr);
 			} else if (curr instanceof PackageFragmentRootContainer) {
 				javaElements.addAll(Arrays.asList(((PackageFragmentRootContainer) curr).getPackageFragmentRoots()));
 			} else if (curr instanceof IWorkingSet) {
 				IAdaptable[] members= ((IWorkingSet) curr).getElements();
 				for (int k= 0; k < members.length; k++) {
-					Object adapted= members[k].getAdapter(IJavaElement.class);
-					if (adapted != null) {
+					IJavaElement adapted= (IJavaElement)members[k].getAdapter(IJavaElement.class);
+					if (adapted instanceof IPackageFragmentRoot) {
 						javaElements.add(adapted);
 					}
 				}
-			} else if (curr instanceof IAdaptable) {
-				Object adapted= ((IAdaptable) curr).getAdapter(IJavaElement.class);
-				if (adapted != null) {
-					javaElements.add(adapted);
-				}
 			}
  		}
-		IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-		if (selection.isEmpty()) {
-			javaElements.add(model);
-		}
 		if (!javaElements.isEmpty()) {
-			model.refreshExternalArchives((IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]), monitor);
+			IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+			model.refreshExternalArchives(javaElements.toArray(new IJavaElement[javaElements.size()]), monitor);
 		}
 	}
 }

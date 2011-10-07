@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -119,6 +119,7 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor implements
 			return fRewrite.createChange(true);
 		}
 
+		@Override
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
 			if (fBinding == binding) {
@@ -137,6 +138,7 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor implements
 			return true;
 		}
 
+		@Override
 		public boolean visit(AbstractTypeDeclaration node) {
 			String name= node.getName().getIdentifier();
 			if (name.equals(getNewElementName())) {
@@ -178,20 +180,24 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor implements
 		status.merge(initialize(arguments));
 	}
 
+	@Override
 	protected RenameModifications computeRenameModifications() throws CoreException {
 		RenameModifications result= new RenameModifications();
 		result.rename(fTypeParameter, new RenameArguments(getNewElementName(), getUpdateReferences()));
 		return result;
 	}
 
+	@Override
 	protected IFile[] getChangedFiles() throws CoreException {
 		return new IFile[] {ResourceUtil.getFile(fTypeParameter.getDeclaringMember().getCompilationUnit())};
 	}
 
+	@Override
 	public int getSaveMode() {
 		return RefactoringSaveHelper.SAVE_NOTHING;
 	}
 
+	@Override
 	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor monitor, CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(context);
@@ -217,6 +223,7 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor implements
 		return status;
 	}
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		if (!fTypeParameter.exists())
@@ -248,6 +255,7 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor implements
 		return result;
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		try {
@@ -315,6 +323,7 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor implements
 		return status;
 	}
 
+	@Override
 	protected String[] getAffectedProjectNatures() throws CoreException {
 		return JavaProcessors.computeAffectedNatures(fTypeParameter);
 	}
@@ -323,10 +332,12 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor implements
 		return fTypeParameter.getElementName();
 	}
 
+	@Override
 	public Object[] getElements() {
 		return new Object[] { fTypeParameter};
 	}
 
+	@Override
 	public String getIdentifier() {
 		return IDENTIFIER;
 	}
@@ -346,6 +357,7 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor implements
 		return null;
 	}
 
+	@Override
 	public String getProcessorName() {
 		return RefactoringCoreMessages.RenameTypeParameterProcessor_name;
 	}
@@ -389,6 +401,7 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor implements
 		return new RefactoringStatus();
 	}
 
+	@Override
 	public boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isRenameAvailable(fTypeParameter);
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,7 @@ public class NLSScanner {
 	}
 
 	private static NLSLine[] scan(IScanner scanner, char[] content) throws InvalidInputException, BadLocationException {
-		List lines= new ArrayList();
+		List<NLSLine> lines= new ArrayList<NLSLine>();
 		scanner.setSource(content);
 		int token= scanner.getNextToken();
 		int currentLineNr= -1;
@@ -68,7 +68,7 @@ public class NLSScanner {
 		 * a) >=0: parenthesis counter per nested annotation level, or
 		 * b)  -1: read a '@' or '.' in annotation type, waiting for identifier to complete annotation.
 		 */
-		LinkedList insideAnnotation= new LinkedList();
+		LinkedList<int[]> insideAnnotation= new LinkedList<int[]>();
 		int defaultCounter= 0; // counting up tokens starting with 'default'
 
 		while (token != ITerminalSymbols.TokenNameEOF) {
@@ -83,7 +83,7 @@ public class NLSScanner {
 
 				case ITerminalSymbols.TokenNameIdentifier:
 					if (! insideAnnotation.isEmpty()) {
-						int[] parenCounter= (int[]) insideAnnotation.getLast();
+						int[] parenCounter= insideAnnotation.getLast();
 						if (parenCounter[0] == -1)
 							parenCounter[0]= 0;
 						else if (parenCounter[0] == 0)
@@ -93,7 +93,7 @@ public class NLSScanner {
 
 				case ITerminalSymbols.TokenNameDOT:
 					if (! insideAnnotation.isEmpty()) {
-						int[] parenCounter= (int[]) insideAnnotation.getLast();
+						int[] parenCounter= insideAnnotation.getLast();
 						if (parenCounter[0] == 0)
 							parenCounter[0]= -1;
 						else if (parenCounter[0] == -1)
@@ -103,11 +103,11 @@ public class NLSScanner {
 
 				case ITerminalSymbols.TokenNameLPAREN:
 					if (! insideAnnotation.isEmpty())
-						++((int[]) insideAnnotation.getLast())[0];
+						++insideAnnotation.getLast()[0];
 					break;
 				case ITerminalSymbols.TokenNameRPAREN:
 					if (! insideAnnotation.isEmpty()) {
-						int parenCount= --((int[]) insideAnnotation.getLast())[0];
+						int parenCount= --insideAnnotation.getLast()[0];
 						if (parenCount <= 0) {
 							insideAnnotation.removeLast();
 						}
@@ -169,7 +169,7 @@ public class NLSScanner {
 			token= scanner.getNextToken();
 		}
 		NLSLine[] result;
-		result= (NLSLine[])lines.toArray(new NLSLine[lines.size()]);
+		result= lines.toArray(new NLSLine[lines.size()]);
 		IDocument document= new Document(String.valueOf(scanner.getSource()));
 		for (int i= 0; i < result.length; i++) {
 			setTagPositions(document, result[i]);

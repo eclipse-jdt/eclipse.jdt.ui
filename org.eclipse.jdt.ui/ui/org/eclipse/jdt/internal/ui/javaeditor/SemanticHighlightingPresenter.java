@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -234,7 +234,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	private JavaPresentationReconciler fPresentationReconciler;
 
 	/** UI's current highlighted positions - can contain <code>null</code> elements */
-	private List fPositions= new ArrayList();
+	private List<Position> fPositions= new ArrayList<Position>();
 	/** UI position lock */
 	private Object fPositionLock= new Object();
 
@@ -265,7 +265,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 *
 	 * @param list The list
 	 */
-	public void addAllPositions(List list) {
+	public void addAllPositions(List<Position> list) {
 		synchronized (fPositionLock) {
 			list.addAll(fPositions);
 		}
@@ -281,7 +281,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @param removedPositions the removed positions
 	 * @return the text presentation or <code>null</code>, if reconciliation should be canceled
 	 */
-	public TextPresentation createPresentation(List addedPositions, List removedPositions) {
+	public TextPresentation createPresentation(List<Position> addedPositions, List<Position> removedPositions) {
 		JavaSourceViewer sourceViewer= fSourceViewer;
 		JavaPresentationReconciler presentationReconciler= fPresentationReconciler;
 		if (sourceViewer == null || presentationReconciler == null)
@@ -297,13 +297,13 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		int minStart= Integer.MAX_VALUE;
 		int maxEnd= Integer.MIN_VALUE;
 		for (int i= 0, n= removedPositions.size(); i < n; i++) {
-			Position position= (Position) removedPositions.get(i);
+			Position position= removedPositions.get(i);
 			int offset= position.getOffset();
 			minStart= Math.min(minStart, offset);
 			maxEnd= Math.max(maxEnd, offset + position.getLength());
 		}
 		for (int i= 0, n= addedPositions.size(); i < n; i++) {
-			Position position= (Position) addedPositions.get(i);
+			Position position= addedPositions.get(i);
 			int offset= position.getOffset();
 			minStart= Math.min(minStart, offset);
 			maxEnd= Math.max(maxEnd, offset + position.getLength());
@@ -329,7 +329,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @param removedPositions the removed positions
 	 * @return the runnable or <code>null</code>, if reconciliation should be canceled
 	 */
-	public Runnable createUpdateRunnable(final TextPresentation textPresentation, List addedPositions, List removedPositions) {
+	public Runnable createUpdateRunnable(final TextPresentation textPresentation, List<Position> addedPositions, List<Position> removedPositions) {
 		if (fSourceViewer == null || textPresentation == null)
 			return null;
 
@@ -379,11 +379,11 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 
 		String positionCategory= getPositionCategory();
 
-		List removedPositionsList= Arrays.asList(removedPositions);
+		List<HighlightedPosition> removedPositionsList= Arrays.asList(removedPositions);
 
 		try {
 			synchronized (fPositionLock) {
-				List oldPositions= fPositions;
+				List<Position> oldPositions= fPositions;
 				int newSize= Math.max(fPositions.size() + addedPositions.length - removedPositions.length, 10);
 
 				/*
@@ -393,7 +393,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 				 * removed on the fly. The second of two is the list of added positions. The result
 				 * is stored in newPositions.
 				 */
-				List newPositions= new ArrayList(newSize);
+				List<Position> newPositions= new ArrayList<Position>(newSize);
 				Position position= null;
 				Position addedPosition= null;
 				for (int i= 0, j= 0, n= oldPositions.size(), m= addedPositions.length; i < n || position != null || j < m || addedPosition != null;) {
@@ -401,7 +401,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 
 					// a) find the next non-deleted Position from the old list
 					while (position == null && i < n) {
-						position= (Position) oldPositions.get(i++);
+						position= oldPositions.get(i++);
 						if (position.isDeleted() || contain(removedPositionsList, position)) {
 							document.removePosition(positionCategory, position);
 							position= null;
@@ -465,7 +465,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @param position the position
 	 * @return <code>true</code> iff the positions contain the position
 	 */
-	private boolean contain(List positions, Position position) {
+	private boolean contain(List<? extends Position> positions, Position position) {
 		return indexOf(positions, position) != -1;
 	}
 
@@ -475,7 +475,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @param position the position
 	 * @return the index
 	 */
-	private int indexOf(List positions, Position position) {
+	private int indexOf(List<? extends Position> positions, Position position) {
 		int index= computeIndexAtOffset(positions, position.getOffset());
 		int size= positions.size();
 		while (index < size) {
@@ -503,12 +503,12 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @param offset the offset
 	 * @return the index of the last position with an offset greater than the given offset
 	 */
-	private int computeIndexAfterOffset(List positions, int offset) {
+	private int computeIndexAfterOffset(List<Position> positions, int offset) {
 		int i= -1;
 		int j= positions.size();
 		while (j - i > 1) {
 			int k= (i + j) >> 1;
-			Position position= (Position) positions.get(k);
+			Position position= positions.get(k);
 			if (position.getOffset() > offset)
 				j= k;
 			else
@@ -524,12 +524,12 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @param offset the offset
 	 * @return the index of the last position with an offset equal or greater than the given offset
 	 */
-	private int computeIndexAtOffset(List positions, int offset) {
+	private int computeIndexAtOffset(List<? extends Position> positions, int offset) {
 		int i= -1;
 		int j= positions.size();
 		while (j - i > 1) {
 			int k= (i + j) >> 1;
-			Position position= (Position) positions.get(k);
+			Position position= positions.get(k);
 			if (position.getOffset() >= offset)
 				j= k;
 			else
@@ -545,14 +545,14 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		IRegion region= textPresentation.getExtent();
 		int i= computeIndexAtOffset(fPositions, region.getOffset()), n= computeIndexAtOffset(fPositions, region.getOffset() + region.getLength());
 		if (n - i > 2) {
-			List ranges= new ArrayList(n - i);
+			List<StyleRange> ranges= new ArrayList<StyleRange>(n - i);
 			for (; i < n; i++) {
 				HighlightedPosition position= (HighlightedPosition) fPositions.get(i);
 				if (!position.isDeleted())
 					ranges.add(position.createStyleRange());
 			}
 			StyleRange[] array= new StyleRange[ranges.size()];
-			array= (StyleRange[]) ranges.toArray(array);
+			array= ranges.toArray(array);
 			textPresentation.replaceStyleRanges(array);
 		} else {
 			for (; i < n; i++) {
@@ -691,7 +691,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 */
 	private void invalidateTextPresentation() {
 		for (int i= 0, n= fPositions.size(); i < n; i++) {
-			Position position= (Position) fPositions.get(i);
+			Position position= fPositions.get(i);
 			fSourceViewer.invalidateTextPresentation(position.getOffset(), position.getLength());
 		}
 	}

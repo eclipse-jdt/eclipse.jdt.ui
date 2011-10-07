@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,6 +91,7 @@ public class MultiActionGroup extends ActionGroup {
 
 			viewMenu.add(new ContributionItem() {
 
+				@Override
 				public void fill(Menu menu, int index) {
 
 					int style= SWT.CHECK;
@@ -105,6 +106,7 @@ public class MultiActionGroup extends ActionGroup {
 					mi.setSelection(fCurrentSelection == j);
 					mi.addSelectionListener(new SelectionAdapter() {
 
+						@Override
 						public void widgetSelected(SelectionEvent e) {
 							if (fCurrentSelection == j) {
 								fItems[fCurrentSelection].setSelection(true);
@@ -120,6 +122,7 @@ public class MultiActionGroup extends ActionGroup {
 
 					});
 				}
+				@Override
 				public boolean isDynamic() {
 					return false;
 				}

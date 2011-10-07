@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,11 +75,12 @@ public final class RefactoringSearchEngine2 {
 	private class RefactoringCompilationUnitCollector extends RefactoringSearchCollector {
 
 		/** The collected compilation units */
-		private final Set fCollectedUnits= new HashSet();
+		private final Set<ICompilationUnit> fCollectedUnits= new HashSet<ICompilationUnit>();
 
 		/** The inaccurate matches */
-		private final Set fInaccurateMatches= new HashSet();
+		private final Set<SearchMatch> fInaccurateMatches= new HashSet<SearchMatch>();
 
+		@Override
 		public final void acceptSearchMatch(final SearchMatch match) throws CoreException {
 			final SearchMatch accepted= fRequestor.acceptSearchMatch(match);
 			if (accepted != null) {
@@ -87,7 +88,7 @@ public final class RefactoringSearchEngine2 {
 				if (!resource.equals(fLastResource)) {
 					final IJavaElement element= JavaCore.create(resource);
 					if (element instanceof ICompilationUnit)
-						fCollectedUnits.add(element);
+						fCollectedUnits.add((ICompilationUnit) element);
 				}
 				if (fInaccurate && accepted.getAccuracy() == SearchMatch.A_INACCURATE && !fInaccurateMatches.contains(accepted)) {
 					fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_inaccurate_match, BasicElementLabels.getResourceName(accepted.getResource())), null, null, RefactoringStatusEntry.NO_CODE);
@@ -96,21 +97,25 @@ public final class RefactoringSearchEngine2 {
 			}
 		}
 
+		@Override
 		public final void clearResults() {
 			super.clearResults();
 			fCollectedUnits.clear();
 			fInaccurateMatches.clear();
 		}
 
-		public final Collection getBinaryResources() {
-			return Collections.EMPTY_SET;
+		@Override
+		public final Collection<IResource> getBinaryResources() {
+			return Collections.emptySet();
 		}
 
-		public final Collection getCollectedMatches() {
+		@Override
+		public final Collection<ICompilationUnit> getCollectedMatches() {
 			return fCollectedUnits;
 		}
 
-		public final Collection getInaccurateMatches() {
+		@Override
+		public final Collection<SearchMatch> getInaccurateMatches() {
 			return fInaccurateMatches;
 		}
 	}
@@ -123,25 +128,26 @@ public final class RefactoringSearchEngine2 {
 			fLastResource= null;
 		}
 
-		public abstract Collection getBinaryResources();
+		public abstract Collection<IResource> getBinaryResources();
 
-		public abstract Collection getCollectedMatches();
+		public abstract Collection<?> getCollectedMatches();
 
-		public abstract Collection getInaccurateMatches();
+		public abstract Collection<SearchMatch> getInaccurateMatches();
 	}
 
 	/** Search requestor which collects every search match */
 	private class RefactoringSearchMatchCollector extends RefactoringSearchCollector {
 
 		/** The binary resources */
-		private final Set fBinaryResources= new HashSet();
+		private final Set<IResource> fBinaryResources= new HashSet<IResource>();
 
 		/** The collected matches */
-		private final List fCollectedMatches= new ArrayList();
+		private final List<SearchMatch> fCollectedMatches= new ArrayList<SearchMatch>();
 
 		/** The inaccurate matches */
-		private final Set fInaccurateMatches= new HashSet();
+		private final Set<SearchMatch> fInaccurateMatches= new HashSet<SearchMatch>();
 
+		@Override
 		public final void acceptSearchMatch(final SearchMatch match) throws CoreException {
 			final SearchMatch accepted= fRequestor.acceptSearchMatch(match);
 			if (accepted != null) {
@@ -167,6 +173,7 @@ public final class RefactoringSearchEngine2 {
 			}
 		}
 
+		@Override
 		public final void clearResults() {
 			super.clearResults();
 			fCollectedMatches.clear();
@@ -174,15 +181,18 @@ public final class RefactoringSearchEngine2 {
 			fBinaryResources.clear();
 		}
 
-		public final Collection getBinaryResources() {
+		@Override
+		public final Collection<IResource> getBinaryResources() {
 			return fBinaryResources;
 		}
 
-		public final Collection getCollectedMatches() {
+		@Override
+		public final Collection<SearchMatch> getCollectedMatches() {
 			return fCollectedMatches;
 		}
 
-		public final Collection getInaccurateMatches() {
+		@Override
+		public final Collection<SearchMatch> getInaccurateMatches() {
 			return fInaccurateMatches;
 		}
 	}
@@ -263,10 +273,10 @@ public final class RefactoringSearchEngine2 {
 	 */
 	public final ICompilationUnit[] getAffectedCompilationUnits() {
 		if (fGranularity == GRANULARITY_COMPILATION_UNIT) {
-			final Collection collection= getCollector().getCollectedMatches();
+			final Collection<?> collection= getCollector().getCollectedMatches();
 			final ICompilationUnit[] units= new ICompilationUnit[collection.size()];
 			int index= 0;
-			for (final Iterator iterator= collection.iterator(); iterator.hasNext(); index++)
+			for (final Iterator<?> iterator= collection.iterator(); iterator.hasNext(); index++)
 				units[index]= (ICompilationUnit) iterator.next();
 			return units;
 		} else {
@@ -283,27 +293,31 @@ public final class RefactoringSearchEngine2 {
 	 * <p>
 	 * In order to retrieve the java projects, grouping by resource must have been enabled before searching.
 	 *
-	 * @return the java projects of the previous queries (element type: <code>&ltIJavaProject, Collection&ltSearchResultGroup&gt&gt</code>)
+	 * @return the java projects of the previous queries (element type:
+	 * <code>&lt;IJavaProject, Collection&lt;SearchResultGroup&gt;&gt;</code> if granularity is {@link #GRANULARITY_SEARCH_MATCH} or
+	 * <code>&lt;IJavaProject, Collection&lt;ICompilationUnit&gt;&gt;</code> if it is {@link #GRANULARITY_COMPILATION_UNIT}).
 	 */
-	public final Map getAffectedProjects() {
-		final Map map= new HashMap();
+	public final Map<IJavaProject, ? extends Set<?>> getAffectedProjects() {
 		IJavaProject project= null;
 		ICompilationUnit unit= null;
 		if (fGranularity == GRANULARITY_COMPILATION_UNIT) {
+			final Map<IJavaProject, Set<ICompilationUnit>> map= new HashMap<IJavaProject, Set<ICompilationUnit>>();
 			final ICompilationUnit[] units= getAffectedCompilationUnits();
 			for (int index= 0; index < units.length; index++) {
 				unit= units[index];
 				project= unit.getJavaProject();
 				if (project != null) {
-					Set set= (Set) map.get(project);
+					Set<ICompilationUnit> set= map.get(project);
 					if (set == null) {
-						set= new HashSet();
+						set= new HashSet<ICompilationUnit>();
 						map.put(project, set);
 					}
 					set.add(unit);
 				}
 			}
+			return map;
 		} else {
+			final Map<IJavaProject, Set<SearchResultGroup>> map= new HashMap<IJavaProject, Set<SearchResultGroup>>();
 			final SearchResultGroup[] groups= getGroupedMatches();
 			SearchResultGroup group= null;
 			for (int index= 0; index < groups.length; index++) {
@@ -312,17 +326,17 @@ public final class RefactoringSearchEngine2 {
 				if (unit != null) {
 					project= unit.getJavaProject();
 					if (project != null) {
-						Set set= (Set) map.get(project);
+						Set<SearchResultGroup> set= map.get(project);
 						if (set == null) {
-							set= new HashSet();
+							set= new HashSet<SearchResultGroup>();
 							map.put(project, set);
 						}
 						set.add(group);
 					}
 				}
 			}
+			return map;
 		}
-		return map;
 	}
 
 	/**
@@ -348,32 +362,32 @@ public final class RefactoringSearchEngine2 {
 	 * @return the found search matches
 	 */
 	private SearchResultGroup[] getGroupedMatches() {
-		final Map grouped= new HashMap();
-		List matches= null;
+		final Map<IResource, List<SearchMatch>> grouped= new HashMap<IResource, List<SearchMatch>>();
+		List<SearchMatch> matches= null;
 		IResource resource= null;
 		SearchMatch match= null;
-		for (final Iterator iterator= getSearchMatches().iterator(); iterator.hasNext();) {
+		for (final Iterator<?> iterator= getSearchMatches().iterator(); iterator.hasNext();) {
 			match= (SearchMatch) iterator.next();
 			resource= match.getResource();
 			if (!grouped.containsKey(resource))
-				grouped.put(resource, new ArrayList(4));
-			matches= (List) grouped.get(resource);
+				grouped.put(resource, new ArrayList<SearchMatch>(4));
+			matches= grouped.get(resource);
 			matches.add(match);
 		}
 		if (fBinary) {
-			final Collection collection= getCollector().getBinaryResources();
-			for (final Iterator iterator= grouped.keySet().iterator(); iterator.hasNext();) {
-				resource= (IResource) iterator.next();
+			final Collection<IResource> collection= getCollector().getBinaryResources();
+			for (final Iterator<IResource> iterator= grouped.keySet().iterator(); iterator.hasNext();) {
+				resource= iterator.next();
 				if (collection.contains(resource))
 					iterator.remove();
 			}
 		}
 		final SearchResultGroup[] result= new SearchResultGroup[grouped.keySet().size()];
 		int index= 0;
-		for (final Iterator iterator= grouped.keySet().iterator(); iterator.hasNext();) {
-			resource= (IResource) iterator.next();
-			matches= (List) grouped.get(resource);
-			result[index++]= new SearchResultGroup(resource, ((SearchMatch[]) matches.toArray(new SearchMatch[matches.size()])));
+		for (final Iterator<IResource> iterator= grouped.keySet().iterator(); iterator.hasNext();) {
+			resource= iterator.next();
+			matches= grouped.get(resource);
+			result[index++]= new SearchResultGroup(resource, matches.toArray(new SearchMatch[matches.size()]));
 		}
 		return result;
 	}
@@ -414,13 +428,13 @@ public final class RefactoringSearchEngine2 {
 	 *
 	 * @return the filtered search matches
 	 */
-	private Collection getSearchMatches() {
-		Collection results= null;
+	private Collection<?> getSearchMatches() {
+		Collection<?> results= null;
 		if (fInaccurate) {
-			results= new LinkedList(getCollector().getCollectedMatches());
-			final Collection collection= getCollector().getInaccurateMatches();
+			results= new LinkedList<Object>(getCollector().getCollectedMatches());
+			final Collection<SearchMatch> collection= getCollector().getInaccurateMatches();
 			SearchMatch match= null;
-			for (final Iterator iterator= results.iterator(); iterator.hasNext();) {
+			for (final Iterator<?> iterator= results.iterator(); iterator.hasNext();) {
 				match= (SearchMatch) iterator.next();
 				if (collection.contains(match))
 					iterator.remove();
@@ -445,12 +459,12 @@ public final class RefactoringSearchEngine2 {
 	 * @return the found search matches
 	 */
 	private SearchMatch[] getUngroupedMatches() {
-		Collection results= null;
+		Collection<?> results= null;
 		if (fBinary) {
-			results= new LinkedList(getSearchMatches());
-			final Collection collection= getCollector().getBinaryResources();
+			results= new LinkedList<Object>(getSearchMatches());
+			final Collection<IResource> collection= getCollector().getBinaryResources();
 			SearchMatch match= null;
-			for (final Iterator iterator= results.iterator(); iterator.hasNext();) {
+			for (final Iterator<?> iterator= results.iterator(); iterator.hasNext();) {
 				match= (SearchMatch) iterator.next();
 				if (collection.contains(match.getResource()))
 					iterator.remove();

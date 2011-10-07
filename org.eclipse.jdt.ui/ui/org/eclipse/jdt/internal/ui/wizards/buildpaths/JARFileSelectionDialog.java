@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,6 +74,7 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 		private final Image IMG_FOLDER= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
 		private final Image IMG_JAR=  JavaPlugin.getDefault().getImageRegistry().get(JavaPluginImages.IMG_OBJS_EXTJAR);
 
+		@Override
 		public Image getImage(Object element) {
 			if (element instanceof File) {
 				File curr= (File) element;
@@ -86,6 +87,7 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 			return null;
 		}
 
+		@Override
 		public String getText(Object element) {
 			if (element instanceof File) {
 				return BasicElementLabels.getResourceName(((File) element).getName());
@@ -138,6 +140,7 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 			fAcceptFolders= acceptFolders;
 		}
 
+		@Override
 		public boolean select(Viewer viewer, Object parent, Object element) {
 			if (element instanceof File) {
 				File file= (File) element;
@@ -167,6 +170,7 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 	}
 
 	private static class FileViewerComparator extends ViewerComparator {
+		@Override
 		public int category(Object element) {
 			if (element instanceof File) {
 				if (((File) element).isFile()) {

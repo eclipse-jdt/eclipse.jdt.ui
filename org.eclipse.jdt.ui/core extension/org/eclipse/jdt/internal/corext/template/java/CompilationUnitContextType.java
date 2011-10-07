@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.template.java;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
+import org.eclipse.jface.text.templates.SimpleTemplateVariableResolver;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
@@ -39,7 +40,8 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 	 	public ReturnType() {
 	 	 	super("return_type", JavaTemplateMessages.CompilationUnitContextType_variable_description_return_type);  //$NON-NLS-1$
 	 	}
-	 	protected String resolve(TemplateContext context) {
+	 	@Override
+		protected String resolve(TemplateContext context) {
 			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(IJavaElement.METHOD);
 			if (element == null)
 				return null;
@@ -56,6 +58,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 		public File() {
 			super("file", JavaTemplateMessages.CompilationUnitContextType_variable_description_file);  //$NON-NLS-1$
 		}
+		@Override
 		protected String resolve(TemplateContext context) {
 			ICompilationUnit unit= ((CompilationUnitContext) context).getCompilationUnit();
 
@@ -65,6 +68,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 		/*
 		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#isUnambiguous(org.eclipse.jface.text.templates.TemplateContext)
 		 */
+		@Override
 		protected boolean isUnambiguous(TemplateContext context) {
 			return resolve(context) != null;
 		}
@@ -75,6 +79,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 			super("primary_type_name", JavaTemplateMessages.CompilationUnitContextType_variable_description_primary_type_name);  //$NON-NLS-1$
 
 		}
+		@Override
 		protected String resolve(TemplateContext context) {
 			ICompilationUnit unit= ((CompilationUnitContext) context).getCompilationUnit();
 			if (unit == null)
@@ -85,6 +90,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 		/*
 		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#isUnambiguous(org.eclipse.jface.text.templates.TemplateContext)
 		 */
+		@Override
 		protected boolean isUnambiguous(TemplateContext context) {
 			return resolve(context) != null;
 		}
@@ -97,6 +103,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 			super(name, description);
 			fElementType= elementType;
 		}
+		@Override
 		protected String resolve(TemplateContext context) {
 			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(fElementType);
 			if (element instanceof IType)
@@ -107,6 +114,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 		/*
 		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#isUnambiguous(org.eclipse.jface.text.templates.TemplateContext)
 		 */
+		@Override
 		protected boolean isUnambiguous(TemplateContext context) {
 			return resolve(context) != null;
 		}
@@ -156,6 +164,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 		public Arguments() {
 			super("enclosing_method_arguments", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_method_arguments);  //$NON-NLS-1$
 		}
+		@Override
 		protected String resolve(TemplateContext context) {
 			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(IJavaElement.METHOD);
 			if (element == null)
@@ -192,6 +201,33 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 	}
 */
 
+	/**
+	 * The line selection variable determines templates that work on selected
+	 * lines.
+	 * <p>
+	 * This class contains additional description that tells about the
+	 * 'Source &gt; Surround With > ...' menu.</p>
+	 * 
+	 * @since 3.7
+	 * @see org.eclipse.jface.text.templates.GlobalTemplateVariables.LineSelection
+	 */
+	protected static class SurroundWithLineSelection extends SimpleTemplateVariableResolver {
+	
+		/**
+		 * Creates a new line selection variable
+		 */
+		public SurroundWithLineSelection() {
+			super(org.eclipse.jface.text.templates.GlobalTemplateVariables.LineSelection.NAME, JavaTemplateMessages.CompilationUnitContextType_variable_description_line_selection);
+		}
+		@Override
+		protected String resolve(TemplateContext context) {
+			String selection= context.getVariable(org.eclipse.jface.text.templates.GlobalTemplateVariables.SELECTION);
+			if (selection == null)
+				return ""; //$NON-NLS-1$
+			return selection;
+		}
+	}
+
 	/*
 	 * @see ContextType#ContextType(String)
 	 */
@@ -208,6 +244,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.template.ContextType#validateVariables(org.eclipse.jdt.internal.corext.template.TemplateVariable[])
 	 */
+	@Override
 	protected void validateVariables(TemplateVariable[] variables) throws TemplateException {
 		// check for multiple cursor variables
 		for (int i= 0; i < variables.length; i++) {

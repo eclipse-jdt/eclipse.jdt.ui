@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -484,11 +484,9 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			}
 
 			fInstalledJVMs= getWorkspaceJREs();
-			Arrays.sort(fInstalledJVMs, new Comparator() {
+			Arrays.sort(fInstalledJVMs, new Comparator<IVMInstall>() {
 
-				public int compare(Object arg0, Object arg1) {
-					IVMInstall i0= (IVMInstall)arg0;
-					IVMInstall i1= (IVMInstall)arg1;
+				public int compare(IVMInstall i0, IVMInstall i1) {
 					if (i1 instanceof IVMInstall2 && i0 instanceof IVMInstall2) {
 						String cc0= JavaModelUtil.getCompilerCompliance((IVMInstall2) i0, JavaCore.VERSION_1_4);
 						String cc1= JavaModelUtil.getCompilerCompliance((IVMInstall2) i1, JavaCore.VERSION_1_4);
@@ -533,9 +531,9 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			}
 
 			fInstalledEEs= JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments();
-			Arrays.sort(fInstalledEEs, new Comparator() {
-				public int compare(Object arg0, Object arg1) {
-					return Policy.getComparator().compare(((IExecutionEnvironment)arg0).getId(), ((IExecutionEnvironment)arg1).getId());
+			Arrays.sort(fInstalledEEs, new Comparator<IExecutionEnvironment>() {
+				public int compare(IExecutionEnvironment arg0, IExecutionEnvironment arg1) {
+					return Policy.getComparator().compare(arg0.getId(), arg1.getId());
 				}
 			});
 			selectionIndex= -1;//find new index
@@ -557,7 +555,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 
 		private IVMInstall[] getWorkspaceJREs() {
-			List standins = new ArrayList();
+			List<VMStandin> standins = new ArrayList<VMStandin>();
 			IVMInstallType[] types = JavaRuntime.getVMInstallTypes();
 			for (int i = 0; i < types.length; i++) {
 				IVMInstallType type = types[i];
@@ -567,7 +565,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					standins.add(new VMStandin(install));
 				}
 			}
-			return ((IVMInstall[])standins.toArray(new IVMInstall[standins.size()]));
+			return standins.toArray(new IVMInstall[standins.size()]);
 		}
 
 		private String getDefaultJVMName() {
@@ -644,7 +642,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			String jreID= BuildPathSupport.JRE_PREF_PAGE_ID;
 			String eeID= BuildPathSupport.EE_PREF_PAGE_ID;
 			String complianceId= CompliancePreferencePage.PREF_ID;
-			Map data= new HashMap();
+			Map<String, Boolean> data= new HashMap<String, Boolean>();
 			data.put(PropertyAndPreferencePage.DATA_NO_LINK, Boolean.TRUE);
 			PreferencesUtil.createPreferenceDialogOn(getShell(), jreID, new String[] { jreID, complianceId , eeID }, data).open();
 
@@ -845,7 +843,12 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			String selectedCompliance= fJREGroup.getSelectedCompilerCompliance();
 			if (selectedCompliance != null) {
 				String defaultCompliance= JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
-				if (selectedCompliance.equals(defaultCompliance)) {
+				if (JavaModelUtil.HIDE_VERSION_1_7 && fJREGroup.fUseEEJRE.isSelected() && fJREGroup.fEECombo.getText().indexOf(JavaCore.VERSION_1_7) != -1) {
+					fHintText.setText(NewWizardMessages.NewJavaProjectWizardPageOne_DetectGroup_java17_message);
+					fHintText.setVisible(true);
+					fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
+					fIcon.setVisible(true);
+				} else if (selectedCompliance.equals(defaultCompliance)) {
 					fHintText.setVisible(false);
 					fIcon.setVisible(false);
 				} else {
@@ -875,6 +878,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				fHintText.setVisible(false);
 				fIcon.setVisible(false);
 			}
+
 		}
 
 		private boolean computeDetectState() {
@@ -931,7 +935,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			String jreID= BuildPathSupport.JRE_PREF_PAGE_ID;
 			String eeID= BuildPathSupport.EE_PREF_PAGE_ID;
 			String complianceId= CompliancePreferencePage.PREF_ID;
-			Map data= new HashMap();
+			Map<String, Boolean> data= new HashMap<String, Boolean>();
 			data.put(PropertyAndPreferencePage.DATA_NO_LINK, Boolean.TRUE);
 			String id= "JRE".equals(e.text) ? jreID : complianceId; //$NON-NLS-1$
 			PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { jreID, complianceId, eeID  }, data).open();
@@ -1146,6 +1150,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		setControl(composite);
 	}
 
+	@Override
 	protected void setControl(Control newControl) {
 		Dialog.applyDialogFont(newControl);
 
@@ -1344,6 +1349,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
@@ -1412,7 +1418,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		if (treeSelection.isEmpty())
 			return EMPTY_WORKING_SET_ARRAY;
 
-		List elements= treeSelection.toList();
+		List<?> elements= treeSelection.toList();
 		if (elements.size() == 1) {
 			Object element= elements.get(0);
 			TreePath[] paths= treeSelection.getPathsFor(element);
@@ -1434,14 +1440,14 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			return EMPTY_WORKING_SET_ARRAY;
 		}
 
-		ArrayList result= new ArrayList();
-		for (Iterator iterator= elements.iterator(); iterator.hasNext();) {
+		ArrayList<IWorkingSet> result= new ArrayList<IWorkingSet>();
+		for (Iterator<?> iterator= elements.iterator(); iterator.hasNext();) {
 			Object element= iterator.next();
 			if (element instanceof IWorkingSet && isValidWorkingSet((IWorkingSet) element)) {
-				result.add(element);
+				result.add((IWorkingSet) element);
 			}
 		}
-		return (IWorkingSet[]) result.toArray(new IWorkingSet[result.size()]);
+		return result.toArray(new IWorkingSet[result.size()]);
 	}
 
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,6 +77,7 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
     /*
      * @see SelectionDispatchAction#selectionChanged(ITextSelection)
      */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
@@ -87,6 +88,7 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 	 * @param selection the Java text selection
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		if (selection.getLength() != 0)
 			setEnabled(false);
@@ -97,6 +99,7 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(selection));
@@ -111,6 +114,7 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		IJavaElement[] elements= getSelectedElements(selection);
 		try {
@@ -130,6 +134,7 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;
@@ -147,7 +152,7 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 	}
 
 	private static IJavaElement[] getSelectedElements(IStructuredSelection selection){
-		List list= selection.toList();
+		List<?> list= selection.toList();
 		IJavaElement[] elements= new IJavaElement[list.size()];
 		for (int i= 0; i < list.size(); i++) {
 			Object object= list.get(i);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,15 +45,16 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.TextBoxDialogField;
 
+
 public class AppearancePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	private static final String SHOW_CU_CHILDREN= PreferenceConstants.SHOW_CU_CHILDREN;
 	private static final String PREF_METHOD_RETURNTYPE= PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE;
 	private static final String PREF_METHOD_TYPEPARAMETERS= PreferenceConstants.APPEARANCE_METHOD_TYPEPARAMETERS;
 	private static final String PREF_COMPRESS_PACKAGE_NAMES= PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES;
-	private static final String PREF_ABBREVIATE_PACKAGE_NAMES= JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES;
+	private static final String PREF_ABBREVIATE_PACKAGE_NAMES= PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES;
 	private static final String PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW= PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW;
-	private static final String PREF_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW;
+	private static final String PREF_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW;
 	private static final String STACK_BROWSING_VIEWS_VERTICALLY= PreferenceConstants.BROWSING_STACK_VERTICALLY;
 	private static final String PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER;
 	private static final String PREF_CATEGORY= PreferenceConstants.APPEARANCE_CATEGORY;
@@ -140,6 +141,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	/*
 	 * @see PreferencePage#createControl(Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.APPEARANCE_PREFERENCE_PAGE);
@@ -148,6 +150,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	/*
 	 * @see PreferencePage#createContents(Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		initializeDialogUnits(parent);
 		int nColumns= 1;
@@ -241,6 +244,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	/*
 	 * @see IPreferencePage#performOk()
 	 */
+	@Override
 	public boolean performOk() {
 		IPreferenceStore prefs= getPreferenceStore();
 		prefs.setValue(PREF_METHOD_RETURNTYPE, fShowMethodReturnType.isSelected());
@@ -253,13 +257,14 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		prefs.setValue(PREF_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, fAbbreviatePackageNamePattern.getText());
 		prefs.setValue(PREF_ABBREVIATE_PACKAGE_NAMES, fAbbreviatePackageNames.isSelected());
 		prefs.setValue(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fFoldPackagesInPackageExplorer.isSelected());
-		JavaPlugin.getDefault().savePluginPreferences();
+		JavaPlugin.flushInstanceScope();
 		return super.performOk();
 	}
 
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
+	@Override
 	protected void performDefaults() {
 		IPreferenceStore prefs= getPreferenceStore();
 		fShowMethodReturnType.setSelection(prefs.getDefaultBoolean(PREF_METHOD_RETURNTYPE));

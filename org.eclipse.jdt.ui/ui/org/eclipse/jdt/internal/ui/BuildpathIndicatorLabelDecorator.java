@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ public class BuildpathIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void decorate(Object element, IDecoration decoration) {
 		ImageDescriptor overlay= getOverlay(element);
 		if (overlay != null) {
@@ -61,7 +62,8 @@ public class BuildpathIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		return null;
 	}
 
-	protected void processDelta(IJavaElementDelta delta, List result) {
+	@Override
+	protected void processDelta(IJavaElementDelta delta, List<IJavaElement> result) {
 		IJavaElement elem= delta.getElement();
 
 		boolean isChanged= delta.getKind() == IJavaElementDelta.CHANGED;

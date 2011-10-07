@@ -8,12 +8,12 @@ public class TestSetterAsReceiver {
 		(a.setField("d")).length();
 	}
 
-	String setField(String field) {
-		this.field = field;
+	String getField() {
 		return field;
 	}
 
-	String getField() {
+	String setField(String field) {
+		this.field = field;
 		return field;
 	}
 }

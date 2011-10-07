@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -357,6 +357,26 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, false, false, false);
 	}
 
+	// change visibility: https://bugs.eclipse.org/319069
+	public void test39() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
+	}
+	
+	// change visibility: https://bugs.eclipse.org/319069
+	public void test40() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
+	}
+	
+	// change visibility: https://bugs.eclipse.org/319069
+	public void test41() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
+	}
+	
+	// change visibility: https://bugs.eclipse.org/319069
+	public void test42() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
+	}
+	
 	// --- Non static
 
 	public void test_nonstatic_0() throws Exception{
@@ -531,6 +551,36 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "Inner", "MoreInner", "p2", new String[]{"A"}, new String[]{"p2"}, "p", true, true, false, true);
 	}
 
+	public void test_nonstatic_45() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, null, false, true, false, false);
+	}
+
+	public void test_nonstatic_46() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, null, false, true, false, false);
+	}
+
+	public void test_nonstatic_47() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, null, false, true, false, false);
+	}
+
+	public void test_nonstatic_48() throws Exception {
+		String fileCommentTemplate= "/** Copy right or wrong. */";
+		StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, fileCommentTemplate, null);
+		String newFileTemplate= "${filecomment}\n${package_declaration}\n\n${typecomment}\n${type_declaration}";
+		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID, newFileTemplate, null);
+		
+		try {
+			validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, null, false, true, false, false);
+		} finally {
+			fileCommentTemplate= "/**\n * \n */";
+			StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, fileCommentTemplate, null);
+		}
+	}
+	
+	public void test_nonstatic_49() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, "a", false, true, true, true);
+	}
+
 	public void testFail_nonstatic_0() throws Exception{
 		validateFailingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", RefactoringStatus.ERROR);
 	}
@@ -593,5 +643,21 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 	public void test_secondary_8() throws Exception {
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A", "S", "T" }, new String[] { "p", "q", "q" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_9() throws Exception {
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_10() throws Exception {
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_11() throws Exception {
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
+	}
+
+	public void test_secondary_12() throws Exception {
+		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 }

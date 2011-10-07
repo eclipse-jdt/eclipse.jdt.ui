@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -88,25 +88,26 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 			runAction(action);
 
 			// Fill Find field
-			SWTEventHelper.pressKeyChar(display, FIND);
+			SWTEventHelper.pressKeyChar(display, FIND,false);
 
 			// Switch to Replace field
-			SWTEventHelper.pressKeyCode(display, SWT.TAB);
+			SWTEventHelper.pressKeyCode(display, SWT.TAB,false);
 
 			// Fill Replace field
-			SWTEventHelper.pressKeyChar(display, REPLACE);
+			SWTEventHelper.pressKeyChar(display, REPLACE,false);
 
 			performanceMeter.start();
 
 			// Press Replace All button via mnemonic
-			SWTEventHelper.keyCodeDown(display, SWT.MOD3);
-			SWTEventHelper.pressKeyChar(display, 'a');
-			SWTEventHelper.keyCodeUp(display, SWT.MOD3);
+			SWTEventHelper.keyCodeDown(display, SWT.MOD3,false);
+			SWTEventHelper.pressKeyChar(display, 'a',false);
+			SWTEventHelper.keyCodeUp(display, SWT.MOD3,false);
 
 
 			// Close Find/Replace dialog
-			SWTEventHelper.pressKeyCode(display, SWT.ESC);
+			SWTEventHelper.pressKeyCode(display, SWT.ESC,false);
 
+			EditorTestHelper.runEventQueue();
 			DisplayHelper helper= new DisplayHelper() {
 				public boolean condition() {
 					return fEditor.isDirty() && display.getActiveShell() == fEditor.getEditorSite().getShell();
@@ -127,7 +128,6 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 
 	private void runAction(IAction action) {
 		action.run();
-		EditorTestHelper.runEventQueue();
 	}
 
 

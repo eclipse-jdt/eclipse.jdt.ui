@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,9 +56,9 @@ public class VariableCreationDialog extends StatusDialog {
 
 	private CPVariableElement fElement;
 
-	private List fExistingNames;
+	private List<CPVariableElement> fExistingNames;
 
-	public VariableCreationDialog(Shell parent, CPVariableElement element, List existingNames) {
+	public VariableCreationDialog(Shell parent, CPVariableElement element, List<CPVariableElement> existingNames) {
 		super(parent);
 		if (element == null) {
 			setTitle(NewWizardMessages.VariableCreationDialog_titlenew);
@@ -102,6 +102,7 @@ public class VariableCreationDialog extends StatusDialog {
 	/*
 	 * @see Windows#configureShell
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.VARIABLE_CREATION_DIALOG);
@@ -115,6 +116,7 @@ public class VariableCreationDialog extends StatusDialog {
 	/*
 	 * @see Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
 
@@ -207,7 +209,7 @@ public class VariableCreationDialog extends StatusDialog {
 			return false;
 		}
 		for (int i= 0; i < fExistingNames.size(); i++) {
-			CPVariableElement elem= (CPVariableElement)fExistingNames.get(i);
+			CPVariableElement elem= fExistingNames.get(i);
 			if (name.equals(elem.getName())){
 				return true;
 			}

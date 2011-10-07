@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,7 +66,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	private Composite fParentComposite;
 
 	private IProject fProject; // project or null
-	private Map fData; // page data
+	private Map<String, Object> fData; // page data
 
 	public static final String DATA_NO_LINK= "PropertyAndPreferencePage.nolink"; //$NON-NLS-1$
 
@@ -91,7 +91,8 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		return fData == null || !Boolean.TRUE.equals(fData.get(DATA_NO_LINK));
 	}
 
-    protected Label createDescriptionLabel(Composite parent) {
+    @Override
+	protected Label createDescriptionLabel(Composite parent) {
 		fParentComposite= parent;
 		if (isProjectPreferencePage()) {
 			Composite composite= new Composite(parent, SWT.NONE);
@@ -141,6 +142,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#createContents(Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -197,15 +199,15 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	 * @param link the link
 	 */
 	final void doLinkActivated(Link link) {
-		Map data= getData();
+		Map<String, Object> data= getData();
 		if (data == null)
-			data= new HashMap();
+			data= new HashMap<String, Object>();
 		data.put(DATA_NO_LINK, Boolean.TRUE);
 
 		if (isProjectPreferencePage()) {
 			openWorkspacePreferences(data);
 		} else {
-			HashSet projectsWithSpecifics= new HashSet();
+			HashSet<IJavaProject> projectsWithSpecifics= new HashSet<IJavaProject>();
 			try {
 				IJavaProject[] projects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
 				for (int i= 0; i < projects.length; i++) {
@@ -302,6 +304,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
 	 */
+	@Override
 	protected void performDefaults() {
 		if (useProjectSettings()) {
 			enableProjectSpecificSettings(false);
@@ -338,9 +341,11 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
+	@Override
 	public void applyData(Object data) {
 		if (data instanceof Map) {
-			fData= (Map) data;
+			fData= (Map<String, Object>) data;
 		}
 		if (fChangeWorkspaceSettings != null) {
 			if (!offerLink()) {
@@ -350,7 +355,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		}
  	}
 
-	protected Map getData() {
+	protected Map<String, Object> getData() {
 		return fData;
 	}
 

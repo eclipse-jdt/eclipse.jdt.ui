@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,6 +66,7 @@ public abstract class StructureSelectionAction extends Action {
 	/*
 	 * Method declared in IAction.
 	 */
+	@Override
 	public final  void run() {
 		IJavaElement inputElement= EditorUtility.getEditorInputJavaElement(fEditor, false);
 		if (!(inputElement instanceof ITypeRoot && inputElement.exists()))
@@ -165,8 +166,8 @@ public abstract class StructureSelectionAction extends Action {
 		ASTNode parent= node.getParent();
 		StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
 		if (locationInParent.isChildListProperty()) {
-			List siblings= (List) parent.getStructuralProperty(locationInParent);
-			return (ASTNode[]) siblings.toArray(new ASTNode[siblings.size()]);
+			List<? extends ASTNode> siblings= (List<? extends ASTNode>) parent.getStructuralProperty(locationInParent);
+			return siblings.toArray(new ASTNode[siblings.size()]);
 		}
 		return null;
 	}

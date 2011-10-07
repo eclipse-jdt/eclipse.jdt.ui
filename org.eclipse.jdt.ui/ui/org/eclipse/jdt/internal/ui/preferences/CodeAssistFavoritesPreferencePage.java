@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage
 
 	private CodeAssistFavoritesConfigurationBlock fConfigurationBlock;
 
+	@Override
 	public void createControl(Composite parent) {
 		IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer) getContainer();
 		fConfigurationBlock= new CodeAssistFavoritesConfigurationBlock(getNewStatusChangedListener(), container);
@@ -48,18 +49,22 @@ public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);
 	}
 
+	@Override
 	protected Control createPreferenceContent(Composite composite) {
 		return fConfigurationBlock.createContents(composite);
 	}
 
+	@Override
 	protected boolean hasProjectSpecificOptions(IProject project) {
 		return false;
 	}
 
+	@Override
 	protected String getPreferencePageID() {
 		return PAGE_ID;
 	}
 
+	@Override
 	protected String getPropertyPageID() {
 		return null;
 	}
@@ -67,6 +72,7 @@ public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage
 		/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
+	@Override
 	public void dispose() {
 		if (fConfigurationBlock != null) {
 			fConfigurationBlock.dispose();
@@ -77,6 +83,7 @@ public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
 	 */
+	@Override
 	protected void performDefaults() {
 		super.performDefaults();
 		if (fConfigurationBlock != null) {
@@ -87,6 +94,7 @@ public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
+	@Override
 	public boolean performOk() {
 		if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
 			return false;
@@ -97,6 +105,7 @@ public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performApply()
 	 */
+	@Override
 	public void performApply() {
 		if (fConfigurationBlock != null) {
 			fConfigurationBlock.performApply();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,8 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.OpenResourceAction;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
+
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
@@ -106,17 +108,19 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.ISelection)
 	 */
+	@Override
 	public void selectionChanged(ISelection selection) {
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.ISelection)
 	 */
+	@Override
 	public void run(ISelection selection) {
 		internalRun(null);
 	}
 
-	private int evaluateSelection(IStructuredSelection selection, List allClosedProjects) {
+	private int evaluateSelection(IStructuredSelection selection, List<Object> allClosedProjects) {
 		Object[] array= selection.toArray();
 		int selectionStatus = 0;
 		for (int i= 0; i < array.length; i++) {
@@ -145,6 +149,11 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	}
 
 	private static boolean isClosedProject(Object element) {
+		if (element instanceof IJavaProject) {
+			IProject project= ((IJavaProject) element).getProject();
+			return !project.isOpen();
+		}
+
 		// assume all closed project are rendered as IProject
 		return element instanceof IProject && !((IProject) element).isOpen();
 	}
@@ -155,8 +164,9 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
-		ArrayList allClosedProjects= new ArrayList();
+		List<Object> allClosedProjects= new ArrayList<Object>();
 		int selectionStatus= evaluateSelection(selection, allClosedProjects);
 		if ((selectionStatus & CLOSED_PROJECTS_SELECTED) != 0) { // selection contains closed projects
 			fWorkbenchAction.selectionChanged(new StructuredSelection(allClosedProjects));
@@ -166,7 +176,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 		}
 	}
 
-	private void internalRun(List initialSelection) {
+	private void internalRun(List<?> initialSelection) {
 		ListSelectionDialog dialog= new ListSelectionDialog(getShell(), getClosedProjectsInWorkspace(), new ArrayContentProvider(), new JavaElementLabelProvider(), ActionMessages.OpenProjectAction_dialog_message);
 		dialog.setTitle(ActionMessages.OpenProjectAction_dialog_title);
 		if (initialSelection != null && !initialSelection.isEmpty()) {
@@ -210,7 +220,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 
 	private Object[] getClosedProjectsInWorkspace() {
 		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		List result= new ArrayList(5);
+		List<IProject> result= new ArrayList<IProject>(5);
 		for (int i = 0; i < projects.length; i++) {
 			IProject project= projects[i];
 			if (!project.isOpen())

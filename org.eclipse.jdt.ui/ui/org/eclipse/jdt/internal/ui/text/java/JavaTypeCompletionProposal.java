@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -95,6 +95,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	/* (non-Javadoc)
 	 * @see ICompletionProposalExtension#apply(IDocument, char, int)
 	 */
+	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 		try {
 			ImportRewrite impRewrite= null;
@@ -130,6 +131,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
 	 */
+	@Override
 	protected boolean isValidPrefix(String prefix) {
 		return super.isValidPrefix(prefix) || isPrefix(prefix, fUnqualifiedTypeName) || isPrefix(prefix, fFullyQualifiedTypeName);
 	}
@@ -137,6 +139,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal#getCompletionText()
 	 */
+	@Override
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		return fUnqualifiedTypeName;
 	}

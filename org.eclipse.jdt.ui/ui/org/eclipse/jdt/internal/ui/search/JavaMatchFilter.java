@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,6 +53,7 @@ abstract class JavaMatchFilter extends MatchFilter {
 	/* (non-Javadoc)
 	 * @see org.eclipse.search.ui.text.MatchFilter#filters(org.eclipse.search.ui.text.Match)
 	 */
+	@Override
 	public boolean filters(Match match) {
 		if (match instanceof JavaElementMatch) {
 			return filters((JavaElementMatch) match);
@@ -91,14 +92,14 @@ abstract class JavaMatchFilter extends MatchFilter {
 
 	private static JavaMatchFilter[] decodeFiltersString(String encodedString) {
 		StringTokenizer tokenizer= new StringTokenizer(encodedString, String.valueOf(';'));
-		HashSet result= new HashSet();
+		HashSet<JavaMatchFilter> result= new HashSet<JavaMatchFilter>();
 		while (tokenizer.hasMoreTokens()) {
 			JavaMatchFilter curr= findMatchFilter(tokenizer.nextToken());
 			if (curr != null) {
 				result.add(curr);
 			}
 		}
-		return (JavaMatchFilter[]) result.toArray(new JavaMatchFilter[result.size()]);
+		return result.toArray(new JavaMatchFilter[result.size()]);
 	}
 
 	private static final JavaMatchFilter POTENTIAL_FILTER= new PotentialFilter();
@@ -140,14 +141,14 @@ abstract class JavaMatchFilter extends MatchFilter {
 	}
 
 	public static JavaMatchFilter[] allFilters(JavaSearchQuery query) {
-		ArrayList res= new ArrayList();
+		ArrayList<JavaMatchFilter> res= new ArrayList<JavaMatchFilter>();
 		for (int i= 0; i < ALL_FILTERS.length; i++) {
 			JavaMatchFilter curr= ALL_FILTERS[i];
 			if (curr.isApplicable(query)) {
 				res.add(curr);
 			}
 		}
-		return (JavaMatchFilter[]) res.toArray(new JavaMatchFilter[res.size()]);
+		return res.toArray(new JavaMatchFilter[res.size()]);
 	}
 
 	private static JavaMatchFilter findMatchFilter(String id) {
@@ -161,48 +162,59 @@ abstract class JavaMatchFilter extends MatchFilter {
 }
 
 class PotentialFilter extends JavaMatchFilter {
+	@Override
 	public boolean filters(JavaElementMatch match) {
 		return match.getAccuracy() == SearchMatch.A_INACCURATE;
 	}
 
+	@Override
 	public String getName() {
 		return SearchMessages.MatchFilter_PotentialFilter_name;
 	}
 
+	@Override
 	public String getActionLabel() {
 		return SearchMessages.MatchFilter_PotentialFilter_actionLabel;
 	}
 
+	@Override
 	public String getDescription() {
 		return SearchMessages.MatchFilter_PotentialFilter_description;
 	}
 
+	@Override
 	public boolean isApplicable(JavaSearchQuery query) {
 		return true;
 	}
 
+	@Override
 	public String getID() {
 		return "filter_potential"; //$NON-NLS-1$
 	}
 }
 
 class ImportFilter extends JavaMatchFilter {
+	@Override
 	public boolean filters(JavaElementMatch match) {
 		return match.getElement() instanceof IImportDeclaration;
 	}
 
+	@Override
 	public String getName() {
 		return SearchMessages.MatchFilter_ImportFilter_name;
 	}
 
+	@Override
 	public String getActionLabel() {
 		return SearchMessages.MatchFilter_ImportFilter_actionLabel;
 	}
 
+	@Override
 	public String getDescription() {
 		return SearchMessages.MatchFilter_ImportFilter_description;
 	}
 
+	@Override
 	public boolean isApplicable(JavaSearchQuery query) {
 		QuerySpecification spec= query.getSpecification();
 		if (spec instanceof ElementQuerySpecification) {
@@ -223,12 +235,14 @@ class ImportFilter extends JavaMatchFilter {
 		return false;
 	}
 
+	@Override
 	public String getID() {
 		return "filter_imports"; //$NON-NLS-1$
 	}
 }
 
 abstract class VariableFilter extends JavaMatchFilter {
+	@Override
 	public boolean isApplicable(JavaSearchQuery query) {
 		QuerySpecification spec= query.getSpecification();
 		if (spec instanceof ElementQuerySpecification) {
@@ -245,80 +259,101 @@ abstract class VariableFilter extends JavaMatchFilter {
 }
 
 class WriteFilter extends VariableFilter {
+	@Override
 	public boolean filters(JavaElementMatch match) {
 		return match.isWriteAccess() && !match.isReadAccess();
 	}
+	@Override
 	public String getName() {
 		return SearchMessages.MatchFilter_WriteFilter_name;
 	}
+	@Override
 	public String getActionLabel() {
 		return SearchMessages.MatchFilter_WriteFilter_actionLabel;
 	}
+	@Override
 	public String getDescription() {
 		return SearchMessages.MatchFilter_WriteFilter_description;
 	}
+	@Override
 	public String getID() {
 		return "filter_writes"; //$NON-NLS-1$
 	}
 }
 
 class ReadFilter extends VariableFilter {
+	@Override
 	public boolean filters(JavaElementMatch match) {
 		return match.isReadAccess() && !match.isWriteAccess();
 	}
+	@Override
 	public String getName() {
 		return SearchMessages.MatchFilter_ReadFilter_name;
 	}
+	@Override
 	public String getActionLabel() {
 		return SearchMessages.MatchFilter_ReadFilter_actionLabel;
 	}
+	@Override
 	public String getDescription() {
 		return SearchMessages.MatchFilter_ReadFilter_description;
 	}
+	@Override
 	public String getID() {
 		return "filter_reads"; //$NON-NLS-1$
 	}
 }
 
 class JavadocFilter extends JavaMatchFilter {
+	@Override
 	public boolean filters(JavaElementMatch match) {
 		return match.isJavadoc();
 	}
+	@Override
 	public String getName() {
 		return SearchMessages.MatchFilter_JavadocFilter_name;
 	}
+	@Override
 	public String getActionLabel() {
 		return SearchMessages.MatchFilter_JavadocFilter_actionLabel;
 	}
+	@Override
 	public String getDescription() {
 		return SearchMessages.MatchFilter_JavadocFilter_description;
 	}
+	@Override
 	public boolean isApplicable(JavaSearchQuery query) {
 		return true;
 	}
+	@Override
 	public String getID() {
 		return "filter_javadoc"; //$NON-NLS-1$
 	}
 }
 
 class PolymorphicFilter extends JavaMatchFilter {
-    public boolean filters(JavaElementMatch match) {
+    @Override
+	public boolean filters(JavaElementMatch match) {
         return match.isSuperInvocation();
     }
 
-    public String getName() {
+    @Override
+	public String getName() {
         return SearchMessages.MatchFilter_PolymorphicFilter_name;
     }
 
-    public String getActionLabel() {
+    @Override
+	public String getActionLabel() {
         return SearchMessages.MatchFilter_PolymorphicFilter_actionLabel;
     }
 
-    public String getDescription() {
+    @Override
+	public String getDescription() {
         return SearchMessages.MatchFilter_PolymorphicFilter_description;
     }
 
-    public boolean isApplicable(JavaSearchQuery query) {
+    @Override
+	public boolean isApplicable(JavaSearchQuery query) {
         QuerySpecification spec= query.getSpecification();
         switch (spec.getLimitTo()) {
 			case IJavaSearchConstants.REFERENCES:
@@ -334,12 +369,14 @@ class PolymorphicFilter extends JavaMatchFilter {
         return false;
     }
 
-    public String getID() {
+    @Override
+	public String getID() {
         return "filter_polymorphic"; //$NON-NLS-1$
     }
 }
 
 abstract class GenericTypeFilter extends JavaMatchFilter {
+	@Override
 	public boolean isApplicable(JavaSearchQuery query) {
 		QuerySpecification spec= query.getSpecification();
 		if (spec instanceof ElementQuerySpecification) {
@@ -362,48 +399,60 @@ abstract class GenericTypeFilter extends JavaMatchFilter {
 }
 
 class ErasureMatchFilter extends GenericTypeFilter {
+	@Override
 	public boolean filters(JavaElementMatch match) {
 		return (match.getMatchRule() & (SearchPattern.R_FULL_MATCH | SearchPattern.R_EQUIVALENT_MATCH)) == 0;
 	}
+	@Override
 	public String getName() {
 		return SearchMessages.MatchFilter_ErasureFilter_name;
 	}
+	@Override
 	public String getActionLabel() {
 		return SearchMessages.MatchFilter_ErasureFilter_actionLabel;
 	}
+	@Override
 	public String getDescription() {
 		return SearchMessages.MatchFilter_ErasureFilter_description;
 	}
+	@Override
 	public String getID() {
 		return "filter_erasure"; //$NON-NLS-1$
 	}
 }
 
 class InexactMatchFilter extends GenericTypeFilter {
+	@Override
 	public boolean filters(JavaElementMatch match) {
 		return (match.getMatchRule() & (SearchPattern.R_FULL_MATCH)) == 0;
 	}
+	@Override
 	public String getName() {
 		return SearchMessages.MatchFilter_InexactFilter_name;
 	}
+	@Override
 	public String getActionLabel() {
 		return SearchMessages.MatchFilter_InexactFilter_actionLabel;
 	}
+	@Override
 	public String getDescription() {
 		return SearchMessages.MatchFilter_InexactFilter_description;
 	}
+	@Override
 	public String getID() {
 		return "filter_inexact"; //$NON-NLS-1$
 	}
 }
 
 abstract class ModifierFilter extends JavaMatchFilter {
+	@Override
 	public boolean isApplicable(JavaSearchQuery query) {
 		return true;
 	}
 }
 
 class NonPublicFilter extends ModifierFilter {
+	@Override
 	public boolean filters(JavaElementMatch match) {
 		Object element= match.getElement();
 		if (element instanceof IMember) {
@@ -415,21 +464,26 @@ class NonPublicFilter extends ModifierFilter {
 		}
 		return false;
 	}
+	@Override
 	public String getName() {
 		return SearchMessages.MatchFilter_NonPublicFilter_name;
 	}
+	@Override
 	public String getActionLabel() {
 		return SearchMessages.MatchFilter_NonPublicFilter_actionLabel;
 	}
+	@Override
 	public String getDescription() {
 		return SearchMessages.MatchFilter_NonPublicFilter_description;
 	}
+	@Override
 	public String getID() {
 		return "filter_non_public"; //$NON-NLS-1$
 	}
 }
 
 class StaticFilter extends ModifierFilter {
+	@Override
 	public boolean filters(JavaElementMatch match) {
 		Object element= match.getElement();
 		if (element instanceof IMember) {
@@ -441,21 +495,26 @@ class StaticFilter extends ModifierFilter {
 		}
 		return false;
 	}
+	@Override
 	public String getName() {
 		return SearchMessages.MatchFilter_StaticFilter_name;
 	}
+	@Override
 	public String getActionLabel() {
 		return SearchMessages.MatchFilter_StaticFilter_actionLabel;
 	}
+	@Override
 	public String getDescription() {
 		return SearchMessages.MatchFilter_StaticFilter_description;
 	}
+	@Override
 	public String getID() {
 		return 	"filter_static"; //$NON-NLS-1$
 	}
 }
 
 class NonStaticFilter extends ModifierFilter {
+	@Override
 	public boolean filters(JavaElementMatch match) {
 		Object element= match.getElement();
 		if (element instanceof IMember) {
@@ -467,21 +526,26 @@ class NonStaticFilter extends ModifierFilter {
 		}
 		return false;
 	}
+	@Override
 	public String getName() {
 		return SearchMessages.MatchFilter_NonStaticFilter_name;
 	}
+	@Override
 	public String getActionLabel() {
 		return SearchMessages.MatchFilter_NonStaticFilter_actionLabel;
 	}
+	@Override
 	public String getDescription() {
 		return SearchMessages.MatchFilter_NonStaticFilter_description;
 	}
+	@Override
 	public String getID() {
 		return 	"filter_non_static"; //$NON-NLS-1$
 	}
 }
 
 class DeprecatedFilter extends ModifierFilter {
+	@Override
 	public boolean filters(JavaElementMatch match) {
 		Object element= match.getElement();
 		if (element instanceof IMember) {
@@ -493,21 +557,26 @@ class DeprecatedFilter extends ModifierFilter {
 		}
 		return false;
 	}
+	@Override
 	public String getName() {
 		return SearchMessages.MatchFilter_DeprecatedFilter_name;
 	}
+	@Override
 	public String getActionLabel() {
 		return SearchMessages.MatchFilter_DeprecatedFilter_actionLabel;
 	}
+	@Override
 	public String getDescription() {
 		return SearchMessages.MatchFilter_DeprecatedFilter_description;
 	}
+	@Override
 	public String getID() {
 		return 	"filter_deprecated"; //$NON-NLS-1$
 	}
 }
 
 class NonDeprecatedFilter extends ModifierFilter {
+	@Override
 	public boolean filters(JavaElementMatch match) {
 		Object element= match.getElement();
 		if (element instanceof IMember) {
@@ -519,15 +588,19 @@ class NonDeprecatedFilter extends ModifierFilter {
 		}
 		return false;
 	}
+	@Override
 	public String getName() {
 		return SearchMessages.MatchFilter_NonDeprecatedFilter_name;
 	}
+	@Override
 	public String getActionLabel() {
 		return SearchMessages.MatchFilter_NonDeprecatedFilter_actionLabel;
 	}
+	@Override
 	public String getDescription() {
 		return SearchMessages.MatchFilter_NonDeprecatedFilter_description;
 	}
+	@Override
 	public String getID() {
 		return 	"filter_non_deprecated"; //$NON-NLS-1$
 	}

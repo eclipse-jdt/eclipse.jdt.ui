@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,18 +37,22 @@ public class UndoDeleteResourceChange extends Change {
 		fResourceDescription= resourceDescription;
 	}
 
+	@Override
 	public void initializeValidationData(IProgressMonitor pm) {
 
 	}
 
+	@Override
 	public Object getModifiedElement() {
 		return null;
 	}
 
+	@Override
 	public String getName() {
 		return Messages.format(RefactoringCoreMessages.UndoDeleteResourceChange_change_name, BasicElementLabels.getResourceName(fResourceDescription.getName()));
 	}
 
+	@Override
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		if (! fResourceDescription.isValid()) {
 			return RefactoringStatus.createFatalErrorStatus(
@@ -67,12 +71,14 @@ public class UndoDeleteResourceChange extends Change {
 		return new RefactoringStatus();
 	}
 
+	@Override
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		IResource created= fResourceDescription.createResource(pm);
 		created.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(pm, 1));
 		return new DeleteResourceChange(created.getFullPath(), true);
 	}
 
+	@Override
 	public String toString() {
 		return "Remove " + fResourceDescription.getName(); //$NON-NLS-1$
 	}

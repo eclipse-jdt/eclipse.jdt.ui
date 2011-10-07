@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,8 @@ import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
  */
 public class SearchLeakTestWrapper extends TestCase {
 
+	private static final Class THIS= SearchLeakTestWrapper.class;
+
 	SearchLeakTest fTest;
 	private String fName;
 
@@ -34,12 +36,12 @@ public class SearchLeakTestWrapper extends TestCase {
 		fName= name;
 	}
 
-	public static Test allTests() {
-		return new LeakTestSetup(new JUnitSourceSetup(new TestSuite(SearchLeakTestWrapper.class)));
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
 	}
 
-	public static Test suite() {
-		return allTests();
+	public static Test setUpTest(Test test) {
+		return new LeakTestSetup(new JUnitSourceSetup(test));
 	}
 
 	protected void setUp() throws Exception {

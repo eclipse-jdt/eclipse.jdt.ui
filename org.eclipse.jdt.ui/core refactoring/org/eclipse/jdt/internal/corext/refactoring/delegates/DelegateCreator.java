@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -414,7 +414,7 @@ public abstract class DelegateCreator {
 		int firstParam= msg.indexOf("{0}"); //$NON-NLS-1$
 		Assert.isTrue(firstParam != -1);
 
-		List fragments= new ArrayList();
+		List<ASTNode> fragments= new ArrayList<ASTNode>();
 		TextElement text= getAst().newTextElement();
 		text.setText(msg.substring(0, firstParam).trim());
 		fragments.add(text);

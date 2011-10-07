@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -140,7 +140,6 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		RenameRefactoring refactoring= (RenameRefactoring) createRefactoring(descriptor);
 		RenameFieldProcessor processor= (RenameFieldProcessor) refactoring.getProcessor();
 
-		int numbers= 1;
 		List elements= new ArrayList();
 		elements.add(field);
 		List args= new ArrayList();
@@ -148,12 +147,10 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		if (fRenameGetter) {
 			elements.add(processor.getGetter());
 			args.add(new RenameArguments(processor.getNewGetterName(), fUpdateReferences));
-			numbers++;
 		}
 		if (fRenameSetter) {
 			elements.add(processor.getSetter());
 			args.add(new RenameArguments(processor.getNewSetterName(), fUpdateReferences));
-			numbers++;
 		}
 		String[] renameHandles= ParticipantTesting.createHandles(elements.toArray());
 

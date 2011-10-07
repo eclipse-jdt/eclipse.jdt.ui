@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *     Sebastian Davids, sdavids@gmx.de, - bug 38692
  *     Matt Chapman, mpchapman@gmail.com - 89977 Make JDT .java agnostic
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.io.File;
@@ -28,6 +27,8 @@ import org.xml.sax.SAXException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import org.eclipse.core.filesystem.URIUtil;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -69,6 +70,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 
 public class JavadocOptionsManager {
 
@@ -159,7 +161,7 @@ public class JavadocOptionsManager {
 
 	private static final String JAVADOC_COMMAND_HISTORY= "javadoc_command_history"; //$NON-NLS-1$
 
-	public JavadocOptionsManager(IFile xmlJavadocFile, IDialogSettings dialogSettings, List currSelection) {
+	public JavadocOptionsManager(IFile xmlJavadocFile, IDialogSettings dialogSettings, List<?> currSelection) {
 		fXmlfile= xmlJavadocFile;
 		fWizardStatus= new StatusInfo();
 
@@ -224,7 +226,7 @@ public class JavadocOptionsManager {
 	}
 
 
-	private void loadFromDialogStore(IDialogSettings settings, List sel) {
+	private void loadFromDialogStore(IDialogSettings settings, List<?> sel) {
 		fInitialElements= getInitialElementsFromSelection(sel);
 
 		IJavaProject project= getSingleProjectFromInitialSelection();
@@ -310,7 +312,7 @@ public class JavadocOptionsManager {
 
 
 	//loads defaults for wizard (nothing is stored)
-	private void loadDefaults(List sel) {
+	private void loadDefaults(List<?> sel) {
 		fInitialElements= getInitialElementsFromSelection(sel);
 
 		IJavaProject project= getSingleProjectFromInitialSelection();
@@ -479,24 +481,24 @@ public class JavadocOptionsManager {
 		}
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 
-		ArrayList res= new ArrayList();
+		ArrayList<IContainer> res= new ArrayList<IContainer>();
 
 		String[] strings= sourcePaths.split(File.pathSeparator);
 		for (int i= 0; i < strings.length; i++) {
 			IPath path= makeAbsolutePathFromRelative(new Path(strings[i].trim()));
 			if (path != null) {
-				IContainer[] containers= root.findContainersForLocation(path);
+				IContainer[] containers= root.findContainersForLocationURI(URIUtil.toURI(path.makeAbsolute()));
 				for (int k= 0; k < containers.length; k++) {
 					res.add(containers[k]);
 				}
 			}
 
 		}
-		return (IContainer[]) res.toArray(new IContainer[res.size()]);
+		return res.toArray(new IContainer[res.size()]);
 	}
 
 	private IJavaElement[] getSelectedElementsFromAnt(Element element) {
-		List res= new ArrayList();
+		List<IJavaElement> res= new ArrayList<IJavaElement>();
 
 		// get all the packages listed in the ANT file
 		String packagenames= element.getAttribute(PACKAGENAMES);
@@ -531,7 +533,7 @@ public class JavadocOptionsManager {
 					IPath path= makeAbsolutePathFromRelative(new Path(name));
 					//if unable to create an absolute path to the resource skip it
 					if (path != null) {
-						IFile[] files= root.findFilesForLocation(path);
+						IFile[] files= root.findFilesForLocationURI(URIUtil.toURI(path.makeAbsolute()));
 						for (int i= 0; i < files.length; i++) {
 							IJavaElement el= JavaCore.createCompilationUnitFrom(files[i]);
 							if (el != null) {
@@ -542,7 +544,7 @@ public class JavadocOptionsManager {
 				}
 			}
 		}
-		return (IJavaElement[]) res.toArray(new IJavaElement[res.size()]);
+		return res.toArray(new IJavaElement[res.size()]);
 	}
 
 	/**
@@ -694,7 +696,7 @@ public class JavadocOptionsManager {
 	}
 
 
-	public IStatus getArgumentArray(List vmArgs, List toolArgs) {
+	public IStatus getArgumentArray(List<String> vmArgs, List<String> toolArgs) {
 		MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, JavadocExportMessages.JavadocOptionsManager_status_title, null);
 
 		//bug 38692
@@ -764,6 +766,8 @@ public class JavadocOptionsManager {
 
 		} //end standard options
 
+		String locale= null;
+
 		if (fAdditionalParams.length() + fVMParams.length() != 0) {
 			ExecutionArguments tokens= new ExecutionArguments(fVMParams, fAdditionalParams);
 			String[] vmArgsArray= tokens.getVMArgumentsArray();
@@ -772,7 +776,11 @@ public class JavadocOptionsManager {
 			}
 			String[] argsArray= tokens.getProgramArgumentsArray();
 			for (int i= 0; i < argsArray.length; i++) {
-				toolArgs.add(argsArray[i]);
+				String arg= argsArray[i];
+				if ("-locale".equals(arg) && i + 1 < argsArray.length) { //$NON-NLS-1$
+					locale= argsArray[++i];
+				} else
+					toolArgs.add(arg);
 			}
 		}
 		addProxyOptions(vmArgs);
@@ -798,15 +806,21 @@ public class JavadocOptionsManager {
 				}
 			}
 		}
+		// The locale argument needs to be first.
+		if (locale != null) {
+			toolArgs.add(0, "-locale"); //$NON-NLS-1$
+			toolArgs.add(1, locale);
+		}
+
 		return status;
 	}
 
-	private void addProxyOptions(List vmOptions) {
+	private void addProxyOptions(List<String> vmOptions) {
 		// bug 74132
 		String hostPrefix= "-J-Dhttp.proxyHost="; //$NON-NLS-1$
 		String portPrefix= "-J-Dhttp.proxyPort="; //$NON-NLS-1$
 		for (int i= 0; i < vmOptions.size(); i++) {
-			String curr= (String) vmOptions.get(i);
+			String curr= vmOptions.get(i);
 			if (curr.startsWith(hostPrefix) || curr.startsWith(portPrefix)) {
 				return;
 			}
@@ -830,7 +844,7 @@ public class JavadocOptionsManager {
 
 				IPath basePath= null;
 				IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-				if (root.findFilesForLocation(filePath).length > 0) {
+				if (root.findFilesForLocationURI(URIUtil.toURI(filePath.makeAbsolute())).length > 0) {
 					basePath= directoryPath; // only do relative path if ant file is stored in the workspace
 				}
 				JavadocWriter writer= new JavadocWriter(basePath, projects);
@@ -1023,8 +1037,8 @@ public class JavadocOptionsManager {
 		return fSource;
 	}
 
-	private IJavaElement[] getInitialElementsFromSelection(List candidates) {
-		ArrayList res= new ArrayList();
+	private IJavaElement[] getInitialElementsFromSelection(List<?> candidates) {
+		ArrayList<IJavaElement> res= new ArrayList<IJavaElement>();
 		for (int i= 0; i < candidates.size(); i++) {
 			try {
 				IJavaElement elem= getSelectableJavaElement(candidates.get(i));
@@ -1035,7 +1049,7 @@ public class JavadocOptionsManager {
 				// ignore this
 			}
 		}
-		return (IJavaElement[]) res.toArray(new IJavaElement[res.size()]);
+		return res.toArray(new IJavaElement[res.size()]);
 	}
 
 	private IJavaElement getSelectableJavaElement(Object obj) throws JavaModelException {
@@ -1107,7 +1121,7 @@ public class JavadocOptionsManager {
 	}
 
 	/**
-	 * @param project
+	 * @param project the Java project
 	 */
 	public void updateRecentSettings(IJavaProject project) {
 		fRecentSettings.setProjectSettings(project, fDestination, fAntpath, fHRefs);

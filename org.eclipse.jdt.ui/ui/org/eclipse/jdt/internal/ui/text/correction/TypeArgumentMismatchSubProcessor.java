@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,7 @@ public class TypeArgumentMismatchSubProcessor {
 
 //	}
 
-	public static void removeMismatchedArguments(IInvocationContext context, IProblemLocation problem, Collection proposals){
+	public static void removeMismatchedArguments(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals){
 		ICompilationUnit cu= context.getCompilationUnit();
 		ASTNode selectedNode= problem.getCoveredNode(context.getASTRoot());
 		if (!(selectedNode instanceof SimpleName)) {
@@ -65,6 +65,15 @@ public class TypeArgumentMismatchSubProcessor {
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
 			proposals.add(proposal);
 		}
+	}
+
+	public static void getInferDiamondArgumentsProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		ASTNode selectedNode= problem.getCoveredNode(context.getASTRoot());
+		if (!(selectedNode instanceof SimpleName)) {
+			return;
+		}
+		
+		QuickAssistProcessor.getInferDiamondArgumentsProposal(context, selectedNode, null, proposals);
 	}
 
 }

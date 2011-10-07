@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,6 +78,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		// Do nothing
 	}
@@ -85,6 +86,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(CallHierarchy.arePossibleInputElements(selection.toList()));
 	}
@@ -92,6 +94,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		ITypeRoot input= SelectionConverter.getInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), input))
@@ -101,7 +104,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 			IJavaElement[] elements= SelectionConverter.codeResolveOrInputForked(fEditor);
 			if (elements == null)
 				return;
-			List candidates= new ArrayList(elements.length);
+			List<IJavaElement> candidates= new ArrayList<IJavaElement>(elements.length);
 			for (int i= 0; i < elements.length; i++) {
 				IJavaElement element= elements[i];
 				if (CallHierarchy.isPossibleInputElement(element)) {
@@ -114,7 +117,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 					candidates.add(enclosingMethod);
 				}
 			}
-			CallHierarchyUI.openSelectionDialog((IMember[]) candidates.toArray(new IMember[candidates.size()]), getSite().getWorkbenchWindow());
+			CallHierarchyUI.openSelectionDialog(candidates.toArray(new IMember[candidates.size()]), getSite().getWorkbenchWindow());
 
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(),
@@ -142,13 +145,14 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
-		List elements= selection.toList();
+		List<?> elements= selection.toList();
 		if (!CallHierarchy.arePossibleInputElements(elements)) {
 			elements= Collections.EMPTY_LIST;
 		}
 
-		IMember[] members= (IMember[]) elements.toArray(new IMember[elements.size()]);
+		IMember[] members= elements.toArray(new IMember[elements.size()]);
 		if (!ActionUtil.areProcessable(getShell(), members))
 			return;
 

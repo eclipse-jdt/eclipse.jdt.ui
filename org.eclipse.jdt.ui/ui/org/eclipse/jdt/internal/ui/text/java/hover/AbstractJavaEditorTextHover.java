@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,11 +11,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
-
-
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
@@ -40,7 +40,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
-
 
 
 /**
@@ -108,6 +107,10 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 		 */
 		if (hoverRegion.getLength() == 0)
 			return null;
+		
+		IDocument document= textViewer.getDocument();
+		if (document != null && isInheritDoc(document, hoverRegion))
+			return null;
 
 		ICodeAssist resolve= getCodeAssist();
 		if (resolve != null) {
@@ -118,6 +121,23 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns whether the word is "inheritDoc".
+	 * 
+	 * @param document the document
+	 * @param wordRegion the word region
+	 * @return <code>true</code> iff the word is "inheritDoc"
+	 * @since 3.7
+	 */
+	private static boolean isInheritDoc(IDocument document, IRegion wordRegion) {
+		try {
+			String word= document.get(wordRegion.getOffset(), wordRegion.getLength());
+			return "inheritDoc".equals(word); //$NON-NLS-1$
+		} catch (BadLocationException e) {
+			return false;
+		}
 	}
 
 	/*
@@ -133,7 +153,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.ITextHoverExtension2#getInformationPresenterControlCreator()
+	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 * @since 3.4
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {

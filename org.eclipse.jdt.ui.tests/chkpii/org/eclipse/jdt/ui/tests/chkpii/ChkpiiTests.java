@@ -152,8 +152,10 @@ public class ChkpiiTests extends TestCase {
 		} catch (InterruptedException e) {
 			return false;
 		} finally {
-			out.terminate();
-			err.terminate();
+			if (err != null)
+				err.terminate();
+			if (out != null)
+				out.terminate();
 		}
 
  		if (err.getContents().length() > 0 || !new File(type.getOutputFile()).exists()) {

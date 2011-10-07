@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,9 +36,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.preferences.DefaultScope;
-import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -100,7 +100,7 @@ public abstract class ProfileConfigurationBlock {
 
 	class ProfileComboController implements Observer, SelectionListener {
 
-		private final List fSortedProfiles;
+		private final List<Profile> fSortedProfiles;
 
 		public ProfileComboController() {
 			fSortedProfiles= fProfileManager.getSortedProfiles();
@@ -112,7 +112,7 @@ public abstract class ProfileConfigurationBlock {
 
 		public void widgetSelected(SelectionEvent e) {
 			final int index= fProfileCombo.getSelectionIndex();
-			fProfileManager.setSelected((Profile)fSortedProfiles.get(index));
+			fProfileManager.setSelected(fSortedProfiles.get(index));
 		}
 
 		public void widgetDefaultSelected(SelectionEvent e) {}
@@ -201,7 +201,7 @@ public abstract class ProfileConfigurationBlock {
 			final IContentType type= Platform.getContentTypeManager().getContentType("org.eclipse.core.runtime.xml"); //$NON-NLS-1$
 			if (type != null)
 				encoding= type.getDefaultCharset();
-			final Collection profiles= new ArrayList();
+			final Collection<Profile> profiles= new ArrayList<Profile>();
 			profiles.addAll(fProfileManager.getSortedProfiles());
 			try {
 				fProfileStore.writeProfilesToFile(profiles, file, encoding);
@@ -254,7 +254,7 @@ public abstract class ProfileConfigurationBlock {
 			JavaPlugin.getDefault().getDialogSettings().put(fLastSaveLoadPathKey + ".loadpath", dialog.getFilterPath()); //$NON-NLS-1$
 
 			final File file= new File(path);
-			Collection profiles= null;
+			Collection<Profile> profiles= null;
 			try {
 				profiles= fProfileStore.readProfilesFromFile(file);
 			} catch (CoreException e) {
@@ -264,7 +264,7 @@ public abstract class ProfileConfigurationBlock {
 			}
 			if (profiles == null || profiles.isEmpty())
 				return;
-			Iterator iter=profiles.iterator();
+			Iterator<Profile> iter=profiles.iterator();
 			while (iter.hasNext()) {
 				final CustomProfile profile= (CustomProfile)iter.next();
 
@@ -332,7 +332,7 @@ public abstract class ProfileConfigurationBlock {
 			fCurrContext= fInstanceScope;
 		}
 
-		List profiles= null;
+		List<Profile> profiles= null;
         try {
             profiles= fProfileStore.readProfiles(fInstanceScope);
         } catch (CoreException e) {
@@ -348,7 +348,7 @@ public abstract class ProfileConfigurationBlock {
         }
 
         if (profiles == null)
-            profiles= new ArrayList();
+            profiles= new ArrayList<Profile>();
 
 		fProfileManager= createProfileManager(profiles, fCurrContext, access, fProfileVersioner);
 
@@ -379,7 +379,7 @@ public abstract class ProfileConfigurationBlock {
 
 	protected abstract ProfileStore createProfileStore(IProfileVersioner versioner);
 
-	protected abstract ProfileManager createProfileManager(List profiles, IScopeContext context, PreferencesAccess access, IProfileVersioner profileVersioner);
+	protected abstract ProfileManager createProfileManager(List<Profile> profiles, IScopeContext context, PreferencesAccess access, IProfileVersioner profileVersioner);
 
 	protected abstract ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile);
 

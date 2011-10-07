@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,10 +25,10 @@ public class TypeSetEnvironment {
 	private final TypeUniverseSet fUniverse;
 	private final EmptyTypeSet fEmptyTypeSet;
 
-	private final Map/*<TType, SubTypesOfSingleton>*/ fSubtypesOfSingletons= new LinkedHashMap();//@perf
-	private final Map/*<TType, SubTypesSet>*/ fSubTypesSets= new LinkedHashMap();//@perf
-	private final Map/*<TType, SuperTypesOfSingleton>*/ fSuperTypesOfSingletons= new LinkedHashMap();//@perf
-	private final Map/*<TType, SuperTypesSet>*/ fSuperTypesSets= new LinkedHashMap();//@perf
+	private final Map<TType, SubTypesOfSingleton> fSubtypesOfSingletons= new LinkedHashMap<TType, SubTypesOfSingleton>();//@perf
+	private final Map<TypeSet, SubTypesSet> fSubTypesSets= new LinkedHashMap<TypeSet, SubTypesSet>();//@perf
+	private final Map<TType, SuperTypesOfSingleton> fSuperTypesOfSingletons= new LinkedHashMap<TType, SuperTypesOfSingleton>();//@perf
+	private final Map<Object, SuperTypesSet> fSuperTypesSets= new LinkedHashMap<Object, SuperTypesSet>();//@perf
 
 	private int fgCommonExprHits= 0;
 	private int fgCommonExprMisses= 0;
@@ -56,7 +56,7 @@ public class TypeSetEnvironment {
 			return this.getUniverseTypeSet();
 		if (fSubtypesOfSingletons.containsKey(superType)) {
 			fgCommonExprHits++;
-			return (SubTypesOfSingleton) fSubtypesOfSingletons.get(superType);
+			return fSubtypesOfSingletons.get(superType);
 		} else {
 			SubTypesOfSingleton s= new SubTypesOfSingleton(superType, this);
 
@@ -69,7 +69,7 @@ public class TypeSetEnvironment {
 	public SubTypesSet createSubTypesSet(TypeSet superTypes) {
 		if (fSubTypesSets.containsKey(superTypes)) {
 			fgCommonExprHits++;
-			return (SubTypesSet) fSubTypesSets.get(superTypes);
+			return fSubTypesSets.get(superTypes);
 		} else {
 			SubTypesSet s= new SubTypesSet(superTypes);
 
@@ -82,7 +82,7 @@ public class TypeSetEnvironment {
 	public SuperTypesOfSingleton createSuperTypesOfSingleton(TType subType) {
 		if (fSuperTypesOfSingletons.containsKey(subType)) {
 			fgCommonExprHits++;
-			return (SuperTypesOfSingleton) fSuperTypesOfSingletons.get(subType);
+			return fSuperTypesOfSingletons.get(subType);
 		} else {
 			SuperTypesOfSingleton s= new SuperTypesOfSingleton(subType, this);
 
@@ -95,7 +95,7 @@ public class TypeSetEnvironment {
 	public SuperTypesSet createSuperTypesSet(TType subType) {
 		if (fSuperTypesSets.containsKey(subType)) {
 			fgCommonExprHits++;
-			return (SuperTypesSet) fSuperTypesSets.get(subType);
+			return fSuperTypesSets.get(subType);
 		} else {
 			SuperTypesSet s= new SuperTypesSet(subType, this);
 
@@ -107,7 +107,7 @@ public class TypeSetEnvironment {
 
 	public SuperTypesSet createSuperTypesSet(TypeSet subTypes) {
 		if (fSuperTypesSets.containsKey(subTypes))
-			return (SuperTypesSet) fSuperTypesSets.get(subTypes);
+			return fSuperTypesSets.get(subTypes);
 		else {
 			SuperTypesSet s= new SuperTypesSet(subTypes, this);
 

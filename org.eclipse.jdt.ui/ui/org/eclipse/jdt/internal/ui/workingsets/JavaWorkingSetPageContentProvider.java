@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 class JavaWorkingSetPageContentProvider extends StandardJavaElementContentProvider {
 
+	@Override
 	public boolean hasChildren(Object element) {
 
 		if (element instanceof IProject && !((IProject)element).isAccessible())
@@ -42,6 +43,7 @@ class JavaWorkingSetPageContentProvider extends StandardJavaElementContentProvid
 		return super.hasChildren(element);
 	}
 
+	@Override
 	public Object[] getChildren(Object parentElement) {
 		try {
 			if (parentElement instanceof IJavaModel)
@@ -60,6 +62,7 @@ class JavaWorkingSetPageContentProvider extends StandardJavaElementContentProvid
 		}
 	}
 
+	@Override
 	protected Object[] getPackageFragmentRootContent(IPackageFragmentRoot root) throws JavaModelException {
 		if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
 			// Don't show IJarEntryResource

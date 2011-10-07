@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,7 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 public class ConvertLoopCleanUp extends AbstractCleanUp {
 
-	public ConvertLoopCleanUp(Map options) {
+	public ConvertLoopCleanUp(Map<String, String> options) {
 		super(options);
 	}
 
@@ -38,6 +38,7 @@ public class ConvertLoopCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED), false, false, null);
 	}
@@ -45,6 +46,7 @@ public class ConvertLoopCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
@@ -60,18 +62,20 @@ public class ConvertLoopCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String[] getStepDescriptions() {
-		List result= new ArrayList();
+		List<String> result= new ArrayList<String>();
 
 		if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED))
 			result.add(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description);
 
-		return (String[])result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 

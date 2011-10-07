@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,12 +50,12 @@ public final class SpecificContentAssistExecutor {
 	 * @param categoryId the id of the proposal category to show proposals for
 	 */
 	public void invokeContentAssist(final ITextEditor editor, String categoryId) {
-		Collection categories= fRegistry.getProposalCategories();
+		Collection<CompletionProposalCategory> categories= fRegistry.getProposalCategories();
 		boolean[] inclusionState= new boolean[categories.size()];
 		boolean[] separateState= new boolean[categories.size()];
 		int i= 0;
-		for (Iterator it= categories.iterator(); it.hasNext(); i++) {
-			CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
+		for (Iterator<CompletionProposalCategory> it= categories.iterator(); it.hasNext(); i++) {
+			CompletionProposalCategory cat= it.next();
 			inclusionState[i]= cat.isIncluded();
 			cat.setIncluded(cat.getId().equals(categoryId));
 			separateState[i]= cat.isSeparateCommand();
@@ -68,8 +68,8 @@ public final class SpecificContentAssistExecutor {
 				target.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
 		} finally {
 			i= 0;
-			for (Iterator it= categories.iterator(); it.hasNext(); i++) {
-				CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
+			for (Iterator<CompletionProposalCategory> it= categories.iterator(); it.hasNext(); i++) {
+				CompletionProposalCategory cat= it.next();
 				cat.setIncluded(inclusionState[i]);
 				cat.setSeparateCommand(separateState[i]);
 			}

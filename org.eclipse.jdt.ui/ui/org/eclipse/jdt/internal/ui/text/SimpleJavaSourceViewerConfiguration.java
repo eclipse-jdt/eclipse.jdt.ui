@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,6 +59,7 @@ public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfigu
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getAutoEditStrategies(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
 	 */
+	@Override
 	public IAutoEditStrategy[] getAutoEditStrategies(ISourceViewer sourceViewer, String contentType) {
 		return null;
 	}
@@ -66,6 +67,7 @@ public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfigu
 	/*
 	 * @see SourceViewerConfiguration#getAnnotationHover(ISourceViewer)
 	 */
+	@Override
 	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
 		return null;
 	}
@@ -73,6 +75,7 @@ public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfigu
 	/*
 	 * @see SourceViewerConfiguration#getOverviewRulerAnnotationHover(ISourceViewer)
 	 */
+	@Override
 	public IAnnotationHover getOverviewRulerAnnotationHover(ISourceViewer sourceViewer) {
 		return null;
 	}
@@ -80,6 +83,7 @@ public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfigu
 	/*
 	 * @see SourceViewerConfiguration#getConfiguredTextHoverStateMasks(ISourceViewer, String)
 	 */
+	@Override
 	public int[] getConfiguredTextHoverStateMasks(ISourceViewer sourceViewer, String contentType) {
 		return null;
 	}
@@ -87,6 +91,7 @@ public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfigu
 	/*
 	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String, int)
 	 */
+	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
 		return null;
 	}
@@ -94,6 +99,7 @@ public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfigu
 	/*
 	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String)
 	 */
+	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
 		return null;
 	}
@@ -101,6 +107,7 @@ public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfigu
 	/*
 	 * @see SourceViewerConfiguration#getContentFormatter(ISourceViewer)
 	 */
+	@Override
 	public IContentFormatter getContentFormatter(ISourceViewer sourceViewer) {
 		if (fConfigureFormatter)
 			return super.getContentFormatter(sourceViewer);
@@ -111,6 +118,7 @@ public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfigu
 	/*
 	 * @see SourceViewerConfiguration#getInformationControlCreator(ISourceViewer)
 	 */
+	@Override
 	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
 		return null;
 	}
@@ -118,6 +126,7 @@ public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfigu
 	/*
 	 * @see SourceViewerConfiguration#getInformationPresenter(ISourceViewer)
 	 */
+	@Override
 	public IInformationPresenter getInformationPresenter(ISourceViewer sourceViewer) {
 		return null;
 	}
@@ -125,6 +134,7 @@ public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfigu
 	/*
 	 * @see org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration#getOutlinePresenter(org.eclipse.jface.text.source.ISourceViewer, boolean)
 	 */
+	@Override
 	public IInformationPresenter getOutlinePresenter(ISourceViewer sourceViewer, boolean doCodeResolve) {
 		return null;
 	}
@@ -132,6 +142,7 @@ public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfigu
 	/*
 	 * @see org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration#getHierarchyPresenter(org.eclipse.jface.text.source.ISourceViewer, boolean)
 	 */
+	@Override
 	public IInformationPresenter getHierarchyPresenter(ISourceViewer sourceViewer, boolean doCodeResolve) {
 		return null;
 	}
@@ -139,6 +150,7 @@ public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfigu
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinkDetectors(org.eclipse.jface.text.source.ISourceViewer)
 	 */
+	@Override
 	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
 		return null;
 	}

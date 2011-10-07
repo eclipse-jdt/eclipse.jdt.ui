@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,6 +86,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 
 public class RenamePackageTests extends RefactoringTest {
+	private static final boolean BUG_PACKAGE_CANT_BE_RENAMED_TO_A_PACKAGE_THAT_ALREADY_EXISTS= true;
 	private static final boolean BUG_6054= false;
 	private static final boolean BUG_54962_71267= false;
 
@@ -443,11 +444,12 @@ public class RenamePackageTests extends RefactoringTest {
 
 	/**
 	 * Custom project and source folder structure.
+	 * 
 	 * @param roots source folders
 	 * @param packageNames package names per root
 	 * @param newPackageName the new package name for packageNames[0][0]
 	 * @param cuNames cu names per package
-	 * @throws Exception
+	 * @throws Exception if one of the resources cannot be created
 	 */
 	private void helperMultiProjects(IPackageFragmentRoot[] roots, String[][] packageNames, String newPackageName, String[][][] cuNames) throws Exception{
 		ICompilationUnit[][][] cus=new ICompilationUnit[roots.length][][];
@@ -501,12 +503,13 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 
 	/**
-	 * 2 Projects with a root each:
-	 * Project RenamePack2 (root: srcTest) requires project RenamePack1 (root: srcPrg).
+	 * 2 Projects with a root each: Project RenamePack2 (root: srcTest) requires project RenamePack1
+	 * (root: srcPrg).
+	 * 
 	 * @param packageNames package names per root
 	 * @param newPackageName the new package name for packageNames[0][0]
 	 * @param cuNames cu names per package
-	 * @throws Exception
+	 * @throws Exception if one of the resources cannot be created
 	 */
 	private void helperProjectsPrgTest(String[][] packageNames, String newPackageName, String[][][] cuNames) throws Exception{
 		IJavaProject projectPrg= null;
@@ -718,7 +721,7 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 
 	public void testHierarchical02() throws Exception {
-		if (true) {
+		if (BUG_PACKAGE_CANT_BE_RENAMED_TO_A_PACKAGE_THAT_ALREADY_EXISTS) {
 			printTestDisabledMessage("package can't be renamed to a package that already exists.");
 			return;
 		}

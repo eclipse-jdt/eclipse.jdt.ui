@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -127,6 +127,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		/*
 		 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
 		 */
+		@Override
 		public String getText(Object element) {
 		    return getColumnText(element, 0); // needed to make the sorter work
 		}
@@ -157,12 +158,12 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		}
 	}
 
-	private final Comparator fCategoryComparator= new Comparator() {
-		private int getRank(Object o) {
-			return ((ModelElement) o).getRank();
+	private final Comparator<ModelElement> fCategoryComparator= new Comparator<ModelElement>() {
+		private int getRank(ModelElement o) {
+			return o.getRank();
 		}
 
-		public int compare(Object o1, Object o2) {
+		public int compare(ModelElement o1, ModelElement o2) {
 			return getRank(o1) - getRank(o2);
 		}
 	};
@@ -172,17 +173,17 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		private static final String COLON= ":"; //$NON-NLS-1$
 		private static final String SEPARATOR= "\0"; //$NON-NLS-1$
 
-		private final List fElements;
+		private final List<ModelElement> fElements;
 		/**
 		 * The read-only list of elements.
 		 */
-		final List elements;
+		final List<ModelElement> elements;
 
 		public PreferenceModel(CompletionProposalComputerRegistry registry) {
-			List categories= registry.getProposalCategories();
-			fElements= new ArrayList();
-			for (Iterator it= categories.iterator(); it.hasNext();) {
-				CompletionProposalCategory category= (CompletionProposalCategory) it.next();
+			List<CompletionProposalCategory> categories= registry.getProposalCategories();
+			fElements= new ArrayList<ModelElement>();
+			for (Iterator<CompletionProposalCategory> it= categories.iterator(); it.hasNext();) {
+				CompletionProposalCategory category= it.next();
 				if (category.hasComputers()) {
 					fElements.add(new ModelElement(category, this));
 				}
@@ -194,7 +195,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
         public void moveUp(ModelElement category) {
         	int index= fElements.indexOf(category);
 			if (index > 0) {
-				Object item= fElements.remove(index);
+				ModelElement item= fElements.remove(index);
 				fElements.add(index - 1, item);
 				writeOrderPreference(null, false);
 			}
@@ -203,7 +204,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
         public void moveDown(ModelElement category) {
         	int index= fElements.indexOf(category);
 			if (index < fElements.size() - 1) {
-				Object item= fElements.remove(index);
+				ModelElement item= fElements.remove(index);
 				fElements.add(index + 1, item);
 				writeOrderPreference(null, false);
 			}
@@ -211,8 +212,8 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 
     	private void writeInclusionPreference(ModelElement changed, boolean isInDefaultCategory) {
     		StringBuffer buf= new StringBuffer();
-    		for (Iterator it= fElements.iterator(); it.hasNext();) {
-    			ModelElement item= (ModelElement) it.next();
+    		for (Iterator<ModelElement> it= fElements.iterator(); it.hasNext();) {
+    			ModelElement item= it.next();
     			boolean included= changed == item ? isInDefaultCategory : item.isInDefaultCategory();
     			if (!included)
     				buf.append(item.getId() + SEPARATOR);
@@ -226,8 +227,8 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
     	private void writeOrderPreference(ModelElement changed, boolean isSeparate) {
     		StringBuffer buf= new StringBuffer();
     		int i= 0;
-    		for (Iterator it= fElements.iterator(); it.hasNext(); i++) {
-    			ModelElement item= (ModelElement) it.next();
+    		for (Iterator<ModelElement> it= fElements.iterator(); it.hasNext(); i++) {
+    			ModelElement item= it.next();
     			boolean separate= changed == item ? isSeparate : item.isSeparateCommand();
     			int rank= separate ? i : i + LIMIT;
     			buf.append(item.getId() + COLON + rank + SEPARATOR);
@@ -339,7 +340,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 
 	/** element type: {@link ModelElement}. */
 	private final PreferenceModel fModel;
-	private final Map fImages= new HashMap();
+	private final Map<ImageDescriptor, Image> fImages= new HashMap<ImageDescriptor, Image>();
 
 	private CheckboxTableViewer fDefaultViewer;
 	private CheckboxTableViewer fSeparateViewer;
@@ -354,6 +355,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#createContents(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 
 		ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
@@ -466,6 +468,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 	    Link link= new Link(composite, SWT.NONE | SWT.WRAP);
 		link.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_key_binding_hint);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				PreferencesUtil.createPreferenceDialogOn(getShell(), e.text, null, null);
 			}
@@ -537,6 +540,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		});
 
 		table.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleTableSelection();
 			}
@@ -556,10 +560,11 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		fUpButton= new Button(composite, SWT.PUSH | SWT.CENTER);
         fUpButton.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_Up);
         fUpButton.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
+        	@Override
+			public void widgetSelected(SelectionEvent e) {
         		int index= getSelectionIndex();
         		if (index != -1) {
-        			((ModelElement) fModel.elements.get(index)).moveUp();
+        			fModel.elements.get(index).moveUp();
         			fSeparateViewer.refresh();
         			handleTableSelection();
         		}
@@ -571,10 +576,11 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
         fDownButton= new Button(composite, SWT.PUSH | SWT.CENTER);
         fDownButton.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_Down);
         fDownButton.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
+        	@Override
+			public void widgetSelected(SelectionEvent e) {
         		int index= getSelectionIndex();
         		if (index != -1) {
-        			((ModelElement) fModel.elements.get(index)).moveDown();
+        			fModel.elements.get(index).moveDown();
         			fSeparateViewer.refresh();
         			handleTableSelection();
         		}
@@ -596,11 +602,6 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		PixelConverter pixelConverter= new PixelConverter(composite);
 		String str= PreferencesMessages.CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout;
 		addTextField(timeoutComposite, str, PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAME_FROM_ATTACHED_JAVADOC, 0, pixelConverter.convertWidthInCharsToPixels(7));
-
-		Label ms= new Label(timeoutComposite, SWT.NONE);
-		gd= new GridData();
-		ms.setLayoutData(gd);
-		ms.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout_ms);
 
 	}
 
@@ -627,6 +628,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateControls()
 	 */
+	@Override
 	protected void updateControls() {
 		super.updateControls();
 
@@ -639,11 +641,11 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 
 	private void updateCheckedState() {
 		final int size= fModel.elements.size();
-		List defaultChecked= new ArrayList(size);
-		List separateChecked= new ArrayList(size);
+		List<ModelElement> defaultChecked= new ArrayList<ModelElement>(size);
+		List<ModelElement> separateChecked= new ArrayList<ModelElement>(size);
 
-		for (Iterator it= fModel.elements.iterator(); it.hasNext();) {
-			ModelElement element= (ModelElement) it.next();
+		for (Iterator<ModelElement> it= fModel.elements.iterator(); it.hasNext();) {
+			ModelElement element= it.next();
 			if (element.isInDefaultCategory())
 				defaultChecked.add(element);
 			if (element.isSeparateCommand())
@@ -657,9 +659,10 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#processChanges(org.eclipse.ui.preferences.IWorkbenchPreferenceContainer)
 	 */
+	@Override
 	protected boolean processChanges(IWorkbenchPreferenceContainer container) {
-		for (Iterator it= fModel.elements.iterator(); it.hasNext();) {
-			ModelElement item= (ModelElement) it.next();
+		for (Iterator<ModelElement> it= fModel.elements.iterator(); it.hasNext();) {
+			ModelElement item= it.next();
 			item.update();
 		}
 
@@ -669,6 +672,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key, java.lang.String, java.lang.String)
 	 */
+	@Override
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		if (changedKey == PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAME_FROM_ATTACHED_JAVADOC) {
 			final StatusInfo status= new StatusInfo();
@@ -697,6 +701,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#getFullBuildDialogStrings(boolean)
 	 */
+	@Override
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		// no builds triggered by our settings
 		return null;
@@ -705,9 +710,10 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#dispose()
 	 */
+	@Override
 	public void dispose() {
-		for (Iterator it= fImages.values().iterator(); it.hasNext();) {
-			Image image= (Image) it.next();
+		for (Iterator<Image> it= fImages.values().iterator(); it.hasNext();) {
+			Image image= it.next();
 			image.dispose();
 		}
 
@@ -767,7 +773,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		if (imgDesc == null)
 			return null;
 
-		Image img= (Image) fImages.get(imgDesc);
+		Image img= fImages.get(imgDesc);
 		if (img == null) {
 			img= imgDesc.createImage(false);
 			fImages.put(imgDesc, img);

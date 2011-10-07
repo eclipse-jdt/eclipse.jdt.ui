@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,7 +108,8 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
      * @see org.eclipse.jface.dialogs.DialogPage#dispose()
      * @since 3.3
      */
-    public void dispose() {
+    @Override
+	public void dispose() {
     	try {
         	super.dispose();
         } finally {
@@ -250,6 +251,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 * @param visible if <code>true</code> the page becomes visible; otherwise
 	 * it becomes invisible
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.dom.AST;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
@@ -28,11 +27,13 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+
 public class InlineConstantTests extends RefactoringTest {
 	private static final Class clazz = InlineConstantTests.class;
 	private static final String REFACTORING_PATH = "InlineConstant/";
 
-	private boolean toSucceed;
+	protected boolean toSucceed;
 
 	public InlineConstantTests(String name) {
 		super(name);
@@ -42,7 +43,7 @@ public class InlineConstantTests extends RefactoringTest {
 		return REFACTORING_PATH + successPath();
 	}
 
-	private String successPath() {
+	protected String successPath() {
 		return toSucceed ? "/canInline/" : "/cannotInline/";
 	}
 
@@ -80,10 +81,10 @@ public class InlineConstantTests extends RefactoringTest {
 				return i;
 		return -1;
 	}
-	private void helper1(String cuQName, int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean removeDeclaration) throws Exception{
+	protected void helper1(String cuQName, int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean removeDeclaration) throws Exception{
 		helper1(new String[] {cuQName}, cuQName, startLine, startColumn, endLine, endColumn, replaceAll, removeDeclaration);
 	}
-	private void helper1(String[] cuQNames, String selectionCuQName, int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean removeDeclaration) throws Exception{
+	protected void helper1(String[] cuQNames, String selectionCuQName, int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean removeDeclaration) throws Exception{
 		int selectionCuIndex= firstIndexOf(selectionCuQName, cuQNames);
 		Assert.isTrue(selectionCuIndex != -1, "parameter selectionCuQName must match some String in cuQNames.");
 		helper1(cuQNames, selectionCuIndex, startLine, startColumn, endLine, endColumn, replaceAll, removeDeclaration);
@@ -97,7 +98,7 @@ public class InlineConstantTests extends RefactoringTest {
 		ICompilationUnit selectionCu= cus[selectionCuIndex];
 
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
-		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(AST.JLS3).parse(selectionCu, true), selection.getOffset(), selection.getLength());
+		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(selectionCu, true), selection.getOffset(), selection.getLength());
 		if (ref.checkStaticFinalConstantNameSelected().hasFatalError())
 			ref= null;
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
@@ -136,7 +137,7 @@ public class InlineConstantTests extends RefactoringTest {
 		ICompilationUnit selectionCu= cus[selectionCuIndex];
 
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
-		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(AST.JLS3).parse(selectionCu, true), selection.getOffset(), selection.getLength());
+		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(selectionCu, true), selection.getOffset(), selection.getLength());
 		if (ref.checkStaticFinalConstantNameSelected().hasFatalError())
 			ref= null;
 		if (ref == null)
@@ -300,6 +301,18 @@ public class InlineConstantTests extends RefactoringTest {
 		helper1("p.A", 4, 24, 4, 25, true, true);
 	}
 	
+	public void test35() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
+		helper1("p.A", 4, 22, 4, 23, true, true);
+	}
+
+	public void test36() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
+		helper1("p.A", 4, 22, 4, 23, true, true);
+	}
+
+	public void test37() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
+		helper1("p.A", 4, 23, 4, 28, true, true);
+	}
+
 	// -- testing failing preconditions
 
 	public void testFail0() throws Exception {

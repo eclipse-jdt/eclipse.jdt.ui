@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */
+	@Override
 	protected void addUserInputPages(){
 		addPage(new IntroduceParameterInputPage(getIntroduceParameterRefactoring().guessParameterNames()));
 	}
@@ -108,12 +109,14 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 				fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(refactoring));
 				refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
 				fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
 					}
 				});
 				fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
 				fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
 					}
@@ -147,6 +150,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			return cp;
 		}
 
+		@Override
 		public void dispose() {
 			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
 			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);
@@ -161,7 +165,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			fSignaturePreview= new JavaSourceViewer(composite, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP /*| SWT.BORDER*/, store);
 			fSignaturePreview.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
 			fSignaturePreview.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
-			fSignaturePreview.getTextWidget().setBackground(composite.getBackground());
+			fSignaturePreview.adaptBackgroundColor(composite);
 			fSignaturePreview.setDocument(fSignaturePreviewDocument);
 			fSignaturePreview.setEditable(false);
 

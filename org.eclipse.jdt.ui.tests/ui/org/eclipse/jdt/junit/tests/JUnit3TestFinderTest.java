@@ -13,7 +13,6 @@ package org.eclipse.jdt.junit.tests;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import junit.framework.Test;
 import junit.framework.TestCase;
 
 import org.eclipse.jdt.junit.JUnitCore;
@@ -38,10 +37,6 @@ import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 public class JUnit3TestFinderTest extends TestCase {
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fRoot;
-
-	public static Test setUpTest(Test test) {
-		return test;
-	}
 
 	protected void setUp() throws Exception {
 		super.setUp();

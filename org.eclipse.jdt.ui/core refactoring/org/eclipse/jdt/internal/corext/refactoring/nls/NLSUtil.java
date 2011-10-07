@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -111,7 +111,7 @@ public class NLSUtil {
 	 * @throws CoreException if scanning fails
 	 */
 	public static TextEdit[] createNLSEdits(ICompilationUnit cu, int[] positions) throws CoreException {
-		List result= new ArrayList();
+		List<InsertEdit> result= new ArrayList<InsertEdit>();
 		try {
 			NLSLine[] allLines= NLSScanner.scan(cu);
 			for (int i= 0; i < allLines.length; i++) {
@@ -148,7 +148,7 @@ public class NLSUtil {
 		if (result.isEmpty())
 			return null;
 
-		return (TextEdit[])result.toArray(new TextEdit[result.size()]);
+		return result.toArray(new TextEdit[result.size()]);
 	}
 
 	private static NLSLine scanCurrentLine(ICompilationUnit cu, int position) throws JavaModelException {
@@ -237,13 +237,13 @@ public class NLSUtil {
 	 * @return the position in <code>keys</code> after which key must be inserted, returns -1 for before
 	 * @since 3.4
 	 */
-	public static int getInsertionPosition(String key, List keys) {
+	public static int getInsertionPosition(String key, List<String> keys) {
 		int result= 0;
 
 		int invertDistance= Integer.MIN_VALUE;
 		int i= 0;
-		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
-			String string= (String) iterator.next();
+		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
+			String string= iterator.next();
 
 			int currentInvertDistance= invertDistance(key, string);
 			if (currentInvertDistance > invertDistance) {

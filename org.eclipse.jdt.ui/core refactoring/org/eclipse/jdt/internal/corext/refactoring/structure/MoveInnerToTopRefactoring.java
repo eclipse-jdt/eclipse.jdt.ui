@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -90,6 +91,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
+import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer.SourceRange;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ConvertMemberTypeDescriptor;
@@ -132,6 +135,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
@@ -150,9 +154,9 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 		private final ITypeBinding fCurrentType;
 
-		private final List fMethodAccesses= new ArrayList(0);
+		private final List<MethodInvocation> fMethodAccesses= new ArrayList<MethodInvocation>(0);
 
-		private final List fSimpleNames= new ArrayList(0);
+		private final List<Name> fSimpleNames= new ArrayList<Name>(0);
 
 		MemberAccessNodeCollector(ITypeBinding currType) {
 			Assert.isNotNull(currType);
@@ -160,19 +164,21 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		}
 
 		MethodInvocation[] getMethodInvocations() {
-			return (MethodInvocation[]) fMethodAccesses.toArray(new MethodInvocation[fMethodAccesses.size()]);
+			return fMethodAccesses.toArray(new MethodInvocation[fMethodAccesses.size()]);
 		}
 
 		SimpleName[] getSimpleFieldNames() {
-			return (SimpleName[]) fSimpleNames.toArray(new SimpleName[fSimpleNames.size()]);
+			return fSimpleNames.toArray(new SimpleName[fSimpleNames.size()]);
 		}
 
+		@Override
 		public boolean visit(FieldAccess node) {
 			// field accesses always have an expression: look at the expression to find out if we do an outer instance access.
 			node.getExpression().accept(this);
 			return false;
 		}
 
+		@Override
 		public boolean visit(MethodInvocation node) {
 			Expression expression= node.getExpression();
 			if (expression == null) {
@@ -185,17 +191,19 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			} else {
 				expression.accept(this);
 			}
-			List arguments= node.arguments();
+			List<Expression> arguments= node.arguments();
 			for (int i= 0; i < arguments.size(); i++) {
-				((ASTNode) arguments.get(i)).accept(this);
+				arguments.get(i).accept(this);
 			}
 			return false;
 		}
+		@Override
 		public boolean visit(QualifiedName node) {
 			node.getQualifier().accept(this);
 			return false;
 		}
 
+		@Override
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
 			if (binding instanceof IVariableBinding) {
@@ -209,6 +217,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			return false;
 		}
 
+		@Override
 		public boolean visit(ThisExpression node) {
 			final Name qualifier= node.getQualifier();
 			if (qualifier != null) {
@@ -221,12 +230,13 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		}
 
 		private boolean isAccessToOuter(ITypeBinding binding) {
-			if (Bindings.isSuperType(binding, fCurrentType)) {
+			binding= binding.getTypeDeclaration();
+			if (Bindings.isSuperType(binding, fCurrentType, false)) {
 				return false;
 			}
 			ITypeBinding outer= fCurrentType.getDeclaringClass();
 			while (outer != null) {
-				if (Bindings.isSuperType(binding, outer)) {
+				if (Bindings.isSuperType(binding, outer, false)) {
 					return true;
 				}
 				outer= outer.getDeclaringClass();
@@ -250,6 +260,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			fGroup= group;
 		}
 
+		@Override
 		public boolean visit(final ClassInstanceCreation node) {
 			Assert.isNotNull(node);
 			if (fCreateInstanceField) {
@@ -276,11 +287,13 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			return true;
 		}
 
+		@Override
 		public boolean visit(final QualifiedType node) {
 			Assert.isNotNull(node);
 			return false;
 		}
 
+		@Override
 		public boolean visit(final SimpleType node) {
 			Assert.isNotNull(node);
 			if (!(node.getParent() instanceof ClassInstanceCreation)) {
@@ -294,6 +307,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			return super.visit(node);
 		}
 
+		@Override
 		public boolean visit(final ThisExpression node) {
 			Assert.isNotNull(node);
 			final Name name= node.getQualifier();
@@ -313,7 +327,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		}
 	}
 
-	private static void addTypeParameters(final CompilationUnit unit, final IType type, final Map map) throws JavaModelException {
+	private static void addTypeParameters(final CompilationUnit unit, final IType type, final Map<String, ITypeBinding> map) throws JavaModelException {
 		Assert.isNotNull(unit);
 		Assert.isNotNull(type);
 		Assert.isNotNull(map);
@@ -321,8 +335,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		if (declaration instanceof TypeDeclaration) {
 			ITypeBinding binding= null;
 			TypeParameter parameter= null;
-			for (final Iterator iterator= ((TypeDeclaration) declaration).typeParameters().iterator(); iterator.hasNext();) {
-				parameter= (TypeParameter) iterator.next();
+			for (final Iterator<TypeParameter> iterator= ((TypeDeclaration) declaration).typeParameters().iterator(); iterator.hasNext();) {
+				parameter= iterator.next();
 				binding= parameter.resolveBinding();
 				if (binding != null && !map.containsKey(binding.getKey()))
 					map.put(binding.getKey(), binding);
@@ -369,12 +383,12 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	private static AbstractTypeDeclaration findTypeDeclaration(IType type, CompilationUnit unit) {
-		final List types= getDeclaringTypes(type);
+		final List<IType> types= getDeclaringTypes(type);
 		types.add(type);
 		AbstractTypeDeclaration[] declarations= (AbstractTypeDeclaration[]) unit.types().toArray(new AbstractTypeDeclaration[unit.types().size()]);
 		AbstractTypeDeclaration declaration= null;
-		for (final Iterator iterator= types.iterator(); iterator.hasNext();) {
-			IType enclosing= (IType) iterator.next();
+		for (final Iterator<IType> iterator= types.iterator(); iterator.hasNext();) {
+			IType enclosing= iterator.next();
 			declaration= findTypeDeclaration(enclosing, declarations);
 			Assert.isNotNull(declaration);
 			declarations= getAbstractTypeDeclarations(declaration);
@@ -385,15 +399,15 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 	public static AbstractTypeDeclaration[] getAbstractTypeDeclarations(final AbstractTypeDeclaration declaration) {
 		int typeCount= 0;
-		for (Iterator iterator= declaration.bodyDeclarations().listIterator(); iterator.hasNext();) {
+		for (Iterator<BodyDeclaration> iterator= declaration.bodyDeclarations().listIterator(); iterator.hasNext();) {
 			if (iterator.next() instanceof AbstractTypeDeclaration) {
 				typeCount++;
 			}
 		}
 		AbstractTypeDeclaration[] declarations= new AbstractTypeDeclaration[typeCount];
 		int next= 0;
-		for (final Iterator iterator= declaration.bodyDeclarations().listIterator(); iterator.hasNext();) {
-			Object object= iterator.next();
+		for (final Iterator<BodyDeclaration> iterator= declaration.bodyDeclarations().listIterator(); iterator.hasNext();) {
+			BodyDeclaration object= iterator.next();
 			if (object instanceof AbstractTypeDeclaration) {
 				declarations[next++]= (AbstractTypeDeclaration) object;
 			}
@@ -401,12 +415,11 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		return declarations;
 	}
 
-	// List of ITypes
-	private static List getDeclaringTypes(IType type) {
+	private static List<IType> getDeclaringTypes(IType type) {
 		IType declaringType= type.getDeclaringType();
 		if (declaringType == null)
-			return new ArrayList(0);
-		List result= getDeclaringTypes(declaringType);
+			return new ArrayList<IType>(0);
+		List<IType> result= getDeclaringTypes(declaringType);
 		result.add(declaringType);
 		return result;
 	}
@@ -414,18 +427,18 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	private static String[] getFieldNames(IType type) {
 		try {
 			IField[] fields= type.getFields();
-			List result= new ArrayList(fields.length);
+			List<String> result= new ArrayList<String>(fields.length);
 			for (int i= 0; i < fields.length; i++) {
 				result.add(fields[i].getElementName());
 			}
-			return (String[]) result.toArray(new String[result.size()]);
+			return result.toArray(new String[result.size()]);
 		} catch (JavaModelException e) {
 			return null;
 		}
 	}
 
-	private static Set getMergedSet(Set s1, Set s2) {
-		Set result= new HashSet();
+	private static Set<ICompilationUnit> getMergedSet(Set<ICompilationUnit> s1, Set<ICompilationUnit> s2) {
+		Set<ICompilationUnit> result= new HashSet<ICompilationUnit>();
 		result.addAll(s1);
 		result.addAll(s2);
 		return result;
@@ -433,15 +446,15 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 	private static String[] getParameterNamesOfAllConstructors(IType type) throws JavaModelException {
 		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
-		Set result= new HashSet();
+		Set<String> result= new HashSet<String>();
 		for (int i= 0; i < constructors.length; i++) {
 			result.addAll(Arrays.asList(constructors[i].getParameterNames()));
 		}
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
-	private static ASTNode[] getReferenceNodesIn(CompilationUnit cuNode, Map references, ICompilationUnit cu) {
-		SearchMatch[] results= (SearchMatch[]) references.get(cu);
+	private static ASTNode[] getReferenceNodesIn(CompilationUnit cuNode, Map<ICompilationUnit, SearchMatch[]> references, ICompilationUnit cu) {
+		SearchMatch[] results= references.get(cu);
 		if (results == null)
 			return new ASTNode[0];
 		return ASTNodeSearchUtil.getAstNodes(results, cuNode);
@@ -490,13 +503,13 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 	private CompilationUnitRewrite fSourceRewrite;
 
-	private Collection fStaticImports;
+	private Collection<IBinding> fStaticImports;
 
 	private IType fType;
 
 	private String fQualifiedTypeName;
 
-	private Collection fTypeImports;
+	private Collection<ITypeBinding> fTypeImports;
 
 	/**
 	 * Creates a new move inner to top refactoring.
@@ -552,11 +565,11 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		Assert.isNotNull(rewrite);
 		if (declaration instanceof TypeDeclaration) {
 			final TypeDeclaration type= (TypeDeclaration) declaration;
-			final List existing= type.typeParameters();
-			final Set names= new HashSet();
+			final List<TypeParameter> existing= type.typeParameters();
+			final Set<String> names= new HashSet<String>();
 			TypeParameter parameter= null;
-			for (final Iterator iterator= existing.iterator(); iterator.hasNext();) {
-				parameter= (TypeParameter) iterator.next();
+			for (final Iterator<TypeParameter> iterator= existing.iterator(); iterator.hasNext();) {
+				parameter= iterator.next();
 				names.add(parameter.getName().getIdentifier());
 			}
 			final ListRewrite rewriter= rewrite.getListRewrite(type, TypeDeclaration.TYPE_PARAMETERS_PROPERTY);
@@ -578,15 +591,15 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			ImportRewrite rewrite= StubUtility.createImportRewrite(targetUnit, true);
 			if (fTypeImports != null) {
 				ITypeBinding type= null;
-				for (final Iterator iterator= fTypeImports.iterator(); iterator.hasNext();) {
-					type= (ITypeBinding) iterator.next();
+				for (final Iterator<ITypeBinding> iterator= fTypeImports.iterator(); iterator.hasNext();) {
+					type= iterator.next();
 					rewrite.addImport(type);
 				}
 			}
 			if (fStaticImports != null) {
 				IBinding binding= null;
-				for (final Iterator iterator= fStaticImports.iterator(); iterator.hasNext();) {
-					binding= (IBinding) iterator.next();
+				for (final Iterator<IBinding> iterator= fStaticImports.iterator(); iterator.hasNext();) {
+					binding= iterator.next();
 					rewrite.addStaticImport(binding);
 				}
 			}
@@ -611,14 +624,14 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 				if (type != null && unit.findDeclaringNode(binding) != null)
 					addTypeQualification(type, targetRewrite, group);
 			}
-			List types= null;
+			List<Type> types= null;
 			if (declaration instanceof TypeDeclaration)
 				types= ((TypeDeclaration) declaration).superInterfaceTypes();
 			else if (declaration instanceof EnumDeclaration)
 				types= ((EnumDeclaration) declaration).superInterfaceTypes();
 			if (types != null) {
-				for (final Iterator iterator= types.iterator(); iterator.hasNext();) {
-					type= (Type) iterator.next();
+				for (final Iterator<Type> iterator= types.iterator(); iterator.hasNext();) {
+					type= iterator.next();
 					if (unit.findDeclaringNode(type.resolveBinding()) != null)
 						addTypeQualification(type, targetRewrite, group);
 				}
@@ -671,12 +684,12 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 	private RefactoringStatus checkConstructorParameterNames() {
 		RefactoringStatus result= new RefactoringStatus();
-		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(fType.getCompilationUnit(), false);
+		CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(fType.getCompilationUnit(), false);
 		MethodDeclaration[] nodes= getConstructorDeclarationNodes(findTypeDeclaration(fType, cuNode));
 		for (int i= 0; i < nodes.length; i++) {
 			MethodDeclaration constructor= nodes[i];
-			for (Iterator iter= constructor.parameters().iterator(); iter.hasNext();) {
-				SingleVariableDeclaration param= (SingleVariableDeclaration) iter.next();
+			for (Iterator<SingleVariableDeclaration> iter= constructor.parameters().iterator(); iter.hasNext();) {
+				SingleVariableDeclaration param= iter.next();
 				if (fEnclosingInstanceFieldName.equals(param.getName().getIdentifier())) {
 					String[] keys= new String[] { BasicElementLabels.getJavaElementName(param.getName().getIdentifier()), BasicElementLabels.getJavaElementName(fType.getElementName())};
 					String msg= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_name_used, keys);
@@ -702,6 +715,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		return result;
 	}
 
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2);//$NON-NLS-1$
 		try {
@@ -727,6 +741,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		}
 	}
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor monitor) throws CoreException {
 		return Checks.checkIfCuBroken(fType);
 	}
@@ -749,9 +764,10 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			return createReadAccessExpressionForEnclosingInstance(node.getAST());
 	}
 
+	@Override
 	public Change createChange(final IProgressMonitor monitor) throws CoreException {
 		monitor.beginTask(RefactoringCoreMessages.MoveInnerToTopRefactoring_creating_change, 1);
-		final Map arguments= new HashMap();
+		final Map<String, String> arguments= new HashMap<String, String>();
 		String project= null;
 		IJavaProject javaProject= fType.getJavaProject();
 		if (javaProject != null)
@@ -789,7 +805,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		final TextChangeManager manager= new TextChangeManager();
 		try {
 			monitor.beginTask(RefactoringCoreMessages.MoveInnerToTopRefactoring_creating_preview, 4);
-			final Map rewrites= new HashMap(2);
+			final Map<ICompilationUnit, CompilationUnitRewrite> rewrites= new HashMap<ICompilationUnit, CompilationUnitRewrite>(2);
 			fSourceRewrite.clearASTAndImportRewrites();
 			rewrites.put(fSourceRewrite.getCu(), fSourceRewrite);
 			final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fType.getPackageFragment(), fType);
@@ -798,14 +814,14 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			adjustor.setFailureSeverity(RefactoringStatus.WARNING);
 			adjustor.setStatus(status);
 			adjustor.adjustVisibility(new SubProgressMonitor(monitor, 1));
-			final Map parameters= new LinkedHashMap();
+			final Map<String, ITypeBinding> parameters= new LinkedHashMap<String, ITypeBinding>();
 			addTypeParameters(fSourceRewrite.getRoot(), fType, parameters);
 			final ITypeBinding[] bindings= new ITypeBinding[parameters.values().size()];
 			parameters.values().toArray(bindings);
-			final Map typeReferences= createTypeReferencesMapping(new SubProgressMonitor(monitor, 1), status);
-			Map constructorReferences= null;
+			final Map<ICompilationUnit, SearchMatch[]> typeReferences= createTypeReferencesMapping(new SubProgressMonitor(monitor, 1), status);
+			Map<ICompilationUnit, SearchMatch[]> constructorReferences= null;
 			if (JdtFlags.isStatic(fType))
-				constructorReferences= new HashMap(0);
+				constructorReferences= new HashMap<ICompilationUnit, SearchMatch[]>(0);
 			else
 				constructorReferences= createConstructorReferencesMapping(new SubProgressMonitor(monitor, 1), status);
 			if (fCreateInstanceField) {
@@ -820,8 +836,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			}
 			monitor.worked(1);
 			ICompilationUnit inputCU= fType.getCompilationUnit();
-			for (final Iterator iterator= getMergedSet(typeReferences.keySet(), constructorReferences.keySet()).iterator(); iterator.hasNext();) {
-				final ICompilationUnit unit= (ICompilationUnit) iterator.next();
+			for (final Iterator<ICompilationUnit> iterator= getMergedSet(typeReferences.keySet(), constructorReferences.keySet()).iterator(); iterator.hasNext();) {
+				final ICompilationUnit unit= iterator.next();
 				final CompilationUnitRewrite targetRewrite= getCompilationUnitRewrite(unit);
 				createCompilationUnitRewrite(bindings, targetRewrite, typeReferences, constructorReferences, adjustor.getAdjustments().containsKey(fType), inputCU, unit, false, status, monitor);
 				if (unit.equals(inputCU)) {
@@ -859,7 +875,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		}
 	}
 
-	private void createCompilationUnitRewrite(final ITypeBinding[] parameters, final CompilationUnitRewrite targetRewrite, final Map typeReferences, final Map constructorReferences, boolean visibilityWasAdjusted, final ICompilationUnit sourceUnit, final ICompilationUnit targetUnit, final boolean remove, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	private void createCompilationUnitRewrite(final ITypeBinding[] parameters, final CompilationUnitRewrite targetRewrite, final Map<ICompilationUnit, SearchMatch[]> typeReferences, final Map<ICompilationUnit, SearchMatch[]> constructorReferences, boolean visibilityWasAdjusted, final ICompilationUnit sourceUnit, final ICompilationUnit targetUnit, final boolean remove, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(parameters);
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(typeReferences);
@@ -881,8 +897,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 					addInheritedTypeQualifications(declaration, targetRewrite, qualifierGroup);
 					addEnclosingInstanceDeclaration(declaration, rewrite);
 				}
-				fTypeImports= new HashSet();
-				fStaticImports= new HashSet();
+				fTypeImports= new HashSet<ITypeBinding>();
+				fStaticImports= new HashSet<IBinding>();
 				ImportRewriteUtil.collectImports(fType.getJavaProject(), declaration, fTypeImports, fStaticImports, false);
 				if (binding != null)
 					fTypeImports.remove(binding);
@@ -964,9 +980,9 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	// Map<ICompilationUnit, SearchMatch[]>
-	private Map createConstructorReferencesMapping(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
+	private Map<ICompilationUnit, SearchMatch[]> createConstructorReferencesMapping(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		SearchResultGroup[] groups= ConstructorReferenceFinder.getConstructorReferences(fType, pm, status);
-		Map result= new HashMap();
+		Map<ICompilationUnit, SearchMatch[]> result= new HashMap<ICompilationUnit, SearchMatch[]>();
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
 			ICompilationUnit cu= group.getCompilationUnit();
@@ -1028,12 +1044,13 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		if (change == null)
 			change= new CompilationUnitChange("", unit); //$NON-NLS-1$
 		final String source= change.getPreviewContent(new NullProgressMonitor());
-		final ASTParser parser= ASTParser.newParser(AST.JLS3);
+		final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setProject(fType.getJavaProject());
 		parser.setResolveBindings(false);
 		parser.setSource(source.toCharArray());
 		final AbstractTypeDeclaration declaration= findTypeDeclaration(fType, (CompilationUnit) parser.createAST(null));
-		return source.substring(declaration.getStartPosition(), ASTNodes.getExclusiveEnd(declaration));
+		SourceRange sourceRange= new TargetSourceRangeComputer().computeSourceRange(declaration);
+		return source.substring(sourceRange.getStartPosition(), sourceRange.getStartPosition() + sourceRange.getLength());
 	}
 
 	private Expression createQualifiedReadAccessExpressionForEnclosingInstance(AST ast) {
@@ -1066,7 +1083,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			if (StubUtility.doAddComments(unit.getJavaProject()))
 				fileComment= CodeGeneration.getFileComment(unit, separator);
 			String content= CodeGeneration.getCompilationUnitContent(unit, fileComment, null, block, separator);
-			if (content == null || block.startsWith("/*") || block.startsWith("//")) { //$NON-NLS-1$//$NON-NLS-2$
+			if (content == null) {
 				final StringBuffer buffer= new StringBuffer();
 				if (!fType.getPackageFragment().isDefaultPackage()) {
 					buffer.append("package ").append(fType.getPackageFragment().getElementName()).append(';'); //$NON-NLS-1$
@@ -1083,15 +1100,14 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		return unit.getSource();
 	}
 
-	// Map<ICompilationUnit, SearchMatch[]>
-	private Map createTypeReferencesMapping(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
+	private Map<ICompilationUnit, SearchMatch[]> createTypeReferencesMapping(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(fType, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 		engine.setFiltering(true, true);
 		engine.setScope(RefactoringScopeFactory.create(fType));
 		engine.setStatus(status);
 		engine.searchPattern(new SubProgressMonitor(pm, 1));
 		final SearchResultGroup[] groups= (SearchResultGroup[]) engine.getResults();
-		Map result= new HashMap();
+		Map<ICompilationUnit, SearchMatch[]> result= new HashMap<ICompilationUnit, SearchMatch[]>();
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
 			ICompilationUnit cu= group.getCompilationUnit();
@@ -1119,12 +1135,12 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	private MethodDeclaration[] getConstructorDeclarationNodes(final AbstractTypeDeclaration declaration) {
 		if (declaration instanceof TypeDeclaration) {
 			final MethodDeclaration[] declarations= ((TypeDeclaration) declaration).getMethods();
-			final List result= new ArrayList(2);
+			final List<MethodDeclaration> result= new ArrayList<MethodDeclaration>(2);
 			for (int index= 0; index < declarations.length; index++) {
 				if (declarations[index].isConstructor())
 					result.add(declarations[index]);
 			}
-			return (MethodDeclaration[]) result.toArray(new MethodDeclaration[result.size()]);
+			return result.toArray(new MethodDeclaration[result.size()]);
 		}
 		return new MethodDeclaration[] {};
 	}
@@ -1164,6 +1180,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
+	@Override
 	public String getName() {
 		return RefactoringCoreMessages.MoveInnerToTopRefactoring_name;
 	}
@@ -1394,14 +1411,14 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	private void setEnclosingInstanceFieldInConstructor(ASTRewrite rewrite, MethodDeclaration decl) throws JavaModelException {
 		final AST ast= decl.getAST();
 		final Block body= decl.getBody();
-		final List statements= body.statements();
+		final List<Statement> statements= body.statements();
 		if (statements.isEmpty()) {
 			final Assignment assignment= ast.newAssignment();
 			assignment.setLeftHandSide(createReadAccessExpressionForEnclosingInstance(ast));
 			assignment.setRightHandSide(ast.newSimpleName(getNameForEnclosingInstanceConstructorParameter()));
 			rewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY).insertFirst(ast.newExpressionStatement(assignment), null);
 		} else {
-			final Statement first= (Statement) statements.get(0);
+			final Statement first= statements.get(0);
 			if (first instanceof ConstructorInvocation) {
 				rewrite.getListRewrite(first, ConstructorInvocation.ARGUMENTS_PROPERTY).insertFirst(ast.newSimpleName(fEnclosingInstanceFieldName), null);
 			} else {

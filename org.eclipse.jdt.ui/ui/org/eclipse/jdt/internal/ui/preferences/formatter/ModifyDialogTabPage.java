@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,7 +80,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	 * On each change, the new value is written to the map and the listeners are notified.
 	 */
 	protected abstract class Preference extends Observable {
-	    private final Map fPreferences;
+	    private final Map<String, String> fPreferences;
 	    private boolean fEnabled;
 	    private String fKey;
 
@@ -89,7 +89,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	     * @param preferences The map where the value is written.
 	     * @param key The key for which a value is managed.
 	     */
-	    public Preference(Map preferences, String key) {
+	    public Preference(Map<String, String> preferences, String key) {
 	        fPreferences= preferences;
 	        fEnabled= true;
 	        fKey= key;
@@ -97,7 +97,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	    /**
 	     * @return Gets the map of this Preference.
 	     */
-	    protected final Map getPreferences() {
+	    protected final Map<String, String> getPreferences() {
 	        return fPreferences;
 	    }
 
@@ -167,7 +167,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		 * @param style SWT style flag for the button
 		 */
 		public ButtonPreference(Composite composite, int numColumns,
-								  Map preferences, String key,
+								  Map<String, String> preferences, String key,
 								  String [] values, String text, int style) {
 		    super(preferences, key);
 		    if (values == null || text == null)
@@ -182,6 +182,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			updateWidget();
 
 			fCheckbox.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					checkboxChecked(((Button)e.widget).getSelection());
 				}
@@ -194,6 +195,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			notifyObservers();
 		}
 
+		@Override
 		protected void updateWidget() {
 			if (getKey() != null) {
 				fCheckbox.setEnabled(getEnabled());
@@ -214,19 +216,20 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			checkboxChecked(checked);
 		}
 
+		@Override
 		public Control getControl() {
 			return fCheckbox;
 		}
 	}
 
 	protected final class CheckboxPreference extends ButtonPreference {
-		public CheckboxPreference(Composite composite, int numColumns, Map preferences, String key, String[] values, String text) {
+		public CheckboxPreference(Composite composite, int numColumns, Map<String, String> preferences, String key, String[] values, String text) {
 	        super(composite, numColumns, preferences, key, values, text, SWT.CHECK);
         }
 	}
 
 	protected final class RadioPreference extends ButtonPreference {
-		public RadioPreference(Composite composite, int numColumns, Map preferences, String key, String[] values, String text) {
+		public RadioPreference(Composite composite, int numColumns, Map<String, String> preferences, String key, String[] values, String text) {
 	        super(composite, numColumns, preferences, key, values, text, SWT.RADIO);
         }
 	}
@@ -250,7 +253,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		 * @param items An array of n elements indicating the text to be written in the combo box.
 		 */
 		public ComboPreference(Composite composite, int numColumns,
-								  Map preferences, String key,
+								  Map<String, String> preferences, String key,
 								  String [] values, String text, String [] items) {
 		    super(preferences, key);
 		    if (values == null || items == null || text == null)
@@ -272,6 +275,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			updateWidget();
 
 			fCombo.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					comboSelected(((Combo)e.widget).getSelectionIndex());
 				}
@@ -284,6 +288,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			notifyObservers(fValues[index]);
 		}
 
+		@Override
 		protected void updateWidget() {
 			if (getKey() != null) {
 				fCombo.setEnabled(getEnabled());
@@ -295,7 +300,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		}
 
 		public String getSelectedItem() {
-			final String selected= (String)getPreferences().get(getKey());
+			final String selected= getPreferences().get(getKey());
 			for (int i= 0; i < fValues.length; i++) {
 				if (fValues[i].equals(selected)) {
 					return fItems[i];
@@ -308,6 +313,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			return value.equals(getPreferences().get(getKey()));
 		}
 
+		@Override
 		public Control getControl() {
 			return fCombo;
 		}
@@ -337,7 +343,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		 * @param text The label text for this Preference.
 		 */
 		public NumberPreference(Composite composite, int numColumns,
-							   Map preferences, String key,
+							   Map<String, String> preferences, String key,
 							   int minValue, int maxValue, String text) {
 		    super(preferences, key);
 
@@ -428,6 +434,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			notifyObservers();
 		}
 
+		@Override
 		protected void updateWidget() {
 		    final boolean hasKey= getKey() != null;
 
@@ -435,7 +442,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			fNumberText.setEnabled(hasKey && getEnabled());
 
 			if (hasKey) {
-			    String s= (String)getPreferences().get(getKey());
+			    String s= getPreferences().get(getKey());
 			    try {
 			        fSelected= Integer.parseInt(s);
 			    } catch (NumberFormatException e) {
@@ -449,6 +456,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			}
 		}
 
+		@Override
 		public Control getControl() {
 			return fNumberText;
 		}
@@ -496,7 +504,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		 * @param text the label text for this Preference.
 		 * @param inputValidator the input validator or <code>null</code> if none
 		 */
-		public StringPreference(Composite composite, int numColumns, Map preferences, String key, String text, IInputValidator inputValidator) {
+		public StringPreference(Composite composite, int numColumns, Map<String, String> preferences, String key, String text, IInputValidator inputValidator) {
 			super(preferences, key);
 
 			fInputValidator= inputValidator;
@@ -575,6 +583,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			notifyObservers();
 		}
 
+		@Override
 		protected void updateWidget() {
 			final boolean hasKey= getKey() != null;
 
@@ -582,13 +591,14 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			fText.setEnabled(hasKey && getEnabled());
 
 			if (hasKey) {
-				fSelected= (String)getPreferences().get(getKey());
+				fSelected= getPreferences().get(getKey());
 				fText.setText(fSelected);
 			} else {
 				fText.setText(""); //$NON-NLS-1$
 			}
 		}
 
+		@Override
 		public Control getControl() {
 			return fText;
 		}
@@ -611,20 +621,21 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 
 		private final IDialogSettings fDialogSettings;
 
-		private final Map fItemMap;
-		private final List fItemList;
+		private final Map<Control, Integer> fItemMap;
+		private final List<Control> fItemList;
 
 		private int fIndex;
 
 		public DefaultFocusManager() {
 			fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
-			fItemMap= new HashMap();
-			fItemList= new ArrayList();
+			fItemMap= new HashMap<Control, Integer>();
+			fItemList= new ArrayList<Control>();
 			fIndex= 0;
 		}
 
+		@Override
 		public void focusGained(FocusEvent e) {
-			fDialogSettings.put(PREF_LAST_FOCUS_INDEX, ((Integer)fItemMap.get(e.widget)).intValue());
+			fDialogSettings.put(PREF_LAST_FOCUS_INDEX, fItemMap.get(e.widget).intValue());
 		}
 
 		public void add(Control control) {
@@ -649,7 +660,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 				index= fDialogSettings.getInt(PREF_LAST_FOCUS_INDEX);
 				// make sure the value is within the range
 				if ((index >= 0) && (index <= fItemList.size() - 1)) {
-					((Control)fItemList.get(index)).setFocus();
+					fItemList.get(index).setFocus();
 				}
 			} catch (NumberFormatException ex) {
 				// this is the first time
@@ -677,6 +688,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			fMinimalHight= minimalHight;
 		}
 
+		@Override
 		public Point computeSize(Composite composite, int wHint, int hHint, boolean force) {
 			if (wHint != SWT.DEFAULT && hHint != SWT.DEFAULT) {
 				return new Point(wHint, hHint);
@@ -714,6 +726,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			return new Point(x, y);
 		}
 
+		@Override
 		public void layout(Composite composite, boolean force) {
 			Rectangle rect = composite.getClientArea();
 			Control[] children = composite.getChildren();
@@ -744,7 +757,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	/**
 	 * The map where the current settings are stored.
 	 */
-	protected Map fWorkingValues;
+	protected Map<String, String> fWorkingValues;
 
 	/**
 	 * The modify dialog where we can display status messages.
@@ -755,7 +768,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	/*
 	 * Create a new <code>ModifyDialogTabPage</code>
 	 */
-	public ModifyDialogTabPage(IModifyDialogTabPage.IModificationListener modifyListener, Map workingValues) {
+	public ModifyDialogTabPage(IModifyDialogTabPage.IModificationListener modifyListener, Map<String, String> workingValues) {
 		fWorkingValues= workingValues;
 		fModifyListener= modifyListener;
 		fDefaultFocusManager= new DefaultFocusManager();
@@ -768,7 +781,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setWorkingValues(Map workingValues) {
+	public void setWorkingValues(Map<String, String> workingValues) {
 		fWorkingValues= workingValues;
 	}
 

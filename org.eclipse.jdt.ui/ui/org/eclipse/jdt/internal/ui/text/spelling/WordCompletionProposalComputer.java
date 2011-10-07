@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
@@ -54,7 +56,7 @@ public final class WordCompletionProposalComputer implements IJavaCompletionProp
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (contributes()) {
 			try {
 				IDocument document= context.getDocument();
@@ -77,11 +79,11 @@ public final class WordCompletionProposalComputer implements IJavaCompletionProp
 
 					if (checker != null) {
 
-						final List proposals= new ArrayList(checker.getProposals(candidate, Character.isUpperCase(candidate.charAt(0))));
-						final List result= new ArrayList(proposals.size());
+						final List<RankedWordProposal> proposals= new ArrayList<RankedWordProposal>(checker.getProposals(candidate, Character.isUpperCase(candidate.charAt(0))));
+						final List<ICompletionProposal> result= new ArrayList<ICompletionProposal>(proposals.size());
 
-						for (Iterator it= proposals.iterator(); it.hasNext();) {
-							RankedWordProposal word= (RankedWordProposal) it.next();
+						for (Iterator<RankedWordProposal> it= proposals.iterator(); it.hasNext();) {
+							RankedWordProposal word= it.next();
 							String text= word.getText();
 							if (text.startsWith(candidate))
 								word.setRank(word.getRank() + PREFIX_RANK_SHIFT);
@@ -90,6 +92,7 @@ public final class WordCompletionProposalComputer implements IJavaCompletionProp
 								/*
 								 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
 								 */
+								@Override
 								public boolean validate(IDocument doc, int validate_offset, DocumentEvent event) {
 									return offset == validate_offset;
 								}
@@ -104,7 +107,7 @@ public final class WordCompletionProposalComputer implements IJavaCompletionProp
 				JavaPlugin.log(exception);
 			}
 		}
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 	private boolean contributes() {
@@ -114,8 +117,8 @@ public final class WordCompletionProposalComputer implements IJavaCompletionProp
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
-		return Collections.EMPTY_LIST;
+	public List<IContextInformation> computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
+		return Collections.emptyList();
 	}
 
 	/*

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 IBM Corporation and others.
+ * Copyright (c) 2009, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,7 +44,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
  * defines <code>m1</code> in <code>implements</code> clause of declaration of type <code>T</code></li>
  * </ul>
  */
-public class MethodsSourcePositionComparator implements Comparator {
+public class MethodsSourcePositionComparator implements Comparator<IMethodBinding> {
 
 	private final ITypeBinding fTypeBinding;
 
@@ -55,15 +55,10 @@ public class MethodsSourcePositionComparator implements Comparator {
 		fTypeBinding= typeBinding;
 	}
 
-	public int compare(Object o1, Object o2) {
-		if (!(o1 instanceof IMethodBinding)) {
+	public int compare(IMethodBinding firstMethodBinding, IMethodBinding secondMethodBinding) {
+		if (firstMethodBinding == null || secondMethodBinding == null) {
 			return 0;
 		}
-		if (!(o2 instanceof IMethodBinding)) {
-			return 0;
-		}
-		IMethodBinding firstMethodBinding= (IMethodBinding)o1;
-		IMethodBinding secondMethodBinding= (IMethodBinding)o2;
 		ITypeBinding firstMethodType= firstMethodBinding.getDeclaringClass();
 		ITypeBinding secondMethodType= secondMethodBinding.getDeclaringClass();
 

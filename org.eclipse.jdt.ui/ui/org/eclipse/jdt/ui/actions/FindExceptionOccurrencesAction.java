@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,6 +83,7 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
@@ -93,6 +94,7 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		CompilationUnit astRoot= selection.resolvePartialAstAtOffset();
 		setEnabled(astRoot != null && new ExceptionOccurrencesFinder().initialize(astRoot, selection.getOffset(), selection.getLength()) == null);
@@ -101,6 +103,7 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(false);
 	}
@@ -108,6 +111,7 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 	/* (non-JavaDoc)
 	 * Method declared in SelectionDispatchAction.
 	 */
+	@Override
 	public final void run(ITextSelection ts) {
 		ITypeRoot input= getEditorInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), input))

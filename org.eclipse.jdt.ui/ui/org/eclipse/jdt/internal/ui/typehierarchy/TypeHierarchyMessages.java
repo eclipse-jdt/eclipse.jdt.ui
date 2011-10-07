@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,9 @@ public final class TypeHierarchyMessages extends NLS {
 	public static String HistoryDropDownAction_tooltip;
 	public static String HistoryAction_description;
 	public static String HistoryAction_tooltip;
+	public static String HistoryAction_inputElements_1;
+	public static String HistoryAction_inputElements_2;
+	public static String HistoryAction_inputElements_more;
 	public static String HistoryListDialog_title;
 	public static String HistoryListDialog_label;
 	public static String HistoryListDialog_remove_button;
@@ -68,8 +71,14 @@ public final class TypeHierarchyMessages extends NLS {
 	public static String TypeHierarchyViewPart_exception_title;
 	public static String TypeHierarchyViewPart_exception_message;
 	public static String TypeHierarchyViewPart_tooltip;
+	public static String TypeHierarchyViewPart_tooltip2;
+	public static String TypeHierarchyViewPart_tooltip_more;
 	public static String TypeHierarchyViewPart_ws_description;
+	public static String TypeHierarchyViewPart_ws_description2;
+	public static String TypeHierarchyViewPart_ws_description_more;
 	public static String TypeHierarchyViewPart_ws_tooltip;
+	public static String TypeHierarchyViewPart_ws_tooltip2;
+	public static String TypeHierarchyViewPart_ws_tooltip_more;
 	public static String TypeHierarchyViewPart_restoreinput;
 	public static String TypeHierarchyViewPart_layout_submenu;
 	public static String TypeHierarchyLifeCycle_computeInput;

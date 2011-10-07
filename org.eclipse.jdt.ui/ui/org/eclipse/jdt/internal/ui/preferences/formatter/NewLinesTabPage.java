@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,9 +23,12 @@ public class NewLinesTabPage extends FormatterTabPage {
 
 	private final String PREVIEW=
 	createPreviewHeader(FormatterMessages.NewLinesTabPage_preview_header) +
+	"@Deprecated\n" + //$NON-NLS-1$
+	"package com.example; // annotation on package is only allowed in package-info.java\n" + //$NON-NLS-1$
+	"\n" + //$NON-NLS-1$
 	"public class Empty {}\n" + //$NON-NLS-1$
-	"class Example {" + //$NON-NLS-1$
-	"  static int [] fArray= {1, 2, 3, 4, 5 };" + //$NON-NLS-1$
+	"@Deprecated class Example {" + //$NON-NLS-1$
+	"  @Deprecated static int [] fArray= {1, 2, 3, 4, 5 };" + //$NON-NLS-1$
 	"  Listener fListener= new Listener() {" + //$NON-NLS-1$
 	"  };\n" + //$NON-NLS-1$
 	"  @Deprecated @Override " + //$NON-NLS-1$
@@ -49,10 +52,11 @@ public class NewLinesTabPage extends FormatterTabPage {
 
 	private CompilationUnitPreview fPreview;
 
-	public NewLinesTabPage(ModifyDialog modifyDialog, Map workingValues) {
+	public NewLinesTabPage(ModifyDialog modifyDialog, Map<String, String> workingValues) {
 		super(modifyDialog, workingValues);
 	}
 
+	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 
 		final Group newlinesGroup= createGroup(numColumns, composite, FormatterMessages.NewLinesTabPage_newlines_group_title);
@@ -75,21 +79,27 @@ public class NewLinesTabPage extends FormatterTabPage {
 		createPref(emptyStatementsGroup, numColumns, FormatterMessages.NewLinesTabPage_emtpy_statement_group_option_empty_statement_on_new_line, DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, FALSE_TRUE);
 
 		final Group annotationsGroup= createGroup(numColumns, composite, FormatterMessages.NewLinesTabPage_annotations_group_title);
-		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_members, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER, DO_NOT_INSERT_INSERT);
+		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_packages, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PACKAGE, DO_NOT_INSERT_INSERT);
+		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_types, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_TYPE, DO_NOT_INSERT_INSERT);
+		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_fields, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_FIELD, DO_NOT_INSERT_INSERT);
+		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_methods, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD, DO_NOT_INSERT_INSERT);
 		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_paramters, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PARAMETER, DO_NOT_INSERT_INSERT);
 		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_local_variables, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE, DO_NOT_INSERT_INSERT);
 	}
 
+	@Override
 	protected void initializePage() {
 	    fPreview.setPreviewText(PREVIEW);
 	}
 
-    protected JavaPreview doCreateJavaPreview(Composite parent) {
+    @Override
+	protected JavaPreview doCreateJavaPreview(Composite parent) {
         fPreview= new CompilationUnitPreview(fWorkingValues, parent);
         return fPreview;
     }
 
-    protected void doUpdatePreview() {
+    @Override
+	protected void doUpdatePreview() {
     	super.doUpdatePreview();
         fPreview.update();
     }

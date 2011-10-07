@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -115,6 +115,7 @@ public class ASTFragmentFactory {
 			return new FragmentForFullSubtreeFactory().createFragment(node);
 		}
 
+		@Override
 		public boolean visit(InfixExpression node) {
 			/* Try creating an associative infix expression fragment
 			/* for the full subtree.  If this is not applicable,
@@ -127,10 +128,12 @@ public class ASTFragmentFactory {
 			setFragment(fragment);
 			return false;
 		}
+		@Override
 		public boolean visit(Expression node) {
 			setFragment(new SimpleExpressionFragment(node));
 			return false;
 		}
+		@Override
 		public boolean visit(ASTNode node) {
 			setFragment(new SimpleFragment(node));
 			return false;
@@ -146,6 +149,7 @@ public class ASTFragmentFactory {
 			return new FragmentForSubPartBySourceRangeFactory().createFragment(node, range, cu);
 		}
 
+		@Override
 		public boolean visit(InfixExpression node) {
 			try {
 				setFragment(createInfixExpressionSubPartFragmentBySourceRange(node, fRange, fCu));
@@ -155,6 +159,7 @@ public class ASTFragmentFactory {
 			return false;
 		}
 
+		@Override
 		public boolean visit(ASTNode node) {
 			//let fragment be null
 			return false;

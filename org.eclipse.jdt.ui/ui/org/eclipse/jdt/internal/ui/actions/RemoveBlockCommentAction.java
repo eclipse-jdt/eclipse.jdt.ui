@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,8 +48,9 @@ public class RemoveBlockCommentAction extends BlockCommentAction {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.actions.AddBlockCommentAction#runInternal(org.eclipse.jface.text.ITextSelection, org.eclipse.jface.text.IDocumentExtension3, org.eclipse.jdt.internal.ui.actions.AddBlockCommentAction.Edit.EditFactory)
 	 */
+	@Override
 	protected void runInternal(ITextSelection selection, IDocumentExtension3 docExtension, Edit.EditFactory factory) throws BadPartitioningException, BadLocationException {
-		List edits= new LinkedList();
+		List<Edit> edits= new LinkedList<Edit>();
 		int tokenLength= getCommentStart().length();
 
 		int offset= selection.getOffset();
@@ -82,6 +83,7 @@ public class RemoveBlockCommentAction extends BlockCommentAction {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.actions.AddBlockCommentAction#validSelection(org.eclipse.jface.text.ITextSelection)
 	 */
+	@Override
 	protected boolean isValidSelection(ITextSelection selection) {
 		return selection != null && !selection.isEmpty();
 	}

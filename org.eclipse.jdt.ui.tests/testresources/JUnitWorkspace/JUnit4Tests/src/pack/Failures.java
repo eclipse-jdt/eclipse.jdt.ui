@@ -1,10 +1,17 @@
 package pack;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import pack.OrderedRunner.Order;
+
+@RunWith(OrderedRunner.class)
+@Order({"testNasty", "ignored", "testError", "errorExpected", "errorExpectedOther",
+	"compareTheStuff", "testCompareNull"})
 public class Failures {
 	
 	@Test

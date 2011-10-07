@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,7 +50,7 @@ public class DefaultSpellingEngine implements ISpellingEngine {
 	private static final IContentType PROPERTIES_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaProperties"); //$NON-NLS-1$
 
 	/** Available spelling engines by content type */
-	private Map fEngines= new HashMap();
+	private Map<IContentType, SpellingEngine> fEngines= new HashMap<IContentType, SpellingEngine>();
 
 	/**
 	 * Initialize concrete engines.
@@ -88,7 +88,7 @@ public class DefaultSpellingEngine implements ISpellingEngine {
 			return null;
 
 		if (fEngines.containsKey(contentType))
-			return (ISpellingEngine) fEngines.get(contentType);
+			return fEngines.get(contentType);
 
 		return getEngine(contentType.getBaseType());
 	}

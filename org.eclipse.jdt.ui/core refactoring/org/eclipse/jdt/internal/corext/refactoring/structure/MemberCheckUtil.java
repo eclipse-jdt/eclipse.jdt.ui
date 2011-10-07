@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -128,14 +128,14 @@ class MemberCheckUtil {
 	}
 
 	private static IType[] getAllEnclosedTypes(IType type) throws JavaModelException {
-		List result= new ArrayList(2);
+		List<IType> result= new ArrayList<IType>(2);
 		IType[] directlyEnclosed= type.getTypes();
 		result.addAll(Arrays.asList(directlyEnclosed));
 		for (int i= 0; i < directlyEnclosed.length; i++) {
 			IType enclosedType= directlyEnclosed[i];
 			result.addAll(Arrays.asList(getAllEnclosedTypes(enclosedType)));
 		}
-		return (IType[]) result.toArray(new IType[result.size()]);
+		return result.toArray(new IType[result.size()]);
 	}
 
 	private static boolean typeNameExistsInEnclosingTypeChain(IType type, String typeName){

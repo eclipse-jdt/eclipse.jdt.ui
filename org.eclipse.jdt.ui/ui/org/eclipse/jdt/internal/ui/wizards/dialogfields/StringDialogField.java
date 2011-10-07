@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,6 +54,7 @@ public class StringDialogField extends DialogField {
 	/*
 	 * @see DialogField#doFillIntoGrid
 	 */
+	@Override
 	public Control[] doFillIntoGrid(Composite parent, int nColumns) {
 		assertEnoughColumns(nColumns);
 
@@ -68,6 +69,7 @@ public class StringDialogField extends DialogField {
 	/*
 	 * @see DialogField#getNumberOfControls
 	 */
+	@Override
 	public int getNumberOfControls() {
 		return 2;
 	}
@@ -85,6 +87,7 @@ public class StringDialogField extends DialogField {
 	/*
 	 * @see DialogField#setFocus
 	 */
+	@Override
 	public boolean setFocus() {
 		if (isOkToUse(fTextControl)) {
 			fTextControl.setFocus();
@@ -147,6 +150,7 @@ public class StringDialogField extends DialogField {
 	/*
 	 * @see DialogField#updateEnableState
 	 */
+	@Override
 	protected void updateEnableState() {
 		super.updateEnableState();
 		if (isOkToUse(fTextControl)) {
@@ -192,6 +196,7 @@ public class StringDialogField extends DialogField {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#refresh()
 	 */
+	@Override
 	public void refresh() {
 		super.refresh();
 		if (isOkToUse(fTextControl)) {

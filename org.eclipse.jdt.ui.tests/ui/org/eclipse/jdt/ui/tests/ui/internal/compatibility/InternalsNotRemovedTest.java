@@ -37,7 +37,7 @@ public class InternalsNotRemovedTest {
 			org.eclipse.jdt.internal.ui.JavaUIMessages.TypeSelectionDialog_lowerLabel,
 			org.eclipse.jdt.internal.ui.JavaUIMessages.TypeSelectionDialog_upperLabel,
 
-			// See: https://bugs.eclipse.org/297529
+			// See https://bugs.eclipse.org/297529
 			org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater.ID
 
 	};

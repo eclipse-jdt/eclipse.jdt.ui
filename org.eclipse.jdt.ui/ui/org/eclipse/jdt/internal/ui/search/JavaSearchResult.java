@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,11 +29,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class JavaSearchResult extends AbstractJavaSearchResult {
 
 	private final JavaSearchQuery fQuery;
-	private final Map fElementsToParticipants;
+	private final Map<Object, IMatchPresentation> fElementsToParticipants;
 
 	public JavaSearchResult(JavaSearchQuery query) {
 		fQuery= query;
-		fElementsToParticipants= new HashMap();
+		fElementsToParticipants= new HashMap<Object, IMatchPresentation>();
 		setActiveMatchFilters(JavaMatchFilter.getLastUsedFilters());
 	}
 
@@ -61,6 +61,7 @@ public class JavaSearchResult extends AbstractJavaSearchResult {
 	/* (non-Javadoc)
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#setMatchFilters(org.eclipse.search.ui.text.MatchFilter[])
 	 */
+	@Override
 	public void setActiveMatchFilters(MatchFilter[] filters) {
 		super.setActiveMatchFilters(filters);
 		JavaMatchFilter.setLastUsedFilters(filters);
@@ -69,6 +70,7 @@ public class JavaSearchResult extends AbstractJavaSearchResult {
 	/* (non-Javadoc)
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#getAllMatchFilters()
 	 */
+	@Override
 	public MatchFilter[] getAllMatchFilters() {
 		return JavaMatchFilter.allFilters(fQuery);
 	}
@@ -81,7 +83,7 @@ public class JavaSearchResult extends AbstractJavaSearchResult {
 	}
 
 	synchronized IMatchPresentation getSearchParticpant(Object element) {
-		return (IMatchPresentation) fElementsToParticipants.get(element);
+		return fElementsToParticipants.get(element);
 	}
 
 	boolean addMatch(Match match, IMatchPresentation participant) {
@@ -96,6 +98,7 @@ public class JavaSearchResult extends AbstractJavaSearchResult {
 		return true;
 	}
 
+	@Override
 	public void removeAll() {
 		synchronized(this) {
 			fElementsToParticipants.clear();
@@ -103,6 +106,7 @@ public class JavaSearchResult extends AbstractJavaSearchResult {
 		super.removeAll();
 	}
 
+	@Override
 	public void removeMatch(Match match) {
 		synchronized(this) {
 			if (getMatchCount(match.getElement()) == 1)

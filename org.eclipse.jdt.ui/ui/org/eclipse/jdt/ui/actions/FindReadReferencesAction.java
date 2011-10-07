@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,10 +56,12 @@ public class FindReadReferencesAction extends FindReferencesAction {
 		super(editor);
 	}
 
-	Class[] getValidTypes() {
+	@Override
+	Class<?>[] getValidTypes() {
 		return new Class[] { IField.class, ILocalVariable.class };
 	}
 
+	@Override
 	void init() {
 		setText(SearchMessages.Search_FindReadReferencesAction_label);
 		setToolTipText(SearchMessages.Search_FindReadReferencesAction_tooltip);
@@ -67,10 +69,12 @@ public class FindReadReferencesAction extends FindReferencesAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKSPACE_ACTION);
 	}
 
+	@Override
 	int getLimitTo() {
 		return IJavaSearchConstants.READ_ACCESSES;
 	}
 
+	@Override
 	String getOperationUnavailableMessage() {
 		return SearchMessages.JavaElementAction_operationUnavailable_field;
 	}

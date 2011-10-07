@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,7 @@ public class JavaFoldingStructureProviderRegistry {
 	private static final String EXTENSION_POINT= "foldingStructureProviders"; //$NON-NLS-1$
 
 	/** The map of descriptors, indexed by their identifiers. */
-	private Map fDescriptors;
+	private Map<String, JavaFoldingStructureProviderDescriptor> fDescriptors;
 
 	/**
 	 * Creates a new instance.
@@ -58,7 +58,7 @@ public class JavaFoldingStructureProviderRegistry {
 	public JavaFoldingStructureProviderDescriptor[] getFoldingProviderDescriptors() {
 		synchronized (this) {
 			ensureRegistered();
-			return (JavaFoldingStructureProviderDescriptor[]) fDescriptors.values().toArray(new JavaFoldingStructureProviderDescriptor[fDescriptors.size()]);
+			return fDescriptors.values().toArray(new JavaFoldingStructureProviderDescriptor[fDescriptors.size()]);
 		}
 	}
 
@@ -73,7 +73,7 @@ public class JavaFoldingStructureProviderRegistry {
 	public JavaFoldingStructureProviderDescriptor getFoldingProviderDescriptor(String id) {
 		synchronized (this) {
 			ensureRegistered();
-			return (JavaFoldingStructureProviderDescriptor) fDescriptors.get(id);
+			return fDescriptors.get(id);
 		}
 	}
 
@@ -127,7 +127,7 @@ public class JavaFoldingStructureProviderRegistry {
 	 */
 	public void reloadExtensions() {
 		IExtensionRegistry registry= Platform.getExtensionRegistry();
-		Map map= new HashMap();
+		Map<String, JavaFoldingStructureProviderDescriptor> map= new HashMap<String, JavaFoldingStructureProviderDescriptor>();
 
 		IConfigurationElement[] elements= registry.getConfigurationElementsFor(JavaPlugin.getPluginId(), EXTENSION_POINT);
 		for (int i= 0; i < elements.length; i++) {

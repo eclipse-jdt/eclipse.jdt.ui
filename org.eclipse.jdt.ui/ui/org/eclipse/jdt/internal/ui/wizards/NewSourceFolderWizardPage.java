@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -142,9 +142,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 
 	public void init(IStructuredSelection selection) {
 		String projPath= getProjectPath(selection);
-		if (projPath != null) {
-			fProjectField.setText(projPath);
-		}
+		fProjectField.setText(projPath != null ? projPath : ""); //$NON-NLS-1$
 		fRootDialogField.setText(""); //$NON-NLS-1$
 	}
 
@@ -202,10 +200,12 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
-			fRootDialogField.setFocus();
+			if (fProjectField.getText().length() > 0)
+				fRootDialogField.setFocus();
 		}
 	}
 
@@ -341,7 +341,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 						}
 					}
 				}
-				ArrayList newEntries= new ArrayList(fEntries.length + 1);
+				ArrayList<IClasspathEntry> newEntries= new ArrayList<IClasspathEntry>(fEntries.length + 1);
 				int projectEntryIndex= -1;
 
 				for (int i= 0; i < fEntries.length; i++) {
@@ -360,7 +360,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 
 				IClasspathEntry newEntry= JavaCore.newSourceEntry(path);
 
-				Set modified= new HashSet();
+				Set<IClasspathEntry> modified= new HashSet<IClasspathEntry>();
 				if (fExcludeInOthersFields.isSelected()) {
 					addExclusionPatterns(newEntry, newEntries, modified);
 					IClasspathEntry entry= JavaCore.newSourceEntry(path);
@@ -375,7 +375,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 					}
 				}
 
-				fNewEntries= (IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]);
+				fNewEntries= newEntries.toArray(new IClasspathEntry[newEntries.size()]);
 				fNewOutputLocation= fOutputLocation;
 
 				IJavaModelStatus status= JavaConventions.validateClasspath(fCurrJProject, fNewEntries, fNewOutputLocation);
@@ -399,7 +399,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 					return;
 				}
 				if (!modified.isEmpty()) {
-					String info= modified.size() == 1 ? Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_AddedExclusions_singular, ((IClasspathEntry)(modified.iterator().next()))
+					String info= modified.size() == 1 ? Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_AddedExclusions_singular, (modified.iterator().next())
 							.getPath()) : Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_AddedExclusions_plural, String.valueOf(modified.size()));
 					fRootStatus.setInfo(info);
 					return;
@@ -408,9 +408,9 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		}
 	}
 
-	private void insertAtEndOfCategory(IClasspathEntry entry, List entries) {
+	private void insertAtEndOfCategory(IClasspathEntry entry, List<IClasspathEntry> entries) {
 		int length= entries.size();
-		IClasspathEntry[] elements= (IClasspathEntry[])entries.toArray(new IClasspathEntry[length]);
+		IClasspathEntry[] elements= entries.toArray(new IClasspathEntry[length]);
 		int i= 0;
 		while (i < length && elements[i].getEntryKind() != entry.getEntryKind()) {
 			i++;
@@ -438,10 +438,10 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		}
 	}
 
-	private void addExclusionPatterns(IClasspathEntry newEntry, List existing, Set modifiedEntries) {
+	private void addExclusionPatterns(IClasspathEntry newEntry, List<IClasspathEntry> existing, Set<IClasspathEntry> modifiedEntries) {
 		IPath entryPath= newEntry.getPath();
 		for (int i= 0; i < existing.size(); i++) {
-			IClasspathEntry curr= (IClasspathEntry) existing.get(i);
+			IClasspathEntry curr= existing.get(i);
 			IPath currPath= curr.getPath();
 			if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE && currPath.isPrefixOf(entryPath)) {
 				IPath[] exclusionFilters= curr.getExclusionPatterns();
@@ -505,7 +505,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	// ------------- choose dialogs
 
 	private IFolder chooseFolder(String title, String message, IPath initialPath) {
-		Class[] acceptedClasses= new Class[] { IFolder.class };
+		Class<?>[] acceptedClasses= new Class[] { IFolder.class };
 		ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, null);
 

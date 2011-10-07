@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,7 +52,6 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeAssistAdvancedConfigurationBlock_Up;
 	public static String CodeAssistAdvancedConfigurationBlock_Down;
 	public static String CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout;
-	public static String CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout_ms;
 	public static String CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout_emptyInput;
 	public static String CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout_invalidInput;
 	public static String CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout_invalidRange;
@@ -190,13 +189,14 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_addJavaDocTags;
 	public static String JavaEditorPreferencePage_smartPaste;
 	public static String JavaEditorPreferencePage_link;
-	public static String JavaEditorPreferencePage_link_tooltip;
 	public static String JavaEditorPreferencePage_importsOnPaste;
 	public static String JavaEditorPreferencePage_subWordNavigation;
 	public static String JavaEditorPreferencePage_typing_smartSemicolon;
 	public static String JavaEditorPreferencePage_typing_smartOpeningBrace;
 	public static String JavaEditorPreferencePage_typing_smartTab;
 	public static String JavaEditorPreferencePage_hoverTab_title;
+	public static String JavaEditorPreferencePage_smartInsertMode_message;
+	public static String JavaEditorPreferencePage_smartAutoIndentAfterNewLine;
 	public static String JavaEditorColoringConfigurationBlock_link;
 	public static String JavaBasePreferencePage_openTypeHierarchy;
 	public static String JavaBasePreferencePage_inView;
@@ -218,7 +218,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorHoverConfigurationBlock_insertDelimiterAndModifier;
 	public static String MarkOccurrencesConfigurationBlock_title;
 	public static String MarkOccurrencesConfigurationBlock_link;
-	public static String MarkOccurrencesConfigurationBlock_link_tooltip;
 	public static String MarkOccurrencesConfigurationBlock_markOccurrences;
 	public static String MarkOccurrencesConfigurationBlock_markTypeOccurrences;
 	public static String MarkOccurrencesConfigurationBlock_markMethodOccurrences;
@@ -230,22 +229,11 @@ public final class PreferencesMessages extends NLS {
 	public static String MarkOccurrencesConfigurationBlock_markImplementors;
 	public static String MarkOccurrencesConfigurationBlock_markBreakContinueTargets;
 	public static String MarkOccurrencesConfigurationBlock_stickyOccurrences;
-	public static String JavaElementInfoPage_binary;
-	public static String JavaElementInfoPage_classpath_entry_kind;
-	public static String JavaElementInfoPage_library;
-	public static String JavaElementInfoPage_nameLabel;
-	public static String JavaElementInfoPage_not_present;
-	public static String JavaElementInfoPage_package;
-	public static String JavaElementInfoPage_package_contents;
-	public static String JavaElementInfoPage_project;
-	public static String JavaElementInfoPage_resource_path;
-	public static String JavaElementInfoPage_source;
-	public static String JavaElementInfoPage_variable;
-	public static String JavaElementInfoPage_variable_path;
-	public static String JavaElementInfoPage_location;
 	public static String JavadocConfigurationPropertyPage_IsPackageFragmentRoot_description;
 	public static String JavadocConfigurationPropertyPage_IsIncorrectElement_description;
 	public static String JavadocConfigurationPropertyPage_IsJavaProject_description;
+	public static String JavadocConfigurationPropertyPage_location_path;
+	public static String JavadocConfigurationPropertyPage_locationPath_none;
 	public static String JavadocConfigurationBlock_browse_folder_button;
 	public static String JavadocConfigurationBlock_error_notafolder;
 	public static String JavadocConfigurationBlock_javadocFolderDialog_label;
@@ -276,14 +264,20 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_ignore_documented_unused_parameters;
 	public static String ProblemSeveritiesConfigurationBlock_pb_redundant_null_check;
 	public static String ProblemSeveritiesConfigurationBlock_pb_redundant_super_interface_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_redundant_type_arguments_label;
+	public static String ProblemSeveritiesConfigurationBlock_include_assert_in_null_analysis;
 	public static String ProblemSeveritiesConfigurationBlock_treat_optional_as_fatal;
 	public static String SourceAttachmentPropertyPage_error_title;
 	public static String SourceAttachmentPropertyPage_error_message;
 	public static String SourceAttachmentPropertyPage_invalid_container;
+	public static String SourceAttachmentPropertyPage_location_path;
+	public static String SourceAttachmentPropertyPage_locationPath_none;
 	public static String SourceAttachmentPropertyPage_noarchive_message;
 	public static String NativeLibrariesPropertyPage_invalidElementSelection_desription;
 	public static String NativeLibrariesPropertyPage_errorAttaching_title;
 	public static String NativeLibrariesPropertyPage_errorAttaching_message;
+	public static String NativeLibrariesPropertyPage_location_path;
+	public static String NativeLibrariesPropertyPage_locationPath_none;
 	public static String AppearancePreferencePage_description;
 	public static String AppearancePreferencePage_methodreturntype_label;
 	public static String AppearancePreferencePage_showCategory_label;
@@ -373,6 +367,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_needsfullbuild_message;
 	public static String ProblemSeveritiesConfigurationBlock_needsprojectbuild_message;
 	public static String ProblemSeveritiesConfigurationBlock_common_description;
+	public static String ProblemSeveritiesConfigurationBlock_pb_unavoidable_generic_type_problems;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unsafe_type_op_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_raw_type_reference;
 	public static String ProblemSeveritiesConfigurationBlock_pb_final_param_bound_label;
@@ -388,6 +383,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_unused_throwing_exception_when_overriding_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unused_throwing_exception_ignore_unchecked_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_missing_serial_version_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_missing_static_on_method_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_missing_synchronized_on_inherited_method;
 	public static String ProblemSeveritiesConfigurationBlock_pb_missing_hashcode_method;
 	public static String ProblemSeveritiesConfigurationBlock_pb_overriding_pkg_dflt_label;
@@ -448,6 +444,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocProblemsConfigurationBlock_pb_missing_javadoc_tags_visibility_label;
 	public static String JavadocProblemsConfigurationBlock_pb_missing_javadoc_tags_overriding_label;
 	public static String JavadocProblemsConfigurationBlock_pb_missing_comments_label;
+	public static String JavadocProblemsConfigurationBlock_pb_missing_comments_method_type_parameter_label;
 	public static String JavadocProblemsConfigurationBlock_pb_missing_comments_visibility_label;
 	public static String JavadocProblemsConfigurationBlock_pb_missing_comments_overriding_label;
 	public static String JavadocProblemsConfigurationBlock_pb_missing_tag_description;
@@ -482,7 +479,6 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_classfiles_group_label;
 	public static String CodeStylePreferencePage_title;
 	public static String CodeTemplatesPreferencePage_title;
-	public static String JavaCategoryPropertyPage_text;
 	public static String NameConventionConfigurationBlock_field_label;
 	public static String NameConventionConfigurationBlock_static_label;
 	public static String NameConventionConfigurationBlock_arg_label;
@@ -705,10 +701,8 @@ public final class PreferencesMessages extends NLS {
 	public static String PropertiesFileEditorPreferencePage_underline;
 	public static String PropertiesFileEditorPreferencePage_preview;
 	public static String PropertiesFileEditorPreferencePage_link;
-	public static String PropertiesFileEditorPreferencePage_link_tooltip;
 	public static String SmartTypingConfigurationBlock_autoclose_title;
 	public static String SmartTypingConfigurationBlock_automove_title;
-	public static String SmartTypingConfigurationBlock_tabs_title;
 	public static String SmartTypingConfigurationBlock_tabs_message_tab_text;
 	public static String SmartTypingConfigurationBlock_tabs_message_others_text;
 	public static String SmartTypingConfigurationBlock_tabs_message_tooltip;
@@ -717,6 +711,7 @@ public final class PreferencesMessages extends NLS {
 	public static String SmartTypingConfigurationBlock_tabs_message_tabsAndSpaces;
 	public static String SmartTypingConfigurationBlock_pasting_title;
 	public static String SmartTypingConfigurationBlock_strings_title;
+	public static String SmartTypingConfigurationBlock_indentation_title;
 	public static String CodeAssistConfigurationBlock_typeFilters_link;
 	public static String CodeAssistConfigurationBlock_sortingSection_title;
 	public static String CodeAssistConfigurationBlock_autoactivationSection_title;
@@ -736,13 +731,14 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_unhandled_surpresswarning_tokens;
 	public static String ProblemSeveritiesConfigurationBlock_pb_enable_surpresswarning_annotation;
 	public static String SmartTypingConfigurationBlock_annotationReporting_link;
-	public static String CodeAssistConfigurationBlock_restricted_link;
-	public static String CodeAssistConfigurationBlock_hideDiscouraged_label;
-	public static String CodeAssistConfigurationBlock_hideForbidden_label;
+	public static String TypeFilterPreferencePage_restricted_link;
+	public static String TypeFilterPreferencePage_hideDiscouraged_label;
+	public static String TypeFilterPreferencePage_hideForbidden_label;
 	public static String UserLibraryPreferencePage_UserLibraryPreferencePage_libraries_up_button;
 	public static String UserLibraryPreferencePage_UserLibraryPreferencePage_libraries_down_button;
 	public static String EditTemplateDialog_autoinsert;
 	public static String ComplianceConfigurationBlock_jrecompliance_info;
+	public static String ComplianceConfigurationBlock_17_ee_warning;
 	public static String ComplianceConfigurationBlock_jrecompliance_info_project;
 	public static String ProblemSeveritiesConfigurationBlock_section_generics;
 	public static String JavaBasePreferencePage_dialogs;
@@ -760,6 +756,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_parameter_assignment;
 	public static String ProblemSeveritiesConfigurationBlock_pb_null_reference;
 	public static String ProblemSeveritiesConfigurationBlock_pb_potential_null_reference;
+	public static String ProblemSeveritiesConfigurationBlock_pb_potentially_missing_static_on_method_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_fall_through_case;
 	public static String ProblemSeveritiesConfigurationBlock_unused_suppresswarnings_token;
 	public static String CodeAssistConfigurationBlock_hideDeprecated_label;
@@ -784,4 +781,14 @@ public final class PreferencesMessages extends NLS {
 	public static String FavoriteStaticMemberInputDialog_error_invalidTypeName;
 	public static String FavoriteStaticMemberInputDialog_error_entryExists;
 
+	public static String OptionsConfigurationBlock_Disabled;
+	public static String OptionsConfigurationBlock_Enabled;
+	public static String OptionsConfigurationBlock_NoOptionMatchesTheFilter;
+	public static String OptionsConfigurationBlock_Off;
+	public static String OptionsConfigurationBlock_On;
+	public static String OptionsConfigurationBlock_RefreshFilter;
+	public static String OptionsConfigurationBlock_TypeFilterText;
+
+	public static String FilterTextControl_Clear;
+	public static String FilterTextControl_ClearFilterField;
 }

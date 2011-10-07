@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 IBM Corporation and others.
+ * Copyright (c) 2009, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,8 +34,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ui.texteditor.ITextEditor;
-
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -83,9 +82,9 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	private final boolean fQualify;
 
 	/**
-	 * The current text editor.
+	 * The editor.
 	 */
-	private ITextEditor fEditor;
+	private IEditorPart fEditor;
 
 	/**
 	 * Creates a new Java element implementation hyperlink for methods.
@@ -95,9 +94,9 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 * @param method the method to open
 	 * @param qualify <code>true</code> if the hyperlink text should show a qualified name for
 	 *            element.
-	 * @param editor the active java editor
+	 * @param editor the editor
 	 */
-	public JavaElementImplementationHyperlink(IRegion region, SelectionDispatchAction openAction, IMethod method, boolean qualify, ITextEditor editor) {
+	public JavaElementImplementationHyperlink(IRegion region, SelectionDispatchAction openAction, IMethod method, boolean qualify, IEditorPart editor) {
 		Assert.isNotNull(openAction);
 		Assert.isNotNull(region);
 		Assert.isNotNull(method);
@@ -153,13 +152,22 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 * Hierarchy is opened.
 	 * </p>
 	 * 
-	 * @param openAction the action to use to open the methods
-	 * @param method the method
+	 * @param editor the editor
 	 * @param region the region of the selection
-	 * @param editor the active java editor
+	 * @param method the method
+	 * @param openAction the action to use to open the methods
 	 * @since 3.6
 	 */
 	public static void openImplementations(IEditorPart editor, IRegion region, final IMethod method, SelectionDispatchAction openAction) {
+		try {
+			if (cannotBeOverriddenMethod(method)) {
+				openAction.run(new StructuredSelection(method));
+				return;
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			return;
+		}
 		ITypeRoot editorInput= EditorUtility.getEditorInputJavaElement(editor, false);
 
 		CompilationUnit ast= SharedASTProvider.getAST(editorInput, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
@@ -195,7 +203,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 
 		final boolean isMethodAbstract[]= new boolean[1];
 		final String dummyString= new String();
-		final ArrayList links= new ArrayList();
+		final ArrayList<IMethod> links= new ArrayList<IMethod>();
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
 
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -206,6 +214,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 					String methodLabel= JavaElementLabels.getElementLabel(method, JavaElementLabels.DEFAULT_QUALIFIED);
 					monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, methodLabel), 10);
 					SearchRequestor requestor= new SearchRequestor() {
+						@Override
 						public void acceptSearchMatch(SearchMatch match) throws CoreException {
 							if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
 								Object element= match.getElement();
@@ -273,6 +282,20 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 			openAction.run(new StructuredSelection(links.get(0)));
 		else
 			openQuickHierarchy(editor);
+	}
+
+	/**
+	 * Checks whether or not a method can be overridden.
+	 * 
+	 * @param method the method
+	 * @return <code>true</code> if the method cannot be overridden, <code>false</code> otherwise
+	 * @throws JavaModelException if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource
+	 * @since 3.7
+	 */
+	private static boolean cannotBeOverriddenMethod(IMethod method) throws JavaModelException {
+		return JdtFlags.isPrivate(method) || JdtFlags.isFinal(method) || JdtFlags.isStatic(method) || method.isConstructor()
+				|| JdtFlags.isFinal((IMember)method.getParent());
 	}
 
 	/**

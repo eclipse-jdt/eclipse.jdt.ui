@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,13 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -62,6 +66,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 
 	private NativeLibrariesConfigurationBlock fConfigurationBlock;
 	private boolean fIsValidElement;
+	private boolean fIsReadOnly;
 	private IClasspathEntry fEntry;
 	private IPath fContainerPath;
 	private String fInitialNativeLibPath;
@@ -69,6 +74,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 	/**
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		IJavaElement elem= getJavaElement();
 		try {
@@ -83,7 +89,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 					if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 						fContainerPath= entry.getPath();
 						fEntry= handleContainerEntry(fContainerPath, elem.getJavaProject(), root.getPath());
-						fIsValidElement= fEntry != null;
+						fIsValidElement= fEntry != null && !fIsReadOnly;
 					} else {
 						fContainerPath= null;
 						fEntry= entry;
@@ -114,11 +120,12 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 			setDescription(Messages.format(PreferencesMessages.NativeLibrariesPropertyPage_not_supported, containerName));
 			return null;
 		}
+		IClasspathEntry entry= JavaModelUtil.findEntryInContainer(container, jarPath);
 		if (status.getCode() == ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY) {
 			setDescription(Messages.format(PreferencesMessages.NativeLibrariesPropertyPage_read_only, containerName));
-			return null;
+			fIsReadOnly= true;
+			return entry;
 		}
-		IClasspathEntry entry= JavaModelUtil.findEntryInContainer(container, jarPath);
 		Assert.isNotNull(entry);
 		return entry;
 	}
@@ -126,27 +133,55 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
-		if (!fIsValidElement)
-			return new Composite(parent, SWT.NONE);
+		if (!fIsValidElement || fIsReadOnly) {
+			Composite inner= new Composite(parent, SWT.NONE);
+			
+			if (fIsReadOnly) {
+				GridLayout layout= new GridLayout();
+				layout.marginWidth= 0;
+				inner.setLayout(layout);
+
+				Label label= new Label(inner, SWT.WRAP);
+				label.setText(PreferencesMessages.NativeLibrariesPropertyPage_location_path);
+				
+				Text location= new Text(inner, SWT.READ_ONLY | SWT.WRAP);
+				GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+				gd.widthHint= convertWidthInCharsToPixels(80);
+				location.setLayoutData(gd);
+				String locationPath= PreferencesMessages.NativeLibrariesPropertyPage_locationPath_none;
+				if (fEntry != null) {
+					String nativeLibrariesPath= getNativeLibrariesPath(fEntry);
+					if (nativeLibrariesPath != null)
+						locationPath= nativeLibrariesPath;
+				}
+				location.setText(locationPath);
+				Dialog.applyDialogFont(inner);
+			}
+			return inner;
+		}
 
 		IJavaElement elem= getJavaElement();
 		if (elem == null)
 			return new Composite(parent, SWT.NONE);
 
-		fInitialNativeLibPath= null;
-		IClasspathAttribute[] extraAttributes= fEntry.getExtraAttributes();
-		for (int i= 0; i < extraAttributes.length; i++) {
-			if (extraAttributes[i].getName().equals(JavaRuntime.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY)) {
-				fInitialNativeLibPath= extraAttributes[i].getValue();
-				break;
-			}
-		}
+		fInitialNativeLibPath= getNativeLibrariesPath(fEntry);
 		fConfigurationBlock= new NativeLibrariesConfigurationBlock(this, getShell(), fInitialNativeLibPath, fEntry);
 		Control control= fConfigurationBlock.createContents(parent);
 
 		Dialog.applyDialogFont(control);
 		return control;
+	}
+
+	private static String getNativeLibrariesPath(IClasspathEntry entry) {
+		IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
+		for (int i= 0; i < extraAttributes.length; i++) {
+			if (extraAttributes[i].getName().equals(JavaRuntime.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY)) {
+				return extraAttributes[i].getValue();
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -160,6 +195,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
+	@Override
 	protected void performDefaults() {
 		if (fConfigurationBlock != null) {
 			fConfigurationBlock.performDefaults();
@@ -170,6 +206,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 	/**
 	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
+	@Override
 	public boolean performOk() {
 		if (fConfigurationBlock != null) {
 			String nativeLibraryPath= fConfigurationBlock.getNativeLibraryPath();

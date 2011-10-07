@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,11 +59,13 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 			selectionProvider.addSelectionChangedListener(fAssignWorkingSetAction);
 		}
 
+		@Override
 		public void dispose() {
 			super.dispose();
 			fSelectionProvider.removeSelectionChangedListener(fAssignWorkingSetAction);
 		}
 
+		@Override
 		public void fillContextMenu(IMenuManager menu) {
 			if (fAssignWorkingSetAction.isEnabled())
 				menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fAssignWorkingSetAction);
@@ -85,21 +87,26 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 			/*
 			 * @see org.eclipse.jface.action.Action#run()
 			 */
+			@Override
 			public void run() {
 				fJavaEditor.getViewer().getTextWidget().setFocus();
 			}
 		}
 
-		private Action fGoToEditor;
+		private GoToEditorAction fGoToEditor;
+		private ToggleBreadcrumbAction fHideBreadcrumb;
 
 		public BreadcrumbActionGroup(JavaEditor javaEditor) {
 			fGoToEditor= new GoToEditorAction(javaEditor);
 			fGoToEditor.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB);
+			fHideBreadcrumb= new ToggleBreadcrumbAction(javaEditor.getSite().getPage(), true);
+			fHideBreadcrumb.setActionDefinitionId(IJavaEditorActionDefinitionIds.TOGGLE_BREADCRUMB);
 		}
 
 		/*
 		 * @see org.eclipse.ui.actions.ActionGroup#fillActionBars(org.eclipse.ui.IActionBars)
 		 */
+		@Override
 		public void fillActionBars(IActionBars actionBars) {
 			super.fillActionBars(actionBars);
 			actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB, fGoToEditor);
@@ -108,9 +115,11 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 		/*
 		 * @see org.eclipse.ui.actions.ActionGroup#fillContextMenu(org.eclipse.jface.action.IMenuManager)
 		 */
+		@Override
 		public void fillContextMenu(IMenuManager menu) {
 			super.fillContextMenu(menu);
 			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGoToEditor);
+			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fHideBreadcrumb);
 		}
 	}
 
@@ -134,6 +143,7 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.actions.CompositeActionGroup#fillContextMenu(org.eclipse.jface.action.IMenuManager)
 	 */
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
 

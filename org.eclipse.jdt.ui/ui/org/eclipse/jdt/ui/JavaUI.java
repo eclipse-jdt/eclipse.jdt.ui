@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -329,11 +329,11 @@ public final class JavaUI {
 			roots= project.getPackageFragmentRoots();
 		}
 
-		List consideredRoots= null;
+		List<IPackageFragmentRoot> consideredRoots= null;
 		if ((style & IJavaElementSearchConstants.CONSIDER_BINARIES) != 0) {
 			consideredRoots= Arrays.asList(roots);
 		} else {
-			consideredRoots= new ArrayList(roots.length);
+			consideredRoots= new ArrayList<IPackageFragmentRoot>(roots.length);
 			for (int i= 0; i < roots.length; i++) {
 				IPackageFragmentRoot root= roots[i];
 				if (root.getKind() != IPackageFragmentRoot.K_BINARY)
@@ -342,7 +342,7 @@ public final class JavaUI {
 			}
 		}
 
-		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope((IJavaElement[])consideredRoots.toArray(new IJavaElement[consideredRoots.size()]));
+		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(consideredRoots.toArray(new IJavaElement[consideredRoots.size()]));
 		BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
 		if (style == 0 || style == IJavaElementSearchConstants.CONSIDER_REQUIRED_PROJECTS) {
 			return createPackageDialog(parent, context, searchScope, false, true, filter);
@@ -805,7 +805,7 @@ public final class JavaUI {
 	 */
 	public static org.eclipse.jdt.core.IWorkingCopy[] getSharedWorkingCopiesOnClasspath() {
 		org.eclipse.jdt.core.IWorkingCopy[] wcs= getSharedWorkingCopies();
-		List result= new ArrayList(wcs.length);
+		List<org.eclipse.jdt.core.IWorkingCopy> result= new ArrayList<org.eclipse.jdt.core.IWorkingCopy>(wcs.length);
 		for (int i = 0; i < wcs.length; i++) {
 			org.eclipse.jdt.core.IWorkingCopy wc= wcs[i];
 			if (wc instanceof IJavaElement) {
@@ -815,7 +815,7 @@ public final class JavaUI {
 				}
 			}
 		}
-		return (org.eclipse.jdt.core.IWorkingCopy[])result.toArray(new org.eclipse.jdt.core.IWorkingCopy[result.size()]);
+		return result.toArray(new org.eclipse.jdt.core.IWorkingCopy[result.size()]);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * <p>Clients can make the following assumptions about the AST:
  * <dl>
  *    <li>the AST has a {@link ITypeRoot} as source: {@link CompilationUnit#getTypeRoot()} is not null.</li>
- *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS3 API level 3} or higher</li>
+ *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS4 API level 4} or higher</li>
  *    <li>the AST has bindings resolved ({@link AST#hasResolvedBindings()})</li>
  *    <li>{@link AST#hasStatementsRecovery() statement} and {@link AST#hasBindingsRecovery() bindings}
  *           recovery are enabled
@@ -68,6 +68,7 @@ public final class SharedASTProvider {
 		/*
 		 * @see java.lang.Object#toString()
 		 */
+		@Override
 		public String toString() {
 			return fName;
 		}
@@ -108,18 +109,19 @@ public final class SharedASTProvider {
 	 * <p>
 	 * Clients are not allowed to modify the AST and must not keep any references.
 	 * </p>
-	 *
+	 * 
 	 * @param element the {@link ITypeRoot}, must not be <code>null</code>
 	 * @param waitFlag {@link #WAIT_YES}, {@link #WAIT_NO} or {@link #WAIT_ACTIVE_ONLY}
 	 * @param progressMonitor the progress monitor or <code>null</code>
 	 * @return the AST or <code>null</code>.
 	 *         <dl>
-	 *         <li>if {@link #WAIT_NO} has been specified <code>null</code> is returned if the
+	 *         <li>If {@link #WAIT_NO} has been specified <code>null</code> is returned if the
 	 *         element is not input of the current Java editor or no AST is available</li>
-	 *         <li>if {@link #WAIT_ACTIVE_ONLY} has been specified <code>null</code> is returned if
+	 *         <li>If {@link #WAIT_ACTIVE_ONLY} has been specified <code>null</code> is returned if
 	 *         the element is not input of the current Java editor</li>
-	 *         <li>if {@link #WAIT_YES} has been specified either the shared AST is returned or a
+	 *         <li>If {@link #WAIT_YES} has been specified either the shared AST is returned or a
 	 *         new AST is created.</li>
+	 *         <li><code>null</code> will be returned if the operation gets canceled.</li>
 	 *         </dl>
 	 */
 	public static CompilationUnit getAST(ITypeRoot element, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {

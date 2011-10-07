@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,8 +26,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.core.resources.IProject;
 
@@ -46,9 +46,9 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.IProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
@@ -77,16 +77,19 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		}
     }
 
+	@Override
 	protected IProfileVersioner createProfileVersioner() {
 	    return new CleanUpProfileVersioner();
     }
 
+	@Override
 	protected ProfileStore createProfileStore(IProfileVersioner versioner) {
 	    fProfileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
 		return fProfileStore;
     }
 
-	protected ProfileManager createProfileManager(List profiles, IScopeContext context, PreferencesAccess access, IProfileVersioner profileVersioner) {
+	@Override
+	protected ProfileManager createProfileManager(List<Profile> profiles, IScopeContext context, PreferencesAccess access, IProfileVersioner profileVersioner) {
 		profiles.addAll(CleanUpPreferenceUtil.getBuiltInProfiles());
 	    fProfileManager= new CleanUpProfileManager(profiles, context, access, profileVersioner);
 		return fProfileManager;
@@ -95,9 +98,10 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	/**
      * {@inheritDoc}
      */
-    protected void configurePreview(Composite composite, int numColumns, final ProfileManager profileManager) {
-    	Map settings= profileManager.getSelected().getSettings();
-		final Map sharedSettings= new Hashtable();
+    @Override
+	protected void configurePreview(Composite composite, int numColumns, final ProfileManager profileManager) {
+    	Map<String, String> settings= profileManager.getSelected().getSettings();
+		final Map<String, String> sharedSettings= new Hashtable<String, String>();
 		fill(settings, sharedSettings);
 
 		final ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
@@ -155,14 +159,15 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
     	return buf.toString();
     }
 
-	private void fill(Map settings, Map sharedSettings) {
+	private void fill(Map<String, String> settings, Map<String, String> sharedSettings) {
 		sharedSettings.clear();
-		for (Iterator iterator= settings.keySet().iterator(); iterator.hasNext();) {
-	        String key= (String)iterator.next();
+		for (Iterator<String> iterator= settings.keySet().iterator(); iterator.hasNext();) {
+	        String key= iterator.next();
 	        sharedSettings.put(key, settings.get(key));
         }
     }
 
+	@Override
 	protected ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile) {
         return new CleanUpModifyDialog(shell, profile, profileManager, profileStore, newProfile, CLEANUP_PAGE_SETTINGS_KEY, DIALOGSTORE_LASTSAVELOADPATH);
     }
@@ -170,6 +175,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Composite createContents(Composite parent) {
 	    Composite composite= super.createContents(parent);
 
@@ -211,6 +217,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void performDefaults() {
 		super.performDefaults();
 		if (fCurrContext == null)
@@ -230,6 +237,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void preferenceChanged(PreferenceChangeEvent event) {
 		if (CleanUpConstants.CLEANUP_PROFILES.equals(event.getKey())) {
 			try {
@@ -237,16 +245,16 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 				if (id == null)
 					fProfileManager.getDefaultProfile().getID();
 
-				List oldProfiles= fProfileManager.getSortedProfiles();
-				Profile[] oldProfilesArray= (Profile[])oldProfiles.toArray(new Profile[oldProfiles.size()]);
+				List<Profile> oldProfiles= fProfileManager.getSortedProfiles();
+				Profile[] oldProfilesArray= oldProfiles.toArray(new Profile[oldProfiles.size()]);
 				for (int i= 0; i < oldProfilesArray.length; i++) {
 					if (oldProfilesArray[i] instanceof CustomProfile) {
 						fProfileManager.deleteProfile((CustomProfile)oldProfilesArray[i]);
 					}
 				}
 
-				List newProfiles= fProfileStore.readProfilesFromString((String)event.getNewValue());
-				for (Iterator iterator= newProfiles.iterator(); iterator.hasNext();) {
+				List<Profile> newProfiles= fProfileStore.readProfilesFromString((String)event.getNewValue());
+				for (Iterator<Profile> iterator= newProfiles.iterator(); iterator.hasNext();) {
 					CustomProfile profile= (CustomProfile)iterator.next();
 					fProfileManager.addProfile(profile);
 				}

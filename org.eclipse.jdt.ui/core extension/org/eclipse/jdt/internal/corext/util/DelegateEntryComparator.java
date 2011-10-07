@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,17 +40,9 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperat
  * type <code>T</code></li>
  * </ul>
  */
-public class DelegateEntryComparator implements Comparator {
+public class DelegateEntryComparator implements Comparator<DelegateEntry> {
 
-	public int compare(Object o1, Object o2) {
-		if (!(o1 instanceof DelegateEntry)) {
-			return 0;
-		}
-		if (!(o2 instanceof DelegateEntry)) {
-			return 0;
-		}
-		DelegateEntry firstEntry= (DelegateEntry)o1;
-		DelegateEntry secondEntry= (DelegateEntry)o2;
+	public int compare(DelegateEntry firstEntry, DelegateEntry secondEntry) {
 		IVariableBinding firstVariable= firstEntry.field;
 		IVariableBinding secondVariable= secondEntry.field;
 

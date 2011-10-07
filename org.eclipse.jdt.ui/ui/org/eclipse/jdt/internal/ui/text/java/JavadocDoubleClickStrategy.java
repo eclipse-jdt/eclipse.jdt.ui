@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,7 @@ public class JavadocDoubleClickStrategy extends PartitionDoubleClickSelector {
 	 * @param position the offset around which to return the word
 	 * @return the word's region, or <code>null</code> for no selection
 	 */
+	@Override
 	protected IRegion findExtendedDoubleClickSelection(IDocument document, int position) {
 		try {
 			IRegion match= super.findExtendedDoubleClickSelection(document, position);

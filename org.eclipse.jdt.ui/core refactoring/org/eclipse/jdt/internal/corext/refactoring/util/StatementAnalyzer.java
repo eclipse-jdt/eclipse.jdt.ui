@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,11 +23,14 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.SourceRange;
+import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
@@ -71,15 +74,20 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode node= nodes[0];
 		int selectionOffset= getSelection().getOffset();
 		try {
-			int pos= fScanner.getNextStartOffset(selectionOffset, true);
-			if (pos == node.getStartPosition()) {
+			int start= fScanner.getNextStartOffset(selectionOffset, true);
+			if (start == node.getStartPosition()) {
 				int lastNodeEnd= ASTNodes.getExclusiveEnd(nodes[nodes.length - 1]);
-
-				pos= fScanner.getNextStartOffset(lastNodeEnd, true);
+				int pos= fScanner.getNextStartOffset(lastNodeEnd, true);
 				int selectionEnd= getSelection().getInclusiveEnd();
 				if (pos <= selectionEnd) {
-					ISourceRange range= new SourceRange(lastNodeEnd, pos - lastNodeEnd);
-					invalidSelection(RefactoringCoreMessages.StatementAnalyzer_end_of_selection, JavaStatusContext.create(fCUnit, range));
+					IScanner scanner= fScanner.getScanner();
+					char[] token= scanner.getCurrentTokenSource(); //see https://bugs.eclipse.org/324237
+					if (start < lastNodeEnd && token.length == 1 && (token[0] == ';' || token[0] == ',')) {
+						setSelection(Selection.createFromStartEnd(start, lastNodeEnd - 1));
+					} else {
+						ISourceRange range= new SourceRange(lastNodeEnd, pos - lastNodeEnd);
+						invalidSelection(RefactoringCoreMessages.StatementAnalyzer_end_of_selection, JavaStatusContext.create(fCUnit, range));
+					}
 				}
 				return; // success
 			}
@@ -105,6 +113,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 	/* (non-Javadoc)
 	 * Method declared in ASTVisitor
 	 */
+	@Override
 	public void endVisit(CompilationUnit node) {
 		if (!hasSelectedNodes()) {
 			super.endVisit(node);
@@ -124,6 +133,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 	/* (non-Javadoc)
 	 * Method declared in ASTVisitor
 	 */
+	@Override
 	public void endVisit(DoStatement node) {
 		ASTNode[] selectedNodes= getSelectedNodes();
 		if (doAfterValidation(node, selectedNodes)) {
@@ -137,6 +147,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 	/* (non-Javadoc)
 	 * Method declared in ASTVisitor
 	 */
+	@Override
 	public void endVisit(ForStatement node) {
 		ASTNode[] selectedNodes= getSelectedNodes();
 		if (doAfterValidation(node, selectedNodes)) {
@@ -156,10 +167,11 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 	/* (non-Javadoc)
 	 * Method declared in ASTVisitor
 	 */
+	@Override
 	public void endVisit(SwitchStatement node) {
 		ASTNode[] selectedNodes= getSelectedNodes();
 		if (doAfterValidation(node, selectedNodes)) {
-			List cases= getSwitchCases(node);
+			List<SwitchCase> cases= getSwitchCases(node);
 			for (int i= 0; i < selectedNodes.length; i++) {
 				ASTNode topNode= selectedNodes[i];
 				if (cases.contains(topNode)) {
@@ -174,6 +186,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 	/* (non-Javadoc)
 	 * Method declared in ASTVisitor
 	 */
+	@Override
 	public void endVisit(SynchronizedStatement node) {
 		ASTNode firstSelectedNode= getFirstSelectedNode();
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
@@ -187,15 +200,16 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 	/* (non-Javadoc)
 	 * Method declared in ASTVisitor
 	 */
+	@Override
 	public void endVisit(TryStatement node) {
 		ASTNode firstSelectedNode= getFirstSelectedNode();
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.AFTER) {
 			if (firstSelectedNode == node.getBody() || firstSelectedNode == node.getFinally()) {
 				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_try_statement);
 			} else {
-				List catchClauses= node.catchClauses();
-				for (Iterator iterator= catchClauses.iterator(); iterator.hasNext();) {
-					CatchClause element= (CatchClause)iterator.next();
+				List<CatchClause> catchClauses= node.catchClauses();
+				for (Iterator<CatchClause> iterator= catchClauses.iterator(); iterator.hasNext();) {
+					CatchClause element= iterator.next();
 					if (element == firstSelectedNode || element.getBody() == firstSelectedNode) {
 						invalidSelection(RefactoringCoreMessages.StatementAnalyzer_try_statement);
 					} else if (element.getException() == firstSelectedNode) {
@@ -210,6 +224,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 	/* (non-Javadoc)
 	 * Method declared in ASTVisitor
 	 */
+	@Override
 	public void endVisit(WhileStatement node) {
 		ASTNode[] selectedNodes= getSelectedNodes();
 		if (doAfterValidation(node, selectedNodes)) {
@@ -234,12 +249,12 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		reset();
 	}
 
-	private static List getSwitchCases(SwitchStatement node) {
-		List result= new ArrayList();
-		for (Iterator iter= node.statements().iterator(); iter.hasNext(); ) {
+	private static List<SwitchCase> getSwitchCases(SwitchStatement node) {
+		List<SwitchCase> result= new ArrayList<SwitchCase>();
+		for (Iterator<Statement> iter= node.statements().iterator(); iter.hasNext(); ) {
 			Object element= iter.next();
 			if (element instanceof SwitchCase)
-				result.add(element);
+				result.add((SwitchCase) element);
 		}
 		return result;
 	}
@@ -252,7 +267,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		return false;
 	}
 
-	protected static boolean contains(ASTNode[] nodes, List list) {
+	protected static boolean contains(ASTNode[] nodes, List<Expression> list) {
 		for (int i = 0; i < nodes.length; i++) {
 			if (list.contains(nodes[i]))
 				return true;

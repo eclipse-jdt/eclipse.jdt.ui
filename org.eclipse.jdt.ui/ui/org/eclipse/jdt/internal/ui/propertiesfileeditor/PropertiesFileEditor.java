@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -24,8 +25,10 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IShowInTargetList;
 
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
+import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.ITextEditorHelpContextIds;
 import org.eclipse.ui.editors.text.TextEditor;
 
@@ -50,11 +53,18 @@ public class PropertiesFileEditor extends TextEditor {
 	/** Open action. */
 	protected OpenAction fOpenAction;
 
+	/**
+	 * Property change listener on Editors UI store.
+	 * @since 3.7
+	 */
+	private IPropertyChangeListener fPropertyChangeListener;
+
 
 	/*
 	 * @see org.eclipse.ui.editors.text.TextEditor#initializeEditor()
 	 * @since 3.4
 	 */
+	@Override
 	protected void initializeEditor() {
 		setDocumentProvider(JavaPlugin.getDefault().getPropertiesFileDocumentProvider());
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
@@ -66,12 +76,22 @@ public class PropertiesFileEditor extends TextEditor {
 		setHelpContextId(ITextEditorHelpContextIds.TEXT_EDITOR);
 		configureInsertMode(SMART_INSERT, false);
 		setInsertMode(INSERT);
+
+		// Need to listen on Editors UI preference store because JDT disables this functionality in its preferences.
+		fPropertyChangeListener= new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				if (AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SPACES_FOR_TABS.equals(event.getProperty()))
+					handlePreferenceStoreChanged(event);
+			}
+		};
+		EditorsUI.getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
 	}
 
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#initializeKeyBindingScopes()
 	 * @since 3.4
 	 */
+	@Override
 	protected void initializeKeyBindingScopes() {
 		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.propertiesEditorScope" });  //$NON-NLS-1$
 	}
@@ -79,6 +99,7 @@ public class PropertiesFileEditor extends TextEditor {
 	/*
 	 * @see org.eclipse.ui.editors.text.TextEditor#createActions()
 	 */
+	@Override
 	protected void createActions() {
 		super.createActions();
 
@@ -111,6 +132,7 @@ public class PropertiesFileEditor extends TextEditor {
 	/*
 	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
 	 */
+	@Override
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
 
 		try {
@@ -129,6 +151,7 @@ public class PropertiesFileEditor extends TextEditor {
 	/*
 	 * @see AbstractTextEditor#affectsTextPresentation(PropertyChangeEvent)
 	 */
+	@Override
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
 		return ((PropertiesFileSourceViewerConfiguration)getSourceViewerConfiguration()).affectsTextPresentation(event) || super.affectsTextPresentation(event);
 	}
@@ -137,6 +160,7 @@ public class PropertiesFileEditor extends TextEditor {
 	/*
 	 * @see org.eclipse.ui.editors.text.TextEditor#getAdapter(java.lang.Class)
 	 */
+	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter == IShowInTargetList.class) {
 			return new IShowInTargetList() {
@@ -153,6 +177,7 @@ public class PropertiesFileEditor extends TextEditor {
 	 * @see org.eclipse.ui.part.WorkbenchPart#getOrientation()
 	 * @since 3.2
 	 */
+	@Override
 	public int getOrientation() {
 		return SWT.LEFT_TO_RIGHT;	// properties editors are always left to right by default (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=110986)
 	}
@@ -160,6 +185,7 @@ public class PropertiesFileEditor extends TextEditor {
 	/*
 	 * @see org.eclipse.ui.texteditor.StatusTextEditor#updateStatusField(java.lang.String)
 	 */
+	@Override
 	protected void updateStatusField(String category) {
 		super.updateStatusField(category);
 		if (getEditorSite() != null) {
@@ -179,6 +205,7 @@ public class PropertiesFileEditor extends TextEditor {
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#collectContextMenuPreferencePages()
 	 * @since 3.1
 	 */
+	@Override
 	protected String[] collectContextMenuPreferencePages() {
 		String[] ids= super.collectContextMenuPreferencePages();
 		String[] more= new String[ids.length + 1];
@@ -191,9 +218,30 @@ public class PropertiesFileEditor extends TextEditor {
 	 * @see org.eclipse.ui.editors.text.TextEditor#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
 	 * @since 3.4
 	 */
+	@Override
 	protected void editorContextMenuAboutToShow(IMenuManager menu) {
 		super.editorContextMenuAboutToShow(menu);
 
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, IJavaEditorActionDefinitionIds.TOGGLE_COMMENT);
+	}
+
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#isTabsToSpacesConversionEnabled()
+	 * @since 3.7
+	 */
+	@Override
+	protected boolean isTabsToSpacesConversionEnabled() {
+		// Can't use our own preference store because JDT disables this functionality in its preferences.
+		return EditorsUI.getPreferenceStore().getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SPACES_FOR_TABS);
+	}
+
+	/*
+	 * @see org.eclipse.ui.editors.text.TextEditor#dispose()
+	 * @since 3.7
+	 */
+	@Override
+	public void dispose() {
+		EditorsUI.getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
+		super.dispose();
 	}
 }

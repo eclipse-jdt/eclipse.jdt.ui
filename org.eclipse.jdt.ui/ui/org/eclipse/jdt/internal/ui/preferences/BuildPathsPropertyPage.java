@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,6 +72,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	/*
 	 * @see PreferencePage#createControl(Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		// ensure the page has no special buttons
 		noDefaultAndApplyButton();
@@ -92,6 +93,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.BUILD_PATH_PROPERTY_PAGE);
@@ -111,6 +113,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	 * @see org.eclipse.jface.preference.PreferencePage#okToLeave()
 	 * @since 3.5
 	 */
+	@Override
 	public boolean okToLeave() {
 		if (fBuildPathsBlock != null && fBuildPathsBlock.hasChangesInDialog()) {
 			String title= PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_title;
@@ -137,6 +140,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		if (fBuildPathsBlock != null) {
 			if (visible) {
@@ -205,6 +209,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	/*
 	 * @see IPreferencePage#performOk
 	 */
+	@Override
 	public boolean performOk() {
 		if (fBuildPathsBlock != null) {
 			getSettings().put(INDEX, fBuildPathsBlock.getPageIndex());
@@ -243,9 +248,10 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
 	 */
+	@Override
 	public void applyData(Object data) {
 		if (data instanceof Map) {
-			Map map= (Map) data;
+			Map<?, ?> map= (Map<?, ?>) data;
 			Object selectedLibrary= map.get(DATA_REVEAL_ENTRY);
 			if (selectedLibrary instanceof IClasspathEntry) {
 				IClasspathEntry entry= (IClasspathEntry) selectedLibrary;

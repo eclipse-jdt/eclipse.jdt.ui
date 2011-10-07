@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ public class JavaDocTagDictionary extends AbstractSpellDictionary implements IJa
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#getName()
 	 */
+	@Override
 	protected final URL getURL() {
 		return null;
 	}
@@ -32,6 +33,7 @@ public class JavaDocTagDictionary extends AbstractSpellDictionary implements IJa
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#isCorrect(java.lang.String)
 	 */
+	@Override
 	public boolean isCorrect(final String word) {
 
 		if (word.charAt(0) == JAVADOC_TAG_PREFIX)
@@ -43,6 +45,7 @@ public class JavaDocTagDictionary extends AbstractSpellDictionary implements IJa
 	/*
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.AbstractSpellDictionary#load(java.net.URL)
 	 */
+	@Override
 	protected synchronized boolean load(final URL url) {
 
 		unload();
@@ -63,6 +66,7 @@ public class JavaDocTagDictionary extends AbstractSpellDictionary implements IJa
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#stripNonLetters(java.lang.String)
 	 * @since 3.3
 	 */
+	@Override
 	protected String stripNonLetters(String word) {
 		return word;
 	}

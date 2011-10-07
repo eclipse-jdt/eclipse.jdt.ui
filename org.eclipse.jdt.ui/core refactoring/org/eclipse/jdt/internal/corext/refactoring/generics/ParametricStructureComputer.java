@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.Generic
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SubTypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
 
@@ -58,6 +59,7 @@ public class ParametricStructureComputer {
 			return fBase;
 		}
 
+		@Override
 		public String toString() {
 			if (this == NONE)
 				return "NONE"; //$NON-NLS-1$
@@ -99,7 +101,7 @@ public class ParametricStructureComputer {
 	}
 
 
-	private Stack/*<ConstraintVariable2>*/ fWorkList2= new Stack();
+	private Stack<ConstraintVariable2> fWorkList2= new Stack<ConstraintVariable2>();
 
 
 	private void setStructureAndPush(ConstraintVariable2 v, ParametricStructure structure) {
@@ -203,10 +205,10 @@ public class ParametricStructureComputer {
 			dumpContainerStructure();
 
 		while (!fWorkList2.isEmpty()) {
-			ConstraintVariable2 v= (ConstraintVariable2) fWorkList2.pop();
-			List/*<ITypeConstraint>*/ usedIn= fTCModel.getUsedIn(v);
+			ConstraintVariable2 v= fWorkList2.pop();
+			List<ITypeConstraint2> usedIn= fTCModel.getUsedIn(v);
 
-			for(Iterator/*<ITypeConstraint>*/ iter= usedIn.iterator(); iter.hasNext(); ) {
+			for(Iterator<ITypeConstraint2> iter= usedIn.iterator(); iter.hasNext(); ) {
 				SubTypeConstraint2 stc= (SubTypeConstraint2) iter.next();
 
 				ConstraintVariable2 lhs= stc.getLeft();
@@ -312,8 +314,8 @@ public class ParametricStructureComputer {
 		// Propagate structure from container variable to any subsidiary element variables
 		if (elemStructure(v) != ParametricStructure.NONE && fTCModel.getElementVariables(v).size() > 0) {
 			ParametricStructure t= elemStructure(v);
-			for(Iterator iterator=fTCModel.getElementVariables(v).values().iterator(); iterator.hasNext(); ) {
-				CollectionElementVariable2 typeVar= (CollectionElementVariable2) iterator.next();
+			for(Iterator<CollectionElementVariable2> iterator=fTCModel.getElementVariables(v).values().iterator(); iterator.hasNext(); ) {
+				CollectionElementVariable2 typeVar= iterator.next();
 				int declarationTypeVariableIndex= typeVar.getDeclarationTypeVariableIndex();
 
 				if (declarationTypeVariableIndex != CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX)
@@ -414,6 +416,7 @@ public class ParametricStructureComputer {
 		static public TypeOperator Equals= new TypeOperator("=^="); //$NON-NLS-1$
 		static public TypeOperator SubType= new TypeOperator("<="); //$NON-NLS-1$
 		static public TypeOperator SuperType= new TypeOperator("=>"); //$NON-NLS-1$
+		@Override
 		public String toString() {
 			return fOp;
 		}
@@ -475,8 +478,8 @@ public class ParametricStructureComputer {
 		return fElemStructureEnv.elemStructure(v);
 	}
 
-	public Collection/*<CollectionElementVariable2>*/ createElemConstraintVariables() {
-		Collection newVars= new HashSet();
+	public Collection<CollectionElementVariable2> createElemConstraintVariables() {
+		Collection<CollectionElementVariable2> newVars= new HashSet<CollectionElementVariable2>();
 
 		computeContainerStructure();
 
@@ -503,11 +506,11 @@ public class ParametricStructureComputer {
 		return newVars;
 	}
 
-	private Collection/*ConstraintVariable2*/ createVariablesFor(ConstraintVariable2 v) {
+	private Collection<CollectionElementVariable2> createVariablesFor(ConstraintVariable2 v) {
 		ParametricStructure t= elemStructure(v);
 
 		if (t == null || t == ParametricStructure.NONE)
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 
 		ParametricStructure parmType= t;
 		TType base = parmType.getBase();
@@ -517,42 +520,42 @@ public class ParametricStructureComputer {
 		throw new IllegalStateException("Attempt to create element variables for parametric variable of unknown type: " + parmType); //$NON-NLS-1$
 	}
 
-	private Collection/*<ConstraintVariable2>*/ getElementVariables(GenericType base, ConstraintVariable2 parent) {
+	private Collection<CollectionElementVariable2> getElementVariables(GenericType base, ConstraintVariable2 parent) {
 		fTCModel.makeElementVariables(parent, base);
 		return fTCModel.getElementVariables(parent).values();
 	}
 
-	private Collection/*ConstraintVariable2*/ createAndInitVars(ConstraintVariable2 v, ParametricStructure parmType) {
+	private Collection<CollectionElementVariable2> createAndInitVars(ConstraintVariable2 v, ParametricStructure parmType) {
 //TODO (->): in InferTypeArgumentsConstraintsSolver#createInitialEstimate(..)
 //->		fTypeEstimates.setEstimateOf(v, SubTypesOfSingleton.create(ParametricStructure.getBaseContainerType(parmType.getBase(), sHierarchy)));
-		Collection/*<ConstraintVariable2>*/ elementVars= getElementVariables(parmType.getBase(), v);
+		Collection<CollectionElementVariable2> elementVars= getElementVariables(parmType.getBase(), v);
 //->		setNewTypeParamEstimateForEach(elementVars);
-		Collection result= createVars(elementVars, parmType.getParameters());
+		Collection<CollectionElementVariable2> result= createVars(elementVars, parmType.getParameters());
 		return result;
 	}
 
-	private Collection/*ConstraintVariable2*/ createVars(Collection/*ConstraintVariable2>*/ cvs, ParametricStructure[] parms) {
+	private Collection<CollectionElementVariable2> createVars(Collection<CollectionElementVariable2> cvs, ParametricStructure[] parms) {
 		if (parms.length > 0) { // happens, e.g., for Properties (non-parametric)
 //			Assert.isTrue(cvs.size() == parms.length, "cvs.length==" + cvs.size() + " parms.length=" + parms.length); //assumption is wrong in presence of NOT_DECLARED_TYPE_VARIABLE_INDEX
-			for (Iterator iter= cvs.iterator(); iter.hasNext(); ) {
-				CollectionElementVariable2 childVar= (CollectionElementVariable2) iter.next();
+			for (Iterator<CollectionElementVariable2> iter= cvs.iterator(); iter.hasNext(); ) {
+				CollectionElementVariable2 childVar= iter.next();
 				int declarationTypeVariableIndex= childVar.getDeclarationTypeVariableIndex();
 
 				if (declarationTypeVariableIndex != CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX)
 					setElemStructure(childVar, parms[declarationTypeVariableIndex]);
 			}
 		} else {
-			for (Iterator iter= cvs.iterator(); iter.hasNext(); ) {
-				CollectionElementVariable2 childVar= (CollectionElementVariable2) iter.next();
+			for (Iterator<CollectionElementVariable2> iter= cvs.iterator(); iter.hasNext(); ) {
+				CollectionElementVariable2 childVar= iter.next();
 				int declarationTypeVariableIndex= childVar.getDeclarationTypeVariableIndex();
 
 				if (declarationTypeVariableIndex != CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX)
 					setElemStructure(childVar, ParametricStructure.NONE);
 			}
 		}
-		List result= new ArrayList(cvs.size() * 2);//roughly
-		for (Iterator iter= cvs.iterator(); iter.hasNext(); ) {
-			CollectionElementVariable2 childVar= (CollectionElementVariable2) iter.next();
+		List<CollectionElementVariable2> result= new ArrayList<CollectionElementVariable2>(cvs.size() * 2);//roughly
+		for (Iterator<CollectionElementVariable2> iter= cvs.iterator(); iter.hasNext(); ) {
+			CollectionElementVariable2 childVar= iter.next();
 			int declarationTypeVariableIndex= childVar.getDeclarationTypeVariableIndex();
 
 			if (declarationTypeVariableIndex != CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX) {

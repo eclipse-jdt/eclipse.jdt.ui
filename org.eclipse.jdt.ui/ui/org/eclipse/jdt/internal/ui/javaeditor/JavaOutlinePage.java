@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,14 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
@@ -26,10 +32,14 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.ListenerList;
 
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -55,7 +65,12 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchCommandConstants;
@@ -63,6 +78,7 @@ import org.eclipse.ui.OpenAndLinkWithEditorHelper;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.handlers.CollapseAllHandler;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.model.WorkbenchAdapter;
@@ -85,12 +101,15 @@ import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
@@ -101,20 +120,25 @@ import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
 import org.eclipse.jdt.internal.ui.actions.CategoryFilterActionGroup;
+import org.eclipse.jdt.internal.ui.actions.CollapseAllAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragSupport;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropSupport;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
+import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionComparator;
@@ -212,6 +236,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				/*
 				 * @see java.lang.Object#toString()
 				 */
+				@Override
 				public String toString() {
 					return JavaEditorMessages.JavaOutlinePage_error_NoTopLevelType;
 				}
@@ -256,7 +281,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					if (!initializers)
 						return children;
 
-					Vector v= new Vector();
+					Vector<IJavaElement> v= new Vector<IJavaElement>();
 					for (int i= 0; i < children.length; i++) {
 						if (matches(children[i]))
 							continue;
@@ -374,6 +399,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				/*
 				 * @see TreeViewer#internalExpandToLevel
 				 */
+				@Override
 				protected void internalExpandToLevel(Widget node, int level) {
 					if (node instanceof Item) {
 						Item i= (Item) node;
@@ -391,6 +417,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				/*
 				 * @see org.eclipse.jface.viewers.AbstractTreeViewer#isExpandable(java.lang.Object)
 				 */
+				@Override
 				public boolean isExpandable(Object element) {
 					if (hasFilters()) {
 						return getFilteredChildren(element).length > 0;
@@ -401,6 +428,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				/*
 				 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 				 */
+				@Override
 				protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
 					Object input= getInput();
 					if (event instanceof ProblemsLabelChangedEvent) {
@@ -458,6 +486,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					valueChanged(checked, false);
 				}
 
+				@Override
 				public void run() {
 					valueChanged(isChecked(), true);
 				}
@@ -499,6 +528,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			/*
 			 * @see org.eclipse.jface.action.Action#run()
 			 */
+			@Override
 			public void run() {
 				setTopLevelTypeOnly(!fTopLevelTypeOnly);
 			}
@@ -533,6 +563,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			/**
 			 * Runs the action.
 			 */
+			@Override
 			public void run() {
 				final boolean isChecked= isChecked();
 				PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE, isChecked);
@@ -561,6 +592,163 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		}
 
 
+
+	/**
+	 * Formats the code associated with the elements selected in the Outline view. The action
+	 * requires that the selection provided by the site's selection provider is of type
+	 * {@link IStructuredSelection}
+	 * 
+	 * @since 3.7
+	 */
+	private class FormatElementAction extends SelectionDispatchAction {
+
+		/**
+		 * Creates a new <code>FormatViewElementAction</code>.
+		 * 
+		 * @param site the site providing context information for this action
+		 */
+		FormatElementAction(IPageSite site) {
+			super(site);
+		}
+
+		/**
+		 * Executes the action based on the Structured Selection. This formats the non-overlapping
+		 * element(s) that have been selected in the view.
+		 * 
+		 * @param selection the current selection
+		 */
+		@Override
+		public void run(IStructuredSelection selection) {
+			ICompilationUnit compilationUnit= (ICompilationUnit)((IJavaElement)selection.getFirstElement()).getAncestor(IJavaElement.COMPILATION_UNIT);
+			if (ElementValidator.check(compilationUnit, getShell(), JavaEditorMessages.JavaEditor_FormatElementDialog_label, fEditor != null)) {
+				JavaSourceViewer javaSourceViewer= (JavaSourceViewer)fEditor.getViewer();
+				javaSourceViewer.rememberSelection();
+				javaSourceViewer.setRedraw(false);
+				try {
+					IDocument document= javaSourceViewer.getDocument();
+					IRegion[] regions= getOrderedRegionsForNonOverlappingElements(selection, document);
+					Map<String, String> formatterSettings= new HashMap<String, String>(compilationUnit.getJavaProject().getOptions(true));
+					String content= compilationUnit.getBuffer().getContents();
+					String lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
+
+					TextEdit edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS, content, regions, 0, lineDelimiter, formatterSettings);
+					edit.apply(javaSourceViewer.getDocument());
+
+				} catch (CoreException e) {
+					JavaPlugin.log(e);
+				} catch (MalformedTreeException e) {
+					JavaPlugin.log(e);
+				} catch (BadLocationException e) {
+					JavaPlugin.log(e);
+				} finally {
+					javaSourceViewer.setRedraw(true);
+					javaSourceViewer.restoreSelection();
+				}
+			}
+		}
+
+		/**
+		 * Parses the selections for non-overlapping elements and returns their source regions
+		 * ordered by their offsets.
+		 * 
+		 * @param selection the selected elements
+		 * @param document the document containing the selected elements
+		 * @return the array of ordered source regions
+		 */
+		private IRegion[] getOrderedRegionsForNonOverlappingElements(IStructuredSelection selection, IDocument document) {
+			List<?> allElements= selection.toList();
+			Iterator<?> iterator= selection.iterator();
+			ArrayList<IRegion> regions= new ArrayList<IRegion>(selection.size());
+			while (iterator.hasNext()) {
+				Object element= iterator.next();
+				if (!isElementOverlapping((IJavaElement)element, allElements)) {
+					regions.add(getElementRegion(element, document));
+				}
+			}
+			Comparator<IRegion> comparator= new Comparator<IRegion>() {
+				public int compare(IRegion region0, IRegion region1) {
+					int region1Offset= region0.getOffset();
+					int region2Offset= region1.getOffset();
+					if (region1Offset > region2Offset)
+						return 1;
+					else if (region1Offset == region2Offset)
+						return 0;
+					else
+						return -1;
+				}
+			};
+			Collections.sort(regions, comparator);
+			Object[] sortedObjects= regions.toArray();
+			IRegion[] sortedRegions= new Region[sortedObjects.length];
+			System.arraycopy(sortedObjects, 0, sortedRegions, 0, sortedObjects.length);
+			return sortedRegions;
+		}
+
+		/**
+		 * Calculates the region of the element. The start is at beginning of its first line if from
+		 * the source start to the beginning of the line is all whitespace.
+		 * 
+		 * @param element the element whose regions is to be calculated
+		 * @param document the document containing the element whose region is to be calculated
+		 * @return the region for the element
+		 */
+		private Region getElementRegion(Object element, IDocument document) {
+			try {
+				ISourceRange sourceRange= ((ISourceReference)element).getSourceRange();
+				int sourceOffset= sourceRange.getOffset();
+				int beginningOfWSOffset= sourceOffset - 1;
+				int lineAtSourceOffset= document.getLineOfOffset(sourceOffset);
+				while (beginningOfWSOffset >= 0 && Character.isWhitespace(document.getChar(beginningOfWSOffset)) && lineAtSourceOffset == document.getLineOfOffset(beginningOfWSOffset)) {
+					beginningOfWSOffset--;
+				}
+				beginningOfWSOffset++;
+				int sourceLength= sourceRange.getLength() + (sourceOffset - beginningOfWSOffset);
+				if (lineAtSourceOffset != document.getLineOfOffset(beginningOfWSOffset))
+					return new Region(document.getLineOffset(lineAtSourceOffset), sourceLength);
+				else
+					return new Region(beginningOfWSOffset, sourceLength);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+			}
+			return null;
+		}
+
+		/**
+		 * Checks if element has an enclosing parent among other selected elements.
+		 * 
+		 * @param element the element to be checked for overlap against all elements
+		 * @param allElements the list of all elements
+		 * @return <code>true</code> if the element has a parent in the list of all elements
+		 */
+		private boolean isElementOverlapping(IJavaElement element, List<?> allElements) {
+			element= element.getParent();
+			while (element != null) {
+				if (element instanceof ISourceReference) {
+					if (allElements.contains(element))
+						return true;
+				} else {
+					return false;
+				}
+				element= element.getParent();
+			}
+			return false;
+		}
+
+		/**
+		 * Notifies the action of a change in the Selection.
+		 * 
+		 * @param selection the new Structured Selection
+		 */
+		@Override
+		public void selectionChanged(IStructuredSelection selection) {
+			setEnabled(fEditor.isEditorInputModifiable());
+		}
+	}
+
+
+
 	/** A flag to show contents of top level type only */
 	private boolean fTopLevelTypeOnly;
 
@@ -574,11 +762,25 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 	private ListenerList fSelectionChangedListeners= new ListenerList(ListenerList.IDENTITY);
 	private ListenerList fPostSelectionChangedListeners= new ListenerList(ListenerList.IDENTITY);
-	private Hashtable fActions= new Hashtable();
+	private Hashtable<String, IAction> fActions= new Hashtable<String, IAction>();
 
 	private TogglePresentationAction fTogglePresentation;
 
 	private ToggleLinkingAction fToggleLinkingAction;
+
+	/**
+	 * Action for Collapse All.
+	 * 
+	 * @since 3.7
+	 */
+	private CollapseAllAction fCollapseAllAction;
+
+	/**
+	 * Action for Format Element
+	 * 
+	 * @since 3.7
+	 */
+	private FormatElementAction fFormatElement;
 
 	private CompositeActionGroup fActionGroups;
 
@@ -625,6 +827,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	/*
 	 * @see org.eclipse.ui.part.Page#init(org.eclipse.ui.part.IPageSite)
 	 */
+	@Override
 	public void init(IPageSite pageSite) {
 		super.init(pageSite);
 	}
@@ -696,6 +899,11 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 	private void registerToolbarActions(IActionBars actionBars) {
 		IToolBarManager toolBarManager= actionBars.getToolBarManager();
+
+		fCollapseAllAction= new CollapseAllAction(fOutlineViewer);
+		fCollapseAllAction.setActionDefinitionId(CollapseAllHandler.COMMAND_ID);
+		toolBarManager.add(fCollapseAllAction);
+
 		toolBarManager.add(new LexicalSortingAction());
 
 		fMemberFilterActionGroup= new MemberFilterActionGroup(fOutlineViewer, "org.eclipse.jdt.ui.JavaOutlinePage"); //$NON-NLS-1$
@@ -718,6 +926,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	/*
 	 * @see IPage#createControl
 	 */
+	@Override
 	public void createControl(Composite parent) {
 
 		Tree tree= new Tree(parent, SWT.MULTI);
@@ -783,6 +992,11 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 		fActionGroups.fillActionBars(actionBars);
 
+		fFormatElement= new FormatElementAction(site);
+		fFormatElement.setActionDefinitionId(IJavaEditorActionDefinitionIds.QUICK_FORMAT);
+		site.getSelectionProvider().addSelectionChangedListener(fFormatElement);
+		actionBars.setGlobalActionHandler(JdtActionConstants.FORMAT_ELEMENT, fFormatElement);
+
 		IStatusLineManager statusLineManager= actionBars.getStatusLineManager();
 		if (statusLineManager != null) {
 			StatusBarUpdater updater= new StatusBarUpdater(statusLineManager);
@@ -793,16 +1007,19 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 		fOpenAndLinkWithEditorHelper= new OpenAndLinkWithEditorHelper(fOutlineViewer) {
 
+			@Override
 			protected void activate(ISelection selection) {
 				fEditor.doSelectionChanged(selection);
 				getSite().getPage().activate(fEditor);
 			}
 
+			@Override
 			protected void linkToEditor(ISelection selection) {
 				fEditor.doSelectionChanged(selection);
 
 			}
 
+			@Override
 			protected void open(ISelection selection, boolean activate) {
 				fEditor.doSelectionChanged(selection);
 				if (activate)
@@ -815,6 +1032,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 		IHandlerService handlerService= (IHandlerService)site.getService(IHandlerService.class);
 		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR, new ActionHandler(fToggleLinkingAction));
+		handlerService.activateHandler(CollapseAllHandler.COMMAND_ID, new ActionHandler(fCollapseAllAction));
 
 
 		fOutlineViewer.setInput(fInput);
@@ -833,6 +1051,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		site.setSelectionProvider(provider);
 	}
 
+	@Override
 	public void dispose() {
 
 		if (fEditor == null)
@@ -859,6 +1078,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 		fSelectionChangedListeners.clear();
 		fSelectionChangedListeners= null;
+		getSite().getSelectionProvider().removeSelectionChangedListener(fFormatElement);
 
 		fPostSelectionChangedListeners.clear();
 		fPostSelectionChangedListeners= null;
@@ -883,6 +1103,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		super.dispose();
 	}
 
+	@Override
 	public Control getControl() {
 		if (fOutlineViewer != null)
 			return fOutlineViewer.getControl();
@@ -905,7 +1126,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			ISelection s= fOutlineViewer.getSelection();
 			if (s instanceof IStructuredSelection) {
 				IStructuredSelection ss= (IStructuredSelection) s;
-				List elements= ss.toList();
+				List<?> elements= ss.toList();
 				if (!elements.contains(reference)) {
 					s= (reference == null ? StructuredSelection.EMPTY : new StructuredSelection(reference));
 					fOutlineViewer.setSelection(s, true);
@@ -924,7 +1145,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 	public IAction getAction(String actionID) {
 		Assert.isNotNull(actionID);
-		return (IAction) fActions.get(actionID);
+		return fActions.get(actionID);
 	}
 
 	/*
@@ -985,6 +1206,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	/*
 	 * @see Page#setFocus()
 	 */
+	@Override
 	public void setFocus() {
 		if (fOutlineViewer != null)
 			fOutlineViewer.getControl().setFocus();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +35,11 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.jface.text.IRewriteTarget;
@@ -42,11 +47,17 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Region;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchCommandConstants;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.IProgressService;
+import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.ITextEditorExtension3;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -57,7 +68,9 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
@@ -69,7 +82,9 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.SharedASTProvider;
 
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
 /**
@@ -158,6 +173,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		/* (non-Javadoc)
 		 * @see org.eclipse.swt.dnd.Transfer#getTypeIds()
 		 */
+		@Override
 		protected int[] getTypeIds() {
 			return new int[] { TYPEID };
 		}
@@ -165,6 +181,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		/* (non-Javadoc)
 		 * @see org.eclipse.swt.dnd.Transfer#getTypeNames()
 		 */
+		@Override
 		protected String[] getTypeNames() {
 			return new String[] { TYPE_NAME };
 		}
@@ -172,6 +189,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		/* (non-Javadoc)
 		 * @see org.eclipse.swt.dnd.Transfer#javaToNative(java.lang.Object, org.eclipse.swt.dnd.TransferData)
 		 */
+		@Override
 		protected void javaToNative(Object data, TransferData transferData) {
 			if (data instanceof ClipboardData) {
 				try {
@@ -185,6 +203,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		/* (non-Javadoc)
 		 * Method declared on Transfer.
 		 */
+		@Override
 		protected Object nativeToJava(TransferData transferData) {
 			byte[] bytes = (byte[]) super.nativeToJava(transferData);
 			if (bytes != null) {
@@ -242,6 +261,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
+	@Override
 	public void run() {
 		if (fOperationCode == -1 || fOperationTarget == null)
 			return;
@@ -280,9 +300,30 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		return null;
 	}
 
+	/**
+	 * Returns whether the Smart Insert Mode is selected.
+	 * 
+	 * @return <code>true</code> if the Smart Insert Mode is selected
+	 * @since 3.7
+	 */
+	private boolean isSmartInsertMode() {
+		IWorkbenchPage page= JavaPlugin.getActivePage();
+		if (page != null) {
+			IEditorPart part= page.getActiveEditor();
+			if (part instanceof ITextEditorExtension3) {
+				ITextEditorExtension3 extension= (ITextEditorExtension3)part;
+				return extension.getInsertMode() == ITextEditorExtension3.SMART_INSERT;
+			} else if (part != null && EditorUtility.isCompareEditorInput(part.getEditorInput())) {
+				ITextEditorExtension3 extension= (ITextEditorExtension3)part.getAdapter(ITextEditorExtension3.class);
+				if (extension != null)
+					return extension.getInsertMode() == ITextEditorExtension3.SMART_INSERT;
+			}
+		}
+		return false;
+	}
 
 	protected final void internalDoOperation() {
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE)) {
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE) && isSmartInsertMode()) {
 			if (fOperationCode == ITextOperationTarget.PASTE) {
 				doPasteWithImportsOperation();
 			} else {
@@ -296,6 +337,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.IUpdate#update()
 	 */
+	@Override
 	public void update() {
 		super.update();
 
@@ -315,6 +357,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.TextEditorAction#setEditor(org.eclipse.ui.texteditor.ITextEditor)
 	 */
+	@Override
 	public void setEditor(ITextEditor editor) {
 		super.setEditor(editor);
 		fOperationTarget= null;
@@ -352,8 +395,8 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				if (textData == null)
 					return;
 
-				ArrayList datas= new ArrayList(3);
-				ArrayList transfers= new ArrayList(3);
+				ArrayList<Object> datas= new ArrayList<Object>(3);
+				ArrayList<ByteArrayTransfer> transfers= new ArrayList<ByteArrayTransfer>(3);
 				datas.add(textData);
 				transfers.add(TextTransfer.getInstance());
 
@@ -366,7 +409,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				datas.add(clipboardData);
 				transfers.add(fgTransferInstance);
 
-				Transfer[] dataTypes= (Transfer[]) transfers.toArray(new Transfer[transfers.size()]);
+				Transfer[] dataTypes= transfers.toArray(new Transfer[transfers.size()]);
 				Object[] data= datas.toArray();
 				setClipboardContents(clipboard, data, dataTypes);
 			} finally {
@@ -409,7 +452,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 
 		// do process import if selection spans over import declaration or package
-		List list= astRoot.imports();
+		List<ImportDeclaration> list= astRoot.imports();
 		if (!list.isEmpty()) {
 			if (offset < ((ASTNode) list.get(list.size() - 1)).getStartPosition()) {
 				return null;
@@ -420,8 +463,8 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			}
 		}
 
-		ArrayList typeImportsRefs= new ArrayList();
-		ArrayList staticImportsRefs= new ArrayList();
+		ArrayList<SimpleName> typeImportsRefs= new ArrayList<SimpleName>();
+		ArrayList<SimpleName> staticImportsRefs= new ArrayList<SimpleName>();
 
 		ImportReferencesCollector.collect(astRoot, inputElement.getJavaProject(), new Region(offset, length), typeImportsRefs, staticImportsRefs);
 
@@ -429,9 +472,9 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			return null;
 		}
 
-		HashSet namesToImport= new HashSet(typeImportsRefs.size());
+		HashSet<String> namesToImport= new HashSet<String>(typeImportsRefs.size());
 		for (int i= 0; i < typeImportsRefs.size(); i++) {
-			Name curr= (Name) typeImportsRefs.get(i);
+			Name curr= typeImportsRefs.get(i);
 			IBinding binding= curr.resolveBinding();
 			if (binding != null && binding.getKind() == IBinding.TYPE) {
 				ITypeBinding typeBinding= (ITypeBinding) binding;
@@ -451,9 +494,9 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			}
 		}
 
-		HashSet staticsToImport= new HashSet(staticImportsRefs.size());
+		HashSet<String> staticsToImport= new HashSet<String>(staticImportsRefs.size());
 		for (int i= 0; i < staticImportsRefs.size(); i++) {
-			Name curr= (Name) staticImportsRefs.get(i);
+			Name curr= staticImportsRefs.get(i);
 			IBinding binding= curr.resolveBinding();
 			if (binding != null) {
 				StringBuffer buf= new StringBuffer(Bindings.getImportName(binding));
@@ -469,8 +512,8 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			return null;
 		}
 
-		String[] typeImports= (String[]) namesToImport.toArray(new String[namesToImport.size()]);
-		String[] staticImports= (String[]) staticsToImport.toArray(new String[staticsToImport.size()]);
+		String[] typeImports= namesToImport.toArray(new String[namesToImport.size()]);
+		String[] staticImports= staticsToImport.toArray(new String[staticsToImport.size()]);
 		return new ClipboardData(inputElement, typeImports, staticImports);
 	}
 
@@ -505,9 +548,8 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 	}
 
-
-	private void addImports(ICompilationUnit unit, ClipboardData data) throws CoreException {
-		ImportRewrite rewrite= StubUtility.createImportRewrite(unit, true);
+	private void addImports(final ICompilationUnit unit, ClipboardData data) throws CoreException {
+		final ImportRewrite rewrite= StubUtility.createImportRewrite(unit, true);
 		String[] imports= data.getTypeImports();
 		for (int i= 0; i < imports.length; i++) {
 			rewrite.addImport(imports[i]);
@@ -523,8 +565,34 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			rewrite.addStaticImport(qualifier, name, isField);
 		}
 
-		JavaModelUtil.applyEdit(unit, rewrite.rewriteImports(null), false, null);
+		try {
+			getProgressService().busyCursorWhile(new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					try {
+						JavaModelUtil.applyEdit(unit, rewrite.rewriteImports(monitor), false, null);
+					} catch (CoreException e) {
+						throw new InvocationTargetException(e);
+					}
+				}
+			});
+		} catch (InvocationTargetException e) {
+			Throwable cause= e.getCause();
+			if (cause instanceof CoreException)
+				throw (CoreException) cause;
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.JavaPlugin_internal_error, cause));
+		} catch (InterruptedException e) {
+			// Canceled by the user
+		}
 	}
 
+	private IProgressService getProgressService() {
+		IEditorPart editor= getTextEditor();
+		if (editor != null) {
+			IWorkbenchPartSite site= editor.getSite();
+			if (site != null)
+				return (IWorkbenchSiteProgressService) editor.getSite().getAdapter(IWorkbenchSiteProgressService.class);
+		}
+		return PlatformUI.getWorkbench().getProgressService();
+	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,6 +48,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	private static final Key PREF_PB_MISSING_JAVADOC_TAGS= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS);
 	private static final Key PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_VISIBILITY);
 	private static final Key PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_OVERRIDING);
+	private static final Key PREF_PB_MISSING_JAVADOC_TAGS_METHOD_TYPE_PARAMETERS= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_METHOD_TYPE_PARAMETERS);
 
 	private static final Key PREF_PB_MISSING_JAVADOC_TAG_DESCRIPTION= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAG_DESCRIPTION);
 
@@ -91,6 +92,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 				PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY,
 				PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF, PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF,
 				PREF_PB_MISSING_JAVADOC_TAGS, PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING,
+				PREF_PB_MISSING_JAVADOC_TAGS_METHOD_TYPE_PARAMETERS,
 				PREF_PB_MISSING_JAVADOC_COMMENTS, PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING,
 				PREF_PB_MISSING_JAVADOC_TAG_DESCRIPTION,
 			};
@@ -100,6 +102,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	/*
 	 * @see org.eclipse.jface.preference.PreferencePage#createContents(Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		fPixelConverter= new PixelConverter(parent);
 		setShell(parent.getShell());
@@ -186,7 +189,10 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		gd.horizontalSpan= nColumns;
 		description.setLayoutData(gd);
 
-		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
+		int indent= fPixelConverter.convertWidthInCharsToPixels(4);
+
+		spacer= new Composite(composite, SWT.NONE);
+		GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);
 
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_label;
 		addComboBox(composite, label, PREF_PB_INVALID_JAVADOC, errorWarningIgnore, errorWarningIgnoreLabels, 0);
@@ -216,6 +222,10 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_tag_description;
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAG_DESCRIPTION, missingTagValues, missingTagLabels, indent);
 
+
+		spacer= new Composite(composite, SWT.NONE);
+		GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);
+
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_label;
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
@@ -224,6 +234,13 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 
 		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_tags_overriding_label;
 		addCheckBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING, disabledEnabled, indent);
+
+		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_method_type_parameter_label;
+		addCheckBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS_METHOD_TYPE_PARAMETERS, disabledEnabled, indent);
+		
+
+		spacer= new Composite(composite, SWT.NONE);
+		GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);
 
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_label;
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
@@ -241,6 +258,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */
+	@Override
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		if (!areSettingsEnabled()) {
 			return;
@@ -279,6 +297,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 
 			boolean enableMissingTagsErrors= !checkValue(PREF_PB_MISSING_JAVADOC_TAGS, IGNORE);
 			getCheckBox(PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING).setEnabled(enableMissingTagsErrors);
+			getCheckBox(PREF_PB_MISSING_JAVADOC_TAGS_METHOD_TYPE_PARAMETERS).setEnabled(enableMissingTagsErrors);
 			setComboEnabled(PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, enableMissingTagsErrors);
 
 			boolean enableMissingCommentsErrors= !checkValue(PREF_PB_MISSING_JAVADOC_COMMENTS, IGNORE);
@@ -301,6 +320,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	}
 
 
+	@Override
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		String title= PreferencesMessages.JavadocProblemsConfigurationBlock_needsbuild_title;
 		String message;

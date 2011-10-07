@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,6 +92,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public RefactoringDescriptorProxy[] getDescriptors() {
 			if (fHistoryDelta != null)
 				return fHistoryDelta;
@@ -146,6 +147,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public boolean isEmpty() {
 			final RefactoringDescriptorProxy[] proxies= getDescriptors();
 			if (proxies != null)
@@ -156,6 +158,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public RefactoringHistory removeAll(final RefactoringHistory history) {
 			throw new UnsupportedOperationException();
 		}
@@ -231,10 +234,12 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 		}
 		setConfiguration(new RefactoringHistoryControlConfiguration(null, false, false) {
 
+			@Override
 			public String getProjectPattern() {
 				return JarImportMessages.JarImportWizard_project_pattern;
 			}
 
+			@Override
 			public String getWorkspaceCaption() {
 				return JarImportMessages.JarImportWizard_workspace_caption;
 			}
@@ -258,6 +263,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void addUserDefinedPages() {
 		fImportPage= new JarImportWizardPage(this, fImportWizard);
 		addPage(fImportPage);
@@ -266,6 +272,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean canFinish() {
 		return super.canFinish() && fImportData.getPackageFragmentRoot() != null && fImportData.getRefactoringFileLocation() != null;
 	}
@@ -273,6 +280,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected boolean deconfigureClasspath(final IClasspathEntry[] entries, final IProgressMonitor monitor) throws CoreException {
 		final boolean rename= fImportData.isRenameJarFile();
 		if (rename && !fCancelled) {
@@ -305,6 +313,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IWizardPage getNextPage(final IWizardPage page) {
 		if (page == fImportPage && fImportData.getRefactoringHistory() == null)
 			return null;
@@ -314,6 +323,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected IPackageFragmentRoot getPackageFragmentRoot() {
 		return fImportData.getPackageFragmentRoot();
 	}
@@ -321,6 +331,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected RefactoringHistory getRefactoringHistory() {
 		return fHistoryProxy;
 	}
@@ -396,6 +407,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean performFinish() {
 		if (fNewSettings) {
 			final IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();

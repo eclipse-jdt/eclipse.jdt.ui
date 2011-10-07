@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,14 +45,14 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifica
 
 public class MoveModifications extends RefactoringModifications {
 
-	private List fMoves;
-	private List fMoveArguments;
-	private List fParticipantDescriptorFilter;
+	private List<Object> fMoves;
+	private List<RefactoringArguments> fMoveArguments;
+	private List<IParticipantDescriptorFilter> fParticipantDescriptorFilter;
 
 	public MoveModifications() {
-		fMoves= new ArrayList();
-		fMoveArguments= new ArrayList();
-		fParticipantDescriptorFilter= new ArrayList();
+		fMoves= new ArrayList<Object>();
+		fMoveArguments= new ArrayList<RefactoringArguments>();
+		fParticipantDescriptorFilter= new ArrayList<IParticipantDescriptorFilter>();
 	}
 
 	public void move(IResource resource, MoveArguments args) {
@@ -97,14 +97,14 @@ public class MoveModifications extends RefactoringModifications {
 			createIncludingParents(resourceDestination);
 			MoveArguments arguments= new MoveArguments(resourceDestination, args.getUpdateReferences());
 			IResource[] resourcesToMove= collectResourcesOfInterest(pack);
-			Set allMembers= new HashSet(Arrays.asList(resourceSource.members()));
+			Set<IResource> allMembers= new HashSet<IResource>(Arrays.asList(resourceSource.members()));
 			for (int i= 0; i < resourcesToMove.length; i++) {
 				IResource toMove= resourcesToMove[i];
 				getResourceModifications().addMove(toMove, arguments);
 				allMembers.remove(toMove);
 			}
-			for (Iterator iter= allMembers.iterator(); iter.hasNext();) {
-				IResource element= (IResource) iter.next();
+			for (Iterator<IResource> iter= allMembers.iterator(); iter.hasNext();) {
+				IResource element= iter.next();
 				if (element instanceof IFile) {
 					getResourceModifications().addDelete(element);
 					iter.remove();
@@ -134,6 +134,7 @@ public class MoveModifications extends RefactoringModifications {
 		}
 	}
 
+	@Override
 	public void buildDelta(IResourceChangeDescriptionFactory builder) {
 		for (int i= 0; i < fMoves.size(); i++) {
 			Object element= fMoves.get(i);
@@ -144,8 +145,9 @@ public class MoveModifications extends RefactoringModifications {
 		getResourceModifications().buildDelta(builder);
 	}
 
+	@Override
 	public void buildValidateEdits(ValidateEditChecker checker) {
-		for (Iterator iter= fMoves.iterator(); iter.hasNext();) {
+		for (Iterator<Object> iter= fMoves.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof ICompilationUnit) {
 				ICompilationUnit unit= (ICompilationUnit)element;
@@ -157,17 +159,18 @@ public class MoveModifications extends RefactoringModifications {
 		}
 	}
 
+	@Override
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {
-		List result= new ArrayList();
+		List<RefactoringParticipant> result= new ArrayList<RefactoringParticipant>();
 		for (int i= 0; i < fMoves.size(); i++) {
 			result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(status,
 				owner, fMoves.get(i),
 				(MoveArguments) fMoveArguments.get(i),
-				(IParticipantDescriptorFilter) fParticipantDescriptorFilter.get(i),
+				fParticipantDescriptorFilter.get(i),
 				natures, shared)));
 		}
 		result.addAll(Arrays.asList(getResourceModifications().getParticipants(status, owner, natures, shared)));
-		return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
+		return result.toArray(new RefactoringParticipant[result.size()]);
 	}
 
 	private void add(Object element, RefactoringArguments args, IParticipantDescriptorFilter filter) {

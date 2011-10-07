@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
  */
 public class JavaAllCompletionProposalComputer extends JavaTypeCompletionProposalComputer {
 
+	@Override
 	protected CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context) {
 		CompletionProposalCollector collector= super.createCollector(context);
 		collector.setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, false);
@@ -44,6 +45,7 @@ public class JavaAllCompletionProposalComputer extends JavaTypeCompletionProposa
 		return collector;
 	}
 
+	@Override
 	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
 		int invocationOffset= context.getInvocationOffset();
 		int typeContext= super.guessContextInformationPosition(context);

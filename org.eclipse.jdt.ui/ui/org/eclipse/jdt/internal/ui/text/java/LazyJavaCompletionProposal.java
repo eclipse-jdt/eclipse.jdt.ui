@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,16 +11,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-
 import org.eclipse.osgi.util.TextProcessor;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.CompletionProposal;
@@ -123,6 +125,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	/*
 	 * @see ICompletionProposalExtension#getTriggerCharacters()
 	 */
+	@Override
 	public final char[] getTriggerCharacters() {
 		if (!fTriggerCharactersComputed)
 			setTriggerCharacters(computeTriggerCharacters());
@@ -137,6 +140,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * Sets the trigger characters.
 	 * @param triggerCharacters The set of characters which can trigger the application of this completion proposal
 	 */
+	@Override
 	public final void setTriggerCharacters(char[] triggerCharacters) {
 		fTriggerCharactersComputed= true;
 		super.setTriggerCharacters(triggerCharacters);
@@ -146,6 +150,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * Sets the proposal info.
 	 * @param proposalInfo The additional information associated with this proposal or <code>null</code>
 	 */
+	@Override
 	public final void setProposalInfo(ProposalInfo proposalInfo) {
 		fProposalInfoComputed= true;
 		super.setProposalInfo(proposalInfo);
@@ -158,6 +163,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * @return the additional proposal info, or <code>null</code> if none
 	 *         exists
 	 */
+	@Override
 	protected final ProposalInfo getProposalInfo() {
 		if (!fProposalInfoComputed)
 			setProposalInfo(computeProposalInfo());
@@ -173,11 +179,13 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * (Cursor positioned after the completion)
 	 * @param cursorPosition The cursorPosition to set
 	 */
+	@Override
 	public final void setCursorPosition(int cursorPosition) {
 		fCursorPositionComputed= true;
 		super.setCursorPosition(cursorPosition);
 	}
 
+	@Override
 	protected final int getCursorPosition() {
 		if (!fCursorPositionComputed)
 			setCursorPosition(computeCursorPosition());
@@ -191,6 +199,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isInJavadoc()
 	 */
+	@Override
 	protected final boolean isInJavadoc() {
 		return fInvocationContext.getCoreContext().isInJavadoc();
 	}
@@ -198,6 +207,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	/*
 	 * @see ICompletionProposal#getContextInformation()
 	 */
+	@Override
 	public final IContextInformation getContextInformation() {
 		if (!fContextInformationComputed)
 			setContextInformation(computeContextInformation());
@@ -212,6 +222,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * Sets the context information.
 	 * @param contextInformation The context information associated with this proposal
 	 */
+	@Override
 	public final void setContextInformation(IContextInformation contextInformation) {
 		fContextInformationComputed= true;
 		super.setContextInformation(contextInformation);
@@ -221,23 +232,27 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getStyledDisplayString()
 	 * @since 3.4
 	 */
+	@Override
 	public StyledString getStyledDisplayString() {
 		if (!fDisplayStringComputed)
 			setStyledDisplayString(computeDisplayString());
 		return super.getStyledDisplayString();
 	}
 
+	@Override
 	public String getDisplayString() {
 		if (!fDisplayStringComputed)
 			setStyledDisplayString(computeDisplayString());
 		return super.getDisplayString();
 	}
 
+	@Override
 	protected final void setDisplayString(String string) {
 		fDisplayStringComputed= true;
 		super.setDisplayString(string);
 	}
 
+	@Override
 	public void setStyledDisplayString(StyledString text) {
 		fDisplayStringComputed= true;
 		super.setStyledDisplayString(text);
@@ -250,6 +265,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	/*
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
+	@Override
 	public final String getAdditionalProposalInfo() {
 		return super.getAdditionalProposalInfo();
 	}
@@ -258,6 +274,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * Gets the replacement offset.
 	 * @return Returns a int
 	 */
+	@Override
 	public final int getReplacementOffset() {
 		if (!fReplacementOffsetComputed)
 			setReplacementOffset(fProposal.getReplaceStart());
@@ -268,6 +285,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * Sets the replacement offset.
 	 * @param replacementOffset The replacement offset to set
 	 */
+	@Override
 	public final void setReplacementOffset(int replacementOffset) {
 		fReplacementOffsetComputed= true;
 		super.setReplacementOffset(replacementOffset);
@@ -276,6 +294,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getCompletionOffset()
 	 */
+	@Override
 	public int getPrefixCompletionStart(IDocument document, int completionOffset) {
 		return getReplacementOffset();
 	}
@@ -284,6 +303,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * Gets the replacement length.
 	 * @return Returns a int
 	 */
+	@Override
 	public final int getReplacementLength() {
 		if (!fReplacementLengthComputed)
 			setReplacementLength(fProposal.getReplaceEnd() - fProposal.getReplaceStart());
@@ -294,6 +314,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * Sets the replacement length.
 	 * @param replacementLength The replacementLength to set
 	 */
+	@Override
 	public final void setReplacementLength(int replacementLength) {
 		fReplacementLengthComputed= true;
 		super.setReplacementLength(replacementLength);
@@ -303,6 +324,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * Gets the replacement string.
 	 * @return Returns a String
 	 */
+	@Override
 	public final String getReplacementString() {
 		if (!fReplacementStringComputed)
 			setReplacementString(computeReplacementString());
@@ -317,6 +339,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * Sets the replacement string.
 	 * @param replacementString The replacement string to set
 	 */
+	@Override
 	public final void setReplacementString(String replacementString) {
 		fReplacementStringComputed= true;
 		super.setReplacementString(replacementString);
@@ -325,6 +348,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	/*
 	 * @see ICompletionProposal#getImage()
 	 */
+	@Override
 	public final Image getImage() {
 		if (!fImageComputed)
 			setImage(computeImage());
@@ -339,6 +363,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * Sets the image.
 	 * @param image The image to set
 	 */
+	@Override
 	public final void setImage(Image image) {
 		fImageComputed= true;
 		super.setImage(image);
@@ -347,6 +372,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
 	 */
+	@Override
 	protected boolean isValidPrefix(String prefix) {
 		if (super.isValidPrefix(prefix))
 			return true;
@@ -367,6 +393,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * Gets the proposal's relevance.
 	 * @return Returns a int
 	 */
+	@Override
 	public final int getRelevance() {
 		if (!fRelevanceComputed)
 			setRelevance(computeRelevance());
@@ -377,6 +404,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * Sets the proposal's relevance.
 	 * @param relevance The relevance to set
 	 */
+	@Override
 	public final void setRelevance(int relevance) {
 		fRelevanceComputed= true;
 		super.setRelevance(relevance);
@@ -413,12 +441,14 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 		}
 	}
 
+	@Override
 	public final String getSortString() {
 		if (!fSortStringComputed)
 			setSortString(computeSortString());
 		return super.getSortString();
 	}
 
+	@Override
 	protected final void setSortString(String string) {
 		fSortStringComputed= true;
 		super.setSortString(string);
@@ -443,5 +473,30 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 */
 	public void setContextInformationPosition(int contextInformationPosition) {
 		fContextInformationPosition= contextInformationPosition;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
+	 * @since 3.7
+	 */
+	@Override
+	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
+		Point selection= viewer.getSelectedRange();
+		boolean smartToggle= (stateMask & SWT.CTRL) != 0;
+		if (!(insertCompletion() ^ smartToggle) && selection.y > 0)
+			fReplacementLengthComputed= false;
+		super.apply(viewer, trigger, stateMask, offset);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#selected(org.eclipse.jface.text.ITextViewer, boolean)
+	 * @since 3.7
+	 */
+	@Override
+	public void selected(ITextViewer viewer, boolean smartToggle) {
+		Point selection= viewer.getSelectedRange();
+		if (!(insertCompletion() ^ smartToggle) && selection.y > 0)
+			fReplacementLengthComputed= false;
+		super.selected(viewer, smartToggle);
 	}
 }

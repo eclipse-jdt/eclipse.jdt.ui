@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -94,7 +95,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 
 	private ICompletionProposal findCorrection(String id, boolean isAssist, ITextSelection selection, ICompilationUnit cu, IAnnotationModel model) {
 		AssistContext context= new AssistContext(cu, fEditor.getViewer(), fEditor, selection.getOffset(), selection.getLength());
-		Collection proposals= new ArrayList(10);
+		Collection<IJavaCompletionProposal> proposals= new ArrayList<IJavaCompletionProposal>(10);
 		if (isAssist) {
 			if (id.equals(LinkedNamesAssistProposal.ASSIST_ID)) {
 				return getLocalRenameProposal(context); // shortcut for local rename
@@ -109,7 +110,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 				return null;
 			}
 		}
-		for (Iterator iter= proposals.iterator(); iter.hasNext();) {
+		for (Iterator<IJavaCompletionProposal> iter= proposals.iterator(); iter.hasNext();) {
 			Object curr= iter.next();
 			if (curr instanceof ICommandAccess) {
 				if (id.equals(((ICommandAccess) curr).getCommandId())) {
@@ -121,9 +122,9 @@ public class CorrectionCommandHandler extends AbstractHandler {
 	}
 
 	private Annotation[] getAnnotations(int offset, boolean goToClosest) throws BadLocationException {
-		ArrayList resultingAnnotations= new ArrayList();
+		ArrayList<Annotation> resultingAnnotations= new ArrayList<Annotation>();
 		JavaCorrectionAssistant.collectQuickFixableAnnotations(fEditor, offset, goToClosest, resultingAnnotations);
-		return (Annotation[]) resultingAnnotations.toArray(new Annotation[resultingAnnotations.size()]);
+		return resultingAnnotations.toArray(new Annotation[resultingAnnotations.size()]);
 	}
 
 	private ICompletionProposal getLocalRenameProposal(IInvocationContext context) {

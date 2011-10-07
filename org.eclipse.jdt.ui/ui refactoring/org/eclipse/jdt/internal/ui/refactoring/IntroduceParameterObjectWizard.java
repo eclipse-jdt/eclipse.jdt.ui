@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -102,6 +102,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 		setDefaultPageTitle(RefactoringMessages.IntroduceParameterObjectWizard_wizardpage_title);
 	}
 
+	@Override
 	protected void addUserInputPages() {
 		addPage(new IntroduceParameterObjectInputPage(fProcessor));
 	}
@@ -122,10 +123,10 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			public Object[] getElements(Object inputElement) {
 				if (inputElement instanceof IntroduceParameterObjectProcessor) {
 					IntroduceParameterObjectProcessor refactoring= (IntroduceParameterObjectProcessor) inputElement;
-					List parameterInfos= refactoring.getParameterInfos();
-					List result= new ArrayList(parameterInfos.size());
-					for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
-						ParameterInfo pi= (ParameterInfo) iter.next();
+					List<ParameterInfo> parameterInfos= refactoring.getParameterInfos();
+					List<ParameterInfo> result= new ArrayList<ParameterInfo>(parameterInfos.size());
+					for (Iterator<ParameterInfo> iter= parameterInfos.iterator(); iter.hasNext();) {
+						ParameterInfo pi= iter.next();
 						if (!pi.isAdded())
 							result.add(pi);
 					}
@@ -136,6 +137,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 		}
 
 		private abstract class ParameterInfoLabelProvider extends CellLabelProvider {
+			@Override
 			public void update(ViewerCell cell) {
 				ParameterInfo pi= (ParameterInfo) cell.getElement();
 				cell.setText(doGetValue(pi));
@@ -152,6 +154,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				fTextEditor= textEditor;
 			}
 
+			@Override
 			protected void setValue(Object element, Object value) {
 				if (element instanceof ParameterInfo) {
 					ParameterInfo pi= (ParameterInfo) element;
@@ -164,6 +167,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			public abstract void doSetValue(ParameterInfo pi, String string);
 
+			@Override
 			protected Object getValue(Object element) {
 				if (element instanceof ParameterInfo) {
 					ParameterInfo pi= (ParameterInfo) element;
@@ -174,10 +178,12 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			public abstract String doGetValue(ParameterInfo pi);
 
+			@Override
 			protected CellEditor getCellEditor(Object element) {
 				return fTextEditor;
 			}
 
+			@Override
 			protected boolean canEdit(Object element) {
 				if (element instanceof ParameterInfo) {
 					ParameterInfo pi= (ParameterInfo) element;
@@ -241,7 +247,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 		}
 
 		protected void validateRefactoring() {
-			List names= new ArrayList();
+			List<String> names= new ArrayList<String>();
 			boolean oneChecked= false;
 			setMessage(null);
 			setErrorMessage(null);
@@ -249,9 +255,9 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			IJavaProject project= fProcessor.getMethod().getJavaProject();
 			String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
 			String compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-			List parameterInfos= fProcessor.getParameterInfos();
-			for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
-				ParameterInfo pi= (ParameterInfo) iter.next();
+			List<ParameterInfo> parameterInfos= fProcessor.getParameterInfos();
+			for (Iterator<ParameterInfo> iter= parameterInfos.iterator(); iter.hasNext();) {
+				ParameterInfo pi= iter.next();
 				if (names.contains(pi.getNewName())) {
 					setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_parametername_check_notunique, BasicElementLabels.getJavaElementName(pi.getNewName())));
 					setPageComplete(false);
@@ -337,7 +343,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			fSignaturePreview= new JavaSourceViewer(composite, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP, store);
 			fSignaturePreview.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
 			fSignaturePreview.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
-			fSignaturePreview.getTextWidget().setBackground(composite.getBackground());
+			fSignaturePreview.adaptBackgroundColor(composite);
 			fSignaturePreview.setDocument(fSignaturePreviewDocument);
 			fSignaturePreview.setEditable(false);
 
@@ -378,6 +384,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(refactoring));
 				refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
 				fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
 						validateRefactoring();
@@ -385,6 +392,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				});
 				fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
 				fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
 					}
@@ -417,6 +425,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			final Button topLvlRadio= new Button(composite, SWT.RADIO);
 			topLvlRadio.setText(RefactoringMessages.IntroduceParameterObjectWizard_createastoplevel_radio);
 			topLvlRadio.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					boolean fAsTopLevel= topLvlRadio.getSelection();
 					fProcessor.setCreateAsTopLevel(fAsTopLevel);
@@ -462,9 +471,9 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			gridData= new GridData(GridData.FILL_BOTH);
 			table.setLayoutData(gridData);
 			tv.setInput(fProcessor);
-			List parameterInfos= fProcessor.getParameterInfos();
-			for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
-				ParameterInfo pi= (ParameterInfo) iter.next();
+			List<ParameterInfo> parameterInfos= fProcessor.getParameterInfos();
+			for (Iterator<ParameterInfo> iter= parameterInfos.iterator(); iter.hasNext();) {
+				ParameterInfo pi= iter.next();
 				tv.setChecked(pi, pi.isCreateField());
 			}
 			tv.refresh(true);
@@ -502,6 +511,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			editButton.setEnabled(!tv.getSelection().isEmpty());
 			SWTUtil.setButtonDimensionHint(editButton);
 			editButton.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					ISelection selection= tv.getSelection();
 					if (selection instanceof IStructuredSelection) {
@@ -530,6 +540,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			});
 
 			downButton.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					int[] indices= tv.getTable().getSelectionIndices();
 					Arrays.sort(indices);
@@ -544,6 +555,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			});
 			upButton.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					int[] indices= tv.getTable().getSelectionIndices();
 					Arrays.sort(indices);
@@ -558,12 +570,12 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			});
 			tv.addCheckStateListener(new ICheckStateListener() {
-				Map fLastNames=new HashMap();
+				Map<ParameterInfo, String> fLastNames=new HashMap<ParameterInfo, String>();
 				public void checkStateChanged(CheckStateChangedEvent event) {
 					ParameterInfo element= (ParameterInfo) event.getElement();
 					element.setCreateField(event.getChecked());
 					if (element.isCreateField()){
-						String lastName= (String) fLastNames.get(element);
+						String lastName= fLastNames.get(element);
 						if (lastName==null){
 							lastName= fProcessor.getFieldName(element);
 						}
@@ -597,6 +609,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			TableViewerColumn viewerColumn= new TableViewerColumn(tv, SWT.LEAD);
 			viewerColumn.setLabelProvider(new ParameterInfoLabelProvider() {
+				@Override
 				protected String doGetValue(ParameterInfo pi) {
 					return pi.getNewTypeName();
 				}
@@ -606,14 +619,17 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			columnType.setText(RefactoringMessages.IntroduceParameterObjectWizard_type_column);
 			viewerColumn= new TableViewerColumn(tv, SWT.LEAD);
 			viewerColumn.setLabelProvider(new ParameterInfoLabelProvider() {
+				@Override
 				protected String doGetValue(ParameterInfo pi) {
 					return pi.getNewName();
 				}
 			});
 			viewerColumn.setEditingSupport(new ParameterInfoEditingSupport(cellEditor, tv) {
+				@Override
 				public String doGetValue(ParameterInfo pi) {
 					return pi.getNewName();
 				}
+				@Override
 				public void doSetValue(ParameterInfo pi, String string) {
 					pi.setNewName(string);
 				}
@@ -642,6 +658,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			button.setText(RefactoringMessages.IntroduceParameterObjectWizard_creategetter_checkbox);
 			button.addSelectionListener(new SelectionAdapter() {
 
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fProcessor.setCreateGetter(button.getSelection());
 					validateRefactoring();
@@ -659,6 +676,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			button.setText(RefactoringMessages.IntroduceParameterObjectWizard_createsetter_checkbox);
 			button.addSelectionListener(new SelectionAdapter() {
 
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fProcessor.setCreateSetter(button.getSelection());
 					validateRefactoring();
@@ -717,6 +735,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			}
 		}
 
+		@Override
 		public void dispose() {
 			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);
 			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);

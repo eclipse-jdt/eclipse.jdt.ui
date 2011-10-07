@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */
+	@Override
 	protected void addUserInputPages(){
 		addPage(new ExtractInterfaceInputPage(fProcessor));
 	}
@@ -117,6 +118,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			addInstanceofCheckbox(result, layout.marginWidth);
 			fReplaceAllCheckbox.addSelectionListener(new SelectionAdapter() {
 
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fInstanceofCheckbox.setEnabled(fReplaceAllCheckbox.getSelection());
 				}
@@ -150,6 +152,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			fGenerateAnnotationsCheckbox= createCheckbox(result,  title, false);
 			fProcessor.setAnnotations(fGenerateAnnotationsCheckbox.getSelection());
 			fGenerateAnnotationsCheckbox.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fProcessor.setAnnotations(fGenerateAnnotationsCheckbox.getSelection());
 				}
@@ -161,6 +164,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			fGenerateCommentsCheckbox= createCheckbox(result,  title, false);
 			fProcessor.setComments(fGenerateCommentsCheckbox.getSelection());
 			fGenerateCommentsCheckbox.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fProcessor.setComments(fGenerateCommentsCheckbox.getSelection());
 				}
@@ -178,6 +182,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			fInstanceofCheckbox.setText(title);
 			fProcessor.setInstanceOf(fInstanceofCheckbox.getSelection());
 			fInstanceofCheckbox.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fProcessor.setInstanceOf(fInstanceofCheckbox.getSelection());
 				}
@@ -273,6 +278,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			fSelectAllButton.setLayoutData(new GridData());
 			SWTUtil.setButtonDimensionHint(fSelectAllButton);
 			fSelectAllButton.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fTableViewer.setAllChecked(true);
 					ExtractInterfaceInputPage.this.updateUIElementEnablement();
@@ -285,6 +291,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			fDeselectAllButton.setLayoutData(new GridData());
 			SWTUtil.setButtonDimensionHint(fDeselectAllButton);
 			fDeselectAllButton.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fTableViewer.setAllChecked(false);
 					ExtractInterfaceInputPage.this.updateUIElementEnablement();
@@ -306,6 +313,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			fReplaceAllCheckbox= createCheckbox(result,  title, defaultValue);
 			fProcessor.setReplace(fReplaceAllCheckbox.getSelection());
 			fReplaceAllCheckbox.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fProcessor.setReplace(fReplaceAllCheckbox.getSelection());
 				}
@@ -319,6 +327,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			fDeclarePublicCheckbox= createCheckbox(result,  title, defaultValue);
 			fProcessor.setPublic(fDeclarePublicCheckbox.getSelection());
 			fDeclarePublicCheckbox.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fProcessor.setPublic(fDeclarePublicCheckbox.getSelection());
 				}
@@ -333,6 +342,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			fDeclareAbstractCheckbox= createCheckbox(result,  title, defaultValue);
 			processor.setAbstract(fDeclareAbstractCheckbox.getSelection());
 			fDeclareAbstractCheckbox.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					processor.setAbstract(fDeclareAbstractCheckbox.getSelection());
 				}
@@ -353,6 +363,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#validateTextField(String)
 		 */
+		@Override
 		protected RefactoringStatus validateTextField(String text) {
 			final ExtractInterfaceProcessor processor= fProcessor;
 			processor.setTypeName(text);
@@ -362,6 +373,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jface.wizard.IWizardPage#getNextPage()
 		 */
+		@Override
 		public IWizardPage getNextPage() {
 			try {
 				initializeRefactoring();
@@ -376,6 +388,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
 		 */
+		@Override
 		public boolean performFinish(){
 			try {
 				initializeRefactoring();
@@ -399,10 +412,11 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		}
 
 		private IMember[] getCheckedMembers() {
-			List checked= Arrays.asList(fTableViewer.getCheckedElements());
-			return (IMember[]) checked.toArray(new IMember[checked.size()]);
+			List<?> checked= Arrays.asList(fTableViewer.getCheckedElements());
+			return checked.toArray(new IMember[checked.size()]);
 		}
 
+		@Override
 		public void dispose() {
 			fInstanceofCheckbox= null;
 			fGenerateCommentsCheckbox= null;

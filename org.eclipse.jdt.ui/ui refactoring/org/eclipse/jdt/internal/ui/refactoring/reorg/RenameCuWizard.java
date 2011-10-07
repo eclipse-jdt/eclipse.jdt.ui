@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ public class RenameCuWizard extends RenameTypeWizard {
 			IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE);
 	}
 
+	@Override
 	protected RefactoringStatus validateNewName(String newName) {
 		String fullName= JavaModelUtil.getRenamedCUName(getCompilationUnit(), newName);
 		return super.validateNewName(fullName);
@@ -46,11 +47,14 @@ public class RenameCuWizard extends RenameTypeWizard {
 		return (ICompilationUnit) getCompilationUnitProcessor().getElements()[0];
 	}
 
+	@Override
 	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
 		return new RenameTypeWizardInputPage(message, IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE, true, initialSetting) {
+			@Override
 			protected RefactoringStatus validateTextField(String text) {
 				return validateNewName(text);
 			}
+			@Override
 			protected String getNewName(INameUpdating nameUpdating) {
 				String result= nameUpdating.getNewElementName();
 				// If renaming a CU we have to remove the java file extension
@@ -59,6 +63,7 @@ public class RenameCuWizard extends RenameTypeWizard {
 		};
 	}
 
+	@Override
 	protected boolean isRenameType() {
 		// the flag 'willRenameType' may change in checkInitialConditions(), but
 		// only from true to false.

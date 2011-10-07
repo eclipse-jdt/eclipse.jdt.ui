@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,9 +15,9 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.ui.IWorkbenchSite;
 
@@ -57,6 +57,7 @@ public class AllCleanUpsAction extends CleanUpAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected ICleanUp[] getCleanUps(ICompilationUnit[] units) {
 		return JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
 	}
@@ -64,6 +65,7 @@ public class AllCleanUpsAction extends CleanUpAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected String getActionName() {
 		return ActionMessages.CleanUpAction_actionName;
 	}
@@ -71,6 +73,7 @@ public class AllCleanUpsAction extends CleanUpAction {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void performRefactoring(ICompilationUnit[] cus, ICleanUp[] cleanUps) throws InvocationTargetException {
 		RefactoringExecutionStarter.startCleanupRefactoring(cus, cleanUps, !showWizard(), getShell(), showWizard(), getActionName());
 	}

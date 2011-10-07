@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,7 @@ public class GotoResourceAction extends Action {
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(parentShell, IJavaHelpContextIds.GOTO_RESOURCE_DIALOG);
 		}
 
+		@Override
 		protected ItemsFilter createFilter() {
 			return new GotoResourceFilter();
 		}
@@ -57,6 +58,7 @@ public class GotoResourceAction extends Action {
 			 *
 			 * @see org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog.ResourceFilter#matchItem(java.lang.Object)
 			 */
+			@Override
 			public boolean matchItem(Object item) {
 				IResource resource = (IResource) item;
 				return super.matchItem(item) && select(resource);
@@ -90,6 +92,7 @@ public class GotoResourceAction extends Action {
 			 *
 			 * @see org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog.ResourceFilter#equalsFilter(org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter)
 			 */
+			@Override
 			public boolean equalsFilter(ItemsFilter filter) {
 				if (!super.equalsFilter(filter)) {
 					return false;
@@ -109,6 +112,7 @@ public class GotoResourceAction extends Action {
 		fPackageExplorer= explorer;
 	}
 
+	@Override
 	public void run() {
 		TreeViewer viewer= fPackageExplorer.getTreeViewer();
 		GotoResourceDialog dialog= new GotoResourceDialog(fPackageExplorer.getSite().getShell(),

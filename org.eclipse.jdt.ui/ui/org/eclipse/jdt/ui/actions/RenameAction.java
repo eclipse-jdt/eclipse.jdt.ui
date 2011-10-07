@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -76,6 +75,7 @@ public class RenameAction extends SelectionDispatchAction {
 	/*
 	 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
 	 */
+	@Override
 	public void selectionChanged(SelectionChangedEvent event) {
 		fRenameJavaElement.selectionChanged(event);
 		if (fRenameResource != null)
@@ -86,6 +86,7 @@ public class RenameAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#update(ISelection)
 	 */
+	@Override
 	public void update(ISelection selection) {
 		fRenameJavaElement.update(selection);
 
@@ -103,6 +104,7 @@ public class RenameAction extends SelectionDispatchAction {
 		}
 	}
 
+	@Override
 	public void run(IStructuredSelection selection) {
 		if (fRenameJavaElement.isEnabled())
 			fRenameJavaElement.run(selection);
@@ -110,10 +112,9 @@ public class RenameAction extends SelectionDispatchAction {
 			fRenameResource.run(selection);
 	}
 
+	@Override
 	public void run(ITextSelection selection) {
-		if (fRenameJavaElement.canRunInEditor())
+		if (fRenameJavaElement.isEnabled())
 			fRenameJavaElement.run(selection);
-		else
-			MessageDialog.openInformation(getShell(), RefactoringMessages.RenameAction_rename, RefactoringMessages.RenameAction_unavailable);
 	}
 }

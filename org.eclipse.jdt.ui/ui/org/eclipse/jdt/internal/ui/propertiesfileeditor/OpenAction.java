@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,17 +20,16 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 /**
- * This action opens a tool (internal editor or view or an external
- * application) for the element at the given location.
+ * This action opens a tool (internal editor or view or an external application) for the element at
+ * the given location.
  * <p>
- * XXX:	This does not work for properties files coming from a JAR due to
- * 		missing J Core functionality. For details see:
- * 		https://bugs.eclipse.org/bugs/show_bug.cgi?id=22376
+ * XXX: This does not work for properties files coming from a JAR due to missing J Core
+ * functionality. For details see http://bugs.eclipse.org/22376
  * </p>
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- *
+ * 
  * @since 3.1
  */
 public class OpenAction extends SelectionDispatchAction {
@@ -57,6 +56,7 @@ public class OpenAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.text.ITextSelection)
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}
@@ -69,6 +69,7 @@ public class OpenAction extends SelectionDispatchAction {
 		return fEditor.getEditorInput() instanceof IFileEditorInput;
 	}
 
+	@Override
 	public void run(ITextSelection selection) {
 
 		if (!checkEnabled(selection))

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Control;
@@ -37,6 +40,7 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 			fView= view;
 		}
 
+		@Override
 		public void run() {
 			fView.setHistoryEntries(new IJavaElement[0]);
 			fView.setInputElement(null);
@@ -74,7 +78,7 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 			fMenu.dispose();
 		}
 		fMenu= new Menu(parent);
-		IJavaElement[] elements= fHierarchyView.getHistoryEntries();
+		List<IJavaElement[]> elements= fHierarchyView.getHistoryEntries();
 		addEntries(fMenu, elements);
 		new MenuItem(fMenu, SWT.SEPARATOR);
 		addActionToMenu(fMenu, new HistoryListAction(fHierarchyView));
@@ -82,18 +86,19 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 		return fMenu;
 	}
 
-	private boolean addEntries(Menu menu, IJavaElement[] elements) {
+	private boolean addEntries(Menu menu, List<IJavaElement[]> elements) {
 		boolean checked= false;
-
-		int min= Math.min(elements.length, RESULTS_IN_DROP_DOWN);
-		for (int i= 0; i < min; i++) {
-			HistoryAction action= new HistoryAction(fHierarchyView, elements[i]);
-			action.setChecked(elements[i].equals(fHierarchyView.getInputElement()));
+		int count= 0;
+		int min= Math.min(elements.size(), RESULTS_IN_DROP_DOWN);
+		for (Iterator<IJavaElement[]> iterator= elements.iterator(); count < min; count++) {
+			IJavaElement[] entries= iterator.next();
+			if (entries == null || entries.length == 0)
+				continue;
+			HistoryAction action= new HistoryAction(fHierarchyView, entries);
+			action.setChecked(entries.equals(fHierarchyView.getInputElements()));
 			checked= checked || action.isChecked();
 			addActionToMenu(menu, action);
 		}
-
-
 		return checked;
 	}
 
@@ -103,6 +108,7 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 		item.fill(parent, -1);
 	}
 
+	@Override
 	public void run() {
 		(new HistoryListAction(fHierarchyView)).run();
 	}

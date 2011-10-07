@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -189,7 +189,7 @@ public class ElementValidator {
 	}
 
 	private static IResource[] getResources(IAdaptable[] elements) {
-		Set result= new HashSet();
+		Set<IResource> result= new HashSet<IResource>();
 		for (int i= 0; i < elements.length; i++) {
 			IAdaptable element= elements[i];
 			IResource resource= null;
@@ -206,6 +206,6 @@ public class ElementValidator {
 			if (resource != null)
 				result.add(resource);
 		}
-		return (IResource[]) result.toArray(new IResource[result.size()]);
+		return result.toArray(new IResource[result.size()]);
 	}
 }

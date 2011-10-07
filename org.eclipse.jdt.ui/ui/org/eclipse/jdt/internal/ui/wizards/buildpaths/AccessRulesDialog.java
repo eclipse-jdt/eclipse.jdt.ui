@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,7 +63,7 @@ public class AccessRulesDialog extends StatusDialog {
 
 	public static final int SWITCH_PAGE= 10;
 
-	private final ListDialogField fAccessRulesList;
+	private final ListDialogField<IAccessRule> fAccessRulesList;
 	private final SelectionButtonDialogField fCombineRulesCheckbox;
 	private final CPListElement fCurrElement;
 
@@ -98,11 +98,12 @@ public class AccessRulesDialog extends StatusDialog {
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
 
-	private ListDialogField createListContents(CPListElement entryToEdit) {
+	private ListDialogField<IAccessRule> createListContents(CPListElement entryToEdit) {
 		String label= NewWizardMessages.AccessRulesDialog_rules_label;
 		String[] buttonLabels= new String[] {
 				NewWizardMessages.AccessRulesDialog_rules_add,
@@ -117,7 +118,7 @@ public class AccessRulesDialog extends StatusDialog {
 		TypeRestrictionAdapter adapter= new TypeRestrictionAdapter();
 		AccessRulesLabelProvider labelProvider= new AccessRulesLabelProvider();
 
-		ListDialogField patternList= new ListDialogField(adapter, buttonLabels, labelProvider);
+		ListDialogField<IAccessRule> patternList= new ListDialogField<IAccessRule>(adapter, buttonLabels, labelProvider);
 		patternList.setDialogFieldListener(adapter);
 
 		patternList.setLabelText(label);
@@ -127,7 +128,7 @@ public class AccessRulesDialog extends StatusDialog {
 		patternList.enableButton(IDX_EDIT, false);
 
 		IAccessRule[] rules= (IAccessRule[]) entryToEdit.getAttribute(CPListElement.ACCESSRULES);
-		ArrayList elements= new ArrayList(rules.length);
+		ArrayList<IAccessRule> elements= new ArrayList<IAccessRule>(rules.length);
 		for (int i= 0; i < rules.length; i++) {
 			elements.add(rules[i]);
 		}
@@ -137,6 +138,7 @@ public class AccessRulesDialog extends StatusDialog {
 	}
 
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
 
@@ -207,6 +209,7 @@ public class AccessRulesDialog extends StatusDialog {
 					// with link
 					text.setText(Messages.format(NewWizardMessages.AccessRulesDialog_severity_info_with_link, args), true, false);
 					text.addHyperlinkListener(new HyperlinkAdapter() {
+						@Override
 						public void linkActivated(HyperlinkEvent e) {
 							doErrorWarningLinkPressed();
 						}
@@ -267,7 +270,7 @@ public class AccessRulesDialog extends StatusDialog {
 	}
 
 
-	protected void doCustomButtonPressed(ListDialogField field, int index) {
+	protected void doCustomButtonPressed(ListDialogField<IAccessRule> field, int index) {
 		if (index == IDX_ADD) {
 			addEntry(field);
 		} else if (index == IDX_EDIT) {
@@ -275,33 +278,33 @@ public class AccessRulesDialog extends StatusDialog {
 		}
 	}
 
-	protected void doDoubleClicked(ListDialogField field) {
+	protected void doDoubleClicked(ListDialogField<IAccessRule> field) {
 		editEntry(field);
 	}
 
-	protected void doSelectionChanged(ListDialogField field) {
-		List selected= field.getSelectedElements();
+	protected void doSelectionChanged(ListDialogField<IAccessRule> field) {
+		List<IAccessRule> selected= field.getSelectedElements();
 		field.enableButton(IDX_EDIT, canEdit(selected));
 	}
 
-	private boolean canEdit(List selected) {
+	private boolean canEdit(List<IAccessRule> selected) {
 		return selected.size() == 1;
 	}
 
-	private void editEntry(ListDialogField field) {
+	private void editEntry(ListDialogField<IAccessRule> field) {
 
-		List selElements= field.getSelectedElements();
+		List<IAccessRule> selElements= field.getSelectedElements();
 		if (selElements.size() != 1) {
 			return;
 		}
-		IAccessRule rule= (IAccessRule) selElements.get(0);
+		IAccessRule rule= selElements.get(0);
 		AccessRuleEntryDialog dialog= new AccessRuleEntryDialog(getShell(), rule, fCurrElement);
 		if (dialog.open() == Window.OK) {
 			field.replaceElement(rule, dialog.getRule());
 		}
 	}
 
-	private void addEntry(ListDialogField field) {
+	private void addEntry(ListDialogField<IAccessRule> field) {
 		AccessRuleEntryDialog dialog= new AccessRuleEntryDialog(getShell(), null, fCurrElement);
 		if (dialog.open() == Window.OK) {
 			field.addElement(dialog.getRule());
@@ -312,24 +315,24 @@ public class AccessRulesDialog extends StatusDialog {
 
 	// -------- TypeRestrictionAdapter --------
 
-	private class TypeRestrictionAdapter implements IListAdapter, IDialogFieldListener {
+	private class TypeRestrictionAdapter implements IListAdapter<IAccessRule>, IDialogFieldListener {
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#customButtonPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField, int)
 		 */
-		public void customButtonPressed(ListDialogField field, int index) {
+		public void customButtonPressed(ListDialogField<IAccessRule> field, int index) {
 			doCustomButtonPressed(field, index);
 		}
 
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#selectionChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
-		public void selectionChanged(ListDialogField field) {
+		public void selectionChanged(ListDialogField<IAccessRule> field) {
 			doSelectionChanged(field);
 		}
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#doubleClicked(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
-		public void doubleClicked(ListDialogField field) {
+		public void doubleClicked(ListDialogField<IAccessRule> field) {
 			doDoubleClicked(field);
 		}
 
@@ -348,8 +351,8 @@ public class AccessRulesDialog extends StatusDialog {
 	}
 
 	public IAccessRule[] getAccessRules() {
-		List elements= fAccessRulesList.getElements();
-		return (IAccessRule[]) elements.toArray(new IAccessRule[elements.size()]);
+		List<IAccessRule> elements= fAccessRulesList.getElements();
+		return elements.toArray(new IAccessRule[elements.size()]);
 	}
 
 	public boolean doCombineAccessRules() {
@@ -359,14 +362,19 @@ public class AccessRulesDialog extends StatusDialog {
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.ACCESS_RULES_DIALOG);
+		String helpContextId;
+		if (fCurrElement.getEntryKind() == IClasspathEntry.CPE_PROJECT)
+			helpContextId= IJavaHelpContextIds.ACCESS_RULES_DIALOG_COMBINE_RULES;
+		else
+			helpContextId= IJavaHelpContextIds.ACCESS_RULES_DIALOG;
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, helpContextId);
 	}
 
-
 	public void performPageSwitch(IWorkbenchPreferenceContainer pageContainer) {
-		HashMap data= new HashMap();
+		HashMap<String, String> data= new HashMap<String, String>();
 		data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_KEY, JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE);
 		data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
 		pageContainer.openPage(ProblemSeveritiesPreferencePage.PROP_ID, data);

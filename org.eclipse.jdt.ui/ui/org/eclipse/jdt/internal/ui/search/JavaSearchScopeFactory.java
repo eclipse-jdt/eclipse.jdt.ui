@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -106,7 +106,7 @@ public class JavaSearchScopeFactory {
 		if (workingSets == null || workingSets.length < 1)
 			return EMPTY_SCOPE;
 
-		Set javaElements= new HashSet(workingSets.length * 10);
+		Set<IJavaElement> javaElements= new HashSet<IJavaElement>(workingSets.length * 10);
 		for (int i= 0; i < workingSets.length; i++) {
 			IWorkingSet workingSet= workingSets[i];
 			if (workingSet.isEmpty() && workingSet.isAggregateWorkingSet()) {
@@ -122,7 +122,7 @@ public class JavaSearchScopeFactory {
 	}
 
 	public IJavaSearchScope createJavaSearchScope(IWorkingSet workingSet, int includeMask) {
-		Set javaElements= new HashSet(10);
+		Set<IJavaElement> javaElements= new HashSet<IJavaElement>(10);
 		if (workingSet.isEmpty() && workingSet.isAggregateWorkingSet()) {
 			return createWorkspaceScope(includeMask);
 		}
@@ -137,7 +137,7 @@ public class JavaSearchScopeFactory {
 	public IJavaSearchScope createJavaSearchScope(IResource[] resources, int includeMask) {
 		if (resources == null)
 			return EMPTY_SCOPE;
-		Set javaElements= new HashSet(resources.length);
+		Set<IJavaElement> javaElements= new HashSet<IJavaElement>(resources.length);
 		addJavaElements(javaElements, resources);
 		return createJavaSearchScope(javaElements, includeMask);
 	}
@@ -155,7 +155,7 @@ public class JavaSearchScopeFactory {
 	}
 
 	public IJavaSearchScope createJavaProjectSearchScope(String[] projectNames, int includeMask) {
-		ArrayList res= new ArrayList();
+		ArrayList<IJavaElement> res= new ArrayList<IJavaElement>();
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		for (int i= 0; i < projectNames.length; i++) {
 			IJavaProject project= JavaCore.create(root.getProject(projectNames[i]));
@@ -285,13 +285,13 @@ public class JavaSearchScopeFactory {
 
 	public IProject[] getProjects(IJavaSearchScope scope) {
 		IPath[] paths= scope.enclosingProjectsAndJars();
-		HashSet temp= new HashSet();
+		HashSet<IResource> temp= new HashSet<IResource>();
 		for (int i= 0; i < paths.length; i++) {
 			IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(paths[i]);
 			if (resource != null && resource.getType() == IResource.PROJECT)
 				temp.add(resource);
 		}
-		return (IProject[]) temp.toArray(new IProject[temp.size()]);
+		return temp.toArray(new IProject[temp.size()]);
 	}
 
 	public IJavaElement[] getJavaElements(ISelection selection) {
@@ -306,7 +306,7 @@ public class JavaSearchScopeFactory {
 		if (elements.length == 0)
 			return new IJavaElement[0];
 
-		Set result= new HashSet(elements.length);
+		Set<IJavaElement> result= new HashSet<IJavaElement>(elements.length);
 		for (int i= 0; i < elements.length; i++) {
 			Object selectedElement= elements[i];
 			if (selectedElement instanceof IJavaElement) {
@@ -325,7 +325,7 @@ public class JavaSearchScopeFactory {
 			}
 
 		}
-		return (IJavaElement[]) result.toArray(new IJavaElement[result.size()]);
+		return result.toArray(new IJavaElement[result.size()]);
 	}
 
 	public IJavaSearchScope createJavaSearchScope(IJavaElement[] javaElements, boolean includeJRE) {
@@ -338,10 +338,10 @@ public class JavaSearchScopeFactory {
 		return SearchEngine.createJavaSearchScope(javaElements, getSearchFlags(includeMask));
 	}
 
-	private IJavaSearchScope createJavaSearchScope(Collection javaElements, int includeMask) {
+	private IJavaSearchScope createJavaSearchScope(Collection<IJavaElement> javaElements, int includeMask) {
 		if (javaElements.isEmpty())
 			return EMPTY_SCOPE;
-		IJavaElement[] elementArray= (IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]);
+		IJavaElement[] elementArray= javaElements.toArray(new IJavaElement[javaElements.size()]);
 		return SearchEngine.createJavaSearchScope(elementArray, getSearchFlags(includeMask));
 	}
 
@@ -349,12 +349,12 @@ public class JavaSearchScopeFactory {
 		return includeMask;
 	}
 
-	private void addJavaElements(Set javaElements, IResource[] resources) {
+	private void addJavaElements(Set<IJavaElement> javaElements, IResource[] resources) {
 		for (int i= 0; i < resources.length; i++)
 			addJavaElements(javaElements, resources[i]);
 	}
 
-	private void addJavaElements(Set javaElements, IResource resource) {
+	private void addJavaElements(Set<IJavaElement> javaElements, IResource resource) {
 		IJavaElement javaElement= (IJavaElement)resource.getAdapter(IJavaElement.class);
 		if (javaElement == null)
 			// not a Java resource
@@ -372,11 +372,11 @@ public class JavaSearchScopeFactory {
 		javaElements.add(javaElement);
 	}
 
-	private void addJavaElements(Set javaElements, IJavaElement javaElement) {
+	private void addJavaElements(Set<IJavaElement> javaElements, IJavaElement javaElement) {
 		javaElements.add(javaElement);
 	}
 
-	private void addJavaElements(Set javaElements, IWorkingSet workingSet) {
+	private void addJavaElements(Set<IJavaElement> javaElements, IWorkingSet workingSet) {
 		if (workingSet == null)
 			return;
 
@@ -406,7 +406,7 @@ public class JavaSearchScopeFactory {
 		}
 	}
 
-	private void addJavaElements(Set javaElements, LogicalPackage selectedElement) {
+	private void addJavaElements(Set<IJavaElement> javaElements, LogicalPackage selectedElement) {
 		IPackageFragment[] packages= selectedElement.getFragments();
 		for (int i= 0; i < packages.length; i++)
 			addJavaElements(javaElements, packages[i]);

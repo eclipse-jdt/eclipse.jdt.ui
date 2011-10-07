@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -99,7 +99,7 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner implements I
 		IToken multiLineComment= new Token(JAVA_MULTI_LINE_COMMENT);
 		IToken singleLineComment= new Token(JAVA_SINGLE_LINE_COMMENT);
 
-		List rules= new ArrayList();
+		List<IPredicateRule> rules= new ArrayList<IPredicateRule>();
 
 		// Add rule for single line comments.
 		rules.add(new EndOfLineRule("//", singleLineComment)); //$NON-NLS-1$

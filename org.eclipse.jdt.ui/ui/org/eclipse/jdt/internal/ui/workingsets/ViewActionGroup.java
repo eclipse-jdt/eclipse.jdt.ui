@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,6 +73,7 @@ public class ViewActionGroup extends ActionGroup {
 			fActiveActionGroup= fFilterActionGroup;
 	}
 
+	@Override
 	public void dispose() {
 		fFilterActionGroup.dispose();
 		fShowActionGroup.dispose();
@@ -87,6 +88,7 @@ public class ViewActionGroup extends ActionGroup {
 		fWorkingSetAssignementAction.setWorkingSetModel(model);
 	}
 
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		if (fWorkingSetAssignementAction.isEnabled())
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fWorkingSetAssignementAction);
@@ -95,6 +97,7 @@ public class ViewActionGroup extends ActionGroup {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		fMenuManager= actionBars.getMenuManager();

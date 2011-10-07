@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -99,11 +99,8 @@ public final class ActionMessages extends NLS {
 	public static String OpenTypeHierarchyAction_description;
 	public static String OpenTypeHierarchyAction_dialog_title;
 	public static String OpenTypeHierarchyAction_messages_title;
-	public static String OpenTypeHierarchyAction_messages_no_java_element;
-	public static String OpenTypeHierarchyAction_messages_no_java_resources;
-	public static String OpenTypeHierarchyAction_messages_no_types;
+	public static String OpenTypeHierarchyAction_messages_no_java_elements;
 	public static String OpenTypeHierarchyAction_messages_no_valid_java_element;
-	public static String OpenTypeHierarchyAction_messages_unknown_import_decl;
 	public static String ShowInPackageViewAction_label;
 	public static String ShowInPackageViewAction_description;
 	public static String ShowInPackageViewAction_tooltip;
@@ -374,6 +371,7 @@ public final class ActionMessages extends NLS {
 	public static String SurroundWithTemplateMenuAction_NoneApplicable;
 	public static String SurroundWithTemplateMenuAction_SurroundWithTemplateSubMenuName;
 	public static String SurroundWithTemplateMenuAction_SurroundWithTryCatchActionName;
+	public static String SurroundWithTemplateMenuAction_SurroundWithTryMultiCatchActionName;
 
 	public static String ToggleLinkingAction_label;
 	public static String ToggleLinkingAction_tooltip;

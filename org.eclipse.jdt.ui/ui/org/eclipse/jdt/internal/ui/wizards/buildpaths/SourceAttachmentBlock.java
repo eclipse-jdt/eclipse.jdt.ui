@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -509,7 +509,7 @@ public class SourceAttachmentBlock {
 	private IPath chooseInternal() {
 		String initSelection= fFileNameField.getText();
 
-		ViewerFilter filter= new ArchiveFileFilter((List) null, false, false);
+		ViewerFilter filter= new ArchiveFileFilter((List<IResource>) null, false, false);
 
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,6 +67,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 		 */
+		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			return !fSelectedElements.contains(element);
 		}
@@ -79,13 +80,13 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 	private ITreeContentProvider fTreeContentProvider;
 
 	private boolean fFirstCheck;
-	private final HashSet fSelectedElements;
+	private final HashSet<Object> fSelectedElements;
 	private IWorkingSet fWorkingSet;
 
 	protected AbstractWorkingSetWizardPage(String pageName, String title, ImageDescriptor titleImage) {
 		super(pageName, title, titleImage);
 
-		fSelectedElements= new HashSet();
+		fSelectedElements= new HashSet<Object>();
 		fFirstCheck= true;
 	}
 
@@ -277,6 +278,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		});
 
 		addButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				addTreeSelection();
 
@@ -301,6 +303,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		});
 
 		removeButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				removeTableSelection();
 
@@ -322,6 +325,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 			/* (non-Javadoc)
 			 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
 			 */
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				TreeItem[] items= fTree.getTree().getItems();
 				for (int i= 0; i < items.length; i++) {
@@ -339,6 +343,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 			/* (non-Javadoc)
 			 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
 			 */
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fSelectedElements.clear();
 
@@ -442,17 +447,17 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 	 */
 	public void finish() {
 		String workingSetName= fWorkingSetName.getText();
-		HashSet elements= fSelectedElements;
+		HashSet<Object> elements= fSelectedElements;
 
 		if (fWorkingSet == null) {
 			IWorkingSetManager workingSetManager= PlatformUI.getWorkbench().getWorkingSetManager();
-			fWorkingSet= workingSetManager.createWorkingSet(workingSetName, (IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
+			fWorkingSet= workingSetManager.createWorkingSet(workingSetName, elements.toArray(new IAdaptable[elements.size()]));
 			fWorkingSet.setId(getPageId());
 		} else {
 			// Add inaccessible resources
 			IAdaptable[] oldItems= fWorkingSet.getElements();
-			HashSet closedProjectsToRetain= new HashSet(elements.size());
-			HashSet closedProjectsToRemove= new HashSet(elements.size());
+			HashSet<IProject> closedProjectsToRetain= new HashSet<IProject>(elements.size());
+			HashSet<IProject> closedProjectsToRemove= new HashSet<IProject>(elements.size());
 			for (int i= 0; i < oldItems.length; i++) {
 				IResource oldResource= null;
 				if (oldItems[i] instanceof IResource) {
@@ -474,7 +479,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 			elements.removeAll(closedProjectsToRemove);
 
 			fWorkingSet.setName(workingSetName);
-			fWorkingSet.setElements((IAdaptable[]) elements.toArray(new IAdaptable[elements.size()]));
+			fWorkingSet.setElements(elements.toArray(new IAdaptable[elements.size()]));
 		}
 	}
 

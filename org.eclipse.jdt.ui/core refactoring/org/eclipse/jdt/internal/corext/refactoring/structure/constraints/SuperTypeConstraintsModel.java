@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,16 +52,18 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
  */
 public final class SuperTypeConstraintsModel {
 
-	/** Customized implementation of a hash set */
-	private static class HashedSet extends AbstractSet {
+	/** Customized implementation of a hash set 
+	 * @param <E> the element type */
+	private static class HashedSet<E> extends AbstractSet<E> {
 
 		/** The backing hash map */
-		private final Map fImplementation= new HashMap();
+		private final Map<E, E> fImplementation= new HashMap<E, E>();
 
 		/*
 		 * @see java.util.AbstractCollection#add(java.lang.Object)
 		 */
-		public final boolean add(final Object object) {
+		@Override
+		public final boolean add(final E object) {
 			return fImplementation.put(object, object) == null;
 		}
 
@@ -71,8 +73,8 @@ public final class SuperTypeConstraintsModel {
 		 * @param object the object to add
 		 * @return An already existing object considered equal to the specified one, or the newly added object
 		 */
-		public final Object addExisting(final Object object) {
-			final Object result= fImplementation.get(object);
+		public final E addExisting(final E object) {
+			final E result= fImplementation.get(object);
 			if (result != null)
 				return result;
 			fImplementation.put(object, object);
@@ -82,6 +84,7 @@ public final class SuperTypeConstraintsModel {
 		/*
 		 * @see java.util.AbstractCollection#clear()
 		 */
+		@Override
 		public final void clear() {
 			fImplementation.clear();
 		}
@@ -89,6 +92,7 @@ public final class SuperTypeConstraintsModel {
 		/*
 		 * @see java.util.AbstractCollection#contains(java.lang.Object)
 		 */
+		@Override
 		public final boolean contains(final Object object) {
 			return fImplementation.containsKey(object);
 		}
@@ -96,6 +100,7 @@ public final class SuperTypeConstraintsModel {
 		/*
 		 * @see java.util.AbstractCollection#isEmpty()
 		 */
+		@Override
 		public final boolean isEmpty() {
 			return fImplementation.isEmpty();
 		}
@@ -103,13 +108,15 @@ public final class SuperTypeConstraintsModel {
 		/*
 		 * @see java.util.AbstractCollection#iterator()
 		 */
-		public final Iterator iterator() {
+		@Override
+		public final Iterator<E> iterator() {
 			return fImplementation.keySet().iterator();
 		}
 
 		/*
 		 * @see java.util.AbstractCollection#remove(java.lang.Object)
 		 */
+		@Override
 		public final boolean remove(final Object object) {
 			return fImplementation.remove(object) == object;
 		}
@@ -117,6 +124,7 @@ public final class SuperTypeConstraintsModel {
 		/*
 		 * @see java.util.AbstractCollection#size()
 		 */
+		@Override
 		public final int size() {
 			return fImplementation.size();
 		}
@@ -134,14 +142,17 @@ public final class SuperTypeConstraintsModel {
 	 * @param variable the constraint variable
 	 * @return the usage of the constraint variable (element type: <code>ITypeConstraint2</code>)
 	 */
-	public static Collection getVariableUsage(final ConstraintVariable2 variable) {
+	public static Collection<ITypeConstraint2> getVariableUsage(final ConstraintVariable2 variable) {
 		final Object data= variable.getData(DATA_USAGE);
-		if (data == null)
-			return Collections.EMPTY_LIST;
-		else if (data instanceof Collection)
-			return Collections.unmodifiableCollection((Collection) data);
-		else
-			return Collections.singletonList(data);
+		if (data == null) {
+			return Collections.emptyList();
+		} else if (data instanceof Collection) {
+			@SuppressWarnings("unchecked")
+			Collection<ITypeConstraint2> collection= (Collection<ITypeConstraint2>) data;
+			return Collections.unmodifiableCollection(collection);
+		} else {
+			return Collections.singletonList((ITypeConstraint2) data);
+		}
 	}
 
 	/**
@@ -162,12 +173,14 @@ public final class SuperTypeConstraintsModel {
 	 */
 	public static void setVariableUsage(final ConstraintVariable2 variable, ITypeConstraint2 constraint) {
 		final Object data= variable.getData(DATA_USAGE);
-		if (data == null)
+		if (data == null) {
 			variable.setData(DATA_USAGE, constraint);
-		else if (data instanceof Collection)
-			((Collection) data).add(constraint);
-		else {
-			final Collection usage= new ArrayList(2);
+		} else if (data instanceof Collection) {
+			@SuppressWarnings("unchecked")
+			Collection<ITypeConstraint2> collection= (Collection<ITypeConstraint2>) data;
+			collection.add(constraint);
+		} else {
+			final Collection<Object> usage= new ArrayList<Object>(2);
 			usage.add(data);
 			usage.add(constraint);
 			variable.setData(DATA_USAGE, usage);
@@ -175,16 +188,16 @@ public final class SuperTypeConstraintsModel {
 	}
 
 	/** The cast variables (element type: <code>CastVariable2</code>) */
-	private final Collection fCastVariables= new ArrayList();
+	private final Collection<CastVariable2> fCastVariables= new ArrayList<CastVariable2>();
 
 	/** The compliance level */
 	private int fCompliance= 3;
 
 	/** The set of constraint variables (element type: <code>ConstraintVariable2</code>) */
-	private final HashedSet fConstraintVariables= new HashedSet();
+	private final HashedSet<ConstraintVariable2> fConstraintVariables= new HashedSet<ConstraintVariable2>();
 
 	/** The covariant type constraints (element type: <code>CovariantTypeConstraint</code>) */
-	private final Collection fCovariantTypeConstraints= new ArrayList();
+	private final Collection<ITypeConstraint2> fCovariantTypeConstraints= new ArrayList<ITypeConstraint2>();
 
 	/** The type environment to use */
 	private TypeEnvironment fEnvironment;
@@ -195,18 +208,19 @@ public final class SuperTypeConstraintsModel {
 	/** The supertype as replacement */
 	private final TType fSuperType;
 
-	/** The TType cache (element type: <code>&lt;String, ITypeBinding&gt;</code>) */
-	private Map fTTypeCache= new LinkedHashMap(MAX_CACHE, 0.75f, true) {
+	/** The TType cache */
+	private Map<String, TType> fTTypeCache= new LinkedHashMap<String, TType>(MAX_CACHE, 0.75f, true) {
 
 		private static final long serialVersionUID= 1L;
 
-		protected final boolean removeEldestEntry(Map.Entry entry) {
+		@Override
+		protected final boolean removeEldestEntry(Map.Entry<String, TType> entry) {
 			return size() > MAX_CACHE;
 		}
 	};
 
 	/** The set of type constraints (element type: <code>ITypeConstraint2</code>) */
-	private final Set fTypeConstraints= new HashSet();
+	private final Set<ITypeConstraint2> fTypeConstraints= new HashSet<ITypeConstraint2>();
 
 	/**
 	 * Creates a new super type constraints model.
@@ -293,7 +307,7 @@ public final class SuperTypeConstraintsModel {
 		if (type.isArray())
 			type= type.getElementType();
 		type= type.getTypeDeclaration();
-		return (ConstraintVariable2) fConstraintVariables.addExisting(new ImmutableTypeVariable2(createTType(type)));
+		return fConstraintVariables.addExisting(new ImmutableTypeVariable2(createTType(type)));
 	}
 
 	/**
@@ -340,7 +354,7 @@ public final class SuperTypeConstraintsModel {
 	public final ConstraintVariable2 createExceptionVariable(final Name name) {
 		final ITypeBinding binding= name.resolveTypeBinding();
 		if (isConstrainedType(binding))
-			return (ConstraintVariable2) fConstraintVariables.addExisting(new TypeVariable2(createTType(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(name), name)));
+			return fConstraintVariables.addExisting(new TypeVariable2(createTType(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(name), name)));
 		return null;
 	}
 
@@ -354,7 +368,7 @@ public final class SuperTypeConstraintsModel {
 		if (type.isArray())
 			type= type.getElementType();
 		if (isConstrainedType(type))
-			return (ConstraintVariable2) fConstraintVariables.addExisting(new ImmutableTypeVariable2(createTType(type)));
+			return fConstraintVariables.addExisting(new ImmutableTypeVariable2(createTType(type)));
 		return null;
 	}
 
@@ -371,7 +385,7 @@ public final class SuperTypeConstraintsModel {
 		if (type.isArray())
 			type= type.getElementType();
 		if (isConstrainedType(type))
-			return (ConstraintVariable2) fConstraintVariables.addExisting(new IndependentTypeVariable2(createTType(type)));
+			return fConstraintVariables.addExisting(new IndependentTypeVariable2(createTType(type)));
 		return null;
 	}
 
@@ -396,7 +410,7 @@ public final class SuperTypeConstraintsModel {
 				variable= new ParameterTypeVariable2(type, index, method.getMethodDeclaration());
 			else
 				variable= new ImmutableTypeVariable2(type);
-			return (ConstraintVariable2) fConstraintVariables.addExisting(variable);
+			return fConstraintVariables.addExisting(variable);
 		}
 		return null;
 	}
@@ -419,7 +433,7 @@ public final class SuperTypeConstraintsModel {
 					variable= new ReturnTypeVariable2(type, method);
 				else
 					variable= new ImmutableTypeVariable2(type);
-				return (ConstraintVariable2) fConstraintVariables.addExisting(variable);
+				return fConstraintVariables.addExisting(variable);
 			}
 		}
 		return null;
@@ -448,7 +462,7 @@ public final class SuperTypeConstraintsModel {
 	 */
 	public final TType createTType(final ITypeBinding binding) {
 		final String key= binding.getKey();
-		final TType cached= (TType) fTTypeCache.get(key);
+		final TType cached= fTTypeCache.get(key);
 		if (cached != null)
 			return cached;
 		final TType type= fEnvironment.create(binding);
@@ -467,7 +481,7 @@ public final class SuperTypeConstraintsModel {
 		if (type.isArray())
 			type= type.getElementType();
 		if (isConstrainedType(type))
-			return (ConstraintVariable2) fConstraintVariables.addExisting(new TypeVariable2(createTType(type), range));
+			return fConstraintVariables.addExisting(new TypeVariable2(createTType(type), range));
 		return null;
 	}
 
@@ -483,7 +497,7 @@ public final class SuperTypeConstraintsModel {
 			if (binding.isArray())
 				binding= binding.getElementType();
 			if (isConstrainedType(binding))
-				return (ConstraintVariable2) fConstraintVariables.addExisting(new TypeVariable2(createTType(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(type), type)));
+				return fConstraintVariables.addExisting(new TypeVariable2(createTType(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(type), type)));
 		}
 		return null;
 	}
@@ -512,7 +526,7 @@ public final class SuperTypeConstraintsModel {
 			}
 			if (variable == null)
 				variable= new VariableVariable2(createTType(type), declaration);
-			return (ConstraintVariable2) fConstraintVariables.addExisting(variable);
+			return fConstraintVariables.addExisting(variable);
 		}
 		return null;
 	}
@@ -530,7 +544,7 @@ public final class SuperTypeConstraintsModel {
 	 *
 	 * @return the cast variables (element type: <code>CastVariable2</code>)
 	 */
-	public final Collection getCastVariables() {
+	public final Collection<CastVariable2> getCastVariables() {
 		return Collections.unmodifiableCollection(fCastVariables);
 	}
 
@@ -548,7 +562,7 @@ public final class SuperTypeConstraintsModel {
 	 *
 	 * @return the constraint variables (element type: <code>ConstraintVariable2</code>)
 	 */
-	public final Collection getConstraintVariables() {
+	public final Collection<ConstraintVariable2> getConstraintVariables() {
 		return Collections.unmodifiableCollection(fConstraintVariables);
 	}
 
@@ -575,7 +589,7 @@ public final class SuperTypeConstraintsModel {
 	 *
 	 * @return the type constraints (element type: <code>ITypeConstraint2</code>)
 	 */
-	public final Collection getTypeConstraints() {
+	public final Collection<ITypeConstraint2> getTypeConstraints() {
 		return Collections.unmodifiableCollection(fTypeConstraints);
 	}
 

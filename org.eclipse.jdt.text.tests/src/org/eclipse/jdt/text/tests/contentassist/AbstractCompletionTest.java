@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -105,6 +105,10 @@ public class AbstractCompletionTest extends TestCase {
 		fWaitBeforeCompleting= false;
 	}
 
+	protected IPackageFragment getAnonymousTestPackage() throws CoreException {
+		return CompletionTestSetup.getAnonymousTestPackage();
+	}
+
 	protected void configureCoreOptions(Hashtable options) {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "1");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
@@ -144,8 +148,16 @@ public class AbstractCompletionTest extends TestCase {
 		store.setToDefault(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
 		store.setToDefault(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION);
 		store.setToDefault(PreferenceConstants.CODEASSIST_AUTOINSERT);
-		fCU= null;
-		fEditor= null;
+
+		if (fEditor != null) {
+			EditorTestHelper.closeEditor(fEditor);
+			fEditor= null;
+		}
+
+		if (fCU != null) {
+			JavaProjectHelper.delete(fCU);
+			fCU= null;
+		}
 
 		JavaProjectHelper.emptyDisplayLoop();
 	}
@@ -310,7 +322,7 @@ public class AbstractCompletionTest extends TestCase {
 	}
 
 	private void assertProposal(String selector, StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection) throws CoreException {
-		fCU= createCU(CompletionTestSetup.getAnonymousTestPackage(), contents.toString());
+		fCU= createCU(getAnonymousTestPackage(), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
 		IDocument doc;
 		ITextSelection postSelection;
@@ -321,6 +333,7 @@ public class AbstractCompletionTest extends TestCase {
 			postSelection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
 		} finally {
 			EditorTestHelper.closeEditor(fEditor);
+			fEditor= null;
 		}
 
 		assertEquals(result.toString(), doc.get());
@@ -329,7 +342,7 @@ public class AbstractCompletionTest extends TestCase {
 	}
 
 	private void assertIncrementalCompletion(StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection) throws CoreException {
-		fCU= createCU(CompletionTestSetup.getAnonymousTestPackage(), contents.toString());
+		fCU= createCU(getAnonymousTestPackage(), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
 		IDocument doc;
 		ITextSelection postSelection;
@@ -339,6 +352,7 @@ public class AbstractCompletionTest extends TestCase {
 			postSelection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
 		} finally {
 			EditorTestHelper.closeEditor(fEditor);
+			fEditor= null;
 		}
 
 		assertEquals(result.toString(), doc.get());
@@ -347,12 +361,13 @@ public class AbstractCompletionTest extends TestCase {
 	}
 
 	private void assertNoProposal(String selector, StringBuffer contents, IRegion preSelection) throws CoreException {
-		fCU= createCU(CompletionTestSetup.getAnonymousTestPackage(), contents.toString());
+		fCU= createCU(getAnonymousTestPackage(), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
 		try {
 			assertNull(findNamedProposal(selector, preSelection));
 		} finally {
 			EditorTestHelper.closeEditor(fEditor);
+			fEditor= null;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,9 +19,14 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ui.IWorkbenchPartSite;
@@ -33,6 +38,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -50,12 +57,8 @@ public class CodeFormatterTest extends CoreTests {
 		super(name);
 	}
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
-	}
-
 	public static Test suite() {
-		return allTests();
+		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
@@ -145,6 +148,38 @@ public class CodeFormatterTest extends CoreTests {
 		buf.append("    public C() {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(formatted, expected);
+	}
+
+	public void testFormatFieldDeclWithExtraWhitespace() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("    class A {\n");
+		buf.append("        int i;\n");
+		buf.append("}\n");
+
+		String contents= buf.toString();
+		String formatString1= "    class A {";
+		String formatString2= "        int i;";
+
+		IRegion[] regions= new Region[] { new
+				Region(contents.indexOf(formatString1), formatString1.length()), new
+				Region(contents.indexOf(formatString2), formatString2.length()) };
+		TextEdit edit= ToolFactory.createCodeFormatter(null,
+				ToolFactory.M_FORMAT_EXISTING).format((CodeFormatter.K_COMPILATION_UNIT |
+						CodeFormatter.F_INCLUDE_COMMENTS), contents, regions, 0, "\n");
+		assertNotNull(edit);
+		Document doc= new Document(contents);
+		edit.apply(doc);
+		String formatted= doc.get();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("class A {\n");
+		buf.append("    int i;\n");
+		buf.append("}\n");
+
 		String expected= buf.toString();
 		assertEqualString(formatted, expected);
 	}

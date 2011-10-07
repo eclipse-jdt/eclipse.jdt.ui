@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,10 +54,11 @@ class LocationCopyAction extends Action {
 		});
 	}
 
+	@Override
 	public void run() {
 		IStructuredSelection selection= (IStructuredSelection) fLocationViewer.getSelection();
 		StringBuffer buf= new StringBuffer();
-		for (Iterator iterator= selection.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator= selection.iterator(); iterator.hasNext();) {
 			CallLocation location= (CallLocation) iterator.next();
 			buf.append(location.getLineNumber()).append('\t').append(location.getCallText());
 			buf.append('\n');

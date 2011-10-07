@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,31 +34,33 @@ public class CoreTests extends TestCase {
 	public static Test suite() {
 
 		TestSuite suite= new TestSuite();
-		suite.addTest(AddImportTest.allTests());
+		suite.addTest(AddImportTest.suite());
 		suite.addTest(SourceActionTests.suite());
-		suite.addTest(ASTNodesInsertTest.allTests());
-		suite.addTest(BindingsNameTest.allTests());
-		suite.addTest(CallHierarchyTest.allTests());
-		suite.addTest(ClassPathDetectorTest.allTests());
-		suite.addTest(CodeFormatterUtilTest.allTests());
-		suite.addTest(CodeFormatterTest.allTests());
-		suite.addTest(HierarchicalASTVisitorTest.allTests());
-		suite.addTest(ImportOrganizeTest.allTests());
-		suite.addTest(JavaElementLabelsTest.allTests());
-		suite.addTest(JavaElementPropertyTesterTest.allTests());
-		suite.addTest(JavaModelUtilTest.allTests());
-		suite.addTest(MethodOverrideTest.allTests());
-		suite.addTest(NameProposerTest.allTests());
-		suite.addTest(OverrideTest.allTests());
-		suite.addTest(PartialASTTest.allTests());
-		suite.addTest(ScopeAnalyzerTest.allTests());
-		suite.addTest(TemplateStoreTest.allTests());
-		suite.addTest(TypeHierarchyTest.allTests());
-		suite.addTest(TypeRulesTest.allTests());
-		suite.addTest(TypeInfoTest.allTests());
-		suite.addTest(StringsTest.allTests());
-		suite.addTest(IndentManipulationTest.allTests());
-		suite.addTest(SelectionHistoryTest.allTests());
+		suite.addTest(ASTNodesInsertTest.suite());
+		suite.addTest(BindingsNameTest.suite());
+		suite.addTest(CallHierarchyTest.suite());
+		suite.addTest(ClassPathDetectorTest.suite());
+		suite.addTest(CodeFormatterUtilTest.suite());
+		suite.addTest(CodeFormatterTest.suite());
+		suite.addTest(HierarchicalASTVisitorTest.suite());
+		suite.addTest(ImportOrganizeTest.suite());
+		suite.addTest(JavaElementLabelsTest.suite());
+		suite.addTest(JavaElementLabelsTest17.suite());
+		suite.addTest(JavaElementPropertyTesterTest.suite());
+		suite.addTest(JavaModelUtilTest.suite());
+		suite.addTest(MethodOverrideTest.suite());
+		suite.addTest(NameProposerTest.suite());
+		suite.addTest(OverrideTest.suite());
+		suite.addTest(PartialASTTest.suite());
+		suite.addTest(ScopeAnalyzerTest.suite());
+		suite.addTest(TemplateStoreTest.suite());
+		suite.addTest(TypeHierarchyTest.suite());
+		suite.addTest(TypeRulesTest.suite());
+		suite.addTest(TypeInfoTest.suite());
+		suite.addTest(StringsTest.suite());
+		suite.addTest(IndentManipulationTest.suite());
+		suite.addTest(SelectionHistoryTest.suite());
+		suite.addTest(ASTProviderTest.suite());
 
 		return new ProjectTestSetup(suite);
 	}

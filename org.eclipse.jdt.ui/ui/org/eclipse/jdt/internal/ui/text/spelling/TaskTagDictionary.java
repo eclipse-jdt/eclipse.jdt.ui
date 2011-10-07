@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,12 +14,12 @@ package org.eclipse.jdt.internal.ui.text.spelling;
 import java.net.URL;
 import java.util.StringTokenizer;
 
-import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary;
 
 /**
@@ -32,6 +32,7 @@ public class TaskTagDictionary extends AbstractSpellDictionary implements IPrope
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#getName()
 	 */
+	@Override
 	protected final URL getURL() {
 		return null;
 	}
@@ -39,15 +40,10 @@ public class TaskTagDictionary extends AbstractSpellDictionary implements IPrope
 	/*
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.AbstractSpellDictionary#load(java.net.URL)
 	 */
+	@Override
 	protected synchronized boolean load(final URL url) {
-
-		final Plugin plugin= JavaCore.getPlugin();
-		if (plugin != null) {
-
-			plugin.getPluginPreferences().addPropertyChangeListener(this);
-			return updateTaskTags();
-		}
-		return false;
+		JavaPlugin.getJavaCorePluginPreferences().addPropertyChangeListener(this);
+		return updateTaskTags();
 	}
 
 	/*
@@ -62,12 +58,9 @@ public class TaskTagDictionary extends AbstractSpellDictionary implements IPrope
 	/*
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellDictionary#unload()
 	 */
+	@Override
 	public synchronized void unload() {
-
-		final Plugin plugin= JavaCore.getPlugin();
-		if (plugin != null)
-			plugin.getPluginPreferences().removePropertyChangeListener(this);
-
+		JavaPlugin.getJavaCorePluginPreferences().removePropertyChangeListener(this);
 		super.unload();
 	}
 
@@ -96,6 +89,7 @@ public class TaskTagDictionary extends AbstractSpellDictionary implements IPrope
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#stripNonLetters(java.lang.String)
 	 * @since 3.3
 	 */
+	@Override
 	protected String stripNonLetters(String word) {
 		return word;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 		setText(WorkingSetMessages.RemoveWorkingSetElementAction_label);
 	}
 
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		IWorkingSet workingSet= getWorkingSet(selection);
 		setEnabled(workingSet != null && !IWorkingSetIDs.OTHERS.equals(workingSet.getId()));
@@ -42,9 +43,9 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 		if (!(selection instanceof ITreeSelection))
 			return null;
 		ITreeSelection treeSelection= (ITreeSelection)selection;
-		List elements= treeSelection.toList();
+		List<?> elements= treeSelection.toList();
 		IWorkingSet result= null;
-		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			TreePath[] paths= treeSelection.getPathsFor(element);
 			if (paths.length != 1)
@@ -65,13 +66,14 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 		return result;
 	}
 
+	@Override
 	public void run(IStructuredSelection selection) {
 		IWorkingSet ws= getWorkingSet(selection);
 		if (ws == null)
 			return;
-		HashSet elements= new HashSet(Arrays.asList(ws.getElements()));
-		List selectedElements= selection.toList();
-		for (Iterator iter= selectedElements.iterator(); iter.hasNext();) {
+		HashSet<IAdaptable> elements= new HashSet<IAdaptable>(Arrays.asList(ws.getElements()));
+		List<?> selectedElements= selection.toList();
+		for (Iterator<?> iter= selectedElements.iterator(); iter.hasNext();) {
 			Object object= iter.next();
 			if (object instanceof IAdaptable) {
 				IAdaptable[] adaptedElements= ws.adaptElements(new IAdaptable[] {(IAdaptable)object});
@@ -80,6 +82,6 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 				}
 			}
 		}
-		ws.setElements((IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
+		ws.setElements(elements.toArray(new IAdaptable[elements.size()]));
 	}
 }

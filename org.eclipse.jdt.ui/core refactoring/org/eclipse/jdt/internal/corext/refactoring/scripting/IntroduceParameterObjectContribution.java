@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ public class IntroduceParameterObjectContribution extends JavaUIRefactoringContr
 	public IntroduceParameterObjectContribution() {
 	}
 
+	@Override
 	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		if (descriptor instanceof IntroduceParameterObjectDescriptor) {
 			IntroduceParameterObjectProcessor processor= new IntroduceParameterObjectProcessor((IntroduceParameterObjectDescriptor) descriptor);
@@ -38,10 +39,12 @@ public class IntroduceParameterObjectContribution extends JavaUIRefactoringContr
 		return null;
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return RefactoringSignatureDescriptorFactory.createIntroduceParameterObjectDescriptor();
 	}
 
+	@Override
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createIntroduceParameterObjectDescriptor(project, description, comment, arguments, flags);
 	}

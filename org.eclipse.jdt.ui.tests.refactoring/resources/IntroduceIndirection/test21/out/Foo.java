@@ -3,7 +3,6 @@ package p;
 public class Foo {
 	
 	/**
-	 * @param <E>
 	 * @param foo
 	 * @param e
 	 */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,13 +34,14 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		super();
 	}
 
-	public CodeFormatCleanUp(Map options) {
+	public CodeFormatCleanUp(Map<String, String> options) {
 		super(options);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public CleanUpRequirements getRequirements() {
 		boolean requiresChangedRegions= isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE) && isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 		return new CleanUpRequirements(false, false, requiresChangedRegions, null);
@@ -49,6 +50,7 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		ICompilationUnit compilationUnit= context.getCompilationUnit();
 		if (compilationUnit == null)
@@ -73,8 +75,9 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String[] getStepDescriptions() {
-		ArrayList result= new ArrayList();
+		ArrayList<String> result= new ArrayList<String>();
 		if (isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE))
 			result.add(MultiFixMessages.CodeFormatCleanUp_description);
 
@@ -89,12 +92,13 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		if (isEnabled(CleanUpConstants.FORMAT_CORRECT_INDENTATION))
 			result.add(MultiFixMessages.CodeFormatCleanUp_correctIndentation_description);
 
-		return (String[])result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 		buf.append("/**\n"); //$NON-NLS-1$

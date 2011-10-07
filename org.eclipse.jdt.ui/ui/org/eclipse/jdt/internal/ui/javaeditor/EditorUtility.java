@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,16 +80,12 @@ import org.eclipse.compare.rangedifferencer.IRangeComparator;
 import org.eclipse.compare.rangedifferencer.RangeDifference;
 import org.eclipse.compare.rangedifferencer.RangeDifferencer;
 
-import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.ILocalVariable;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -259,16 +255,9 @@ public class EditorUtility {
 				return;
 			else if (element instanceof IClassFile)
 				return;
-			else if (element instanceof ILocalVariable)
-				range= ((ILocalVariable)element).getNameRange();
-			else if (element instanceof IMember)
-				range= ((IMember)element).getNameRange();
-			else if (element instanceof ITypeParameter)
-				range= ((ITypeParameter)element).getNameRange();
-			else if (element instanceof IAnnotation)
-				range= ((IAnnotation)element).getNameRange();
-			else if (element instanceof ISourceReference)
-				range= ((ISourceReference)element).getSourceRange();
+
+			if (element instanceof ISourceReference)
+				range= ((ISourceReference)element).getNameRange();
 
 			if (range != null)
 				revealInEditor(part, range.getOffset(), range.getLength());
@@ -310,6 +299,7 @@ public class EditorUtility {
 			final IEditorInput input= editor.getEditorInput();
 			if (input instanceof IFileEditorInput) {
 				WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
+					@Override
 					protected void execute(IProgressMonitor monitor) throws CoreException {
 						IMarker marker= null;
 						try {
@@ -600,8 +590,8 @@ public class EditorUtility {
 	 * @since 3.4
 	 */
 	public static IEditorPart[] getDirtyEditors(boolean skipNonResourceEditors) {
-		Set inputs= new HashSet();
-		List result= new ArrayList(0);
+		Set<IEditorInput> inputs= new HashSet<IEditorInput>();
+		List<IEditorPart> result= new ArrayList<IEditorPart>(0);
 		IWorkbench workbench= PlatformUI.getWorkbench();
 		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
 		for (int i= 0; i < windows.length; i++) {
@@ -619,7 +609,7 @@ public class EditorUtility {
 				}
 			}
 		}
-		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
+		return result.toArray(new IEditorPart[result.size()]);
 	}
 
 	private static boolean isResourceEditorInput(IEditorInput input) {
@@ -646,8 +636,8 @@ public class EditorUtility {
 	 * @since 3.3
 	 */
 	public static IEditorPart[] getDirtyEditorsToSave(boolean saveUnknownEditors) {
-		Set inputs= new HashSet();
-		List result= new ArrayList(0);
+		Set<IEditorInput> inputs= new HashSet<IEditorInput>();
+		List<IEditorPart> result= new ArrayList<IEditorPart>(0);
 		IWorkbench workbench= PlatformUI.getWorkbench();
 		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
 		for (int i= 0; i < windows.length; i++) {
@@ -665,7 +655,7 @@ public class EditorUtility {
 				}
 			}
 		}
-		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
+		return result.toArray(new IEditorPart[result.size()]);
 	}
 
 	/*
@@ -781,7 +771,7 @@ public class EditorUtility {
 					//2. Successive changed lines are merged into on RangeDifference
 					//     forAll r1,r2 element differences: r1.rightStart()<r2.rightStart() -> r1.rightEnd()<r2.rightStart
 
-					ArrayList regions= new ArrayList();
+					ArrayList<IRegion> regions= new ArrayList<IRegion>();
 					for (int i= 0; i < differences.length; i++) {
 						RangeDifference curr= differences[i];
 						if (curr.kind() == RangeDifference.CHANGE && curr.rightLength() > 0) {
@@ -800,7 +790,7 @@ public class EditorUtility {
 						}
 					}
 
-					return (IRegion[]) regions.toArray(new IRegion[regions.size()]);
+					return regions.toArray(new IRegion[regions.size()]);
 				}
 			});
 		} finally {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,21 +62,28 @@ public class ProjectTestSetup extends TestSetup {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		IJavaProject project= getProject();
-		if (project.exists()) { // allow nesting of ProjectTestSetups
+		if (projectExists()) { // allow nesting of ProjectTestSetups
 			return;
 		}
 
 		fAutobuilding = CoreUtility.setAutoBuilding(false);
 
-		fJProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
-		fJProject.setRawClasspath(getDefaultClasspath(), null);
-
-		TestOptions.initializeProjectOptions(fJProject);
+		fJProject= createAndInitializeProject();
 
 		JavaCore.setOptions(TestOptions.getDefaultOptions());
 		TestOptions.initializeCodeGenerationOptions();
 		JavaPlugin.getDefault().getCodeTemplateStore().load();
+	}
+
+	protected boolean projectExists() {
+		return getProject().exists();
+	}
+
+	protected IJavaProject createAndInitializeProject() throws CoreException {
+		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
+		javaProject.setRawClasspath(getDefaultClasspath(), null);
+		TestOptions.initializeProjectOptions(javaProject);
+		return javaProject;
 	}
 
 	protected void tearDown() throws Exception {

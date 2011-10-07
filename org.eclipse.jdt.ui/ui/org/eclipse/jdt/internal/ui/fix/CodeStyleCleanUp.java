@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,16 +38,17 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 	public CodeStyleCleanUp() {
 	}
 
-	public CodeStyleCleanUp(Map options) {
+	public CodeStyleCleanUp(Map<String, String> options) {
 		super(options);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public CleanUpRequirements getRequirements() {
 		boolean requireAST= requireAST();
-		Map requiredOptions= requireAST ? getRequiredOptions() : null;
+		Map<String, String> requiredOptions= requireAST ? getRequiredOptions() : null;
 		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
 	}
 
@@ -69,6 +70,7 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
@@ -93,6 +95,7 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		return CodeStyleFix.createCleanUp(compilationUnit, problems,
 				isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS),
@@ -100,8 +103,8 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 				isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS));
 	}
 
-	private Map getRequiredOptions() {
-		Map result= new Hashtable();
+	private Map<String, String> getRequiredOptions() {
+		Map<String, String> result= new Hashtable<String, String>();
 		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS))
 			result.put(JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER, JavaCore.WARNING);
 		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS))
@@ -112,8 +115,9 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String[] getStepDescriptions() {
-		List result= new ArrayList();
+		List<String> result= new ArrayList<String>();
 		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS))
 			result.add(MultiFixMessages.CodeStyleMultiFix_AddThisQualifier_description);
 		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS))
@@ -130,9 +134,10 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 			result.add(MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description);
 		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS))
 			result.add(MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect);
-		return (String[])result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
+	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 
@@ -216,6 +221,7 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
 		IProblem[] problems= compilationUnit.getProblems();

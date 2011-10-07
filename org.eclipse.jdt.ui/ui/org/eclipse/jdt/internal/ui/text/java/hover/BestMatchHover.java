@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,8 +35,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class BestMatchHover extends AbstractJavaEditorTextHover {
 
-	private List fTextHoverSpecifications;
-	private List fInstantiatedTextHovers;
+	private List<JavaEditorTextHoverDescriptor> fTextHoverSpecifications;
+	private List<IJavaEditorTextHover> fInstantiatedTextHovers;
 	private ITextHover fBestHover;
 
 	public BestMatchHover() {
@@ -54,8 +54,8 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 	private void installTextHovers() {
 
 		// initialize lists - indicates that the initialization happened
-		fTextHoverSpecifications= new ArrayList(2);
-		fInstantiatedTextHovers= new ArrayList(2);
+		fTextHoverSpecifications= new ArrayList<JavaEditorTextHoverDescriptor>(2);
+		fInstantiatedTextHovers= new ArrayList<IJavaEditorTextHover>(2);
 
 		// populate list
 		JavaEditorTextHoverDescriptor[] hoverDescs= JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
@@ -72,9 +72,9 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 
 		boolean done= true;
 		int i= -1;
-		for (Iterator iterator= fTextHoverSpecifications.iterator(); iterator.hasNext();) {
+		for (Iterator<JavaEditorTextHoverDescriptor> iterator= fTextHoverSpecifications.iterator(); iterator.hasNext();) {
 			i++;
-			JavaEditorTextHoverDescriptor spec= (JavaEditorTextHoverDescriptor) iterator.next();
+			JavaEditorTextHoverDescriptor spec= iterator.next();
 			if (spec == null)
 				continue;
 
@@ -106,8 +106,8 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 		if (fInstantiatedTextHovers == null)
 			return null;
 
-		for (Iterator iterator= fInstantiatedTextHovers.iterator(); iterator.hasNext(); ) {
-			ITextHover hover= (ITextHover)iterator.next();
+		for (Iterator<IJavaEditorTextHover> iterator= fInstantiatedTextHovers.iterator(); iterator.hasNext(); ) {
+			ITextHover hover= iterator.next();
 			if (hover == null)
 				continue;
 
@@ -124,6 +124,7 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 	/*
 	 * @see org.eclipse.jface.text.ITextHoverExtension2#getHoverInfo2(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 */
+	@Override
 	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
 
 		checkTextHovers();
@@ -132,8 +133,8 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 		if (fInstantiatedTextHovers == null)
 			return null;
 
-		for (Iterator iterator= fInstantiatedTextHovers.iterator(); iterator.hasNext(); ) {
-			ITextHover hover= (ITextHover)iterator.next();
+		for (Iterator<IJavaEditorTextHover> iterator= fInstantiatedTextHovers.iterator(); iterator.hasNext(); ) {
+			ITextHover hover= iterator.next();
 			if (hover == null)
 				continue;
 
@@ -159,6 +160,7 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 	 * @see org.eclipse.jface.text.ITextHoverExtension#getHoverControlCreator()
 	 * @since 3.0
 	 */
+	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		if (fBestHover instanceof ITextHoverExtension)
 			return ((ITextHoverExtension)fBestHover).getHoverControlCreator();
@@ -170,6 +172,7 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 * @since 3.0
 	 */
+	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		if (fBestHover instanceof IInformationProviderExtension2) // this is wrong, but left here for backwards compatibility
 			return ((IInformationProviderExtension2)fBestHover).getInformationPresenterControlCreator();

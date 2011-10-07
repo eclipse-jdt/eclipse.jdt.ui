@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,6 +78,7 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void dispose() {
 		super.dispose();
 		fHistoryLabelProvider.dispose();
@@ -90,6 +91,7 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Image getImage(final Object element) {
 		if (element instanceof IFolder) {
 			final IFolder folder= (IFolder) element;
@@ -115,6 +117,7 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getText(final Object element) {
 		if (element instanceof IFolder) {
 			final IFolder folder= (IFolder) element;

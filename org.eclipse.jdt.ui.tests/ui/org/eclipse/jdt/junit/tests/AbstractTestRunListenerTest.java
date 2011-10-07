@@ -12,7 +12,6 @@ package org.eclipse.jdt.junit.tests;
 
 import java.util.ArrayList;
 
-import junit.framework.Test;
 import junit.framework.TestCase;
 
 import org.eclipse.jdt.junit.launcher.JUnitLaunchShortcut;
@@ -90,10 +89,6 @@ public class AbstractTestRunListenerTest extends TestCase {
 
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
-	}
-
-	public static Test setUpTest(Test test) {
-		return test;
 	}
 
 	private static class TestJUnitLaunchShortcut extends JUnitLaunchShortcut {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.ui.text.JavaIndenter;
  */
 public class JavaHeuristicScannerTest extends TestCase {
 
+	private static final boolean BUG_65463= true;
 	private FastPartitioner fPartitioner;
 	private Document fDocument;
 	private JavaIndenter fScanner;
@@ -110,15 +111,6 @@ public class JavaHeuristicScannerTest extends TestCase {
 		Assert.assertEquals(21, pos);
 	}
 
-	public void testPrevIndentationUnit4() {
-		fDocument.set("\tint a;\n" +
-			"\tif (true)\n" +
-			"\t\treturn a\n" +
-			"");
-
-		int pos= fScanner.findReferencePosition(29);
-		Assert.assertEquals(28, pos);
-	}
 
 	public void testPrevIndentationUnit5() {
 		fDocument.set("\tint a;\n" +
@@ -322,34 +314,6 @@ public class JavaHeuristicScannerTest extends TestCase {
 			"");
 
 		String indent= fScanner.computeIndentation(18).toString();
-		Assert.assertEquals("\t\t", indent);
-	}
-
-	public void testIndentation2() {
-		fDocument.set("\tint a;\n" +
-			"\tif (true)\n" +
-			"\t\treturn a");
-
-		String indent= fScanner.computeIndentation(28).toString();
-		Assert.assertEquals("\t\t", indent);
-	}
-
-	public void testIndentation3() {
-		fDocument.set("\tint a;\n" +
-			"\tif (true)\n" +
-			"\t\treturn a;");
-
-		String indent= fScanner.computeIndentation(29).toString();
-		Assert.assertEquals("\t\t", indent);
-	}
-
-	public void testIndentation4() {
-		fDocument.set("\tint a;\n" +
-			"\tif (true)\n" +
-			"\t\treturn a\n" +
-			"");
-
-		String indent= fScanner.computeIndentation(29).toString();
 		Assert.assertEquals("\t\t", indent);
 	}
 
@@ -707,7 +671,7 @@ public class JavaHeuristicScannerTest extends TestCase {
 
 		// this is bogus, since this is really just an unfinished call argument list - how could we know
 		String indent= fScanner.computeIndentation(fDocument.getLength() - 2).toString();
-		Assert.assertEquals("		", indent);
+		Assert.assertEquals("			", indent);
 	}
 
 	public void testExceptionIndentation1() {
@@ -847,7 +811,7 @@ public class JavaHeuristicScannerTest extends TestCase {
     }
 
 	public void testConditional1() throws Exception {
-		if (true) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
+		if (BUG_65463) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
 			return;
     	fDocument.set(
     			"		public boolean isPrime() {\n" +
@@ -860,7 +824,7 @@ public class JavaHeuristicScannerTest extends TestCase {
     }
 
 	public void testConditional2() throws Exception {
-		if (true) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
+		if (BUG_65463) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
 			return;
     	fDocument.set(
     			"		public boolean isPrime() {\n" +
@@ -873,4 +837,271 @@ public class JavaHeuristicScannerTest extends TestCase {
     	Assert.assertEquals("					", indent);
 
     }
+
+	public void testContinuationIndentationOfForStatement() throws Exception {
+		fDocument.set("\tfor (int i = (2 * 2); i < array.length; i++) {\n" +
+				"\tint i= 25;\n" +
+				"\t}");
+
+		String indent= fScanner.computeIndentation(22).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(27).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(39).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(40).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(5).toString();
+		Assert.assertEquals("\t", indent);
+		indent= fScanner.computeIndentation(45).toString();
+		Assert.assertEquals("\t", indent);
+		indent= fScanner.computeIndentation(60).toString();
+		Assert.assertEquals("\t", indent);
+	}
+
+	public void testContinuationIndentationOfForEachStatement() throws Exception {
+		// Bug 331028 and Bug 331734
+		fDocument.set("\tfor (int value : values) {\n" +
+				"\t\tsum += value;\n" +
+				"\t\t\t\tSystem.out.println(sum);\n" +
+				"\t}");
+
+		String indent= fScanner.computeIndentation(44).toString();
+		Assert.assertEquals("\t\t", indent);
+	}
+
+	public void testContinuationIndentationOfForEachStatement2() throws Exception {
+		// Bug 348198
+		fDocument.set("\tfor (int value : values)\n" +
+				"\t\tsum += value;\n" +
+				"\t\t\t\tSystem.out.println(sum);\n" +
+				"\t}");
+
+		String indent= fScanner.computeIndentation(44).toString();
+		Assert.assertEquals("\t", indent);
+	}
+
+	public void testContinuationIndentationOfBooleanExpression() throws Exception {
+		fDocument.set("\tboolean a = true || false;\n" +
+				"\tboolean b = a || false;\n");
+
+		String indent= fScanner.computeIndentation(20).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(40).toString();
+		Assert.assertEquals("\t\t", indent);
+	}
+
+	public void testContinuationIndentationOfReturnStatement() throws Exception {
+		fDocument.set("\t\treturn \"I'm such a long string that you have to split me to see the whole line without scrolling around\"\n");
+
+		String indent= fScanner.computeIndentation(8).toString();
+		Assert.assertEquals("\t\t\t", indent);
+		indent= fScanner.computeIndentation(21).toString();
+		Assert.assertEquals("\t\t\t", indent);
+		indent= fScanner.computeIndentation(38).toString();
+		Assert.assertEquals("\t\t\t", indent);
+	}
+
+	public void testContinuationIndentationOfAssignmentStatement() throws Exception {
+		fDocument.set("\tint i= 5+");
+
+		String indent= fScanner.computeIndentation(7).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(10).toString();
+		Assert.assertEquals("\t\t", indent);
+	}
+
+	public void testContinuationIndentationOfThrowsClause() throws Exception {
+		fDocument.set("\tprivate void thrower() throws java.sql.SQLException, java.io.IOException {");
+
+		String indent= fScanner.computeIndentation(23).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(24).toString();
+		Assert.assertEquals("\t\t", indent);
+	}
+
+	public void testContinuationIndentationOfParentheses() throws Exception {
+		fDocument.set("\tint foo() {\n\treturn \"\".length(\n\t\t);\n\t}");
+
+		String indent= fScanner.computeIndentation(34).toString();
+		Assert.assertEquals("\t\t", indent);
+	}
+
+	public void testContinuationIndentationOfAnnotation() throws Exception {
+		fDocument.set("\t@MyAnnotation(\n\t\tvalue=\"hello\")\n\t\tpublic class ArrayAnnotationBug {\n\t\t}");
+		String indent= fScanner.computeIndentation(33).toString();
+		Assert.assertEquals("\t", indent);
+
+		fDocument.set("\t@org.eclipse.jdt.MyAnnotation(\n\t\tvalue=\"hello\")\n\t\tpublic class ArrayAnnotationBug {\n\t\t}");
+		indent= fScanner.computeIndentation(49).toString();
+		Assert.assertEquals("\t", indent);
+	}
+
+	public void testIndentationAfterIfTryCatch() throws Exception {
+		fDocument.set("\tpublic class Bug237081 {\n" +
+				"\t\tpublic void foo() {\n" +
+				"\t\t\tif (true)\n" +
+				"\t\t\t\ttry {\n" +
+				"\t\t\t\t} catch (RuntimeException ex) {\n" +
+				"\t\t\t\t}\n" +
+				"\t\t\t\tfoo();\n" +
+				"\t\t}\n" +
+				"\t}");
+		String indent= fScanner.computeIndentation(117).toString();
+		Assert.assertEquals("\t\t\t", indent);
+
+		fDocument.set("\tpublic class Bug237081 {\n" +
+				"\t\tpublic void foo() {\n" +
+				"\t\t\tif (true)\n" +
+				"\t\t\t\ttry {\n" +
+				"\t\t\t\t} catch (RuntimeException ex) {\n" +
+				"\t\t\t\t} catch (RuntimeException ex) {\n" +
+				"\t\t\t\t} finally {\n" +
+				"\t\t\t\t}\n" +
+				"\t\tfoo();\n" +
+				"\t\t}\n" +
+				"\t}");
+		indent= fScanner.computeIndentation(167).toString();
+		Assert.assertEquals("\t\t\t", indent);
+	}
+
+	public void testContinuationIndentationOfBrackets() throws Exception {
+		fDocument.set("\tprivate void helper2(boolean[] booleans) {\n\t}");
+
+		String indent= fScanner.computeIndentation(31).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(30).toString();
+		Assert.assertEquals("\t                             ", indent);
+
+		fDocument.set("\tif (booleans[0]) {\n\t\tString[] aString= new String[]{\"a\", \"b\"};\n\t\tbooleans[5]= true;\n\t}");
+		indent= fScanner.computeIndentation(16).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(14).toString();
+		Assert.assertEquals("\t             ", indent);
+		indent= fScanner.computeIndentation(30).toString();
+		Assert.assertEquals("\t\t\t", indent);
+		indent= fScanner.computeIndentation(52).toString();
+		Assert.assertEquals("\t\t\t", indent);
+		indent= fScanner.computeIndentation(77).toString();
+		Assert.assertEquals("\t\t\t", indent);
+	}
+
+	public void testContinuationIndentationOfStrings1() throws Exception {
+		fDocument.set(
+				"	String[] i = new String[] {\n" + //0-28
+				"		\"X.java\",\n" + //29-40
+				"		\"public class X extends B{\"\n" + //41-70
+				"		+ \"test\"\n" +	//71-81
+				"		+ \"    public \"};");//82-
+
+		String indent= fScanner.computeIndentation(73).toString(); // at the beginning of 4th line
+		Assert.assertEquals("\t\t\t", indent);
+		indent= fScanner.computeIndentation(84).toString(); // at the beginning of 5th line
+		Assert.assertEquals("\t\t", indent);
+
+		fDocument.set(
+				"	String[] i = new String[] {\n" +//0-28
+				"		\"X.java\",\n" + //29-40
+				"		\"public class X extends B{\" +\n" + //41-72
+				"		\"test\" +\n" + //73-
+				"		\"    public\"\n};");
+
+		indent= fScanner.computeIndentation(75).toString(); //at the beginning of 4th line
+		Assert.assertEquals("\t\t\t", indent);
+	}
+
+	public void testContinuationIndentationOfStrings2() throws Exception {
+		//Bug 338229
+		fDocument.set(
+				"	System.out.println(\"Some\"\n" + //0-26
+				"		+ new Object()\n" + //27-43
+						"		+ \"string:\\n\" + definedType.toString());\n"); //44-
+
+		String indent= fScanner.computeIndentation(59).toString(); //before the last +
+		Assert.assertEquals("\t\t", indent);
+	}
+
+	public void testContinuationIndentationOfStrings3() throws Exception {
+		fDocument.set(
+				"	String test =\n" + //0-14
+				"		\"this is the 1st string\"\n" + //15-41
+				"		+ \"this is the 1st string\";\n");//42-
+
+		String indent= fScanner.computeIndentation(44).toString();//at the beginning of 3rd line
+		Assert.assertEquals("\t\t\t", indent);
+	}
+
+	public void testContinuationIndentation1() throws Exception {
+		fDocument.set("\treturn (thisIsAVeryLongName == 1 && anotherVeryLongName == 1)\n" +
+				"\t\t|| thisIsAVeryLongName == 2;");
+
+		String indent= fScanner.computeIndentation(68).toString();
+		Assert.assertEquals("\t\t", indent);
+		indent= fScanner.computeIndentation(88).toString();
+		Assert.assertEquals("\t\t", indent);
+	}
+
+	public void testContinuationIndentation2() {
+		fDocument.set("\tint a;\n" +
+				"\tif (true)\n" +
+				"\t\treturn a\n" +
+				"");
+
+		int pos= fScanner.findReferencePosition(29);
+		Assert.assertEquals(21, pos);
+	}
+
+	public void testContinuationIndentation3() {
+		fDocument.set("\tint a;\n" +
+				"\tif (true)\n" +
+				"\t\treturn a");
+
+		String indent= fScanner.computeIndentation(28).toString();
+		Assert.assertEquals("\t\t\t", indent);
+	}
+
+	public void testContinuationIndentation4() {
+		fDocument.set("\tint a;\n" +
+				"\tif (true)\n" +
+				"\t\treturn a;");
+
+		String indent= fScanner.computeIndentation(29).toString();
+		Assert.assertEquals("\t\t\t", indent);
+	}
+
+	public void testContinuationIndentation5() {
+		fDocument.set("\tint a;\n" +
+				"\tif (true)\n" +
+				"\t\treturn a\n" +
+				"");
+
+		String indent= fScanner.computeIndentation(29).toString();
+		Assert.assertEquals("\t\t\t", indent);
+	}
+
+	public void testIndentationTryWithResources() throws Exception {
+		String s= "class A {\n" +
+				"	void foo() throws Throwable {\n" +
+				"		try (FileReader reader1 = new FileReader(\"file1\");\n" +
+				"			FileReader reader2 = new FileReader(\"file2\");\n" +
+				"			FileReader reader3 = new FileReader(\"file3\");\n" +
+				"			FileReader reader4 = new FileReader(\"file4\");\n" +
+				"			FileReader reader5 = new FileReader(\"file5\")) {\n" +
+				"			int ch;\n" +
+				"			while ((ch = reader1.read()) != -1) {\n" +
+				"				System.out.println(ch);\n" +
+				"			}\n" +
+				"		}\n" +
+				"	}\n";
+
+		fDocument.set(s);
+
+		int offset= s.indexOf("FileReader reader2");
+		String indent= fScanner.computeIndentation(offset).toString();
+		Assert.assertEquals("\t\t\t", indent);
+
+		offset= s.indexOf("FileReader reader5");
+		indent= fScanner.computeIndentation(offset).toString();
+		Assert.assertEquals("\t\t\t", indent);
+	}
 }

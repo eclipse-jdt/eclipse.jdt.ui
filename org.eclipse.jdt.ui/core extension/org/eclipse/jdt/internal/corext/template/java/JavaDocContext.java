@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,6 +72,7 @@ public class JavaDocContext extends CompilationUnitContext {
 	/*
 	 * @see TemplateContext#canEvaluate(Template templates)
 	 */
+	@Override
 	public boolean canEvaluate(Template template) {
 		String key= getKey();
 
@@ -86,6 +87,7 @@ public class JavaDocContext extends CompilationUnitContext {
 	/*
 	 * @see DocumentTemplateContext#getStart()
 	 */
+	@Override
 	public int getStart() {
 		if (fIsManaged && getCompletionLength() > 0)
 			return super.getStart();
@@ -140,6 +142,7 @@ public class JavaDocContext extends CompilationUnitContext {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.DocumentTemplateContext#getEnd()
 	 */
+	@Override
 	public int getEnd() {
 
 		if (fIsManaged || getCompletionLength() == 0)
@@ -164,6 +167,7 @@ public class JavaDocContext extends CompilationUnitContext {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.DocumentTemplateContext#getKey()
 	 */
+	@Override
 	public String getKey() {
 
 		if (getCompletionLength() == 0)
@@ -186,6 +190,7 @@ public class JavaDocContext extends CompilationUnitContext {
 	/*
 	 * @see TemplateContext#evaluate(Template)
 	 */
+	@Override
 	public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException {
 		TemplateTranslator translator= new TemplateTranslator();
 		TemplateBuffer buffer= translator.translate(template);

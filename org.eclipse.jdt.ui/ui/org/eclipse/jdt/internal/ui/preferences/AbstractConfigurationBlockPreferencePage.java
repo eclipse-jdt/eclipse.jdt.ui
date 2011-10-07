@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,6 +60,7 @@ public abstract class AbstractConfigurationBlockPreferencePage extends Preferenc
 	/*
 	 * @see PreferencePage#createControl(Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), getHelpId());
@@ -68,6 +69,7 @@ public abstract class AbstractConfigurationBlockPreferencePage extends Preferenc
 	/*
 	 * @see PreferencePage#createContents(Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 
 		fOverlayStore.load();
@@ -88,13 +90,14 @@ public abstract class AbstractConfigurationBlockPreferencePage extends Preferenc
     /*
 	 * @see PreferencePage#performOk()
 	 */
+	@Override
 	public boolean performOk() {
 
 		fConfigurationBlock.performOk();
 
 		fOverlayStore.propagate();
 
-		JavaPlugin.getDefault().savePluginPreferences();
+		JavaPlugin.flushInstanceScope();
 
 		return true;
 	}
@@ -102,6 +105,7 @@ public abstract class AbstractConfigurationBlockPreferencePage extends Preferenc
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
+	@Override
 	public void performDefaults() {
 
 		fOverlayStore.loadDefaults();
@@ -113,6 +117,7 @@ public abstract class AbstractConfigurationBlockPreferencePage extends Preferenc
 	/*
 	 * @see DialogPage#dispose()
 	 */
+	@Override
 	public void dispose() {
 
 		fConfigurationBlock.dispose();

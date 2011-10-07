@@ -15,11 +15,11 @@ public class TestThisExpressionInner {
 		setField(10);
 	}
 
-	void setField(int field) {
-		this.field = field;
-	}
-
 	int getField() {
 		return field;
+	}
+
+	void setField(int field) {
+		this.field = field;
 	}	
 }

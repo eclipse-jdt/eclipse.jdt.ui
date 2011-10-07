@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,10 +34,11 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
  */
 public class OffOnTagsTabPage extends FormatterTabPage {
 
-	public OffOnTagsTabPage(ModifyDialog modifyDialog, Map workingValues) {
+	public OffOnTagsTabPage(ModifyDialog modifyDialog, Map<String, String> workingValues) {
 		super(modifyDialog, workingValues);
 	}
 
+	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 		createLabel(numColumns, composite, FormatterMessages.OffOnTagsTabPage_description);
 
@@ -98,6 +99,7 @@ public class OffOnTagsTabPage extends FormatterTabPage {
 
 	}
 
+	@Override
 	public final Composite createContents(Composite parent) {
 		if (fPixelConverter == null)
 			fPixelConverter= new PixelConverter(parent);
@@ -120,10 +122,12 @@ public class OffOnTagsTabPage extends FormatterTabPage {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#initializePage()
 	 */
+	@Override
 	protected void initializePage() {
 		// Nothing to do.
 	}
 
+	@Override
 	protected void doUpdatePreview() {
 		// Nothing to do since this page has no preview.
 	}
@@ -131,6 +135,7 @@ public class OffOnTagsTabPage extends FormatterTabPage {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected JavaPreview doCreateJavaPreview(Composite parent) {
 		return null; // This method won't be called.
 	}

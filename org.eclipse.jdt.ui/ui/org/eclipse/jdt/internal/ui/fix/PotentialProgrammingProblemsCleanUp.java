@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,7 +35,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 
-	public PotentialProgrammingProblemsCleanUp(Map options) {
+	public PotentialProgrammingProblemsCleanUp(Map<String, String> options) {
 		super(options);
 	}
 
@@ -46,9 +46,10 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	/**A
 	 * {@inheritDoc}
 	 */
+	@Override
 	public CleanUpRequirements getRequirements() {
 		boolean requireAST= requireAST();
-		Map requiredOptions= requireAST ? getRequiredOptions() : null;
+		Map<String, String> requiredOptions= requireAST ? getRequiredOptions() : null;
 		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
 	}
 
@@ -64,6 +65,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 
 		boolean addSUID= isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
@@ -78,6 +80,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
@@ -87,8 +90,8 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)));
 	}
 
-	private Map getRequiredOptions() {
-		Map result= new Hashtable();
+	private Map<String, String> getRequiredOptions() {
+		Map<String, String> result= new Hashtable<String, String>();
 		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) ||
 				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)))
 			result.put(JavaCore.COMPILER_PB_MISSING_SERIAL_VERSION, JavaCore.WARNING);
@@ -98,20 +101,22 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String[] getStepDescriptions() {
-		List result= new ArrayList();
+		List<String> result= new ArrayList<String>();
 
 		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)))
 			result.add(MultiFixMessages.SerialVersionCleanUp_Generated_description);
 		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)))
 			result.add(MultiFixMessages.CodeStyleCleanUp_addDefaultSerialVersionId_description);
 
-		return (String[])result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 
@@ -140,6 +145,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 		RefactoringStatus superStatus= super.checkPreConditions(project, compilationUnits, monitor);
 		if (superStatus.hasFatalError())
@@ -154,6 +160,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
 		return PotentialProgrammingProblemsFix.checkPostConditions(monitor);
 	}
@@ -161,6 +168,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) ||
 				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)))

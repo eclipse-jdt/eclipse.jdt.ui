@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,6 +85,7 @@ public class ReplaceInvocationsInputPage extends UserInputWizardPage {
 		replaceAll.setEnabled(false); // does not work for now...
 		replaceAll.setSelection(! canSingle);
 		replaceAll.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				boolean all= ((Button) event.widget).getSelection();
 				changeMode(all ? ReplaceInvocationsRefactoring.Mode.REPLACE_ALL : ReplaceInvocationsRefactoring.Mode.REPLACE_SINGLE);
@@ -99,7 +100,7 @@ public class ReplaceInvocationsInputPage extends UserInputWizardPage {
 		JavaSourceViewer signatureViewer= new JavaSourceViewer(parent, null, null, false, SWT.READ_ONLY | SWT.WRAP /*| SWT.BORDER*/, store);
 		signatureViewer.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
 		signatureViewer.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
-		signatureViewer.getTextWidget().setBackground(parent.getBackground());
+		signatureViewer.adaptBackgroundColor(parent);
 		String signatureLabel= JavaElementLabels.getElementLabel(fRefactoring.getMethod(), LABEL_FLAGS);
 		signatureViewer.setDocument(new Document(signatureLabel));
 		signatureViewer.setEditable(false);

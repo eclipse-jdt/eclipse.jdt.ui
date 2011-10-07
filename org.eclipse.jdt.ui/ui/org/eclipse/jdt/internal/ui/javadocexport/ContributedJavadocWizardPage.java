@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,8 +29,8 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.wizards.JavadocExportWizardPage;
-import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 import org.eclipse.jdt.ui.wizards.JavadocExportWizardPage.IJavadocExportWizardPageContainer;
+import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
@@ -39,6 +39,7 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 
 	private static class ErrorJavadocExportWizardPage extends JavadocExportWizardPage {
 
+		@Override
 		public Control createContents(Composite parent) {
 			Label label= new Label(parent, SWT.NONE);
 			label.setText(JavadocExportMessages.ContributedJavadocWizardPage_error_create_page);
@@ -78,6 +79,7 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.NewElementWizardPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		getPage().setVisible(visible);
 		super.setVisible(visible);
@@ -100,6 +102,7 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#performHelp()
 	 */
+	@Override
 	public void performHelp() {
 		getPage().performHelp();
 	}
@@ -107,6 +110,7 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
+	@Override
 	public void dispose() {
 		if (fPage != null) {
 			fPage.dispose();
@@ -116,28 +120,28 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 	}
 
 	public String[] getConfiguredJavadocOptions() {
-		ArrayList vmArgs= new ArrayList();
-		ArrayList toolArgs= new ArrayList();
+		ArrayList<String> vmArgs= new ArrayList<String>();
+		ArrayList<String> toolArgs= new ArrayList<String>();
 		fStore.getArgumentArray(vmArgs, toolArgs);
-		return (String[]) toolArgs.toArray(new String[toolArgs.size()]);
+		return toolArgs.toArray(new String[toolArgs.size()]);
 	}
 
 	public String[] getConfiguredVMOptions() {
-		ArrayList vmArgs= new ArrayList();
-		ArrayList toolArgs= new ArrayList();
+		ArrayList<String> vmArgs= new ArrayList<String>();
+		ArrayList<String> toolArgs= new ArrayList<String>();
 		fStore.getArgumentArray(vmArgs, toolArgs);
-		return (String[]) vmArgs.toArray(new String[vmArgs.size()]);
+		return vmArgs.toArray(new String[vmArgs.size()]);
 	}
 
 	public IJavaElement[] getSelectedJavaElements() {
 		IJavaElement[] sourceElements= fStore.getSourceElements();
 		if (sourceElements != null) {
-			return (IJavaElement[]) sourceElements.clone();
+			return sourceElements.clone();
 		}
 		return new IJavaElement[0];
 	}
 
-	public void updateArguments(ArrayList vmOptions, ArrayList toolOptions) {
+	public void updateArguments(ArrayList<String> vmOptions, ArrayList<String> toolOptions) {
 		getPage().updateArguments(vmOptions, toolOptions);
 	}
 
@@ -164,7 +168,7 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 	}
 
 	public static ContributedJavadocWizardPage[] getContributedPages(JavadocOptionsManager store) {
-		ArrayList pages= new ArrayList();
+		ArrayList<ContributedJavadocWizardPage> pages= new ArrayList<ContributedJavadocWizardPage>();
 
 		IConfigurationElement[] elements= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, ATT_EXTENSION);
 		for (int i = 0; i < elements.length; i++) {
@@ -179,7 +183,7 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 			}
 			pages.add(new ContributedJavadocWizardPage(elements[i], store));
 		}
-		return (ContributedJavadocWizardPage[]) pages.toArray(new ContributedJavadocWizardPage[pages.size()]);
+		return pages.toArray(new ContributedJavadocWizardPage[pages.size()]);
 	}
 
 

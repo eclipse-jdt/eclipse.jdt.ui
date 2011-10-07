@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
  * @since 3.2
  */
 public class TightSourceRangeComputer extends TargetSourceRangeComputer {
-	private HashSet/*<ASTNode>*/ fTightSourceRangeNodes= new HashSet();
+	private HashSet<ASTNode> fTightSourceRangeNodes= new HashSet<ASTNode>();
 
 	/**
 	 * Add the given node to the set of "tight" nodes.
@@ -42,18 +42,18 @@ public class TightSourceRangeComputer extends TargetSourceRangeComputer {
 	public void addTightSourceNode(ASTNode reference) {
 		fTightSourceRangeNodes.add(reference);
 
-	    List properties= reference.structuralPropertiesForType();
-	    for (Iterator iterator= properties.iterator(); iterator.hasNext();) {
-	        StructuralPropertyDescriptor descriptor= (StructuralPropertyDescriptor)iterator.next();
+	    List<StructuralPropertyDescriptor> properties= reference.structuralPropertiesForType();
+	    for (Iterator<StructuralPropertyDescriptor> iterator= properties.iterator(); iterator.hasNext();) {
+	        StructuralPropertyDescriptor descriptor= iterator.next();
 	        if (descriptor.isChildProperty()) {
 	        	ASTNode child= (ASTNode)reference.getStructuralProperty(descriptor);
 	        	if (child != null && isExtending(child, reference)) {
 	        		addTightSourceNode(child);
 	        	}
 	        } else if (descriptor.isChildListProperty()) {
-	        	List childs= (List)reference.getStructuralProperty(descriptor);
-	        	for (Iterator iterator2= childs.iterator(); iterator2.hasNext();) {
-	                ASTNode child= (ASTNode)iterator2.next();
+	        	List<? extends ASTNode> children= (List<? extends ASTNode>) reference.getStructuralProperty(descriptor);
+	        	for (Iterator<? extends ASTNode> iterator2= children.iterator(); iterator2.hasNext();) {
+	                ASTNode child= iterator2.next();
 	                if (isExtending(child, reference)) {
 		        		addTightSourceNode(child);
 		        	}
@@ -62,6 +62,7 @@ public class TightSourceRangeComputer extends TargetSourceRangeComputer {
         }
     }
 
+	@Override
 	public SourceRange computeSourceRange(ASTNode node) {
 		if (fTightSourceRangeNodes.contains(node)) {
 			return new TargetSourceRangeComputer.SourceRange(node.getStartPosition(), node.getLength());

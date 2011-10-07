@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,12 +58,13 @@ class ExpandWithConstructorsAction extends Action {
 	/*
 	 * @see Action#run
 	 */
+	@Override
 	public void run() {
 		boolean isChecked= isChecked();
 		fCallHierarchyViewer.cancelJobs();
 
 		IStructuredSelection selection= (IStructuredSelection)getSelection();
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			CallerMethodWrapper member= (CallerMethodWrapper)iter.next();
 			member.setExpandWithConstructors(isChecked);
 			if (!isChecked) { // must collapse before refresh
@@ -72,6 +73,7 @@ class ExpandWithConstructorsAction extends Action {
 			fCallHierarchyViewer.refresh(member);
 			if (isChecked) { // expand only after refresh
 				fCallHierarchyViewer.setExpandedState(member, true);
+				fCallHierarchyViewer.expandConstructorNode();
 			}
 		}
 	}
@@ -101,7 +103,7 @@ class ExpandWithConstructorsAction extends Action {
 		IStructuredSelection structuredSelection= (IStructuredSelection)selection;
 		CallerMethodWrapper[] wrappers= new CallerMethodWrapper[structuredSelection.size()];
 		int i= 0;
-		for (Iterator iter= structuredSelection.iterator(); iter.hasNext(); i++) {
+		for (Iterator<?> iter= structuredSelection.iterator(); iter.hasNext(); i++) {
 			Object element= iter.next();
 			if (!(element instanceof CallerMethodWrapper) || element instanceof RealCallers)
 				return false;

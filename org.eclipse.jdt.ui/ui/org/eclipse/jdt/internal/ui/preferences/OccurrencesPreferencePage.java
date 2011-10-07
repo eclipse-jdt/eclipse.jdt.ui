@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ public class OccurrencesPreferencePage extends AbstractConfigurationBlockPrefere
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.AbstractConfigureationBlockPreferencePage#getHelpId()
 	 */
+	@Override
 	protected String getHelpId() {
 		return IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE;
 	}
@@ -36,6 +37,7 @@ public class OccurrencesPreferencePage extends AbstractConfigurationBlockPrefere
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.AbstractConfigurationBlockPreferencePage#setDescription()
 	 */
+	@Override
 	protected void setDescription() {
 		// This page has no description
 	}
@@ -43,6 +45,7 @@ public class OccurrencesPreferencePage extends AbstractConfigurationBlockPrefere
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.AbstractConfigurationBlockPreferencePage#setPreferenceStore()
 	 */
+	@Override
 	protected void setPreferenceStore() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 	}
@@ -50,6 +53,7 @@ public class OccurrencesPreferencePage extends AbstractConfigurationBlockPrefere
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.AbstractConfigureationBlockPreferencePage#createConfigurationBlock(org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore)
 	 */
+	@Override
 	protected IPreferenceConfigurationBlock createConfigurationBlock(OverlayPreferenceStore overlayPreferenceStore) {
 		return new MarkOccurrencesConfigurationBlock(overlayPreferenceStore);
 	}

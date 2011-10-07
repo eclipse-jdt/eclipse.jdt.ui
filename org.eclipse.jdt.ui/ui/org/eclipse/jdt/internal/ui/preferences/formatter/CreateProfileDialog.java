@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,7 +60,7 @@ public class CreateProfileDialog extends StatusDialog {
 	private final static StatusInfo fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.CreateProfileDialog_status_message_profile_with_this_name_already_exists);
 
 	private final ProfileManager fProfileManager;
-	private final List fSortedProfiles;
+	private final List<Profile> fSortedProfiles;
 	private final String [] fSortedNames;
 
 	private CustomProfile fCreatedProfile;
@@ -78,11 +78,13 @@ public class CreateProfileDialog extends StatusDialog {
 	}
 
 
+	@Override
 	public void create() {
 		super.create();
 		setTitle(FormatterMessages.CreateProfileDialog_dialog_title);
 	}
 
+	@Override
 	public Control createDialogArea(Composite parent) {
 
 		final int numColumns= 2;
@@ -174,13 +176,14 @@ public class CreateProfileDialog extends StatusDialog {
 	}
 
 
+	@Override
 	protected void okPressed() {
 		if (!getStatus().isOK())
 			return;
 
 		JavaPlugin.getDefault().getDialogSettings().put(PREF_OPEN_EDIT_DIALOG, fOpenEditDialog);
 
-		final Map baseSettings= new HashMap(((Profile)fSortedProfiles.get(fProfileCombo.getSelectionIndex())).getSettings());
+		final Map<String, String> baseSettings= new HashMap<String, String>(fSortedProfiles.get(fProfileCombo.getSelectionIndex()).getSettings());
 		final String profileName= fNameText.getText();
 
 		fCreatedProfile= new CustomProfile(profileName, baseSettings, fProfileVersioner.getCurrentVersion(), fProfileVersioner.getProfileKind());

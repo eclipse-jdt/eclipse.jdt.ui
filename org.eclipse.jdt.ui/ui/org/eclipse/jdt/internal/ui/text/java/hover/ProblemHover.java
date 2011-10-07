@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,6 +54,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -63,9 +64,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.preferences.JavadocProblemsConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock;
+import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key;
 import org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -110,6 +111,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
+		@Override
 		public void run() {
 			boolean showPropertyPage;
 
@@ -142,7 +144,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 				showPropertyPage= true;
 			}
 
-			Map data= new HashMap();
+			Map<String, Object> data= new HashMap<String, Object>();
 			String pageId;
 			if (fIsJavadocOption) {
 				if (showPropertyPage) {
@@ -190,6 +192,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractAnnotationHover.AnnotationInfo#getCompletionProposals()
 		 */
+		@Override
 		public ICompletionProposal[] getCompletionProposals() {
 			if (annotation instanceof IJavaAnnotation) {
 				ICompletionProposal[] result= getJavaAnnotationFixes((IJavaAnnotation) annotation);
@@ -217,11 +220,11 @@ public class ProblemHover extends AbstractAnnotationHover {
 			if (!SpellingAnnotation.TYPE.equals(javaAnnotation.getType()) && !hasProblem(context.getASTRoot().getProblems(), location))
 				return NO_PROPOSALS;
 
-			ArrayList proposals= new ArrayList();
+			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<IJavaCompletionProposal>();
 			JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
 			Collections.sort(proposals, new CompletionProposalComparator());
 
-			return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+			return proposals.toArray(new ICompletionProposal[proposals.size()]);
 		}
 
 		private static boolean hasProblem(IProblem[] problems, IProblemLocation location) {
@@ -257,10 +260,10 @@ public class ProblemHover extends AbstractAnnotationHover {
 
 			AssistContext context= new AssistContext(cu, sourceViewer, position.getOffset(), position.getLength());
 
-			ArrayList proposals= new ArrayList();
+			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<IJavaCompletionProposal>();
 			JavaCorrectionProcessor.collectProposals(context, model, new Annotation[] { markerAnnotation }, true, false, proposals);
 
-			return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+			return proposals.toArray(new ICompletionProposal[proposals.size()]);
 		}
 
 		private static ICompilationUnit getCompilationUnit(IMarker marker) {
@@ -276,6 +279,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractAnnotationHover.AnnotationInfo#fillToolBar(org.eclipse.jface.action.ToolBarManager)
 		 */
+		@Override
 		public void fillToolBar(ToolBarManager manager, IInformationControl infoControl) {
 			super.fillToolBar(manager, infoControl);
 			if (!(annotation instanceof IJavaAnnotation))
@@ -298,6 +302,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 		super(false);
 	}
 
+	@Override
 	protected AnnotationInfo createAnnotationInfo(Annotation annotation, Position position, ITextViewer textViewer) {
 		return new ProblemInfo(annotation, position, textViewer);
 	}

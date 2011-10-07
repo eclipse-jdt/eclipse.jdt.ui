@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,24 +60,6 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 public class JavaElementLabelComposer {
 
 	/**
-	 * Use of this constant is <b>FORBIDDEN</b> for external clients.
-	 * <p>
-	 * TODO: Make API in PreferenceConstants in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
-	 * 
-	 * @see PreferenceConstants#APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW
-	 */
-	public static final String APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= "org.eclipse.jdt.ui.pkgNameAbbreviationPatternForPackagesView";//$NON-NLS-1$
-
-	/**
-	 * Use of this constant is <b>FORBIDDEN</b> for external clients.
-	 * <p>
-	 * TODO: Make API in PreferenceConstants in 3.7, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=306069
-	 * 
-	 * @see PreferenceConstants#APPEARANCE_ABBREVIATE_PACKAGE_NAMES
-	 */
-	public static final String APPEARANCE_ABBREVIATE_PACKAGE_NAMES= "org.eclipse.jdt.ui.abbreviatepackagenames";//$NON-NLS-1$
-
-	/**
 	 * An adapter for buffer supported by the label composer.
 	 */
 	public static abstract class FlexibleBuffer {
@@ -126,24 +108,29 @@ public class JavaElementLabelComposer {
 			fStringBuffer= stringBuffer;
 		}
 
+		@Override
 		public FlexibleBuffer append(char ch) {
 			fStringBuffer.append(ch);
 			return this;
 		}
 
+		@Override
 		public FlexibleBuffer append(String string) {
 			fStringBuffer.append(string);
 			return this;
 		}
 
+		@Override
 		public int length() {
 			return fStringBuffer.length();
 		}
 
+		@Override
 		public void setStyle(int offset, int length, Styler styler) {
 			// no style
 		}
 
+		@Override
 		public String toString() {
 			return fStringBuffer.toString();
 		}
@@ -156,24 +143,29 @@ public class JavaElementLabelComposer {
 			fStyledString= stringBuffer;
 		}
 
+		@Override
 		public FlexibleBuffer append(char ch) {
 			fStyledString.append(ch);
 			return this;
 		}
 
+		@Override
 		public FlexibleBuffer append(String string) {
 			fStyledString.append(string);
 			return this;
 		}
 
+		@Override
 		public int length() {
 			return fStyledString.length();
 		}
 
+		@Override
 		public void setStyle(int offset, int length, Styler styler) {
 			fStyledString.setStyle(offset, length, styler);
 		}
 
+		@Override
 		public String toString() {
 			return fStyledString.toString();
 		}
@@ -379,25 +371,47 @@ public class JavaElementLabelComposer {
 
 			fBuffer.append(getElementName(method));
 
+			// constructor type arguments
+			if (getFlag(flags, JavaElementLabels.T_TYPE_PARAMETERS) && method.isConstructor()) {
+				if (resolvedSig != null && resolvedKey.isParameterizedType()) {
+					BindingKey declaringType= resolvedKey.getDeclaringType();
+					if (declaringType != null) {
+						String[] declaringTypeArguments= declaringType.getTypeArguments();
+						appendTypeArgumentSignaturesLabel(method, declaringTypeArguments, flags);
+					}
+				}
+			}
+		
 			// parameters
 			fBuffer.append('(');
+			String[] declaredParameterTypes= method.getParameterTypes();
 			if (getFlag(flags, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES)) {
 				String[] types= null;
 				int nParams= 0;
 				boolean renderVarargs= false;
+				boolean isPolymorphic= false;
 				if (getFlag(flags, JavaElementLabels.M_PARAMETER_TYPES)) {
 					if (resolvedSig != null) {
 						types= Signature.getParameterTypes(resolvedSig);
 					} else {
-						types= method.getParameterTypes();
+						types= declaredParameterTypes;
 					}
 					nParams= types.length;
 					renderVarargs= method.exists() && Flags.isVarargs(method.getFlags());
+					if (renderVarargs
+							&& resolvedSig != null
+							&& declaredParameterTypes.length == 1
+							&& JavaModelUtil.isPolymorphicSignature(method)) {
+						renderVarargs= false;
+						isPolymorphic= true;
+					}
 				}
 				String[] names= null;
 				if (getFlag(flags, JavaElementLabels.M_PARAMETER_NAMES) && method.exists()) {
 					names= method.getParameterNames();
-					if (types == null) {
+					if (isPolymorphic) {
+						// handled specially below
+					} else	if (types == null) {
 						nParams= names.length;
 					} else { // types != null
 						if (nParams != names.length) {
@@ -437,11 +451,15 @@ public class JavaElementLabelComposer {
 						if (types != null) {
 							fBuffer.append(' ');
 						}
-						fBuffer.append(names[i]);
+						if (isPolymorphic) {
+							fBuffer.append(names[0] + i);
+						} else {
+							fBuffer.append(names[i]);
+						}
 					}
 				}
 			} else {
-				if (method.getParameterTypes().length > 0) {
+				if (declaredParameterTypes.length > 0) {
 					fBuffer.append(JavaElementLabels.ELLIPSIS_STRING);
 				}
 			}
@@ -630,7 +648,7 @@ public class JavaElementLabelComposer {
 		}
 
 		if (getFlag(flags, JavaElementLabels.F_FULLY_QUALIFIED)) {
-			appendElementLabel(localVariable.getParent(), JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
+			appendElementLabel(localVariable.getDeclaringMember(), JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
 			fBuffer.append('.');
 		}
 
@@ -648,7 +666,7 @@ public class JavaElementLabelComposer {
 		// post qualification
 		if (getFlag(flags, JavaElementLabels.F_POST_QUALIFIED)) {
 			fBuffer.append(JavaElementLabels.CONCAT_STRING);
-			appendElementLabel(localVariable.getParent(), JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
+			appendElementLabel(localVariable.getDeclaringMember(), JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
 		}
 	}
 
@@ -726,7 +744,7 @@ public class JavaElementLabelComposer {
 				}
 				break;
 			case Signature.CLASS_TYPE_SIGNATURE:
-				String baseType= getSimpleTypeName(enclosingElement, Signature.getTypeErasure(typeSig));
+				String baseType= getSimpleTypeName(enclosingElement, typeSig);
 				fBuffer.append(baseType);
 
 				String[] typeArguments= Signature.getTypeArguments(typeSig);
@@ -752,6 +770,10 @@ public class JavaElementLabelComposer {
 			case Signature.CAPTURE_TYPE_SIGNATURE:
 				appendTypeSignatureLabel(enclosingElement, typeSig.substring(1), flags);
 				break;
+			case Signature.INTERSECTION_TYPE_SIGNATURE:
+				String[] typeBounds= Signature.getIntersectionTypeBounds(typeSig);
+				appendTypeBoundsSignaturesLabel(enclosingElement, typeBounds, flags);
+				break;
 			default:
 				// unknown
 		}
@@ -765,7 +787,7 @@ public class JavaElementLabelComposer {
 	 * @return the simple name of the given type signature
 	 */
 	protected String getSimpleTypeName(IJavaElement enclosingElement, String typeSig) {
-		return Signature.getSimpleName(Signature.toString(typeSig));
+		return Signature.getSimpleName(Signature.toString(Signature.getTypeErasure(typeSig)));
 	}
 
 	private void appendTypeArgumentSignaturesLabel(IJavaElement enclosingElement, String[] typeArgsSig, long flags) {
@@ -781,6 +803,15 @@ public class JavaElementLabelComposer {
 		}
 	}
 
+	private void appendTypeBoundsSignaturesLabel(IJavaElement enclosingElement, String[] typeArgsSig, long flags) {
+		for (int i = 0; i < typeArgsSig.length; i++) {
+			if (i > 0) {
+				fBuffer.append(" | "); //$NON-NLS-1$
+			}
+			appendTypeSignatureLabel(enclosingElement, typeArgsSig[i], flags);
+		}
+	}
+	
 	/**
 	 * Appends labels for type parameters from a signature.
 	 *
@@ -1366,7 +1397,7 @@ public class JavaElementLabelComposer {
 	public static PackageNameAbbreviation[] parseAbbreviationPattern(String pattern) {
 		String[] parts= pattern.split("\\s*(?:\r\n?|\n)\\s*"); //$NON-NLS-1$
 
-		ArrayList result= new ArrayList();
+		ArrayList<PackageNameAbbreviation> result= new ArrayList<PackageNameAbbreviation>();
 
 		for (int i= 0; i < parts.length; i++) {
 			String part= parts[i].trim();
@@ -1390,16 +1421,13 @@ public class JavaElementLabelComposer {
 			result.add(pkgAbbr);
 		}
 
-		Collections.sort(result, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				PackageNameAbbreviation a1= (PackageNameAbbreviation)o1;
-				PackageNameAbbreviation a2= (PackageNameAbbreviation)o2;
-
+		Collections.sort(result, new Comparator<PackageNameAbbreviation>() {
+			public int compare(PackageNameAbbreviation a1, PackageNameAbbreviation a2) {
 				return a2.getPackagePrefix().length() - a1.getPackagePrefix().length();
 			}
 		});
 
-		return (PackageNameAbbreviation[])result.toArray(new PackageNameAbbreviation[0]);
+		return result.toArray(new PackageNameAbbreviation[0]);
 	}
 	
 	private boolean isPackageNameCompressionEnabled() {
@@ -1416,14 +1444,14 @@ public class JavaElementLabelComposer {
 
 	private boolean isPackageNameAbbreviationEnabled() {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-		return store.getBoolean(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES);
+		return store.getBoolean(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES);
 	}
 
 	private String getPkgNameAbbreviationPatternForPackagesView() {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-		if (!store.getBoolean(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES))
+		if (!store.getBoolean(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES))
 			return ""; //$NON-NLS-1$
-		return store.getString(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW);
+		return store.getString(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW);
 	}
 
 }

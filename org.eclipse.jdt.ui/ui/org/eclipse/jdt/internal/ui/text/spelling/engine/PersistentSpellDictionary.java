@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.AbstractSpellDictionary#acceptsWords()
 	 */
+	@Override
 	public boolean acceptsWords() {
 		return true;
 	}
@@ -49,6 +50,7 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#addWord(java.lang.String)
 	 */
+	@Override
 	public void addWord(final String word) {
 		if (isCorrect(word))
 			return;
@@ -91,6 +93,7 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#getURL()
 	 */
+	@Override
 	protected final URL getURL() {
 		return fLocation;
 	}

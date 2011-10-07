@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,6 +63,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void initializeValidationData(IProgressMonitor pm) {
 		super.initializeValidationData(pm);
 		WorkspaceTracker.INSTANCE.addListener(this);
@@ -70,6 +71,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 		fTimeStamp= System.currentTimeMillis();
 	}
 
+	@Override
 	public void dispose() {
 		if (fListenerRegistered) {
 			WorkspaceTracker.INSTANCE.removeListener(this);
@@ -81,6 +83,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		if (fValidationState == null) {
 			return super.isValid(pm);
@@ -91,6 +94,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		final Change[] result= new Change[1];
 		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
@@ -105,6 +109,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Change createUndoChange(Change[] childUndos) {
 		DynamicValidationStateChange result= new DynamicValidationStateChange(getName());
 		for (int i= 0; i < childUndos.length; i++) {

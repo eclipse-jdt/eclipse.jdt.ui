@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ public class LibraryContainer extends PackageFragmentRootContainer {
 		super(project);
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof LibraryContainer) {
 			LibraryContainer other = (LibraryContainer)obj;
@@ -38,19 +39,23 @@ public class LibraryContainer extends PackageFragmentRootContainer {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		return getJavaProject().hashCode();
 	}
 
+	@Override
 	public IAdaptable[] getChildren() {
 		return getPackageFragmentRoots();
 	}
 
 
+	@Override
 	public ImageDescriptor getImageDescriptor() {
 		return JavaPluginImages.DESC_OBJS_LIBRARY;
 	}
 
+	@Override
 	public String getLabel() {
 		return PackagesMessages.LibraryContainer_name;
 	}
@@ -58,8 +63,9 @@ public class LibraryContainer extends PackageFragmentRootContainer {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer#getPackageFragmentRoots()
 	 */
+	@Override
 	public IPackageFragmentRoot[] getPackageFragmentRoots() {
-		List list= new ArrayList();
+		List<IPackageFragmentRoot> list= new ArrayList<IPackageFragmentRoot>();
 		try {
 			IPackageFragmentRoot[] roots= getJavaProject().getPackageFragmentRoots();
 			for (int i= 0; i < roots.length; i++) {
@@ -72,6 +78,6 @@ public class LibraryContainer extends PackageFragmentRootContainer {
 		} catch (JavaModelException e) {
 			// fall through
 		}
-		return (IPackageFragmentRoot[]) list.toArray(new IPackageFragmentRoot[list.size()]);
+		return list.toArray(new IPackageFragmentRoot[list.size()]);
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,11 @@ import java.util.List;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.BadPartitioningException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension3;
+import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.IWordDetector;
 import org.eclipse.jface.text.rules.WhitespaceRule;
@@ -47,13 +51,20 @@ public final class PropertyValueScanner extends AbstractJavaScanner {
 				return false;
 
 			try {
-				// check whether it is the first '='
-				IRegion lineInfo= fDocument.getLineInformationOfOffset(fOffset);
-				int offset= lineInfo.getOffset();
-				String line= fDocument.get(offset, lineInfo.getLength());
-				int i= line.indexOf(c);
-				return i != -1 && i + lineInfo.getOffset() + 1 == fOffset;
+				// check whether it is the first '=' in the logical line
+
+				int i=fOffset-2;
+				while (Character.isWhitespace(fDocument.getChar(i))) {
+					i--;
+				}
+				
+				ITypedRegion partition= null;
+				if (fDocument instanceof IDocumentExtension3)
+					partition= ((IDocumentExtension3)fDocument).getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, i, false);
+				return partition != null && IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType());
 			} catch (BadLocationException ex) {
+				return false;
+			} catch (BadPartitioningException e) {
 				return false;
 			}
 		}
@@ -88,6 +99,7 @@ public final class PropertyValueScanner extends AbstractJavaScanner {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractJavaScanner#getTokenProperties()
 	 */
+	@Override
 	protected String[] getTokenProperties() {
 		return fgTokenProperties;
 	}
@@ -95,9 +107,10 @@ public final class PropertyValueScanner extends AbstractJavaScanner {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractJavaScanner#createRules()
 	 */
-	protected List createRules() {
+	@Override
+	protected List<IRule> createRules() {
 		setDefaultReturnToken(getToken(PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE));
-		List rules= new ArrayList();
+		List<IRule> rules= new ArrayList<IRule>();
 
 		// Add rule for arguments.
 		IToken token= getToken(PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT);

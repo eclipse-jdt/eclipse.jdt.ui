@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,7 +65,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 			fTextFlagMask ^= JavaElementLabels.M_APP_TYPE_PARAMETERS;
 		}
 		if (!(store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)
-				|| store.getBoolean(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES))) {
+				|| store.getBoolean(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES))) {
 			fTextFlagMask ^= JavaElementLabels.P_COMPRESSED;
 		}
 		if (!store.getBoolean(PreferenceConstants.APPEARANCE_CATEGORY)) {
@@ -85,8 +85,8 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 				|| property.equals(PreferenceConstants.APPEARANCE_CATEGORY)
 				|| property.equals(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW)
 				|| property.equals(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)
-				|| property.equals(JavaElementLabelComposer.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW)
-				|| property.equals(JavaElementLabelComposer.APPEARANCE_ABBREVIATE_PACKAGE_NAMES)) {
+				|| property.equals(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW)
+				|| property.equals(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES)) {
 			initMasks();
 			LabelProviderChangedEvent lpEvent= new LabelProviderChangedEvent(this, null); // refresh all
 			fireLabelProviderChanged(lpEvent);
@@ -105,6 +105,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	/*
 	 * @see IBaseLabelProvider#dispose()
 	 */
+	@Override
 	public void dispose() {
 		PreferenceConstants.getPreferenceStore().removePropertyChangeListener(this);
 		PlatformUI.getWorkbench().getEditorRegistry().removePropertyListener(this);
@@ -114,6 +115,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	/*
 	 * @see JavaUILabelProvider#evaluateImageFlags()
 	 */
+	@Override
 	protected int evaluateImageFlags(Object element) {
 		return getImageFlags() & fImageFlagMask;
 	}
@@ -121,6 +123,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	/*
 	 * @see JavaUILabelProvider#evaluateTextFlags()
 	 */
+	@Override
 	protected long evaluateTextFlags(Object element) {
 		return getTextFlags() & fTextFlagMask;
 	}

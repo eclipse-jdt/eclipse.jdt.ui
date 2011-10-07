@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,12 +63,14 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		return null;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof JavaElementResourceMapping))
 			return false;
 		return getJavaElement().equals(((JavaElementResourceMapping)obj).getJavaElement());
 	}
 
+	@Override
 	public int hashCode() {
 		IJavaElement javaElement= getJavaElement();
 		if (javaElement == null)
@@ -77,10 +79,12 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		return javaElement.hashCode();
 	}
 
+	@Override
 	public String getModelProviderId() {
 		return JavaModelProvider.JAVA_MODEL_PROVIDER_ID;
 	}
 
+	@Override
 	public boolean contains(ResourceMapping mapping) {
 		if (mapping instanceof JavaElementResourceMapping) {
 			JavaElementResourceMapping javaMapping = (JavaElementResourceMapping) mapping;
@@ -100,9 +104,11 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			Assert.isNotNull(model);
 			fJavaModel= model;
 		}
+		@Override
 		public Object getModelObject() {
 			return fJavaModel;
 		}
+		@Override
 		public IProject[] getProjects() {
 			IJavaProject[] projects= null;
 			try {
@@ -117,6 +123,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			}
 			return result;
 		}
+		@Override
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 			IJavaProject[] projects= fJavaModel.getJavaProjects();
 			ResourceTraversal[] result= new ResourceTraversal[projects.length];
@@ -133,12 +140,15 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			Assert.isNotNull(project);
 			fProject= project;
 		}
+		@Override
 		public Object getModelObject() {
 			return fProject;
 		}
+		@Override
 		public IProject[] getProjects() {
 			return new IProject[] {fProject.getProject() };
 		}
+		@Override
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 			return new ResourceTraversal[] {
 				new ResourceTraversal(new IResource[] {fProject.getProject()}, IResource.DEPTH_INFINITE, 0)
@@ -152,12 +162,15 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			Assert.isNotNull(root);
 			fRoot= root;
 		}
+		@Override
 		public Object getModelObject() {
 			return fRoot;
 		}
+		@Override
 		public IProject[] getProjects() {
 			return new IProject[] {fRoot.getJavaProject().getProject() };
 		}
+		@Override
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 			return new ResourceTraversal[] {
 				new ResourceTraversal(new IResource[] {fRoot.getResource()}, IResource.DEPTH_INFINITE, 0)
@@ -171,12 +184,15 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			Assert.isNotNull(pack);
 			fPack= pack;
 		}
+		@Override
 		public Object getModelObject() {
 			return fPack;
 		}
+		@Override
 		public IProject[] getProjects() {
 			return new IProject[] { fPack.getJavaProject().getProject() };
 		}
+		@Override
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 			if (context instanceof RemoteResourceMappingContext) {
 				return getRemotePackageFragmentTraversals(fPack, (RemoteResourceMappingContext)context, monitor);
@@ -187,7 +203,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 	}
 
 	private static ResourceTraversal[] getPackageFragmentTraversals(IPackageFragment pack) throws CoreException {
-		ArrayList res= new ArrayList();
+		ArrayList<ResourceTraversal> res= new ArrayList<ResourceTraversal>();
 		IContainer container= (IContainer)pack.getResource();
 		
 		if (container != null) {
@@ -203,11 +219,11 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			}
 		}
 	
-		return (ResourceTraversal[]) res.toArray(new ResourceTraversal[res.size()]);
+		return res.toArray(new ResourceTraversal[res.size()]);
 	}
 
 	private static ResourceTraversal[] getRemotePackageFragmentTraversals(IPackageFragment pack, RemoteResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
-		ArrayList res= new ArrayList();
+		ArrayList<ResourceTraversal> res= new ArrayList<ResourceTraversal>();
 		IContainer container= (IContainer)pack.getResource();
 		
 		if (container != null) {
@@ -226,7 +242,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 				}
 			}
 		}
-		return (ResourceTraversal[]) res.toArray(new ResourceTraversal[res.size()]);
+		return res.toArray(new ResourceTraversal[res.size()]);
 	}
 	
 	private static final class CompilationUnitResourceMapping extends JavaElementResourceMapping {
@@ -235,12 +251,15 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			Assert.isNotNull(unit);
 			fUnit= unit;
 		}
+		@Override
 		public Object getModelObject() {
 			return fUnit;
 		}
+		@Override
 		public IProject[] getProjects() {
 			return new IProject[] {fUnit.getJavaProject().getProject() };
 		}
+		@Override
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 			return new ResourceTraversal[] {
 				new ResourceTraversal(new IResource[] {fUnit.getResource()}, IResource.DEPTH_ONE, 0)
@@ -253,12 +272,15 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		private ClassFileResourceMapping(IClassFile classFile) {
 			fClassFile= classFile;
 		}
+		@Override
 		public Object getModelObject() {
 			return fClassFile;
 		}
+		@Override
 		public IProject[] getProjects() {
 			return new IProject[] { fClassFile.getJavaProject().getProject() };
 		}
+		@Override
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 			return new ResourceTraversal[] {
 				new ResourceTraversal(new IResource[] {fClassFile.getResource()}, IResource.DEPTH_ONE, 0)
@@ -271,18 +293,21 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		private LogicalPackageResourceMapping(IPackageFragment[] fragments) {
 			fFragments= fragments;
 		}
+		@Override
 		public Object getModelObject() {
 			return fFragments;
 		}
+		@Override
 		public IProject[] getProjects() {
-			Set result= new HashSet();
+			Set<IProject> result= new HashSet<IProject>();
 			for (int i= 0; i < fFragments.length; i++) {
 				result.add(fFragments[i].getJavaProject().getProject());
 			}
-			return (IProject[])result.toArray(new IProject[result.size()]);
+			return result.toArray(new IProject[result.size()]);
 		}
+		@Override
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
-			List result= new ArrayList();
+			List<ResourceTraversal> result= new ArrayList<ResourceTraversal>();
 			if (context instanceof RemoteResourceMappingContext) {
 				for (int i= 0; i < fFragments.length; i++) {
 					result.addAll(Arrays.asList(getRemotePackageFragmentTraversals(fFragments[i], (RemoteResourceMappingContext)context, monitor)));
@@ -292,9 +317,10 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 					result.addAll(Arrays.asList(getPackageFragmentTraversals(fFragments[i])));
 				}
 			}
-			return (ResourceTraversal[])result.toArray(new ResourceTraversal[result.size()]);
+			return result.toArray(new ResourceTraversal[result.size()]);
 		}
 
+		@Override
 		public String getModelProviderId() {
 			return JavaModelProvider.JAVA_MODEL_PROVIDER_ID;
 		}
@@ -371,7 +397,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 
 	public static ResourceMapping create(LogicalPackage logicalPackage) {
 		IPackageFragment[] fragments= logicalPackage.getFragments();
-		List toProcess= new ArrayList(fragments.length);
+		List<IPackageFragment> toProcess= new ArrayList<IPackageFragment>(fragments.length);
 		for (int i= 0; i < fragments.length; i++) {
 			// only add if not part of an archive
 			IPackageFragmentRoot root= (IPackageFragmentRoot)fragments[i].getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
@@ -381,6 +407,6 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		}
 		if (toProcess.size() == 0)
 			return null;
-		return new LogicalPackageResourceMapping((IPackageFragment[])toProcess.toArray(new IPackageFragment[toProcess.size()]));
+		return new LogicalPackageResourceMapping(toProcess.toArray(new IPackageFragment[toProcess.size()]));
 	}
 }

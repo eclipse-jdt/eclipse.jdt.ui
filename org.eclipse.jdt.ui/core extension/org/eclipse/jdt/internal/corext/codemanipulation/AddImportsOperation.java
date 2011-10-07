@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -426,21 +426,21 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			typeKinds= ASTResolving.getPossibleTypeKinds(nameNode, is50OrHigher);
 		}
 
-		ArrayList typeInfos= new ArrayList();
+		ArrayList<TypeNameMatch> typeInfos= new ArrayList<TypeNameMatch>();
 		TypeNameMatchCollector requestor= new TypeNameMatchCollector(typeInfos);
 		int matchMode= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
 		new SearchEngine().searchAllTypeNames(null, matchMode, simpleTypeName.toCharArray(), matchMode, getSearchForConstant(typeKinds), searchScope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 
-		ArrayList typeRefsFound= new ArrayList(typeInfos.size());
+		ArrayList<TypeNameMatch> typeRefsFound= new ArrayList<TypeNameMatch>(typeInfos.size());
 		for (int i= 0, len= typeInfos.size(); i < len; i++) {
-			TypeNameMatch curr= (TypeNameMatch) typeInfos.get(i);
+			TypeNameMatch curr= typeInfos.get(i);
 			if (curr.getPackageName().length() > 0) { // do not suggest imports from the default package
 				if (isOfKind(curr, typeKinds, is50OrHigher) && isVisible(curr)) {
 					typeRefsFound.add(curr);
 				}
 			}
 		}
-		return (TypeNameMatch[]) typeRefsFound.toArray(new TypeNameMatch[typeRefsFound.size()]);
+		return typeRefsFound.toArray(new TypeNameMatch[typeRefsFound.size()]);
 	}
 
 	private boolean isOfKind(TypeNameMatch curr, int typeKinds, boolean is50OrHigher) {

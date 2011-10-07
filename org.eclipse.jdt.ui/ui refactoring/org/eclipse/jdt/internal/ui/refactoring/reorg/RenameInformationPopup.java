@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -305,6 +305,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 		// Leave linked mode when popup loses focus
 		// (except when focus goes back to workbench window or menu is open):
 		fPopup.addShellListener(new ShellAdapter() {
+			@Override
 			public void shellDeactivated(ShellEvent e) {
 				if (fIsMenuUp)
 					return;
@@ -335,6 +336,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 //		fPopup.moveBelow(workbenchShell.getShells()[0]);
 
 		UIJob delayJob= new UIJob(display, ReorgMessages.RenameInformationPopup_delayJobName) {
+			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				fDelayJobFinished= true;
 				if (fPopup != null && ! fPopup.isDisposed()) {
@@ -495,6 +497,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 	private void addMoveSupport(final Shell popupShell, final Control movedControl) {
 		movedControl.addMouseListener(new MouseAdapter() {
 
+			@Override
 			public void mouseDown(final MouseEvent downEvent) {
 				if (downEvent.button != 1) {
 					return;
@@ -538,6 +541,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 					/*
 					 * @see org.eclipse.swt.events.ControlAdapter#controlMoved(org.eclipse.swt.events.ControlEvent)
 					 */
+					@Override
 					public void controlMoved(ControlEvent moveEvent) {
 						Rectangle[] currentRects= tracker.getRectangles();
 						final Rectangle mouseMoveCurrent= currentRects[0];
@@ -692,11 +696,13 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 		menuButton.setImage(fMenuImage);
 		menuButton.setToolTipText(ReorgMessages.RenameInformationPopup_menu);
 		fToolBar.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseDown(MouseEvent e) {
 				showMenu(fToolBar);
 			}
 		});
 		menuButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				showMenu(fToolBar);
 			}
@@ -728,6 +734,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 				boolean canRefactor= ! fRenameLinkedMode.isOriginalName();
 				
 				IAction refactorAction= new Action(ReorgMessages.RenameInformationPopup_RenameInWorkspace) {
+					@Override
 					public void run() {
 						activateEditor();
 						fRenameLinkedMode.doRename(false);
@@ -738,6 +745,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 				manager.add(refactorAction);
 
 				IAction previewAction= new Action(ReorgMessages.RenameInformationPopup_Preview) {
+					@Override
 					public void run() {
 						activateEditor();
 						fRenameLinkedMode.doRename(true);
@@ -748,6 +756,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 				manager.add(previewAction);
 
 				IAction openDialogAction= new Action(ReorgMessages.RenameInformationPopup_OpenDialog + '\t' + fOpenDialogBinding) {
+					@Override
 					public void run() {
 						activateEditor();
 						fRenameLinkedMode.startFullDialog();
@@ -766,6 +775,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 				manager.add(subMenuManager);
 
 				IAction prefsAction= new Action(ReorgMessages.RenameInformationPopup_preferences) {
+					@Override
 					public void run() {
 						fRenameLinkedMode.cancel();
 						String linkedModePrefPageID= "org.eclipse.ui.editors.preferencePages.LinkedModePreferencePage"; //$NON-NLS-1$
@@ -781,6 +791,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 
 	private void addMoveMenuItem(IMenuManager manager, final int snapPosition, String text) {
 		IAction action= new Action(text, IAction.AS_RADIO_BUTTON) {
+			@Override
 			public void run() {
 				fSnapPosition= snapPosition;
 				fSnapPositionChanged= true;

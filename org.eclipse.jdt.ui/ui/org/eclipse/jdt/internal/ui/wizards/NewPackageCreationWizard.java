@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ public class NewPackageCreationWizard extends NewElementWizard {
 	/*
 	 * @see Wizard#addPages
 	 */
+	@Override
 	public void addPages() {
 		super.addPages();
 		if (fPage == null) {
@@ -52,6 +53,7 @@ public class NewPackageCreationWizard extends NewElementWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		fPage.createPackage(monitor); // use the full progress monitor
 	}
@@ -59,6 +61,7 @@ public class NewPackageCreationWizard extends NewElementWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
 	 */
+	@Override
 	public boolean performFinish() {
 		boolean res= super.performFinish();
 		if (res) {
@@ -70,6 +73,7 @@ public class NewPackageCreationWizard extends NewElementWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getCreatedElement()
 	 */
+	@Override
 	public IJavaElement getCreatedElement() {
 		return fPage.getNewPackageFragment();
 	}

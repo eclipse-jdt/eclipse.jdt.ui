@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Mateusz Matela and others.
+ * Copyright (c) 2008, 2011 Mateusz Matela and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,16 +44,18 @@ import org.eclipse.jdt.core.dom.StringLiteral;
  * @since 3.5
  */
 public class StringFormatGenerator extends AbstractToStringGenerator {
-	private List arguments;
+	private List<Expression> arguments;
 
 	private StringBuffer buffer;
 
+	@Override
 	protected void initialize() {
 		super.initialize();
-		arguments= new ArrayList();
+		arguments= new ArrayList<Expression>();
 		buffer= new StringBuffer();
 	}
 
+	@Override
 	protected void complete() throws CoreException {
 		super.complete();
 		ReturnStatement rStatement= fAst.newReturnStatement();
@@ -80,6 +82,7 @@ public class StringFormatGenerator extends AbstractToStringGenerator {
 		toStringMethod.getBody().statements().add(rStatement);
 	}
 
+	@Override
 	protected Object processElement(String templateElement, Object member) {
 		if (templateElement == ToStringTemplateParser.MEMBER_VALUE_VARIABLE) {
 			return createMemberAccessExpression(member, false, false);
@@ -87,12 +90,13 @@ public class StringFormatGenerator extends AbstractToStringGenerator {
 		return super.processElement(templateElement, member);
 	}
 
+	@Override
 	protected void addElement(Object element) {
 		if (element instanceof String) {
 			buffer.append((String)element);
 		}
 		if (element instanceof Expression) {
-			arguments.add(element);
+			arguments.add((Expression) element);
 			if (getContext().is50orHigher()) {
 				buffer.append("%s"); //$NON-NLS-1$
 			} else {
@@ -101,6 +105,7 @@ public class StringFormatGenerator extends AbstractToStringGenerator {
 		}
 	}
 
+	@Override
 	protected Expression createMemberAccessExpression(Object member, boolean ignoreArraysCollections, boolean ignoreNulls) {
 		ITypeBinding type= getMemberType(member);
 		if (!getContext().is50orHigher() && type.isPrimitive()) {

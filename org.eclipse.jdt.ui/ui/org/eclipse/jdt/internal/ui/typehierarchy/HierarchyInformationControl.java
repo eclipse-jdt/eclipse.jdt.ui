@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -84,6 +84,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	private KeyAdapter getKeyAdapter() {
 		if (fKeyAdapter == null) {
 			fKeyAdapter= new KeyAdapter() {
+				@Override
 				public void keyPressed(KeyEvent e) {
 					int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
 					KeySequence keySequence = KeySequence.getInstance(SWTKeySupport.convertAcceleratorToKeyStroke(accelerator));
@@ -107,10 +108,12 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected boolean hasHeader() {
 		return true;
 	}
 
+	@Override
 	protected Text createFilterText(Composite parent) {
 		// text set later
 		Text text= super.createFilterText(parent);
@@ -122,6 +125,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl#createTreeViewer(org.eclipse.swt.widgets.Composite, int)
 	 */
+	@Override
 	protected TreeViewer createTreeViewer(Composite parent, int style) {
 		Tree tree= new Tree(parent, SWT.SINGLE | (style & ~SWT.MULTI));
 		GridData gd= new GridData(GridData.FILL_BOTH);
@@ -130,6 +134,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 
 		TreeViewer treeViewer= new TreeViewer(tree);
 		treeViewer.addFilter(new ViewerFilter() {
+			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				return element instanceof IType;
 			}
@@ -142,12 +147,13 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 
 		fLabelProvider= new HierarchyLabelProvider(fLifeCycle);
 		fLabelProvider.setFilter(new ViewerFilter() {
+			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				return hasFocusMethod((IType) element);
 			}
 		});
 
-		fLabelProvider.setTextFlags(JavaElementLabels.ALL_DEFAULT | JavaElementLabels.T_POST_QUALIFIED);
+		fLabelProvider.setTextFlags(JavaElementLabels.ALL_DEFAULT | JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.P_COMPRESSED);
 		fLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));
 		treeViewer.setLabelProvider(new ColoringLabelProvider(fLabelProvider));
 
@@ -183,6 +189,10 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 
 	private IMethod findMethod(IMethod filterMethod, IType typeToFindIn) throws JavaModelException {
 		IType filterType= filterMethod.getDeclaringType();
+		if (filterType.equals(typeToFindIn)) {
+			return filterMethod;
+		}
+		
 		ITypeHierarchy hierarchy= fLifeCycle.getHierarchy();
 
 		boolean filterOverrides= JavaModelUtil.isSuperType(hierarchy, typeToFindIn, filterType);
@@ -202,6 +212,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setInput(Object information) {
 		if (!(information instanceof IJavaElement)) {
 			inputChanged(null, null);
@@ -211,8 +222,10 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		IMethod locked= null;
 		try {
 			IJavaElement elem= (IJavaElement) information;
-			if (elem.getElementType() == IJavaElement.LOCAL_VARIABLE) {
-				elem= elem.getParent();
+			switch (elem.getElementType()) {
+				case IJavaElement.LOCAL_VARIABLE :
+				case IJavaElement.TYPE_PARAMETER :
+					elem= elem.getParent();
 			}
 
 			switch (elem.getElementType()) {
@@ -294,6 +307,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		inputChanged(fLifeCycle, selection);
 	}
 
+	@Override
 	protected void stringMatcherUpdated() {
 		if (fDoFilter) {
 			super.stringMatcherUpdated(); // refresh the view
@@ -346,6 +360,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		}
 	}
 
+	@Override
 	protected String getStatusFieldText() {
 		KeySequence[] sequences= getInvokingCommandKeySequences();
 		String keyName= ""; //$NON-NLS-1$
@@ -362,6 +377,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#getId()
 	 */
+	@Override
 	protected String getId() {
 		return "org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy"; //$NON-NLS-1$
 	}
@@ -369,6 +385,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Object getSelectedElement() {
 		Object selectedElement= super.getSelectedElement();
 		if (selectedElement instanceof IType && fFocus != null) {

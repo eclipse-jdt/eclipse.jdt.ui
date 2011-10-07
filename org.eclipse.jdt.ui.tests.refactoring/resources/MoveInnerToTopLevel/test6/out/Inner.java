@@ -1,5 +1,4 @@
 package p;
-
 /**
  * Inner class javadoc
  */

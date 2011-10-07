@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,9 +64,9 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 	public static final int DROP_DOWN_ACTION= 18;
 
 	private final IWorkbenchSite fSite;
-	private final List fSelectedElements;
+	private final List<Object> fSelectedElements;
 	private final ISetSelectionTarget fSelectionTarget;
-	private final List fListeners;
+	private final List<IBuildpathModifierListener> fListeners;
 
 	public BuildpathModifierAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, int id) {
 		this(site, selectionTarget, id, IAction.AS_PUSH_BUTTON);
@@ -77,8 +77,8 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 
 		fSite= site;
 		fSelectionTarget= selectionTarget;
-		fSelectedElements= new ArrayList();
-		fListeners= new ArrayList();
+		fSelectedElements= new ArrayList<Object>();
+		fListeners= new ArrayList<IBuildpathModifierListener>();
 
 		setId(Integer.toString(id));
     }
@@ -109,7 +109,7 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 
 	protected abstract boolean canHandle(IStructuredSelection elements);
 
-	protected List getSelectedElements() {
+	protected List<?> getSelectedElements() {
 		return fSelectedElements;
 	}
 
@@ -122,8 +122,8 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 	}
 
 	protected void informListeners(BuildpathDelta delta) {
-		for (Iterator iterator= fListeners.iterator(); iterator.hasNext();) {
-	        ((IBuildpathModifierListener)iterator.next()).buildpathChanged(delta);
+		for (Iterator<IBuildpathModifierListener> iterator= fListeners.iterator(); iterator.hasNext();) {
+	        iterator.next().buildpathChanged(delta);
         }
 	}
 
@@ -160,7 +160,7 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 			return;
 
 		// get all the view and editor parts
-		List parts= new ArrayList();
+		List<IWorkbenchPart> parts= new ArrayList<IWorkbenchPart>();
 		IWorkbenchPartReference refs[]= page.getViewReferences();
 		for (int i= 0; i < refs.length; i++) {
 			IWorkbenchPart part= refs[i].getPart(false);
@@ -173,9 +173,9 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 				parts.add(refs[i].getPart(false));
 		}
 
-		Iterator itr= parts.iterator();
+		Iterator<IWorkbenchPart> itr= parts.iterator();
 		while (itr.hasNext()) {
-			IWorkbenchPart part= (IWorkbenchPart) itr.next();
+			IWorkbenchPart part= itr.next();
 
 			// get the part's ISetSelectionTarget implementation
 			ISetSelectionTarget target= null;

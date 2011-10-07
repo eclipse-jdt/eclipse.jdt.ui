@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -105,6 +105,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.infoviews.JavadocView;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
@@ -135,6 +136,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			update();
 		}
 
+		@Override
 		public void run() {
 			BrowserInformationControlInput previous= (BrowserInformationControlInput) fInfoControl.getInput().getPrevious();
 			if (previous != null) {
@@ -174,6 +176,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			update();
 		}
 
+		@Override
 		public void run() {
 			BrowserInformationControlInput next= (BrowserInformationControlInput) fInfoControl.getInput().getNext();
 			if (next != null) {
@@ -211,6 +214,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
+		@Override
 		public void run() {
 			JavadocBrowserInformationControlInput infoInput= (JavadocBrowserInformationControlInput) fInfoControl.getInput(); //TODO: check cast
 			fInfoControl.notifyDelayedInputChange(null);
@@ -241,6 +245,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
+		@Override
 		public void run() {
 			JavadocBrowserInformationControlInput infoInput= (JavadocBrowserInformationControlInput) fInfoControl.getInput(); //TODO: check cast
 			fInfoControl.notifyDelayedInputChange(null);
@@ -280,6 +285,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
+		@Override
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			if (BrowserInformationControl.isAvailable(parent)) {
 				ToolBarManager tbm= new ToolBarManager(SWT.FLAT);
@@ -376,6 +382,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
+		@Override
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			String tooltipAffordanceString= fAdditionalInfoAffordance ? JavaPlugin.getAdditionalInfoAffordanceString() : EditorsUI.getTooltipAffordanceString();
 			if (BrowserInformationControl.isAvailable(parent)) {
@@ -384,6 +391,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					/*
 					 * @see org.eclipse.jface.text.IInformationControlExtension5#getInformationPresenterControlCreator()
 					 */
+					@Override
 					public IInformationControlCreator getInformationPresenterControlCreator() {
 						return fInformationPresenterControlCreator;
 					}
@@ -398,6 +406,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#canReuse(org.eclipse.jface.text.IInformationControl)
 		 */
+		@Override
 		public boolean canReuse(IInformationControl control) {
 			if (!super.canReuse(control))
 				return false;
@@ -438,9 +447,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	private IInformationControlCreator fPresenterControlCreator;
 
 	/*
-	 * @see org.eclipse.jface.text.ITextHoverExtension2#getInformationPresenterControlCreator()
+	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 * @since 3.1
 	 */
+	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		if (fPresenterControlCreator == null)
 			fPresenterControlCreator= new PresenterControlCreator(getSite());
@@ -464,6 +474,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @see ITextHoverExtension#getHoverControlCreator()
 	 * @since 3.2
 	 */
+	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		if (fHoverControlCreator == null)
 			fHoverControlCreator= new HoverControlCreator(getInformationPresenterControlCreator());
@@ -543,6 +554,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	/*
 	 * @see org.eclipse.jface.text.ITextHoverExtension2#getHoverInfo2(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 */
+	@Override
 	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
 		return internalGetHoverInfo(textViewer, hoverRegion);
 	}
@@ -801,7 +813,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	private static String getEscapedStringLiteral(String stringValue) {
-		StringLiteral stringLiteral= AST.newAST(AST.JLS3).newStringLiteral();
+		StringLiteral stringLiteral= AST.newAST(ASTProvider.SHARED_AST_LEVEL).newStringLiteral();
 		stringLiteral.setLiteralValue(stringValue);
 		String stringConstant= stringLiteral.getEscapedValue();
 		if (stringConstant.length() > 80) {
@@ -812,7 +824,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	private static String getEscapedCharacterLiteral(char ch) {
-		CharacterLiteral characterLiteral= AST.newAST(AST.JLS3).newCharacterLiteral();
+		CharacterLiteral characterLiteral= AST.newAST(ASTProvider.SHARED_AST_LEVEL).newCharacterLiteral();
 		characterLiteral.setCharValue(ch);
 		return characterLiteral.getEscapedValue();
 	}
@@ -881,10 +893,6 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		return null;
 	}
 
-	public static void addImageAndLabel(StringBuffer buf, String imageSrcPath, int imageWidth, int imageHeight, String label, int labelLeft, int labelTop) {
-		addImageAndLabel(buf, null, imageSrcPath, imageWidth, imageHeight, label, labelLeft, labelTop);
-	}
-	
 	public static void addImageAndLabel(StringBuffer buf, IJavaElement element, String imageSrcPath, int imageWidth, int imageHeight, String label, int labelLeft, int labelTop) {
 		buf.append("<div style='word-wrap: break-word; position: relative; "); //$NON-NLS-1$
 		
@@ -910,16 +918,16 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 			// hack for broken transparent PNG support in IE 6, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=223900 :
 			buf.append("<!--[if lte IE 6]><![if gte IE 5.5]>\n"); //$NON-NLS-1$
-			String tooltip= JavaHoverMessages.JavadocHover_openDeclaration;
-			buf.append("<span alt='").append(tooltip).append("' style=\"").append(imageStyle). //$NON-NLS-1$ //$NON-NLS-2$
+			String tooltip= element == null ? "" : "alt='" + JavaHoverMessages.JavadocHover_openDeclaration + "' "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			buf.append("<span ").append(tooltip).append("style=\"").append(imageStyle). //$NON-NLS-1$ //$NON-NLS-2$
 					append("filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='").append(imageSrcPath).append("')\"></span>\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			buf.append("<![endif]><![endif]-->\n"); //$NON-NLS-1$
 
 			buf.append("<!--[if !IE]>-->\n"); //$NON-NLS-1$
-			buf.append("<img alt='").append(tooltip).append("' style='").append(imageStyle).append("' src='").append(imageSrcPath).append("'/>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			buf.append("<img ").append(tooltip).append("style='").append(imageStyle).append("' src='").append(imageSrcPath).append("'/>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			buf.append("<!--<![endif]-->\n"); //$NON-NLS-1$
 			buf.append("<!--[if gte IE 7]>\n"); //$NON-NLS-1$
-			buf.append("<img alt='").append(tooltip).append("' style='").append(imageStyle).append("' src='").append(imageSrcPath).append("'/>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			buf.append("<img ").append(tooltip).append("style='").append(imageStyle).append("' src='").append(imageSrcPath).append("'/>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			buf.append("<![endif]-->\n"); //$NON-NLS-1$
 			if (element != null) {
 				buf.append("</a>"); //$NON-NLS-1$
@@ -961,7 +969,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		ASTNode node= getHoveredASTNode(editorInputElement, hoverRegion);
 		
 		if (node == null) {
-			ASTParser p= ASTParser.newParser(AST.JLS3);
+			ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			p.setProject(element.getJavaProject());
 			try {
 				binding= p.createBindings(new IJavaElement[] { element }, null)[0];

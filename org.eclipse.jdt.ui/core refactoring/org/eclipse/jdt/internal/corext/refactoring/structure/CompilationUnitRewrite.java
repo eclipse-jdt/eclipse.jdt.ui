@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * A {@link CompilationUnitRewrite} holds all data structures that are typically
@@ -56,7 +57,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class CompilationUnitRewrite {
 	//TODO: add RefactoringStatus fStatus;?
 	private ICompilationUnit fCu;
-	private List/*<TextEditGroup>*/ fTextEditGroups= new ArrayList();
+	private List<TextEditGroup> fTextEditGroups= new ArrayList<TextEditGroup>();
 
 	private CompilationUnit fRoot; // lazily initialized
 	private ASTRewrite fRewrite; // lazily initialized
@@ -149,7 +150,7 @@ public class CompilationUnitRewrite {
 
 	public void clearASTRewrite() {
 		fRewrite= null;
-		fTextEditGroups= new ArrayList();
+		fTextEditGroups= new ArrayList<TextEditGroup>();
 	}
 
 	public void clearImportRewrites() {
@@ -273,8 +274,8 @@ public class CompilationUnitRewrite {
 				if (!isEmptyEdit(rewriteEdit)) {
 					multiEdit.addChild(rewriteEdit);
 					if (generateGroups) {
-						for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
-							TextEditGroup group= (TextEditGroup) iter.next();
+						for (Iterator<TextEditGroup> iter= fTextEditGroups.iterator(); iter.hasNext();) {
+							TextEditGroup group= iter.next();
 							cuChange.addTextEditGroup(group);
 						}
 					}
@@ -312,7 +313,7 @@ public class CompilationUnitRewrite {
 
 	public CompilationUnit getRoot() {
 		if (fRoot == null)
-			fRoot= new RefactoringASTParser(AST.JLS3).parse(fCu, fOwner, fResolveBindings, fStatementsRecovery, fBindingsRecovery, null);
+			fRoot= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(fCu, fOwner, fResolveBindings, fStatementsRecovery, fBindingsRecovery, null);
 		return fRoot;
 	}
 
@@ -363,8 +364,8 @@ public class CompilationUnitRewrite {
 	}
 
 	public void clearGroupDescriptions() {
-		for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
-			TextEditGroup group= (TextEditGroup) iter.next();
+		for (Iterator<TextEditGroup> iter= fTextEditGroups.iterator(); iter.hasNext();) {
+			TextEditGroup group= iter.next();
 			group.clearTextEdits();
 		}
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -207,7 +207,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 				for (int j= 0; j < operations && !timeout.hasTimedOut(); j++) {
 					// avoid overhead: assertTrue(text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1);
 					SWTEventHelper.pressKeyCodeCombination(display, mode.SCROLL_COMBO, false);
-					sleepAndRun(display);
+					runEventQueue(display);
 					// average for select & scroll is 30ms/line
 					// - give it ten time as much to allow for GCs (300ms),
 					// check back every 10 lines == never wait longer than 3s.
@@ -221,7 +221,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 				// 2: wait until the events have been swallowed
 				timeout= waiter.restart(2000);
 				while (!timeout.hasTimedOut() && text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1) {
-					sleepAndRun(display);
+					runEventQueue(display);
 				}
 				waiter.hold();
 				assertFalse("Never scrolled to the bottom within 2000ms.\nTopIndex: " + text.getTopIndex() + " visibleLines: " + visibleLinesInViewport + " totalLines: " + numberOfLines + " operations: " + operations, timeout.hasTimedOut());
@@ -230,7 +230,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 				timeout= waiter.restart(2000);
 				SWTEventHelper.pressKeyCodeCombination(display, mode.HOME_COMBO, false);
 				while (!timeout.hasTimedOut() && text.getTopIndex() != 0) {
-					sleepAndRun(display);
+					runEventQueue(display);
 				}
 				waiter.hold();
 				assertFalse("Never went back to the top within 2000ms.", timeout.hasTimedOut());
@@ -267,7 +267,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 
 				int topIndex= 0;
 				while (!timeout.hasTimedOut()) {
-					sleepAndRun(display);
+					runEventQueue(display);
 
 					final int currentTopIndex= text.getTopIndex();
 
@@ -294,7 +294,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 				for (int j= keyCodes.length - 1; j >= 0; j--) {
 					SWTEventHelper.keyCodeUp(display, keyCodes[j], false);
 				}
-				sleepAndRun(display);
+				runEventQueue(display);
 
 				performanceMeter.stop();
 				assertFalse("Never scrolled to the bottom, last event received " + delay + "ms ago, topIndex: " + text.getTopIndex(), timeout.hasTimedOut());
@@ -303,7 +303,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 				timeout= waiter.restart(2000);
 				SWTEventHelper.pressKeyCodeCombination(display, mode.HOME_COMBO, false);
 				while (!timeout.hasTimedOut() && text.getTopIndex() != 0) {
-					sleepAndRun(display);
+					runEventQueue(display);
 				}
 				waiter.hold();
 
@@ -314,8 +314,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 		}
 	}
 
-	private void sleepAndRun(Display display) {
-		if (display.sleep())
-			EditorTestHelper.runEventQueue(display);
+	private void runEventQueue(Display display) {
+		EditorTestHelper.runEventQueue(display);
 	}
 }

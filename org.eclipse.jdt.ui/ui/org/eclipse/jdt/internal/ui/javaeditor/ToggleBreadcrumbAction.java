@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,17 +43,35 @@ public class ToggleBreadcrumbAction extends ResourceAction implements IPropertyC
 	 * @param page the workbench page
 	 */
 	public ToggleBreadcrumbAction(IWorkbenchPage page) {
-		super(JavaEditorMessages.getBundleForConstructedKeys(), "ToggleBreadcrumbAction.", IAction.AS_CHECK_BOX); //$NON-NLS-1$
-		JavaPluginImages.setToolImageDescriptors(this, "toggle_breadcrumb.gif"); //$NON-NLS-1$
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.TOGGLE_BREADCRUMB_ACTION);
-		fPage= page;
-		fPage.getWorkbenchWindow().addPerspectiveListener(this);
-		update();
+		this(page, false);
 	}
 
+	/**
+	 * Constructs and updates the action.
+	 *
+	 * @param page the workbench page
+	 * @param inContextMenu <code>true</code> iff this action is shown in the context menu of a breadcrumb
+	 * 
+	 * @since 3.7
+	 */
+	public ToggleBreadcrumbAction(IWorkbenchPage page, boolean inContextMenu) {
+		super(JavaEditorMessages.getBundleForConstructedKeys(),
+				inContextMenu ? "ToggleBreadcrumbAction.Hide." : "ToggleBreadcrumbAction.", //$NON-NLS-1$ //$NON-NLS-2$
+				inContextMenu ? IAction.AS_PUSH_BUTTON : IAction.AS_CHECK_BOX);
+		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.TOGGLE_BREADCRUMB_ACTION);
+		fPage= page;
+		if (!inContextMenu) {
+			JavaPluginImages.setToolImageDescriptors(this, "toggle_breadcrumb.gif"); //$NON-NLS-1$
+			fPage.getWorkbenchWindow().addPerspectiveListener(this);
+		}
+		update();
+	}
+	
 	/*
 	 * @see IAction#actionPerformed
 	 */
+	@Override
 	public void run() {
 		fStore.setValue(getPreferenceKey(), isChecked());
 	}

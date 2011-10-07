@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -183,8 +183,18 @@ public class TestRunListenerTest extends AbstractTestRunListenerTest {
 	public void testTreeOnSecondTestStarted() throws Exception {
 		String source=
 				"package pack;\n" +
-				"import junit.framework.TestCase;\n" +
+				"import junit.framework.*;\n" +
 				"public class ATestCase extends TestCase {\n" +
+				"    public static Test suite() {\n" +
+				"        // ensure ordering:\n" +
+				"        TestSuite result= new TestSuite(\"pack.ATestCase\");\n" +
+				"        result.addTest(new ATestCase(\"testSucceed\"));\n" +
+				"        result.addTest(new ATestCase(\"testFail\"));\n" +
+				"        return result;\n" +
+				"    }\n" +
+				"    public ATestCase(String name) {\n" +
+				"        super(name);\n" +
+				"    }\n" +
 				"    public void testSucceed() { }\n" +
 				"    public void testFail() { fail(); }\n" +
 				"}";
@@ -203,8 +213,18 @@ public class TestRunListenerTest extends AbstractTestRunListenerTest {
 	public void testTreeOnSecondTestStarted2() throws Exception {
 		String source=
 				"package pack;\n" +
-				"import junit.framework.TestCase;\n" +
+				"import junit.framework.*;\n" +
 				"public class ATestCase extends TestCase {\n" +
+				"    public static Test suite() {\n" +
+				"        // ensure ordering:\n" +
+				"        TestSuite result= new TestSuite(\"pack.ATestCase\");\n" +
+				"        result.addTest(new ATestCase(\"testFail\"));\n" +
+				"        result.addTest(new ATestCase(\"testSucceed\"));\n" +
+				"        return result;\n" +
+				"    }\n" +
+				"    public ATestCase(String name) {\n" +
+				"        super(name);\n" +
+				"    }\n" +
 				"    public void testFail() { fail(); }\n" +
 				"    public void testSucceed() { }\n" +
 				"}";

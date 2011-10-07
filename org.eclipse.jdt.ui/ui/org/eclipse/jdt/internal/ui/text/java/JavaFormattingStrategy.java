@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy;
@@ -38,9 +39,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 
 	/** Documents to be formatted by this strategy */
-	private final LinkedList fDocuments= new LinkedList();
+	private final LinkedList<IDocument> fDocuments= new LinkedList<IDocument>();
 	/** Partitions to be formatted by this strategy */
-	private final LinkedList fPartitions= new LinkedList();
+	private final LinkedList<TypedPosition> fPartitions= new LinkedList<TypedPosition>();
 
 	/**
 	 * Creates a new java formatting strategy.
@@ -52,14 +53,15 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 	/*
 	 * @see org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy#format()
 	 */
+	@Override
 	public void format() {
 		super.format();
 
-		final IDocument document= (IDocument)fDocuments.removeFirst();
-		final TypedPosition partition= (TypedPosition)fPartitions.removeFirst();
+		final IDocument document= fDocuments.removeFirst();
+		final TypedPosition partition= fPartitions.removeFirst();
 
 		if (document != null && partition != null) {
-			Map partitioners= null;
+			Map<String, IDocumentPartitioner> partitioners= null;
 			try {
 
 				final TextEdit edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS, document.get(), partition.getOffset(), partition.getLength(), 0, TextUtilities.getDefaultLineDelimiter(document), getPreferences());
@@ -85,16 +87,18 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 	/*
 	 * @see org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy#formatterStarts(org.eclipse.jface.text.formatter.IFormattingContext)
 	 */
+	@Override
 	public void formatterStarts(final IFormattingContext context) {
 		super.formatterStarts(context);
 
-		fPartitions.addLast(context.getProperty(FormattingContextProperties.CONTEXT_PARTITION));
-		fDocuments.addLast(context.getProperty(FormattingContextProperties.CONTEXT_MEDIUM));
+		fPartitions.addLast((TypedPosition) context.getProperty(FormattingContextProperties.CONTEXT_PARTITION));
+		fDocuments.addLast((IDocument) context.getProperty(FormattingContextProperties.CONTEXT_MEDIUM));
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy#formatterStops()
 	 */
+	@Override
 	public void formatterStops() {
 		super.formatterStops();
 

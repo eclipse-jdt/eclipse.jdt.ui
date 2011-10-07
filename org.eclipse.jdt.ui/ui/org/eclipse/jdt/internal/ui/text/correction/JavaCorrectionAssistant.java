@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -109,6 +109,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistant#install(org.eclipse.jface.text.ITextViewer)
 	 */
+	@Override
 	public void install(ISourceViewer sourceViewer) {
 		super.install(sourceViewer);
 		fViewer= sourceViewer;
@@ -122,6 +123,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ContentAssistant#uninstall()
 	 */
+	@Override
 	public void uninstall() {
 		if (fLightBulbUpdater != null) {
 			fLightBulbUpdater.uninstall();
@@ -144,6 +146,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 	 *
 	 * @see IQuickAssistAssistant#showPossibleQuickAssists()
 	 */
+	@Override
 	public String showPossibleQuickAssists() {
 		boolean isReinvoked= false;
 		fIsProblemLocationAvailable= false;
@@ -165,7 +168,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 			return super.showPossibleQuickAssists();
 
 
-		ArrayList resultingAnnotations= new ArrayList(20);
+		ArrayList<Annotation> resultingAnnotations= new ArrayList<Annotation>(20);
 		try {
 			Point selectedRange= fViewer.getSelectedRange();
 			int currOffset= selectedRange.x;
@@ -185,7 +188,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
-		fCurrentAnnotations= (Annotation[]) resultingAnnotations.toArray(new Annotation[resultingAnnotations.size()]);
+		fCurrentAnnotations= resultingAnnotations.toArray(new Annotation[resultingAnnotations.size()]);
 
 		return super.showPossibleQuickAssists();
 	}
@@ -203,7 +206,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 		return document.getLineInformationOfOffset(invocationLocation);
 	}
 
-	public static int collectQuickFixableAnnotations(ITextEditor editor, int invocationLocation, boolean goToClosest, ArrayList resultingAnnotations) throws BadLocationException {
+	public static int collectQuickFixableAnnotations(ITextEditor editor, int invocationLocation, boolean goToClosest, ArrayList<Annotation> resultingAnnotations) throws BadLocationException {
 		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(editor.getEditorInput());
 		if (model == null) {
 			return invocationLocation;
@@ -211,7 +214,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 
 		ensureUpdatedAnnotations(editor);
 
-		Iterator iter= model.getAnnotationIterator();
+		Iterator<Annotation> iter= model.getAnnotationIterator();
 		if (goToClosest) {
 			IRegion lineInfo= getRegionOfInterest(editor, invocationLocation);
 			if (lineInfo == null) {
@@ -220,11 +223,11 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 			int rangeStart= lineInfo.getOffset();
 			int rangeEnd= rangeStart + lineInfo.getLength();
 
-			ArrayList allAnnotations= new ArrayList();
-			ArrayList allPositions= new ArrayList();
+			ArrayList<Annotation> allAnnotations= new ArrayList<Annotation>();
+			ArrayList<Position> allPositions= new ArrayList<Position>();
 			int bestOffset= Integer.MAX_VALUE;
 			while (iter.hasNext()) {
-				Annotation annot= (Annotation) iter.next();
+				Annotation annot= iter.next();
 				if (JavaCorrectionProcessor.isQuickFixableType(annot)) {
 					Position pos= model.getPosition(annot);
 					if (pos != null && isInside(pos.offset, rangeStart, rangeEnd)) { // inside our range?
@@ -238,7 +241,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 				return invocationLocation;
 			}
 			for (int i= 0; i < allPositions.size(); i++) {
-				Position pos= (Position) allPositions.get(i);
+				Position pos= allPositions.get(i);
 				if (isInside(bestOffset, pos.offset, pos.offset + pos.length)) {
 					resultingAnnotations.add(allAnnotations.get(i));
 				}
@@ -246,7 +249,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 			return bestOffset;
 		} else {
 			while (iter.hasNext()) {
-				Annotation annot= (Annotation) iter.next();
+				Annotation annot= iter.next();
 				if (JavaCorrectionProcessor.isQuickFixableType(annot)) {
 					Position pos= model.getPosition(annot);
 					if (pos != null && isInside(invocationLocation, pos.offset, pos.offset + pos.length)) {
@@ -320,6 +323,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ContentAssistant#possibleCompletionsClosed()
 	 */
+	@Override
 	protected void possibleCompletionsClosed() {
 		super.possibleCompletionsClosed();
 		restorePosition();

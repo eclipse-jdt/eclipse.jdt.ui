@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ public abstract class ProfilePreferencePage extends PropertyAndPreferencePage {
 
 	protected abstract ProfileConfigurationBlock createConfigurationBlock(PreferencesAccess access);
 
+	@Override
 	public void createControl(Composite parent) {
     	IPreferencePageContainer container= getContainer();
     	IWorkingCopyManager workingCopyManager;
@@ -49,14 +50,17 @@ public abstract class ProfilePreferencePage extends PropertyAndPreferencePage {
     	super.createControl(parent);
     }
 
+	@Override
 	protected Control createPreferenceContent(Composite composite) {
     	return fConfigurationBlock.createContents(composite);
     }
 
+	@Override
 	protected boolean hasProjectSpecificOptions(IProject project) {
     	return fConfigurationBlock.hasProjectSpecificOptions(project);
     }
 
+	@Override
 	protected void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
     	super.enableProjectSpecificSettings(useProjectSpecificSettings);
     	if (fConfigurationBlock != null) {
@@ -64,6 +68,7 @@ public abstract class ProfilePreferencePage extends PropertyAndPreferencePage {
     	}
     }
 
+	@Override
 	public void dispose() {
     	if (fConfigurationBlock != null) {
     		fConfigurationBlock.dispose();
@@ -71,6 +76,7 @@ public abstract class ProfilePreferencePage extends PropertyAndPreferencePage {
     	super.dispose();
     }
 
+	@Override
 	protected void performDefaults() {
     	if (fConfigurationBlock != null) {
     		fConfigurationBlock.performDefaults();
@@ -78,6 +84,7 @@ public abstract class ProfilePreferencePage extends PropertyAndPreferencePage {
     	super.performDefaults();
     }
 
+	@Override
 	public boolean performOk() {
     	if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
     		return false;
@@ -85,6 +92,7 @@ public abstract class ProfilePreferencePage extends PropertyAndPreferencePage {
     	return super.performOk();
     }
 
+	@Override
 	public void performApply() {
     	if (fConfigurationBlock != null) {
     		fConfigurationBlock.performApply();
@@ -92,6 +100,7 @@ public abstract class ProfilePreferencePage extends PropertyAndPreferencePage {
     	super.performApply();
     }
 
+	@Override
 	public void setElement(IAdaptable element) {
     	super.setElement(element);
     	setDescription(null); // no description for property page

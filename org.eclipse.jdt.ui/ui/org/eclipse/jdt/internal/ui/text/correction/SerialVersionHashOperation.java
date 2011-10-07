@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -204,9 +204,9 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 
 	private static char[][] getSortedInterfacesNames(IClassFileReader cfReader) {
 		char[][] interfaceNames= cfReader.getInterfaceNames();
-		Arrays.sort(interfaceNames, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				return CharOperation.compareTo(((char[]) o1), ((char[]) o2));
+		Arrays.sort(interfaceNames, new Comparator<char[]>() {
+			public int compare(char[] o1, char[] o2) {
+				return CharOperation.compareTo(o1, o2);
 			}
 		});
 		return interfaceNames;
@@ -214,9 +214,9 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 
 	private static IFieldInfo[] getSortedFields(IClassFileReader cfReader) {
 		IFieldInfo[] allFields= cfReader.getFieldInfos();
-		Arrays.sort(allFields, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				return CharOperation.compareTo(((IFieldInfo) o1).getName(), ((IFieldInfo) o2).getName());
+		Arrays.sort(allFields, new Comparator<IFieldInfo>() {
+			public int compare(IFieldInfo o1, IFieldInfo o2) {
+				return CharOperation.compareTo(o1.getName(), o2.getName());
 			}
 		});
 		return allFields;
@@ -234,10 +234,8 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 
 	private static IMethodInfo[] getSortedMethods(IClassFileReader cfReader) {
 		IMethodInfo[] allMethods= cfReader.getMethodInfos();
-		Arrays.sort(allMethods, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				IMethodInfo mi1= (IMethodInfo) o1;
-				IMethodInfo mi2= (IMethodInfo) o2;
+		Arrays.sort(allMethods, new Comparator<IMethodInfo>() {
+			public int compare(IMethodInfo mi1, IMethodInfo mi2) {
 				if (mi1.isConstructor() != mi2.isConstructor()) {
 					return mi1.isConstructor() ? -1 : 1;
 				} else if (mi1.isConstructor()) {
@@ -354,6 +352,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected boolean addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) {
 		Assert.isNotNull(fragment);
 		try {
@@ -376,6 +375,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void addLinkedPositions(ASTRewrite rewrite, VariableDeclarationFragment fragment, LinkedProposalModel positionGroups) {
 		//Do nothing
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -136,14 +136,17 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 		delegeteLabelProvider.removeListener(listener);
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		return delegeteLabelProvider.equals(obj);
 	}
 
+	@Override
 	public int hashCode() {
 		return delegeteLabelProvider.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return delegeteLabelProvider.toString();
 	}

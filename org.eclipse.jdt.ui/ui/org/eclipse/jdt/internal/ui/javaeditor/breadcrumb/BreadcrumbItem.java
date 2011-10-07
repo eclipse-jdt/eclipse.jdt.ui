@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -114,6 +114,7 @@ class BreadcrumbItem extends Item {
 	/*
 	 * @see org.eclipse.swt.widgets.Widget#dispose()
 	 */
+	@Override
 	public void dispose() {
 		fContainer.dispose();
 		super.dispose();
@@ -270,6 +271,7 @@ class BreadcrumbItem extends Item {
 	/*
 	 * @see org.eclipse.swt.widgets.Item#setText(java.lang.String)
 	 */
+	@Override
 	public void setText(String string) {
 		super.setText(string);
 		fDetailsBlock.setText(string);
@@ -282,6 +284,7 @@ class BreadcrumbItem extends Item {
 	/*
 	 * @see org.eclipse.swt.widgets.Item#setImage(org.eclipse.swt.graphics.Image)
 	 */
+	@Override
 	public void setImage(Image image) {
 		super.setImage(image);
 		fDetailsBlock.setImage(image);

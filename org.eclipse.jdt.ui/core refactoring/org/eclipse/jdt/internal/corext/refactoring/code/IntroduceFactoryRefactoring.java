@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,6 +64,7 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
@@ -363,6 +364,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.IntroduceFactory_checkingActivation, 1);
@@ -384,7 +386,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * call sites to the constructor.
 	 */
 	private ICompilationUnit[] collectAffectedUnits(SearchResultGroup[] searchHits) {
-		Collection	result= new ArrayList();
+		Collection<ICompilationUnit>	result= new ArrayList<ICompilationUnit>();
 		boolean hitInFactoryClass= false;
 
 		for(int i=0; i < searchHits.length; i++) {
@@ -397,7 +399,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		}
 		if (!hitInFactoryClass)
 			result.add(fFactoryUnitHandle);
-		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
+		return result.toArray(new ICompilationUnit[result.size()]);
 	}
 
 	/**
@@ -445,7 +447,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * (i.e. are binary and therefore can't be modified).
 	 */
 	private SearchResultGroup[] excludeBinaryUnits(SearchResultGroup[] groups) {
-		Collection/*<SearchResultGroup>*/	result= new ArrayList();
+		Collection<SearchResultGroup>	result= new ArrayList<SearchResultGroup>();
 
 		for (int i = 0; i < groups.length; i++) {
 			SearchResultGroup	rg=   groups[i];
@@ -456,7 +458,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			else
 				fCallSitesInBinaryUnits= true;
 		}
-		return (SearchResultGroup[]) result.toArray(new SearchResultGroup[result.size()]);
+		return result.toArray(new SearchResultGroup[result.size()]);
 	}
 
 	/**
@@ -523,6 +525,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.IntroduceFactory_checking_preconditions, 1);
@@ -562,11 +565,11 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		MethodDeclaration	ctorDecl= (MethodDeclaration) ctorUnit.findDeclaringNode(fCtorBinding.getKey());
 
 		if (ctorDecl != null) {
-			List	formalArgs= ctorDecl.parameters();
-			int		i= 0;
+			List<SingleVariableDeclaration>	formalArgs= ctorDecl.parameters();
+			int i= 0;
 
-			for(Iterator iter= formalArgs.iterator(); iter.hasNext(); i++) {
-				SingleVariableDeclaration	svd= (SingleVariableDeclaration) iter.next();
+			for(Iterator<SingleVariableDeclaration> iter= formalArgs.iterator(); iter.hasNext(); i++) {
+				SingleVariableDeclaration svd= iter.next();
 
 				names[i]= svd.getName().getIdentifier();
 			}
@@ -594,7 +597,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		ClassInstanceCreation	newCtorCall= ast.newClassInstanceCreation();
 		ReturnStatement			ret= ast.newReturnStatement();
 		Block		body= ast.newBlock();
-		List		stmts= body.statements();
+		List<Statement>		stmts= body.statements();
 		String		retTypeName= ctorBinding.getName();
 
 		createFactoryMethodSignature(ast, newMethod);
@@ -633,7 +636,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
         else {
             Type baseType= ast.newSimpleType(ast.newSimpleName(ctorTypeName));
             ParameterizedType newInstantiatedType= ast.newParameterizedType(baseType);
-            List/*<Type>*/ newInstTypeArgs= newInstantiatedType.typeArguments();
+            List<Type> newInstTypeArgs= newInstantiatedType.typeArguments();
 
             for(int i= 0; i < ctorOwnerTypeParameters.length; i++) {
                 Type typeArg= ASTNodeFactory.newType(ast, ctorOwnerTypeParameters[i].getName());
@@ -661,7 +664,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
         else {
             Type baseType= ast.newSimpleType(ast.newSimpleName(retTypeName));
             ParameterizedType newRetType= ast.newParameterizedType(baseType);
-            List/*<Type>*/ newRetTypeArgs= newRetType.typeArguments();
+            List<Type> newRetTypeArgs= newRetType.typeArguments();
 
             for(int i= 0; i < ctorOwnerTypeParameters.length; i++) {
                 Type retTypeArg= ASTNodeFactory.newType(ast, ctorOwnerTypeParameters[i].getName());
@@ -684,7 +687,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param newMethod the <code>MethodDeclaration</code> for the factory method
 	 */
 	private void createFactoryMethodSignature(AST ast, MethodDeclaration newMethod) {
-		List argDecls= newMethod.parameters();
+		List<SingleVariableDeclaration> argDecls= newMethod.parameters();
 
 		for(int i=0; i < fArgTypes.length; i++) {
 			SingleVariableDeclaration argDecl= ast.newSingleVariableDeclaration();
@@ -705,7 +708,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		}
 
 		ITypeBinding[] ctorExcepts= fCtorBinding.getExceptionTypes();
-		List exceptions= newMethod.thrownExceptions();
+		List<Name> exceptions= newMethod.thrownExceptions();
 
 		for(int i=0; i < ctorExcepts.length; i++) {
 			String excName= fImportRewriter.addImport(ctorExcepts[i]);
@@ -735,11 +738,11 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	private void copyTypeParameters(AST ast, MethodDeclaration newMethod) {
 		ITypeBinding[] ctorOwnerTypeParms= fCtorBinding.getDeclaringClass().getTypeParameters();
-		List/*<TypeParameter>*/ factoryMethodTypeParms= newMethod.typeParameters();
+		List<TypeParameter> factoryMethodTypeParms= newMethod.typeParameters();
 		for(int i= 0; i < ctorOwnerTypeParms.length; i++) {
             TypeParameter newParm= ast.newTypeParameter();
             ITypeBinding[] parmTypeBounds= ctorOwnerTypeParms[i].getTypeBounds();
-            List/*<Type>*/ newParmBounds= newParm.typeBounds();
+            List<Type> newParmBounds= newParm.typeBounds();
 
             newParm.setName(ast.newSimpleName(ctorOwnerTypeParms[i].getName()));
             for(int b=0; b < parmTypeBounds.length; b++) {
@@ -785,12 +788,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * the factory method
 	 */
 	private void createFactoryMethodConstructorArgs(AST ast, ClassInstanceCreation newCtorCall) {
-		List argList= newCtorCall.arguments();
+		List<Expression> argList= newCtorCall.arguments();
 
 		for(int i=0; i < fArgTypes.length; i++) {
 			ASTNode ctorArg= ast.newSimpleName(fFormalArgNames[i]);
 
-			argList.add(ctorArg);
+			argList.add((Expression) ctorArg);
 		}
 	}
 
@@ -830,9 +833,9 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		factoryMethodCall.setName(ast.newSimpleName(fNewMethodName));
 
-		List actualCtorArgsList= actualCtorArgs.getRewrittenList();
+		List<Expression> actualCtorArgsList= actualCtorArgs.getRewrittenList();
 		for (int i=0; i < actualCtorArgsList.size(); i++) {
-			Expression actualCtorArg= (Expression) actualCtorArgsList.get(i);
+			Expression actualCtorArg= actualCtorArgsList.get(i);
 			
 			ASTNode movedArg;
 			if (ASTNodes.isExistingNode(actualCtorArg)) {
@@ -973,15 +976,13 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	private boolean replaceConstructorCalls(SearchResultGroup rg, CompilationUnit unit, ASTRewrite unitRewriter, CompilationUnitChange unitChange) throws CoreException {
 		Assert.isTrue(ASTCreator.getCu(unit).equals(rg.getCompilationUnit()));
 		SearchMatch[] hits= rg.getSearchResults();
-		Arrays.sort(hits, new Comparator() {
+		Arrays.sort(hits, new Comparator<SearchMatch>() {
 			/**
 			 * Sort by descending offset, such that nested constructor calls are processed first.
 			 * This is necessary, since they can only be moved into the factory method invocation
 			 * after they have been rewritten.
 			 */
-			public int compare(Object o1, Object o2) {
-				SearchMatch m1= (SearchMatch)o1;
-				SearchMatch m2= (SearchMatch)o2;
+			public int compare(SearchMatch m1, SearchMatch m2) {
 				return m2.getOffset() - m1.getOffset();
 			}
 		});
@@ -1118,11 +1119,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.IntroduceFactory_createChanges, fAllCallsTo.length);
 			final ITypeBinding binding= fFactoryOwningClass.resolveBinding();
-			final Map arguments= new HashMap();
+			final Map<String, String> arguments= new HashMap<String, String>();
 			String project= null;
 			IJavaProject javaProject= fCUHandle.getJavaProject();
 			if (javaProject != null)
@@ -1183,6 +1185,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#getName()
 	 */
+	@Override
 	public String getName() {
 		return RefactoringCoreMessages.IntroduceFactory_name;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal;
  *
  * @since 3.1
  */
-public final class CompletionProposalComparator implements Comparator {
+public final class CompletionProposalComparator implements Comparator<ICompletionProposal> {
 
 	private boolean fOrderAlphabetically;
 
@@ -48,13 +48,11 @@ public final class CompletionProposalComparator implements Comparator {
 		fOrderAlphabetically= orderAlphabetically;
 	}
 
-	/*
-	 * @see Comparator#compare(Object, Object)
+	/**
+	 * {@inheritDoc}
+	 * @since 3.7
 	 */
-	public int compare(Object o1, Object o2) {
-		ICompletionProposal p1= (ICompletionProposal) o1;
-		ICompletionProposal p2= (ICompletionProposal) o2;
-
+	public int compare(ICompletionProposal p1, ICompletionProposal p2) {
 		if (!fOrderAlphabetically) {
 			int r1= getRelevance(p1);
 			int r2= getRelevance(p2);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ class SimpleFragment extends ASTFragment {
 		fNode= node;
 	}
 
+	@Override
 	public IASTFragment[] getMatchingFragmentsWithNode(ASTNode node) {
 		if (! JdtASTMatcher.doNodesMatch(getAssociatedNode(), node))
 			return new IASTFragment[0];
@@ -67,10 +68,12 @@ class SimpleFragment extends ASTFragment {
 		}
 	}
 
+	@Override
 	public int hashCode() {
 		return fNode.hashCode();
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;

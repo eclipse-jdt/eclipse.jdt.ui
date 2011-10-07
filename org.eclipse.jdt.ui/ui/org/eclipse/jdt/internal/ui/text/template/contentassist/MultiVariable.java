@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ import org.eclipse.jface.text.templates.TemplateVariableType;
 public class MultiVariable extends TemplateVariable {
 	private static final Object DEFAULT_KEY= new Object();
 
-	private final Map fValueMap= new HashMap(); // <Object, Object[]>
+	private final Map<Object, Object[]> fValueMap= new HashMap<Object, Object[]>();
 	/** The master key defining the active set. */
 	private Object fKey;
 	/** The currently active object. */
@@ -82,6 +82,7 @@ public class MultiVariable extends TemplateVariable {
 	/*
 	 * @see org.eclipse.jface.text.templates.TemplateVariable#setValues(java.lang.String[])
 	 */
+	@Override
 	public void setValues(String[] values) {
 		setChoices(values);
 	}
@@ -94,6 +95,7 @@ public class MultiVariable extends TemplateVariable {
 	 * @see org.eclipse.jface.text.templates.TemplateVariable#getDefaultValue()
 	 * @since 3.3
 	 */
+	@Override
 	public String getDefaultValue() {
 		return toString(fCurrentChoice);
 	}
@@ -105,6 +107,7 @@ public class MultiVariable extends TemplateVariable {
 	/*
 	 * @see org.eclipse.jface.text.templates.TemplateVariable#getValues()
 	 */
+	@Override
 	public String[] getValues() {
 		Object[] values= getChoices();
 		String[] result= new String[values.length];
@@ -125,10 +128,10 @@ public class MultiVariable extends TemplateVariable {
 	 *         <code>null</code> if the set is not defined.
 	 */
 	public Object[] getChoices(Object key) {
-		return (Object[]) fValueMap.get(key);
+		return fValueMap.get(key);
 	}
 
 	public Object[][] getAllChoices() {
-		return (Object[][]) fValueMap.values().toArray(new Object[fValueMap.size()][]);
+		return fValueMap.values().toArray(new Object[fValueMap.size()][]);
 	}
 }

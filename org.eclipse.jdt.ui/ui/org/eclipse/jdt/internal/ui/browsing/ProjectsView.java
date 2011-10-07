@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,6 +60,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createViewer(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected StructuredViewer createViewer(Composite parent) {
 		ProblemTreeViewer result= new ProblemTreeViewer(parent, SWT.MULTI);
 		fFilterUpdater= new FilterUpdater(result);
@@ -70,6 +71,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#dispose()
 	 */
+	@Override
 	public void dispose() {
 		if (fFilterUpdater != null)
 			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fFilterUpdater);
@@ -79,6 +81,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getAdapter(java.lang.Class)
 	 */
+	@Override
 	public Object getAdapter(Class key) {
 		if (key == IShowInTargetList.class) {
 			return new IShowInTargetList() {
@@ -95,6 +98,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createContentProvider()
 	 */
+	@Override
 	protected IContentProvider createContentProvider() {
 		return new ProjectAndSourceFolderContentProvider(this);
 	}
@@ -104,10 +108,12 @@ public class ProjectsView extends JavaBrowsingPart {
 	 *
 	 * @return	the string used as ID for the Help context
 	 */
+	@Override
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.PROJECTS_VIEW;
 	}
 
+	@Override
 	protected String getLinkToEditorKey() {
 		return PreferenceConstants.LINK_BROWSING_PROJECTS_TO_EDITOR;
 	}
@@ -116,6 +122,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	/**
 	 * Adds additional listeners to this view.
 	 */
+	@Override
 	protected void hookViewerListeners() {
 		super.hookViewerListeners();
 		getViewer().addDoubleClickListener(new IDoubleClickListener() {
@@ -128,6 +135,7 @@ public class ProjectsView extends JavaBrowsingPart {
 		});
 	}
 
+	@Override
 	protected void setInitialInput() {
 		IJavaElement root= JavaCore.create(JavaPlugin.getWorkspace().getRoot());
 		getViewer().setInput(root);
@@ -141,6 +149,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid input
 	 */
+	@Override
 	protected boolean isValidInput(Object element) {
 		return element instanceof IJavaModel;
 	}
@@ -152,6 +161,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid element
 	 */
+	@Override
 	protected boolean isValidElement(Object element) {
 		return element instanceof IJavaProject || element instanceof IPackageFragmentRoot;
 	}
@@ -162,6 +172,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	 * @param je	the Java element which has the focus
 	 * @return the element to select
 	 */
+	@Override
 	protected IJavaElement findElementToSelect(IJavaElement je) {
 		if (je == null)
 			return null;
@@ -184,6 +195,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	/*
 	 * @see JavaBrowsingPart#setInput(Object)
 	 */
+	@Override
 	protected void setInput(Object input) {
 		// Don't allow to clear input for this view
 		if (input != null)
@@ -192,6 +204,7 @@ public class ProjectsView extends JavaBrowsingPart {
 			getViewer().setSelection(null);
 	}
 
+	@Override
 	protected void createActions() {
 		super.createActions();
 		fActionGroups.addGroup(new ProjectActionGroup(this));
@@ -203,11 +216,13 @@ public class ProjectsView extends JavaBrowsingPart {
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#activateHandlers(org.eclipse.ui.handlers.IHandlerService)
 	 * @since 3.4
 	 */
+	@Override
 	protected void activateHandlers(IHandlerService handlerService) {
 		super.activateHandlers(handlerService);
 		handlerService.activateHandler(CollapseAllHandler.COMMAND_ID, new ActionHandler(fCollapseAllAction));
 	}
 
+	@Override
 	protected void fillToolBar(IToolBarManager tbm) {
 		super.fillToolBar(tbm);
 		tbm.add(fCollapseAllAction);
@@ -219,13 +234,14 @@ public class ProjectsView extends JavaBrowsingPart {
 	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
 	 * @since 2.1
 	 */
+	@Override
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (!needsToProcessSelectionChanged(part))
 			return;
 
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection sel= (IStructuredSelection)selection;
-			Iterator iter= sel.iterator();
+			Iterator<?> iter= sel.iterator();
 			while (iter.hasNext()) {
 				Object selectedElement= iter.next();
 				if (selectedElement instanceof LogicalPackage) {

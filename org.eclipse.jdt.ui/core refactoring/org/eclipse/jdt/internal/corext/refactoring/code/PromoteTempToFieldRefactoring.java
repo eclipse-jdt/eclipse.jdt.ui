@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -50,6 +51,7 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -188,7 +190,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
    		status.merge(initializeStatus);
     }
 
-    public String getName() {
+    @Override
+	public String getName() {
         return RefactoringCoreMessages.PromoteTempToFieldRefactoring_name;
     }
 
@@ -303,6 +306,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     /*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= Checks.validateModifiesFiles(
 			ResourceUtil.getFiles(new ICompilationUnit[]{fCu}),
@@ -373,14 +377,14 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		final AbstractTypeDeclaration type= getEnclosingType();
 		if (type instanceof TypeDeclaration) {
 			FieldDeclaration[] fields= ((TypeDeclaration) type).getFields();
-			List result= new ArrayList(fields.length);
+			List<String> result= new ArrayList<String>(fields.length);
 			for (int i= 0; i < fields.length; i++) {
-				for (Iterator iter= fields[i].fragments().iterator(); iter.hasNext();) {
-					VariableDeclarationFragment field= (VariableDeclarationFragment) iter.next();
+				for (Iterator<VariableDeclarationFragment> iter= fields[i].fragments().iterator(); iter.hasNext();) {
+					VariableDeclarationFragment field= iter.next();
 					result.add(field.getName().getIdentifier());
 				}
 			}
-			return (String[]) result.toArray(new String[result.size()]);
+			return result.toArray(new String[result.size()]);
 		}
 		return new String[] {};
 	}
@@ -443,7 +447,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     /*
      * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
      */
-    public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
+    @Override
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
     	try{
 	        RefactoringStatus result= new RefactoringStatus();
 	        result.merge(checkClashesWithExistingFields());
@@ -466,12 +471,13 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 				if (!method.isConstructor())
 					continue;
 				NameCollector nameCollector= new NameCollector(method) {
+					@Override
 					protected boolean visitNode(ASTNode node) {
 						return true;
 					}
 				};
 				method.accept(nameCollector);
-				List names= nameCollector.getNames();
+				List<String> names= nameCollector.getNames();
 				if (names.contains(fFieldName)) {
 					String[] keys= { BasicElementLabels.getJavaElementName(fFieldName), BindingLabelProvider.getBindingLabel(method.resolveBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED)};
 					String msg= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_Name_conflict, keys);
@@ -510,20 +516,21 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
 
     private FieldDeclaration[] getFieldDeclarations(ChildListPropertyDescriptor descriptor) {
-    	final List bodyDeclarations= (List) getMethodDeclaration().getParent().getStructuralProperty(descriptor);
-    	List fields= new ArrayList(1);
-    	for (Iterator iter= bodyDeclarations.iterator(); iter.hasNext();) {
+    	final List<BodyDeclaration> bodyDeclarations= (List<BodyDeclaration>) getMethodDeclaration().getParent().getStructuralProperty(descriptor);
+    	List<FieldDeclaration> fields= new ArrayList<FieldDeclaration>(1);
+    	for (Iterator<BodyDeclaration> iter= bodyDeclarations.iterator(); iter.hasNext();) {
 	        Object each= iter.next();
 	        if (each instanceof FieldDeclaration)
-	        	fields.add(each);
+	        	fields.add((FieldDeclaration) each);
         }
-        return (FieldDeclaration[]) fields.toArray(new FieldDeclaration[fields.size()]);
+        return fields.toArray(new FieldDeclaration[fields.size()]);
     }
 
     /*
      * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
      */
-    public Change createChange(IProgressMonitor pm) throws CoreException {
+    @Override
+	public Change createChange(IProgressMonitor pm) throws CoreException {
     	pm.beginTask("", 1); //$NON-NLS-1$
     	try {
     		if (fFieldName.length() == 0) {
@@ -617,7 +624,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	}
 
 	private int computeInsertIndexForNewConstructor(AbstractTypeDeclaration declaration) {
-    	List declarations= declaration.bodyDeclarations();
+    	List<BodyDeclaration> declarations= declaration.bodyDeclarations();
     	if (declarations.isEmpty())
 	        return 0;
 		int index= findFirstMethodIndex(declaration);
@@ -646,7 +653,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     	Assert.isTrue(constructor.isConstructor());
         if (constructor.getBody() == null)
         	return false;
-        List statements= constructor.getBody().statements();
+        List<Statement> statements= constructor.getBody().statements();
         if (statements == null)
         	return false;
         if (statements.size() > 0 && statements.get(0) instanceof ConstructorInvocation)
@@ -657,20 +664,20 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     private static MethodDeclaration[] getAllConstructors(AbstractTypeDeclaration typeDeclaration) {
 		if (typeDeclaration instanceof TypeDeclaration) {
 			MethodDeclaration[] allMethods= ((TypeDeclaration) typeDeclaration).getMethods();
-			List result= new ArrayList(Math.min(allMethods.length, 1));
+			List<MethodDeclaration> result= new ArrayList<MethodDeclaration>(Math.min(allMethods.length, 1));
 			for (int i= 0; i < allMethods.length; i++) {
 				MethodDeclaration declaration= allMethods[i];
 				if (declaration.isConstructor())
 					result.add(declaration);
 			}
-			return (MethodDeclaration[]) result.toArray(new MethodDeclaration[result.size()]);
+			return result.toArray(new MethodDeclaration[result.size()]);
 		}
 		return new MethodDeclaration[] {};
 	}
 
 
 	private ConvertLocalVariableDescriptor getRefactoringDescriptor() {
-		final Map arguments= new HashMap();
+		final Map<String, String> arguments= new HashMap<String, String>();
 		String project= null;
 		IJavaProject javaProject= fCu.getJavaProject();
 		if (javaProject != null)
@@ -732,7 +739,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 
 		Statement newStatement= createNewAssignmentStatement(rewrite);
 
-    	List fragments= tempDeclarationStatement.fragments();
+    	List<VariableDeclarationFragment> fragments= tempDeclarationStatement.fragments();
 
 		int fragmentIndex= fragments.indexOf(fTempDeclarationNode);
 		Assert.isTrue(fragmentIndex != -1);
@@ -743,7 +750,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		}
 
         for (int i1= fragmentIndex, n = fragments.size(); i1 < n; i1++) {
-        	VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(i1);
+        	VariableDeclarationFragment fragment= fragments.get(i1);
         	rewrite.remove(fragment, null);
         }
         if (fragmentIndex == 0)
@@ -754,12 +761,12 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         listRewrite.insertAt(newStatement, statementIndex + 1, null);
 
         if (fragmentIndex + 1 < fragments.size()){
-            VariableDeclarationFragment firstFragmentAfter= (VariableDeclarationFragment)fragments.get(fragmentIndex + 1);
+            VariableDeclarationFragment firstFragmentAfter= fragments.get(fragmentIndex + 1);
             VariableDeclarationFragment copyfirstFragmentAfter= (VariableDeclarationFragment)rewrite.createCopyTarget(firstFragmentAfter);
         	VariableDeclarationStatement statement= getAST().newVariableDeclarationStatement(copyfirstFragmentAfter);
          	Type type= (Type)rewrite.createCopyTarget(tempDeclarationStatement.getType());
         	statement.setType(type);
-        	List modifiers= tempDeclarationStatement.modifiers();
+        	List<IExtendedModifier> modifiers= tempDeclarationStatement.modifiers();
         	if (modifiers.size() > 0) {
         		ListRewrite modifiersRewrite= rewrite.getListRewrite(tempDeclarationStatement, VariableDeclarationStatement.MODIFIERS2_PROPERTY);
         		ASTNode firstModifier= (ASTNode) modifiers.get(0);
@@ -768,7 +775,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	        	statement.modifiers().add(modifiersCopy);
         	}
         	for (int i= fragmentIndex + 2; i < fragments.size(); i++) {
-        		VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(i);
+        		VariableDeclarationFragment fragment= fragments.get(i);
                 VariableDeclarationFragment fragmentCopy= (VariableDeclarationFragment)rewrite.createCopyTarget(fragment);
                 statement.fragments().add(fragmentCopy);
             }
@@ -805,11 +812,11 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 
     private void addLocalDeclarationRemoval(ASTRewrite rewrite) {
 		VariableDeclarationStatement tempDeclarationStatement= getTempDeclarationStatement();
-    	List fragments= tempDeclarationStatement.fragments();
+    	List<VariableDeclarationFragment> fragments= tempDeclarationStatement.fragments();
 
     	int fragmentIndex= fragments.indexOf(fTempDeclarationNode);
     	Assert.isTrue(fragmentIndex != -1);
-        VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(fragmentIndex);
+        VariableDeclarationFragment fragment= fragments.get(fragmentIndex);
         rewrite.remove(fragment, null);
         if (fragments.size() == 1)
 			rewrite.remove(tempDeclarationStatement, null);
@@ -823,7 +830,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     	if (fields.length == 0)
     		insertIndex= 0;
     	else
-    		insertIndex= ((List) parent.getStructuralProperty(descriptor)).indexOf(fields[fields.length - 1]) + 1;
+    		insertIndex= ((List<? extends ASTNode>) parent.getStructuralProperty(descriptor)).indexOf(fields[fields.length - 1]) + 1;
 
     	final FieldDeclaration declaration= createNewFieldDeclaration(rewrite);
 		rewrite.getListRewrite(parent, descriptor).insertAt(declaration, insertIndex, null);
@@ -863,19 +870,20 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
 
     private static class LocalTypeAndVariableUsageAnalyzer extends HierarchicalASTVisitor{
-    	private final List fLocalDefinitions= new ArrayList(0); // List of IBinding (Variable and Type)
-    	private final List fLocalReferencesToEnclosing= new ArrayList(0); // List of ASTNodes
-		private final List fMethodTypeVariables;
+    	private final List<IBinding> fLocalDefinitions= new ArrayList<IBinding>(0); // List of IBinding (Variable and Type)
+    	private final List<SimpleName> fLocalReferencesToEnclosing= new ArrayList<SimpleName>(0); // List of ASTNodes
+		private final List<ITypeBinding> fMethodTypeVariables;
 		private boolean fClassTypeVariablesUsed= false;
     	public LocalTypeAndVariableUsageAnalyzer(ITypeBinding[] methodTypeVariables) {
 			fMethodTypeVariables= Arrays.asList(methodTypeVariables);
 		}
-		public List getUsageOfEnclosingNodes(){
+		public List<SimpleName> getUsageOfEnclosingNodes(){
 			return fLocalReferencesToEnclosing;
 		}
 		public boolean getClassTypeVariablesUsed() {
 			return fClassTypeVariablesUsed;
 		}
+		@Override
 		public boolean visit(SimpleName node) {
 			ITypeBinding typeBinding= node.resolveTypeBinding();
 			if (typeBinding != null && typeBinding.isLocal()) {

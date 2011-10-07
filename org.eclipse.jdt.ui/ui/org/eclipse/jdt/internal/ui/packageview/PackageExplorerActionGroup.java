@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -185,6 +185,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fSelectAllAction= new SelectAllAction(fPart.getTreeViewer());
 	}
 
+	@Override
 	public void dispose() {
 		super.dispose();
 	}
@@ -204,6 +205,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	//---- Action Bars ----------------------------------------------------------------------------
 
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		setGlobalActionHandlers(actionBars);
@@ -272,6 +274,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	//---- Context menu -------------------------------------------------------------------------
 
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		IStructuredSelection selection= (IStructuredSelection)getContext().getSelection();
 		int size= selection.size();

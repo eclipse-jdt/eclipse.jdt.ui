@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,6 +75,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		radioAll.setText(RefactoringMessages.InlineMethodInputPage_all_invocations);
 		radioAll.setSelection(all);
 		radioAll.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				fRemove.setEnabled(fRefactoring.canEnableDeleteSource());
 				if (((Button)event.widget).getSelection())
@@ -91,6 +92,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		fRemove.setSelection(fRefactoring.canEnableDeleteSource());
 		fRefactoring.setDeleteSource(fRefactoring.canEnableDeleteSource());
 		fRemove.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fRefactoring.setDeleteSource(((Button)e.widget).getSelection());
 			}
@@ -108,6 +110,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 			radioSelected.setFocus();
 		}
 		radioSelected.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				fRemove.setEnabled(false);
 				if (((Button)event.widget).getSelection())

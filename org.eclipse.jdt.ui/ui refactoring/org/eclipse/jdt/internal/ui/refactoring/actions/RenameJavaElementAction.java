@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,6 +61,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 
 	//---- Structured selection ------------------------------------------------
 
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			if (selection.size() == 1) {
@@ -93,9 +94,12 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		return (IJavaElement)first;
 	}
 
+	@Override
 	public void run(IStructuredSelection selection) {
 		IJavaElement element= getJavaElement(selection);
 		if (element == null)
+			return;
+		if (!ActionUtil.isEditable(getShell(), element))
 			return;
 		try {
 			run(element, false);
@@ -106,6 +110,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 
 	//---- text selection ------------------------------------------------------------
 
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		if (selection instanceof JavaTextSelection) {
 			try {
@@ -125,8 +130,14 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		}
 	}
 
+	@Override
 	public void run(ITextSelection selection) {
-		doRun();
+		if (!ActionUtil.isEditable(fEditor))
+			return;
+		if (canRunInEditor())
+			doRun();
+		else
+			MessageDialog.openInformation(getShell(), RefactoringMessages.RenameAction_rename, RefactoringMessages.RenameAction_unavailable);
 	}
 
 	public void doRun() {

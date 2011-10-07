@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -121,17 +121,17 @@ public final class JarPackagerUtil {
 	 * @param elements elements for which to retrieve the resources from
 	 * @return a List with the selected resources
 	 */
-	public static List asResources(Object[] elements) {
+	public static List<IResource> asResources(Object[] elements) {
 		if (elements == null)
 			return null;
-		List selectedResources= new ArrayList(elements.length);
+		List<IResource> selectedResources= new ArrayList<IResource>(elements.length);
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];
 			if (element instanceof IJavaElement) {
 				selectedResources.add(((IJavaElement)element).getResource());
 			}
 			else if (element instanceof IResource)
-				selectedResources.add(element);
+				selectedResources.add((IResource) element);
 		}
 		return selectedResources;
 	}
@@ -220,18 +220,18 @@ public final class JarPackagerUtil {
 		return false;
 	}
 
-	static boolean contains(List resources, IFile file) {
+	static boolean contains(List<IResource> resources, IFile file) {
 		if (resources == null || file == null)
 			return false;
 
 		if (resources.contains(file))
 			return true;
 
-		Iterator iter= resources.iterator();
+		Iterator<IResource> iter= resources.iterator();
 		while (iter.hasNext()) {
-			IResource resource= (IResource)iter.next();
+			IResource resource= iter.next();
 			if (resource != null && resource.getType() != IResource.FILE) {
-				List children= null;
+				List<IResource> children= null;
 				try {
 					children= Arrays.asList(((IContainer)resource).members());
 				} catch (CoreException ex) {

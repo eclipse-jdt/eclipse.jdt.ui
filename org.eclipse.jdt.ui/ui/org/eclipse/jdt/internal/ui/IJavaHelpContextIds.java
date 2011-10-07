@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,9 @@ public interface IJavaHelpContextIds {
 	// Actions
 	public static final String GETTERSETTER_ACTION= 											PREFIX + "getter_setter_action_context"; //$NON-NLS-1$
 	public static final String ADD_UNIMPLEMENTED_METHODS_ACTION= 					PREFIX + "add_unimplemented_methods_action_context"; //$NON-NLS-1$
+	/** @since 3.7 **/
+	public static final String SHOW_IN_BREADCRUMB_ACTION=							PREFIX + "show_in_breadcrumb_action_context"; //$NON-NLS-1$
+	public static final String COPY_QUALIFIED_NAME_ACTION= 							PREFIX + "copy_qualified_name_action_context"; //$NON-NLS-1$
 	/** @since 3.2 **/
 	public static final String GENERATE_HASHCODE_EQUALS_ACTION=						PREFIX + "add_hashcode_equals_action_context"; //$NON-NLS-1$
 	/** @since 3.5 **/
@@ -172,12 +175,12 @@ public interface IJavaHelpContextIds {
 	public static final String OPEN_INPUT_ACTION= 														PREFIX + "open_input_action"; //$NON-NLS-1$
 	public static final String OPEN_SUPER_IMPLEMENTATION_ACTION= 					PREFIX + "open_super_implementation_action"; //$NON-NLS-1$
 	public static final String PULL_UP_ACTION= 													PREFIX + "pull_up_action"; //$NON-NLS-1$
-	
+
 	/**
 	 * @since 3.6
 	 */
 	public static final String OPEN_IMPLEMENTATION_ACTION= 					PREFIX + "open_implementation_action"; //$NON-NLS-1$
-	
+
 	/**
 	 * @since 3.2
 	 */
@@ -226,10 +229,10 @@ public interface IJavaHelpContextIds {
 	/**
 	 * @since 3.0
 	 */
-	public static final String TOGGLE_COMMENT_ACTION=							PREFIX + "toggle_comment_action"; 	 //$NON-NLS-1$
-	public static final String ADD_BLOCK_COMMENT_ACTION=				PREFIX + "add_block_comment_action"; 	//$NON-NLS-1$
-	public static final String REMOVE_BLOCK_COMMENT_ACTION=				PREFIX + "remove_block_comment_action";	//$NON-NLS-1$
-	public static final String QUICK_FIX_ACTION= 						PREFIX + "quick_fix_action"; 	 //$NON-NLS-1$
+	public static final String TOGGLE_COMMENT_ACTION=						PREFIX + "toggle_comment_action"; 	 //$NON-NLS-1$
+	public static final String ADD_BLOCK_COMMENT_ACTION=					PREFIX + "add_block_comment_action"; 	//$NON-NLS-1$
+	public static final String REMOVE_BLOCK_COMMENT_ACTION=					PREFIX + "remove_block_comment_action";	//$NON-NLS-1$
+	public static final String QUICK_FIX_ACTION= 							PREFIX + "quick_fix_action"; 	 //$NON-NLS-1$
 	public static final String PARAMETER_HINTS_ACTION= 						PREFIX + "parameter_hints_action"; 	 //$NON-NLS-1$
 	public static final String SHOW_OUTLINE_ACTION= 						PREFIX + "show_outline_action"; 	 //$NON-NLS-1$
 	public static final String OPEN_STRUCTURE_ACTION= 						PREFIX + "open_structure_action"; 	 //$NON-NLS-1$
@@ -271,6 +274,11 @@ public interface IJavaHelpContextIds {
 	public static final String NEW_CONTAINER_DIALOG= PREFIX + "new_container_dialog_context"; //$NON-NLS-1$
 	public static final String EXCLUSION_PATTERN_DIALOG= PREFIX + "exclusion_pattern_dialog_context"; //$NON-NLS-1$
 	public static final String ACCESS_RULES_DIALOG= PREFIX + "access_rules_dialog_context"; //$NON-NLS-1$
+	/**
+	 * @since 3.7
+	 */
+	public static final String ACCESS_RULES_DIALOG_COMBINE_RULES= PREFIX + "access_rules_dialog_combine_rules_context"; //$NON-NLS-1$
+
 	public static final String OUTPUT_LOCATION_DIALOG= PREFIX + "output_location_dialog_context"; //$NON-NLS-1$
 	public static final String VARIABLE_CREATION_DIALOG= PREFIX + "variable_creation_dialog_context"; //$NON-NLS-1$
 	public static final String JAVA_SEARCH_PAGE= PREFIX + "java_search_page_context"; //$NON-NLS-1$
@@ -302,9 +310,9 @@ public interface IJavaHelpContextIds {
 
 	// Preference/Property pages
 	public static final String APPEARANCE_PREFERENCE_PAGE= 			PREFIX + "appearance_preference_page_context"; //$NON-NLS-1$
-	public static final String SORT_ORDER_PREFERENCE_PAGE=		    PREFIX + "sort_order_preference_page_context"; //$NON-NLS-1$
-	public static final String TYPE_FILTER_PREFERENCE_PAGE=		    PREFIX + "type_filter_preference_page_context"; //$NON-NLS-1$
-	public static final String BUILD_PATH_PROPERTY_PAGE= 				PREFIX + "build_path_property_page_context"; //$NON-NLS-1$
+	public static final String SORT_ORDER_PREFERENCE_PAGE=			PREFIX + "sort_order_preference_page_context"; //$NON-NLS-1$
+	public static final String TYPE_FILTER_PREFERENCE_PAGE=			PREFIX + "type_filter_preference_page_context"; //$NON-NLS-1$
+	public static final String BUILD_PATH_PROPERTY_PAGE= 			PREFIX + "build_path_property_page_context"; //$NON-NLS-1$
 	public static final String CP_VARIABLES_PREFERENCE_PAGE= 		PREFIX + "cp_variables_preference_page_context"; //$NON-NLS-1$
 	/**
 	 * @since 3.0
@@ -337,6 +345,7 @@ public interface IJavaHelpContextIds {
 	public static final String JAVADOC_PROBLEMS_PREFERENCE_PAGE= PREFIX + "javadoc_problems_preference_page_context"; //$NON-NLS-1$
 	public static final String PROBLEM_SEVERITIES_PREFERENCE_PAGE= PREFIX + "problem_severities_preference_page_context"; //$NON-NLS-1$
 	public static final String TODOTASK_PREFERENCE_PAGE= PREFIX + "tasktags_preference_page_context"; //$NON-NLS-1$
+	public static final String TYPING_PREFERENCE_PAGE= PREFIX + "typing_preference_page_context"; //$NON-NLS-1$
 
 	public static final String TEMPLATE_PREFERENCE_PAGE= PREFIX + "template_preference_page_context"; //$NON-NLS-1$
 	public static final String NEW_JAVA_PROJECT_PREFERENCE_PAGE= PREFIX + "new_java_project_preference_page_context"; //$NON-NLS-1$
@@ -432,33 +441,39 @@ public interface IJavaHelpContextIds {
 	// Custom Filters
 	public static final String CUSTOM_FILTERS_DIALOG= PREFIX + "open_custom_filters_dialog_context"; //$NON-NLS-1$
 
-    // Call Hierarchy
-    public static final String CALL_HIERARCHY_VIEW= PREFIX + "call_hierarchy_view_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_FILTERS_DIALOG= PREFIX + "call_hierarchy_filters_dialog_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_FOCUS_ON_SELECTION_ACTION= PREFIX + "call_hierarchy_focus_on_selection_action_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_HISTORY_ACTION= PREFIX + "call_hierarchy_history_action_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_HISTORY_DROP_DOWN_ACTION= PREFIX + "call_hierarchy_history_drop_down_action_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_REFRESH_VIEW_ACTION= PREFIX + "call_hierarchy_refresh_action_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_SEARCH_SCOPE_ACTION= PREFIX + "call_hierarchy_search_scope_action_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_TOGGLE_CALL_MODE_ACTION= PREFIX + "call_hierarchy_toggle_call_mode_action_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_TOGGLE_JAVA_LABEL_FORMAT_ACTION= PREFIX + "call_hierarchy_toggle_java_label_format_action_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_TOGGLE_ORIENTATION_ACTION= PREFIX + "call_hierarchy_toggle_call_mode_action_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_COPY_ACTION= PREFIX + "call_hierarchy_copy_action_context"; //$NON-NLS-1$
+	// Call Hierarchy
+	public static final String CALL_HIERARCHY_VIEW= PREFIX + "call_hierarchy_view_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_FILTERS_DIALOG= PREFIX + "call_hierarchy_filters_dialog_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_FOCUS_ON_SELECTION_ACTION= PREFIX + "call_hierarchy_focus_on_selection_action_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_HISTORY_ACTION= PREFIX + "call_hierarchy_history_action_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_HISTORY_DROP_DOWN_ACTION= PREFIX + "call_hierarchy_history_drop_down_action_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_REFRESH_VIEW_ACTION= PREFIX + "call_hierarchy_refresh_action_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_SEARCH_SCOPE_ACTION= PREFIX + "call_hierarchy_search_scope_action_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_TOGGLE_CALL_MODE_ACTION= PREFIX + "call_hierarchy_toggle_call_mode_action_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_TOGGLE_JAVA_LABEL_FORMAT_ACTION= PREFIX + "call_hierarchy_toggle_java_label_format_action_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_TOGGLE_ORIENTATION_ACTION= PREFIX + "call_hierarchy_toggle_call_mode_action_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_COPY_ACTION= PREFIX + "call_hierarchy_copy_action_context"; //$NON-NLS-1$
 	public static final String CALL_HIERARCHY_TOGGLE_IMPLEMENTORS_ACTION= PREFIX + "call_hierarchy_toggle_implementors_action_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_OPEN_ACTION= PREFIX + "call_hierarchy_open_action_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_CANCEL_SEARCH_ACTION= PREFIX + "call_hierarchy_cancel_search_action_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_EXPAND_WITH_CONSTRUCTORS_ACTION= PREFIX + "call_hierarchy_expand_with_constructors_action_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_EXPAND_WITH_CONSTRUCTORS_DIALOG= PREFIX + "call_hierarchy_expand_with_constructors_dialog_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_REMOVE_FROM_VIEW_ACTION= PREFIX + "call_hierarchy_remove_from_view_action_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_OPEN_ACTION= PREFIX + "call_hierarchy_open_action_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_CANCEL_SEARCH_ACTION= PREFIX + "call_hierarchy_cancel_search_action_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_EXPAND_WITH_CONSTRUCTORS_ACTION= PREFIX + "call_hierarchy_expand_with_constructors_action_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_EXPAND_WITH_CONSTRUCTORS_DIALOG= PREFIX + "call_hierarchy_expand_with_constructors_dialog_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_REMOVE_FROM_VIEW_ACTION= PREFIX + "call_hierarchy_remove_from_view_action_context"; //$NON-NLS-1$
 
-    /**
-     * @since 3.6
-     */
-    public static final String CALL_HIERARCHY_REFRESH_SINGLE_ELEMENT_ACTION= PREFIX + "call_hierarchy_refresh_single_element_action_context"; //$NON-NLS-1$
-    /**
-     * @since 3.2
-     */
-    //User library preference page
+	/**
+	 * @since 3.6
+	 */
+	public static final String CALL_HIERARCHY_REFRESH_SINGLE_ELEMENT_ACTION= PREFIX + "call_hierarchy_refresh_single_element_action_context"; //$NON-NLS-1$
+
+	/**
+	 * @since 3.7
+	 */
+	public static final String CALL_HIERARCHY_SEARCH_IN_DIALOG= PREFIX + "call_hierarchy_search_in_dialog_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_PIN_VIEW_ACTION= PREFIX + "call_hierarchy_pin_view_action_context"; //$NON-NLS-1$
+	/**
+	 * @since 3.2
+	 */
+	//User library preference page
 	public static final String CP_EDIT_USER_LIBRARY= PREFIX + "cp_edit_user_library"; //$NON-NLS-1$
 	public static final String CP_EXPORT_USER_LIBRARY= PREFIX + "cp_export_user_library"; //$NON-NLS-1$
 	public static final String CP_IMPORT_USER_LIBRARY= PREFIX + "cp_import_user_library"; //$NON-NLS-1$

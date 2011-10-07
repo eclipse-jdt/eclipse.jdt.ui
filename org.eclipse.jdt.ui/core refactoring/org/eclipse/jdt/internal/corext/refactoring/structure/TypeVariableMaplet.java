@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,6 +54,7 @@ public final class TypeVariableMaplet {
 		fTargetIndex= offset;
 	}
 
+	@Override
 	public final boolean equals(final Object object) {
 		if (object instanceof TypeVariableMaplet) {
 			final TypeVariableMaplet mapping= (TypeVariableMaplet) object;
@@ -98,6 +99,7 @@ public final class TypeVariableMaplet {
 		return fTargetName;
 	}
 
+	@Override
 	public final int hashCode() {
 		return fSourceIndex | fTargetIndex | fSourceName.hashCode() | fTargetName.hashCode();
 	}

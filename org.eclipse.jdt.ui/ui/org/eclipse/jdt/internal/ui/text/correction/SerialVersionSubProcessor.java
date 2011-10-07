@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,7 +46,7 @@ public final class SerialVersionSubProcessor {
 		}
 
 		private static ICleanUp createCleanUp(boolean isDefault) {
-			Map options= new Hashtable();
+			Map<String, String> options= new Hashtable<String, String>();
 			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpOptions.TRUE);
 			if (isDefault) {
 				options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpOptions.TRUE);
@@ -63,6 +63,7 @@ public final class SerialVersionSubProcessor {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 			if (fIsDefaultProposal) {
 				return CorrectionMessages.SerialVersionDefaultProposal_message_default_info;
@@ -83,7 +84,7 @@ public final class SerialVersionSubProcessor {
 	 * @param proposals
 	 *        the proposal collection to extend
 	 */
-	public static final void getSerialVersionProposals(final IInvocationContext context, final IProblemLocation location, final Collection proposals) {
+	public static final void getSerialVersionProposals(final IInvocationContext context, final IProblemLocation location, final Collection<ICommandAccess> proposals) {
 
 		Assert.isNotNull(context);
 		Assert.isNotNull(location);

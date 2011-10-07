@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -230,6 +230,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 		private final ILabelProvider fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_SMALL_ICONS);
 
+		@Override
 		public void dispose() {
 			super.dispose();
 			fLabelProvider.dispose();
@@ -288,7 +289,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		return result;
 	}
 
-	private static void putToStringMapping(final Map result, final String[] actionLabels, final int actionIndex) {
+	private static void putToStringMapping(final Map<String, Integer> result, final String[] actionLabels, final int actionIndex) {
 		result.put(actionLabels[actionIndex], new Integer(actionIndex));
 	}
 
@@ -356,7 +357,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	}
 
 	private MemberActionInfo[] asMemberActionInfos() {
-		final List toPullUp= Arrays.asList(fProcessor.getMembersToMove());
+		final List<IMember> toPullUp= Arrays.asList(fProcessor.getMembersToMove());
 		final IMember[] members= fProcessor.getPullableMembersOfDeclaringType();
 		final MemberActionInfo[] result= new MemberActionInfo[members.length];
 		for (int i= 0; i < members.length; i++) {
@@ -369,6 +370,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		return result;
 	}
 
+	@Override
 	public boolean canFlipToNextPage() {
 		return isPageComplete();
 	}
@@ -432,6 +434,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		SWTUtil.setButtonDimensionHint(fSelectAllButton);
 		fSelectAllButton.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(final SelectionEvent event) {
 				final IMember[] members= getMembers();
 				setActionForMembers(members, PULL_UP_ACTION);
@@ -446,6 +449,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		SWTUtil.setButtonDimensionHint(fDeselectAllButton);
 		fDeselectAllButton.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(final SelectionEvent event) {
 				final IMember[] members= getMembers();
 				setActionForMembers(members, MemberActionInfo.NO_ACTION);
@@ -463,6 +467,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		SWTUtil.setButtonDimensionHint(fEditButton);
 		fEditButton.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(final SelectionEvent event) {
 				editSelectedMembers();
 			}
@@ -474,6 +479,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		SWTUtil.setButtonDimensionHint(fAddButton);
 		fAddButton.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(final SelectionEvent event) {
 				checkAdditionalRequired();
 			}
@@ -514,12 +520,14 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		fProcessor.setInstanceOf(fInstanceofButton.getSelection());
 		fInstanceofButton.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(final SelectionEvent e) {
 				fProcessor.setInstanceOf(fInstanceofButton.getSelection());
 			}
 		});
 		fReplaceButton.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(final SelectionEvent e) {
 				fInstanceofButton.setEnabled(fReplaceButton.getSelection());
 			}
@@ -623,8 +631,8 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	}
 
 	// String -> Integer
-	private Map createStringMappingForSelectedMembers() {
-		final Map result= new HashMap();
+	private Map<String, Integer> createStringMappingForSelectedMembers() {
+		final Map<String, Integer> result= new HashMap<String, Integer>();
 		putToStringMapping(result, METHOD_LABELS, PULL_UP_ACTION);
 		putToStringMapping(result, METHOD_LABELS, DECLARE_ABSTRACT_ACTION);
 		return result;
@@ -688,6 +696,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		}
 	}
 
+	@Override
 	public void dispose() {
 		fInstanceofButton= null;
 		fReplaceButton= null;
@@ -707,15 +716,15 @@ public class PullUpMemberPage extends UserInputWizardPage {
 					? Messages.format(RefactoringMessages.PullUpInputPage1_Mark_selected_members_singular, JavaElementLabels.getElementLabel(selectedMembers[0].getMember(),
 							JavaElementLabels.M_PARAMETER_TYPES))
 					: Messages.format(RefactoringMessages.PullUpInputPage1_Mark_selected_members_plural, String.valueOf(selectedMembers.length));
-			final Map stringMapping= createStringMappingForSelectedMembers();
-			final String[] keys= (String[]) stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
+			final Map<String, Integer> stringMapping= createStringMappingForSelectedMembers();
+			final String[] keys= stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
 			Arrays.sort(keys);
 			final int initialSelectionIndex= getInitialSelectionIndexForEditDialog(stringMapping, keys);
 			final ComboSelectionDialog dialog= new ComboSelectionDialog(getShell(), shellTitle, labelText, keys, initialSelectionIndex);
 			dialog.setBlockOnOpen(true);
 			if (dialog.open() == Window.CANCEL)
 				return;
-			final int action= ((Integer) stringMapping.get(dialog.getSelectedString())).intValue();
+			final int action= stringMapping.get(dialog.getSelectedString()).intValue();
 			setActionForInfos(selectedMembers, action);
 		} finally {
 			updateWizardPage(preserved, true);
@@ -730,13 +739,13 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	private MemberActionInfo[] getActiveInfos() {
 		final MemberActionInfo[] infos= getTableInput();
-		final List result= new ArrayList(infos.length);
+		final List<MemberActionInfo> result= new ArrayList<MemberActionInfo>(infos.length);
 		for (int i= 0; i < infos.length; i++) {
 			final MemberActionInfo info= infos[i];
 			if (info.isActive())
 				result.add(info);
 		}
-		return (MemberActionInfo[]) result.toArray(new MemberActionInfo[result.size()]);
+		return result.toArray(new MemberActionInfo[result.size()]);
 	}
 
 	private int getCommonActionCodeForSelectedInfos() {
@@ -767,13 +776,13 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		return null;
 	}
 
-	private int getInitialSelectionIndexForEditDialog(final Map stringMapping, final String[] keys) {
+	private int getInitialSelectionIndexForEditDialog(final Map<String, Integer> stringMapping, final String[] keys) {
 		final int commonActionCode= getCommonActionCodeForSelectedInfos();
 		if (commonActionCode == -1)
 			return 0;
-		for (final Iterator iter= stringMapping.keySet().iterator(); iter.hasNext();) {
-			final String key= (String) iter.next();
-			final int action= ((Integer) stringMapping.get(key)).intValue();
+		for (final Iterator<String> iter= stringMapping.keySet().iterator(); iter.hasNext();) {
+			final String key= iter.next();
+			final int action= stringMapping.get(key).intValue();
 			if (commonActionCode == action) {
 				for (int i= 0; i < keys.length; i++) {
 					if (key.equals(keys[i]))
@@ -791,26 +800,26 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	private IMember[] getMembers() {
 		final MemberActionInfo[] infos= getTableInput();
-		final List result= new ArrayList(infos.length);
+		final List<IMember> result= new ArrayList<IMember>(infos.length);
 		for (int index= 0; index < infos.length; index++) {
 			result.add(infos[index].getMember());
 		}
-		return (IMember[]) result.toArray(new IMember[result.size()]);
+		return result.toArray(new IMember[result.size()]);
 	}
 
 	private IMember[] getMembersForAction(final int action) {
-		List result= new ArrayList();
+		List<IMember> result= new ArrayList<IMember>();
 		getMembersForAction(action, false, result);
-		return (IMember[]) result.toArray(new IMember[result.size()]);
+		return result.toArray(new IMember[result.size()]);
 	}
 
 	private IMethod[] getMethodsForAction(final int action) {
-		List result= new ArrayList();
+		List<IMember> result= new ArrayList<IMember>();
 		getMembersForAction(action, true, result);
-		return (IMethod[]) result.toArray(new IMethod[result.size()]);
+		return result.toArray(new IMethod[result.size()]);
 	}
 
-	private void getMembersForAction(int action, boolean onlyMethods, List result) {
+	private void getMembersForAction(int action, boolean onlyMethods, List<IMember> result) {
 		boolean isDestinationInterface= isDestinationInterface();
 		final MemberActionInfo[] infos= getTableInput();
 		for (int index= 0; index < infos.length; index++) {
@@ -842,6 +851,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		return false;
 	}
 
+	@Override
 	public IWizardPage getNextPage() {
 		initializeRefactoring();
 		storeDialogSettings();
@@ -867,8 +877,8 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	private MemberActionInfo[] getSelectedMembers() {
 		Assert.isTrue(fTableViewer.getSelection() instanceof IStructuredSelection);
 		final IStructuredSelection structured= (IStructuredSelection) fTableViewer.getSelection();
-		final List result= structured.toList();
-		return (MemberActionInfo[]) result.toArray(new MemberActionInfo[result.size()]);
+		final List<?> result= structured.toList();
+		return result.toArray(new MemberActionInfo[result.size()]);
 	}
 
 	private MemberActionInfo[] getTableInput() {
@@ -913,6 +923,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		fProcessor.setDeletedMethods(getMethodsForAction(PULL_UP_ACTION));
 	}
 
+	@Override
 	protected boolean performFinish() {
 		initializeRefactoring();
 		storeDialogSettings();
@@ -959,6 +970,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		fTableViewer.setColumnProperties(new String[] { MEMBER_PROPERTY, ACTION_PROPERTY});
 	}
 
+	@Override
 	public void setVisible(final boolean visible) {
 		super.setVisible(visible);
 		if (visible) {

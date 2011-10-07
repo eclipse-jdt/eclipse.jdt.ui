@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -89,6 +89,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 		return CompareMessages.PropertyCompareViewer_title;
 	}
 
+	@Override
 	protected IStructureComparator createStructureComparator(Object input,
 			IDocument document, ISharedDocumentAdapter sharedDocumentAdapter,
 			IProgressMonitor monitor) throws CoreException {
@@ -100,6 +101,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 			isEditable= false;
 
 		DocumentRangeNode root= new StructureRootNode(document, input, this, sharedDocumentAdapter) {
+			@Override
 			public boolean isEditable() {
 				return isEditable;
 			}
@@ -115,6 +117,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 		return root;
 	}
 
+	@Override
 	public IStructureComparator locate(Object path, Object source) {
 		return null;
 	}
@@ -316,10 +319,12 @@ public class PropertiesStructureCreator extends StructureCreator {
 		return buf.toString();
 	}
 
+	@Override
 	protected IDocumentPartitioner getDocumentPartitioner() {
 		return new FastPartitioner(new PropertiesFilePartitionScanner(), IPropertiesFilePartitions.PARTITIONS);
 	}
 
+	@Override
 	protected String getDocumentPartitioning() {
 		return IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING;
 	}

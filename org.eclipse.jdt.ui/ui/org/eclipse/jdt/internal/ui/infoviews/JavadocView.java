@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -113,7 +113,6 @@ import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.SourceRange;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -145,6 +144,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
@@ -181,6 +181,7 @@ public class JavadocView extends AbstractInfoView {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.infoviews.JavadocView.IBrowserInput#getInputElement()
 		 */
+		@Override
 		public Object getInputElement() {
 			return fInput;
 		}
@@ -188,6 +189,7 @@ public class JavadocView extends AbstractInfoView {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.infoviews.JavadocView.IBrowserInput#getInputName()
 		 */
+		@Override
 		public String getInputName() {
 			return fInput.getElementName();
 		}
@@ -212,6 +214,7 @@ public class JavadocView extends AbstractInfoView {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.infoviews.JavadocView.IBrowserInput#getInputElement()
 		 */
+		@Override
 		public Object getInputElement() {
 			return fURL;
 		}
@@ -219,6 +222,7 @@ public class JavadocView extends AbstractInfoView {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.infoviews.JavadocView.IBrowserInput#getInputName()
 		 */
+		@Override
 		public String getInputName() {
 			return fURL.toExternalForm();
 		}
@@ -254,6 +258,7 @@ public class JavadocView extends AbstractInfoView {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
+		@Override
 		public void run() {
 			setInput(fCurrent.getNext());
 		}
@@ -290,6 +295,7 @@ public class JavadocView extends AbstractInfoView {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
+		@Override
 		public void run() {
 			setInput(fCurrent.getPrevious());
 		}
@@ -312,6 +318,7 @@ public class JavadocView extends AbstractInfoView {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
+		@Override
 		public void run() {
 			setLinkingEnabled(!isLinkingEnabled());
 		}
@@ -339,6 +346,7 @@ public class JavadocView extends AbstractInfoView {
 		/* (non-Javadoc)
 		 * Method declared on SelectionDispatchAction.
 		 */
+		@Override
 		public void selectionChanged(IStructuredSelection structuredSelection) {
 			super.selectionChanged(structuredSelection);
 			Object element= structuredSelection.getFirstElement();
@@ -354,6 +362,7 @@ public class JavadocView extends AbstractInfoView {
 		/* (non-Javadoc)
 		 * Method declared on SelectionDispatchAction.
 		 */
+		@Override
 		public void run(IStructuredSelection selection) {
 			if (!canEnableFor(selection))
 				return;
@@ -369,6 +378,7 @@ public class JavadocView extends AbstractInfoView {
 		/*
 		 * @see org.eclipse.jdt.ui.actions.OpenAttachedJavadocAction#canEnableFor(org.eclipse.jface.viewers.IStructuredSelection)
 		 */
+		@Override
 		protected boolean canEnableFor(IStructuredSelection selection) {
 			if (selection.size() != 1)
 				return false;
@@ -505,6 +515,7 @@ public class JavadocView extends AbstractInfoView {
 		/**
 		 * Selects all in the view.
 		 */
+		@Override
 		public void run() {
 			if (fControl instanceof StyledText)
 		        ((StyledText)fControl).selectAll();
@@ -537,6 +548,7 @@ public class JavadocView extends AbstractInfoView {
 			fControl= control;
 			if (fControl instanceof StyledText) {
 			    ((StyledText)fControl).addSelectionListener(new SelectionAdapter() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 					    fireSelectionChanged();
 					}
@@ -600,6 +612,7 @@ public class JavadocView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#internalCreatePartControl(Composite)
 	 */
+	@Override
 	protected void internalCreatePartControl(Composite parent) {
 		try {
 			fBrowser= new Browser(parent, SWT.NONE);
@@ -647,6 +660,7 @@ public class JavadocView extends AbstractInfoView {
 				/*
 				 * @see org.eclipse.swt.events.ControlAdapter#controlResized(org.eclipse.swt.events.ControlEvent)
 				 */
+				@Override
 				public void controlResized(ControlEvent e) {
 					doSetInput(fOriginalInput);
 				}
@@ -728,6 +742,7 @@ public class JavadocView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#createActions()
 	 */
+	@Override
 	protected void createActions() {
 		super.createActions();
 		fSelectAllAction= new SelectAllAction(getControl(), (SelectionProvider) getSelectionProvider());
@@ -762,6 +777,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#fillActionBars(org.eclipse.ui.IActionBars)
 	 * @since 3.4
 	 */
+	@Override
 	protected void fillActionBars(final IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 
@@ -782,6 +798,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#fillToolBar(org.eclipse.jface.action.IToolBarManager)
 	 * @since 3.4
 	 */
+	@Override
 	protected void fillToolBar(IToolBarManager tbm) {
 		tbm.add(fBackAction);
 		tbm.add(fForthAction);
@@ -796,6 +813,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
 	 * @since 3.4
 	 */
+	@Override
 	public void menuAboutToShow(IMenuManager menu) {
 		super.menuAboutToShow(menu);
 
@@ -809,6 +827,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getSelectAllAction()
 	 * @since 3.0
 	 */
+	@Override
 	protected IAction getSelectAllAction() {
 		// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
 		if (fIsUsingBrowserWidget)
@@ -821,6 +840,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getCopyToClipboardAction()
 	 * @since 3.0
 	 */
+	@Override
 	protected IAction getCopyToClipboardAction() {
 		// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
 		if (fIsUsingBrowserWidget)
@@ -832,6 +852,7 @@ public class JavadocView extends AbstractInfoView {
 	/*
  	 * @see AbstractInfoView#setForeground(Color)
  	 */
+	@Override
 	protected void setForeground(Color color) {
 		getControl().setForeground(color);
 	}
@@ -839,6 +860,7 @@ public class JavadocView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#setBackground(Color)
 	 */
+	@Override
 	protected void setBackground(Color color) {
 		getControl().setBackground(color);
 		fBackgroundColorRGB= color.getRGB();
@@ -865,6 +887,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getBackgroundColorKey()
 	 * @since 3.2
 	 */
+	@Override
 	protected String getBackgroundColorKey() {
 		return "org.eclipse.jdt.ui.JavadocView.backgroundColor";		 //$NON-NLS-1$
 	}
@@ -872,6 +895,7 @@ public class JavadocView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#internalDispose()
 	 */
+	@Override
 	protected void internalDispose() {
 		fText= null;
 		fBrowser= null;
@@ -889,6 +913,7 @@ public class JavadocView extends AbstractInfoView {
 	/*
 	 * @see org.eclipse.ui.part.WorkbenchPart#setFocus()
 	 */
+	@Override
 	public void setFocus() {
 		getControl().setFocus();
 	}
@@ -896,6 +921,7 @@ public class JavadocView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#computeInput(Object)
 	 */
+	@Override
 	protected Object computeInput(Object input) {
 		//TODO: never used?
 		if (getControl() == null || ! (input instanceof IJavaElement))
@@ -928,6 +954,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#computeInput(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection, org.eclipse.jdt.core.IJavaElement, org.eclipse.core.runtime.IProgressMonitor)
 	 * @since 3.4
 	 */
+	@Override
 	protected Object computeInput(IWorkbenchPart part, ISelection selection, IJavaElement input, IProgressMonitor monitor) {
 		if (getControl() == null || input == null)
 			return null;
@@ -959,6 +986,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @see AbstractInfoView#computeDescription(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection, org.eclipse.jdt.core.IJavaElement, org.eclipse.core.runtime.IProgressMonitor)
 	 * @since 3.4
 	 */
+	@Override
 	protected String computeDescription(IWorkbenchPart part, ISelection selection, IJavaElement inputElement, IProgressMonitor monitor) {
 		return ""; //$NON-NLS-1$
 	}
@@ -991,6 +1019,7 @@ public class JavadocView extends AbstractInfoView {
 	 * 
 	 * @param input a String containing the HTML to be showin in the view
 	 */
+	@Override
 	protected void doSetInput(Object input) {
 		String javadocHtml= (String)input;
 		fOriginalInput= javadocHtml;
@@ -1118,7 +1147,7 @@ public class JavadocView extends AbstractInfoView {
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr, null, true));
 				if (curr instanceof ILocalVariable) {
 					ISourceRange nameRange= ((ILocalVariable) curr).getNameRange();
-					ITypeRoot typeRoot= ((IMember) curr.getParent()).getTypeRoot();
+					ITypeRoot typeRoot= ((ILocalVariable) curr).getTypeRoot();
 					Region hoverRegion= new Region(nameRange.getOffset(), nameRange.getLength());
 					buffer.append("<br>"); //$NON-NLS-1$
 					JavadocHover.addAnnotations(buffer, curr, typeRoot, hoverRegion);
@@ -1163,7 +1192,7 @@ public class JavadocView extends AbstractInfoView {
 		}
 
 		StringBuffer buf= new StringBuffer();
-		JavadocHover.addImageAndLabel(buf, imageName, 16, 16, label.toString(), 20, 2);
+		JavadocHover.addImageAndLabel(buf, member, imageName, 16, 16, label.toString(), 20, 2);
 		return buf.toString();
 	}
 
@@ -1171,6 +1200,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#isIgnoringNewInput(org.eclipse.jdt.core.IJavaElement, org.eclipse.jface.viewers.ISelection)
 	 * @since 3.2
 	 */
+	@Override
 	protected boolean isIgnoringNewInput(IJavaElement je, IWorkbenchPart part, ISelection selection) {
 		if (fCurrent != null && fCurrent.getInputElement() instanceof URL)
 			return false;
@@ -1205,6 +1235,7 @@ public class JavadocView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#findSelectedJavaElement(IWorkbenchPart)
 	 */
+	@Override
 	protected IJavaElement findSelectedJavaElement(IWorkbenchPart part, ISelection selection) {
 		IJavaElement element;
 		try {
@@ -1240,6 +1271,7 @@ public class JavadocView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#getControl()
 	 */
+	@Override
 	protected Control getControl() {
 		if (fIsUsingBrowserWidget)
 			return fBrowser;
@@ -1251,6 +1283,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getHelpContextId()
 	 * @since 3.1
 	 */
+	@Override
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.JAVADOC_VIEW;
 	}
@@ -1328,7 +1361,7 @@ public class JavadocView extends AbstractInfoView {
 		if (monitor.isCanceled())
 			return null;
 
-		ASTParser p= ASTParser.newParser(AST.JLS3);
+		ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		p.setProject(constantField.getJavaProject());
 		IBinding[] createBindings;
 		try {

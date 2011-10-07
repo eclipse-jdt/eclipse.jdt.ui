@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,7 @@ import org.eclipse.ui.IWorkingSet;
  * 
  * @since 3.5
  */
-public class WorkingSetComparator implements Comparator {
+public class WorkingSetComparator implements Comparator<IWorkingSet> {
 	
 	private Collator fCollator= Collator.getInstance();
 
@@ -59,27 +59,15 @@ public class WorkingSetComparator implements Comparator {
 	 * 
 	 * @see Comparator#compare(Object, Object)
 	 */
-	public int compare(Object o1, Object o2) {
+	public int compare(IWorkingSet w1, IWorkingSet w2) {
 
-		String name1= null;
-		String name2= null;
-
-		if (o1 instanceof IWorkingSet) {
-			IWorkingSet workingSet= (IWorkingSet)o1;
-			if (fIsOtherWorkingSetOnTop && IWorkingSetIDs.OTHERS.equals(workingSet.getId())) {
-				return -1;
-			}
-			name1= workingSet.getLabel();
-		}
-
-		if (o2 instanceof IWorkingSet) {
-			IWorkingSet workingSet= (IWorkingSet)o2;
-			if (fIsOtherWorkingSetOnTop && IWorkingSetIDs.OTHERS.equals(workingSet.getId())) {
-				return 1;
-			}
-			name2= workingSet.getLabel();
-		}
-		return fCollator.compare(name1, name2);
+		if (fIsOtherWorkingSetOnTop && IWorkingSetIDs.OTHERS.equals(w1.getId()))
+			return -1;
+		
+		if (fIsOtherWorkingSetOnTop && IWorkingSetIDs.OTHERS.equals(w2.getId()))
+			return 1;
+		
+		return fCollator.compare(w1.getLabel(), w2.getLabel());
 	}
 }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,7 +59,7 @@ public class JarWriter2 {
 	private JarOutputStream fJarOutputStream;
 	private JarPackageData fJarPackage;
 
-	private Set fDirectories= new HashSet();
+	private Set<String> fDirectories= new HashSet<String>();
 
 	/**
 	 * Creates an instance which is used to create a JAR based
@@ -229,7 +229,7 @@ public class JarWriter2 {
 	protected void addDirectories(IPath destinationPath, File correspondingFile) throws IOException {
 		String path= destinationPath.toString().replace(File.separatorChar, '/');
 		int lastSlash= path.lastIndexOf('/');
-		List directories= new ArrayList(2);
+		List<JarEntry> directories= new ArrayList<JarEntry>(2);
 		while(lastSlash != -1) {
 			path= path.substring(0, lastSlash + 1);
 			if (!fDirectories.add(path))
@@ -252,7 +252,7 @@ public class JarWriter2 {
 		}
 
 		for(int i= directories.size() - 1; i >= 0; --i) {
-			fJarOutputStream.putNextEntry((JarEntry)directories.get(i));
+			fJarOutputStream.putNextEntry(directories.get(i));
 		}
 	}
 

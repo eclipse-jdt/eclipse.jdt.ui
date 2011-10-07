@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -69,6 +71,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.SOURCE_ATTACHMENT_PROPERTY_PAGE);
@@ -77,6 +80,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	/*
 	 * @see PreferencePage#createContents
 	 */
+	@Override
 	protected Control createContents(Composite composite) {
 		initializeDialogUnits(composite);
 		Control result= createPageContent(composite);
@@ -90,7 +94,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 			fEntry= null;
 			fRoot= getJARPackageFragmentRoot();
 			if (fRoot == null || fRoot.getKind() != IPackageFragmentRoot.K_BINARY) {
-				return createMessageContent(composite, PreferencesMessages.SourceAttachmentPropertyPage_noarchive_message);
+				return createMessageContent(composite, PreferencesMessages.SourceAttachmentPropertyPage_noarchive_message, null);
 			}
 
 			IPath containerPath= null;
@@ -101,16 +105,16 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 				ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
 				IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
 				if (initializer == null || container == null) {
-					return createMessageContent(composite, Messages.format(PreferencesMessages.SourceAttachmentPropertyPage_invalid_container, BasicElementLabels.getPathLabel(containerPath, false)));
+					return createMessageContent(composite, Messages.format(PreferencesMessages.SourceAttachmentPropertyPage_invalid_container, BasicElementLabels.getPathLabel(containerPath, false)), fRoot);
 				}
 				String containerName= container.getDescription();
 
 				IStatus status= initializer.getSourceAttachmentStatus(containerPath, jproject);
 				if (status.getCode() == ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED) {
-					return createMessageContent(composite, Messages.format(PreferencesMessages.SourceAttachmentPropertyPage_not_supported, containerName));
+					return createMessageContent(composite, Messages.format(PreferencesMessages.SourceAttachmentPropertyPage_not_supported, containerName), null);
 				}
 				if (status.getCode() == ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY) {
-					return createMessageContent(composite, Messages.format(PreferencesMessages.SourceAttachmentPropertyPage_read_only, containerName));
+					return createMessageContent(composite, Messages.format(PreferencesMessages.SourceAttachmentPropertyPage_read_only, containerName), fRoot);
 				}
 				entry= JavaModelUtil.findEntryInContainer(container, fRoot.getPath());
 			}
@@ -121,12 +125,12 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 			return fSourceAttachmentBlock.createControl(composite);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			return createMessageContent(composite, PreferencesMessages.SourceAttachmentPropertyPage_noarchive_message);
+			return createMessageContent(composite, PreferencesMessages.SourceAttachmentPropertyPage_noarchive_message, null);
 		}
 	}
 
 
-	private Control createMessageContent(Composite composite, String message) {
+	private Control createMessageContent(Composite composite, String message, IPackageFragmentRoot root) {
 		Composite inner= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
@@ -137,8 +141,28 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 		gd.widthHint= convertWidthInCharsToPixels(80);
 
 		Label label= new Label(inner, SWT.LEFT + SWT.WRAP);
-		label.setText(message);
 		label.setLayoutData(gd);
+		
+		try {
+			if (root != null) {
+				message= message + "\n\n" + PreferencesMessages.SourceAttachmentPropertyPage_location_path; //$NON-NLS-1$
+				
+				Text location= new Text(inner, SWT.READ_ONLY | SWT.WRAP);
+				gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+				gd.widthHint= convertWidthInCharsToPixels(80);
+				location.setLayoutData(gd);
+				IPath sourceAttachmentPath= root.getSourceAttachmentPath();
+				String locationPath= PreferencesMessages.SourceAttachmentPropertyPage_locationPath_none;
+				if (sourceAttachmentPath != null)
+					locationPath= sourceAttachmentPath.toString();
+				location.setText(locationPath);
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			// don't show location
+		}
+		
+		label.setText(message);
 		return inner;
 	}
 
@@ -146,6 +170,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	/*
 	 * @see IPreferencePage#performOk
 	 */
+	@Override
 	public boolean performOk() {
 		if (fSourceAttachmentBlock != null) {
 			try {
@@ -172,6 +197,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
+	@Override
 	protected void performDefaults() {
 		if (fSourceAttachmentBlock != null) {
 			fSourceAttachmentBlock.setDefaults();

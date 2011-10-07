@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import junit.framework.Test;
 import junit.framework.TestCase;
 
 import org.eclipse.jdt.junit.JUnitCore;
@@ -43,10 +42,6 @@ public class JUnit4TestFinderTest extends TestCase {
 
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fRoot;
-
-	public static Test setUpTest(Test test) {
-		return test;
-	}
 
 	protected void setUp() throws Exception {
 		super.setUp();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -114,12 +114,11 @@ public class JavaDocIndentStrategyTest extends TextPerformanceTestCase implement
 	}
 
 	/**
-	 * Places the caret behind a Javadoc prefix after which the declaration
-	 * of a method with many arguments and declared exceptions follows and
-	 * measures the time it takes to auto edit when entering a newline. See
-	 * also <code>testResources/javaDocIndentStrategyTest1/Test.java<code>.
-	 *
-	 * @throws Exception
+	 * Places the caret behind a Javadoc prefix after which the declaration of a method with many
+	 * arguments and declared exceptions follows and measures the time it takes to auto edit when
+	 * entering a newline. See also <code>testResources/javaDocIndentStrategyTest1/Test.java<code>.
+	 * 
+	 * @throws Exception if something fails while executing this test
 	 */
 	public void testJavaDocIndentStrategy() throws Exception {
 		int destOffset= EditorTestHelper.getDocument(fEditor).getLineOffset(LINE) + COLUMN;

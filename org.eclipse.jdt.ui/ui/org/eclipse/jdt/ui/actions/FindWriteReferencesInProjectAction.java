@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,6 +61,7 @@ public class FindWriteReferencesInProjectAction extends FindWriteReferencesActio
 		super(editor);
 	}
 
+	@Override
 	void init() {
 		setText(SearchMessages.Search_FindWriteReferencesInProjectAction_label);
 		setToolTipText(SearchMessages.Search_FindWriteReferencesInProjectAction_tooltip);
@@ -68,6 +69,7 @@ public class FindWriteReferencesInProjectAction extends FindWriteReferencesActio
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_PROJECT_ACTION);
 	}
 
+	@Override
 	QuerySpecification createQuery(IJavaElement element) throws JavaModelException {
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 		JavaEditor editor= getEditor();

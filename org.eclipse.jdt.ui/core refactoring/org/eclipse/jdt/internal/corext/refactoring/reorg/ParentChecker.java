@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -175,7 +175,7 @@ public class ParentChecker {
 	}
 
 	private void removeResourcesDescendantsOfJavaElements() {
-		List subResources= new ArrayList(3);
+		List<IResource> subResources= new ArrayList<IResource>(3);
 		for (int i= 0; i < fResources.length; i++) {
 			IResource subResource= fResources[i];
 			for (int j= 0; j < fJavaElements.length; j++) {
@@ -184,11 +184,11 @@ public class ParentChecker {
 					subResources.add(subResource);
 			}
 		}
-		removeFromSetToDelete((IResource[]) subResources.toArray(new IResource[subResources.size()]));
+		removeFromSetToDelete(subResources.toArray(new IResource[subResources.size()]));
 	}
 
 	private void removeJavaElementsDescendantsOfJavaElements() {
-		List subElements= new ArrayList(3);
+		List<IJavaElement> subElements= new ArrayList<IJavaElement>(3);
 		for (int i= 0; i < fJavaElements.length; i++) {
 			IJavaElement subElement= fJavaElements[i];
 			for (int j= 0; j < fJavaElements.length; j++) {
@@ -197,11 +197,11 @@ public class ParentChecker {
 					subElements.add(subElement);
 			}
 		}
-		removeFromSetToDelete((IJavaElement[]) subElements.toArray(new IJavaElement[subElements.size()]));
+		removeFromSetToDelete(subElements.toArray(new IJavaElement[subElements.size()]));
 	}
 
 	private void removeResourcesDescendantsOfResources() {
-		List subResources= new ArrayList(3);
+		List<IResource> subResources= new ArrayList<IResource>(3);
 		for (int i= 0; i < fResources.length; i++) {
 			IResource subResource= fResources[i];
 			for (int j= 0; j < fResources.length; j++) {
@@ -210,7 +210,7 @@ public class ParentChecker {
 					subResources.add(subResource);
 			}
 		}
-		removeFromSetToDelete((IResource[]) subResources.toArray(new IResource[subResources.size()]));
+		removeFromSetToDelete(subResources.toArray(new IResource[subResources.size()]));
 	}
 
 	public static boolean isDescendantOf(IResource subResource, IJavaElement superElement) {

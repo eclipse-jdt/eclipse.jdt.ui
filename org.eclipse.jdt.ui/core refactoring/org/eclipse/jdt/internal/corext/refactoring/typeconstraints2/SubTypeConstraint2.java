@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ public final class SubTypeConstraint2 implements ITypeConstraint2 {
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public final boolean equals(Object other) {
 		// can use object identity on ConstraintVariables, since we have the stored (or to be stored) objects
 		if (other.getClass() != SubTypeConstraint2.class)
@@ -48,6 +49,7 @@ public final class SubTypeConstraint2 implements ITypeConstraint2 {
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public final int hashCode() {
 		return fDescendant.hashCode() ^ 37 * fAncestor.hashCode();
 	}
@@ -55,6 +57,7 @@ public final class SubTypeConstraint2 implements ITypeConstraint2 {
 	/*
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public final String toString() {
 		return fDescendant.toString() + " <= " + fAncestor.toString(); //$NON-NLS-1$
 	}

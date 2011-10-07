@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,40 +51,47 @@ class ConstantChecks {
 			super(ex);
 		}
 
+		@Override
 		public boolean visit(SuperFieldAccess node) {
 			fResult= false;
 			return false;
 		}
+		@Override
 		public boolean visit(SuperMethodInvocation node) {
 			fResult= false;
 			return false;
 		}
+		@Override
 		public boolean visit(ThisExpression node) {
 			fResult= false;
 			return false;
 		}
+		@Override
 		public boolean visit(FieldAccess node) {
-			fResult= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
+			fResult&= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
 			return false;
 		}
+		@Override
 		public boolean visit(MethodInvocation node) {
 			if(node.getExpression() == null) {
 				visitName(node.getName());
 			} else {
-				fResult= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
+				fResult&= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
 			}
 
 			return false;
 		}
+		@Override
 		public boolean visit(QualifiedName node) {
 			return visitName(node);
 		}
+		@Override
 		public boolean visit(SimpleName node) {
 			return visitName(node);
 		}
 
 		private boolean visitName(Name name) {
-			fResult= checkName(name);
+			fResult&= checkName(name);
 			return false; //Do not descend further
 		}
 
@@ -128,22 +135,27 @@ class ConstantChecks {
 			super(ex);
 		}
 
+		@Override
 		public boolean visit(SuperFieldAccess node) {
 			fResult= false;
 			return false;
 		}
+		@Override
 		public boolean visit(SuperMethodInvocation node) {
 			fResult= false;
 			return false;
 		}
+		@Override
 		public boolean visit(ThisExpression node) {
 			fResult= false;
 			return false;
 		}
 
+		@Override
 		public boolean visit(QualifiedName node) {
 			return visitName(node);
 		}
+		@Override
 		public boolean visit(SimpleName node) {
 			return visitName(node);
 		}

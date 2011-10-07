@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,24 +38,29 @@ class SearchScopeProjectAction extends SearchScopeAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
 	}
 
-	public IJavaSearchScope getSearchScope() {
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getSearchScope(int)
+	 */
+	@Override
+	public IJavaSearchScope getSearchScope(int includeMask) {
 		IMember[] members= fGroup.getView().getInputElements();
 		if (members == null) {
 			return null;
 		}
 
-		HashSet projects= new HashSet();
+		HashSet<IJavaProject> projects= new HashSet<IJavaProject>();
 		for (int i= 0; i < members.length; i++) {
 			projects.add(members[i].getJavaProject());
 		}
 		return SearchEngine.createJavaSearchScope(
-				(IJavaProject[]) projects.toArray(new IJavaProject[projects.size()]),
-				JavaSearchScopeFactory.NO_PROJ);
+				projects.toArray(new IJavaProject[projects.size()]),
+				includeMask);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeActionGroup.SearchScopeAction#getSearchScopeType()
 	 */
+	@Override
 	public int getSearchScopeType() {
 		return SearchScopeActionGroup.SEARCH_SCOPE_TYPE_PROJECT;
 	}
@@ -63,17 +68,18 @@ class SearchScopeProjectAction extends SearchScopeAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
 	 */
-	public String getFullDescription() {
+	@Override
+	public String getFullDescription(int includeMask) {
 		IMember[] members= fGroup.getView().getInputElements();
 		if (members != null) {
-			HashSet projectNames= new HashSet();
+			HashSet<String> projectNames= new HashSet<String>();
 			for (int i= 0; i < members.length; i++) {
 				projectNames.add(members[i].getJavaProject().getElementName());
 			}
 			JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 			return factory.getProjectScopeDescription(
-					(String[]) projectNames.toArray(new String[projectNames.size()]),
-					JavaSearchScopeFactory.NO_PROJ);
+					projectNames.toArray(new String[projectNames.size()]),
+					includeMask);
 		}
 		return ""; //$NON-NLS-1$
 	}

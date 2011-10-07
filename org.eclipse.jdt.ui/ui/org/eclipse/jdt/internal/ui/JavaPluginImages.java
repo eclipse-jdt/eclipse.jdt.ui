@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,7 @@ public class JavaPluginImages {
 
 	// The plug-in registry
 	private static ImageRegistry fgImageRegistry= null;
-	private static HashMap fgAvoidSWTErrorMap= null;
+	private static HashMap<String, ImageDescriptor> fgAvoidSWTErrorMap= null;
 
 	private static final String T_OBJ= "obj16"; 		//$NON-NLS-1$
 	private static final String T_OVR= "ovr16"; 		//$NON-NLS-1$
@@ -373,6 +373,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_SYNCH= createUnManagedCached(T_OVR, "synch_co.gif"); 						//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_VOLATILE= createUnManagedCached(T_OVR, "volatile_co.gif"); 						//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_TRANSIENT= createUnManagedCached(T_OVR, "transient_co.gif"); 						//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_NATIVE= createUnManagedCached(T_OVR, "native_co.gif"); 						//$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OVR_RUN= createUnManagedCached(T_OVR, "run_co.gif"); 							//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_WARNING= createUnManagedCached(T_OVR, "warning_co.gif"); 					//$NON-NLS-1$
@@ -384,6 +385,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_SYNCH_AND_IMPLEMENTS= createUnManagedCached(T_OVR, "sync_impl.gif");   //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_CONSTRUCTOR= createUnManagedCached(T_OVR, "constr_ovr.gif");			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_DEPRECATED= createUnManagedCached(T_OVR, "deprecated.gif");			//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_DEFAULT= createUnManagedCached(T_OVR, "default_tsk.gif");			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_FOCUS= createUnManagedCached(T_OVR, "focus_ovr.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_ANNOTATION= createUnManagedCached(T_OVR, "annotation_tsk.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_ENUM= createUnManagedCached(T_OVR, "enum_tsk.gif"); //$NON-NLS-1$
@@ -477,6 +479,7 @@ public class JavaPluginImages {
 			fDescriptor = descriptor;
 		}
 
+		@Override
 		public ImageData getImageData() {
 			if (fData == null) {
 				fData= fDescriptor.getImageData();
@@ -503,7 +506,7 @@ public class JavaPluginImages {
 	 */
 	public static ImageDescriptor getDescriptor(String key) {
 		if (fgImageRegistry == null) {
-			return (ImageDescriptor) fgAvoidSWTErrorMap.get(key);
+			return fgAvoidSWTErrorMap.get(key);
 		}
 		return getImageRegistry().getDescriptor(key);
 	}
@@ -536,9 +539,9 @@ public class JavaPluginImages {
 	/* package */ static ImageRegistry getImageRegistry() {
 		if (fgImageRegistry == null) {
 			fgImageRegistry= new ImageRegistry();
-			for (Iterator iter= fgAvoidSWTErrorMap.keySet().iterator(); iter.hasNext();) {
-				String key= (String) iter.next();
-				fgImageRegistry.put(key, (ImageDescriptor) fgAvoidSWTErrorMap.get(key));
+			for (Iterator<String> iter= fgAvoidSWTErrorMap.keySet().iterator(); iter.hasNext();) {
+				String key= iter.next();
+				fgImageRegistry.put(key, fgAvoidSWTErrorMap.get(key));
 			}
 			fgAvoidSWTErrorMap= null;
 		}
@@ -571,7 +574,7 @@ public class JavaPluginImages {
 		ImageDescriptor result= create(prefix, name, true);
 
 		if (fgAvoidSWTErrorMap == null) {
-			fgAvoidSWTErrorMap= new HashMap();
+			fgAvoidSWTErrorMap= new HashMap<String, ImageDescriptor>();
 		}
 		fgAvoidSWTErrorMap.put(key, result);
 		if (fgImageRegistry != null) {

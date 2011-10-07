@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */
+	@Override
 	protected void addUserInputPages(){
 		addPage(new PromoteTempInputPage());
 	}
@@ -142,6 +143,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 				fInitializeInRadioButtons[i].setData(dataItem);
 				final int j= i;
 				fInitializeInRadioButtons[i].addSelectionListener(new SelectionAdapter(){
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						getPromoteTempRefactoring().setInitializeIn(getDataAsInt(fInitializeInRadioButtons[j]));
 						updateButtonsEnablement();
@@ -184,6 +186,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 			gd.horizontalSpan= 2;
 			fDeclareStaticCheckbox.setLayoutData(gd);
 			fDeclareStaticCheckbox.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					getPromoteTempRefactoring().setDeclareStatic(fDeclareStaticCheckbox.getSelection());
 					updateButtonsEnablement();
@@ -201,6 +204,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 			gd.horizontalSpan= 2;
 			fDeclareFinalCheckbox.setLayoutData(gd);
 			fDeclareFinalCheckbox.addSelectionListener(new SelectionAdapter(){
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					getPromoteTempRefactoring().setDeclareFinal(fDeclareFinalCheckbox.getSelection());
 					updateButtonsEnablement();
@@ -231,6 +235,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 		 */
+		@Override
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);
 			if (visible && fNameField != null)

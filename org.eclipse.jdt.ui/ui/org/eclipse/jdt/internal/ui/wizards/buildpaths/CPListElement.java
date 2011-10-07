@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,7 +67,10 @@ public class CPListElement {
 	private Object fParentContainer;
 
 	private IClasspathEntry fCachedEntry;
-	private ArrayList fChildren;
+	/**
+	 * List of {@link CPListElement} and {@link CPListElementAttribute}.
+	 */
+	private ArrayList<Object> fChildren;
 	private IPath fLinkTarget, fOrginalLinkTarget;
 
 	private CPListElement() {}
@@ -96,7 +99,7 @@ public class CPListElement {
 		fOrginalPath= newElement ? null : path;
 		fLinkTarget= linkTarget;
 		fOrginalLinkTarget= linkTarget;
-		fChildren= new ArrayList();
+		fChildren= new ArrayList<Object>();
 		fResource= res;
 		fIsExported= false;
 
@@ -160,7 +163,7 @@ public class CPListElement {
 
 
 	private IClasspathAttribute[] getClasspathAttributes() {
-		ArrayList res= new ArrayList();
+		ArrayList<IClasspathAttribute> res= new ArrayList<IClasspathAttribute>();
 		for (int i= 0; i < fChildren.size(); i++) {
 			Object curr= fChildren.get(i);
 			if (curr instanceof CPListElementAttribute) {
@@ -170,7 +173,7 @@ public class CPListElement {
 				}
 			}
 		}
-		return (IClasspathAttribute[]) res.toArray(new IClasspathAttribute[res.size()]);
+		return res.toArray(new IClasspathAttribute[res.size()]);
 	}
 
 
@@ -297,9 +300,9 @@ public class CPListElement {
 
 		IPath toRemove= path.removeFirstSegments(getPath().segmentCount()).addTrailingSeparator();
 		if (JavaModelUtil.isExcludedPath(toRemove, filters)) {
-			List l= new ArrayList(Arrays.asList(filters));
+			List<IPath> l= new ArrayList<IPath>(Arrays.asList(filters));
 			l.remove(toRemove);
-			IPath[] newFilters= (IPath[])l.toArray(new IPath[l.size()]);
+			IPath[] newFilters= l.toArray(new IPath[l.size()]);
 			setAttribute(key, newFilters);
 			return true;
 		}
@@ -329,14 +332,14 @@ public class CPListElement {
 	}
 
 	public CPListElementAttribute[] getAllAttributes() {
-		ArrayList res= new ArrayList();
+		ArrayList<Object> res= new ArrayList<Object>();
 		for (int i= 0; i < fChildren.size(); i++) {
 			Object curr= fChildren.get(i);
 			if (curr instanceof CPListElementAttribute) {
 				res.add(curr);
 			}
 		}
-		return (CPListElementAttribute[]) res.toArray(new CPListElementAttribute[res.size()]);
+		return res.toArray(new CPListElementAttribute[res.size()]);
 	}
 
 
@@ -365,7 +368,7 @@ public class CPListElement {
 
 	private Object[] getFilteredChildren(String[] filteredKeys) {
 		int nChildren= fChildren.size();
-		ArrayList res= new ArrayList(nChildren);
+		ArrayList<Object> res= new ArrayList<Object>(nChildren);
 
 		for (int i= 0; i < nChildren; i++) {
 			Object curr= fChildren.get(i);
@@ -391,6 +394,16 @@ public class CPListElement {
 
 	public Object getParentContainer() {
 		return fParentContainer;
+	}
+
+	/**
+	 * Sets the parent container.
+	 * 
+	 * @param parent the parent container
+	 * @since 3.7
+	 */
+	void setParentContainer(CPUserLibraryElement parent) {
+		fParentContainer= parent;
 	}
 
 	/**
@@ -464,6 +477,7 @@ public class CPListElement {
 	/*
 	 * @see Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object other) {
 		if (other != null && other.getClass().equals(getClass())) {
 			CPListElement elem= (CPListElement) other;
@@ -475,6 +489,7 @@ public class CPListElement {
 	/*
 	 * @see Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return fPath.hashCode() + fEntryKind;
 	}
@@ -482,6 +497,7 @@ public class CPListElement {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return getClasspathEntry().toString();
 	}
@@ -732,9 +748,9 @@ public class CPListElement {
 		fLinkTarget= linkTarget;
 	}
 
-	public static void insert(CPListElement element, List cpList) {
+	public static void insert(CPListElement element, List<CPListElement> cpList) {
 		int length= cpList.size();
-		CPListElement[] elements= (CPListElement[])cpList.toArray(new CPListElement[length]);
+		CPListElement[] elements= cpList.toArray(new CPListElement[length]);
 		int i= 0;
 		while (i < length && elements[i].getEntryKind() != element.getEntryKind()) {
 			i++;
@@ -762,11 +778,11 @@ public class CPListElement {
 		}
 	}
 
-	public static IClasspathEntry[] convertToClasspathEntries(List/*<CPListElement>*/ cpList) {
+	public static IClasspathEntry[] convertToClasspathEntries(List<CPListElement> cpList) {
 		IClasspathEntry[] result= new IClasspathEntry[cpList.size()];
 		int i= 0;
-		for (Iterator iter= cpList.iterator(); iter.hasNext();) {
-			CPListElement cur= (CPListElement)iter.next();
+		for (Iterator<CPListElement> iter= cpList.iterator(); iter.hasNext();) {
+			CPListElement cur= iter.next();
 			result[i]= cur.getClasspathEntry();
 			i++;
 		}
@@ -815,8 +831,8 @@ public class CPListElement {
     	result.fIsMissing= fIsMissing;
     	result.fParentContainer= fParentContainer;
     	result.fCachedEntry= null;
-    	result.fChildren= new ArrayList(fChildren.size());
-    	for (Iterator iterator= fChildren.iterator(); iterator.hasNext();) {
+    	result.fChildren= new ArrayList<Object>(fChildren.size());
+    	for (Iterator<Object> iterator= fChildren.iterator(); iterator.hasNext();) {
     		Object child= iterator.next();
     		if (child instanceof CPListElement) {
     			result.fChildren.add(((CPListElement)child).copy());

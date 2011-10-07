@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,11 +54,13 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParameterizedType;
@@ -70,9 +72,8 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
-import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceIndirectionDescriptor;
@@ -103,6 +104,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -113,6 +115,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
@@ -205,7 +208,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	/**
 	 * CompilationUnitRewrites for all affected cus
 	 */
-	private Map/* <ICompilationUnit,CompilationUnitRewrite> */fRewrites;
+	private Map<ICompilationUnit, CompilationUnitRewrite> fRewrites;
 	/**
 	 * Text change manager (actually a CompilationUnitChange manager) which
 	 * manages all changes.
@@ -221,7 +224,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	/**
 	 * Visibility adjustments for the intermediary
 	 */
-	private Map/*IMember, IVisibilityAdjustment*/ fIntermediaryAdjustments;
+	private Map<IMember, IncomingMemberVisibilityAdjustment> fIntermediaryAdjustments;
 
 
 	private class NoOverrideProgressMonitor extends SubProgressMonitor {
@@ -230,6 +233,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			super(monitor, ticks, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
 		}
 
+		@Override
 		public void setTaskName(String name) {
 			// do nothing
 		}
@@ -266,6 +270,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 	// ********* UI INTERACTION AND STARTUP OPTIONS ************
 
+	@Override
 	public String getName() {
 		return RefactoringCoreMessages.IntroduceIndirectionRefactoring_introduce_indirection_name;
 	}
@@ -366,10 +371,11 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 	// ********** CONDITION CHECKING **********
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.IntroduceIndirectionRefactoring_checking_activation, 1);
-			fRewrites= new HashMap();
+			fRewrites= new HashMap<ICompilationUnit, CompilationUnitRewrite>();
 
 			// This refactoring has been invoked on
 			// (1) a TextSelection inside an ICompilationUnit or inside an IClassFile (definitely with source), or
@@ -390,7 +396,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					selectionNode= getSelectedNode(fSelectionCompilationUnit, selectionCURoot, fSelectionStart, fSelectionLength);
 				} else {
 					// binary class file - no cu rewrite
-					ASTParser parser= ASTParser.newParser(AST.JLS3);
+					ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 					parser.setResolveBindings(true);
 					parser.setSource(fSelectionClassFile);
 					selectionCURoot= (CompilationUnit) parser.createAST(null);
@@ -433,7 +439,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					fTargetMethodBinding= declaration.resolveBinding().getMethodDeclaration();
 				} else {
 					// binary method - no CURewrite available (and none needed as we cannot update the method anyway)
-					ASTParser parser= ASTParser.newParser(AST.JLS3);
+					ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 					parser.setProject(fTargetMethod.getJavaProject());
 					IBinding[] bindings= parser.createBindings(new IJavaElement[] { fTargetMethod }, null);
 					fTargetMethodBinding= ((IMethodBinding) bindings[0]).getMethodDeclaration();
@@ -465,14 +471,15 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		}
 	}
 
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 
 		RefactoringStatus result= new RefactoringStatus();
 		fTextChangeManager= new TextChangeManager();
 		fIntermediaryFirstParameterType= null;
 		fIntermediaryClassBinding= null;
-		for (Iterator iter= fRewrites.values().iterator(); iter.hasNext();)
-			((CompilationUnitRewrite) iter.next()).clearASTAndImportRewrites();
+		for (Iterator<CompilationUnitRewrite> iter= fRewrites.values().iterator(); iter.hasNext();)
+			iter.next().clearASTAndImportRewrites();
 
 		int startupTicks= 5;
 		int hierarchyTicks= 5;
@@ -495,7 +502,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		fIntermediaryClassBinding= typeToBinding(fIntermediaryClass, imRewrite.getRoot());
 
 		fAdjustor= new MemberVisibilityAdjustor(fIntermediaryClass, fIntermediaryClass);
-		fIntermediaryAdjustments= new HashMap();
+		fIntermediaryAdjustments= new HashMap<IMember, IncomingMemberVisibilityAdjustment>();
 
 		// check static method in non-static nested type
 		if (fIntermediaryClassBinding.isNested() && !Modifier.isStatic(fIntermediaryClassBinding.getModifiers()))
@@ -732,8 +739,9 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 	// ******************** CHANGE CREATION ***********************
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		final Map arguments= new HashMap();
+		final Map<String, String> arguments= new HashMap<String, String>();
 		String project= null;
 		IJavaProject javaProject= fTargetMethod.getJavaProject();
 		if (javaProject != null)
@@ -772,11 +780,11 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	 */
 	private RefactoringStatus checkCanCreateIntermediaryMethod() throws JavaModelException {
 		// check if method already exists:
-		List parameterBindings= new ArrayList();
+		List<ITypeBinding> parameterBindings= new ArrayList<ITypeBinding>();
 		if (!isStaticTarget())
 			parameterBindings.add(fIntermediaryFirstParameterType);
 		parameterBindings.addAll(Arrays.asList(fTargetMethodBinding.getParameterTypes()));
-		return Checks.checkMethodInType(fIntermediaryClassBinding, fIntermediaryMethodName, (ITypeBinding[]) parameterBindings.toArray(new ITypeBinding[parameterBindings.size()]));
+		return Checks.checkMethodInType(fIntermediaryClassBinding, fIntermediaryMethodName, parameterBindings.toArray(new ITypeBinding[parameterBindings.size()]));
 	}
 
 	private void createIntermediaryMethod() throws CoreException {
@@ -792,7 +800,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		intermediary.setName(ast.newSimpleName(fIntermediaryMethodName));
 
 		// Flags
-		List modifiers= intermediary.modifiers();
+		List<IExtendedModifier> modifiers= intermediary.modifiers();
 		modifiers.add(imRewrite.getAST().newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 		modifiers.add(imRewrite.getAST().newModifier(ModifierKeyword.STATIC_KEYWORD));
 
@@ -865,11 +873,11 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 				.createGroupDescription(RefactoringCoreMessages.IntroduceIndirectionRefactoring_group_description_create_new_method));
 	}
 
-	private void addTypeParameters(CompilationUnitRewrite imRewrite, List newTypeParameters, ITypeBinding parent) {
+	private void addTypeParameters(CompilationUnitRewrite imRewrite, List<TypeParameter> list, ITypeBinding parent) {
 
 		ITypeBinding enclosing= parent.getDeclaringClass();
 		if (enclosing != null)
-			addTypeParameters(imRewrite, newTypeParameters, enclosing);
+			addTypeParameters(imRewrite, list, enclosing);
 
 		ITypeBinding[] typeParameters= parent.getTypeParameters();
 		for (int i= 0; i < typeParameters.length; i++) {
@@ -879,7 +887,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			for (int j= 0; j < bounds.length; j++)
 				if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) //$NON-NLS-1$
 					ntp.typeBounds().add(imRewrite.getImportRewrite().addImport(bounds[j], imRewrite.getAST()));
-			newTypeParameters.add(ntp);
+			list.add(ntp);
 		}
 	}
 
@@ -955,8 +963,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			return createWarningAboutCall(enclosing, originalInvocation, RefactoringCoreMessages.IntroduceIndirectionRefactoring_call_warning_type_arguments);
 
 		MethodInvocation newInvocation= unitRewriter.getAST().newMethodInvocation();
-		List newInvocationArgs= newInvocation.arguments();
-		List originalInvocationArgs= originalInvocation.arguments();
+		List<Expression> newInvocationArgs= newInvocation.arguments();
+		List<Expression> originalInvocationArgs= originalInvocation.arguments();
 
 		// static call => always use a qualifier
 		String qualifier= unitRewriter.getImportRewrite().addImport(fIntermediaryClassBinding);
@@ -977,7 +985,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					return status;
 				newInvocationArgs.add(expr);
 			} else {
-				ASTNode expressionAsParam= unitRewriter.getASTRewrite().createMoveTarget(expression);
+				Expression expressionAsParam= (Expression) unitRewriter.getASTRewrite().createMoveTarget(expression);
 				newInvocationArgs.add(expressionAsParam);
 			}
 		} else {
@@ -990,8 +998,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		}
 
 		for (int i= 0; i < originalInvocationArgs.size(); i++) {
-			Expression originalInvocationArg= (Expression) originalInvocationArgs.get(i);
-			ASTNode movedArg= unitRewriter.getASTRewrite().createMoveTarget(originalInvocationArg);
+			Expression originalInvocationArg= originalInvocationArgs.get(i);
+			Expression movedArg= (Expression) unitRewriter.getASTRewrite().createMoveTarget(originalInvocationArg);
 			newInvocationArgs.add(movedArg);
 		}
 
@@ -1051,6 +1059,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			return status;
 		}
 
+		currentTypeBinding= currentTypeBinding.getTypeDeclaration();
+
 		ITypeBinding typeOfCall= ASTNodes.getEnclosingType(originalInvocation);
 		if (!typeOfCall.equals(currentTypeBinding)) {
 			if (currentTypeBinding.isAnonymous()) {
@@ -1096,12 +1106,12 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	 * Helper method for retrieving a *bottom-up* list of super type bindings
 	 */
 	private ITypeBinding[] getTypeAndAllSuperTypes(ITypeBinding type) {
-		List result= new ArrayList();
+		List<ITypeBinding> result= new ArrayList<ITypeBinding>();
 		collectSuperTypes(type, result);
-		return (ITypeBinding[]) result.toArray(new ITypeBinding[result.size()]);
+		return result.toArray(new ITypeBinding[result.size()]);
 	}
 
-	private void collectSuperTypes(ITypeBinding curr, List list) {
+	private void collectSuperTypes(ITypeBinding curr, List<ITypeBinding> list) {
 		if (list.add(curr.getTypeDeclaration())) {
 			ITypeBinding[] interfaces= curr.getInterfaces();
 			for (int i= 0; i < interfaces.length; i++) {
@@ -1115,7 +1125,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	}
 
 	private CompilationUnitRewrite getCachedCURewrite(ICompilationUnit unit) {
-		CompilationUnitRewrite rewrite= (CompilationUnitRewrite) fRewrites.get(unit);
+		CompilationUnitRewrite rewrite= fRewrites.get(unit);
 		if (rewrite == null) {
 			rewrite= new CompilationUnitRewrite(unit);
 			fRewrites.put(unit, rewrite);
@@ -1128,7 +1138,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	}
 
 	private void createChangeAndDiscardRewrite(ICompilationUnit compilationUnit) throws CoreException {
-		CompilationUnitRewrite rewrite= (CompilationUnitRewrite) fRewrites.get(compilationUnit);
+		CompilationUnitRewrite rewrite= fRewrites.get(compilationUnit);
 		if (rewrite != null) {
 			fTextChangeManager.manage(compilationUnit, rewrite.createChange(true));
 			fRewrites.remove(compilationUnit);
@@ -1202,9 +1212,9 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	}
 
 	private IFile[] getAllFilesToModify() {
-		List cus= new ArrayList();
+		List<ICompilationUnit> cus= new ArrayList<ICompilationUnit>();
 		cus.addAll(Arrays.asList(fTextChangeManager.getAllCompilationUnits()));
-		return ResourceUtil.getFiles((ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]));
+		return ResourceUtil.getFiles(cus.toArray(new ICompilationUnit[cus.size()]));
 	}
 
 	private boolean isStaticTarget() throws JavaModelException {
@@ -1263,11 +1273,11 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 	private RefactoringStatus adjustVisibility(IMember whoToAdjust, ModifierKeyword neededVisibility, boolean alsoIncreaseEnclosing, IProgressMonitor monitor) throws CoreException {
 
-		Map adjustments;
+		Map<IMember, IncomingMemberVisibilityAdjustment> adjustments;
 		if (isRewriteKept(whoToAdjust.getCompilationUnit()))
 			adjustments= fIntermediaryAdjustments;
 		else
-			adjustments= new HashMap();
+			adjustments= new HashMap<IMember, IncomingMemberVisibilityAdjustment>();
 
 		int existingAdjustments= adjustments.size();
 		addAdjustment(whoToAdjust, neededVisibility, adjustments);
@@ -1291,11 +1301,11 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 		try {
 			monitor.beginTask(RefactoringCoreMessages.MemberVisibilityAdjustor_adjusting, 2);
-			Map rewrites;
+			Map<ICompilationUnit, CompilationUnitRewrite> rewrites;
 			if (!isRewriteKept(whoToAdjust.getCompilationUnit())) {
 				CompilationUnitRewrite rewrite= new CompilationUnitRewrite(whoToAdjust.getCompilationUnit());
 				rewrite.setResolveBindings(false);
-				rewrites= new HashMap();
+				rewrites= new HashMap<ICompilationUnit, CompilationUnitRewrite>();
 				rewrites.put(whoToAdjust.getCompilationUnit(), rewrite);
 				status.merge(rewriteVisibility(adjustments, rewrites, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
 				rewrite.attachChange((CompilationUnitChange) fTextChangeManager.get(whoToAdjust.getCompilationUnit()), true, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
@@ -1306,7 +1316,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		return status;
 	}
 
-	private RefactoringStatus rewriteVisibility(Map adjustments, Map rewrites, IProgressMonitor monitor) throws JavaModelException {
+	private RefactoringStatus rewriteVisibility(Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, Map<ICompilationUnit, CompilationUnitRewrite> rewrites, IProgressMonitor monitor) throws JavaModelException {
 		RefactoringStatus status= new RefactoringStatus();
 		fAdjustor.setRewrites(rewrites);
 		fAdjustor.setAdjustments(adjustments);
@@ -1315,7 +1325,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		return status;
 	}
 
-	private void addAdjustment(IMember whoToAdjust, ModifierKeyword neededVisibility, Map adjustments) throws JavaModelException {
+	private void addAdjustment(IMember whoToAdjust, ModifierKeyword neededVisibility, Map<IMember, IncomingMemberVisibilityAdjustment> adjustments) throws JavaModelException {
 		ModifierKeyword currentVisibility= ModifierKeyword.fromFlagValue(JdtFlags.getVisibilityCode(whoToAdjust));
 		if (MemberVisibilityAdjustor.hasLowerVisibility(currentVisibility, neededVisibility)
 				&& MemberVisibilityAdjustor.needsVisibilityAdjustments(whoToAdjust, neededVisibility, adjustments))

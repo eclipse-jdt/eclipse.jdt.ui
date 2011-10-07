@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,7 +83,9 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
 			if (!CallHierarchyContentProvider.isExpandWithConstructors(methodWrapper)) {
 	        	Display.getDefault().asyncExec(new Runnable(){
 	        		public void run(){
-        				fProvider.collapseAndRefresh(methodWrapper);
+						CallHierarchyViewPart viewPart= fProvider.getViewPart();
+						if (viewPart != null && !viewPart.getViewer().getControl().isDisposed())
+							fProvider.collapseAndRefresh(methodWrapper);
 	        		}
 	        	});
         	}
@@ -117,7 +119,8 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
      *
      * @see org.eclipse.ui.model.IWorkbenchAdapter#getChildren(java.lang.Object)
      */
-    public Object[] getChildren(Object o) {
+    @Override
+	public Object[] getChildren(Object o) {
         return this.fProvider.fetchChildren(((DeferredMethodWrapper) o).getMethodWrapper());
     }
 

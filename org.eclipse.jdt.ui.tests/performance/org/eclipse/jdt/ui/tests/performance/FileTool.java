@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,10 +48,6 @@ public class FileTool {
 	 * @throws IOException
 	 */
 	public static void unzip(ZipFile zipFile, File dstDir) throws IOException {
-		unzip(zipFile, dstDir, dstDir, 0);
-	}
-
-	private static void unzip(ZipFile zipFile, File rootDstDir, File dstDir, int depth) throws IOException {
 
 		Enumeration entries = zipFile.entries();
 

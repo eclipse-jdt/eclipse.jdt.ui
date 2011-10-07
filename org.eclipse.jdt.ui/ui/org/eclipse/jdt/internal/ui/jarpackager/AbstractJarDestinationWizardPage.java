@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.filesystem.URIUtil;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -67,6 +69,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 	/*
 	 * Overrides method from WizardExportPage
 	 */
+	@Override
 	protected void createDestinationGroup(Composite parent) {
 
 		initializeDialogUnits(parent);
@@ -105,6 +108,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 		fDestinationBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		SWTUtil.setButtonDimensionHint(fDestinationBrowseButton);
 		fDestinationBrowseButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleDestinationBrowseButtonPressed();
 			}
@@ -127,7 +131,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 		}
 		String selectedFileName= dialog.open();
 		if (selectedFileName != null) {
-			IContainer[] findContainersForLocation= ResourcesPlugin.getWorkspace().getRoot().findContainersForLocation(new Path(selectedFileName));
+			IContainer[] findContainersForLocation= ResourcesPlugin.getWorkspace().getRoot().findContainersForLocationURI(URIUtil.toURI(new Path(selectedFileName).makeAbsolute()));
 			if (findContainersForLocation.length > 0) {
 				selectedFileName= findContainersForLocation[0].getFullPath().makeRelative().toString();
 			}
@@ -169,6 +173,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 		return "." + JarPackagerUtil.JAR_EXTENSION; //$NON-NLS-1$
 	}
 
+	@Override
 	protected void restoreWidgetValues() {
 		// destination
 		if (fJarPackage.getJarLocation().isEmpty())
@@ -225,6 +230,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 	/*
 	 * Overrides method from WizardDataTransferPage
 	 */
+	@Override
 	protected boolean validateDestinationGroup() {
 		if (fDestinationNamesCombo.getText().length() == 0) {
 			// Clear error
@@ -257,7 +263,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 		}
 		// Inform user about relative directory
 		String currentMessage= getMessage();
-		if (!(new File(fDestinationNamesCombo.getText()).isAbsolute())) {
+		if (!(Path.fromOSString(fDestinationNamesCombo.getText()).isAbsolute())) {
 			if (currentMessage == null)
 				setMessage(JarPackagerMessages.JarPackageWizardPage_info_relativeExportDestination, IMessageProvider.INFORMATION);
 		} else {
@@ -277,6 +283,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void saveWidgetValues() {
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
@@ -324,6 +331,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 		updatePageCompletion();
 	}
 
+	@Override
 	protected void updatePageCompletion() {
 		boolean pageComplete= isPageComplete();
 		setPageComplete(pageComplete);

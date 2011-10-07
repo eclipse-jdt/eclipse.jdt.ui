@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,10 +57,12 @@ public class JavaTextViewer extends Viewer {
 
 	}
 
+	@Override
 	public Control getControl() {
 		return fSourceViewer.getControl();
 	}
 
+	@Override
 	public void setInput(Object input) {
 		if (input instanceof IStreamContentAccessor) {
 			Document document= new Document(getString(input));
@@ -70,17 +72,21 @@ public class JavaTextViewer extends Viewer {
 		fInput= input;
 	}
 
+	@Override
 	public Object getInput() {
 		return fInput;
 	}
 
+	@Override
 	public ISelection getSelection() {
 		return null;
 	}
 
+	@Override
 	public void setSelection(ISelection s, boolean reveal) {
 	}
 
+	@Override
 	public void refresh() {
 	}
 

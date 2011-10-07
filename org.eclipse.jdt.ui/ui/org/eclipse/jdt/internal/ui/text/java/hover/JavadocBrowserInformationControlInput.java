@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,7 @@ public class JavadocBrowserInformationControlInput extends BrowserInformationCon
 	 * @see org.eclipse.jface.internal.text.html.BrowserInformationControlInput#getLeadingImageWidth()
 	 * @since 3.4
 	 */
+	@Override
 	public int getLeadingImageWidth() {
 		return fLeadingImageWidth;
 	}
@@ -63,6 +64,7 @@ public class JavadocBrowserInformationControlInput extends BrowserInformationCon
 	/*
 	 * @see org.eclipse.jface.internal.text.html.BrowserInput#getHtml()
 	 */
+	@Override
 	public String getHtml() {
 		return fHtml;
 	}
@@ -70,6 +72,7 @@ public class JavadocBrowserInformationControlInput extends BrowserInformationCon
 	/*
 	 * @see org.eclipse.jdt.internal.ui.infoviews.BrowserInput#getInputElement()
 	 */
+	@Override
 	public Object getInputElement() {
 		return fElement == null ? (Object) fHtml : fElement;
 	}
@@ -77,6 +80,7 @@ public class JavadocBrowserInformationControlInput extends BrowserInformationCon
 	/*
 	 * @see org.eclipse.jdt.internal.ui.infoviews.BrowserInput#getInputName()
 	 */
+	@Override
 	public String getInputName() {
 		return fElement == null ? "" : fElement.getElementName(); //$NON-NLS-1$
 	}

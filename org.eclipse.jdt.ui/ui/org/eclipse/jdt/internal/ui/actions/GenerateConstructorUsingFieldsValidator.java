@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ public class GenerateConstructorUsingFieldsValidator implements ISelectionStatus
 
 	private final int fEntries;
 
-	private List fSignatures;
+	private List<String> fSignatures;
 
 	private ITypeBinding fType= null;
 
@@ -67,8 +67,8 @@ public class GenerateConstructorUsingFieldsValidator implements ISelectionStatus
 		}
 	}
 
-	private List getExistingConstructorSignatures() {
-		List existing= new ArrayList();
+	private List<String> getExistingConstructorSignatures() {
+		List<String> existing= new ArrayList<String>();
 		IMethodBinding[] methods= fType.getDeclaredMethods();
 		for (int index= 0; index < methods.length; index++) {
 			if (methods[index].isConstructor()) {

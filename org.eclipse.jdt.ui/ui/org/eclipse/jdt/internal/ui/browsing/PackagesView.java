@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
@@ -67,6 +68,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.MultiActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
@@ -88,6 +90,7 @@ public class PackagesView extends JavaBrowsingPart{
 			super(statusLineManager);
 		}
 
+		@Override
 		protected String formatMessage(ISelection sel) {
 			if (sel instanceof IStructuredSelection) {
 				IStructuredSelection selection= (IStructuredSelection)sel;
@@ -137,6 +140,7 @@ public class PackagesView extends JavaBrowsingPart{
 	/**
 	 * Adds filters the viewer of this part.
 	 */
+	@Override
 	protected void addFilters() {
 		super.addFilters();
 		getViewer().addFilter(createNonJavaElementFilter());
@@ -151,12 +155,14 @@ public class PackagesView extends JavaBrowsingPart{
 	 */
 	protected NonJavaElementFilter createNonJavaElementFilter() {
 		return new NonJavaElementFilter(){
+			@Override
 			public boolean select(Viewer viewer, Object parent, Object element){
 				return ((element instanceof IJavaElement) || (element instanceof LogicalPackage) || (element instanceof IFolder));
 			}
 		};
 	}
 
+	@Override
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 		//this must be created before all actions and filters
@@ -187,6 +193,7 @@ public class PackagesView extends JavaBrowsingPart{
 	/*
 	 * @see org.eclipse.ui.IViewPart#saveState(org.eclipse.ui.IMemento)
 	 */
+	@Override
 	public void saveState(IMemento memento) {
 		super.saveState(memento);
 		memento.putInteger(this.getViewSite().getId()+TAG_VIEW_STATE,fCurrViewState);
@@ -195,6 +202,7 @@ public class PackagesView extends JavaBrowsingPart{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createViewer(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected StructuredViewer createViewer(Composite parent) {
 		//Creates the viewer of this part dependent on the current layout.
 		StructuredViewer viewer;
@@ -210,6 +218,7 @@ public class PackagesView extends JavaBrowsingPart{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getAdapter(java.lang.Class)
 	 */
+	@Override
 	public Object getAdapter(Class key) {
 		if (key == IShowInTargetList.class) {
 			return new IShowInTargetList() {
@@ -237,12 +246,14 @@ public class PackagesView extends JavaBrowsingPart{
 	 * Overrides the createContentProvider from JavaBrowsingPart
 	 * Creates the content provider of this part.
 	 */
+	@Override
 	protected IContentProvider createContentProvider() {
 		if(isInListState())
 			return new PackagesViewFlatContentProvider(fWrappedViewer.getViewer());
 		else return new PackagesViewHierarchicalContentProvider(fWrappedViewer.getViewer());
 	}
 
+	@Override
 	protected JavaUILabelProvider createLabelProvider() {
 		if(isInListState())
 			return createListLabelProvider();
@@ -262,10 +273,12 @@ public class PackagesView extends JavaBrowsingPart{
 	 *
 	 * @return	the string used as ID for the Help context
 	 */
+	@Override
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.PACKAGES_BROWSING_VIEW;
 	}
 
+	@Override
 	protected String getLinkToEditorKey() {
 		return PreferenceConstants.LINK_BROWSING_PACKAGES_TO_EDITOR;
 	}
@@ -277,6 +290,7 @@ public class PackagesView extends JavaBrowsingPart{
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid input
 	 */
+	@Override
 	protected boolean isValidInput(Object element) {
 		if (element instanceof IJavaProject || (element instanceof IPackageFragmentRoot && ((IJavaElement)element).getElementName() != IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH))
 			try {
@@ -296,6 +310,7 @@ public class PackagesView extends JavaBrowsingPart{
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid element
 	 */
+	@Override
 	protected boolean isValidElement(Object element) {
 		if (element instanceof IPackageFragment) {
 			IJavaElement parent= ((IPackageFragment)element).getParent();
@@ -308,6 +323,7 @@ public class PackagesView extends JavaBrowsingPart{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#findElementToSelect(org.eclipse.jdt.core.IJavaElement)
 	 */
+	@Override
 	protected IJavaElement findElementToSelect(IJavaElement je) {
 		if (je == null)
 			return null;
@@ -329,6 +345,7 @@ public class PackagesView extends JavaBrowsingPart{
 	/*
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#setInput(java.lang.Object)
 	 */
+	@Override
 	protected void setInput(Object input) {
 		setViewerWrapperInput(input);
 		super.updateTitle();
@@ -341,6 +358,7 @@ public class PackagesView extends JavaBrowsingPart{
 	/**
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#fillActionBars(org.eclipse.ui.IActionBars)
 	 */
+	@Override
 	protected void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		fSwitchActionGroup.fillActionBars(actionBars);
@@ -374,14 +392,17 @@ public class PackagesView extends JavaBrowsingPart{
 	}
 
 	//alter sorter to include LogicalPackages
+	@Override
 	protected JavaElementComparator createJavaElementComparator() {
 		return new JavaElementComparator(){
+			@Override
 			public int category(Object element) {
 				if (element instanceof LogicalPackage) {
 					LogicalPackage cp= (LogicalPackage) element;
 					return super.category(cp.getFragments()[0]);
 				} else return super.category(element);
 			}
+			@Override
 			public int compare(Viewer viewer, Object e1, Object e2){
 				if (e1 instanceof LogicalPackage) {
 					LogicalPackage cp= (LogicalPackage) e1;
@@ -396,6 +417,7 @@ public class PackagesView extends JavaBrowsingPart{
 		};
 	}
 
+	@Override
 	protected StatusBarUpdater createStatusBarUpdater(IStatusLineManager slManager) {
 		return new StatusBarUpdater4LogicalPackage(slManager);
 	}
@@ -404,6 +426,7 @@ public class PackagesView extends JavaBrowsingPart{
 		getSite().setSelectionProvider(fWrappedViewer);
 	}
 
+	@Override
 	void adjustInputAndSetSelection(Object o) {
 		if (!(o instanceof LogicalPackage)) {
 			super.adjustInputAndSetSelection(o);
@@ -418,6 +441,7 @@ public class PackagesView extends JavaBrowsingPart{
 	}
 
 	//do the same thing as the JavaBrowsingPart but with wrapper
+	@Override
 	protected void createActions() {
 		super.createActions();
 
@@ -443,6 +467,7 @@ public class PackagesView extends JavaBrowsingPart{
 			super(actions, index);
 		}
 
+		@Override
 		public void fillActionBars(IActionBars actionBars) {
 			//create new layout group
 			IMenuManager manager= actionBars.getMenuManager();
@@ -474,6 +499,7 @@ public class PackagesView extends JavaBrowsingPart{
 		/*
 		 * @see org.eclipse.jface.action.IAction#run()
 		 */
+		@Override
 		public void run() {
 			switchViewer(fState);
 		}
@@ -529,6 +555,7 @@ public class PackagesView extends JavaBrowsingPart{
 		actionBars.updateActionBars();
 	}
 
+	@Override
 	protected IJavaElement findInputForJavaElement(IJavaElement je) {
 		// null check has to take place here as well (not only in
 		// findInputForJavaElement(IJavaElement, boolean) since we
@@ -567,9 +594,11 @@ public class PackagesView extends JavaBrowsingPart{
 	 *
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createDecoratingLabelProvider(JavaUILabelProvider)
 	 */
+	@Override
 	protected DecoratingJavaLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
 		return new DecoratingJavaLabelProvider(provider, false, isInListState()) {
 
+			@Override
 			public String getText(Object element){
 				if (element instanceof LogicalPackage) {
 					LogicalPackage el= (LogicalPackage) element;
@@ -577,6 +606,7 @@ public class PackagesView extends JavaBrowsingPart{
 				} else return super.getText(element);
 			}
 
+			@Override
 			public Image getImage(Object element) {
 				if(element instanceof LogicalPackage){
 					LogicalPackage el= (LogicalPackage) element;
@@ -598,55 +628,12 @@ public class PackagesView extends JavaBrowsingPart{
 	}
 
 	/*
-	 * Overridden from JavaBrowsingPart to handel LogicalPackages and tree
-	 * structure.
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#adjustInputAndSetSelection(org.eclipse.jdt.core.IJavaElement)
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#isInputResetBy(java.lang.Object, java.lang.Object, org.eclipse.ui.IWorkbenchPart)
+	 * @since 3.7
 	 */
-	void adjustInputAndSetSelection(IJavaElement je) {
-
-		IJavaElement jElementToSelect= findElementToSelect(je);
-		LogicalPackagesProvider p= (LogicalPackagesProvider) fWrappedViewer.getContentProvider();
-
-		Object elementToSelect= jElementToSelect;
-		if (jElementToSelect != null && jElementToSelect.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-			IPackageFragment pkgFragment= (IPackageFragment)jElementToSelect;
-			elementToSelect= p.findLogicalPackage(pkgFragment);
-			if (elementToSelect == null)
-				elementToSelect= pkgFragment;
-		}
-
-		IJavaElement newInput= findInputForJavaElement(je);
-		if (elementToSelect == null && !isValidInput(newInput))
-			setInput(null);
-		else if (elementToSelect == null || getViewer().testFindItem(elementToSelect) == null) {
-
-			//optimization, if you are in the same project but expansion hasn't happened
-			Object input= getViewer().getInput();
-			if (elementToSelect != null && newInput != null) {
-				if (newInput.equals(input)) {
-					getViewer().reveal(elementToSelect);
-				// Adjust input to selection
-				} else {
-					setInput(newInput);
-					getViewer().reveal(elementToSelect);
-				}
-			} else
-				setInput(newInput);
-
-			if (elementToSelect instanceof IPackageFragment) {
-				IPackageFragment pkgFragment= (IPackageFragment)elementToSelect;
-				elementToSelect= p.findLogicalPackage(pkgFragment);
-				if (elementToSelect == null)
-					elementToSelect= pkgFragment;
-			}
-		}
-
-		ISelection selection;
-		if (elementToSelect != null)
-			selection= new StructuredSelection(elementToSelect);
-		else
-			selection= StructuredSelection.EMPTY;
-		setSelection(selection, true);
+	@Override
+	boolean isInputResetBy(Object newInput, Object input, IWorkbenchPart part) {
+		return (!(part instanceof ProjectsView || part instanceof PackageExplorerPart)) && super.isInputResetBy(newInput, input, part);
 	}
 
 }

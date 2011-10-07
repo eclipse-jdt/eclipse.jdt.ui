@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,7 +53,7 @@ public class UnpackJarBuilder extends FatJarBuilder {
 
 	private JarPackageData fJarPackage;
 	
-	private Set jarNames;
+	private Set<String> jarNames;
 
 	public UnpackJarBuilder(JarPackageData jarPackage) {
 		fSubfolder= jarPackage.getAbsoluteJarLocation().removeFileExtension().lastSegment() + SUBFOLDER_SUFFIX;
@@ -72,6 +72,7 @@ public class UnpackJarBuilder extends FatJarBuilder {
 	 * we do not need to merge any manifests here.
 	 * @return false
 	 */
+	@Override
 	public boolean isMergeManifests() {
 		return false;
 	}
@@ -80,6 +81,7 @@ public class UnpackJarBuilder extends FatJarBuilder {
 	 * we do not need to remove signers here.
 	 * @return false
 	 */
+	@Override
 	public boolean isRemoveSigners() {
 		return false;
 	}
@@ -94,8 +96,9 @@ public class UnpackJarBuilder extends FatJarBuilder {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getManifestClasspath() {
-		Set renamedJarNames= new HashSet();
+		Set<String> renamedJarNames= new HashSet<String>();
 		Object[] elements= fJarPackage.getElements();
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];
@@ -109,8 +112,8 @@ public class UnpackJarBuilder extends FatJarBuilder {
 		}
 		StringBuffer result= new StringBuffer();
 		result.append("."); //$NON-NLS-1$
-		for (Iterator iterator= renamedJarNames.iterator(); iterator.hasNext();) {
-			String jarName= (String)iterator.next();
+		for (Iterator<String> iterator= renamedJarNames.iterator(); iterator.hasNext();) {
+			String jarName= iterator.next();
 			result.append(" ").append(fSubfolder).append("/").append(jarName); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return result.toString();
@@ -119,10 +122,11 @@ public class UnpackJarBuilder extends FatJarBuilder {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void open(JarPackageData jarPackage, Shell displayShell, MultiStatus status) throws CoreException {
 		super.open(jarPackage, displayShell, status);
 		fJarPackage= jarPackage;
-		jarNames= new HashSet();
+		jarNames= new HashSet<String>();
 		createBlankSubfolder(displayShell, jarPackage.allowOverwrite());
 	}
 

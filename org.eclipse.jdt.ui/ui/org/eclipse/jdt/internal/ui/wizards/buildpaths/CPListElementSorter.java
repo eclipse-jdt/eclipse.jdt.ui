@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ public class CPListElementSorter extends ViewerComparator {
 	/*
 	 * @see ViewerSorter#category(Object)
 	 */
+	@Override
 	public int category(Object obj) {
 		if (obj instanceof CPListElement) {
 			CPListElement element= (CPListElement) obj;
@@ -64,6 +65,7 @@ public class CPListElementSorter extends ViewerComparator {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ViewerSorter#compare(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
+	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
 
         int cat1 = category(e1);

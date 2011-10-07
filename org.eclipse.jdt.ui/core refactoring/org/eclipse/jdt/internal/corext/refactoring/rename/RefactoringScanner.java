@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,7 @@ public class RefactoringScanner {
 	private final String fQualifier;
 
 	private IScanner fScanner;
-	private Set fMatches; //Set<TextMatch>
+	private Set<TextMatch> fMatches; //Set<TextMatch>
 
 
 	public RefactoringScanner(String name, String qualifier) {
@@ -67,7 +67,7 @@ public class RefactoringScanner {
 
 	public void scan(ICompilationUnit cu)	throws JavaModelException {
 		char[] chars= cu.getBuffer().getCharacters();
-		fMatches= new HashSet();
+		fMatches= new HashSet<TextMatch>();
 		fScanner= ToolFactory.createScanner(true, true, false, true);
 		fScanner.setSource(chars);
 
@@ -81,10 +81,17 @@ public class RefactoringScanner {
 		fScanner= null;
 	}
 
-	/** only for testing */
+	/**
+	 * Scan the given text.
+	 * <p>
+	 * <strong>NOTE:</strong> Use only for testing.
+	 * </p>
+	 * 
+	 * @param text the text
+	 */
 	public void scan(String text) {
 		char[] chars= text.toCharArray();
-		fMatches= new HashSet();
+		fMatches= new HashSet<TextMatch>();
 		fScanner= ToolFactory.createScanner(true, true, false, true);
 		fScanner.setSource(chars);
 		doScan();
@@ -208,7 +215,7 @@ public class RefactoringScanner {
 	/**
 	 * @return Set of TextMatch
 	 */
-	public Set getMatches() {
+	public Set<TextMatch> getMatches() {
 		return fMatches;
 	}
 }

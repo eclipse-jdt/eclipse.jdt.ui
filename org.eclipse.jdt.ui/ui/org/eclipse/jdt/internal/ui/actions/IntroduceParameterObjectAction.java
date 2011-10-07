@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,7 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isIntroduceParameterObjectAvailable(selection));
@@ -77,6 +78,7 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(ITextSelection)
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
@@ -84,6 +86,7 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection)
 	 */
+	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isIntroduceParameterObjectAvailable(selection));
@@ -97,9 +100,13 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		try {
-			run(getSingleSelectedMethod(selection));
+			IMethod singleSelectedMethod= getSingleSelectedMethod(selection);
+			if (!ActionUtil.isEditable(getShell(), singleSelectedMethod))
+				return;
+			run(singleSelectedMethod);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), ActionMessages.IntroduceParameterObjectAction_exceptiondialog_title,	ActionMessages.IntroduceParameterObjectAction_unexpected_exception);
 		}
@@ -108,14 +115,18 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		try {
+			if (!ActionUtil.isEditable(fEditor))
+				return;
 			run(getSingleSelectedMethod(selection));
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), ActionMessages.IntroduceParameterObjectAction_exceptiondialog_title,	ActionMessages.IntroduceParameterObjectAction_unexpected_exception);
 		}
 	}
 
+	@Override
 	public void run(JavaTextSelection selection) {
 		try {
 			IJavaElement[] elements= selection.resolveElementAtOffset();

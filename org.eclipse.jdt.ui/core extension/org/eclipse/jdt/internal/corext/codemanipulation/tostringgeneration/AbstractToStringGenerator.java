@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Mateusz Matela and others.
+ * Copyright (c) 2008, 2011 Mateusz Matela and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -168,7 +168,7 @@ public abstract class AbstractToStringGenerator {
 
 	protected boolean needCollectionToStringMethod;
 
-	protected List typesThatNeedArrayToStringMethod;
+	protected List<ITypeBinding> typesThatNeedArrayToStringMethod;
 
 	public RefactoringStatus checkConditions() {
 		return new RefactoringStatus();
@@ -208,8 +208,8 @@ public abstract class AbstractToStringGenerator {
 		return toStringMethod;
 	}
 
-	public List generateHelperMethods() {
-		List result= new ArrayList();
+	public List<MethodDeclaration> generateHelperMethods() {
+		List<MethodDeclaration> result= new ArrayList<MethodDeclaration>();
 		if (needCollectionToStringMethod)
 			result.add(createHelperToStringMethod(false));
 
@@ -372,8 +372,8 @@ public abstract class AbstractToStringGenerator {
 			// i < length;
 			forStatement.setExpression(createInfixExpression(fAst.newSimpleName(indexName), Operator.LESS, fAst.newSimpleName(lengthParamName)));
 
-			for (Iterator iterator= typesThatNeedArrayToStringMethod.iterator(); iterator.hasNext();) {
-				ITypeBinding typeBinding= (ITypeBinding)iterator.next();
+			for (Iterator<ITypeBinding> iterator= typesThatNeedArrayToStringMethod.iterator(); iterator.hasNext();) {
+				ITypeBinding typeBinding= iterator.next();
 				//if (array instanceof int[]) {
 				String typeName= typeBinding.getName();
 				PrimitiveType.Code code= null;
@@ -460,7 +460,7 @@ public abstract class AbstractToStringGenerator {
 	protected void initialize() {
 		needMaxLenVariable= false;
 		needCollectionToStringMethod= false;
-		typesThatNeedArrayToStringMethod= new ArrayList();
+		typesThatNeedArrayToStringMethod= new ArrayList<ITypeBinding>();
 
 		checkNeedForHelperMethods();
 
@@ -855,10 +855,10 @@ public abstract class AbstractToStringGenerator {
 		return fAst.newName(importedName);
 	}
 	
-	private Set excluded;
+	private Set<String> excluded;
 	protected String createNameSuggestion(String baseName, int variableKind) {
 		if (excluded == null) {
-			excluded= new HashSet();
+			excluded= new HashSet<String>();
 			IVariableBinding[] fields= fContext.getTypeBinding().getDeclaredFields();
 			for (int i= 0; i < fields.length; i++) {
 				excluded.add(fields[i].getName());

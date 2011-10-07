@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -73,10 +74,10 @@ public class ReorgUtils {
 		return false;
 	}
 
-	public static boolean containsOnlyProjects(List elements){
+	public static boolean containsOnlyProjects(List<?> elements){
 		if (elements.isEmpty())
 			return false;
-		for(Iterator iter= elements.iterator(); iter.hasNext(); ) {
+		for(Iterator<?> iter= elements.iterator(); iter.hasNext(); ) {
 			if (! isProject(iter.next()))
 				return false;
 		}
@@ -95,10 +96,10 @@ public class ReorgUtils {
 	 *         otherwise
 	 * @since 3.5
 	 */
-	public static boolean containsOnlyWorkingSets (List elements){
+	public static boolean containsOnlyWorkingSets (List<?> elements){
 		if (elements.isEmpty())
 			return false;
-		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 			if (!isWorkingSet(iter.next()))
 				return false;
 		}
@@ -235,24 +236,24 @@ public class ReorgUtils {
 		}
 	}
 
-	public static IResource[] getResources(List elements) {
-		List resources= new ArrayList(elements.size());
-		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+	public static IResource[] getResources(List<?> elements) {
+		List<IResource> resources= new ArrayList<IResource>(elements.size());
+		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IResource)
-				resources.add(element);
+				resources.add((IResource) element);
 		}
-		return (IResource[]) resources.toArray(new IResource[resources.size()]);
+		return resources.toArray(new IResource[resources.size()]);
 	}
 
-	public static IJavaElement[] getJavaElements(List elements) {
-		List resources= new ArrayList(elements.size());
-		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+	public static IJavaElement[] getJavaElements(List<?> elements) {
+		List<IJavaElement> resources= new ArrayList<IJavaElement>(elements.size());
+		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IJavaElement)
-				resources.add(element);
+				resources.add((IJavaElement) element);
 		}
-		return (IJavaElement[]) resources.toArray(new IJavaElement[resources.size()]);
+		return resources.toArray(new IJavaElement[resources.size()]);
 	}
 
 	/**
@@ -262,25 +263,25 @@ public class ReorgUtils {
 	 * @return the array of jar entry resources
 	 * @since 3.6
 	 */
-	public static IJarEntryResource[] getJarEntryResources(List elements) {
-		List resources= new ArrayList(elements.size());
-		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+	public static IJarEntryResource[] getJarEntryResources(List<?> elements) {
+		List<IJarEntryResource> resources= new ArrayList<IJarEntryResource>(elements.size());
+		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IJarEntryResource)
-				resources.add(element);
+				resources.add((IJarEntryResource) element);
 		}
-		return (IJarEntryResource[]) resources.toArray(new IJarEntryResource[resources.size()]);
+		return resources.toArray(new IJarEntryResource[resources.size()]);
 	}
 
-	public static IWorkingSet[] getWorkingSets(List elements) {
-		List result= new ArrayList(1);
-		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+	public static IWorkingSet[] getWorkingSets(List<?> elements) {
+		List<IWorkingSet> result= new ArrayList<IWorkingSet>(1);
+		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IWorkingSet) {
-				result.add(element);
+				result.add((IWorkingSet) element);
 			}
 		}
-		return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
+		return result.toArray(new IWorkingSet[result.size()]);
 	}
 
 	public static boolean hasSourceAvailable(IMember member) throws JavaModelException{
@@ -289,70 +290,63 @@ public class ReorgUtils {
 	}
 
 	public static IResource[] setMinus(IResource[] setToRemoveFrom, IResource[] elementsToRemove) {
-		Set setMinus= new HashSet(setToRemoveFrom.length - setToRemoveFrom.length);
+		Set<IResource> setMinus= new HashSet<IResource>(setToRemoveFrom.length - setToRemoveFrom.length);
 		setMinus.addAll(Arrays.asList(setToRemoveFrom));
 		setMinus.removeAll(Arrays.asList(elementsToRemove));
-		return (IResource[]) setMinus.toArray(new IResource[setMinus.size()]);
+		return setMinus.toArray(new IResource[setMinus.size()]);
 	}
 
 	public static IJavaElement[] setMinus(IJavaElement[] setToRemoveFrom, IJavaElement[] elementsToRemove) {
-		Set setMinus= new HashSet(setToRemoveFrom.length - setToRemoveFrom.length);
+		Set<IJavaElement> setMinus= new HashSet<IJavaElement>(setToRemoveFrom.length - setToRemoveFrom.length);
 		setMinus.addAll(Arrays.asList(setToRemoveFrom));
 		setMinus.removeAll(Arrays.asList(elementsToRemove));
-		return (IJavaElement[]) setMinus.toArray(new IJavaElement[setMinus.size()]);
+		return setMinus.toArray(new IJavaElement[setMinus.size()]);
 	}
 
 	public static IJavaElement[] union(IJavaElement[] set1, IJavaElement[] set2) {
-		List union= new ArrayList(set1.length + set2.length);//use lists to avoid sequence problems
+		List<IJavaElement> union= new ArrayList<IJavaElement>(set1.length + set2.length);//use lists to avoid sequence problems
 		addAll(set1, union);
 		addAll(set2, union);
-		return (IJavaElement[]) union.toArray(new IJavaElement[union.size()]);
+		return union.toArray(new IJavaElement[union.size()]);
 	}
 
 	public static IResource[] union(IResource[] set1, IResource[] set2) {
-		List union= new ArrayList(set1.length + set2.length);//use lists to avoid sequence problems
+		List<IResource> union= new ArrayList<IResource>(set1.length + set2.length);//use lists to avoid sequence problems
 		addAll(ReorgUtils.getNotNulls(set1), union);
 		addAll(ReorgUtils.getNotNulls(set2), union);
-		return (IResource[]) union.toArray(new IResource[union.size()]);
+		return union.toArray(new IResource[union.size()]);
 	}
 
-	private static void addAll(Object[] array, List list) {
+	private static <T> void addAll(T[] array, List<T> list) {
 		for (int i= 0; i < array.length; i++) {
 			if (! list.contains(array[i]))
 				list.add(array[i]);
 		}
 	}
 
-	public static Set union(Set set1, Set set2){
-		Set union= new HashSet(set1.size() + set2.size());
-		union.addAll(set1);
-		union.addAll(set2);
-		return union;
-	}
-
 	public static IType[] getMainTypes(IJavaElement[] javaElements) throws JavaModelException {
-		List result= new ArrayList();
+		List<IJavaElement> result= new ArrayList<IJavaElement>();
 		for (int i= 0; i < javaElements.length; i++) {
 			IJavaElement element= javaElements[i];
 			if (element instanceof IType && JavaElementUtil.isMainType((IType)element))
 				result.add(element);
 		}
-		return (IType[]) result.toArray(new IType[result.size()]);
+		return result.toArray(new IType[result.size()]);
 	}
 
 	public static IFolder[] getFolders(IResource[] resources) {
-		Set result= getResourcesOfType(resources, IResource.FOLDER);
-		return (IFolder[]) result.toArray(new IFolder[result.size()]);
+		Set<IResource> result= getResourcesOfType(resources, IResource.FOLDER);
+		return result.toArray(new IFolder[result.size()]);
 	}
 
 	public static IFile[] getFiles(IResource[] resources) {
-		Set result= getResourcesOfType(resources, IResource.FILE);
-		return (IFile[]) result.toArray(new IFile[result.size()]);
+		Set<IResource> result= getResourcesOfType(resources, IResource.FILE);
+		return result.toArray(new IFile[result.size()]);
 	}
 
 	//the result can be cast down to the requested type array
-	public static Set getResourcesOfType(IResource[] resources, int typeMask){
-		Set result= new HashSet(resources.length);
+	public static Set<IResource> getResourcesOfType(IResource[] resources, int typeMask){
+		Set<IResource> result= new HashSet<IResource>(resources.length);
 		for (int i= 0; i < resources.length; i++) {
 			if (isOfType(resources[i], typeMask))
 				result.add(resources[i]);
@@ -362,8 +356,8 @@ public class ReorgUtils {
 
 	//the result can be cast down to the requested type array
 	//type is _not_ a mask
-	public static List getElementsOfType(IJavaElement[] javaElements, int type){
-		List result= new ArrayList(javaElements.length);
+	public static List<?> getElementsOfType(IJavaElement[] javaElements, int type){
+		List<IJavaElement> result= new ArrayList<IJavaElement>(javaElements.length);
 		for (int i= 0; i < javaElements.length; i++) {
 			if (isOfType(javaElements[i], type))
 				result.add(javaElements[i]);
@@ -556,47 +550,47 @@ public class ReorgUtils {
 	}
 
 	public static IResource[] getNotNulls(IResource[] resources) {
-		Collection result= new ArrayList(resources.length);
+		Collection<IResource> result= new ArrayList<IResource>(resources.length);
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
 			if (resource != null && ! result.contains(resource))
 				result.add(resource);
 		}
-		return (IResource[]) result.toArray(new IResource[result.size()]);
+		return result.toArray(new IResource[result.size()]);
 	}
 
 	public static IResource[] getNotLinked(IResource[] resources) {
-		Collection result= new ArrayList(resources.length);
+		Collection<IResource> result= new ArrayList<IResource>(resources.length);
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
 			if (resource != null && ! result.contains(resource) && ! resource.isLinked())
 				result.add(resource);
 		}
-		return (IResource[]) result.toArray(new IResource[result.size()]);
+		return result.toArray(new IResource[result.size()]);
 	}
 
 	/* List<IJavaElement> javaElements
 	 * return ICompilationUnit -> List<IJavaElement>
 	 */
-	public static Map groupByCompilationUnit(List javaElements){
-		Map result= new HashMap();
-		for (Iterator iter= javaElements.iterator(); iter.hasNext();) {
-			IJavaElement element= (IJavaElement) iter.next();
+	public static Map<ICompilationUnit, List<IJavaElement>> groupByCompilationUnit(List<IJavaElement> javaElements){
+		Map<ICompilationUnit, List<IJavaElement>> result= new HashMap<ICompilationUnit, List<IJavaElement>>();
+		for (Iterator<IJavaElement> iter= javaElements.iterator(); iter.hasNext();) {
+			IJavaElement element= iter.next();
 			ICompilationUnit cu= ReorgUtils.getCompilationUnit(element);
 			if (cu != null){
 				if (! result.containsKey(cu))
-					result.put(cu, new ArrayList(1));
-				((List)result.get(cu)).add(element);
+					result.put(cu, new ArrayList<IJavaElement>(1));
+				result.get(cu).add(element);
 			}
 		}
 		return result;
 	}
 
-	public static void splitIntoJavaElementsAndResources(Object[] elements, List javaElementResult, List resourceResult) {
+	public static void splitIntoJavaElementsAndResources(Object[] elements, List<? super IJavaElement> javaElementResult, List<? super IResource> resourceResult) {
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];
 			if (element instanceof IJavaElement) {
-				javaElementResult.add(element);
+				javaElementResult.add((IJavaElement) element);
 			} else if (element instanceof IResource) {
 				IResource resource= (IResource)element;
 				IJavaElement jElement= JavaCore.create(resource);
@@ -608,7 +602,7 @@ public class ReorgUtils {
 		}
 	}
 
-	public static boolean containsElementOrParent(Set elements, IJavaElement element) {
+	public static boolean containsElementOrParent(Set<IAdaptable> elements, IJavaElement element) {
 		IJavaElement curr= element;
 		do {
 			if (elements.contains(curr))
@@ -618,7 +612,7 @@ public class ReorgUtils {
 		return false;
 	}
 
-	public static boolean containsElementOrParent(Set elements, IResource element) {
+	public static boolean containsElementOrParent(Set<IAdaptable> elements, IResource element) {
 		IResource curr= element;
 		do {
 			if (elements.contains(curr))

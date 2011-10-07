@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
@@ -99,6 +98,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRewriteUtil;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -109,6 +110,7 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * Partial implementation of a refactoring processor solving supertype
@@ -149,9 +151,9 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * The obsolete casts (element type:
-	 * <code>&ltICompilationUnit, Collection&ltCastVariable2&gt&gt</code>)
+	 * <code>&lt;ICompilationUnit, Collection&lt;CastVariable2&gt;&gt;</code>)
 	 */
-	protected Map fObsoleteCasts= null;
+	protected Map<ICompilationUnit, Collection<CastVariable2>> fObsoleteCasts= null;
 
 	/** The working copy owner */
 	protected final WorkingCopyOwner fOwner= new WorkingCopyOwner() {
@@ -164,16 +166,16 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	protected CodeGenerationSettings fSettings;
 
 	/** The static bindings to import */
-	protected final Set fStaticBindings= new HashSet();
+	protected final Set<IBinding> fStaticBindings= new HashSet<IBinding>();
 
 	/** The type bindings to import */
-	protected final Set fTypeBindings= new HashSet();
+	protected final Set<ITypeBinding> fTypeBindings= new HashSet<ITypeBinding>();
 
 	/**
 	 * The type occurrences (element type:
-	 * <code>&ltICompilationUnit, Collection&ltIDeclaredConstraintVariable&gt&gt</code>)
+	 * <code>&lt;ICompilationUnit, Collection&lt;IDeclaredConstraintVariable&gt;&gt;</code>)
 	 */
-	protected Map fTypeOccurrences= null;
+	protected Map<ICompilationUnit, Collection<ITypeConstraintVariable>> fTypeOccurrences= null;
 
 	/**
 	 * Creates a new supertype refactoring processor.
@@ -279,7 +281,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			buffer.append(delimiter);
 			buffer.append('}');
 			final IDocument document= new Document(buffer.toString());
-			final ASTParser parser= ASTParser.newParser(AST.JLS3);
+			final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			parser.setSource(document.get().toCharArray());
 			final CompilationUnit unit= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 100));
 			final ASTRewrite targetRewrite= ASTRewrite.create(unit.getAST());
@@ -320,8 +322,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
 			final ImportRewrite rewrite= StubUtility.createImportRewrite(unit, true);
 			ITypeBinding type= null;
-			for (final Iterator iterator= fTypeBindings.iterator(); iterator.hasNext();) {
-				type= (ITypeBinding) iterator.next();
+			for (final Iterator<ITypeBinding> iterator= fTypeBindings.iterator(); iterator.hasNext();) {
+				type= iterator.next();
 				if (type.isTypeVariable()) {
 					final ITypeBinding[] bounds= type.getTypeBounds();
 					for (int index= 0; index < bounds.length; index++)
@@ -330,8 +332,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				rewrite.addImport(type);
 			}
 			IBinding binding= null;
-			for (final Iterator iterator= fStaticBindings.iterator(); iterator.hasNext();) {
-				binding= (IBinding) iterator.next();
+			for (final Iterator<IBinding> iterator= fStaticBindings.iterator(); iterator.hasNext();) {
+				binding= iterator.next();
 				rewrite.addStaticImport(binding);
 			}
 			final IDocument document= new Document();
@@ -371,8 +373,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		if (sourceDeclaration instanceof TypeDeclaration) {
 			TypeParameter parameter= null;
 			final ListRewrite rewrite= targetRewrite.getListRewrite(targetDeclaration, TypeDeclaration.TYPE_PARAMETERS_PROPERTY);
-			for (final Iterator iterator= ((TypeDeclaration) sourceDeclaration).typeParameters().iterator(); iterator.hasNext();) {
-				parameter= (TypeParameter) iterator.next();
+			for (final Iterator<TypeParameter> iterator= ((TypeDeclaration) sourceDeclaration).typeParameters().iterator(); iterator.hasNext();) {
+				parameter= iterator.next();
 				rewrite.insertLast(ASTNode.copySubtree(targetRewrite.getAST(), parameter), null);
 				ImportRewriteUtil.collectImports(subType.getJavaProject(), sourceDeclaration, fTypeBindings, fStaticBindings, false);
 			}
@@ -493,6 +495,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void finalize() throws Throwable {
 		resetWorkingCopies();
 	}
@@ -527,13 +530,13 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 *
 	 * @param units
 	 *            the compilation unit map (element type:
-	 *            <code>&ltIJavaProject, Set&ltICompilationUnit&gt&gt</code>)
+	 *            <code>&lt;IJavaProject, Set&lt;ICompilationUnit&gt;&gt;</code>)
 	 * @param nodes
 	 *            the ast nodes representing the type occurrences
 	 * @throws JavaModelException
 	 *             if an error occurs
 	 */
-	protected final void getFieldReferencingCompilationUnits(final Map units, final ASTNode[] nodes) throws JavaModelException {
+	protected final void getFieldReferencingCompilationUnits(final Map<IJavaProject, Set<ICompilationUnit>> units, final ASTNode[] nodes) throws JavaModelException {
 		ASTNode node= null;
 		IField field= null;
 		IJavaProject project= null;
@@ -541,12 +544,12 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			node= nodes[index];
 			project= RefactoringASTParser.getCompilationUnit(node).getJavaProject();
 			if (project != null) {
-				final List fields= getReferencingFields(node, project);
+				final List<IField> fields= getReferencingFields(node, project);
 				for (int offset= 0; offset < fields.size(); offset++) {
-					field= (IField) fields.get(offset);
-					Set set= (Set) units.get(project);
+					field= fields.get(offset);
+					Set<ICompilationUnit> set= units.get(project);
 					if (set == null) {
-						set= new HashSet();
+						set= new HashSet<ICompilationUnit>();
 						units.put(project, set);
 					}
 					final ICompilationUnit unit= field.getCompilationUnit();
@@ -563,13 +566,13 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 *
 	 * @param units
 	 *            the compilation unit map (element type:
-	 *            <code>&ltIJavaProject, Set&ltICompilationUnit&gt&gt</code>)
+	 *            <code>&lt;IJavaProject, Set&lt;ICompilationUnit&gt;&gt;</code>)
 	 * @param nodes
 	 *            the ast nodes representing the type occurrences
 	 * @throws JavaModelException
 	 *             if an error occurs
 	 */
-	protected final void getMethodReferencingCompilationUnits(final Map units, final ASTNode[] nodes) throws JavaModelException {
+	protected final void getMethodReferencingCompilationUnits(final Map<IJavaProject, Set<ICompilationUnit>> units, final ASTNode[] nodes) throws JavaModelException {
 		ASTNode node= null;
 		IMethod method= null;
 		IJavaProject project= null;
@@ -579,9 +582,9 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			if (project != null) {
 				method= getReferencingMethod(node);
 				if (method != null) {
-					Set set= (Set) units.get(project);
+					Set<ICompilationUnit> set= units.get(project);
 					if (set == null) {
-						set= new HashSet();
+						set= new HashSet<ICompilationUnit>();
 						units.put(project, set);
 					}
 					final ICompilationUnit unit= method.getCompilationUnit();
@@ -602,11 +605,11 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @param status
 	 *            the refactoring status
 	 * @return the referenced compilation units (element type:
-	 *         <code>&ltIJavaProject, Collection&ltSearchResultGroup&gt&gt</code>)
+	 *         <code>&lt;IJavaProject, Collection&lt;SearchResultGroup&gt;&gt;</code>)
 	 * @throws JavaModelException
 	 *             if an error occurs
 	 */
-	protected final Map getReferencingCompilationUnits(final IType type, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
+	protected final Map<IJavaProject, Set<SearchResultGroup>> getReferencingCompilationUnits(final IType type, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
 		try {
 			monitor.beginTask("", 100); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
@@ -617,7 +620,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			engine.setScope(RefactoringScopeFactory.create(type));
 			engine.setPattern(SearchPattern.createPattern(type, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 			engine.searchPattern(new SubProgressMonitor(monitor, 100));
-			return engine.getAffectedProjects();
+			return (Map<IJavaProject, Set<SearchResultGroup>>) engine.getAffectedProjects();
 		} finally {
 			monitor.done();
 		}
@@ -634,16 +637,16 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @throws JavaModelException
 	 *             if an error occurs
 	 */
-	protected final List getReferencingFields(final ASTNode node, final IJavaProject project) throws JavaModelException {
-		List result= Collections.EMPTY_LIST;
+	protected final List<IField> getReferencingFields(final ASTNode node, final IJavaProject project) throws JavaModelException {
+		List<IField> result= Collections.emptyList();
 		if (node instanceof Type) {
 			final BodyDeclaration parent= (BodyDeclaration) ASTNodes.getParent(node, BodyDeclaration.class);
 			if (parent instanceof FieldDeclaration) {
-				final List fragments= ((FieldDeclaration) parent).fragments();
-				result= new ArrayList(fragments.size());
+				final List<VariableDeclarationFragment> fragments= ((FieldDeclaration) parent).fragments();
+				result= new ArrayList<IField>(fragments.size());
 				VariableDeclarationFragment fragment= null;
-				for (final Iterator iterator= fragments.iterator(); iterator.hasNext();) {
-					fragment= (VariableDeclarationFragment) iterator.next();
+				for (final Iterator<VariableDeclarationFragment> iterator= fragments.iterator(); iterator.hasNext();) {
+					fragment= iterator.next();
 					final IField field= getCorrespondingField(fragment);
 					if (field != null)
 						result.add(field);
@@ -716,10 +719,10 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 *            the constraints creator to use
 	 * @param units
 	 *            the compilation unit map (element type:
-	 *            <code>&ltIJavaProject, Set&ltICompilationUnit&gt&gt</code>)
+	 *            <code>&lt;IJavaProject, Set&lt;ICompilationUnit&gt;&gt;</code>)
 	 * @param groups
 	 *            the search result group map (element type:
-	 *            <code>&ltICompilationUnit, SearchResultGroup&gt</code>)
+	 *            <code>&lt;ICompilationUnit, SearchResultGroup&gt;</code>)
 	 * @param unit
 	 *            the compilation unit of the subtype
 	 * @param node
@@ -727,13 +730,13 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @param monitor
 	 *            the progress monitor to use
 	 */
-	protected final void performFirstPass(final SuperTypeConstraintsCreator creator, final Map units, final Map groups, final ICompilationUnit unit, final CompilationUnit node, final IProgressMonitor monitor) {
+	protected final void performFirstPass(final SuperTypeConstraintsCreator creator, final Map<IJavaProject, Set<ICompilationUnit>> units, final Map<ICompilationUnit, SearchResultGroup> groups, final ICompilationUnit unit, final CompilationUnit node, final IProgressMonitor monitor) {
 		try {
 			monitor.beginTask("", 100); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
 			node.accept(creator);
 			monitor.worked(20);
-			final SearchResultGroup group= (SearchResultGroup) groups.get(unit);
+			final SearchResultGroup group= groups.get(unit);
 			if (group != null) {
 				final ASTNode[] nodes= ASTNodeSearchUtil.getAstNodes(group.getSearchResults(), node);
 				try {
@@ -834,7 +837,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @param group
 	 *            the text edit group to use
 	 */
-	protected final void rewriteTypeOccurrence(final CompilationUnitRange range, final TType estimate, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final CompilationUnit copy, final Set replacements, final TextEditGroup group) {
+	protected final void rewriteTypeOccurrence(final CompilationUnitRange range, final TType estimate, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final CompilationUnit copy, final Set<String> replacements, final TextEditGroup group) {
 		ASTNode node= null;
 		IBinding binding= null;
 		final CompilationUnit target= rewrite.getRoot();
@@ -967,7 +970,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @throws CoreException
 	 *             if the change could not be generated
 	 */
-	protected abstract void rewriteTypeOccurrences(TextEditBasedChangeManager manager, ASTRequestor requestor, CompilationUnitRewrite rewrite, ICompilationUnit unit, CompilationUnit node, Set replacements, IProgressMonitor monitor) throws CoreException;
+	protected abstract void rewriteTypeOccurrences(TextEditBasedChangeManager manager, ASTRequestor requestor, CompilationUnitRewrite rewrite, ICompilationUnit unit, CompilationUnit node, Set<String> replacements, IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Creates the necessary text edits to replace the subtype occurrences by a
@@ -992,37 +995,37 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @param monitor
 	 *            the progress monitor to use
 	 */
-	protected final void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final ASTRequestor sourceRequestor, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit subUnit, final CompilationUnit subNode, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) {
+	protected final void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final ASTRequestor sourceRequestor, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit subUnit, final CompilationUnit subNode, final Set<String> replacements, final RefactoringStatus status, final IProgressMonitor monitor) {
 		try {
 			monitor.beginTask("", 300); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
 			if (fTypeOccurrences != null) {
-				final Set units= new HashSet(fTypeOccurrences.keySet());
+				final Set<ICompilationUnit> units= new HashSet<ICompilationUnit>(fTypeOccurrences.keySet());
 				if (subUnit != null)
 					units.remove(subUnit);
-				final Map projects= new HashMap();
-				Collection collection= null;
+				final Map<IJavaProject, Collection<ICompilationUnit>> projects= new HashMap<IJavaProject, Collection<ICompilationUnit>>();
+				Collection<ICompilationUnit> collection= null;
 				IJavaProject project= null;
 				ICompilationUnit current= null;
-				for (final Iterator iterator= units.iterator(); iterator.hasNext();) {
-					current= (ICompilationUnit) iterator.next();
+				for (final Iterator<ICompilationUnit> iterator= units.iterator(); iterator.hasNext();) {
+					current= iterator.next();
 					project= current.getJavaProject();
-					collection= (Collection) projects.get(project);
+					collection= projects.get(project);
 					if (collection == null) {
-						collection= new ArrayList();
+						collection= new ArrayList<ICompilationUnit>();
 						projects.put(project, collection);
 					}
 					collection.add(current);
 				}
-				final ASTParser parser= ASTParser.newParser(AST.JLS3);
+				final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 320);
 				try {
-					final Set keySet= projects.keySet();
+					final Set<IJavaProject> keySet= projects.keySet();
 					subMonitor.beginTask("", keySet.size() * 100); //$NON-NLS-1$
 					subMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
-					for (final Iterator iterator= keySet.iterator(); iterator.hasNext();) {
-						project= (IJavaProject) iterator.next();
-						collection= (Collection) projects.get(project);
+					for (final Iterator<IJavaProject> iterator= keySet.iterator(); iterator.hasNext();) {
+						project= iterator.next();
+						collection= projects.get(project);
 						parser.setWorkingCopyOwner(fOwner);
 						parser.setResolveBindings(true);
 						parser.setProject(project);
@@ -1031,8 +1034,9 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 						try {
 							subsubMonitor.beginTask("", collection.size() * 100 + 200); //$NON-NLS-1$
 							subsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
-							parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
+							parser.createASTs(collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
 
+								@Override
 								public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
 									final IProgressMonitor subsubsubMonitor= new SubProgressMonitor(subsubMonitor, 100);
 									try {
@@ -1047,6 +1051,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 									}
 								}
 
+								@Override
 								public final void acceptBinding(final String key, final IBinding binding) {
 									// Do nothing
 								}
@@ -1126,25 +1131,25 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		try {
 			monitor.beginTask("", 300); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
-			final Map firstPass= getReferencingCompilationUnits(subType, new SubProgressMonitor(monitor, 100), status);
-			final Map secondPass= new HashMap();
+			final Map<IJavaProject, Set<SearchResultGroup>> firstPass= getReferencingCompilationUnits(subType, new SubProgressMonitor(monitor, 100), status);
+			final Map<IJavaProject, Set<ICompilationUnit>> secondPass= new HashMap<IJavaProject, Set<ICompilationUnit>>();
 			IJavaProject project= null;
-			Collection collection= null;
+			Collection<SearchResultGroup> collection= null;
 			try {
-				final ASTParser parser= ASTParser.newParser(AST.JLS3);
+				final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 				Object element= null;
 				ICompilationUnit current= null;
 				SearchResultGroup group= null;
 				SearchMatch[] matches= null;
-				final Map groups= new HashMap();
-				for (final Iterator outer= firstPass.keySet().iterator(); outer.hasNext();) {
-					project= (IJavaProject) outer.next();
+				final Map<ICompilationUnit, SearchResultGroup> groups= new HashMap<ICompilationUnit, SearchResultGroup>();
+				for (final Iterator<IJavaProject> outer= firstPass.keySet().iterator(); outer.hasNext();) {
+					project= outer.next();
 					if (level == 3 && !JavaModelUtil.is50OrHigher(project))
 						level= 2;
-					collection= (Collection) firstPass.get(project);
+					collection= firstPass.get(project);
 					if (collection != null) {
-						for (final Iterator inner= collection.iterator(); inner.hasNext();) {
-							group= (SearchResultGroup) inner.next();
+						for (final Iterator<SearchResultGroup> inner= collection.iterator(); inner.hasNext();) {
+							group= inner.next();
 							matches= group.getSearchResults();
 							for (int index= 0; index < matches.length; index++) {
 								element= matches[index].getElement();
@@ -1157,23 +1162,23 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 						}
 					}
 				}
-				Set units= null;
-				final Set processed= new HashSet();
+				Set<ICompilationUnit> units= null;
+				final Set<ICompilationUnit> processed= new HashSet<ICompilationUnit>();
 				if (subUnit != null)
 					processed.add(subUnit);
 				model.beginCreation();
 				IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 120);
 				try {
-					final Set keySet= firstPass.keySet();
+					final Set<IJavaProject> keySet= firstPass.keySet();
 					subMonitor.beginTask("", keySet.size() * 100); //$NON-NLS-1$
 					subMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
-					for (final Iterator outer= keySet.iterator(); outer.hasNext();) {
-						project= (IJavaProject) outer.next();
-						collection= (Collection) firstPass.get(project);
+					for (final Iterator<IJavaProject> outer= keySet.iterator(); outer.hasNext();) {
+						project= outer.next();
+						collection= firstPass.get(project);
 						if (collection != null) {
-							units= new HashSet(collection.size());
-							for (final Iterator inner= collection.iterator(); inner.hasNext();) {
-								group= (SearchResultGroup) inner.next();
+							units= new HashSet<ICompilationUnit>(collection.size());
+							for (final Iterator<SearchResultGroup> inner= collection.iterator(); inner.hasNext();) {
+								group= inner.next();
 								matches= group.getSearchResults();
 								for (int index= 0; index < matches.length; index++) {
 									element= matches[index].getElement();
@@ -1184,16 +1189,16 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 									}
 								}
 							}
-							final List batches= new ArrayList(units);
+							final List<ICompilationUnit> batches= new ArrayList<ICompilationUnit>(units);
 							final int size= batches.size();
 							final int iterations= (size - 1) / SIZE_BATCH + 1;
 							final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 100);
 							try {
 								subsubMonitor.beginTask("", iterations * 100); //$NON-NLS-1$
 								subsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
-								final Map options= RefactoringASTParser.getCompilerOptions(project);
+								final Map<String, String> options= RefactoringASTParser.getCompilerOptions(project);
 								for (int index= 0; index < iterations; index++) {
-									final List iteration= batches.subList(index * SIZE_BATCH, Math.min(size, (index + 1) * SIZE_BATCH));
+									final List<ICompilationUnit> iteration= batches.subList(index * SIZE_BATCH, Math.min(size, (index + 1) * SIZE_BATCH));
 									parser.setWorkingCopyOwner(fOwner);
 									parser.setResolveBindings(true);
 									parser.setProject(project);
@@ -1203,8 +1208,9 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 										final int count= iteration.size();
 										subsubsubMonitor.beginTask("", count * 100); //$NON-NLS-1$
 										subsubsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
-										parser.createASTs((ICompilationUnit[]) iteration.toArray(new ICompilationUnit[count]), new String[0], new ASTRequestor() {
+										parser.createASTs(iteration.toArray(new ICompilationUnit[count]), new String[0], new ASTRequestor() {
 
+											@Override
 											public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
 												if (!processed.contains(unit)) {
 													performFirstPass(creator, secondPass, groups, unit, node, new SubProgressMonitor(subsubsubMonitor, 100));
@@ -1213,6 +1219,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 													subsubsubMonitor.worked(100);
 											}
 
+											@Override
 											public final void acceptBinding(final String key, final IBinding binding) {
 												// Do nothing
 											}
@@ -1234,25 +1241,27 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					performFirstPass(creator, secondPass, groups, subUnit, subNode, new SubProgressMonitor(subMonitor, 20));
 				subMonitor= new SubProgressMonitor(monitor, 100);
 				try {
-					final Set keySet= secondPass.keySet();
+					final Set<IJavaProject> keySet= secondPass.keySet();
 					subMonitor.beginTask("", keySet.size() * 100); //$NON-NLS-1$
 					subMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
-					for (final Iterator iterator= keySet.iterator(); iterator.hasNext();) {
-						project= (IJavaProject) iterator.next();
+					for (final Iterator<IJavaProject> iterator= keySet.iterator(); iterator.hasNext();) {
+						project= iterator.next();
 						if (level == 3 && !JavaModelUtil.is50OrHigher(project))
 							level= 2;
-						collection= (Collection) secondPass.get(project);
-						if (collection != null) {
+						Collection<ICompilationUnit> cuCollection= null;
+						cuCollection= secondPass.get(project);
+						if (cuCollection != null) {
 							parser.setWorkingCopyOwner(fOwner);
 							parser.setResolveBindings(true);
 							parser.setProject(project);
 							parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 							final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 100);
 							try {
-								subsubMonitor.beginTask("", collection.size() * 100); //$NON-NLS-1$
+								subsubMonitor.beginTask("", cuCollection.size() * 100); //$NON-NLS-1$
 								subsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
-								parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
+								parser.createASTs(cuCollection.toArray(new ICompilationUnit[cuCollection.size()]), new String[0], new ASTRequestor() {
 
+									@Override
 									public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
 										if (!processed.contains(unit))
 											performSecondPass(creator, unit, node, new SubProgressMonitor(subsubMonitor, 100));
@@ -1260,6 +1269,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 											subsubMonitor.worked(100);
 									}
 
+									@Override
 									public final void acceptBinding(final String key, final IBinding binding) {
 										// Do nothing
 									}
