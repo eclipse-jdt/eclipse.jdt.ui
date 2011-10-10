@@ -15,6 +15,7 @@ buildnotes*.html
 */doc_zip/*
 */scripts/*
 */icons/*
+.git/*
 
 com.oti.zrh.contextids/*
 com.oti.zrh.eclipse.tools/*
@@ -30,7 +31,7 @@ org.eclipse.pde.doc.user/buildDoc.xml
 
 org.eclipse.platform.doc.isv/buildDoc.xml
 org.eclipse.jdt.doc.isv/buildDoc.xml
-org.eclipse.jdt.core/*
+
 org.eclipse.core.resources/build-user.xml
 org.eclipse.core.tests.resources/test.xml
 org.eclipse.tomcat/conf/*
@@ -38,9 +39,12 @@ org.eclipse.ui/plugin.xml
 org.eclipse.platform.source/*
 org.apache.ant/*
 org.eclipse.ant.core/*
+org.eclipse.ant.tests.core/*
+org.eclipse.ant.tests.ui/*
 org.eclipse.ant.ui/*
 org.eclipse.help.webapp/*
 org.eclipse.pde.ui/*
+org.eclipse.pde.ui.templates/templates_3.0/help/toc.xml
 org.eclipse.pde.build/*
 org.eclipse.releng.tools/*
 org.eclipse.sdk.tests-feature/*
@@ -76,6 +80,11 @@ org.eclipse.help/*
 org.eclipse.help.appserver/*
 org.eclipse.help.base/*
 org.eclipse.help.ui/*
+org.eclipse.jdt.compiler.tool.tests/*
+org.eclipse.jdt.core.tests.builder/*
+org.eclipse.jdt.core.tests.compiler/*
+org.eclipse.jdt.core.tests.model/*
+org.eclipse.jdt.core.tests.performance/*
 org.eclipse.jdt.debug/*
 org.eclipse.jdt.debug.ui/*
 org.eclipse.jdt.launching/*
@@ -93,6 +102,7 @@ org.eclipse.swt.tools/*
 org.eclipse.swt.gtk.linux.x86/*
 org.eclipse.swt.win32.win32.x86/*
 org.eclipse.team.core/*
+org.eclipse.team.tests.cvs.core/*
 org.eclipse.team.ui/*
 org.eclipse.ua.tests/*
 org.eclipse.ui.cheatsheets/*
@@ -110,6 +120,7 @@ org.eclipse.ui.workbench.compatibility/*
 org.eclipse.update.configurator/*
 org.eclipse.update.core/*
 org.eclipse.update.core.linux/*
+org.eclipse.update.tests.core/*
 org.eclipse.update.ui/*
 
 com.ibm.icu/*
@@ -139,3 +150,18 @@ www*jdt-ui/*
 Text*Team*Documents/*
 Eclipse*JDT*Builds/*
 T*JDT-UI*Team*Documents/*
+JDT-UI*Team*Documents/*
+
+org.eclipse.update.examples/*
+org.eclipse.jdt.apt.pluggable.tests/*
+org.eclipse.jdt.apt.tests/*
+org.eclipse.jdt.compiler.apt.tests/*
+org.eclipse.pde.ds.tests/*
+org.eclipse.pde.ui.templates/*
+org.eclipse.ui.externaltools/*
+org.eclipse.core.tests.net/*
+org.eclipse.team.tests.core/*
+org.eclipse.jface.tests.databinding/*
+org.eclipse.ui.tests.browser/*
+org.eclipse.ui.tests.forms/*
+org.eclipse.ui.tests.performance/*
