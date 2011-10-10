@@ -138,6 +138,8 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private static final String METHODNAME_GETCLASS= "getClass"; //$NON-NLS-1$
 
 	private static final String METHODNAME_EQUALS= "equals"; //$NON-NLS-1$
+	
+	private static final String METHODNAME_DEEP_EQUALS= "deepEquals"; //$NON-NLS-1$
 
 	private static final String METHODNAME_HASH_CODE= "hashCode"; //$NON-NLS-1$
 
@@ -853,12 +855,20 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		}
 
 		for (int i= 0; i < fFields.length; i++) {
-			if (fFields[i].getType().isPrimitive() || fFields[i].getType().isEnum())
-				body.statements().add(createSimpleComparison(fFields[i]));
-			else if (fFields[i].getType().isArray())
-				body.statements().add(createArrayComparison(fFields[i].getName()));
-			else
-				body.statements().add(createQualifiedComparison(fFields[i].getName()));
+			IVariableBinding field= fFields[i];
+			ITypeBinding type= field.getType();
+			if (type.isPrimitive() || type.isEnum())
+				body.statements().add(createSimpleComparison(field));
+			else if (type.isArray()) {
+				IJavaProject project= fUnit.getJavaElement().getJavaProject();
+				if (type.getDimensions() > 1 && JavaModelUtil.is50OrHigher(project)) {
+					body.statements().add(createMultiArrayComparison(field.getName()));
+				} else {
+					body.statements().add(createArrayComparison(field.getName()));
+				}
+			} else
+				body.statements().add(createQualifiedComparison(field.getName()));
+
 		}
 
 		// the last return true:
@@ -920,6 +930,24 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private Statement createArrayComparison(String name) {
 		MethodInvocation invoc= fAst.newMethodInvocation();
 		invoc.setName(fAst.newSimpleName(METHODNAME_EQUALS));
+		invoc.setExpression(getQualifiedName(JAVA_UTIL_ARRAYS));
+		invoc.arguments().add(getThisAccessForEquals(name));
+		invoc.arguments().add(getOtherAccess(name));
+
+		PrefixExpression pe= fAst.newPrefixExpression();
+		pe.setOperator(PrefixExpression.Operator.NOT);
+		pe.setOperand(invoc);
+
+		IfStatement ifSt= fAst.newIfStatement();
+		ifSt.setExpression(pe);
+		ifSt.setThenStatement(getThenStatement(getReturnFalse()));
+
+		return ifSt;
+	}
+	
+	private Statement createMultiArrayComparison(String name) {
+		MethodInvocation invoc= fAst.newMethodInvocation();
+		invoc.setName(fAst.newSimpleName(METHODNAME_DEEP_EQUALS));
 		invoc.setExpression(getQualifiedName(JAVA_UTIL_ARRAYS));
 		invoc.arguments().add(getThisAccessForEquals(name));
 		invoc.arguments().add(getOtherAccess(name));

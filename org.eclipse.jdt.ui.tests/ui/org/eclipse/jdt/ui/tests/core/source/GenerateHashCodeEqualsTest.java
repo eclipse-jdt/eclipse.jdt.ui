@@ -1421,5 +1421,76 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	
 		compareSource(expected, a.getSource());
 	}
+	
+	/**
+	 * Test that generated equals() should use Arrays.deepEquals() instead of Arrays.equals() for projects with compliance >= 1.5
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=304176
+	 *
+	 * @throws Exception rarely
+	 */
+	public void testArraysDeepEqualsIn15() throws Exception {
+		IJavaProject javaProject= fPackageP.getJavaProject();
+		Map oldOptions= javaProject.getOptions(false);
+		Map newOptions= new HashMap(oldOptions);
+		JavaModelUtil.setComplianceOptions(newOptions, JavaCore.VERSION_1_5);
+		javaProject.setOptions(newOptions);
+		try {
+			ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+					"\r\n" +
+					"public class A {\r\n" +
+					"\r\n" +
+					"	 int[][][] a = new int[][][] {{null}};\r\n" +
+					"	 int[][][] b = new int[][][] {{null}};\r\n" +
+					"\r\n" +
+					"}\r\n" +
+					"", true, null);
 
+			IField[] fields= getFields(a.getType("A"), new String[] {"a", "b"});
+			runOperation(a.getType("A"), fields, false, false);
+
+			String expected= "package p;\r\n" +
+					"\r\n" +
+					"import java.util.Arrays;\r\n" +
+					"\r\n" +
+					"public class A {\r\n" +
+					"\r\n" +
+					"	 int[][][] a = new int[][][] {{null}};\r\n" +
+					"	 int[][][] b = new int[][][] {{null}};\r\n" +
+					"	/* (non-Javadoc)\r\n" +
+					"	 * @see java.lang.Object#hashCode()\r\n" +
+					"	 */\r\n" +
+					"	@Override\r\n" +
+					"	public int hashCode() {\r\n" +
+					"		final int prime = 31;\r\n" +
+					"		int result = 1;\r\n" +
+					"		result = prime * result + Arrays.hashCode(a);\r\n" +
+					"		result = prime * result + Arrays.hashCode(b);\r\n" +
+					"		return result;\r\n" +
+					"	}\r\n" +
+					"	/* (non-Javadoc)\r\n" +
+					"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" +
+					"	 */\r\n" +
+					"	@Override\r\n" +
+					"	public boolean equals(Object obj) {\r\n" +
+					"		if (this == obj)\r\n" +
+					"			return true;\r\n" +
+					"		if (obj == null)\r\n" +
+					"			return false;\r\n" +
+					"		if (getClass() != obj.getClass())\r\n" +
+					"			return false;\r\n" +
+					"		A other = (A) obj;\r\n" +
+					"		if (!Arrays.deepEquals(a, other.a))\r\n" +
+					"			return false;\r\n" +
+					"		if (!Arrays.deepEquals(b, other.b))\r\n" +
+					"			return false;\r\n" +
+					"		return true;\r\n" +
+					"	}\r\n" +
+					"\r\n" +
+					"}" +
+					"";
+			compareSource(expected, a.getSource());
+		} finally {
+			javaProject.setOptions(oldOptions);
+		}
+	}
 }
