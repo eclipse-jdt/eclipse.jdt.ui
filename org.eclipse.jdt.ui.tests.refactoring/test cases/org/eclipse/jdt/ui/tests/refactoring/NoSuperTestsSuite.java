@@ -29,7 +29,7 @@ public class NoSuperTestsSuite extends TestSuite {
 	
 	private static final Class<? extends Test> WARNING_TEST_CLASS= warning(null).getClass();
 
-	public NoSuperTestsSuite(Class<? extends Test> theClass) {
+	public NoSuperTestsSuite(Class<? extends TestCase> theClass) {
 		super(theClass);
 	}
 	
