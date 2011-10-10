@@ -60,7 +60,7 @@ public class CoreTests extends TestCase {
 		suite.addTest(StringsTest.suite());
 		suite.addTest(IndentManipulationTest.suite());
 		suite.addTest(SelectionHistoryTest.suite());
-		suite.addTest(ASTProviderTest.suite());
+//		suite.addTest(ASTProviderTest.suite()); // tests a fix in AbstractReconciler which is not in R3_6_maintenance_Java7, see bug 339022 comment 5
 
 		return new ProjectTestSetup(suite);
 	}
