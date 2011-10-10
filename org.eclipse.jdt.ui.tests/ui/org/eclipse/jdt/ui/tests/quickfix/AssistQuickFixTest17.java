@@ -495,6 +495,59 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CONVERT_TO_SEPARATE_CATCH_BLOCKS);
 	}
 
+	public void testUnrollMultiCatch6() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=350285#c12
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.reflect.InvocationTargetException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            String.class.getConstructor().newInstance();\n");
+		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
+		buf.append("                | IllegalArgumentException | InvocationTargetException\n");
+		buf.append("                | NoSuchMethodException | SecurityException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("catch");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.reflect.InvocationTargetException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            String.class.getConstructor().newInstance();\n");
+		buf.append("        } catch (InstantiationException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        } catch (IllegalAccessException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        } catch (IllegalArgumentException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        } catch (InvocationTargetException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        } catch (NoSuchMethodException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        } catch (SecurityException e) {\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
 	public void testReplaceMultiCatchClauseWithThrows1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
