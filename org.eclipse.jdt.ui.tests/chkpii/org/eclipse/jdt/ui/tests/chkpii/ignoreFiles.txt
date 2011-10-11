@@ -80,11 +80,7 @@ org.eclipse.help/*
 org.eclipse.help.appserver/*
 org.eclipse.help.base/*
 org.eclipse.help.ui/*
-org.eclipse.jdt.compiler.tool.tests/*
-org.eclipse.jdt.core.tests.builder/*
-org.eclipse.jdt.core.tests.compiler/*
-org.eclipse.jdt.core.tests.model/*
-org.eclipse.jdt.core.tests.performance/*
+org.eclipse.jdt.core.tests.model/workspace/*
 org.eclipse.jdt.debug/*
 org.eclipse.jdt.debug.ui/*
 org.eclipse.jdt.launching/*
