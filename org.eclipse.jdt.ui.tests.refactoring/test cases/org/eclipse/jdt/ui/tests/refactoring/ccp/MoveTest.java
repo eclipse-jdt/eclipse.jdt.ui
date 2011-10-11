@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -564,6 +564,65 @@ public class MoveTest extends RefactoringTest {
 		} finally{
 			performDummySearch();
 			file.delete(true, false, null);
+		}
+	}
+
+	public void testDestination_no_fileToParentDefaultPackage() throws Exception {
+		IPackageFragment defaultPackage= getRoot().getPackageFragment("");
+		assertTrue(defaultPackage.exists());
+		IFolder superFolder= (IFolder)defaultPackage.getResource();
+		IFile file= superFolder.getFile("a.txt");
+		file.create(getStream("123"), true, null);
+
+		try {
+			IJavaElement[] javaElements= {};
+			IResource[] resources= { file };
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			Object destination= defaultPackage;
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			file.delete(true, false, null);
+		}
+	}
+
+	public void testDestination_no_fileToParentDefaultPackage2() throws Exception {
+		IPackageFragment defaultPackage= getRoot().getPackageFragment("");
+		assertTrue(defaultPackage.exists());
+		ICompilationUnit cu= defaultPackage.createCompilationUnit("A.java", "class A{}", false, new NullProgressMonitor());
+		IFolder superFolder= (IFolder)defaultPackage.getResource();
+		IFile file= superFolder.getFile("a.txt");
+		file.create(getStream("123"), true, null);
+
+		try {
+			IJavaElement[] javaElements= {};
+			IResource[] resources= { file };
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			Object destination= cu;
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			file.delete(true, false, null);
+			safeDelete(cu);
+		}
+	}
+
+	public void testDestination_no_fileToParentSourceFolder2() throws Exception {
+		IPackageFragmentRoot root= getRoot();
+		assertTrue(root.exists());
+		IFolder superFolder= (IFolder)root.getPackageFragment("").getResource();
+		IFile file= superFolder.getFile("a.txt");
+		file.create(getStream("123"), true, null);
+
+		try {
+			IJavaElement[] javaElements= {};
+			IResource[] resources= { file };
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			Object destination= root;
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			file.delete(true, false, null);			
 		}
 	}
 

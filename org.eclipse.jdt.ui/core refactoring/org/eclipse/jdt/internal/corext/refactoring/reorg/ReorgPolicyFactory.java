@@ -1648,10 +1648,13 @@ public final class ReorgPolicyFactory {
 			if (destination.equals(commonParent))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_parent);
 			IContainer destinationAsContainer= getDestinationAsContainer();
-			if (destinationAsContainer != null && destinationAsContainer.equals(commonParent))
+			if (destinationAsContainer != null && (destinationAsContainer.equals(commonParent) || commonParent instanceof IPackageFragmentRoot
+					&& destinationAsContainer.equals(((IPackageFragmentRoot) commonParent).getResource())))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_parent);
 			IPackageFragment destinationAsPackage= getDestinationAsPackageFragment();
-			if (destinationAsPackage != null && destinationAsPackage.equals(commonParent))
+
+			if (destinationAsPackage != null && (destinationAsPackage.equals(commonParent) || commonParent instanceof IPackageFragment
+					&& (destinationAsPackage.equals(((IPackageFragment) commonParent).getResource()))))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_parent);
 
 			if (cannotUpdateReferencesForDestination())
