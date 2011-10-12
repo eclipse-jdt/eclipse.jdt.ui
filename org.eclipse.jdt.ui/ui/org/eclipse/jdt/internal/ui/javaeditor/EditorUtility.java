@@ -32,6 +32,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.content.IContentDescription;
+import org.eclipse.core.runtime.content.IContentType;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -53,7 +55,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
 
-import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -160,8 +161,12 @@ public class EditorUtility {
 	 */
 	public static IEditorPart openInEditor(Object inputElement, boolean activate) throws PartInitException {
 
-		if (inputElement instanceof IFile)
-			return openInEditor((IFile) inputElement, activate);
+		if (inputElement instanceof IFile) {
+			IFile file= (IFile) inputElement;
+			if (!isClassFile(file))
+				return openInEditor(file, activate);
+			inputElement= JavaCore.createClassFileFrom(file);
+		}
 
 		IEditorPart editor= findEditor(inputElement, activate);
 		if (editor != null)
@@ -405,13 +410,24 @@ public class EditorUtility {
 
 	public static String getEditorID(IEditorInput input) throws PartInitException {
 		Assert.isNotNull(input);
-		IEditorDescriptor editorDescriptor;
 		if (input instanceof IFileEditorInput)
-			editorDescriptor= IDE.getEditorDescriptor(((IFileEditorInput)input).getFile());
-		else {
-			editorDescriptor= IDE.getEditorDescriptor(input.getName());
+			return IDE.getEditorDescriptor(((IFileEditorInput)input).getFile()).getId();
+
+		String name= input.getName();
+
+		if (input instanceof IClassFileEditorInput) {
+			boolean hasSource;
+			try {
+				hasSource= ((IClassFileEditorInput) input).getClassFile().getSourceRange() != null;
+			} catch (JavaModelException e) {
+				hasSource= false;
+			}
+
+			if (!hasSource)
+				name= "*.class without source"; //$NON-NLS-1$
 		}
-		return editorDescriptor.getId();
+
+		return IDE.getEditorDescriptor(name).getId();
 	}
 
 	/**
@@ -626,6 +642,22 @@ public class EditorUtility {
 		return false;
 	}
 
+	private static boolean isClassFile(IFile file) {
+		IContentDescription contentDescription;
+		try {
+			contentDescription= file.getContentDescription();
+		} catch (CoreException e) {
+			contentDescription= null;
+		}
+		if (contentDescription == null)
+			return false;
+
+		IContentType contentType= contentDescription.getContentType();
+		if (contentType == null)
+			return false;
+
+		return "org.eclipse.jdt.core.javaClass".equals(contentType.getId()); //$NON-NLS-1$
+	}
 
 	/**
 	 * Returns the editors to save before performing global Java-related

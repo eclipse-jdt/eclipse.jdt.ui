@@ -11,24 +11,36 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPathEditorInput;
 import org.eclipse.ui.IPersistableElement;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 /**
  * Class file considered as editor input.
  */
-public class InternalClassFileEditorInput implements IClassFileEditorInput, IPersistableElement {
+public class InternalClassFileEditorInput implements IClassFileEditorInput, IPersistableElement, IPathEditorInput {
 
 	private IClassFile fClassFile;
+
+	private IPath fPath;
 
 	public InternalClassFileEditorInput(IClassFile classFile) {
 		fClassFile= classFile;
@@ -128,6 +140,40 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	public String getFactoryId() {
 		return ClassFileEditorInputFactory.ID;
 	}
+
+	/*
+	 * @see org.eclipse.ui.IPathEditorInput#getPath()
+	 * @since 3.7
+	 */
+	public IPath getPath() {
+		if (fPath == null)
+			fPath= writeToTempFile(fClassFile);
+		return fPath;
+	}
+
+	private static IPath writeToTempFile(IClassFile classFile) {
+		FileOutputStream writer= null;
+		try {
+			File file= File.createTempFile(classFile.getElementName(), ".class"); //$NON-NLS-1$
+			byte[] bytes= classFile.getBytes();
+			writer= new FileOutputStream(file);
+			writer.write(bytes);
+			return new Path(file.toString());
+		} catch (IOException e) {
+			JavaPlugin.log(e);
+		} catch (CoreException e) {
+			JavaPlugin.log(e.getStatus());
+		} finally {
+			if (writer != null)
+				try {
+					writer.close();
+				} catch (IOException e) {
+					JavaPlugin.log(e);
+				}
+		}
+		throw new IllegalArgumentException("Could not create temporary file.");
+	}
+
 }
 
 

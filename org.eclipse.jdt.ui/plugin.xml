@@ -974,6 +974,16 @@
             /> 
       </editor>
       <editor
+            name="%ClassFileViewerName"
+            default="false"
+            icon="$nl$/icons/full/obj16/classf_obj.gif"
+            contributorClass="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorActionContributor"
+            class="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor"
+            symbolicFontName="org.eclipse.jdt.ui.editors.textfont"
+            id="org.eclipse.jdt.ui.ClassFileEditorNoSource"
+            filenames="*.class without source">
+      </editor>
+      <editor
             name="%PropertiesFileEditorName"
             icon="$nl$/icons/full/obj16/file_obj.gif"
             contributorClass="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditorActionContributor"
