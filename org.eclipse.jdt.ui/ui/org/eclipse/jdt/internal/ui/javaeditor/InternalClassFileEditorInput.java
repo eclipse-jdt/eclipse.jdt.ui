@@ -171,7 +171,7 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 					JavaPlugin.log(e);
 				}
 		}
-		throw new IllegalArgumentException("Could not create temporary file.");
+		throw new IllegalArgumentException("Could not create temporary file."); //$NON-NLS-1$
 	}
 
 }

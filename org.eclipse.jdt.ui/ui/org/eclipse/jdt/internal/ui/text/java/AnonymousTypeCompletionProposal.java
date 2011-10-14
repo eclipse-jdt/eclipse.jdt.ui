@@ -388,7 +388,6 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		IRegion lineInfo= document.getLineInformationOfOffset(getReplacementOffset());
 		int indent= Strings.computeIndentUnits(document.get(lineInfo.getOffset(), lineInfo.getLength()), project);
 
-		@SuppressWarnings("unchecked")
 		Map<String, String> options= project != null ? project.getOptions(true) : JavaCore.getOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, DefaultCodeFormatterConstants.TRUE);
 		String replacementString= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, buf.toString(), 0, lineDelim, options);
