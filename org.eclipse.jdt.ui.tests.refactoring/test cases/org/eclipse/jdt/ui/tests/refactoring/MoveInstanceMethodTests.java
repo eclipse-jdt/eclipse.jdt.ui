@@ -445,6 +445,21 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		helper1(new String[] { "p.A", "p.B", "p.Outer" }, "p.A", 6, 17, 6, 20, PARAMETER, "b", true, true);
 	}
 	
+	// Test problem with enum (bug 339980)
+	public void test43() throws Exception {
+		helper1(new String[] { "p.A" }, "p.A", 10, 10, 10, 20, PARAMETER, "fooBar", true, true);
+	}
+
+	// Test problem with enum (bug 339980)
+	public void test44() throws Exception {
+		helper1(new String[] { "p.A", "p.MyEnum" }, "p.A", 8, 10, 8, 20, PARAMETER, "fooBar", true, true);
+	}
+
+	// Test problem with enum (bug 339980)
+	public void test45() throws Exception {
+		helper1(new String[] { "p.A" }, "p.A", 8, 10, 8, 20, PARAMETER, "fooBar", true, true);
+	}
+
 	// Move mA1 to field fB, do not inline delegator
 	public void test3() throws Exception {
 		helper1(new String[] { "p1.A", "p2.B", "p3.C"}, "p1.A", 9, 17, 9, 20, FIELD, "fB", false, false);
