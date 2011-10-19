@@ -28,8 +28,6 @@ import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
  * implemented.
  * </p>
  *
- * @see org.eclipse.jdt.core.refactoring.participants.IRefactoringProcessorIds
- * 
  * @since 3.0
  *
  * @noimplement This interface is not intended to be implemented by clients.
