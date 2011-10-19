@@ -84,7 +84,7 @@ public class TextFieldNavigationHandler {
 	private abstract static class WorkaroundNavigable extends Navigable {
 		/* workarounds for:
 		 * - bug 103630: Add API: Combo#getCaretPosition()
-		 * - bug 106024: Text#setSelection(int, int) does not handle start > end with SWT.SINGLE
+		 * - bug 106024: Combo and Text#setSelection(int, int) does not handle start > end with SWT.SINGLE
 		 */
 		Point fLastSelection;
 		int fCaretPosition;
@@ -226,7 +226,7 @@ public class TextFieldNavigationHandler {
 
 		public ComboNavigable(Combo combo) {
 			fCombo= combo;
-			// workaround for bug 103630:
+			// workaround for bug 103630 and bug 106024:
 			fLastSelection= getSelection();
 			fCaretPosition= fLastSelection.y;
 			fCombo.addKeyListener(new KeyAdapter() {
@@ -267,7 +267,7 @@ public class TextFieldNavigationHandler {
 		public int getCaretPosition() {
 			selectionChanged();
 			return fCaretPosition;
-//			return fCombo.getCaretPosition(); // not available: bug 103630
+//			return fCombo.getCaretPosition(); // cannot be used as this does not return the logical caret position we need
 		}
 
 		@Override
