@@ -58,6 +58,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_PB_INCOMPLETE_BUILDPATH= getJDTCoreKey(JavaCore.CORE_INCOMPLETE_CLASSPATH);
 	private static final Key PREF_PB_CIRCULAR_BUILDPATH= getJDTCoreKey(JavaCore.CORE_CIRCULAR_CLASSPATH);
 	private static final Key PREF_PB_INCOMPATIBLE_JDK_LEVEL= getJDTCoreKey(JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL);
+	private static final Key PREF_PB_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE= getJDTCoreKey(JavaCore.CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE);
 	private static final Key PREF_PB_DUPLICATE_RESOURCE= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE);
 	private static final Key PREF_RECREATE_MODIFIED_CLASS_FILES= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_RECREATE_MODIFIED_CLASS_FILES_IN_OUTPUT_FOLDER);
 
@@ -89,8 +90,8 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		Key[] keys= new Key[] {
 				PREF_PB_MAX_PER_UNIT, PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_INCOMPLETE_BUILDPATH, PREF_PB_CIRCULAR_BUILDPATH,
 				PREF_BUILD_CLEAN_OUTPUT_FOLDER, PREF_PB_DUPLICATE_RESOURCE,
-				PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_ENABLE_EXCLUSION_PATTERNS, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS, PREF_RECREATE_MODIFIED_CLASS_FILES,
-				PREF_PB_STRICTLY_COMPATIBLE_JRE_NOT_AVAILABLE
+				PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_PB_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, PREF_ENABLE_EXCLUSION_PATTERNS, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS, 
+				PREF_RECREATE_MODIFIED_CLASS_FILES,	PREF_PB_STRICTLY_COMPATIBLE_JRE_NOT_AVAILABLE
 			};
 		return keys;
 	}
@@ -192,6 +193,9 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_check_prereq_binary_level_label;
 		addComboBox(othersComposite, label, PREF_PB_INCOMPATIBLE_JDK_LEVEL, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		
+		label = PreferencesMessages.JavaBuildConfigurationBlock_pb_output_overlapping_with_source_label;
+		addComboBox(othersComposite, label, PREF_PB_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_strictly_compatible_jre_not_available_label;
 		addComboBox(othersComposite, label, PREF_PB_STRICTLY_COMPATIBLE_JRE_NOT_AVAILABLE, errorWarningIgnore, errorWarningIgnoreLabels, 0);

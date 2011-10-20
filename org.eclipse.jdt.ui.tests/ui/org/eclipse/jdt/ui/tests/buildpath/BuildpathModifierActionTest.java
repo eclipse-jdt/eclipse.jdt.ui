@@ -316,6 +316,10 @@ public class BuildpathModifierActionTest extends TestCase {
 
 	public void testEditOutputFolder02RemoveProjectAsSourceFolder() throws Exception {
 		fJavaProject= createProject(null);
+
+		// Use the old behavior in order to test the fallback code. Set to ERROR since 3.8.
+		fJavaProject.setOption(JavaCore.CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, JavaCore.IGNORE);
+
 		JavaProjectHelper.addSourceContainer(fJavaProject, null, new IPath[] {new Path("src/")});
 		IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 
@@ -413,6 +417,10 @@ public class BuildpathModifierActionTest extends TestCase {
 
 	public void testEditOutputFolder04RemoveProjectAndExcludeOutput() throws Exception {
 		fJavaProject= createProject(null);
+
+		// Use the old behavior in order to test the fallback code. Set to ERROR since 3.8.
+		fJavaProject.setOption(JavaCore.CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, JavaCore.IGNORE);
+
 		JavaProjectHelper.addSourceContainer(fJavaProject, null, new IPath[] {new Path("src1/"), new Path("src2/")});
 		IPackageFragmentRoot src1= JavaProjectHelper.addSourceContainer(fJavaProject, "src1");
 		IPackageFragmentRoot src2= JavaProjectHelper.addSourceContainer(fJavaProject, "src2");
@@ -694,6 +702,10 @@ public class BuildpathModifierActionTest extends TestCase {
 
 	public void testRemoveFromBuildpathBug153299Src() throws Exception {
 		fJavaProject= createProject(null);
+
+		// Use the old behavior in order to test the fallback code. Set to ERROR since 3.8.
+		fJavaProject.setOption(JavaCore.CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, JavaCore.IGNORE);
+
 		IPackageFragmentRoot p01= JavaProjectHelper.addSourceContainer(fJavaProject, null, new IPath[] {new Path("src1/")});
 		JavaProjectHelper.addSourceContainer(fJavaProject, "src1");
 
