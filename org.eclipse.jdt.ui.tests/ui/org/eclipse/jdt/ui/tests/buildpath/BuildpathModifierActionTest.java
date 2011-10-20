@@ -451,6 +451,7 @@ public class BuildpathModifierActionTest extends TestCase {
 
 	public void testEditOutputFolder05CannotOutputToSource() throws Exception {
 		fJavaProject= createProject(DEFAULT_OUTPUT_FOLDER_NAME);
+		fJavaProject.setOption(JavaCore.CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, JavaCore.ERROR);
 		IPackageFragmentRoot src1= JavaProjectHelper.addSourceContainer(fJavaProject, "src1");
 		JavaProjectHelper.addSourceContainer(fJavaProject, "src2");
 

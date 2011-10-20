@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,6 +108,8 @@ public class OptionsConfigurationBlockTest extends TestCase {
 				
 				JavaCore.CODEASSIST_DISCOURAGED_REFERENCE_CHECK, // is on the Type Filters page now, see https://bugs.eclipse.org/218487
 				JavaCore.CODEASSIST_FORBIDDEN_REFERENCE_CHECK,   // is on the Type Filters page now, see https://bugs.eclipse.org/218487
+
+				JavaCore.CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE // UI was not backported
 		}));
 	}
 
