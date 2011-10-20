@@ -10,17 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.ImageRegistry;
 
 import org.eclipse.jface.text.source.Annotation;
-
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.texteditor.IAnnotationImageProvider;
 
@@ -45,8 +39,6 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 
 	private static Image fgQuickFixImage;
 	private static Image fgQuickFixErrorImage;
-	private static ImageRegistry fgImageRegistry;
-
 	private boolean fShowQuickFixIcon;
 	private int fCachedImageType;
 	private Image fCachedImage;
@@ -63,7 +55,7 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 		if (annotation instanceof IJavaAnnotation) {
 			IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
 			int imageType= getImageType(javaAnnotation);
-			return getImage(javaAnnotation, imageType, Display.getCurrent());
+			return getImage(javaAnnotation, imageType);
 		}
 		return null;
 	}
@@ -101,12 +93,6 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 		return fgQuickFixErrorImage;
 	}
 
-	private ImageRegistry getImageRegistry(Display display) {
-		if (fgImageRegistry == null)
-			fgImageRegistry= new ImageRegistry(display);
-		return fgImageRegistry;
-	}
-
 	private int getImageType(IJavaAnnotation annotation) {
 		int imageType= NO_IMAGE;
 		if (annotation.hasOverlay())
@@ -120,7 +106,7 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 		return imageType;
 	}
 
-	private Image getImage(IJavaAnnotation annotation, int imageType, Display display) {
+	private Image getImage(IJavaAnnotation annotation, int imageType) {
 		if ((imageType == QUICKFIX_IMAGE || imageType == QUICKFIX_ERROR_IMAGE) && fCachedImageType == imageType)
 			return fCachedImage;
 
@@ -142,24 +128,13 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 				fCachedImage= image;
 				break;
 			case GRAY_IMAGE: {
-				ISharedImages sharedImages= PlatformUI.getWorkbench().getSharedImages();
 				String annotationType= annotation.getType();
 				if (JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotationType)) {
-					image= sharedImages.getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
+					image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ERROR_ALT);
 				} else if (JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(annotationType)) {
-					image= sharedImages.getImage(ISharedImages.IMG_OBJS_WARN_TSK);
+					image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_WARNING_ALT);
 				} else if (JavaMarkerAnnotation.INFO_ANNOTATION_TYPE.equals(annotationType)) {
-					image= sharedImages.getImage(ISharedImages.IMG_OBJS_INFO_TSK);
-				}
-				if (image != null) {
-					ImageRegistry registry= getImageRegistry(display);
-					String key= Integer.toString(image.hashCode());
-					Image grayImage= registry.get(key);
-					if (grayImage == null) {
-						grayImage= new Image(display, image, SWT.IMAGE_DISABLE);
-						registry.put(key, grayImage);
-					}
-					image= grayImage;
+					image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INFO_ALT);
 				}
 				fCachedImageType= -1;
 				break;

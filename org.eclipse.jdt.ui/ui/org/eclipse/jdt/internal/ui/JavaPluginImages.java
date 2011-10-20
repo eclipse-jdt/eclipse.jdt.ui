@@ -125,6 +125,9 @@ public class JavaPluginImages {
 
 	public static final String IMG_OBJS_ENV_VAR= NAME_PREFIX + "envvar_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_OBJS_JAVA_MODEL= NAME_PREFIX + "java_model_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ERROR_ALT= NAME_PREFIX + "error_alt_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_WARNING_ALT= NAME_PREFIX + "warning_alt_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INFO_ALT= NAME_PREFIX + "info_alt_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_UNKNOWN= NAME_PREFIX + "unknown_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_LOCAL_VARIABLE= NAME_PREFIX + "localvariable_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_PROJECT_SETTINGS= NAME_PREFIX + "settings_obj.gif"; //$NON-NLS-1$
@@ -469,6 +472,9 @@ public class JavaPluginImages {
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_ADD);
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_CAST);
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_MULTI_FIX);
+		createManagedFromKey(T_OBJ, IMG_OBJS_ERROR_ALT);
+		createManagedFromKey(T_OBJ, IMG_OBJS_WARNING_ALT);
+		createManagedFromKey(T_OBJ, IMG_OBJS_INFO_ALT);
 	}
 
 	private static final class CachedImageDescriptor extends ImageDescriptor {
