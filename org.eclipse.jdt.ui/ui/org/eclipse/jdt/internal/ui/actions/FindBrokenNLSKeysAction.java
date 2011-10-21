@@ -443,6 +443,11 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	}
 
 	private SearchPatternData tryIfPropertyFileSelected(IFile file) {
+		IType accessorType= getAccessorType(file);
+		return (accessorType != null) ? new SearchPatternData(accessorType, file) : null;
+	}
+
+	public static IType getAccessorType(IFile file) {
 		if (!"properties".equalsIgnoreCase(file.getFileExtension())) //$NON-NLS-1$
 			return null;
 
@@ -475,7 +480,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 							String resourceName= resourceBundleName + NLSRefactoring.PROPERTY_FILE_EXT;
 							String name= file.getName();
 							if (resourceName.endsWith(name)) {
-								return new SearchPatternData(type, file);
+								return type;
 							}
 						}
 					}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,7 +64,8 @@ public class EscapeBackslashCompletionProposal implements ICompletionProposal {
 	}
 
 	public String getAdditionalProposalInfo() {
-		return fProposalText;
+		//the proposal info is not HTML
+		return "<pre>" + fProposalText + "</pre>"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public String getDisplayString() {

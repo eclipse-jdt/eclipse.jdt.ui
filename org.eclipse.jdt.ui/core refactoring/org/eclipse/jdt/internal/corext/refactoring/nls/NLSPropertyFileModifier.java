@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -75,6 +77,25 @@ public class NLSPropertyFileModifier {
 
 		addChanges(textChange, nlsSubstitutions);
 
+		return textChange;
+	}
+
+	public static Change removeKeys(IPath propertyFilePath, List<String> keys) throws CoreException {
+
+		String name= Messages.format(NLSMessages.NLSPropertyFileModifier_remove_from_property_file, BasicElementLabels.getPathLabel(propertyFilePath, false));
+		TextChange textChange= new TextFileChange(name, getPropertyFile(propertyFilePath));
+		textChange.setTextType("properties"); //$NON-NLS-1$
+
+		PropertyFileDocumentModel model= new PropertyFileDocumentModel(textChange.getCurrentDocument(new NullProgressMonitor()));
+
+		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
+			String key= iterator.next();
+			TextEdit edit= model.remove(key);
+			if (edit != null) {
+				TextChangeCompatibility.addTextEdit(textChange, Messages.format(NLSMessages.NLSPropertyFileModifier_remove_entry, BasicElementLabels.getJavaElementName(key)), edit);
+			}
+
+		}
 		return textChange;
 	}
 

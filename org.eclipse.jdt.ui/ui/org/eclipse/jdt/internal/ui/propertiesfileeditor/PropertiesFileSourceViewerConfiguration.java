@@ -389,7 +389,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	@Override
 	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
 		if (getEditor() != null) {
-			PropertiesCorrectionAssistant assistant= new PropertiesCorrectionAssistant();
+			PropertiesCorrectionAssistant assistant= new PropertiesCorrectionAssistant(getEditor());
 			assistant.setRestoreCompletionProposalSize(JavaPlugin.getDefault().getDialogSettingsSection("quick_assist_proposal_size")); //$NON-NLS-1$
 			return assistant;
 		}

@@ -15,18 +15,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPartitioningException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension3;
-import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.TextInvocationContext;
+
+import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.ui.texteditor.spelling.SpellingCorrectionProcessor;
 
@@ -35,7 +34,6 @@ import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 
 /**
@@ -52,7 +50,10 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 
 	private ICompletionProposal[] fPreComputedProposals;
 
-	public PropertiesCorrectionProcessor() {
+	private final PropertiesCorrectionAssistant fAssistant;
+
+	public PropertiesCorrectionProcessor(PropertiesCorrectionAssistant assistant) {
+		fAssistant= assistant;
 		fSpellingCorrectionProcessor= new SpellingCorrectionProcessor();
 	}
 
@@ -78,7 +79,7 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 						proposals.add(spellingProposals[i]);
 					}
 				}
-				ICompletionProposal[] assists= collectAssists(context);
+				ICompletionProposal[] assists= PropertiesQuickAssistProcessor.collectAssists(createAssistContext(context));
 				if (assists != null) {
 					for (int i= 0; i < assists.length; i++) {
 						proposals.add(assists[i]);
@@ -86,71 +87,22 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 				}
 				res= proposals.toArray(new ICompletionProposal[proposals.size()]);
 			} catch (BadLocationException e) {
-				fErrorMessage= CorrectionMessages.JavaCorrectionProcessor_error_quickassist_message;
+				fErrorMessage= PropertiesFileEditorMessages.PropertiesCorrectionProcessor_error_quickassist_message;
 				JavaPlugin.log(e);
 			} catch (BadPartitioningException e) {
-				fErrorMessage= CorrectionMessages.JavaCorrectionProcessor_error_quickassist_message;
+				fErrorMessage= PropertiesFileEditorMessages.PropertiesCorrectionProcessor_error_quickassist_message;
 				JavaPlugin.log(e);
 			}
 		}
 
 		if (res == null || res.length == 0) {
-			return new ICompletionProposal[] { new ChangeCorrectionProposal(CorrectionMessages.NoCorrectionProposal_description, new NullChange(""), 0, null) }; //$NON-NLS-1$
+			return new ICompletionProposal[] { new ChangeCorrectionProposal(PropertiesFileEditorMessages.PropertiesCorrectionProcessor_NoCorrectionProposal_description, new NullChange(""), 0, null) }; //$NON-NLS-1$
 		}
 		if (res.length > 1) {
 			Arrays.sort(res, new CompletionProposalComparator());
 		}
 		fPreComputedProposals= null;
 		return res;
-	}
-
-	private static ICompletionProposal[] collectAssists(IQuickAssistInvocationContext invocationContext) throws BadLocationException, BadPartitioningException {
-		ISourceViewer sourceViewer= invocationContext.getSourceViewer();
-		IDocument document= sourceViewer.getDocument();
-		Point selectedRange= sourceViewer.getSelectedRange();
-		int selectionOffset= selectedRange.x;
-		int selectionLength= selectedRange.y;
-		int proposalOffset;
-		int proposalLength;
-		String text;
-		if (selectionLength == 0) {
-			if (selectionOffset != document.getLength()) {
-				char ch= document.getChar(selectionOffset);
-				if (ch == '=' || ch == ':') { //see PropertiesFilePartitionScanner()
-					return null;
-				}
-			}
-
-			ITypedRegion partition= null;
-			if (document instanceof IDocumentExtension3)
-				partition= ((IDocumentExtension3)document).getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, invocationContext.getOffset(), false);
-			if (partition == null)
-				return null;
-
-			String type= partition.getType();
-			if (!(type.equals(IPropertiesFilePartitions.PROPERTY_VALUE) || type.equals(IDocument.DEFAULT_CONTENT_TYPE))) {
-				return null;
-			}
-			proposalOffset= partition.getOffset();
-			proposalLength= partition.getLength();
-			text= document.get(proposalOffset, proposalLength);
-
-			if (type.equals(IPropertiesFilePartitions.PROPERTY_VALUE)) {
-				text= text.substring(1); //see PropertiesFilePartitionScanner()
-				proposalOffset++;
-				proposalLength--;
-			}
-		} else {
-			proposalOffset= selectionOffset;
-			proposalLength= selectionLength;
-			text= document.get(proposalOffset, proposalLength);
-		}
-
-		if (PropertiesFileEscapes.containsUnescapedBackslash(text))
-			return new ICompletionProposal[] { new EscapeBackslashCompletionProposal(PropertiesFileEscapes.escape(text, false, true, false), proposalOffset, proposalLength, true) };
-		if (PropertiesFileEscapes.containsEscapedBackslashes(text))
-			return new ICompletionProposal[] { new EscapeBackslashCompletionProposal(PropertiesFileEscapes.unescapeBackslashes(text), proposalOffset, proposalLength, false) };
-		return null;
 	}
 
 	/*
@@ -171,14 +123,7 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 	 * @see org.eclipse.jface.text.quickassist.IQuickAssistProcessor#canAssist(org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext)
 	 */
 	public boolean canAssist(IQuickAssistInvocationContext invocationContext) {
-		try {
-			return collectAssists(invocationContext) != null;
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-		} catch (BadPartitioningException e) {
-			JavaPlugin.log(e);
-		}
-		return false;
+		return PropertiesQuickAssistProcessor.hasAssists(createAssistContext(invocationContext));
 	}
 
 	/**
@@ -188,5 +133,12 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 	 */
 	public void setProposals(ICompletionProposal[] preComputedProposals) {
 		fPreComputedProposals= preComputedProposals;
+	}
+
+	private PropertiesAssistContext createAssistContext(IQuickAssistInvocationContext invocationContext) {
+		IEditorPart editorPart= fAssistant.getEditor();
+		IFile file= (IFile) editorPart.getEditorInput().getAdapter(IFile.class);
+		ISourceViewer sourceViewer= invocationContext.getSourceViewer();
+		return new PropertiesAssistContext(sourceViewer, invocationContext.getOffset(), invocationContext.getLength(), file, sourceViewer.getDocument());
 	}
 }

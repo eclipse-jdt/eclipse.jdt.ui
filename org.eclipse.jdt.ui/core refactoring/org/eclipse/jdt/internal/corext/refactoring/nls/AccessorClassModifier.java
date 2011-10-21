@@ -177,6 +177,50 @@ public class AccessorClassModifier {
 		return change;
 	}
 
+	public static Change addFields(ICompilationUnit cu, List<String> fields) throws CoreException {
+		AccessorClassModifier sourceModification= new AccessorClassModifier(cu);
+		String message= Messages.format(NLSMessages.AccessorClassModifier_add_fields_to_accessor, BasicElementLabels.getFileName(cu));
+
+		TextChange change= new CompilationUnitChange(message, cu);
+		MultiTextEdit multiTextEdit= new MultiTextEdit();
+		change.setEdit(multiTextEdit);
+
+		for (int i= 0; i < fields.size(); i++) {
+			String field= fields.get(i);
+			NLSSubstitution substitution= new NLSSubstitution(NLSSubstitution.EXTERNALIZED, field, null, null, null);
+			sourceModification.addKey(substitution, change);
+		}
+
+		if (change.getChangeGroups().length == 0)
+			return null;
+
+		change.addEdit(sourceModification.getTextEdit());
+
+		return change;
+	}
+
+	public static Change removeFields(ICompilationUnit cu, List<String> fields) throws CoreException {
+		AccessorClassModifier sourceModification= new AccessorClassModifier(cu);
+		String message= Messages.format(NLSMessages.AccessorClassModifier_remove_fields_from_accessor, BasicElementLabels.getFileName(cu));
+
+		TextChange change= new CompilationUnitChange(message, cu);
+		MultiTextEdit multiTextEdit= new MultiTextEdit();
+		change.setEdit(multiTextEdit);
+
+		for (int i= 0; i < fields.size(); i++) {
+			String field= fields.get(i);
+			NLSSubstitution substitution= new NLSSubstitution(NLSSubstitution.EXTERNALIZED, field, null, null, null);
+			sourceModification.removeKey(substitution, change);
+		}
+
+		if (change.getChangeGroups().length == 0)
+			return null;
+
+		change.addEdit(sourceModification.getTextEdit());
+
+		return change;
+	}
+
 	private void removeKey(NLSSubstitution sub, TextChange change) {
 		ASTNode node= findField(fRoot, sub.getInitialKey());
 		if (node == null)

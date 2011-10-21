@@ -120,7 +120,6 @@ public class NLSAccessorFieldRenameParticipant extends RenameParticipant {
 					return null;
 
 				fChange= new TextFileChange("", (IFile) resourceBundle); //$NON-NLS-1$
-				fChange.setSaveMode(TextFileChange.FORCE_SAVE);
 				fChange.setEdit(edit);
 
 				String changeDescription= Messages.format(NLSMessages.NLSAccessorFieldRenameParticipant_changeDescription, new Object[] { fField.getElementName(), fNewName });

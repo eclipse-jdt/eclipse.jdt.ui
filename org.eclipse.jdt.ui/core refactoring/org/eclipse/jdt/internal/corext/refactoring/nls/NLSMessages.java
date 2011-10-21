@@ -45,13 +45,16 @@ public final class NLSMessages extends NLS {
 	public static String NLSRefactoring_warning;
 	public static String NLSRefactoring_change_name;
 	public static String AccessorClassModifier_add_entry;
+	public static String AccessorClassModifier_add_fields_to_accessor;
 	public static String AccessorClassModifier_remove_entry;
+	public static String AccessorClassModifier_remove_fields_from_accessor;
 	public static String AccessorClassModifier_replace_entry;
 	public static String AccessorClassModifier_missingType;
 	public static String NLSPropertyFileModifier_add_entry;
 	public static String NLSPropertyFileModifier_change_name;
 	public static String NLSPropertyFileModifier_replace_entry;
 	public static String NLSPropertyFileModifier_remove_entry;
+	public static String NLSPropertyFileModifier_remove_from_property_file;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, NLSMessages.class);

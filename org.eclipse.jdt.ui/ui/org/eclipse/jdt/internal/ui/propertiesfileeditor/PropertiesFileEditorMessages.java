@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,6 +57,14 @@ final class PropertiesFileEditorMessages extends NLS {
 	public static String OpenAction_SelectionDialog_elementLabel;
 	public static String OpenAction_SelectionDialog_elementLabelWithMatchCount;
 
+	public static String PropertiesCorrectionProcessor_create_field_in_accessor_label;
+	public static String PropertiesCorrectionProcessor_create_fields_in_accessor_label;
+	public static String PropertiesCorrectionProcessor_remove_key_label;
+	public static String PropertiesCorrectionProcessor_remove_keys_label;
+	public static String PropertiesCorrectionProcessor_error_quickassist_message;
+	public static String PropertiesCorrectionProcessor_NoCorrectionProposal_description;
+	public static String PropertiesCorrectionProcessor_rename_in_workspace;
+	public static String PropertiesCorrectionProcessor_rename_in_workspace_description;
 	public static String PropertiesFileAutoEditStrategy_showQuickAssist;
 	public static String PropertiesFileHover_MalformedEncoding;
 	public static String EscapeBackslashCompletionProposal_unescapeBackslashes;

@@ -18,22 +18,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.text.edits.CopyTargetEdit;
-import org.eclipse.text.edits.DeleteEdit;
-import org.eclipse.text.edits.InsertEdit;
-import org.eclipse.text.edits.MoveSourceEdit;
-import org.eclipse.text.edits.MoveTargetEdit;
 import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditVisitor;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.ui.IEditorPart;
@@ -54,7 +46,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.util.Resources;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -146,137 +137,20 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-
-		final StringBuffer buf= new StringBuffer();
-
+		StringBuffer buf= new StringBuffer();
 		try {
-			final TextChange change= getTextChange();
-
+			TextChange change= getTextChange();
 			change.setKeepPreviewEdits(true);
-			final IDocument previewContent= change.getPreviewDocument(monitor);
-			final TextEdit rootEdit= change.getPreviewEdit(change.getEdit());
+			IDocument previewDocument= change.getPreviewDocument(monitor);
+			TextEdit rootEdit= change.getPreviewEdit(change.getEdit());
 
-			class EditAnnotator extends TextEditVisitor {
-				private int fWrittenToPos = 0;
-
-				public void unchangedUntil(int pos) {
-					if (pos > fWrittenToPos) {
-						appendContent(previewContent, fWrittenToPos, pos, buf, true);
-						fWrittenToPos = pos;
-					}
-				}
-
-				@Override
-				public boolean visit(MoveTargetEdit edit) {
-					return true; //rangeAdded(edit);
-				}
-
-				@Override
-				public boolean visit(CopyTargetEdit edit) {
-					return true; //return rangeAdded(edit);
-				}
-
-				@Override
-				public boolean visit(InsertEdit edit) {
-					return rangeAdded(edit);
-				}
-
-				@Override
-				public boolean visit(ReplaceEdit edit) {
-					if (edit.getLength() > 0)
-						return rangeAdded(edit);
-					return rangeRemoved(edit);
-				}
-
-				@Override
-				public boolean visit(MoveSourceEdit edit) {
-					return rangeRemoved(edit);
-				}
-
-				@Override
-				public boolean visit(DeleteEdit edit) {
-					return rangeRemoved(edit);
-				}
-
-				private boolean rangeRemoved(TextEdit edit) {
-					unchangedUntil(edit.getOffset());
-					return false;
-				}
-
-				private boolean rangeAdded(TextEdit edit) {
-					unchangedUntil(edit.getOffset());
-					buf.append("<b>"); //$NON-NLS-1$
-					appendContent(previewContent, edit.getOffset(), edit.getExclusiveEnd(), buf, false);
-					buf.append("</b>"); //$NON-NLS-1$
-					fWrittenToPos = edit.getExclusiveEnd();
-					return false;
-				}
-			}
-			EditAnnotator ea = new EditAnnotator();
+			EditAnnotator ea= new EditAnnotator(buf, previewDocument);
 			rootEdit.accept(ea);
-
-			// Final pre-existing region
-			ea.unchangedUntil(previewContent.getLength());
+			ea.unchangedUntil(previewDocument.getLength()); // Final pre-existing region
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
 		return buf.toString();
-	}
-
-	private final int surroundLines= 1;
-
-	private void appendContent(IDocument text, int startOffset, int endOffset, StringBuffer buf, boolean surroundLinesOnly) {
-		try {
-			int startLine= text.getLineOfOffset(startOffset);
-			int endLine= text.getLineOfOffset(endOffset);
-
-			boolean dotsAdded= false;
-			if (surroundLinesOnly && startOffset == 0) { // no surround lines for the top no-change range
-				startLine= Math.max(endLine - surroundLines, 0);
-				buf.append("...<br>"); //$NON-NLS-1$
-				dotsAdded= true;
-			}
-
-			for (int i= startLine; i <= endLine; i++) {
-				if (surroundLinesOnly) {
-					if ((i - startLine > surroundLines) && (endLine - i > surroundLines)) {
-						if (!dotsAdded) {
-							buf.append("...<br>"); //$NON-NLS-1$
-							dotsAdded= true;
-						} else if (endOffset == text.getLength()) {
-							return; // no surround lines for the bottom no-change range
-						}
-						continue;
-					}
-				}
-
-				IRegion lineInfo= text.getLineInformation(i);
-				int start= lineInfo.getOffset();
-				int end= start + lineInfo.getLength();
-
-				int from= Math.max(start, startOffset);
-				int to= Math.min(end, endOffset);
-				String content= text.get(from, to - from);
-				if (surroundLinesOnly && (from == start) && Strings.containsOnlyWhitespaces(content)) {
-					continue; // ignore empty lines except when range started in the middle of a line
-				}
-				for (int k= 0; k < content.length(); k++) {
-					char ch= content.charAt(k);
-					if (ch == '<') {
-						buf.append("&lt;"); //$NON-NLS-1$
-					} else if (ch == '>') {
-						buf.append("&gt;"); //$NON-NLS-1$
-					} else {
-						buf.append(ch);
-					}
-				}
-				if (to == end && to != endOffset) { // new line when at the end of the line, and not end of range
-					buf.append("<br>"); //$NON-NLS-1$
-				}
-			}
-		} catch (BadLocationException e) {
-			// ignore
-		}
 	}
 
 	/* (non-Javadoc)
