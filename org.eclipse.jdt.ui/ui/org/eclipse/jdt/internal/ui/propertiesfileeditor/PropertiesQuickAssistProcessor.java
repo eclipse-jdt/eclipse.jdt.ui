@@ -369,6 +369,7 @@ public class PropertiesQuickAssistProcessor {
 						EditAnnotator ea= new EditAnnotator(buf, previewContent);
 						rootEdit.accept(ea);
 						ea.unchangedUntil(previewContent.getLength()); // Final pre-existing region
+						buf.append("<br>"); //$NON-NLS-1$
 					}
 				}
 
