@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -118,6 +118,12 @@ public class PropertiesFileAutoEditStrategyTest extends TestCase {
 		return file;
 	}
 
+	private String getProposalText(Object proposal) {
+		String proposalInfo= ((ICompletionProposal)proposal).getAdditionalProposalInfo();
+		proposalInfo= proposalInfo.substring(5, proposalInfo.length() - 6); //remove <pre> and </pre> tags
+		return proposalInfo;
+	}
+
 	//typing ISO-8859-1
 	public void testTypeISO_8859_1_01() throws Exception {
 		fDocumentCommand.text= "\\";
@@ -174,14 +180,14 @@ public class PropertiesFileAutoEditStrategyTest extends TestCase {
 		fDocumentCommand.text= "C:\\Program Files\\Java";
 		Object proposal= performTestISO_8859_1();
 		assertEquals("C:\\Program Files\\Java", fDocumentCommand.text);
-		assertEquals("C:\\\\Program Files\\\\Java", ((ICompletionProposal)proposal).getAdditionalProposalInfo());
+		assertEquals("C:\\\\Program Files\\\\Java", getProposalText(proposal));
 	}
 
 	public void testPasteISO_8859_1_02() throws Exception {
 		fDocumentCommand.text= "C:\\new folder\\A.java";
 		Object proposal= performTestISO_8859_1();
 		assertEquals("C:\\new folder\\A.java", fDocumentCommand.text);
-		assertEquals("C:\\\\new folder\\\\A.java", ((ICompletionProposal)proposal).getAdditionalProposalInfo());
+		assertEquals("C:\\\\new folder\\\\A.java", getProposalText(proposal));
 	}
 
 	public void testPasteISO_8859_1_03() throws Exception {
@@ -195,7 +201,7 @@ public class PropertiesFileAutoEditStrategyTest extends TestCase {
 		fDocumentCommand.text= "\u0926 \\u0905";
 		Object proposal= performTestISO_8859_1();
 		assertEquals("\\u0926 \\u0905", fDocumentCommand.text);
-		assertEquals("\\u0926 \\\\u0905", ((ICompletionProposal)proposal).getAdditionalProposalInfo());
+		assertEquals("\\u0926 \\\\u0905", getProposalText(proposal));
 	}
 
 	public void testPasteISO_8859_1_05() throws Exception {
@@ -209,7 +215,7 @@ public class PropertiesFileAutoEditStrategyTest extends TestCase {
 		fDocumentCommand.text= "some text\\";
 		Object proposal= performTestISO_8859_1();
 		assertEquals("some text\\", fDocumentCommand.text);
-		assertEquals("some text\\\\", ((ICompletionProposal)proposal).getAdditionalProposalInfo());
+		assertEquals("some text\\\\", getProposalText(proposal));
 	}
 
 	//paste UTF-8
@@ -217,14 +223,14 @@ public class PropertiesFileAutoEditStrategyTest extends TestCase {
 		fDocumentCommand.text= "C:\\Program Files\\Java";
 		Object proposal= performTestUTF8();
 		assertEquals("C:\\Program Files\\Java", fDocumentCommand.text);
-		assertEquals("C:\\\\Program Files\\\\Java", ((ICompletionProposal)proposal).getAdditionalProposalInfo());
+		assertEquals("C:\\\\Program Files\\\\Java", getProposalText(proposal));
 	}
 
 	public void testPasteUTF8_02() throws Exception {
 		fDocumentCommand.text= "C:\\new folder\\A.java";
 		Object proposal= performTestUTF8();
 		assertEquals("C:\\new folder\\A.java", fDocumentCommand.text);
-		assertEquals("C:\\\\new folder\\\\A.java", ((ICompletionProposal)proposal).getAdditionalProposalInfo());
+		assertEquals("C:\\\\new folder\\\\A.java", getProposalText(proposal));
 	}
 
 	public void testPasteUTF8_03() throws Exception {
@@ -245,7 +251,7 @@ public class PropertiesFileAutoEditStrategyTest extends TestCase {
 		fDocumentCommand.text= "\u0926 \\some text";
 		Object proposal= performTestUTF8();
 		assertEquals("\u0926 \\some text", fDocumentCommand.text);
-		assertEquals("\u0926 \\\\some text", ((ICompletionProposal)proposal).getAdditionalProposalInfo());
+		assertEquals("\u0926 \\\\some text", getProposalText(proposal));
 	}
 
 	//paste from properties file ISO-8859-1
