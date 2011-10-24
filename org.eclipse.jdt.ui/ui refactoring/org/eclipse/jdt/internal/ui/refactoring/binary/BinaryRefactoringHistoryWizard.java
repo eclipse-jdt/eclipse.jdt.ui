@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sergey Prigogin <eclipse.sprigogin@gmail.com> - [refactoring] Provide a way to implement refactorings that depend on resources that have to be explicitly released - https://bugs.eclipse.org/347599
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.binary;
 
@@ -38,6 +39,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringContext;
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
@@ -485,7 +487,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected Refactoring createRefactoring(RefactoringDescriptor descriptor, RefactoringStatus status, IProgressMonitor monitor) throws CoreException {
+	protected RefactoringContext createRefactoringContext(RefactoringDescriptor descriptor, RefactoringStatus status, IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(descriptor);
 
 		createNecessarySourceCode(monitor);
@@ -523,7 +525,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 				return null;
 			}
 		}
-		return descriptor.createRefactoring(status);
+		return descriptor.createRefactoringContext(status);
 	}
 
 	/**
