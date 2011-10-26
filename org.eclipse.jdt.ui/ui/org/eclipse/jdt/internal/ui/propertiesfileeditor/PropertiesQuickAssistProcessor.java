@@ -70,7 +70,7 @@ public class PropertiesQuickAssistProcessor {
 		try {
 			return getEscapeUnescapeBackslashProposals(invocationContext, null) ||
 					getCreateFieldsInAccessorClassProposals(invocationContext, null) ||
-					getRemoveKeysProposals(invocationContext, null) ||
+					getRemovePropertiesProposals(invocationContext, null) ||
 					getRenameKeysProposals(invocationContext, null);
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
@@ -85,7 +85,7 @@ public class PropertiesQuickAssistProcessor {
 
 		getEscapeUnescapeBackslashProposals(invocationContext, resultingCollections);
 		getCreateFieldsInAccessorClassProposals(invocationContext, resultingCollections);
-		getRemoveKeysProposals(invocationContext, resultingCollections);
+		getRemovePropertiesProposals(invocationContext, resultingCollections);
 		getRenameKeysProposals(invocationContext, resultingCollections);
 	
 		if (resultingCollections.size() == 0)
@@ -196,7 +196,7 @@ public class PropertiesQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getRemoveKeysProposals(PropertiesAssistContext invocationContext, ArrayList<ICompletionProposal> resultingCollections)
+	private static boolean getRemovePropertiesProposals(PropertiesAssistContext invocationContext, ArrayList<ICompletionProposal> resultingCollections)
 			throws BadLocationException, BadPartitioningException {
 		IDocument document= invocationContext.getDocument();
 		int selectionOffset= invocationContext.getOffset();
@@ -236,9 +236,9 @@ public class PropertiesQuickAssistProcessor {
 			}
 
 			String name= (keys.size() == 1)
-					? PropertiesFileEditorMessages.PropertiesCorrectionProcessor_remove_key_label
-					: PropertiesFileEditorMessages.PropertiesCorrectionProcessor_remove_keys_label;
-			resultingCollections.add(new RemoveKeysProposal(name, 4, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), changes));
+					? PropertiesFileEditorMessages.PropertiesCorrectionProcessor_remove_property_label
+					: PropertiesFileEditorMessages.PropertiesCorrectionProcessor_remove_properties_label;
+			resultingCollections.add(new RemovePropertiesProposal(name, 4, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), changes));
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			return false;
@@ -340,11 +340,11 @@ public class PropertiesQuickAssistProcessor {
 		return keys;
 	}
 
-	private static class RemoveKeysProposal extends ChangeCorrectionProposal {
+	private static class RemovePropertiesProposal extends ChangeCorrectionProposal {
 
 		private final Change[] fChanges;
 
-		protected RemoveKeysProposal(String name, int relevance, Image image, Change[] changes) {
+		protected RemovePropertiesProposal(String name, int relevance, Image image, Change[] changes) {
 			super(name, null, relevance, image);
 			fChanges= changes;
 		}

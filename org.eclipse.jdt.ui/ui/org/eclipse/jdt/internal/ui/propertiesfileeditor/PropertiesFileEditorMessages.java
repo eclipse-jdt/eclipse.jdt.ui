@@ -59,8 +59,8 @@ final class PropertiesFileEditorMessages extends NLS {
 
 	public static String PropertiesCorrectionProcessor_create_field_in_accessor_label;
 	public static String PropertiesCorrectionProcessor_create_fields_in_accessor_label;
-	public static String PropertiesCorrectionProcessor_remove_key_label;
-	public static String PropertiesCorrectionProcessor_remove_keys_label;
+	public static String PropertiesCorrectionProcessor_remove_properties_label;
+	public static String PropertiesCorrectionProcessor_remove_property_label;
 	public static String PropertiesCorrectionProcessor_error_quickassist_message;
 	public static String PropertiesCorrectionProcessor_NoCorrectionProposal_description;
 	public static String PropertiesCorrectionProcessor_rename_in_workspace;

@@ -34,6 +34,8 @@ import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 
+import org.eclipse.text.tests.Accessor;
+
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -64,8 +66,10 @@ public class PropertiesFileQuickAssistTest extends TestCase {
 	private IJavaProject fJProject;
 	private IPackageFragmentRoot fSourceFolder;
 
-	private String REMOVE_KEY= "Remove key";
-	private String REMOVE_KEYS= "Remove keys";
+	private String REMOVE_KEY= (String)new Accessor("org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditorMessages", THIS.getClassLoader()).
+			get("PropertiesCorrectionProcessor_remove_property_label");
+	private String REMOVE_KEYS= (String)new Accessor("org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditorMessages", THIS.getClassLoader()).
+			get("PropertiesCorrectionProcessor_remove_properties_label");
 
 	public PropertiesFileQuickAssistTest(String name) {
 		super(name);
@@ -458,7 +462,7 @@ public class PropertiesFileQuickAssistTest extends TestCase {
 		checkContentOfCu("nls file", cu, buf.toString());
 	}
 
-	public void testRemoveKey1() throws Exception {
+	public void testRemoveProperty1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
@@ -497,7 +501,7 @@ public class PropertiesFileQuickAssistTest extends TestCase {
 		checkContentOfFile("property file", file, buf.toString());
 	}
 
-	public void testRemoveKey2() throws Exception {
+	public void testRemoveProperty2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
@@ -536,7 +540,7 @@ public class PropertiesFileQuickAssistTest extends TestCase {
 		checkContentOfFile("property file", file, buf.toString());
 	}
 
-	public void testRemoveKey3() throws Exception {
+	public void testRemoveProperty3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
@@ -592,7 +596,7 @@ public class PropertiesFileQuickAssistTest extends TestCase {
 		checkContentOfFile("property file", file, buf.toString());
 	}
 
-	public void testRemoveKey4() throws Exception {
+	public void testRemoveProperty4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
