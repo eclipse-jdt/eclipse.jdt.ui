@@ -97,9 +97,11 @@ public class PropertyFileDocumentModel {
 			}
         }
 
+        String text= extra + keyValuePairModell.getKeyValueText();
         keyValuePairModell.fOffset= offset;
+        keyValuePairModell.fLength= text.length();
         fKeyValuePairs.add(index, keyValuePairModell);
-        return new InsertEdit(offset, extra + keyValuePairModell.getKeyValueText());
+		return new InsertEdit(offset, text);
     }
 
     /**
@@ -175,9 +177,12 @@ public class PropertyFileDocumentModel {
             if (!SimpleLineReader.isCommentOrWhiteSpace(line)) {
                 int idx = getIndexOfSeparationCharacter(line);
                 if (idx != -1) {
-					String key= line.substring(0, idx).trim();
-					String value= Strings.trimLeadingTabsAndSpaces(line.substring(idx + 1));
-                    fKeyValuePairs.add(new KeyValuePairModell(key, value, offset, leadingWhiteSpaces));
+					String key= line.substring(0, idx);
+					String trimmedKey= key.trim();
+					String value= line.substring(idx + 1);
+					String trimmedValue= Strings.trimLeadingTabsAndSpaces(value);
+					int length= key.length() + 1 + value.length();
+                    fKeyValuePairs.add(new KeyValuePairModell(trimmedKey, trimmedValue, offset, length, leadingWhiteSpaces));
                     leadingWhiteSpaces = 0;
                 }
             } else {
@@ -272,11 +277,13 @@ public class PropertyFileDocumentModel {
 	private static class KeyValuePairModell extends KeyValuePair {
 
         int fOffset;
+        int fLength;
         int fLeadingWhiteSpaces;
 
-        public KeyValuePairModell(String key, String value, int offset, int leadingWhiteSpaces) {
+        public KeyValuePairModell(String key, String value, int offset, int length, int leadingWhiteSpaces) {
             super(key, value);
             fOffset = offset;
+            fLength = length;
             fLeadingWhiteSpaces = leadingWhiteSpaces;
         }
 
@@ -285,7 +292,7 @@ public class PropertyFileDocumentModel {
         }
 
 		public int getLength() {
-			return fKey.length() + 1 + fValue.length();
+			return fLength;
 		}
 		
         private String getKeyValueText() {
@@ -302,7 +309,7 @@ public class PropertyFileDocumentModel {
     	private boolean fNeedsNewLine;
 
         public LastKeyValuePair(int offset, boolean needsNewLine) {
-            super("zzzzzzz", "key", offset, 0); //$NON-NLS-1$ //$NON-NLS-2$
+            super("zzzzzzz", "key", offset, 7 + 1 + 3, 0); //$NON-NLS-1$ //$NON-NLS-2$
             fNeedsNewLine= needsNewLine;
         }
         public boolean needsNewLine() {
