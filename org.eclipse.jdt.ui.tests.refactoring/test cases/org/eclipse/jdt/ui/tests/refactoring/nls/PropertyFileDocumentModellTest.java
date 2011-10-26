@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -283,6 +283,16 @@ public class PropertyFileDocumentModellTest extends TestCase {
 		assertEquals("org.eclipse.1=value1\n" + "org.eclipse.3=value3\n", props.get());
 	}
 
+	public void testRemovingOfKey2() throws Exception {
+		Document props= new Document("org.eclipse.1=value1\n" + " org.eclipse.2           =  value2   \n" + "org.eclipse.3=value3\n");
+		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(props);
+		
+		DeleteEdit deleteEdit= modell.remove("org.eclipse.2");
+		deleteEdit.apply(props);
+		
+		assertEquals("org.eclipse.1=value1\n" + "org.eclipse.3=value3\n", props.get());
+	}
+	
 	public void testRemovingOfLastKey() throws Exception {
 		Document props= new Document("org.eclipse.1=value1\n" + "org.eclipse.2=value2\n" + "org.eclipse.3=value3\n");
 		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(props);
