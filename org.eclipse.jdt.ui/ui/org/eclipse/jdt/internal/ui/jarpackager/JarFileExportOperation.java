@@ -749,9 +749,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		boolean hasErrors= hasCompileErrors(file);
 		boolean hasWarnings= hasCompileWarnings(file);
 		boolean canBeExported= canBeExported(hasErrors, hasWarnings);
+		reportPossibleCompileProblems(file, hasErrors, hasWarnings, canBeExported);
 		if (!canBeExported)
 			return Collections.EMPTY_LIST.iterator();
-		reportPossibleCompileProblems(file, hasErrors, hasWarnings, canBeExported);
 		IContainer classContainer= outputContainer;
 		if (pathInJar.segmentCount() > 1)
 			classContainer= outputContainer.getFolder(pathInJar.removeLastSegments(1));
@@ -957,13 +957,13 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			if (canBeExported)
 				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_exportedWithCompileErrors, BasicElementLabels.getPathLabel(file.getFullPath(), false)), null);
 			else
-				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_notExportedDueToCompileErrors, BasicElementLabels.getPathLabel(file.getFullPath(), false)), null);
+				addError(Messages.format(JarPackagerMessages.JarFileExportOperation_notExportedDueToCompileErrors, BasicElementLabels.getPathLabel(file.getFullPath(), false)), null);
 		}
 		if (hasWarnings) {
 			if (canBeExported)
 				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_exportedWithCompileWarnings, BasicElementLabels.getPathLabel(file.getFullPath(), false)), null);
 			else
-				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_notExportedDueToCompileWarnings, BasicElementLabels.getPathLabel(file.getFullPath(), false)), null);
+				addError(Messages.format(JarPackagerMessages.JarFileExportOperation_notExportedDueToCompileWarnings, BasicElementLabels.getPathLabel(file.getFullPath(), false)), null);
 		}
 	}
 
