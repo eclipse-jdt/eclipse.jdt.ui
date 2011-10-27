@@ -112,16 +112,14 @@ public class ToggleBreadcrumbAction extends ResourceAction implements IPropertyC
 	}
 
 	/**
-	 * Returns the preference key for the breadcrumb. The
-	 * value depends on the current perspective.
-	 *
-	 * @return the preference key or <code>null</code> if there's no perspective
+	 * Returns the preference key for the breadcrumb. The value depends on the current perspective.
+	 * 
+	 * @return the preference key to use
 	 */
 	private String getPreferenceKey() {
 		IPerspectiveDescriptor perspective= fPage.getPerspective();
-		if (perspective == null)
-			return null;
-		return JavaEditor.EDITOR_SHOW_BREADCRUMB + "." + perspective.getId(); //$NON-NLS-1$
+		String perspectiveID= perspective != null ? perspective.getId() : "<unknown>"; //$NON-NLS-1$
+		return JavaEditor.EDITOR_SHOW_BREADCRUMB + "." + perspectiveID; //$NON-NLS-1$
 	}
 
 	/*
