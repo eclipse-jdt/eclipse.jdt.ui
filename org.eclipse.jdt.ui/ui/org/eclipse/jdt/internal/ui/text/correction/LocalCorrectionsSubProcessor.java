@@ -111,6 +111,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
+import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
@@ -250,16 +251,21 @@ public class LocalCorrectionsSubProcessor {
 				ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
 				ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(decl, imports);
 
+				CodeScopeBuilder.Scope scope= CodeScopeBuilder.perform(decl, Selection.createFromStartLength(offset, length)).
+						findScope(offset, length);
+				scope.setCursor(offset);
+
 				ListRewrite clausesRewrite= rewrite.getListRewrite(surroundingTry, TryStatement.CATCH_CLAUSES_PROPERTY);
 				for (int i= 0; i < uncaughtExceptions.length; i++) {
 					ITypeBinding excBinding= uncaughtExceptions[i];
 					String varName= StubUtility.getExceptionVariableName(cu.getJavaProject());
+					String name= scope.createName(varName, false);
 					SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-					var.setName(ast.newSimpleName(varName));
+					var.setName(ast.newSimpleName(name));
 					var.setType(imports.addImport(excBinding, ast, importRewriteContext));
 					CatchClause newClause= ast.newCatchClause();
 					newClause.setException(var);
-					String catchBody= StubUtility.getCatchBodyContent(cu, excBinding.getName(), varName, selectedNode, String.valueOf('\n'));
+					String catchBody= StubUtility.getCatchBodyContent(cu, excBinding.getName(), name, selectedNode, String.valueOf('\n'));
 					if (catchBody != null) {
 						ASTNode node= rewrite.createStringPlaceholder(catchBody, ASTNode.RETURN_STATEMENT);
 						newClause.getBody().statements().add(node);
@@ -327,10 +333,15 @@ public class LocalCorrectionsSubProcessor {
 					ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
 					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(decl, imports);
 
+					CodeScopeBuilder.Scope scope= CodeScopeBuilder.perform(decl, Selection.createFromStartLength(offset, length)).
+							findScope(offset, length);
+					scope.setCursor(offset);
+
 					CatchClause newCatchClause= ast.newCatchClause();
 					String varName= StubUtility.getExceptionVariableName(cu.getJavaProject());
+					String name= scope.createName(varName, false);
 					SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-					var.setName(ast.newSimpleName(varName));
+					var.setName(ast.newSimpleName(name));
 
 					UnionType newUnionType= ast.newUnionType();
 					List<Type> types= newUnionType.types();
@@ -348,7 +359,7 @@ public class LocalCorrectionsSubProcessor {
 					proposal.addLinkedPosition(rewrite.track(var.getName()), false, nameKey);
 					var.setType(newUnionType);
 					newCatchClause.setException(var);
-					String catchBody= StubUtility.getCatchBodyContent(cu, "Exception", varName, selectedNode, String.valueOf('\n')); //$NON-NLS-1$
+					String catchBody= StubUtility.getCatchBodyContent(cu, "Exception", name, selectedNode, String.valueOf('\n')); //$NON-NLS-1$
 					if (catchBody != null) {
 						ASTNode node= rewrite.createStringPlaceholder(catchBody, ASTNode.RETURN_STATEMENT);
 						newCatchClause.getBody().statements().add(node);
