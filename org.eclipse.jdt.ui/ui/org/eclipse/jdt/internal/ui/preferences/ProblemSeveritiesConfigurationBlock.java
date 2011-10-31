@@ -276,6 +276,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_potentially_missing_static_on_method_label;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
 		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_resource_not_managed_via_twr_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+
 		// --- potential_programming_problems
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_potential_programming_problems;
@@ -344,9 +347,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_potential_resource_leak_label;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIALLY_UNCLOSED_CLOSEABLE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
-
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_resource_not_managed_via_twr_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
 
 		// --- name_shadowing
 
