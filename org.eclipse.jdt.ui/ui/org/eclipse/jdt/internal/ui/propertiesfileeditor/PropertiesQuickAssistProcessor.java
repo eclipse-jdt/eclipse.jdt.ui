@@ -172,6 +172,8 @@ public class PropertiesQuickAssistProcessor {
 
 		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
 			String key= iterator.next();
+			if (!isValidJavaIdentifier(key))
+				continue;
 			IField field= accessorClass.getField(key);
 			if (field.exists())
 				continue;
@@ -192,6 +194,17 @@ public class PropertiesQuickAssistProcessor {
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			return false;
+		}
+		return true;
+	}
+
+	private static boolean isValidJavaIdentifier(String key) {
+		if (!Character.isJavaIdentifierStart(key.charAt(0)))
+			return false;
+
+		for (int i= 1, length= key.length(); i < length; i++) {
+			if (!Character.isJavaIdentifierPart(key.charAt(i)))
+				return false;
 		}
 		return true;
 	}
