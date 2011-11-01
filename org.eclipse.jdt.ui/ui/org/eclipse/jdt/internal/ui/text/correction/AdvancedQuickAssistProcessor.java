@@ -2226,6 +2226,28 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 		ArrayList<Block> allBlocks= new ArrayList<Block>();
 		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(covering), importRewrite);
+
+		Expression switchExpression= switchStatement.getExpression();
+		Name varName;
+		if (switchExpression instanceof Name) {
+			varName= (Name) switchExpression;
+		} else {
+			// Switch expression could have side effects, see bug 252040
+			VariableDeclarationFragment variableDeclarationFragment= ast.newVariableDeclarationFragment();
+			String[] varNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, context.getCompilationUnit().getJavaProject(), expressionType, switchExpression, null);
+			varName= ast.newSimpleName(varNames[0]);
+			variableDeclarationFragment.setName((SimpleName) varName);
+			variableDeclarationFragment.setStructuralProperty(VariableDeclarationFragment.INITIALIZER_PROPERTY, rewrite.createCopyTarget(switchExpression));
+
+			VariableDeclarationStatement variableDeclarationStatement= ast.newVariableDeclarationStatement(variableDeclarationFragment);
+			Type type= importRewrite.addImport(expressionType, ast, importRewriteContext);
+			variableDeclarationStatement.setType(type);
+
+			ASTNode parent= switchStatement.getParent();
+			ListRewrite listRewrite= rewrite.getListRewrite(parent, Block.STATEMENTS_PROPERTY);
+			listRewrite.insertBefore(variableDeclarationStatement, switchStatement, null);
+		}
+
 		for (Iterator<Statement> iter= switchStatement.statements().iterator(); iter.hasNext();) {
 			Statement statement= iter.next();
 			if (statement instanceof SwitchCase) {
@@ -2250,7 +2272,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					return false;
 				}
 				// prepare condition
-				Expression switchCaseCondition= createSwitchCaseCondition(ast, rewrite, importRewrite, importRewriteContext, switchStatement, switchCase, isStringsInSwitch);
+				Expression switchCaseCondition= createSwitchCaseCondition(ast, rewrite, importRewrite, importRewriteContext, varName, switchCase, isStringsInSwitch);
 				if (currentCondition == null) {
 					currentCondition= switchCaseCondition;
 				} else {
@@ -2324,20 +2346,19 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static Expression createSwitchCaseCondition(AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, ImportRewriteContext importRewriteContext, SwitchStatement switchStatement,
+	private static Expression createSwitchCaseCondition(AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, ImportRewriteContext importRewriteContext, Name switchExpression,
 			SwitchCase switchCase, boolean isStringsInSwitch) {
 		Expression expression= switchCase.getExpression();
 		if (isStringsInSwitch) {
 			MethodInvocation methodInvocation= ast.newMethodInvocation();
 			methodInvocation.setExpression((Expression) rewrite.createCopyTarget(expression));
 			methodInvocation.setName(ast.newSimpleName("equals")); //$NON-NLS-1$
-			methodInvocation.arguments().add(rewrite.createCopyTarget(switchStatement.getExpression()));
+			methodInvocation.arguments().add(rewrite.createStringPlaceholder(switchExpression.getFullyQualifiedName(), ASTNode.QUALIFIED_NAME));
 			return methodInvocation;
 		} else {
 			InfixExpression condition= ast.newInfixExpression();
 			condition.setOperator(InfixExpression.Operator.EQUALS);
-			Expression leftExpression= getParenthesizedExpressionIfNeeded(ast, rewrite, switchStatement.getExpression(), condition, InfixExpression.LEFT_OPERAND_PROPERTY);
-			condition.setLeftOperand(leftExpression);
+			condition.setLeftOperand((Expression) rewrite.createStringPlaceholder(switchExpression.getFullyQualifiedName(), ASTNode.QUALIFIED_NAME));
 
 			Expression rightExpression= null;
 			if (expression instanceof SimpleName && ((SimpleName) expression).resolveBinding() instanceof IVariableBinding) {

@@ -4048,9 +4048,10 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foobar() {\n");
-		buf.append("        if ((getFoo() ? getBar() : getBar()) == 1) {\n");
+		buf.append("        int i = getFoo() ? getBar() : getBar();\n");
+		buf.append("        if (i == 1) {\n");
 		buf.append("            System.out.println();\n");
-		buf.append("        } else if ((getFoo() ? getBar() : getBar()) == 2) {\n");
+		buf.append("        } else if (i == 2) {\n");
 		buf.append("            System.out.println();\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
@@ -4097,11 +4098,67 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(int x, int y) {\n");
-		buf.append("        if (x + y == 1) {\n");
+		buf.append("        int i = x + y;\n");
+		buf.append("        if (i == 1) {\n");
 		buf.append("            System.out.println();\n");
-		buf.append("        } else if (x + y == 2) {\n");
+		buf.append("        } else if (i == 2) {\n");
 		buf.append("            System.out.println();\n");
 		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
+	public void testConvertSwitchToIfBug252040() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=252040
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        switch (getSomethingWithSideEffects()) {\n");
+		buf.append("        case 1:\n");
+		buf.append("            System.out.println();\n");
+		buf.append("            break;\n");
+		buf.append("        case 2:\n");
+		buf.append("            System.out.println();\n");
+		buf.append("            break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private int getSomethingWithSideEffects() {\n");
+		buf.append("        System.out.println(\"side effect\");\n");
+		buf.append("        return 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("switch");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int somethingWithSideEffects = getSomethingWithSideEffects();\n");
+		buf.append("        if (somethingWithSideEffects == 1) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        } else if (somethingWithSideEffects == 2) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private int getSomethingWithSideEffects() {\n");
+		buf.append("        System.out.println(\"side effect\");\n");
+		buf.append("        return 2;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 
