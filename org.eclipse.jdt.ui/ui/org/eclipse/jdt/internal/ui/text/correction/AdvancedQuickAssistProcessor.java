@@ -89,6 +89,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
+import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
@@ -2229,6 +2230,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 		Expression switchExpression= switchStatement.getExpression();
 		Name varName;
+		VariableDeclarationStatement variableDeclarationStatement= null;
 		if (switchExpression instanceof Name) {
 			varName= (Name) switchExpression;
 		} else {
@@ -2239,13 +2241,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			variableDeclarationFragment.setName((SimpleName) varName);
 			variableDeclarationFragment.setStructuralProperty(VariableDeclarationFragment.INITIALIZER_PROPERTY, rewrite.createCopyTarget(switchExpression));
 
-			VariableDeclarationStatement variableDeclarationStatement= ast.newVariableDeclarationStatement(variableDeclarationFragment);
+			variableDeclarationStatement= ast.newVariableDeclarationStatement(variableDeclarationFragment);
 			Type type= importRewrite.addImport(expressionType, ast, importRewriteContext);
 			variableDeclarationStatement.setType(type);
-
-			ASTNode parent= switchStatement.getParent();
-			ListRewrite listRewrite= rewrite.getListRewrite(parent, Block.STATEMENTS_PROPERTY);
-			listRewrite.insertBefore(variableDeclarationStatement, switchStatement, null);
 		}
 
 		for (Iterator<Statement> iter= switchStatement.statements().iterator(); iter.hasNext();) {
@@ -2335,8 +2333,13 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				block.getParent().setStructuralProperty(block.getLocationInParent(), innerBlock);
 			}
 		}
-		// replace 'switch' with single if-else-if statement
-		rewrite.replace(switchStatement, firstIfStatement, null);
+
+		if (variableDeclarationStatement == null) {
+			// replace 'switch' with single if-else-if statement
+			rewrite.replace(switchStatement, firstIfStatement, null);
+		} else {
+			new StatementRewrite(rewrite, new ASTNode[] { switchStatement }).replace(new ASTNode[] { variableDeclarationStatement, firstIfStatement }, null);
+		}
 
 		// add correction proposal
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
