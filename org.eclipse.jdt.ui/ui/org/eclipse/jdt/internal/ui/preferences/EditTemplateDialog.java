@@ -133,7 +133,7 @@ public class EditTemplateDialog extends StatusDialog {
 		 */
 		public void update() {
 			// XXX: workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=206111
-			if (fOperationCode == ITextOperationTarget.REDO)
+			if (fOperationCode == ITextOperationTarget.UNDO || fOperationCode == ITextOperationTarget.REDO)
 				return;
 
 			boolean wasEnabled= isEnabled();
