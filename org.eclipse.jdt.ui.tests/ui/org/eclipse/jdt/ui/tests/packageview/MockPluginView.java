@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -124,6 +125,11 @@ public class MockPluginView extends PackageExplorerPart {
 			fAddHappened= true;
 			fAddedObject= object;
 			fAddedParentObject= parentObject;
+		}
+		
+		@Override
+		public Widget[] testFindItems(Object element) {
+			return new Widget[1]; // for https://bugs.eclipse.org/311212
 		}
 	}
 
