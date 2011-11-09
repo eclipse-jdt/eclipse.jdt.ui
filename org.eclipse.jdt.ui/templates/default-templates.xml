@@ -92,6 +92,10 @@
 	${cursor}
 }</template>
 
+<template name="public_static_method" description="%Templates.public_static_method" id="org.eclipse.jdt.ui.templates.public_static_method" context="java-members" enabled="true" autoinsert="false">public static ${return_type} ${name}(${}) {
+	${cursor}
+}</template>
+
 <template name="protected_method" description="%Templates.protected_method" id="org.eclipse.jdt.ui.templates.protected_method" context="java-members" enabled="true" autoinsert="false">protected ${return_type} ${name}(${}) {
 	${cursor}
 }</template>
