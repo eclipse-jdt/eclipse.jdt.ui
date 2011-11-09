@@ -2,7 +2,7 @@
 
 <!--
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -179,6 +179,6 @@ System.arraycopy(${array}, 0, ${result}, ${array1}.length, ${array}.length);</te
 System.arraycopy(${array}, 0, ${result}, 0, ${array}.length);
 ${result}[${array}.length]= ${var};</template>
 
-<template name="static_final" description="%Templates.static_final" id="org.eclipse.jdt.ui.templates.static_final" context="java-members" enabled="true" autoinsert="false">${visibility:link(public,protected,private)} static final ${type:link(String,int)} ${NAME};</template>
+<template name="static_final" description="%Templates.static_final" id="org.eclipse.jdt.ui.templates.static_final" context="java-members" enabled="true" autoinsert="false">${visibility:link('public ','protected ','','private ')}static final ${type:link(String,int)} ${NAME} = ${expr:link('""',0)};</template>
 
 </templates>
