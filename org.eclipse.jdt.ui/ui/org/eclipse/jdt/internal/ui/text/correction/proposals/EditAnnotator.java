@@ -82,16 +82,20 @@ public class EditAnnotator extends TextEditVisitor {
 		return rangeRemoved(edit);
 	}
 
-	private boolean rangeRemoved(TextEdit edit) {
+	protected boolean rangeRemoved(TextEdit edit) {
 		unchangedUntil(edit.getOffset());
 		return false;
 	}
 
 	private boolean rangeAdded(TextEdit edit) {
+		return annotateEdit(edit, "<b>", "</b>"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	protected boolean annotateEdit(TextEdit edit, String startTag, String endTag) {
 		unchangedUntil(edit.getOffset());
-		fBuf.append("<b>"); //$NON-NLS-1$
+		fBuf.append(startTag);
 		appendContent(fPreviewDocument, edit.getOffset(), edit.getExclusiveEnd(), false);
-		fBuf.append("</b>"); //$NON-NLS-1$
+		fBuf.append(endTag);
 		fWrittenToPos= edit.getExclusiveEnd();
 		return false;
 	}

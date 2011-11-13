@@ -51,6 +51,8 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassModifier;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSPropertyFileModifier;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.FindBrokenNLSKeysAction;
@@ -375,14 +377,27 @@ public class PropertiesQuickAssistProcessor {
 				for (int i= 0; i < fChanges.length; i++) {
 					if (fChanges[i] instanceof TextChange) {
 						TextChange change= (TextChange) fChanges[i];
+						String filename= getFileName(change);
+						if (filename != null) {
+							buf.append("<b>"); //$NON-NLS-1$
+							buf.append(filename);
+							buf.append("</b>"); //$NON-NLS-1$
+							buf.append("<br>"); //$NON-NLS-1$
+						}
 						change.setKeepPreviewEdits(true);
-						IDocument previewContent= change.getPreviewDocument(monitor);
-						TextEdit rootEdit= change.getPreviewEdit(change.getEdit());
+						IDocument currentContent= change.getCurrentDocument(monitor);
 
-						EditAnnotator ea= new EditAnnotator(buf, previewContent);
+						TextEdit rootEdit= change.getEdit();
+
+						EditAnnotator ea= new EditAnnotator(buf, currentContent) {
+							@Override
+							protected boolean rangeRemoved(TextEdit edit) {
+								return annotateEdit(edit, "<del>", "</del>"); //$NON-NLS-1$ //$NON-NLS-2$
+							}
+						};
 						rootEdit.accept(ea);
-						ea.unchangedUntil(previewContent.getLength()); // Final pre-existing region
-						buf.append("<br>"); //$NON-NLS-1$
+						ea.unchangedUntil(currentContent.getLength()); // Final pre-existing region
+						buf.append("<br><br>"); //$NON-NLS-1$
 					}
 				}
 
@@ -390,6 +405,16 @@ public class PropertiesQuickAssistProcessor {
 				JavaPlugin.log(e);
 			}
 			return buf.toString();
+		}
+
+		private String getFileName(TextChange change) {
+			Object modifiedElement= change.getModifiedElement();
+			if (modifiedElement instanceof IFile) {
+				return ((IFile) modifiedElement).getName();
+			} else if (modifiedElement instanceof ICompilationUnit) {
+				return ((ICompilationUnit) modifiedElement).getElementName();
+			}
+			return null;
 		}
 	}
 
@@ -417,6 +442,11 @@ public class PropertiesQuickAssistProcessor {
 		@Override
 		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 			return PropertiesFileEditorMessages.PropertiesCorrectionProcessor_rename_in_workspace_description;
+		}
+
+		@Override
+		public String getCommandId() {
+			return IJavaEditorActionDefinitionIds.RENAME_ELEMENT;
 		}
 	}
 }
