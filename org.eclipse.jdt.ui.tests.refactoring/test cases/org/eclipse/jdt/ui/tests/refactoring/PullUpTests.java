@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,8 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.text.templates.Template;
+
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
@@ -35,9 +37,11 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -1037,6 +1041,35 @@ public class PullUpTests extends RefactoringTest {
 								signaturesOfMethodsToPullUp,
 								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
 								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, false, 0);
+	}
+
+	public void test50() throws Exception {
+		// for bug 125326
+
+		Template codeTemplate= StubUtility.getCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, null);
+		try {
+			StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, "", null);
+			String[] selectedMethodNames= { "m" };
+			String[][] selectedMethodSignatures= { new String[0] };
+			String[] selectedFieldNames= {};
+			String[] selectedTypeNames= {};
+			String[] namesOfMethodsToPullUp= { "m" };
+			String[][] signaturesOfMethodsToPullUp= { new String[0] };
+			String[] namesOfFieldsToPullUp= {};
+			String[] namesOfTypesToPullUp= {};
+			String[] namesOfMethodsToDeclareAbstract= {};
+			String[][] signaturesOfMethodsToDeclareAbstract= {};
+
+			declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
+					selectedFieldNames,
+					selectedTypeNames, namesOfMethodsToPullUp,
+					signaturesOfMethodsToPullUp,
+					namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+					signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, false, 0);
+		} finally {
+			StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, codeTemplate.getPattern(), null);
+		}
+
 	}
 
 	public void testFail0() throws Exception{

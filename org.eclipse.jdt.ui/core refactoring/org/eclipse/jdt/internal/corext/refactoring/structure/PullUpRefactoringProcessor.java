@@ -1296,7 +1296,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					fullParamNames[i]= Bindings.getFullyQualifiedName(params[i]);
 				}
 				final String comment= CodeGeneration.getMethodComment(cu, enclosingTypeName, newMethodNode, false, binding.getName(), fullTypeName, fullParamNames, StubUtility.getLineDelimiterUsed(cu));
-				return (Javadoc) rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC);
+				if (comment != null)
+					return (Javadoc) rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC);
 			}
 		}
 		return null;

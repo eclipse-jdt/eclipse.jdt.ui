@@ -1443,7 +1443,7 @@ public class StubUtility {
 		data.setTemplate(copy);
 	}
 
-	private static Template getCodeTemplate(String id, IJavaProject project) {
+	public static Template getCodeTemplate(String id, IJavaProject project) {
 		if (project == null)
 			return JavaPlugin.getDefault().getCodeTemplateStore().findTemplateById(id);
 		ProjectTemplateStore projectStore= new ProjectTemplateStore(project.getProject());
