@@ -1263,6 +1263,81 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
+	public void testExtractToLocalVariable1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public  E() {\n");
+		buf.append("        int a = 1;\n");
+		buf.append("        int b = 1;\n");
+		buf.append("        int d = a + b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String selection= "a + b";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 5);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public  E() {\n");
+		buf.append("        int a = 1;\n");
+		buf.append("        int b = 1;\n");
+		buf.append("        int i = a + b;\n");
+		buf.append("        int d = i;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { ex1 });
+	}
+
+	public void testExtractToLocalVariable2() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=276467
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public  E() {\n");
+		buf.append("        int a = 1;\n");
+		buf.append("        int b = 1;\n");
+		buf.append("        int c = 1;\n");
+		buf.append("        int d = a + b + c;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String selection= "b + c";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public  E() {\n");
+		buf.append("        int a = 1;\n");
+		buf.append("        int b = 1;\n");
+		buf.append("        int c = 1;\n");
+		buf.append("        int i = b + c;\n");
+		buf.append("        int d = a + i;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { ex1 });
+	}
+
 	public void testReplaceCatchClauseWithThrowsWithFinally() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
