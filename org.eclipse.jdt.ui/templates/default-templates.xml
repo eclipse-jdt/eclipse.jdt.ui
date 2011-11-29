@@ -80,7 +80,7 @@
 	// ${todo}: handle exception
 }</template>
 
-<template name="catch" description="%Templates.catch" id="org.eclipse.jdt.ui.templates.catch" context="java" enabled="true" autoinsert="false">catch (${Exception} ${exception_variable_name}) {
+<template name="catch" description="%Templates.catch" id="org.eclipse.jdt.ui.templates.catch" context="java-statements" enabled="true" autoinsert="false">catch (${Exception} ${exception_variable_name}) {
 	${cursor}// ${todo}: handle exception
 }</template>
 
@@ -115,7 +115,7 @@
 
 <template name="cast" description="%Templates.cast" id="org.eclipse.jdt.ui.templates.cast" context="java-statements" enabled="true" autoinsert="false">${type} ${new_name} = (${type}) ${name};</template>
 
-<template name="new" description="%Templates.new" id="org.eclipse.jdt.ui.templates.new" context="java-statements" enabled="true" autoinsert="false">${type} ${name} = new ${type}(${arguments});</template>
+<template name="new" description="%Templates.new" id="org.eclipse.jdt.ui.templates.new" context="java" enabled="true" autoinsert="false">${type} ${name} = new ${type}(${arguments});</template>
 
 <template name="lazy" description="%Templates.lazy" id="org.eclipse.jdt.ui.templates.lazy" context="java-statements" enabled="true" autoinsert="false">if (${name:var} == null) {
 	${name} = new ${type}(${arguments});
@@ -163,7 +163,7 @@ public void ${testName}() throws Exception {
 
 <template name="nls" description="%Templates.non-nls" id="org.eclipse.jdt.ui.templates.non-nls" context="java" enabled="true" autoinsert="false">//$$NON-NLS-${N}$$</template>
 
-<template name="fall-through" description="%Templates.fall-through" id="org.eclipse.jdt.ui.templates.fall-through" context="java" enabled="true" autoinsert="false">//$$FALL-THROUGH$$</template>
+<template name="fall-through" description="%Templates.fall-through" id="org.eclipse.jdt.ui.templates.fall-through" context="java-statements" enabled="true" autoinsert="false">//$$FALL-THROUGH$$</template>
 
 <template name="synchronized" description="%Templates.synchronized" id="org.eclipse.jdt.ui.templates.synchronized" context="java-statements" enabled="true" autoinsert="false">synchronized (${mutex:var}) {
 	${line_selection}
