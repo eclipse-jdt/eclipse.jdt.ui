@@ -262,6 +262,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocConfigurationBlock_browse_archive_path_button;
 	public static String ProblemSeveritiesConfigurationBlock_ignore_documented_unused_exceptions;
 	public static String ProblemSeveritiesConfigurationBlock_ignore_documented_unused_parameters;
+	public static String ProblemSeveritiesConfigurationBlock_pb_redundant_null_annotation;
 	public static String ProblemSeveritiesConfigurationBlock_pb_redundant_null_check;
 	public static String ProblemSeveritiesConfigurationBlock_pb_redundant_super_interface_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_redundant_type_arguments_label;
@@ -357,6 +358,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaBuildConfigurationBlock_invalid_input;
 	public static String JavaBuildConfigurationBlock_filter_invalidsegment_error;
 	public static String ProblemSeveritiesPreferencePage_title;
+	public static String ProblemSeveritiesConfigurationBlock_enable_annotation_null_analysis;
 	public static String ProblemSeveritiesConfigurationBlock_error;
 	public static String ProblemSeveritiesConfigurationBlock_warning;
 	public static String ProblemSeveritiesConfigurationBlock_ignore;
@@ -365,10 +367,12 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_section_code_style;
 	public static String ProblemSeveritiesConfigurationBlock_section_deprecations;
 	public static String ProblemSeveritiesConfigurationBlock_section_name_shadowing;
+	public static String ProblemSeveritiesConfigurationBlock_section_null_analysis;
 	public static String ProblemSeveritiesConfigurationBlock_section_annotations;
 	public static String ProblemSeveritiesConfigurationBlock_needsbuild_title;
 	public static String ProblemSeveritiesConfigurationBlock_needsfullbuild_message;
 	public static String ProblemSeveritiesConfigurationBlock_needsprojectbuild_message;
+	public static String ProblemSeveritiesConfigurationBlock_nonnull_is_default;
 	public static String ProblemSeveritiesConfigurationBlock_common_description;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unavoidable_generic_type_problems;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unsafe_type_op_label;
@@ -758,7 +762,10 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_classfile_greater_source;
 	public static String ProblemSeveritiesConfigurationBlock_pb_parameter_assignment;
 	public static String ProblemSeveritiesConfigurationBlock_pb_null_reference;
+	public static String ProblemSeveritiesConfigurationBlock_pb_null_spec_violation;
+	public static String ProblemSeveritiesConfigurationBlock_pb_null_spec_violation_insufficient_info;
 	public static String ProblemSeveritiesConfigurationBlock_pb_potential_null_reference;
+	public static String ProblemSeveritiesConfigurationBlock_pb_potential_null_spec_violation;
 	public static String ProblemSeveritiesConfigurationBlock_pb_potential_resource_leak_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_potentially_missing_static_on_method_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_fall_through_case;

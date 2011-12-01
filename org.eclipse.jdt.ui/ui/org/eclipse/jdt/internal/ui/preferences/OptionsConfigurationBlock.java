@@ -43,7 +43,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.Scrollable;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
@@ -516,9 +515,9 @@ public abstract class OptionsConfigurationBlock {
 			return addComboBox(parentComposite, label, key, values, valueLabels, indent, parentNode, true);
 		}
 
-		public PreferenceTreeNode addTextField(Composite parentComposite, String label, Key key, int indent, int widthHint, PreferenceTreeNode parentNode, boolean showAllChildren) {
+		public PreferenceTreeNode addTextField(Composite parentComposite, String label, Key key, int indent, int widthHint, PreferenceTreeNode parentNode) {
 			fConfigBlock.addTextField(parentComposite, label, key, indent, widthHint);
-			return addChild(parentNode, label, key, PreferenceTreeNode.TEXT_CONTROL, showAllChildren);
+			return addChild(parentNode, label, key, PreferenceTreeNode.TEXT_CONTROL, true);
 		}
 
 		public PreferenceTreeNode addExpandableComposite(Composite parentComposite, String label, int nColumns, Key key, PreferenceTreeNode parentNode, boolean showAllChildren) {
@@ -688,7 +687,7 @@ public abstract class OptionsConfigurationBlock {
 	protected final ArrayList<Button> fCheckBoxes;
 	protected final ArrayList<Combo> fComboBoxes;
 	protected final ArrayList<Text> fTextBoxes;
-	protected final HashMap<Scrollable, Label> fLabels;
+	protected final HashMap<Control, Label> fLabels;
 	protected final ArrayList<ExpandableComposite> fExpandableComposites;
 
 	private SelectionListener fSelectionListener;
@@ -748,7 +747,7 @@ public abstract class OptionsConfigurationBlock {
 		fCheckBoxes= new ArrayList<Button>();
 		fComboBoxes= new ArrayList<Combo>();
 		fTextBoxes= new ArrayList<Text>(2);
-		fLabels= new HashMap<Scrollable, Label>();
+		fLabels= new HashMap<Control, Label>();
 		fExpandableComposites= new ArrayList<ExpandableComposite>();
 
 		fRebuildCount= getRebuildCount();
@@ -1026,11 +1025,12 @@ public abstract class OptionsConfigurationBlock {
 		Label labelControl= new Label(parent, SWT.WRAP);
 		labelControl.setText(label);
 		labelControl.setFont(JFaceResources.getDialogFont());
-		labelControl.setLayoutData(new GridData());
+		GridData gd= new GridData();
+		gd.horizontalIndent= indent;
+		labelControl.setLayoutData(gd);
 
 		Text textBox= new Text(parent, SWT.BORDER | SWT.SINGLE);
 		textBox.setData(key);
-		textBox.setLayoutData(new GridData());
 
 		makeScrollableCompositeAware(textBox);
 
@@ -1044,7 +1044,6 @@ public abstract class OptionsConfigurationBlock {
 		if (widthHint != 0) {
 			data.widthHint= widthHint;
 		}
-		data.horizontalIndent= indent;
 		data.horizontalSpan= 2;
 		textBox.setLayoutData(data);
 
@@ -1562,6 +1561,13 @@ public abstract class OptionsConfigurationBlock {
 		Combo combo= getComboBox(key);
 		Label label= fLabels.get(combo);
 		combo.setEnabled(enabled);
+		label.setEnabled(enabled);
+	}
+	
+	protected void setTextFieldEnabled(Key key, boolean enabled) {
+		Text text= getTextControl(key);
+		Label label= fLabels.get(text);
+		text.setEnabled(enabled);
 		label.setEnabled(enabled);
 	}
 }

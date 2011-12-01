@@ -85,6 +85,20 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 	private static final Key PREF_PB_NULL_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_NULL_REFERENCE);
 	private static final Key PREF_PB_POTENTIAL_NULL_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE);
+	
+	private static final Key PREF_ANNOTATION_NULL_ANALYSIS= getJDTCoreKey(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS);
+	
+	private static final Key PREF_NULLABLE_ANNOTATION_NAME= getJDTCoreKey(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME);
+	private static final Key PREF_NONNULL_ANNOTATION_NAME= getJDTCoreKey(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME);
+	private static final Key PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME= getJDTCoreKey(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME);
+	
+	private static final Key PREF_NONNULL_IS_DEFAULT= getJDTCoreKey(JavaCore.COMPILER_NONNULL_IS_DEFAULT);
+	
+	private static final Key PREF_PB_NULL_SPECIFICATION_VIOLATION= getJDTCoreKey(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION);
+	private static final Key PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION= getJDTCoreKey(JavaCore.COMPILER_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION);
+	private static final Key PREF_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO= getJDTCoreKey(JavaCore.COMPILER_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO);
+	private static final Key PREF_PB_REDUNDANT_NULL_ANNOTATION= getJDTCoreKey(JavaCore.COMPILER_PB_REDUNDANT_NULL_ANNOTATION);	
+
 	private static final Key PREF_PB_REDUNDANT_NULL_CHECK= getJDTCoreKey(JavaCore.COMPILER_PB_REDUNDANT_NULL_CHECK);
 
 	private static final Key PREF_PB_UNCLOSED_CLOSEABLE= getJDTCoreKey(JavaCore.COMPILER_PB_UNCLOSED_CLOSEABLE);
@@ -159,7 +173,17 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, PREF_PB_DEPRECATION_WHEN_OVERRIDING,
 				PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_INCLUDE_DOC_COMMENT_REFERENCE,
 				PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_EXEMPT_EXCEPTION_AND_THROWABLE,
-				PREF_PB_MISSING_SERIAL_VERSION, PREF_PB_PARAMETER_ASSIGNMENT, PREF_PB_NULL_REFERENCE, PREF_PB_POTENTIAL_NULL_REFERENCE,
+				PREF_PB_MISSING_SERIAL_VERSION, PREF_PB_PARAMETER_ASSIGNMENT,
+				PREF_PB_NULL_REFERENCE, PREF_PB_POTENTIAL_NULL_REFERENCE,
+				PREF_ANNOTATION_NULL_ANALYSIS,
+				PREF_NULLABLE_ANNOTATION_NAME,
+				PREF_NONNULL_ANNOTATION_NAME,
+				PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME,
+				PREF_NONNULL_IS_DEFAULT,
+				PREF_PB_NULL_SPECIFICATION_VIOLATION,
+				PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION,
+				PREF_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO,
+				PREF_PB_REDUNDANT_NULL_ANNOTATION,	
 				PREF_PB_REDUNDANT_NULL_CHECK, PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS,
 				PREF_PB_UNCLOSED_CLOSEABLE, PREF_PB_POTENTIALLY_UNCLOSED_CLOSEABLE, PREF_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE,
 				PREF_PB_FALLTHROUGH_CASE, PREF_PB_REDUNDANT_SUPERINTERFACE, PREF_PB_UNUSED_WARNING_TOKEN,
@@ -205,13 +229,18 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 	private Composite createStyleTabContent(Composite folder) {
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
-
 		String[] errorWarningIgnoreLabels= new String[] {
 			PreferencesMessages.ProblemSeveritiesConfigurationBlock_error,
 			PreferencesMessages.ProblemSeveritiesConfigurationBlock_warning,
 			PreferencesMessages.ProblemSeveritiesConfigurationBlock_ignore
 		};
 
+		String[] errorWarning= new String[] { ERROR, WARNING };
+		String[] errorWarningLabels= new String[] {
+				PreferencesMessages.ProblemSeveritiesConfigurationBlock_error,
+				PreferencesMessages.ProblemSeveritiesConfigurationBlock_warning
+		};
+		
 		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
 		String[] disabledEnabled= new String[] { DISABLED, ENABLED };
 
@@ -320,12 +349,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_fall_through_case;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_FALLTHROUGH_CASE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
-
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_null_reference;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NULL_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
-
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_potential_null_reference;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIAL_NULL_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_comparing_identical;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_COMPARING_IDENTICAL, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
@@ -510,16 +533,61 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_suppress_optional_errors_label;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_SUPPRESS_OPTIONAL_ERRORS, enabledDisabled, extraIndent, node);
+		
+		// --- null analysis
 
-		GridData gd= new GridData();
-		gd.verticalIndent= fPixelConverter.convertHeightInCharsToPixels(2);
-		gd.horizontalSpan= 2;
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_null_analysis;
+		twistieKey= OptionsConfigurationBlock.getLocalKey("ProblemSeveritiesConfigurationBlock_section_null_analysis"); //$NON-NLS-1$
+		section= fFilteredPrefTree.addExpandableComposite(composite, label, nColumns, twistieKey, null, false);
+		excomposite= getExpandableComposite(twistieKey);
+
+		inner= createInnerComposite(excomposite, nColumns, composite.getFont());
+		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_null_reference;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NULL_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_potential_null_reference;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIAL_NULL_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_include_assert_in_null_analysis;
-		addCheckBox(composite, label, PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS, enabledDisabled, defaultIndent);
-		getCheckBox(PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS).setLayoutData(gd);
-
+		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS, enabledDisabled, defaultIndent, section);		
+		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_enable_annotation_null_analysis;
+		node= fFilteredPrefTree.addCheckBox(inner, label, PREF_ANNOTATION_NULL_ANALYSIS, enabledDisabled, defaultIndent, section, false);
+		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_nonnull_is_default;
+		fFilteredPrefTree.addCheckBox(inner, label, PREF_NONNULL_IS_DEFAULT, enabledDisabled, extraIndent, node);
+		
+		label= "'Nullable' annotation:";
+		fFilteredPrefTree.addTextField(inner, label, PREF_NULLABLE_ANNOTATION_NAME, extraIndent, 0, node);
+		
+		label= "'NonNull' annotation:";
+		fFilteredPrefTree.addTextField(inner, label, PREF_NONNULL_ANNOTATION_NAME, extraIndent, 0, node);
+		
+		label= "'NonNullByDefault' annotation:";
+		fFilteredPrefTree.addTextField(inner, label, PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME, extraIndent, 0, node);
+		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_null_spec_violation;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NULL_SPECIFICATION_VIOLATION, errorWarning, errorWarningLabels, extraIndent, node);
+		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_potential_null_spec_violation;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION, errorWarningIgnore, errorWarningIgnoreLabels, extraIndent, node);
+		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_null_spec_violation_insufficient_info;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO, errorWarningIgnore, errorWarningIgnoreLabels, extraIndent, node);
+		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_redundant_null_annotation;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_REDUNDANT_NULL_ANNOTATION, errorWarningIgnore, errorWarningIgnoreLabels, extraIndent, node);
+		
+		// --- global
+		
+		// add some vertical space before:
+		GridData gd= new GridData();
+		gd.verticalIndent= fPixelConverter.convertHeightInCharsToPixels(1);
+		gd.horizontalSpan= 2;
+		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_treat_optional_as_fatal;
-		addCheckBox(composite, label, PREF_PB_FATAL_OPTIONAL_ERROR, enabledDisabled, defaultIndent);
+		addCheckBox(composite, label, PREF_PB_FATAL_OPTIONAL_ERROR, enabledDisabled, defaultIndent).setLayoutData(gd);
 
 		IDialogSettings settingsSection= JavaPlugin.getDefault().getDialogSettings().getSection(SETTINGS_SECTION_NAME);
 		restoreSectionExpansionStates(settingsSection);
@@ -551,7 +619,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 					PREF_PB_LOCAL_VARIABLE_HIDING.equals(changedKey) ||
 					PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION.equals(changedKey) ||
 					PREF_15_PB_MISSING_OVERRIDE_ANNOTATION.equals(changedKey) ||
-					PREF_PB_SUPPRESS_WARNINGS.equals(changedKey)) {
+					PREF_PB_SUPPRESS_WARNINGS.equals(changedKey) ||
+					PREF_ANNOTATION_NULL_ANALYSIS.equals(changedKey)) {
 				updateEnableStates();
 			} else if (PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING.equals(changedKey)) {
 				// merging the two options
@@ -588,6 +657,16 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		boolean enableSuppressWarnings= checkValue(PREF_PB_SUPPRESS_WARNINGS, ENABLED);
 		getCheckBox(PREF_PB_SUPPRESS_OPTIONAL_ERRORS).setEnabled(enableSuppressWarnings);
 		setComboEnabled(PREF_PB_UNUSED_WARNING_TOKEN, enableSuppressWarnings);
+		
+		boolean enableAnnotationNullAnalysis= checkValue(PREF_ANNOTATION_NULL_ANALYSIS, ENABLED);
+		getCheckBox(PREF_NONNULL_IS_DEFAULT).setEnabled(enableAnnotationNullAnalysis);
+		setTextFieldEnabled(PREF_NULLABLE_ANNOTATION_NAME, enableAnnotationNullAnalysis);
+		setTextFieldEnabled(PREF_NONNULL_ANNOTATION_NAME, enableAnnotationNullAnalysis);
+		setTextFieldEnabled(PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME, enableAnnotationNullAnalysis);
+		setComboEnabled(PREF_PB_NULL_SPECIFICATION_VIOLATION, enableAnnotationNullAnalysis);
+		setComboEnabled(PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION, enableAnnotationNullAnalysis);
+		setComboEnabled(PREF_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO, enableAnnotationNullAnalysis);
+		setComboEnabled(PREF_PB_REDUNDANT_NULL_ANNOTATION, enableAnnotationNullAnalysis);
 	}
 
 	@Override
