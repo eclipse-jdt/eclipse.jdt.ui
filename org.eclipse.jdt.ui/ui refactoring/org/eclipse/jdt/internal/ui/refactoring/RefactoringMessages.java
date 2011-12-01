@@ -576,7 +576,7 @@ public final class RefactoringMessages extends NLS {
 
 	public static String MoveInstanceMethodPage_Method_name;
 
-	public static String MoveInstanceMethodPage_Name;
+	public static String MoveInstanceMethodPage_Receiver;
 
 	public static String MoveInstanceMethodPage_New_receiver;
 

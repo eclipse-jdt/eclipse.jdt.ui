@@ -129,18 +129,18 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			table.setHeaderVisible(true);
 			table.setLinesVisible(false);
 
-			TableColumn columnName= new TableColumn(table, SWT.NONE);
-			columnName.setText(RefactoringMessages.MoveInstanceMethodPage_Name);
-			columnName.setResizable(true);
-
 			TableColumn columnType= new TableColumn(table, SWT.NONE);
 			columnType.setText(RefactoringMessages.MoveInstanceMethodPage_Type);
 			columnType.setResizable(true);
 
+			TableColumn columnName= new TableColumn(table, SWT.NONE);
+			columnName.setText(RefactoringMessages.MoveInstanceMethodPage_Receiver);
+			columnName.setResizable(true);
+
 			TableColumnLayout tableColumnLayout= new TableColumnLayout();
 			composite.setLayout(tableColumnLayout);
-			tableColumnLayout.setColumnData(columnName, new ColumnWeightData(40, true));
 			tableColumnLayout.setColumnData(columnType, new ColumnWeightData(60, true));
+			tableColumnLayout.setColumnData(columnName, new ColumnWeightData(40, true));
 			
 			final TableViewer viewer= new TableViewer(table);
 			viewer.setContentProvider(new ArrayContentProvider());
@@ -308,9 +308,15 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
 		 */
 		public Image getColumnImage(final Object element, final int column) {
-			if (column == 0)
-				return getImage(element);
-			return null;
+			final IVariableBinding binding= (IVariableBinding) element;
+			switch (column) {
+				case 0:
+					return getImage(binding.getType());
+				case 1:
+					return getImage(binding);
+				default:
+					return null;
+			}
 		}
 
 		/*
@@ -320,9 +326,9 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			final IVariableBinding binding= (IVariableBinding) element;
 			switch (column) {
 				case 0:
-					return getText(binding);
-				case 1:
 					return getText(binding.getType());
+				case 1:
+					return getText(binding);
 				default:
 					return null;
 			}
