@@ -11,12 +11,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.util.Hashtable;
+
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.core.resources.IProject;
 
@@ -134,6 +140,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_PB_UNUSED_OBJECT_ALLOCATION= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_OBJECT_ALLOCATION);
 	private static final Key PREF_PB_MISSING_STATIC_ON_METHOD= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_STATIC_ON_METHOD);
 	private static final Key PREF_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD= getJDTCoreKey(JavaCore.COMPILER_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD);
+	
+	// special key
+	private static final Key NULL_ANNOTATIONS_LINK= OptionsConfigurationBlock.getLocalKey("ProblemSeveritiesConfigurationBlock_null_annotations_link"); //$NON-NLS-1$
 
 	// values
 	private static final String ERROR= JavaCore.ERROR;
@@ -219,7 +228,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		Composite commonComposite= createStyleTabContent(mainComp);
 		GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.heightHint= fPixelConverter.convertHeightInCharsToPixels(20);
+		gridData.heightHint= fPixelConverter.convertHeightInCharsToPixels(30);
 		commonComposite.setLayoutData(gridData);
 
 		validateSettings(null, null, null);
@@ -450,9 +459,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_private_label;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_PRIVATE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
 
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_redundant_null_check;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_REDUNDANT_NULL_CHECK, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
-
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unnecessary_else_label;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNNECESSARY_ELSE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
 
@@ -549,23 +555,41 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_potential_null_reference;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIAL_NULL_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
 		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_redundant_null_check;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_REDUNDANT_NULL_CHECK, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_include_assert_in_null_analysis;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS, enabledDisabled, defaultIndent, section);		
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_enable_annotation_null_analysis;
-		node= fFilteredPrefTree.addCheckBox(inner, label, PREF_ANNOTATION_NULL_ANALYSIS, enabledDisabled, defaultIndent, section, false);
+		node= fFilteredPrefTree.addCheckBox(inner, label, PREF_ANNOTATION_NULL_ANALYSIS, enabledDisabled, defaultIndent, section);
 		
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_nonnull_is_default;
-		fFilteredPrefTree.addCheckBox(inner, label, PREF_NONNULL_IS_DEFAULT, enabledDisabled, extraIndent, node);
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_null_annotation_description_link;
+		SelectionListener linkListener= new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Hashtable<String, String> defaultOptions= JavaCore.getDefaultOptions();
+				setValue(PREF_NULLABLE_ANNOTATION_NAME, defaultOptions.get(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME));
+				setValue(PREF_NONNULL_ANNOTATION_NAME, defaultOptions.get(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME));
+				setValue(PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME, defaultOptions.get(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME));
+				updateControls();
+			}
+		};
+		fFilteredPrefTree.addLink(inner, label, NULL_ANNOTATIONS_LINK, linkListener, extraIndent, fPixelConverter.convertWidthInCharsToPixels(60), node);
 		
-		label= "'Nullable' annotation:";
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_nullable_annotation_label;
 		fFilteredPrefTree.addTextField(inner, label, PREF_NULLABLE_ANNOTATION_NAME, extraIndent, 0, node);
 		
-		label= "'NonNull' annotation:";
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_nonnull_annotation_label;
 		fFilteredPrefTree.addTextField(inner, label, PREF_NONNULL_ANNOTATION_NAME, extraIndent, 0, node);
 		
-		label= "'NonNullByDefault' annotation:";
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_nonnullbydefault_annotation_label;
 		fFilteredPrefTree.addTextField(inner, label, PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME, extraIndent, 0, node);
+		
+		label= fProject == null
+				? PreferencesMessages.ProblemSeveritiesConfigurationBlock_nonnull_is_default_workspace
+				: PreferencesMessages.ProblemSeveritiesConfigurationBlock_nonnull_is_default_project;
+		fFilteredPrefTree.addCheckBox(inner, label, PREF_NONNULL_IS_DEFAULT, enabledDisabled, extraIndent, node);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_null_spec_violation;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NULL_SPECIFICATION_VIOLATION, errorWarning, errorWarningLabels, extraIndent, node);
@@ -660,6 +684,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		
 		boolean enableAnnotationNullAnalysis= checkValue(PREF_ANNOTATION_NULL_ANALYSIS, ENABLED);
 		getCheckBox(PREF_NONNULL_IS_DEFAULT).setEnabled(enableAnnotationNullAnalysis);
+		Link link= getLink(NULL_ANNOTATIONS_LINK);
+		link.setEnabled(enableAnnotationNullAnalysis);
 		setTextFieldEnabled(PREF_NULLABLE_ANNOTATION_NAME, enableAnnotationNullAnalysis);
 		setTextFieldEnabled(PREF_NONNULL_ANNOTATION_NAME, enableAnnotationNullAnalysis);
 		setTextFieldEnabled(PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME, enableAnnotationNullAnalysis);

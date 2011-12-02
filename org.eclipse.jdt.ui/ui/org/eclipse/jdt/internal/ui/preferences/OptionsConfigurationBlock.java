@@ -241,6 +241,8 @@ public abstract class OptionsConfigurationBlock {
 
 		public static final int TEXT_CONTROL= 4;
 
+		public static final int LINK= 5;
+
 		/**
 		 * Tells the type of UI control corresponding to this node. One of
 		 * <ul>
@@ -525,6 +527,10 @@ public abstract class OptionsConfigurationBlock {
 			return addChild(parentNode, label, key, PreferenceTreeNode.EXPANDABLE_COMPOSITE, showAllChildren);
 		}
 
+		public PreferenceTreeNode addLink(Composite parentComposite, String label, Key key, SelectionListener linkListener, int indent, int widthHint, PreferenceTreeNode parentNode) {
+			fConfigBlock.addLink(parentComposite, label, key, linkListener, indent, widthHint);
+			return addChild(parentNode, label, key, PreferenceTreeNode.LINK, false);
+		}
 		private boolean match(PreferenceTreeNode node, StringMatcher labelMatcher, StringMatcher valueMatcher) {
 			if (node.getKey() == null) {
 				return false;
@@ -636,6 +642,8 @@ public abstract class OptionsConfigurationBlock {
 				control= fConfigBlock.getTextControl(node.getKey());
 			} else if (controlType == PreferenceTreeNode.EXPANDABLE_COMPOSITE) {
 				control= fConfigBlock.getExpandableComposite(node.getKey());
+			} else if (controlType == PreferenceTreeNode.LINK) {
+				control= fConfigBlock.getLink(node.getKey());
 			}
 
 			if (control != null) {
@@ -687,6 +695,7 @@ public abstract class OptionsConfigurationBlock {
 	protected final ArrayList<Button> fCheckBoxes;
 	protected final ArrayList<Combo> fComboBoxes;
 	protected final ArrayList<Text> fTextBoxes;
+	protected final ArrayList<Link> fLinks;
 	protected final HashMap<Control, Label> fLabels;
 	protected final ArrayList<ExpandableComposite> fExpandableComposites;
 
@@ -747,6 +756,7 @@ public abstract class OptionsConfigurationBlock {
 		fCheckBoxes= new ArrayList<Button>();
 		fComboBoxes= new ArrayList<Combo>();
 		fTextBoxes= new ArrayList<Text>(2);
+		fLinks= new ArrayList<Link>(2);
 		fLabels= new HashMap<Control, Label>();
 		fExpandableComposites= new ArrayList<ExpandableComposite>();
 
@@ -799,6 +809,7 @@ public abstract class OptionsConfigurationBlock {
 
 
 	protected void settingsUpdated() {
+		// hook for subclasses
 	}
 
 
@@ -1051,6 +1062,26 @@ public abstract class OptionsConfigurationBlock {
 		return textBox;
 	}
 
+	public Link addLink(Composite parent, String label, Key key, SelectionListener linkListener, int indent, int widthHint) {
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 3;
+		gd.horizontalIndent= indent;
+		gd.widthHint= widthHint;
+
+		Link link= new Link(parent, SWT.NONE);
+		link.setFont(JFaceResources.getDialogFont());
+		link.setText(label);
+		link.setData(key);
+		link.setLayoutData(gd);
+		link.addSelectionListener(linkListener);
+
+		makeScrollableCompositeAware(link);
+
+		fLinks.add(link);
+
+		return link;
+	}
+
 	protected ScrolledPageContent getParentScrolledComposite(Control control) {
 		Control parent= control.getParent();
 		while (!(parent instanceof ScrolledPageContent) && parent != null) {
@@ -1131,9 +1162,8 @@ public abstract class OptionsConfigurationBlock {
 
 	protected SelectionListener getSelectionListener() {
 		if (fSelectionListener == null) {
-			fSelectionListener= new SelectionListener() {
-				public void widgetDefaultSelected(SelectionEvent e) {}
-
+			fSelectionListener= new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					controlChanged(e.widget);
 				}
@@ -1442,6 +1472,7 @@ public abstract class OptionsConfigurationBlock {
 	}
 
 	public void dispose() {
+		// hook for subclasses
 	}
 
 	/**
@@ -1541,6 +1572,17 @@ public abstract class OptionsConfigurationBlock {
 		return null;
 	}
 
+	protected Link getLink(Key key) {
+		for (int i= fLinks.size() - 1; i >= 0; i--) {
+			Link curr= fLinks.get(i);
+			Key data= (Key)curr.getData();
+			if (key.equals(data)) {
+				return curr;
+			}
+		}
+		return null;
+	}
+	
 	protected Control findControl(Key key) {
 		Combo comboBox= getComboBox(key);
 		if (comboBox != null) {
@@ -1553,6 +1595,10 @@ public abstract class OptionsConfigurationBlock {
 		Text text= getTextControl(key);
 		if (text != null) {
 			return text;
+		}
+		Link link= getLink(key);
+		if (link != null) {
+			return link;
 		}
 		return null;
 	}
