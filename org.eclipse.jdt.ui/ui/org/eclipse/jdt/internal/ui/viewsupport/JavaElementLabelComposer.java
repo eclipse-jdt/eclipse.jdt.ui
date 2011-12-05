@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.StyledString.Styler;
 
 import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -35,6 +36,7 @@ import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -43,6 +45,7 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -212,7 +215,7 @@ public class JavaElementLabelComposer {
 	private static String fgPkgNameAbbreviationPattern= ""; //$NON-NLS-1$
 	private static PackageNameAbbreviation[] fgPkgNameAbbreviation;
 
-	private final FlexibleBuffer fBuffer;
+	protected final FlexibleBuffer fBuffer;
 
 	private static final boolean getFlag(long flags, long flag) {
 		return (flags & flag) != 0;
@@ -429,11 +432,20 @@ public class JavaElementLabelComposer {
 						}
 					}
 				}
+				
+				ILocalVariable[] annotatedParameters= null;
+				if (nParams > 0 && getFlag(flags, JavaElementLabels.M_PARAMETER_ANNOTATIONS)) {
+					annotatedParameters= method.getParameters();
+				}
 
 				for (int i= 0; i < nParams; i++) {
 					if (i > 0) {
 						fBuffer.append(JavaElementLabels.COMMA_STRING);
 					}
+					if (annotatedParameters != null && i < annotatedParameters.length) {
+						appendAnnotationLabels(annotatedParameters[i].getAnnotations(), flags);
+					}
+					
 					if (types != null) {
 						String paramSig= types[i];
 						if (renderVarargs && (i == nParams - 1)) {
@@ -538,6 +550,79 @@ public class JavaElementLabelComposer {
 
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e); // NotExistsException will not reach this point
+		}
+	}
+
+	protected void appendAnnotationLabels(IAnnotation[] annotations, long flags) throws JavaModelException {
+		for (int j= 0; j < annotations.length; j++) {
+			IAnnotation annotation= annotations[j];
+			appendAnnotationLabel(annotation, flags);
+			fBuffer.append(' ');
+		}
+	}
+
+	public void appendAnnotationLabel(IAnnotation annotation, long flags) throws JavaModelException {
+		fBuffer.append('@');
+		appendTypeSignatureLabel(annotation, Signature.createTypeSignature(annotation.getElementName(), false), flags);
+		IMemberValuePair[] memberValuePairs= annotation.getMemberValuePairs();
+		if (memberValuePairs.length == 0)
+			return;
+		fBuffer.append('(');
+		for (int i= 0; i < memberValuePairs.length; i++) {
+			if (i > 0)
+				fBuffer.append(JavaElementLabels.COMMA_STRING);
+			IMemberValuePair memberValuePair= memberValuePairs[i];
+			fBuffer.append(getMemberName(annotation, annotation.getElementName(), memberValuePair.getMemberName()));
+			fBuffer.append('=');
+			appendAnnotationValue(annotation, memberValuePair.getValue(), memberValuePair.getValueKind(), flags);
+		}
+		fBuffer.append(')');
+	}
+
+	private void appendAnnotationValue(IAnnotation annotation, Object value, int valueKind, long flags) throws JavaModelException {
+		// Note: To be bug-compatible with Javadoc from Java 5/6/7, we currently don't escape HTML tags in String-valued annotations.
+		if (value instanceof Object[]) {
+			fBuffer.append('{');
+			Object[] values= (Object[]) value;
+			for (int j= 0; j < values.length; j++) {
+				if (j > 0)
+					fBuffer.append(JavaElementLabels.COMMA_STRING);
+				value= values[j];
+				appendAnnotationValue(annotation, value, valueKind, flags);
+			}
+			fBuffer.append('}');
+		} else {
+			switch (valueKind) {
+				case IMemberValuePair.K_CLASS:
+					appendTypeSignatureLabel(annotation, Signature.createTypeSignature((String) value, false), flags);
+					fBuffer.append(".class"); //$NON-NLS-1$
+					break;
+				case IMemberValuePair.K_QUALIFIED_NAME:
+					String name = (String) value;
+					int lastDot= name.lastIndexOf('.');
+					if (lastDot != -1) {
+						String type= name.substring(0, lastDot);
+						String field= name.substring(lastDot + 1);
+						appendTypeSignatureLabel(annotation, Signature.createTypeSignature(type, false), flags);
+						fBuffer.append('.');
+						fBuffer.append(getMemberName(annotation, type, field));
+						break;
+					}
+//				case IMemberValuePair.K_SIMPLE_NAME: // can't implement, since parent type is not known
+					//$FALL-THROUGH$
+				case IMemberValuePair.K_ANNOTATION:
+					appendAnnotationLabel((IAnnotation) value, flags);
+					break;
+				case IMemberValuePair.K_STRING:
+					fBuffer.append(ASTNodes.getEscapedStringLiteral((String) value));
+					break;
+				case IMemberValuePair.K_CHAR:
+					fBuffer.append(ASTNodes.getEscapedCharacterLiteral(((Character) value).charValue()));
+					break;
+				default:
+					fBuffer.append(String.valueOf(value));
+					break;
+			}
 		}
 	}
 
@@ -788,6 +873,18 @@ public class JavaElementLabelComposer {
 	 */
 	protected String getSimpleTypeName(IJavaElement enclosingElement, String typeSig) {
 		return Signature.getSimpleName(Signature.toString(Signature.getTypeErasure(typeSig)));
+	}
+
+	/**
+	 * Returns the simple name of the given member.
+	 *
+	 * @param enclosingElement the enclosing element
+	 * @param typeName the name of the member's declaring type
+	 * @param memberName the name of the member
+	 * @return the simple name of the member
+	 */
+	protected String getMemberName(IJavaElement enclosingElement, String typeName, String memberName) {
+		return memberName;
 	}
 
 	private void appendTypeArgumentSignaturesLabel(IJavaElement enclosingElement, String[] typeArgsSig, long flags) {

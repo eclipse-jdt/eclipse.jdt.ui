@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,6 +72,14 @@ public class JavaElementLabels {
 	 * e.g. <code>foo(index)</code>
 	 */
 	public final static long M_PARAMETER_NAMES= 1L << 1;
+
+	/**
+	 * Method labels contain parameter annotations.
+	 * E.g. <code>foo(@NonNull int)</code>.
+	 * This flag is only valid if {@link #M_PARAMETER_NAMES} or {@link #M_PARAMETER_TYPES} is also set.
+	 * @since 3.8
+	 */
+	public final static long M_PARAMETER_ANNOTATIONS= 1L << 52;
 
 	/**
 	 * Method names contain type parameters prepended.

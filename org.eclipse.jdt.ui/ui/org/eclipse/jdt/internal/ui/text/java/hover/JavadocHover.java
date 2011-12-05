@@ -66,10 +66,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -85,11 +83,11 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -421,7 +419,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	private static final long LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
-		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS
+		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_ANNOTATIONS | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE | JavaElementLabels.M_PRE_TYPE_PARAMETERS | JavaElementLabels.T_TYPE_PARAMETERS
 		| JavaElementLabels.USE_RESOLVED;
 	private static final long LOCAL_VARIABLE_FLAGS= LABEL_FLAGS & ~JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
@@ -766,10 +764,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			return null;
 
 		if (constantValue instanceof String) {
-			return getEscapedStringLiteral((String) constantValue);
+			return ASTNodes.getEscapedStringLiteral((String) constantValue);
 
 		} else if (constantValue instanceof Character) {
-			String constantResult= getEscapedCharacterLiteral(((Character) constantValue).charValue());
+			String constantResult= ASTNodes.getEscapedCharacterLiteral(((Character) constantValue).charValue());
 
 			char charValue= ((Character) constantValue).charValue();
 			String hexString= Integer.toHexString(charValue);
@@ -812,23 +810,6 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		return NodeFinder.perform(unit, hoverRegion.getOffset(),	hoverRegion.getLength());
 	}
 
-	private static String getEscapedStringLiteral(String stringValue) {
-		StringLiteral stringLiteral= AST.newAST(ASTProvider.SHARED_AST_LEVEL).newStringLiteral();
-		stringLiteral.setLiteralValue(stringValue);
-		String stringConstant= stringLiteral.getEscapedValue();
-		if (stringConstant.length() > 80) {
-			return stringConstant.substring(0, 80) + JavaElementLabels.ELLIPSIS_STRING;
-		} else {
-			return stringConstant;
-		}
-	}
-
-	private static String getEscapedCharacterLiteral(char ch) {
-		CharacterLiteral characterLiteral= AST.newAST(ASTProvider.SHARED_AST_LEVEL).newCharacterLiteral();
-		characterLiteral.setCharValue(ch);
-		return characterLiteral.getEscapedValue();
-	}
-	
 	/**
 	 * Creates and returns a formatted message for the given
 	 * constant with its hex value.
@@ -1062,6 +1043,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	private static void addValue(StringBuffer buf, IJavaElement element, Object value) throws URISyntaxException {
+		// Note: To be bug-compatible with Javadoc from Java 5/6/7, we currently don't escape HTML tags in String-valued annotations.
 		if (value instanceof ITypeBinding) {
 			ITypeBinding typeBinding= (ITypeBinding)value;
 			IJavaElement type= typeBinding.getJavaElement();
@@ -1086,10 +1068,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			addAnnotation(buf, element, annotationBinding);
 			
 		} else if (value instanceof String) {
-			buf.append(getEscapedStringLiteral((String)value));
+			buf.append(ASTNodes.getEscapedStringLiteral((String)value));
 			
 		} else if (value instanceof Character) {
-			buf.append(getEscapedCharacterLiteral(((Character)value).charValue()));
+			buf.append(ASTNodes.getEscapedCharacterLiteral(((Character)value).charValue()));
 			
 		} else if (value instanceof Object[]) {
 			Object[] values= (Object[])value;

@@ -612,4 +612,43 @@ public class JavaElementLabelsTest extends CoreTests {
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
 		assertEqualString(lab, "asList(Integer...)");
 	}
+	
+	
+	public void testMethodLabelAnnotatedParameters() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("\n");
+		buf.append("import java.lang.annotation.Retention;\n");
+		buf.append("import java.lang.annotation.RetentionPolicy;\n");
+		buf.append("\n");
+		buf.append("public class Annotations {\n");
+		buf.append("    void foo(@Outer(a=@Ann(\"Hello world\\r\\n\\t\\\"<'#@%^&\")) String param) { }\n");
+		buf.append("    \n");
+		buf.append("    void foo2(@Ann(value=\"\", cl=Annotations.class, ints={1, 2, -19},\n");
+		buf.append("            ch='\\0', sh= 0x7FFF, r= @Retention(RetentionPolicy.SOURCE)) String param) { }\n");
+		buf.append("}\n");
+		buf.append("@interface Ann {\n");
+		buf.append("    String value();\n");
+		buf.append("    Class<?> cl() default Ann.class;\n");
+		buf.append("    int[] ints() default {1, 2};\n");
+		buf.append("    char ch() default 'a';\n");
+		buf.append("    short sh() default 1;\n");
+		buf.append("    Retention r() default @Retention(RetentionPolicy.CLASS);\n");
+		buf.append("}\n");
+		buf.append("@interface Outer {\n");
+		buf.append("    Ann a();\n");
+		buf.append("}\n");
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("Annotations.java", content, false, null);
+
+		IJavaElement foo= cu.getElementAt(content.indexOf("foo"));
+		String lab= JavaElementLabels.getTextLabel(foo, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_ANNOTATIONS);
+		assertEqualString(lab, "org.test.Annotations.foo(@Outer(a=@Ann(value=\"Hello world\\r\\n\\t\\\"<'#@%^&\")) String)");
+
+		IJavaElement foo2= cu.getElementAt(content.indexOf("foo2"));
+		lab= JavaElementLabels.getTextLabel(foo2, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_ANNOTATIONS);
+		assertEqualString(lab, "org.test.Annotations.foo2(@Ann(value=\"\", cl=Annotations.class, ints={1, 2, -19}, ch='\\0', sh=32767, r=@Retention(value=RetentionPolicy.SOURCE)) String)");
+	}
 }

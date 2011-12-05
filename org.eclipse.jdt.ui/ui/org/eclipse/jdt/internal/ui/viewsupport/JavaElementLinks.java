@@ -144,6 +144,24 @@ public class JavaElementLinks {
 				return typeName;
 			}
 		}
+		
+		@Override
+		protected String getMemberName(IJavaElement enclosingElement, String typeName, String memberName) {
+			try {
+				String uri= createURI(JAVADOC_SCHEME, enclosingElement, typeName, memberName, null);
+				return createHeaderLink(uri, memberName);
+			} catch (URISyntaxException e) {
+				JavaPlugin.log(e);
+				return memberName;
+			}
+		}
+		
+		@Override
+		protected void appendAnnotationLabels(IAnnotation[] annotations, long flags) throws JavaModelException {
+			fBuffer.append("<span style='font-weight:normal;'>"); //$NON-NLS-1$
+			super.appendAnnotationLabels(annotations, flags);
+			fBuffer.append("</span>"); //$NON-NLS-1$
+		}
 	}
 
 	public static final String OPEN_LINK_SCHEME= "eclipse-open"; //$NON-NLS-1$

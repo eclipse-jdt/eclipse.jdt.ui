@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -76,6 +78,7 @@ import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -89,6 +92,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
@@ -945,6 +949,32 @@ public class ASTNodes {
 				return declaration.resolveBinding();
 		}
 		return null;
+	}
+
+	/**
+	 * Escapes a string value to a literal that can be used in Java source.
+	 * 
+	 * @param stringValue the string value 
+	 * @return the escaped string
+	 * @see StringLiteral#getEscapedValue()
+	 */
+	public static String getEscapedStringLiteral(String stringValue) {
+		StringLiteral stringLiteral= AST.newAST(ASTProvider.SHARED_AST_LEVEL).newStringLiteral();
+		stringLiteral.setLiteralValue(stringValue);
+		return stringLiteral.getEscapedValue();
+	}
+
+	/**
+	 * Escapes a character value to a literal that can be used in Java source.
+	 * 
+	 * @param ch the character value 
+	 * @return the escaped string
+	 * @see CharacterLiteral#getEscapedValue()
+	 */
+	public static String getEscapedCharacterLiteral(char ch) {
+		CharacterLiteral characterLiteral= AST.newAST(ASTProvider.SHARED_AST_LEVEL).newCharacterLiteral();
+		characterLiteral.setCharValue(ch);
+		return characterLiteral.getEscapedValue();
 	}
 
 }
