@@ -24,6 +24,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -32,10 +34,12 @@ import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
+import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 
@@ -156,8 +160,14 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 	private FilteredPreferenceTree fFilteredPrefTree;
 
+	private IStatus fNullableStatus, fNonNullStatus, fNonNullByDefaultStatus;
+	
 	public ProblemSeveritiesConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
 		super(context, project, getKeys(), container);
+		
+		fNullableStatus= new StatusInfo();
+		fNonNullStatus= new StatusInfo();
+		fNonNullByDefaultStatus= new StatusInfo();
 
 		// Compatibility code for the merge of the two option PB_SIGNAL_PARAMETER:
 		if (ENABLED.equals(getValue(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT))) {
@@ -649,13 +659,21 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 			} else if (PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING.equals(changedKey)) {
 				// merging the two options
 				setValue(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT, newValue);
+				
+			} else if (PREF_NULLABLE_ANNOTATION_NAME.equals(changedKey)) {
+				fNullableStatus= validateNullnessAnnotation(newValue, PreferencesMessages.ProblemSeveritiesConfigurationBlock_nullable_annotation_error);
+			} else if (PREF_NONNULL_ANNOTATION_NAME.equals(changedKey)) {
+				fNonNullStatus= validateNullnessAnnotation(newValue, PreferencesMessages.ProblemSeveritiesConfigurationBlock_nonull_annotation_error);
+			} else if (PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME.equals(changedKey)) {
+				fNonNullByDefaultStatus= validateNullnessAnnotation(newValue, PreferencesMessages.ProblemSeveritiesConfigurationBlock_nonnullbydefault_annotation_error);
 			} else {
 				return;
 			}
 		} else {
 			updateEnableStates();
 		}
-		fContext.statusChanged(new StatusInfo());
+		IStatus status= StatusUtil.getMostSevere(new IStatus[] { fNullableStatus, fNonNullStatus, fNonNullByDefaultStatus });
+		fContext.statusChanged(status);
 	}
 
 	private void updateEnableStates() {
@@ -695,6 +713,16 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		setComboEnabled(PREF_PB_REDUNDANT_NULL_ANNOTATION, enableAnnotationNullAnalysis);
 	}
 
+	private IStatus validateNullnessAnnotation(String value, String errorMessage) {
+		StatusInfo status= new StatusInfo();
+		if (value.length() == 0)
+			return status;
+		if (JavaConventions.validateJavaTypeName(value, JavaCore.VERSION_1_5, JavaCore.VERSION_1_5).matches(IStatus.ERROR)
+				|| value.indexOf('.') == -1)
+			status.setError(errorMessage);
+		return status;
+	}
+	
 	@Override
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		String title= PreferencesMessages.ProblemSeveritiesConfigurationBlock_needsbuild_title;
