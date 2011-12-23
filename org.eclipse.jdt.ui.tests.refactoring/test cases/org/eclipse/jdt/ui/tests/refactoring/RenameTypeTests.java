@@ -1164,6 +1164,11 @@ public class RenameTypeTests extends RefactoringTest {
 		assertEqualLines("invalid renaming in C", getFileContents(getOutputTestFileName("C")), classC.getCompilationUnit().getSource());
 	}
 	
+	public void test66() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=365380
+		helperWithTextual("B", "A", "B", "B", true, true);
+	}
+
 	public void test5() throws Exception {
 		helper2("A", "B");
 	}
