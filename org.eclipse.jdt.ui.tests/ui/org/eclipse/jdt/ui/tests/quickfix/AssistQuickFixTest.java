@@ -1268,7 +1268,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public  E() {\n");
+		buf.append("    public E() {\n");
 		buf.append("        int a = 1;\n");
 		buf.append("        int b = 1;\n");
 		buf.append("        int d = a + b;\n");
@@ -1287,7 +1287,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public  E() {\n");
+		buf.append("    public E() {\n");
 		buf.append("        int a = 1;\n");
 		buf.append("        int b = 1;\n");
 		buf.append("        int i = a + b;\n");
@@ -1305,7 +1305,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public  E() {\n");
+		buf.append("    public E() {\n");
 		buf.append("        int a = 1;\n");
 		buf.append("        int b = 1;\n");
 		buf.append("        int c = 1;\n");
@@ -1325,7 +1325,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public  E() {\n");
+		buf.append("    public E() {\n");
 		buf.append("        int a = 1;\n");
 		buf.append("        int b = 1;\n");
 		buf.append("        int c = 1;\n");
@@ -1344,7 +1344,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public  E() {\n");
+		buf.append("    public E() {\n");
 		buf.append("        int a = 1;\n");
 		buf.append("        int b = 1;\n");
 		buf.append("        int c = 1;\n");
@@ -1365,13 +1365,176 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public  E() {\n");
+		buf.append("    public E() {\n");
 		buf.append("        int a = 1;\n");
 		buf.append("        int b = 1;\n");
 		buf.append("        int c = 1;\n");
 		buf.append("        int i = b + c;\n");
 		buf.append("        int d = a + i;\n");
 		buf.append("        int e = a + i;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { ex1 });
+	}
+
+	public void testExtractToMethod1() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=41302
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public E() {\n");
+		buf.append("        int a = 1;\n");
+		buf.append("        int b = 1;\n");
+		buf.append("        int d = a + b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String selection= "a + b";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 5);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public E() {\n");
+		buf.append("        int a = 1;\n");
+		buf.append("        int b = 1;\n");
+		buf.append("        int d = extracted(a, b);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private int extracted(int a, int b) {\n");
+		buf.append("        return a + b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { ex1 });
+	}
+
+	public void testExtractToMethod2() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=41302
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        int a = 1;\n");
+		buf.append("        int b = 1;\n");
+		buf.append("        int d = a + b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset1= buf.toString().indexOf("int b = 1;");
+		int offset2= buf.toString().indexOf("a + b;") + 6;
+		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        int a = 1;\n");
+		buf.append("        extracted(a);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private void extracted(int a) {\n");
+		buf.append("        int b = 1;\n");
+		buf.append("        int d = a + b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { ex1 });
+	}
+
+	public void testExtractToMethod3() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=41302
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        int a = 1;\n");
+		buf.append("        int b = 1;\n");
+		buf.append("        int d = a + b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset1= buf.toString().indexOf("int a = 1;");
+		int offset2= buf.toString().indexOf("a + b;") + 6;
+		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        extracted();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private void extracted() {\n");
+		buf.append("        int a = 1;\n");
+		buf.append("        int b = 1;\n");
+		buf.append("        int d = a + b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { ex1 });
+	}
+
+	public void testExtractToMethod4() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=41302
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        int i = 0;\n");
+		buf.append("        for (; true;)\n");
+		buf.append("            i++;\n");
+		buf.append("    }\n");
+
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String selection= "i++;";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        int i = 0;\n");
+		buf.append("        for (; true;)\n");
+		buf.append("            i = extracted(i);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private int extracted(int i) {\n");
+		buf.append("        i++;\n");
+		buf.append("        return i;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String ex1= buf.toString();

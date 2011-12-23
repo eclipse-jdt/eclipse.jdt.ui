@@ -294,7 +294,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	private static int getIndex(int offset, List<Statement> statements) {
 		for (int i= 0; i < statements.size(); i++) {
 			Statement s= statements.get(i);
-			if (offset < s.getStartPosition()) {
+			if (offset <= s.getStartPosition()) {
 				return i;
 			}
 			if (offset < s.getStartPosition() + s.getLength()) {
