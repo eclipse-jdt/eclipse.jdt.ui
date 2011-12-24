@@ -27,6 +27,7 @@ import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.SurroundWithTryCatchAction;
 import org.eclipse.jdt.ui.actions.SurroundWithTryMultiCatchAction;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 public class SurroundWithActionGroup extends ActionGroup {
@@ -81,17 +82,19 @@ public class SurroundWithActionGroup extends ActionGroup {
 		});
 	}
 
-	private static SurroundWithTryCatchAction createSurroundWithTryCatchAction(CompilationUnitEditor editor) {
+	static SurroundWithTryCatchAction createSurroundWithTryCatchAction(CompilationUnitEditor editor) {
 		SurroundWithTryCatchAction result= new SurroundWithTryCatchAction(editor);
 		result.setText(ActionMessages.SurroundWithTemplateMenuAction_SurroundWithTryCatchActionName);
+		result.setImageDescriptor(JavaPluginImages.getDescriptor(JavaPluginImages.IMG_CORRECTION_CHANGE));
 		result.setActionDefinitionId(IJavaEditorActionDefinitionIds.SURROUND_WITH_TRY_CATCH);
 		editor.setAction("SurroundWithTryCatch", result); //$NON-NLS-1$
 		return result;
 	}
 
-	private static SurroundWithTryMultiCatchAction createSurroundWithTryMultiCatchAction(CompilationUnitEditor editor) {
+	static SurroundWithTryMultiCatchAction createSurroundWithTryMultiCatchAction(CompilationUnitEditor editor) {
 		SurroundWithTryMultiCatchAction result= new SurroundWithTryMultiCatchAction(editor);
 		result.setText(ActionMessages.SurroundWithTemplateMenuAction_SurroundWithTryMultiCatchActionName);
+		result.setImageDescriptor(JavaPluginImages.getDescriptor(JavaPluginImages.IMG_CORRECTION_CHANGE));
 		result.setActionDefinitionId(IJavaEditorActionDefinitionIds.SURROUND_WITH_TRY_MULTI_CATCH);
 		editor.setAction("SurroundWithTryMultiCatch", result); //$NON-NLS-1$
 		return result;

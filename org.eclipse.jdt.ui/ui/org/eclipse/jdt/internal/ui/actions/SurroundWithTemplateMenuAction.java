@@ -56,7 +56,6 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.SurroundWithTryCatchAction;
 import org.eclipse.jdt.ui.actions.SurroundWithTryMultiCatchAction;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
@@ -64,6 +63,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
@@ -75,6 +75,8 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 	public static final String SURROUND_WITH_QUICK_MENU_ACTION_ID= "org.eclipse.jdt.ui.edit.text.java.surround.with.quickMenu";  //$NON-NLS-1$
 
 	private static final String JAVA_TEMPLATE_PREFERENCE_PAGE_ID= "org.eclipse.jdt.ui.preferences.JavaTemplatePreferencePage"; //$NON-NLS-1$
+
+	private static final String CODE_TEMPLATE_PREFERENCE_PAGE_ID= "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage"; //$NON-NLS-1$
 
 	private static final String TEMPLATE_GROUP= "templateGroup"; //$NON-NLS-1$
 
@@ -91,7 +93,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		 */
 		@Override
 		public void run() {
-			PreferencesUtil.createPreferenceDialogOn(getShell(), JAVA_TEMPLATE_PREFERENCE_PAGE_ID, new String[] {JAVA_TEMPLATE_PREFERENCE_PAGE_ID}, null).open();
+			PreferencesUtil.createPreferenceDialogOn(getShell(), JAVA_TEMPLATE_PREFERENCE_PAGE_ID, new String[] { JAVA_TEMPLATE_PREFERENCE_PAGE_ID, CODE_TEMPLATE_PREFERENCE_PAGE_ID }, null).open();
 		}
 
 		private Shell getShell() {
@@ -233,8 +235,8 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		new JDTQuickMenuCreator(editor) {
 			@Override
 			protected void fillMenu(IMenuManager menu) {
-				SurroundWithTryCatchAction surroundWithTryCatch= createSurroundWithTryCatchAction(editor);
-				SurroundWithTryMultiCatchAction surroundWithTryMultiCatch= createSurroundWithTryMultiCatchAction(editor);
+				SurroundWithTryCatchAction surroundWithTryCatch= SurroundWithActionGroup.createSurroundWithTryCatchAction(editor);
+				SurroundWithTryMultiCatchAction surroundWithTryMultiCatch= SurroundWithActionGroup.createSurroundWithTryMultiCatchAction(editor);
 				SurroundWithTemplateMenuAction.fillMenu(menu, editor, surroundWithTryCatch, surroundWithTryMultiCatch);
 			}
 		}.createMenu();
@@ -271,8 +273,8 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 
 		boolean addSurroundWith= !isInJavadoc(editor);
 		if (addSurroundWith) {
-			SurroundWithTryCatchAction surroundWithTryCatch= createSurroundWithTryCatchAction(editor);
-			SurroundWithTryMultiCatchAction surroundWithTryMultiCatch= createSurroundWithTryMultiCatchAction(editor);
+			SurroundWithTryCatchAction surroundWithTryCatch= SurroundWithActionGroup.createSurroundWithTryCatchAction(editor);
+			SurroundWithTryMultiCatchAction surroundWithTryMultiCatch= SurroundWithActionGroup.createSurroundWithTryMultiCatchAction(editor);
 
 			ActionContributionItem surroundWithTryCatchItem= new ActionContributionItem(surroundWithTryCatch);
 			ActionContributionItem surroundWithTryMultiCatchItem= new ActionContributionItem(surroundWithTryMultiCatch);
@@ -303,22 +305,6 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		ActionContributionItem configAction= new ActionContributionItem(new ConfigureTemplatesAction());
 		configAction.fill(menu, -1);
 
-	}
-
-	private static SurroundWithTryCatchAction createSurroundWithTryCatchAction(CompilationUnitEditor editor) {
-		SurroundWithTryCatchAction result= new SurroundWithTryCatchAction(editor);
-		result.setText(ActionMessages.SurroundWithTemplateMenuAction_SurroundWithTryCatchActionName);
-		result.setActionDefinitionId(IJavaEditorActionDefinitionIds.SURROUND_WITH_TRY_CATCH);
-		editor.setAction("SurroundWithTryCatch", result); //$NON-NLS-1$
-		return result;
-	}
-
-	private static SurroundWithTryMultiCatchAction createSurroundWithTryMultiCatchAction(CompilationUnitEditor editor) {
-		SurroundWithTryMultiCatchAction result= new SurroundWithTryMultiCatchAction(editor);
-		result.setText(ActionMessages.SurroundWithTemplateMenuAction_SurroundWithTryMultiCatchActionName);
-		result.setActionDefinitionId(IJavaEditorActionDefinitionIds.SURROUND_WITH_TRY_MULTI_CATCH);
-		editor.setAction("SurroundWithTryMultiCatch", result); //$NON-NLS-1$
-		return result;
 	}
 
 	protected void initMenu() {
@@ -414,6 +400,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 						applyProposal(proposal, viewer, (char)0, 0, offset);
 					}
 				};
+				action.setImageDescriptor(JavaPluginImages.DESC_OBJS_TEMPLATE);
 
 				result.add(action);
 				j++;
