@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.SourceRange;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
@@ -55,15 +56,20 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ChangeMethodSignatureDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterDescriptor;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.Corext;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -256,10 +262,29 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 
 	private void addParameterInfo(CompilationUnitRewrite cuRewrite) throws JavaModelException {
 		ITypeBinding typeBinding= Bindings.normalizeForDeclarationUse(fSelectedExpression.resolveTypeBinding(), fSelectedExpression.getAST());
-		String typeName= cuRewrite.getImportRewrite().addImport(typeBinding);
 		String name= fParameterName != null ? fParameterName : guessedParameterName();
 		Expression expression= fSelectedExpression instanceof ParenthesizedExpression ? ((ParenthesizedExpression)fSelectedExpression).getExpression() : fSelectedExpression;
-		String defaultValue= fSourceCU.getBuffer().getText(expression.getStartPosition(), expression.getLength());
+		String typeName= typeBinding.getName();
+		String defaultValue= null;
+		if (expression instanceof ClassInstanceCreation && typeBinding.isParameterizedType()) {
+			ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) expression;
+			ImportRewrite importRewrite= cuRewrite.getImportRewrite();			
+			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(fSelectedExpression, importRewrite);
+			typeName= importRewrite.addImport(typeBinding, importRewriteContext);			
+			Type cicType= classInstanceCreation.getType();
+			if (cicType instanceof ParameterizedType && ((ParameterizedType) cicType).typeArguments().size() == 0) {
+				// expand the diamond:
+				AST ast= cuRewrite.getAST();				
+				Type type= importRewrite.addImport(typeBinding, ast, importRewriteContext);				
+				classInstanceCreation.setType(type);    // Should not touch the original AST ...
+				defaultValue= ASTNodes.asFormattedString(classInstanceCreation,  0, StubUtility.getLineDelimiterUsed(cuRewrite.getCu()), cuRewrite.getCu().getJavaProject().getOptions(true));
+				classInstanceCreation.setType(cicType); // ... so let's restore it right away.
+			}
+		}
+		
+		if (defaultValue == null) {
+			defaultValue= fSourceCU.getBuffer().getText(expression.getStartPosition(), expression.getLength());
+		}
 		fParameter= ParameterInfo.createInfoForAddedParameter(typeBinding, typeName, name, defaultValue);
 		if (fArguments == null) {
 			List<ParameterInfo> parameterInfos= fChangeSignatureProcessor.getParameterInfos();
