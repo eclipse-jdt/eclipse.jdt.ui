@@ -29,6 +29,7 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
@@ -93,7 +94,9 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		 */
 		@Override
 		public void run() {
-			PreferencesUtil.createPreferenceDialogOn(getShell(), JAVA_TEMPLATE_PREFERENCE_PAGE_ID, new String[] { JAVA_TEMPLATE_PREFERENCE_PAGE_ID, CODE_TEMPLATE_PREFERENCE_PAGE_ID }, null).open();
+			PreferenceDialog preferenceDialog= PreferencesUtil.createPreferenceDialogOn(getShell(), JAVA_TEMPLATE_PREFERENCE_PAGE_ID, new String[] { JAVA_TEMPLATE_PREFERENCE_PAGE_ID, CODE_TEMPLATE_PREFERENCE_PAGE_ID }, null);
+			preferenceDialog.getTreeViewer().expandAll();
+			preferenceDialog.open();
 		}
 
 		private Shell getShell() {
