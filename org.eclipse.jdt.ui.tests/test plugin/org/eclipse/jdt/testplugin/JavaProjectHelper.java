@@ -764,7 +764,7 @@ public class JavaProjectHelper {
 		proj.setDescription(description, monitor);
 	}
 
-	private static void importFilesFromZip(ZipFile srcZipFile, IPath destPath, IProgressMonitor monitor) throws InvocationTargetException {
+	public static void importFilesFromZip(ZipFile srcZipFile, IPath destPath, IProgressMonitor monitor) throws InvocationTargetException {
 		ZipFileStructureProvider structureProvider=	new ZipFileStructureProvider(srcZipFile);
 		try {
 			ImportOperation op= new ImportOperation(destPath, structureProvider.getRoot(), structureProvider, new ImportOverwriteQuery());
