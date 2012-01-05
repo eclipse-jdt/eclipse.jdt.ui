@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.jdt.ui.tests.performance.views;
 
 import java.io.File;
+import java.util.zip.ZipFile;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
@@ -19,7 +20,16 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.jdt.testplugin.OrderedTestSuite;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -30,6 +40,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
@@ -60,10 +71,10 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 	}
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite("PackageExplorerPerfTest");
-		suite.addTest(new PackageExplorerPerfTest("testOpen"));
-		suite.addTest(new PackageExplorerPerfTest("testSelect"));
-		suite.addTest(new PackageExplorerPerfTest("testExpand"));
+		TestSuite suite= new OrderedTestSuite(PackageExplorerPerfTest.class, new String[] {
+			"testOpen", "testSelect", "testExpand",
+			"testRefreshClassFolder"
+		});
 		return new MyTestSetup(suite);
 	}
 
@@ -103,8 +114,68 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 		finishMeasurements();
 	}
 
+	// test for Bug 311212: [package explorer] Performance problem with refreshing external class folders
+	public void testRefreshClassFolder() throws Throwable {
+		// Import rtstubs a few times. Caveat: Only import class files, but not META-INF.
+		// PackageExplorerContentProvider#processResourceDelta(..) refreshes the parent if a resource changes.
+		// This is not what we want to test.
+		final IJavaProject javaProject= MyTestSetup.fJProject1;
+		File jreArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.RT_STUBS_15);
+		IPackageFragmentRoot classFolder= JavaProjectHelper.addClassFolderWithImport(javaProject, "classes", null, null, jreArchive);
+		((IFolder) classFolder.getResource()).getFolder("META-INF").delete(true, null);
+		
+		ZipFile zipFile= new ZipFile(jreArchive);
+		try {
+			for (int i= 1; i <= 5; i++) {
+				String packName= "copy" + i;
+				classFolder.createPackageFragment(packName, true, null);
+				IFolder folder= javaProject.getProject().getFolder("classes").getFolder(packName);
+				JavaProjectHelper.importFilesFromZip(zipFile, folder.getFullPath(), null);
+				folder.getFolder("META-INF").delete(true, null);
+			}
+		} finally {
+			zipFile.close();
+		}
+		
+		javaProject.getProject().getWorkspace().run(new IWorkspaceRunnable() {
+			public void run(IProgressMonitor monitor) throws CoreException {
+				javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
+			}
+		}, null);
+		getViewer().expandToLevel(classFolder, 1);
+		
+		PackageExplorerPart view= getView();
+		view.selectAndReveal(classFolder); // runs pending updates
+		
+		joinBackgroudActivities();
+		touchAllFilesOnDisk((IFolder) classFolder.getResource());
+		
+		
+		startMeasuring();
+		javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
+		view.selectAndReveal(classFolder); // runs pending updates
+		finishMeasurements();
+	}
+	
+	private void touchAllFilesOnDisk(IFolder folder) throws CoreException {
+		final long now= System.currentTimeMillis();
+		folder.accept(new IResourceVisitor() {
+			public boolean visit(IResource resource) throws CoreException {
+				if (resource instanceof IFile) {
+					IFile file= (IFile) resource;
+					file.getRawLocation().toFile().setLastModified(now);
+				}
+				return true;
+			}
+		});
+	}
+
 	private TreeViewer getViewer() {
+		return getView().getTreeViewer();
+	}
+
+	private PackageExplorerPart getView() {
 		IWorkbenchPage page= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-		return ((PackageExplorerPart)page.findView(JavaUI.ID_PACKAGES)).getTreeViewer();
+		return (PackageExplorerPart)page.findView(JavaUI.ID_PACKAGES);
 	}
 }
