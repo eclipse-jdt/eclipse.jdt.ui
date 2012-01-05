@@ -264,13 +264,14 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		ITypeBinding typeBinding= Bindings.normalizeForDeclarationUse(fSelectedExpression.resolveTypeBinding(), fSelectedExpression.getAST());
 		String name= fParameterName != null ? fParameterName : guessedParameterName();
 		Expression expression= fSelectedExpression instanceof ParenthesizedExpression ? ((ParenthesizedExpression)fSelectedExpression).getExpression() : fSelectedExpression;
-		String typeName= typeBinding.getName();
+		
+		ImportRewrite importRewrite= cuRewrite.getImportRewrite();			
+		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(fSelectedExpression, importRewrite);
+		String typeName= importRewrite.addImport(typeBinding, importRewriteContext);
+		
 		String defaultValue= null;
 		if (expression instanceof ClassInstanceCreation && typeBinding.isParameterizedType()) {
 			ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) expression;
-			ImportRewrite importRewrite= cuRewrite.getImportRewrite();			
-			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(fSelectedExpression, importRewrite);
-			typeName= importRewrite.addImport(typeBinding, importRewriteContext);			
 			Type cicType= classInstanceCreation.getType();
 			if (cicType instanceof ParameterizedType && ((ParameterizedType) cicType).typeArguments().size() == 0) {
 				// expand the diamond:

@@ -5,12 +5,12 @@ package simple;
 import java.util.HashMap;
 import java.util.Map;
 
-class Diamond {
-    void foo() {
-        Map<String, String> m= new HashMap<>();
-    }
+class NewInstance2 {
+	void foo() {
+		Map<String, String> m= new HashMap<>();
+	}
 
-    public static void main(String[] args) {
-        new Diamond().foo();
-    }
+	public static void main(String[] args) {
+		new NewInstance2().foo();
+	}
 }

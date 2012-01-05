@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 
-public class Catch1 {
+public class Catch2 {
 	public void foo(int a, IOException second) throws Exception {
 		try {
 			if (a < 10)
