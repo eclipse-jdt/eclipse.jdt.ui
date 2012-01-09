@@ -213,6 +213,8 @@ public class Checks {
 	 */
 	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) {
 		String newCUName= JavaModelUtil.getRenamedCUName(cu, newName);
+		if (cu.getElementName().equals(newCUName))
+			return new RefactoringStatus();
 		IPath renamedResourcePath= cu.getParent().getPath().append(newCUName);
 		if (resourceExists(renamedResourcePath))
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.Checks_cu_name_used, BasicElementLabels.getResourceName(newCUName)));
@@ -836,7 +838,7 @@ public class Checks {
 	 * @param e
 	 * @return int
 	 *          Checks.IS_RVALUE			if e is an rvalue
-	 *          Checks.IS_RVALUE_GUESSED	if e is guessed as an rvalue 
+	 *          Checks.IS_RVALUE_GUESSED	if e is guessed as an rvalue
 	 *          Checks.NOT_RVALUE_VOID  	if e is not an rvalue because its type is void
 	 *          Checks.NOT_RVALUE_MISC  	if e is not an rvalue for some other reason
 	 */
