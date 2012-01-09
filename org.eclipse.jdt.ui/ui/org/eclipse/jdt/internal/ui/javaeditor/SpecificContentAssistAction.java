@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.Action;
@@ -37,6 +36,7 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 
+
 /**
  * Action to run content assist on a specific proposal category.
  *
@@ -58,8 +58,8 @@ final class SpecificContentAssistAction extends Action implements IUpdate {
 
 	/**
 	 * Creates a new action for a certain proposal category.
-	 *
-	 * @param category
+	 * 
+	 * @param category the completion proposal category
 	 */
 	public SpecificContentAssistAction(CompletionProposalCategory category) {
 		fCategory= category;
