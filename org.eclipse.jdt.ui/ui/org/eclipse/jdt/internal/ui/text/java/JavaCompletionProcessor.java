@@ -31,6 +31,7 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
+
 /**
  * Java completion processor.
  */
@@ -88,6 +89,7 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 
 	/*
 	 * @see ContentAssistProcessor#checkDefaultEnablement(CompletionProposalCategory)
+	 * @since 3.8
 	 */
 	@Override
 	protected boolean checkDefaultEnablement(CompletionProposalCategory category) {
@@ -96,6 +98,7 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 
 	/*
 	 * @see ContentAssistProcessor#checkSeparateEnablement(CompletionProposalCategory)
+	 * @since 3.8
 	 */
 	@Override
 	protected boolean checkSeparateEnablement(CompletionProposalCategory category) {
