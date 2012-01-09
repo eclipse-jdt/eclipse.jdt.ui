@@ -49,6 +49,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+
 /**
  * Describes a category extension to the "javaCompletionProposalComputer" extension point.
  *
@@ -270,11 +271,12 @@ public final class CompletionProposalCategory {
 	
 	/**
 	 * Determines if the project matches any enablement expression defined on the extension.
-	 * If there is no enablement expression, return true for any project.
-	 * Otherwise, if the project is null, return false.
 	 * 
-	 * @param javaProject - the project against which to test the enablement expression
-	 * @return true if this category is to be included in content proposals
+	 * @param javaProject the Java project against which to test the enablement expression, can be
+	 *            <code>null</code>
+	 * @return <code>true</code> if any enablement expression matches the given project or if the
+	 *         project is <code>null</code> or no enablement expression is specified,
+	 *         <code>false</code> otherwise
 	 * @since 3.8
 	 */
 	public boolean matches(IJavaProject javaProject) {

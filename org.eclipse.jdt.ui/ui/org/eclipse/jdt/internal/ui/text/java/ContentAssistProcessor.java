@@ -479,10 +479,11 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	}
 
 	/**
-	 * Determine whether the category is enabled by default
+	 * Determine whether the category is enabled by default.
 	 * 
-	 * @param category - the category to check
-	 * @return true if this category is enabled by default
+	 * @param category the category to check
+	 * @return <code>true</code> if this category is enabled by default, <code>false</code>
+	 *         otherwise
 	 * @since 3.8
 	 */
 	protected boolean checkDefaultEnablement(CompletionProposalCategory category) {
@@ -585,10 +586,11 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	}
 	
 	/**
-	 * Determine whether the category is enabled for separate use
+	 * Determine whether the category is enabled for separate use.
 	 * 
-	 * @param category - the category to check
-	 * @return true if this category is enabled for separate use
+	 * @param category the category to check
+	 * @return <code>true</code> if this category is enabled for separate use, <code>false</code>
+	 *         otherwise
 	 * @since 3.8
 	 */
 	protected boolean checkSeparateEnablement(CompletionProposalCategory category) {
