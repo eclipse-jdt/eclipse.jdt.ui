@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -323,7 +323,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 				RefactoringStatus result1= new RefactoringStatus();
 
 				RefactoringStatus result2= new RefactoringStatus();
-				result2.merge(Checks.checkCompilationUnitNewName(fCu, getNewElementName()));
+				result2.merge(Checks.checkCompilationUnitNewName(fCu, removeFileNameExtension(getNewElementName())));
 				if (result2.hasFatalError())
 					result1.addError(Messages.format(RefactoringCoreMessages.RenameCompilationUnitRefactoring_not_parsed_1, BasicElementLabels.getFileName(fCu)));
 				else
@@ -334,7 +334,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 			if (fWillRenameType) {
 				return fRenameTypeProcessor.checkFinalConditions(pm, context);
 			} else {
-				return Checks.checkCompilationUnitNewName(fCu, getNewElementName());
+				return Checks.checkCompilationUnitNewName(fCu, removeFileNameExtension(getNewElementName()));
 			}
 		} finally{
 			pm.done();
