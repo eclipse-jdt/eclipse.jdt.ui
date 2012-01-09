@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -206,15 +206,15 @@ public class Checks {
 	}
 
 	/**
-	 * Returns ok status if the new name is ok. This is when no other file with that name exists.
-	 * @param cu
-	 * @param newName
-	 * @return the status
+	 * Returns OK status if the new name is OK, i.e. when no file with that name exists.
+	 * The name of the given CU is not OK.
+	 * 
+	 * @param cu CU to rename
+	 * @param newBareName the new name of the CU (without extension)
+	 * @return the status: FATAL if the CU already exists, OK if OK
 	 */
-	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) {
-		String newCUName= JavaModelUtil.getRenamedCUName(cu, newName);
-		if (cu.getElementName().equals(newCUName))
-			return new RefactoringStatus();
+	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newBareName) {
+		String newCUName= JavaModelUtil.getRenamedCUName(cu, newBareName);
 		IPath renamedResourcePath= cu.getParent().getPath().append(newCUName);
 		if (resourceExists(renamedResourcePath))
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.Checks_cu_name_used, BasicElementLabels.getResourceName(newCUName)));
