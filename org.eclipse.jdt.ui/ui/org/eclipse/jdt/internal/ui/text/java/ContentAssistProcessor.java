@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Paul Fullbright <paul.fullbright@oracle.com> - content assist category enablement - http://bugs.eclipse.org/345213
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -471,10 +472,21 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		List<CompletionProposalCategory> included= new ArrayList<CompletionProposalCategory>();
 		for (Iterator<CompletionProposalCategory> it= fCategories.iterator(); it.hasNext();) {
 			CompletionProposalCategory category= it.next();
-			if (category.isIncluded() && category.hasComputers(fPartition))
+			if (checkDefaultEnablement(category)) 
 				included.add(category);
 		}
 		return included;
+	}
+
+	/**
+	 * Determine whether the category is enabled by default
+	 * 
+	 * @param category - the category to check
+	 * @return true if this category is enabled by default
+	 * @since 3.8
+	 */
+	protected boolean checkDefaultEnablement(CompletionProposalCategory category) {
+		return category.isIncluded() && category.hasComputers(fPartition);
 	}
 
 	/**
@@ -565,11 +577,22 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		ArrayList<CompletionProposalCategory> sorted= new ArrayList<CompletionProposalCategory>();
 		for (Iterator<CompletionProposalCategory> it= fCategories.iterator(); it.hasNext();) {
 			CompletionProposalCategory category= it.next();
-			if (category.isSeparateCommand() && category.hasComputers(fPartition))
+			if (checkSeparateEnablement(category))
 				sorted.add(category);
 		}
 		Collections.sort(sorted, ORDER_COMPARATOR);
 		return sorted;
+	}
+	
+	/**
+	 * Determine whether the category is enabled for separate use
+	 * 
+	 * @param category - the category to check
+	 * @return true if this category is enabled for separate use
+	 * @since 3.8
+	 */
+	protected boolean checkSeparateEnablement(CompletionProposalCategory category) {
+		return category.isSeparateCommand() && category.hasComputers(fPartition);
 	}
 
 	private String createEmptyMessage() {

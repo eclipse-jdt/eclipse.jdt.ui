@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Paul Fullbright <paul.fullbright@oracle.com> - content assist category enablement - http://bugs.eclipse.org/345213
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
@@ -28,6 +29,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.IUpdate;
+
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
@@ -101,11 +104,15 @@ final class SpecificContentAssistAction extends Action implements IUpdate {
 	private boolean computeEnablement(ITextEditor editor) {
 		if (editor == null)
 			return false;
+		
 		ITextOperationTarget target= (ITextOperationTarget) editor.getAdapter(ITextOperationTarget.class);
-		boolean hasContentAssist= target != null && target.canDoOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
-		if (!hasContentAssist)
+		if (target == null || ! target.canDoOperation(ISourceViewer.CONTENTASSIST_PROPOSALS))
 			return false;
-
+		
+		IJavaProject javaProject = EditorUtility.getJavaProject(editor.getEditorInput());
+		if (! fCategory.matches(javaProject))
+			return false;
+		
 		ISelection selection= editor.getSelectionProvider().getSelection();
 		return isValidSelection(selection);
 	}

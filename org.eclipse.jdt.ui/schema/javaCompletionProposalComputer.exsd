@@ -7,13 +7,20 @@
       </appInfo>
       <documentation>
          This extension point allows to contribute Java completion proposal computers to participate in the content assist process of the Java editor.
+&lt;p&gt;
+This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Properties to test on are:
+&lt;dl&gt;
+&lt;li&gt;project: type IJavaProject; the current project&lt;/li&gt;
+&lt;/dl&gt;
       </documentation>
    </annotation>
+
+   <include schemaLocation="schema://org.eclipse.core.expressions/schema/expressionLanguage.exsd"/>
 
    <element name="extension">
       <annotation>
          <appInfo>
-            <meta.element labelAttribute="name"/>
+            <meta.element labelAttribute="name" />
          </appInfo>
       </annotation>
       <complexType>
@@ -131,6 +138,9 @@ and must have a public 0-argument constructor.
          </documentation>
       </annotation>
       <complexType>
+         <sequence>
+            <element ref="enablement" minOccurs="0" maxOccurs="1"/>
+         </sequence>
          <attribute name="icon" type="string">
             <annotation>
                <documentation>
@@ -204,7 +214,7 @@ and must have a public 0-argument constructor.
          <meta.section type="copyright"/>
       </appInfo>
       <documentation>
-         Copyright (c) 2006, 2008 IBM Corporation and others.&lt;br&gt;
+         Copyright (c) 2006, 2012 IBM Corporation and others.&lt;br&gt;
 All rights reserved. This program and the accompanying materials are made available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at &lt;a href=&quot;http://www.eclipse.org/legal/epl-v10.html&quot;&gt;http://www.eclipse.org/legal/epl-v10.html&lt;/a&gt;
       </documentation>
    </annotation>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Paul Fullbright <paul.fullbright@oracle.com> - content assist category enablement - http://bugs.eclipse.org/345213
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -16,6 +17,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.osgi.framework.Bundle;
+
+import org.eclipse.core.expressions.EvaluationContext;
+import org.eclipse.core.expressions.EvaluationResult;
+import org.eclipse.core.expressions.Expression;
+import org.eclipse.core.expressions.ExpressionConverter;
+import org.eclipse.core.expressions.ExpressionTagNames;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
@@ -32,6 +39,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -54,6 +63,9 @@ public final class CompletionProposalCategory {
 	private final IConfigurationElement fElement;
 	/** The image descriptor for this category, or <code>null</code> if none specified. */
 	private final ImageDescriptor fImage;
+	
+	/** The enablement expression for this category, or <code>null</code> if none specified. */
+	private final Expression fEnablementExpression;
 
 	private boolean fIsSeparateCommand= true;
 	private boolean fIsEnabled= true;
@@ -74,7 +86,16 @@ public final class CompletionProposalCategory {
 			fName= fId;
 		else
 			fName= name;
-
+		
+		IConfigurationElement[] children= fElement.getChildren(ExpressionTagNames.ENABLEMENT);
+		if (children.length == 1) {
+			ExpressionConverter parser= ExpressionConverter.getDefault();
+			fEnablementExpression = parser.perform(children[0]);
+		}
+		else {
+			fEnablementExpression = null;
+		}
+		
 		String icon= element.getAttribute(ICON);
 		ImageDescriptor img= null;
 		if (icon != null) {
@@ -94,6 +115,7 @@ public final class CompletionProposalCategory {
 		fId= id;
 		fName= name;
 		fElement= null;
+		fEnablementExpression = null;
 		fImage= null;
 	}
 
@@ -244,6 +266,35 @@ public final class CompletionProposalCategory {
 	 */
 	public void setSortOrder(int sortOrder) {
 		fSortOrder= sortOrder;
+	}
+	
+	/**
+	 * Determines if the project matches any enablement expression defined on the extension.
+	 * If there is no enablement expression, return true for any project.
+	 * Otherwise, if the project is null, return false.
+	 * 
+	 * @param javaProject - the project against which to test the enablement expression
+	 * @return true if this category is to be included in content proposals
+	 * @since 3.8
+	 */
+	public boolean matches(IJavaProject javaProject) {
+		if (fEnablementExpression == null) {
+			return true;
+		}
+		
+		if (javaProject == null) {
+			return false;
+		}
+		
+		try {
+			EvaluationContext evalContext= new EvaluationContext(null, javaProject);
+			evalContext.addVariable("project", javaProject); //$NON-NLS-1$
+			return fEnablementExpression.evaluate(evalContext) == EvaluationResult.TRUE;
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}
+		
+		return false;
 	}
 
 	/**

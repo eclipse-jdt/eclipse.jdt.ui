@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Paul Fullbright <paul.fullbright@oracle.com> - content assist category enablement - http://bugs.eclipse.org/345213
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -22,10 +23,13 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
 import org.eclipse.ui.IEditorPart;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
  * Java completion processor.
@@ -82,6 +86,26 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 		return fValidator;
 	}
 
+	/*
+	 * @see ContentAssistProcessor#checkDefaultEnablement(CompletionProposalCategory)
+	 */
+	@Override
+	protected boolean checkDefaultEnablement(CompletionProposalCategory category) {
+		return super.checkDefaultEnablement(category) && category.matches(getJavaProject());
+	}
+
+	/*
+	 * @see ContentAssistProcessor#checkSeparateEnablement(CompletionProposalCategory)
+	 */
+	@Override
+	protected boolean checkSeparateEnablement(CompletionProposalCategory category) {
+		return super.checkSeparateEnablement(category) && category.matches(getJavaProject());
+	}
+
+	private IJavaProject getJavaProject() {
+		return EditorUtility.getJavaProject(fEditor.getEditorInput());
+	}
+	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor#filterAndSort(java.util.List, org.eclipse.core.runtime.IProgressMonitor)
 	 */

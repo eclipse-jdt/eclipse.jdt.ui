@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Paul Fullbright <paul.fullbright@oracle.com> - content assist category enablement - http://bugs.eclipse.org/345213
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
@@ -19,6 +20,8 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
@@ -53,6 +56,8 @@ public final class SpecificContentAssistExecutor {
 		Collection<CompletionProposalCategory> categories= fRegistry.getProposalCategories();
 		boolean[] inclusionState= new boolean[categories.size()];
 		boolean[] separateState= new boolean[categories.size()];
+		boolean[] enabledState= new boolean[categories.size()];
+		IJavaProject javaProject = EditorUtility.getJavaProject(editor.getEditorInput());
 		int i= 0;
 		for (Iterator<CompletionProposalCategory> it= categories.iterator(); it.hasNext(); i++) {
 			CompletionProposalCategory cat= it.next();
@@ -60,6 +65,8 @@ public final class SpecificContentAssistExecutor {
 			cat.setIncluded(cat.getId().equals(categoryId));
 			separateState[i]= cat.isSeparateCommand();
 			cat.setSeparateCommand(false);
+			enabledState[i]= cat.isEnabled();
+			cat.setEnabled(cat.isEnabled() && cat.matches(javaProject));
 		}
 
 		try {
@@ -72,6 +79,7 @@ public final class SpecificContentAssistExecutor {
 				CompletionProposalCategory cat= it.next();
 				cat.setIncluded(inclusionState[i]);
 				cat.setSeparateCommand(separateState[i]);
+				cat.setEnabled((enabledState[i]));
 			}
 		}
 	}
