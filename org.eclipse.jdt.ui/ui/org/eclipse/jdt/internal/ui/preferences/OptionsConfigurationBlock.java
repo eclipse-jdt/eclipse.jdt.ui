@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,6 +57,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.action.LegacyActionTools;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -1414,12 +1415,16 @@ public abstract class OptionsConfigurationBlock {
 		if (needsBuild) {
 			String[] strings= getFullBuildDialogStrings(fProject == null);
 			if (strings != null) {
-				MessageDialog dialog= new MessageDialog(getShell(), strings[0], null, strings[1], MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
-				int res= dialog.open();
-				if (res == 0) {
-					doBuild= true;
-				} else if (res != 1) {
-					return false; // cancel pressed
+				if (ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0) {
+					doBuild= true; // don't bother the user
+				} else {
+					MessageDialog dialog= new MessageDialog(getShell(), strings[0], null, strings[1], MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
+					int res= dialog.open();
+					if (res == 0) {
+						doBuild= true;
+					} else if (res != 1) {
+						return false; // cancel pressed
+					}
 				}
 			}
 		}
