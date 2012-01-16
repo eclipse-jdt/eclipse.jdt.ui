@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,13 @@
 package org.eclipse.jdt.jeview.views;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.QualifiedName;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IMarker;
@@ -124,6 +127,31 @@ public class JEResource extends JEAttribute {
 				return children;
 			}
 		});
+		result.add(new JavaElementChildrenProperty(this, "PERSISTENT PROPERTIES") {
+			@Override protected JEAttribute[] computeChildren() throws CoreException {
+				Map<QualifiedName, String> properties= getResource().getPersistentProperties();
+				JEAttribute[] children= new JEAttribute[properties.size()];
+				int i= 0;
+				for (Entry<QualifiedName, String> property : properties.entrySet()) {
+					children[i]= new JavaElementProperty(this, property.getKey().toString(), property.getValue());
+					i++;
+				}
+				return children;
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "SESSION PROPERTIES") {
+			@Override protected JEAttribute[] computeChildren() throws CoreException {
+				Map<QualifiedName, Object> properties= getResource().getSessionProperties();
+				JEAttribute[] children= new JEAttribute[properties.size()];
+				int i= 0;
+				for (Entry<QualifiedName, Object> property : properties.entrySet()) {
+					children[i]= new JavaElementProperty(this, property.getKey().toString(), property.getValue());
+					i++;
+				}
+				return children;
+			}
+		});
+		
 		return result.toArray(new JEAttribute[result.size()]);
 	}
 
