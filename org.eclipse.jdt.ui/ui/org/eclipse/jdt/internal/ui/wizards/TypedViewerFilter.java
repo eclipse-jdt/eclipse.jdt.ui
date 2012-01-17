@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,7 @@ public class TypedViewerFilter extends ViewerFilter {
 	 * Creates a filter that only allows elements of gives types.
 	 * @param acceptedTypes The types of accepted elements
 	 */
-	public TypedViewerFilter(Class[] acceptedTypes) {
+	public TypedViewerFilter(Class<?>[] acceptedTypes) {
 		this(acceptedTypes, null);
 	}
 
@@ -38,7 +38,7 @@ public class TypedViewerFilter extends ViewerFilter {
 	 * @param rejectedElements Element equals to the rejected elements are
 	 * filtered out
 	 */
-	public TypedViewerFilter(Class[] acceptedTypes, Object[] rejectedElements) {
+	public TypedViewerFilter(Class<?>[] acceptedTypes, Object[] rejectedElements) {
 		Assert.isNotNull(acceptedTypes);
 		fAcceptedTypes= acceptedTypes;
 		fRejectedElements= rejectedElements;
