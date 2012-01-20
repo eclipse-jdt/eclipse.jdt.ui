@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -269,6 +269,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_resource_leak_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_resource_not_managed_via_twr_label;
 	public static String ProblemSeveritiesConfigurationBlock_include_assert_in_null_analysis;
+	public static String ProblemSeveritiesConfigurationBlock_include_fields_in_null_analysis;
 	public static String ProblemSeveritiesConfigurationBlock_treat_optional_as_fatal;
 	public static String SourceAttachmentPropertyPage_error_title;
 	public static String SourceAttachmentPropertyPage_error_message;

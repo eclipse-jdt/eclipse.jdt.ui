@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -116,6 +116,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE= getJDTCoreKey(JavaCore.COMPILER_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE);
 
 	private static final Key PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS= getJDTCoreKey(JavaCore.COMPILER_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS);
+	private static final Key PREF_PB_INCLUDE_FIELDS_IN_NULL_ANALYSIS= getJDTCoreKey(JavaCore.COMPILER_PB_INCLUDE_FIELDS_IN_NULL_ANALYSIS);
+	
 	private static final Key PREF_PB_REDUNDANT_SUPERINTERFACE= getJDTCoreKey(JavaCore.COMPILER_PB_REDUNDANT_SUPERINTERFACE);
 
 	private static final Key PREF_PB_UNUSED_WARNING_TOKEN= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN);
@@ -203,7 +205,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION,
 				PREF_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO,
 				PREF_PB_REDUNDANT_NULL_ANNOTATION,	
-				PREF_PB_REDUNDANT_NULL_CHECK, PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS,
+				PREF_PB_REDUNDANT_NULL_CHECK, PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS, PREF_PB_INCLUDE_FIELDS_IN_NULL_ANALYSIS,
 				PREF_PB_UNCLOSED_CLOSEABLE, PREF_PB_POTENTIALLY_UNCLOSED_CLOSEABLE, PREF_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE,
 				PREF_PB_FALLTHROUGH_CASE, PREF_PB_REDUNDANT_SUPERINTERFACE, PREF_PB_UNUSED_WARNING_TOKEN,
 				PREF_15_PB_UNCHECKED_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST,
@@ -570,6 +572,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_include_assert_in_null_analysis;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS, enabledDisabled, defaultIndent, section);		
+		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_include_fields_in_null_analysis;
+		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_INCLUDE_FIELDS_IN_NULL_ANALYSIS, enabledDisabled, defaultIndent, section);		
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_enable_annotation_null_analysis;
 		node= fFilteredPrefTree.addCheckBox(inner, label, PREF_ANNOTATION_NULL_ANALYSIS, enabledDisabled, defaultIndent, section);
