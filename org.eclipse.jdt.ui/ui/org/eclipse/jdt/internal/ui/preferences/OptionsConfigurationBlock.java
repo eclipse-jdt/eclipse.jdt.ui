@@ -64,6 +64,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.Util;
 
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -900,14 +901,18 @@ public abstract class OptionsConfigurationBlock {
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
+		layout.horizontalSpacing= 0;
 		layout.numColumns= 2;
 		composite.setLayout(layout);
 		composite.setLayoutData(gd);
 
 		final Button checkBox= new Button(composite, SWT.CHECK);
 		checkBox.setFont(JFaceResources.getDialogFont());
+		gd= new GridData(GridData.FILL, GridData.CENTER, false, false);
+		int offset= Util.isMac() ? -4 : Util.isLinux() ? -2 : /* Windows et al. */ 3;
+		gd.widthHint= checkBox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x + offset;
+		checkBox.setLayoutData(gd);
 		checkBox.setData(data);
-		checkBox.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
 		checkBox.addSelectionListener(getSelectionListener());
 		checkBox.getAccessible().addAccessibleListener(new AccessibleAdapter() {
 			@Override
@@ -918,7 +923,6 @@ public abstract class OptionsConfigurationBlock {
 
 		gd= new GridData(GridData.FILL, GridData.CENTER, true, false);
 		gd.widthHint= widthHint;
-		gd.horizontalIndent= -2;
 
 		Link link= new Link(composite, SWT.NONE);
 		link.setText(label);
