@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -762,7 +762,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 	@Override
 	public boolean visit(Assignment node) {
 		boolean result= super.visit(node);
-		if (getSelection().covers(node.getLeftHandSide()) || getSelection().coveredBy(node.getLeftHandSide())) {
+		if ((getSelection().covers(node.getLeftHandSide()) && !getSelection().covers(node.getRightHandSide())) || getSelection().coveredBy(node.getLeftHandSide())) {
+//		if (getSelection().covers(node.getLeftHandSide()) || getSelection().coveredBy(node.getLeftHandSide())) {
 			invalidSelection(
 				RefactoringCoreMessages.ExtractMethodAnalyzer_leftHandSideOfAssignment,
 				JavaStatusContext.create(fCUnit, node));
