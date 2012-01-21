@@ -287,9 +287,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
 				fReturnTypeBinding= ast.resolveWellKnownType("void"); //$NON-NLS-1$
 		}
-		if (fReturnType == null)
+		if (fReturnType == null) {
 			fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
 			fReturnTypeBinding= ast.resolveWellKnownType("void"); //$NON-NLS-1$
+		}
 	}
 
 	//	 !!! -- +/- same as in ExtractTempRefactoring
