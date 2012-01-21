@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -993,6 +993,10 @@ public class ExtractMethodRefactoring extends Refactoring {
 		for (int i= 0; i < typeVariables.length; i++) {
 			TypeParameter parameter= fAST.newTypeParameter();
 			parameter.setName(fAST.newSimpleName(typeVariables[i].getName()));
+			ITypeBinding[] bounds= typeVariables[i].getTypeBounds();
+			for (int j= 0; j < bounds.length; j++)
+				if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) //$NON-NLS-1$
+					parameter.typeBounds().add(fImportRewriter.addImport(bounds[j], fAST));
 			typeParameters.add(parameter);
 		}
 

@@ -2056,6 +2056,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		genericTest();
 	}
 
+	public void test1120() throws Exception {
+		genericTest(); //https://bugs.eclipse.org/bugs/show_bug.cgi?id=369295
+	}
+
 	//---- Test enums ---------------------------------
 
 	public void test1150() throws Exception {
