@@ -44,6 +44,18 @@ public class SourceAttachmentDialog extends StatusDialog {
 	 * @param entry The entry to edit.
 	 */
 	public SourceAttachmentDialog(Shell parent, IClasspathEntry entry) {
+		this(parent, entry, false);
+	}
+
+	/**
+	 * Creates an instance of the SourceAttachmentDialog. After
+	 * <code>open</code>, the edited paths can be accessed from
+	 * the classpath entry returned by <code>getResult</code>
+	 * @param parent Parent shell for the dialog
+	 * @param entry The entry to edit.
+	 * @param canEditEncoding whether the source attachment encoding can be edited
+	 */
+	public SourceAttachmentDialog(Shell parent, IClasspathEntry entry, boolean canEditEncoding) {
 		super(parent);
 
 		IStatusChangeListener listener= new IStatusChangeListener() {
@@ -51,11 +63,11 @@ public class SourceAttachmentDialog extends StatusDialog {
 				updateStatus(status);
 			}
 		};
-		fSourceAttachmentBlock= new SourceAttachmentBlock(listener, entry);
+		fSourceAttachmentBlock= new SourceAttachmentBlock(listener, entry, canEditEncoding);
 
 		setTitle(NewWizardMessages.SourceAttachmentDialog_title);
 	}
-
+	
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4

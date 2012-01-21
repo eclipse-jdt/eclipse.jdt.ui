@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
@@ -100,6 +101,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 			IPath containerPath= null;
 			IJavaProject jproject= fRoot.getJavaProject();
 			IClasspathEntry entry= JavaModelUtil.getClasspathEntry(fRoot);
+			boolean canEditEncoding= true;
 			if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 				containerPath= entry.getPath();
 				ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
@@ -116,12 +118,15 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 				if (status.getCode() == ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY) {
 					return createMessageContent(composite, Messages.format(PreferencesMessages.SourceAttachmentPropertyPage_read_only, containerName), fRoot);
 				}
+				IStatus attributeStatus= initializer.getAttributeStatus(containerPath, jproject, IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING);
+				canEditEncoding= !(attributeStatus.getCode() == ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED || attributeStatus.getCode() == ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY);
+
 				entry= JavaModelUtil.findEntryInContainer(container, fRoot.getPath());
 			}
 			fContainerPath= containerPath;
 			fEntry= entry;
 
-			fSourceAttachmentBlock= new SourceAttachmentBlock(this, entry);
+			fSourceAttachmentBlock= new SourceAttachmentBlock(this, entry, canEditEncoding);
 			return fSourceAttachmentBlock.createControl(composite);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);

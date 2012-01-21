@@ -370,12 +370,12 @@ public final class NewWizardMessages extends NLS {
 
 	public static String SourceAttachmentBlock_message;
 	public static String SourceAttachmentBlock_filename_description;
-	public static String SourceAttachmentBlock_filename_label;
 	public static String SourceAttachmentBlock_filename_externalfile_button;
 	public static String SourceAttachmentBlock_filename_externalfolder_button;
 	public static String SourceAttachmentBlock_filename_internal_button;
 	public static String SourceAttachmentBlock_filename_varlabel;
 	public static String SourceAttachmentBlock_filename_variable_button;
+	public static String SourceAttachmentBlock_filename_external_label;
 	public static String SourceAttachmentBlock_filename_external_varbutton;
 	public static String SourceAttachmentBlock_filename_error_notvalid;
 	public static String SourceAttachmentBlock_filename_error_notabsolute;
@@ -383,8 +383,12 @@ public final class NewWizardMessages extends NLS {
 	public static String SourceAttachmentBlock_filename_error_varnotexists;
 	public static String SourceAttachmentBlock_filename_error_deviceinpath;
 	public static String SourceAttachmentBlock_filename_warning_varempty;
+	public static String SourceAttachmentBlock_filename_workspace_browse;
+	public static String SourceAttachmentBlock_filename_workspace_label;
 	public static String SourceAttachmentBlock_intjardialog_title;
 	public static String SourceAttachmentBlock_intjardialog_message;
+	public static String SourceAttachmentBlock_encoding_label;
+	public static String SourceAttachmentBlock_external_radiolabel;
 	public static String SourceAttachmentBlock_extvardialog_title;
 	public static String SourceAttachmentBlock_extvardialog_description;
 	public static String SourceAttachmentBlock_extjardialog_text;
@@ -701,6 +705,7 @@ public final class NewWizardMessages extends NLS {
 
 	public static String NativeLibrariesDialog_external_message;
 	public static String SourceAttachmentBlock_extfolderdialog_message;
+	public static String SourceAttachmentBlock_workspace_radiolabel;
 	public static String AccessRulesDialog_severity_info_with_link;
 	public static String AccessRulesDialog_severity_info_no_link;
 	public static String AccessRulesDialog_severity_error;

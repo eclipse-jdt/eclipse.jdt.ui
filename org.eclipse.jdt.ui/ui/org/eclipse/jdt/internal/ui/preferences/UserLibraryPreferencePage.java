@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -112,6 +112,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementSorter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListLabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPUserLibraryElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathAttributeConfigurationDescriptors;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -230,6 +231,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		private static final String TAG_VERSION= "version"; //$NON-NLS-1$
 		private static final String TAG_LIBRARY= "library"; //$NON-NLS-1$
 		private static final String TAG_SOURCEATTACHMENT= "source"; //$NON-NLS-1$
+		private static final String TAG_SOURCE_ATTACHMENT_ENCODING= "source_encoding"; //$NON-NLS-1$
 		private static final String TAG_ARCHIVE_PATH= "path"; //$NON-NLS-1$
 		private static final String TAG_ARCHIVE= "archive"; //$NON-NLS-1$
 		private static final String TAG_SYSTEMLIBRARY= "systemlibrary"; //$NON-NLS-1$
@@ -602,7 +604,10 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 						IPath sourceAttachment= (IPath) child.getAttribute(CPListElement.SOURCEATTACHMENT);
 						if (sourceAttachment != null) {
 							childElement.setAttribute(TAG_SOURCEATTACHMENT, sourceAttachment.toPortableString());
-
+						}
+						String sourceEncoding= (String) child.getAttribute(CPListElement.SOURCE_ATTACHMENT_ENCODING);
+						if (sourceEncoding != null) {
+							childElement.setAttribute(TAG_SOURCE_ATTACHMENT_ENCODING, sourceEncoding);
 						}
 						String javadocLocation= (String) child.getAttribute(CPListElement.JAVADOC);
 						if (javadocLocation != null) {
@@ -716,6 +721,10 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 						String sourceAttachString= archiveElement.getAttribute(TAG_SOURCEATTACHMENT);
 						IPath sourceAttach= version.equals(VERSION1) ? Path.fromOSString(sourceAttachString) : Path.fromPortableString(sourceAttachString);
 						newArchive.setAttribute(CPListElement.SOURCEATTACHMENT, sourceAttach);
+					}
+					if (archiveElement.hasAttribute(TAG_SOURCE_ATTACHMENT_ENCODING)) {
+						String javadoc= archiveElement.getAttribute(TAG_SOURCE_ATTACHMENT_ENCODING);
+						newArchive.setAttribute(CPListElement.SOURCE_ATTACHMENT_ENCODING, javadoc);
 					}
 					if (archiveElement.hasAttribute(TAG_JAVADOC)) {
 						String javadoc= archiveElement.getAttribute(TAG_JAVADOC);
@@ -1001,10 +1010,19 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		String key= elem.getKey();
 		CPListElement selElement= elem.getParent();
 		Object parentContainer= selElement.getParentContainer();
+
+		CPListElementAttribute[] allAttributes= selElement.getAllAttributes();
+		boolean canEditEncoding= false;
+		for (int i= 0; i < allAttributes.length; i++) {
+			if (CPListElement.SOURCE_ATTACHMENT_ENCODING.equals(allAttributes[i].getKey())) {
+				canEditEncoding= !(allAttributes[i].isNonModifiable() || allAttributes[i].isNotSupported());
+			}
+		}
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
-			IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(getShell(), selElement.getClasspathEntry());
+			IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(getShell(), selElement.getClasspathEntry(), canEditEncoding);
 			if (result != null) {
 				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, result.getSourceAttachmentPath());
+				selElement.setAttribute(CPListElement.SOURCE_ATTACHMENT_ENCODING, SourceAttachmentBlock.getSourceAttachmentEncoding(result));
 				fLibraryList.refresh(parentContainer);
 				fLibraryList.update(selElement);
 			}

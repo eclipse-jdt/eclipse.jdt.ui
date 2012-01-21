@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,6 +54,7 @@ public class CPListElement {
 	public static final String COMBINE_ACCESSRULES= "combineaccessrules"; //$NON-NLS-1$
 
 	public static final String JAVADOC= IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME;
+	public static final String SOURCE_ATTACHMENT_ENCODING= IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING;
 	public static final String NATIVE_LIB_PATH= JavaRuntime.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY;
 
 	private IJavaProject fProject;
@@ -118,6 +119,7 @@ public class CPListElement {
 			case IClasspathEntry.CPE_VARIABLE:
 				createAttributeElement(SOURCEATTACHMENT, null, true);
 				createAttributeElement(JAVADOC, null, false);
+				createAttributeElement(SOURCE_ATTACHMENT_ENCODING, null, false);
 				createAttributeElement(NATIVE_LIB_PATH, null, false);
 				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
 				break;

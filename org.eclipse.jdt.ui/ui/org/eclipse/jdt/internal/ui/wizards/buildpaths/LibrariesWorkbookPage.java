@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -484,11 +484,19 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		String key= elem.getKey();
 		CPListElement selElement= elem.getParent();
 
+		CPListElementAttribute[] allAttributes= selElement.getAllAttributes();
+		boolean canEditEncoding= false;
+		for (int i= 0; i < allAttributes.length; i++) {
+			if (CPListElement.SOURCE_ATTACHMENT_ENCODING.equals(allAttributes[i].getKey())) {
+				canEditEncoding= !(allAttributes[i].isNonModifiable() || allAttributes[i].isNotSupported());
+			}
+		}
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
-			IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(getShell(), selElement.getClasspathEntry());
+			IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(getShell(), selElement.getClasspathEntry(), canEditEncoding);
 			if (result != null) {
 				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, result.getSourceAttachmentPath());
-				String[] changedAttributes= { CPListElement.SOURCEATTACHMENT };
+				selElement.setAttribute(CPListElement.SOURCE_ATTACHMENT_ENCODING, SourceAttachmentBlock.getSourceAttachmentEncoding(result));
+				String[] changedAttributes= { CPListElement.SOURCEATTACHMENT, CPListElement.SOURCE_ATTACHMENT_ENCODING };
 				attributeUpdated(selElement, changedAttributes);
 				fLibrariesList.refresh(elem);
 				fLibrariesList.update(selElement); // image

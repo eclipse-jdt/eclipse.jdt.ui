@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,6 +70,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
@@ -229,6 +230,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			}
 
 			IJavaProject jproject= root.getJavaProject();
+			boolean canEditEncoding= true;
 			if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 				containerPath= entry.getPath();
 				ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
@@ -247,6 +249,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					createLabel(composite, Messages.format(JavaEditorMessages.ClassFileEditor_SourceAttachmentForm_readonly, containerName));
 					return;
 				}
+				IStatus attributeStatus= initializer.getAttributeStatus(containerPath, jproject, IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING);
+				canEditEncoding= !(attributeStatus.getCode() == ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED || attributeStatus.getCode() == ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY);
 				entry= JavaModelUtil.findEntryInContainer(container, root.getPath());
 				Assert.isNotNull(entry);
 			}
@@ -271,15 +275,15 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				button= createButton(composite, JavaEditorMessages.SourceAttachmentForm_button_changeAttachedSource);
 			}
 
-			button.addSelectionListener(getButtonListener(entry, containerPath, jproject));
+			button.addSelectionListener(getButtonListener(entry, containerPath, jproject, canEditEncoding));
 		}
 
-		private SelectionListener getButtonListener(final IClasspathEntry entry, final IPath containerPath, final IJavaProject jproject) {
+		private SelectionListener getButtonListener(final IClasspathEntry entry, final IPath containerPath, final IJavaProject jproject, final boolean canEditEncoding) {
 			return new SelectionListener() {
 				public void widgetSelected(SelectionEvent event) {
 					Shell shell= getSite().getShell();
 					try {
-						IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(shell, entry);
+						IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(shell, entry, canEditEncoding);
 						if (result != null) {
 							applySourceAttachment(shell, result, jproject, containerPath, entry.getReferencingEntry() != null);
 							verifyInput(getEditorInput());

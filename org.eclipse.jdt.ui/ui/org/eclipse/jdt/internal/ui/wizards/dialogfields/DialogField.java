@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.Assert;
 
 /**
  * Base class of all dialog fields.
- * Dialog fields manage controls together with the model, independed
+ * Dialog fields manage controls together with the model, independent
  * from the creation time of the widgets.
  * - support for automated layouting.
  * - enable / disable, set focus a concept of the base class.
@@ -46,6 +46,8 @@ public class DialogField {
 
 	/**
 	 * Sets the label of the dialog field.
+	 * 
+	 * @param labeltext the label text
 	 */
 	public void setLabelText(String labeltext) {
 		fLabelText= labeltext;
@@ -58,6 +60,8 @@ public class DialogField {
 
 	/**
 	 * Defines the listener for this dialog field.
+	 * 
+	 * @param listener the dialog field listener
 	 */
 	public final void setDialogFieldListener(IDialogFieldListener listener) {
 		fDialogFieldListener= listener;
@@ -75,9 +79,10 @@ public class DialogField {
 	// ------- focus management
 
 	/**
-	 * Tries to set the focus to the dialog field.
-	 * Returns <code>true</code> if the dialog field can take focus.
-	 * 	To be reimplemented by dialog field implementors.
+	 * Tries to set the focus to the dialog field. Returns <code>true</code> if the dialog field can
+	 * take focus. To be reimplemented by dialog field implementors.
+	 * 
+	 * @return <code>true</code> if the dialog field can take focus
 	 */
 	public boolean setFocus() {
 		return false;
@@ -85,6 +90,7 @@ public class DialogField {
 
 	/**
 	 * Posts <code>setFocus</code> to the display event queue.
+	 * @param display the Display
 	 */
 	public void postSetFocusOnDialogField(Display display) {
 		if (display != null) {
@@ -101,11 +107,13 @@ public class DialogField {
 	// ------- layout helpers
 
 	/**
-	 * Creates all controls of the dialog field and fills it to a composite.
-	 * The composite is assumed to have <code>MGridLayout</code> as
-	 * layout.
-	 * The dialog field will adjust its controls' spans to the number of columns given.
-	 * 	To be reimplemented by dialog field implementors.
+	 * Creates all controls of the dialog field and fills it to a composite. The composite is
+	 * assumed to have <code>GridLayout</code> as layout. The dialog field will adjust its controls'
+	 * spans to the number of columns given. To be reimplemented by dialog field implementors.
+	 * 
+	 * @param parent the parent composite
+	 * @param nColumns number of columns
+	 * @return controls of dialog field
 	 */
 	public Control[] doFillIntoGrid(Composite parent, int nColumns) {
 		assertEnoughColumns(nColumns);
@@ -117,8 +125,10 @@ public class DialogField {
 	}
 
 	/**
-	 * Returns the number of columns of the dialog field.
-	 * 	To be reimplemented by dialog field implementors.
+	 * Returns the number of columns of the dialog field. To be reimplemented by dialog field
+	 * implementors.
+	 * 
+	 * @return the number of columns of the dialog field
 	 */
 	public int getNumberOfControls() {
 		return 1;
@@ -134,8 +144,10 @@ public class DialogField {
 
 	/**
 	 * Creates or returns the created label widget.
-	 * @param parent The parent composite or <code>null</code> if the widget has
-	 * already been created.
+	 * 
+	 * @param parent The parent composite or <code>null</code> if the widget has already been
+	 *            created.
+	 * @return the label widget
 	 */
 	public Label getLabelControl(Composite parent) {
 		if (fLabel == null) {
@@ -157,17 +169,21 @@ public class DialogField {
 
 	/**
 	 * Creates a spacer control.
+	 * 
 	 * @param parent The parent composite
+	 * @return the spacer control
 	 */
 	public static Control createEmptySpace(Composite parent) {
 		return createEmptySpace(parent, 1);
 	}
 
 	/**
-	 * Creates a spacer control with the given span.
-	 * The composite is assumed to have <code>MGridLayout</code> as
-	 * layout.
+	 * Creates a spacer control with the given span. The composite is assumed to have
+	 * <code>GridLayout</code> as layout.
+	 * 
 	 * @param parent The parent composite
+	 * @param span the given span
+	 * @return the spacer control
 	 */
 	public static Control createEmptySpace(Composite parent, int span) {
 		Label label= new Label(parent, SWT.LEFT);
@@ -184,7 +200,10 @@ public class DialogField {
 
 	/**
 	 * Tests is the control is not <code>null</code> and not disposed.
-	*/
+	 * 
+	 * @param control the Control
+	 * @return <code>true</code> if the control is not <code>null</code> and not disposed.
+	 */
 	protected final boolean isOkToUse(Control control) {
 		return (control != null) && (Display.getCurrent() != null) && !control.isDisposed();
 	}
@@ -193,6 +212,8 @@ public class DialogField {
 
 	/**
 	 * Sets the enable state of the dialog field.
+	 * 
+	 * @param enabled enable state
 	 */
 	public final void setEnabled(boolean enabled) {
 		if (enabled != fEnabled) {
@@ -221,6 +242,8 @@ public class DialogField {
 
 	/**
 	 * Gets the enable state of the dialog field.
+	 * 
+	 * @return the enable state
 	 */
 	public final boolean isEnabled() {
 		return fEnabled;

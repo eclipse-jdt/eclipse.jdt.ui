@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,18 +83,42 @@ public final class BuildPathDialogAccess {
 	}
 
 	/**
-	 * Shows the UI for configuring source attachments. <code>null</code> is returned
-	 * if the user cancels the dialog. The dialog does not apply any changes.
-	 *
+	 * Shows the UI for configuring source attachments, with editing of source attachment encoding
+	 * disabled. <code>null</code> is returned if the user cancels the dialog. The dialog does not
+	 * apply any changes.
+	 * 
 	 * @param shell The parent shell for the dialog
 	 * @param initialEntry The entry to edit. The kind of the classpath entry must be either
-	 * <code>IClasspathEntry.CPE_LIBRARY</code> or <code>IClasspathEntry.CPE_VARIABLE</code>.
-	 * @return Returns the resulting classpath entry containing a potentially modified source attachment path and
-	 * source attachment root. The resulting entry can be used to replace the original entry on the classpath.
-	 * Note that the dialog does not make any changes on the passed entry nor on the classpath that
-	 * contains it.
+	 *            <code>IClasspathEntry.CPE_LIBRARY</code> or
+	 *            <code>IClasspathEntry.CPE_VARIABLE</code>.
+	 * @return Returns the resulting classpath entry containing a potentially modified source
+	 *         attachment path, source attachment root and source attachment encoding. The resulting
+	 *         entry can be used to replace the original entry on the classpath. Note that the
+	 *         dialog does not make any changes on the passed entry nor on the classpath that
+	 *         contains it.
 	 */
 	public static IClasspathEntry configureSourceAttachment(Shell shell, IClasspathEntry initialEntry) {
+		return configureSourceAttachment(shell, initialEntry, false);
+	}
+
+	/**
+	 * Shows the UI for configuring source attachments. The source attachment encoding can be edited
+	 * depending on the parameter <code>canEditEncoding</code>. <code>null</code> is returned if the
+	 * user cancels the dialog. The dialog does not apply any changes.
+	 * 
+	 * @param shell The parent shell for the dialog
+	 * @param initialEntry The entry to edit. The kind of the classpath entry must be either
+	 *            <code>IClasspathEntry.CPE_LIBRARY</code> or
+	 *            <code>IClasspathEntry.CPE_VARIABLE</code>.
+	 * @param canEditEncoding whether the source attachment encoding can be edited
+	 * @return Returns the resulting classpath entry containing a potentially modified source
+	 *         attachment path, source attachment root and source attachment encoding. The resulting
+	 *         entry can be used to replace the original entry on the classpath. Note that the
+	 *         dialog does not make any changes on the passed entry nor on the classpath that
+	 *         contains it.
+	 * @since 3.8
+	 */
+	public static IClasspathEntry configureSourceAttachment(Shell shell, IClasspathEntry initialEntry, boolean canEditEncoding) {
 		if (initialEntry == null) {
 			throw new IllegalArgumentException();
 		}
@@ -103,13 +127,13 @@ public final class BuildPathDialogAccess {
 			throw new IllegalArgumentException();
 		}
 
-		SourceAttachmentDialog dialog=  new SourceAttachmentDialog(shell, initialEntry);
+		SourceAttachmentDialog dialog=  new SourceAttachmentDialog(shell, initialEntry, canEditEncoding);
 		if (dialog.open() == Window.OK) {
 			return dialog.getResult();
 		}
 		return null;
 	}
-
+	
 	/**
 	 * Shows the UI for configuring a javadoc location. <code>null</code> is returned
 	 * if the user cancels the dialog. If OK is pressed, an array of length 1 containing the configured URL is

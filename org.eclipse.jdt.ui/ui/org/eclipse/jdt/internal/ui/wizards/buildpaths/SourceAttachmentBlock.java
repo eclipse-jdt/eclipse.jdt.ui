@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -44,9 +45,11 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDEEncoding;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -56,10 +59,10 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ComboDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
@@ -77,11 +80,16 @@ public class SourceAttachmentBlock {
 
 	private final IStatusChangeListener fContext;
 
-	private StringButtonDialogField fFileNameField;
-	private SelectionButtonDialogField fWorkspaceButton;
+	private StringButtonDialogField fWorkspaceFileNameField;
+	private StringButtonDialogField fExternalFileNameField;
+	private StringButtonDialogField fVariableFileNameField;
 	private SelectionButtonDialogField fExternalFolderButton;
+	private SelectionButtonDialogField fExternalRadio, fWorkspaceRadio;
+	private ComboDialogField fEncodingCombo;
 
-	private IStatus fNameStatus;
+	private IStatus fWorkspaceNameStatus;
+	private IStatus fExternalNameStatus;
+	private IStatus fVariableNameStatus;
 
 	/**
 	 * The path to which the archive variable points.
@@ -96,76 +104,138 @@ public class SourceAttachmentBlock {
 
 	private IJavaProject fProject;
 	private final IClasspathEntry fEntry;
+	private final boolean fCanEditEncoding;
+	private String fDefaultEncoding;
 
 	/**
 	 * @param context listeners for status updates
 	 * @param entry The entry to edit
 	 */
 	public SourceAttachmentBlock(IStatusChangeListener context, IClasspathEntry entry) {
+		this(context, entry, false);
+	}
+
+	/**
+	 * @param context listeners for status updates
+	 * @param entry The entry to edit
+	 * @param canEditEncoding whether the source attachment encoding can be edited
+	 */
+	public SourceAttachmentBlock(IStatusChangeListener context, IClasspathEntry entry, boolean canEditEncoding) {
 		Assert.isNotNull(entry);
 
 		fContext= context;
 		fEntry= entry;
+		fCanEditEncoding= canEditEncoding;
 
-
+		try {
+			fDefaultEncoding = ResourcesPlugin.getWorkspace().getRoot().getDefaultCharset();
+		} catch (CoreException e) {
+			//do nothing
+		}
+		
 		int kind= entry.getEntryKind();
 		Assert.isTrue(kind == IClasspathEntry.CPE_LIBRARY || kind == IClasspathEntry.CPE_VARIABLE);
 
 		fWorkspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
 
-		fNameStatus= new StatusInfo();
+		fWorkspaceNameStatus= new StatusInfo();
+		fExternalNameStatus= new StatusInfo();
+		fVariableNameStatus= new StatusInfo();
 
 		SourceAttachmentAdapter adapter= new SourceAttachmentAdapter();
 
 		// create the dialog fields (no widgets yet)
 		if (isVariableEntry()) {
-			fFileNameField= new VariablePathDialogField(adapter);
-			fFileNameField.setDialogFieldListener(adapter);
-			fFileNameField.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_varlabel);
-			fFileNameField.setButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_external_varbutton);
-			((VariablePathDialogField)fFileNameField).setVariableButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_variable_button);
-
+			fVariableFileNameField= new VariablePathDialogField(adapter);
+			fVariableFileNameField.setDialogFieldListener(adapter);
+			fVariableFileNameField.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_varlabel);
+			fVariableFileNameField.setButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_external_varbutton);
+			((VariablePathDialogField) fVariableFileNameField).setVariableButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_variable_button);
 		} else {
-			fFileNameField= new StringButtonDialogField(adapter);
-			fFileNameField.setDialogFieldListener(adapter);
-			fFileNameField.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_label);
-			fFileNameField.setButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_externalfile_button);
+			fWorkspaceRadio= new SelectionButtonDialogField(SWT.RADIO);
+			fWorkspaceRadio.setDialogFieldListener(adapter);
+			fWorkspaceRadio.setLabelText(NewWizardMessages.SourceAttachmentBlock_workspace_radiolabel);
 
-			fWorkspaceButton= new SelectionButtonDialogField(SWT.PUSH);
-			fWorkspaceButton.setDialogFieldListener(adapter);
-			fWorkspaceButton.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_internal_button);
+			fWorkspaceFileNameField= new StringButtonDialogField(adapter);
+			fWorkspaceFileNameField.setDialogFieldListener(adapter);
+			fWorkspaceFileNameField.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_workspace_label);
+			fWorkspaceFileNameField.setButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_workspace_browse);
+
+			fExternalRadio= new SelectionButtonDialogField(SWT.RADIO);
+			fExternalRadio.setDialogFieldListener(adapter);
+			fExternalRadio.setLabelText(NewWizardMessages.SourceAttachmentBlock_external_radiolabel);
+
+			fExternalFileNameField= new StringButtonDialogField(adapter);
+			fExternalFileNameField.setDialogFieldListener(adapter);
+			fExternalFileNameField.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_external_label);
+			fExternalFileNameField.setButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_externalfile_button);
 
 			fExternalFolderButton= new SelectionButtonDialogField(SWT.PUSH);
 			fExternalFolderButton.setDialogFieldListener(adapter);
 			fExternalFolderButton.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_externalfolder_button);
 		}
 
+		fEncodingCombo= new ComboDialogField(SWT.DROP_DOWN);
+		fEncodingCombo.setDialogFieldListener(adapter);
+		fEncodingCombo.setLabelText(NewWizardMessages.SourceAttachmentBlock_encoding_label);
+		List<String> encodings= IDEEncoding.getIDEEncodings();
+		fEncodingCombo.setItems(encodings.toArray(new String[encodings.size()]));
+
 		// set the old settings
 		setDefaults();
 	}
 
 	public void setDefaults() {
+		String path= ""; //$NON-NLS-1$
+		String encoding= null;
+
 		if (fEntry.getSourceAttachmentPath() != null) {
-			fFileNameField.setText(fEntry.getSourceAttachmentPath().toString());
-		} else {
-			fFileNameField.setText(""); //$NON-NLS-1$
+			path= fEntry.getSourceAttachmentPath().toString();
+			encoding= getSourceAttachmentEncoding(fEntry);
 		}
+
+		if (encoding == null) {
+			encoding= fDefaultEncoding;
+		}
+
+		if (isVariableEntry()) {
+			fVariableFileNameField.setText(path);
+			fEncodingCombo.setText(encoding);
+		} else {
+			if (isWorkspacePath(path)) {
+				fWorkspaceRadio.setSelection(true);
+				fWorkspaceFileNameField.setText(path);
+			} else if (path.length() != 0) {
+				fExternalRadio.setSelection(true);
+				fExternalFileNameField.setText(path);
+				fEncodingCombo.setText(encoding);
+			} else {
+				fWorkspaceRadio.setSelection(true);
+				fExternalRadio.setSelection(false);
+			}
+		}
+	}
+
+	private boolean isWorkspacePath(String path) {
+		IPath iPath= Path.fromOSString(path);
+		if (iPath == null || iPath.getDevice() != null)
+			return false;
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		if (workspace == null)
+			return false;
+		return workspace.getRoot().findMember(iPath) != null;
 	}
 
 	private boolean isVariableEntry() {
 		return fEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE;
 	}
 
-
 	/**
 	 * Gets the source attachment path chosen by the user
 	 * @return the source attachment path
 	 */
 	public IPath getSourceAttachmentPath() {
-		if (fFileNameField.getText().length() == 0) {
-			return null;
-		}
-		return getFilePath();
+		return (getFilePath().segmentCount() == 0) ? null : getFilePath();
 	}
 
 	/**
@@ -177,9 +247,21 @@ public class SourceAttachmentBlock {
 		return null;
 	}
 
+	private String getEncoding() {
+		if (isVariableEntry() || (fExternalRadio != null && fExternalRadio.isSelected())) {
+			return fEncodingCombo.getText();
+		}
+		return null;
+	}
+
 	public IClasspathEntry getNewEntry() {
 		CPListElement elem= CPListElement.createFromExisting(fEntry, fProject);
-		elem.setAttribute(CPListElement.SOURCEATTACHMENT, getSourceAttachmentPath());
+		IPath sourceAttachmentPath= getSourceAttachmentPath();
+		String encoding= (sourceAttachmentPath == null) ? null : getEncoding();
+		encoding= (encoding == null || encoding.length() == 0 || encoding.equals(fDefaultEncoding)) ? null : encoding;
+
+		elem.setAttribute(CPListElement.SOURCEATTACHMENT, sourceAttachmentPath);
+		elem.setAttribute(CPListElement.SOURCE_ATTACHMENT_ENCODING, encoding);
 		return elem.getClasspathEntry();
 	}
 
@@ -219,8 +301,8 @@ public class SourceAttachmentBlock {
 			desc.setLayoutData(gd);
 			desc.setText(NewWizardMessages.SourceAttachmentBlock_filename_description);
 
-			fFileNameField.doFillIntoGrid(composite, 4);
-			LayoutUtil.setWidthHint(fFileNameField.getTextControl(null), widthHint);
+			fVariableFileNameField.doFillIntoGrid(composite, 4);
+			LayoutUtil.setWidthHint(fVariableFileNameField.getTextControl(null), widthHint);
 
 			// label that shows the resolved path for variable jars
 			//DialogField.createEmptySpace(composite, 1);
@@ -230,7 +312,9 @@ public class SourceAttachmentBlock {
 			gd.widthHint= labelWidthHint;
 			fFullPathResolvedLabel.setLayoutData(gd);
 
-			LayoutUtil.setHorizontalGrabbing(fFileNameField.getTextControl(null));
+			DialogField.createEmptySpace(composite, 4);
+
+			fEncodingCombo.doFillIntoGrid(composite, 2);
 		} else {
 			int widthHint= converter.convertWidthInCharsToPixels(60);
 
@@ -241,22 +325,33 @@ public class SourceAttachmentBlock {
 			message.setLayoutData(gd);
 			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, BasicElementLabels.getResourceName(fEntry.getPath().lastSegment())));
 
-			fWorkspaceButton.doFillIntoGrid(composite, 1);
-			((GridData) fWorkspaceButton.getSelectionButton(null).getLayoutData()).verticalAlignment= SWT.END;
+			fWorkspaceRadio.doFillIntoGrid(composite, 4);
 
+			fWorkspaceFileNameField.doFillIntoGrid(composite, 4);
+			LayoutUtil.setWidthHint(fWorkspaceFileNameField.getTextControl(null), widthHint);
+			LayoutUtil.setHorizontalGrabbing(fWorkspaceFileNameField.getTextControl(null));
 
-			// archive name field
-			fFileNameField.doFillIntoGrid(composite, 4);
-			LayoutUtil.setWidthHint(fFileNameField.getTextControl(null), widthHint);
-			LayoutUtil.setHorizontalGrabbing(fFileNameField.getTextControl(null));
+			DialogField.createEmptySpace(composite, 4);
 
-			// Additional 'browse workspace' button for normal jars
-			DialogField.createEmptySpace(composite, 3);
+			fExternalRadio.doFillIntoGrid(composite, 4);
+			fExternalFileNameField.doFillIntoGrid(composite, 4);
+			LayoutUtil.setWidthHint(fExternalFileNameField.getTextControl(null), widthHint);
+			LayoutUtil.setHorizontalGrabbing(fExternalFileNameField.getTextControl(null));
+
+			fEncodingCombo.doFillIntoGrid(composite, 2);
+			DialogField.createEmptySpace(composite, 1);
 
 			fExternalFolderButton.doFillIntoGrid(composite, 1);
-		}
 
-		fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
+			fWorkspaceRadio.attachDialogField(fWorkspaceFileNameField);
+
+			if (fCanEditEncoding) {
+				fExternalRadio.attachDialogFields(new DialogField[] { fExternalFileNameField, fExternalFolderButton, fEncodingCombo });
+			} else {
+				fEncodingCombo.setEnabled(false);
+				fExternalRadio.attachDialogFields(new DialogField[] { fExternalFileNameField, fExternalFolderButton });
+			}
+		}
 
 		Dialog.applyDialogFont(composite);
 
@@ -279,10 +374,20 @@ public class SourceAttachmentBlock {
 	}
 
 	private void attachmentChangeControlPressed(DialogField field) {
-		if (field == fFileNameField) {
-			IPath jarFilePath= isVariableEntry() ? chooseExtension() : chooseExtJarFile();
+		if (field == fWorkspaceFileNameField) {
+			IPath jarFilePath= chooseInternal();
 			if (jarFilePath != null) {
-				fFileNameField.setText(jarFilePath.toString());
+				fWorkspaceFileNameField.setText(jarFilePath.toString());
+			}
+		} else if (field == fExternalFileNameField) {
+			IPath jarFilePath= chooseExtJarFile();
+			if (jarFilePath != null) {
+				fExternalFileNameField.setText(jarFilePath.toString());
+			}
+		} else if (field == fVariableFileNameField) {
+			IPath jarFilePath= chooseExtension();
+			if (jarFilePath != null) {
+				fVariableFileNameField.setText(jarFilePath.toString());
 			}
 		}
 	}
@@ -290,18 +395,16 @@ public class SourceAttachmentBlock {
 	// ---------- IDialogFieldListener --------
 
 	private void attachmentDialogFieldChanged(DialogField field) {
-		if (field == fFileNameField) {
-			fNameStatus= updateFileNameStatus();
-		} else if (field == fWorkspaceButton) {
-			IPath jarFilePath= chooseInternal();
-			if (jarFilePath != null) {
-				fFileNameField.setText(jarFilePath.toString());
-			}
-			return;
+		if (field == fVariableFileNameField) {
+			fVariableNameStatus= updateFileNameStatus(fVariableFileNameField);
+		} else if (field == fWorkspaceFileNameField) {
+			fWorkspaceNameStatus= updateFileNameStatus(fWorkspaceFileNameField);
+		} else if (field == fExternalFileNameField) {
+			fExternalNameStatus= updateFileNameStatus(fExternalFileNameField);
 		} else if (field == fExternalFolderButton) {
 			IPath folderPath= chooseExtFolder();
 			if (folderPath != null) {
-				fFileNameField.setText(folderPath.toString());
+				fExternalFileNameField.setText(folderPath.toString());
 			}
 			return;
 		}
@@ -309,14 +412,24 @@ public class SourceAttachmentBlock {
 	}
 
 	private void doStatusLineUpdate() {
-		fFileNameField.enableButton(canBrowseFileName());
-
-		// set the resolved path for variable jars
-		if (fFullPathResolvedLabel != null) {
-			fFullPathResolvedLabel.setText(getResolvedLabelString());
+		IStatus status;
+		if (isVariableEntry()) {
+			// set the resolved path for variable jars
+			if (fFullPathResolvedLabel != null) {
+				fFullPathResolvedLabel.setText(getResolvedLabelString());
+			}
+			fVariableFileNameField.enableButton(canBrowseFileName());
+			status= fVariableNameStatus;
+		} else {
+			boolean isWorkSpace= fWorkspaceRadio.isSelected();
+			if (isWorkSpace) {
+				fWorkspaceFileNameField.enableButton(canBrowseFileName());
+				status= fWorkspaceNameStatus;
+			} else {
+				fExternalFileNameField.enableButton(canBrowseFileName());
+				status= fExternalNameStatus;
+			}
 		}
-
-		IStatus status= StatusUtil.getMostSevere(new IStatus[] { fNameStatus });
 		fContext.statusChanged(status);
 	}
 
@@ -352,11 +465,11 @@ public class SourceAttachmentBlock {
 		return null;
 	}
 
-	private IStatus updateFileNameStatus() {
+	private IStatus updateFileNameStatus(StringButtonDialogField field) {
 		StatusInfo status= new StatusInfo();
 		fFileVariablePath= null;
 
-		String fileName= fFileNameField.getText();
+		String fileName= field.getText();
 		if (fileName.length() == 0) {
 			// no source attachment
 			return status;
@@ -433,7 +546,8 @@ public class SourceAttachmentBlock {
 	}
 
 	private IPath getFilePath() {
-		return Path.fromOSString(fFileNameField.getText()).makeAbsolute();
+		String filePath= isVariableEntry() ? fVariableFileNameField.getText() : (fWorkspaceRadio.isSelected() ? fWorkspaceFileNameField.getText() : fExternalFileNameField.getText());
+		return Path.fromOSString(filePath).makeAbsolute();
 	}
 
 	private IPath chooseExtension() {
@@ -507,7 +621,7 @@ public class SourceAttachmentBlock {
 	 * Opens a dialog to choose an internal jar.
 	 */
 	private IPath chooseInternal() {
-		String initSelection= fFileNameField.getText();
+		String initSelection= fWorkspaceFileNameField.getText();
 
 		ViewerFilter filter= new ArchiveFileFilter((List<IResource>) null, false, false);
 
@@ -585,12 +699,32 @@ public class SourceAttachmentBlock {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
-					String[] changedAttributes= { CPListElement.SOURCEATTACHMENT };
+					String[] changedAttributes= { CPListElement.SOURCEATTACHMENT, CPListElement.SOURCE_ATTACHMENT_ENCODING };
 					BuildPathSupport.modifyClasspathEntry(shell, newEntry, changedAttributes, jproject, containerPath, isReferencedEntry, monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				}
 			}
 		};
+	}
+
+	public static String getSourceAttachmentEncoding(IClasspathEntry entry) {
+		if (entry == null) {
+			throw new IllegalArgumentException("Entry must not be null"); //$NON-NLS-1$
+		}
+
+		int kind= entry.getEntryKind();
+		if (kind != IClasspathEntry.CPE_LIBRARY && kind != IClasspathEntry.CPE_VARIABLE) {
+			throw new IllegalArgumentException("Entry must be of kind CPE_LIBRARY or CPE_VARIABLE"); //$NON-NLS-1$
+		}
+
+		IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
+		for (int i= 0; i < extraAttributes.length; i++) {
+			IClasspathAttribute attrib= extraAttributes[i];
+			if (IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING.equals(attrib.getName())) {
+				return attrib.getValue();
+			}
+		}
+		return null;
 	}
 }
