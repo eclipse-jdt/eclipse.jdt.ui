@@ -85,6 +85,7 @@ org.eclipse.jdt.debug/*
 org.eclipse.jdt.debug.ui/*
 org.eclipse.jdt.launching/*
 org.eclipse.jdt.launching.j9/*
+org.eclipse.jetty.*/*
 org.eclipse.jface/*
 org.eclipse.osgi/*
 org.eclipse.pde.ui.tests/*
