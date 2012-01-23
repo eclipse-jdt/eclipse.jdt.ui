@@ -343,8 +343,12 @@ public class SourceAttachmentBlock {
 
 			fExternalFolderButton.doFillIntoGrid(composite, 1);
 
-			fWorkspaceRadio.attachDialogField(fWorkspaceFileNameField);
+			int indent= converter.convertWidthInCharsToPixels(2);
+			LayoutUtil.setHorizontalIndent(fWorkspaceFileNameField.getLabelControl(null), indent);
+			LayoutUtil.setHorizontalIndent(fExternalFileNameField.getLabelControl(null), indent);
+			LayoutUtil.setHorizontalIndent(fEncodingCombo.getLabelControl(null), indent);
 
+			fWorkspaceRadio.attachDialogField(fWorkspaceFileNameField);
 			if (fCanEditEncoding) {
 				fExternalRadio.attachDialogFields(new DialogField[] { fExternalFileNameField, fExternalFolderButton, fEncodingCombo });
 			} else {
