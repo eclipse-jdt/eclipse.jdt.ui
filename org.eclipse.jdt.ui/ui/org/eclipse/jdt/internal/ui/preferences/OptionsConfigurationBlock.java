@@ -510,6 +510,11 @@ public abstract class OptionsConfigurationBlock {
 			return addCheckBox(parentComposite, label, key, values, indent, parentNode, true);
 		}
 
+		public PreferenceTreeNode addCheckBoxWithLink(Composite parentComposite, String label, Key key, String[] values, int indent, PreferenceTreeNode parentNode, boolean showAllChildren, int widthHint, SelectionListener listener) {
+			fConfigBlock.addCheckBoxWithLink(parentComposite, label, key, values, indent, widthHint, listener);
+			return addChild(parentNode, label, key, PreferenceTreeNode.CHECKBOX, showAllChildren);
+		}
+
 		public PreferenceTreeNode addComboBox(Composite parentComposite, String label, Key key, String[] values, String[] valueLabels, int indent, PreferenceTreeNode parentNode, boolean showAllChildren) {
 			fConfigBlock.addComboBox(parentComposite, label, key, values, valueLabels, indent);
 			return addChild(parentNode, label, key, PreferenceTreeNode.COMBO, showAllChildren);

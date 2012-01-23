@@ -11,39 +11,211 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.util.Hashtable;
+import java.util.Arrays;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.preferences.DefaultScope;
 
 import org.eclipse.core.resources.IProject;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.layout.PixelConverter;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 
 public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlock {
+
+	private class NullAnnotationsConfigurationDialog extends StatusDialog {
+		
+		private class StringButtonAdapter implements IDialogFieldListener, IStringButtonAdapter {
+			public void dialogFieldChanged(DialogField field) {
+				doValidation((StringButtonDialogField) field);
+			}
+
+			public void changeControlPressed(DialogField field) {
+				doBrowseTypes((StringButtonDialogField) field);
+			}
+		}
+
+		private static final int RESTORE_DEFAULTS_BUTTON_ID= IDialogConstants.CLIENT_ID + 1;
+		
+		
+		private StringButtonDialogField fNullableAnnotationDialogField;
+		private StringButtonDialogField fNonNullAnnotationDialogField;
+		private StringButtonDialogField fNonNullByDefaultAnnotationDialogField;
+		private IStatus fNullableStatus, fNonNullStatus, fNonNullByDefaultStatus;
+
+		private NullAnnotationsConfigurationDialog() {
+			super(ProblemSeveritiesConfigurationBlock.this.getShell());
+			
+			setTitle(PreferencesMessages.NullAnnotationsConfigurationDialog_title);
+			
+			fNullableStatus= new StatusInfo();
+			fNonNullStatus= new StatusInfo();
+			fNonNullByDefaultStatus= new StatusInfo();
+			
+			StringButtonAdapter adapter= new StringButtonAdapter();
+
+			fNullableAnnotationDialogField= new StringButtonDialogField(adapter);
+			fNullableAnnotationDialogField.setLabelText(PreferencesMessages.NullAnnotationsConfigurationDialog_nullable_annotation_label);
+			fNullableAnnotationDialogField.setButtonLabel(PreferencesMessages.NullAnnotationsConfigurationDialog_browse1);
+			fNullableAnnotationDialogField.setDialogFieldListener(adapter);
+			fNullableAnnotationDialogField.setText(getValue(PREF_NULLABLE_ANNOTATION_NAME));
+			
+			fNonNullAnnotationDialogField= new StringButtonDialogField(adapter);
+			fNonNullAnnotationDialogField.setLabelText(PreferencesMessages.NullAnnotationsConfigurationDialog_nonnull_annotation_label);
+			fNonNullAnnotationDialogField.setButtonLabel(PreferencesMessages.NullAnnotationsConfigurationDialog_browse2);
+			fNonNullAnnotationDialogField.setDialogFieldListener(adapter);
+			fNonNullAnnotationDialogField.setText(getValue(PREF_NONNULL_ANNOTATION_NAME));
+			
+			fNonNullByDefaultAnnotationDialogField= new StringButtonDialogField(adapter);
+			fNonNullByDefaultAnnotationDialogField.setLabelText(PreferencesMessages.NullAnnotationsConfigurationDialog_nonnullbydefault_annotation_label);
+			fNonNullByDefaultAnnotationDialogField.setButtonLabel(PreferencesMessages.NullAnnotationsConfigurationDialog_browse3);
+			fNonNullByDefaultAnnotationDialogField.setDialogFieldListener(adapter);
+			fNonNullByDefaultAnnotationDialogField.setText(getValue(PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME));
+		}
+		
+		@Override
+		protected Control createDialogArea(Composite parent) {
+			Composite composite= (Composite) super.createDialogArea(parent);
+			initializeDialogUnits(parent);
+
+			GridLayout layout= (GridLayout) composite.getLayout();
+			layout.numColumns= 3;
+			
+			int fieldWidthHint= convertWidthInCharsToPixels(60);
+			
+			Label intro= new Label(composite, SWT.WRAP);
+			intro.setText(PreferencesMessages.NullAnnotationsConfigurationDialog_null_annotations_description);
+	    	intro.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, layout.numColumns, 1));
+			LayoutUtil.setWidthHint(intro, fieldWidthHint);
+	    	
+			fNullableAnnotationDialogField.doFillIntoGrid(composite, 3);
+			Text text= fNullableAnnotationDialogField.getTextControl(null);
+			LayoutUtil.setWidthHint(text, fieldWidthHint);
+			TextFieldNavigationHandler.install(text);
+
+			fNonNullAnnotationDialogField.doFillIntoGrid(composite, 3);
+			TextFieldNavigationHandler.install(fNonNullAnnotationDialogField.getTextControl(null));
+			
+			fNonNullByDefaultAnnotationDialogField.doFillIntoGrid(composite, 3);
+			TextFieldNavigationHandler.install(fNonNullByDefaultAnnotationDialogField.getTextControl(null));
+			
+			fNullableAnnotationDialogField.postSetFocusOnDialogField(parent.getDisplay());
+
+			applyDialogFont(composite);
+			return composite;
+		}
+		
+		private void doBrowseTypes(StringButtonDialogField dialogField) {
+			IRunnableContext context= new BusyIndicatorRunnableContext();
+			IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
+			int style= IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES;
+			try {
+				SelectionDialog dialog= JavaUI.createTypeDialog(getShell(), context, scope, style, false, dialogField.getText());
+				dialog.setTitle(PreferencesMessages.NullAnnotationsConfigurationDialog_browse_title);
+				dialog.setMessage(PreferencesMessages.NullAnnotationsConfigurationDialog_choose_annotation);
+				if (dialog.open() == Window.OK) {
+					IType res= (IType) dialog.getResult()[0];
+					dialogField.setText(res.getFullyQualifiedName('.'));
+				}
+			} catch (JavaModelException e) {
+				ExceptionHandler.handle(e, getShell(), PreferencesMessages.NullAnnotationsConfigurationDialog_error_title, PreferencesMessages.NullAnnotationsConfigurationDialog_error_message);
+			}
+		}
+		
+		private void doValidation(StringButtonDialogField dialogField) {
+			String newValue= dialogField.getText();
+			if (fNullableAnnotationDialogField.equals(dialogField)) {
+				fNullableStatus= validateNullnessAnnotation(newValue, PreferencesMessages.NullAnnotationsConfigurationDialog_nullable_annotation_error);
+			} else if (fNonNullAnnotationDialogField.equals(dialogField)) {
+				fNonNullStatus= validateNullnessAnnotation(newValue, PreferencesMessages.NullAnnotationsConfigurationDialog_nonull_annotation_error);
+			} else if (fNonNullByDefaultAnnotationDialogField.equals(dialogField)) {
+				fNonNullByDefaultStatus= validateNullnessAnnotation(newValue, PreferencesMessages.NullAnnotationsConfigurationDialog_nonnullbydefault_annotation_error);
+			}
+			IStatus status= StatusUtil.getMostSevere(new IStatus[] { fNullableStatus, fNonNullStatus, fNonNullByDefaultStatus });
+			updateStatus(status);
+		}
+
+		@Override
+		protected void createButtonsForButtonBar(Composite parent) {
+			createButton(parent, RESTORE_DEFAULTS_BUTTON_ID, PreferencesMessages.NullAnnotationsConfigurationDialog_restore_defaults, false);
+			super.createButtonsForButtonBar(parent);
+		}
+		
+		@Override
+		protected void buttonPressed(int buttonId) {
+			if (buttonId == RESTORE_DEFAULTS_BUTTON_ID) {
+				fNullableAnnotationDialogField.setText(NULL_ANNOTATIONS_DEFAULTS[0]);
+				fNonNullAnnotationDialogField.setText(NULL_ANNOTATIONS_DEFAULTS[1]);
+				fNonNullByDefaultAnnotationDialogField.setText(NULL_ANNOTATIONS_DEFAULTS[2]);
+			} else {
+				super.buttonPressed(buttonId);
+			}
+		}
+		
+		public String[] getResult() {
+			return new String[] {
+					fNullableAnnotationDialogField.getText(),
+					fNonNullAnnotationDialogField.getText(),
+					fNonNullByDefaultAnnotationDialogField.getText()
+			};
+		}
+		@Override
+		protected boolean isResizable() {
+			return true;
+		}
+		
+		@Override
+		protected void configureShell(Shell newShell) {
+			super.configureShell(newShell);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.PROBLEM_SEVERITIES_PROPERTY_PAGE);
+		}
+	}
 
 	private static final String SETTINGS_SECTION_NAME= "ProblemSeveritiesConfigurationBlock";  //$NON-NLS-1$
 
@@ -98,9 +270,19 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	
 	private static final Key PREF_ANNOTATION_NULL_ANALYSIS= getJDTCoreKey(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS);
 	
+	/**
+	 * Key for the "Use default annotations for null " setting.
+	 * <p>Values are { {@link #ENABLED}, {@link #DISABLED} }.
+	 */
+	private static final Key INTR_DEFAULT_NULL_ANNOTATIONS= getLocalKey("internal.default.null.annotations"); //$NON-NLS-1$
 	private static final Key PREF_NULLABLE_ANNOTATION_NAME= getJDTCoreKey(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME);
 	private static final Key PREF_NONNULL_ANNOTATION_NAME= getJDTCoreKey(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME);
 	private static final Key PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME= getJDTCoreKey(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME);
+	private static final String[] NULL_ANNOTATIONS_DEFAULTS= {
+		PREF_NULLABLE_ANNOTATION_NAME.getStoredValue(DefaultScope.INSTANCE, null),
+		PREF_NONNULL_ANNOTATION_NAME.getStoredValue(DefaultScope.INSTANCE, null),
+		PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME.getStoredValue(DefaultScope.INSTANCE, null),
+	};
 	
 	private static final Key PREF_NONNULL_IS_DEFAULT= getJDTCoreKey(JavaCore.COMPILER_NONNULL_IS_DEFAULT);
 	
@@ -147,9 +329,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_PB_MISSING_STATIC_ON_METHOD= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_STATIC_ON_METHOD);
 	private static final Key PREF_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD= getJDTCoreKey(JavaCore.COMPILER_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD);
 	
-	// special key
-	private static final Key NULL_ANNOTATIONS_LINK= OptionsConfigurationBlock.getLocalKey("ProblemSeveritiesConfigurationBlock_null_annotations_link"); //$NON-NLS-1$
-
 	// values
 	private static final String ERROR= JavaCore.ERROR;
 	private static final String WARNING= JavaCore.WARNING;
@@ -162,15 +341,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 	private FilteredPreferenceTree fFilteredPrefTree;
 
-	private IStatus fNullableStatus, fNonNullStatus, fNonNullByDefaultStatus;
-	
 	public ProblemSeveritiesConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
 		super(context, project, getKeys(), container);
 		
-		fNullableStatus= new StatusInfo();
-		fNonNullStatus= new StatusInfo();
-		fNonNullByDefaultStatus= new StatusInfo();
-
 		// Compatibility code for the merge of the two option PB_SIGNAL_PARAMETER:
 		if (ENABLED.equals(getValue(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT))) {
 			setValue(PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, ENABLED);
@@ -197,6 +370,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_PB_MISSING_SERIAL_VERSION, PREF_PB_PARAMETER_ASSIGNMENT,
 				PREF_PB_NULL_REFERENCE, PREF_PB_POTENTIAL_NULL_REFERENCE,
 				PREF_ANNOTATION_NULL_ANALYSIS,
+				INTR_DEFAULT_NULL_ANNOTATIONS,
 				PREF_NULLABLE_ANNOTATION_NAME,
 				PREF_NONNULL_ANNOTATION_NAME,
 				PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME,
@@ -576,30 +750,10 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_include_fields_in_null_analysis;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_INCLUDE_FIELDS_IN_NULL_ANALYSIS, enabledDisabled, defaultIndent, section);		
 		
+		// --- annotation-based nulll analysis
+		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_enable_annotation_null_analysis;
 		node= fFilteredPrefTree.addCheckBox(inner, label, PREF_ANNOTATION_NULL_ANALYSIS, enabledDisabled, defaultIndent, section);
-		
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_null_annotation_description_link;
-		SelectionListener linkListener= new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Hashtable<String, String> defaultOptions= JavaCore.getDefaultOptions();
-				setValue(PREF_NULLABLE_ANNOTATION_NAME, defaultOptions.get(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME));
-				setValue(PREF_NONNULL_ANNOTATION_NAME, defaultOptions.get(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME));
-				setValue(PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME, defaultOptions.get(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME));
-				updateControls();
-			}
-		};
-		fFilteredPrefTree.addLink(inner, label, NULL_ANNOTATIONS_LINK, linkListener, extraIndent, fPixelConverter.convertWidthInCharsToPixels(60), node);
-		
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_nullable_annotation_label;
-		fFilteredPrefTree.addTextField(inner, label, PREF_NULLABLE_ANNOTATION_NAME, extraIndent, 0, node);
-		
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_nonnull_annotation_label;
-		fFilteredPrefTree.addTextField(inner, label, PREF_NONNULL_ANNOTATION_NAME, extraIndent, 0, node);
-		
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_nonnullbydefault_annotation_label;
-		fFilteredPrefTree.addTextField(inner, label, PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME, extraIndent, 0, node);
 		
 		label= fProject == null
 				? PreferencesMessages.ProblemSeveritiesConfigurationBlock_nonnull_is_default_workspace
@@ -618,6 +772,15 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_redundant_null_annotation;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_REDUNDANT_NULL_ANNOTATION, errorWarningIgnore, errorWarningIgnoreLabels, extraIndent, node);
 		
+		label= PreferencesMessages.NullAnnotationsConfigurationDialog_use_default_annotations_for_null;
+		fFilteredPrefTree.addCheckBoxWithLink(inner, label, INTR_DEFAULT_NULL_ANNOTATIONS, enabledDisabled, extraIndent, node, true, SWT.DEFAULT,
+				new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						openNullAnnotationsConfigurationDialog();
+					}
+				});
+		
 		// --- global
 		
 		// add some vertical space before:
@@ -632,6 +795,18 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		restoreSectionExpansionStates(settingsSection);
 
 		return sc1;
+	}
+
+	private void openNullAnnotationsConfigurationDialog() {
+		NullAnnotationsConfigurationDialog dialog= new NullAnnotationsConfigurationDialog();
+		int result= dialog.open();
+		if (result == Window.OK) {
+			String[] annotationNames= dialog.getResult();
+			setValue(PREF_NULLABLE_ANNOTATION_NAME, annotationNames[0]);
+			setValue(PREF_NONNULL_ANNOTATION_NAME, annotationNames[1]);
+			setValue(PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME, annotationNames[2]);
+		}
+		updateNullAnnotationsSetting();
 	}
 
 	private Composite createInnerComposite(ExpandableComposite excomposite, int nColumns, Font font) {
@@ -665,20 +840,33 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				// merging the two options
 				setValue(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT, newValue);
 				
-			} else if (PREF_NULLABLE_ANNOTATION_NAME.equals(changedKey)) {
-				fNullableStatus= validateNullnessAnnotation(newValue, PreferencesMessages.ProblemSeveritiesConfigurationBlock_nullable_annotation_error);
-			} else if (PREF_NONNULL_ANNOTATION_NAME.equals(changedKey)) {
-				fNonNullStatus= validateNullnessAnnotation(newValue, PreferencesMessages.ProblemSeveritiesConfigurationBlock_nonull_annotation_error);
-			} else if (PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME.equals(changedKey)) {
-				fNonNullByDefaultStatus= validateNullnessAnnotation(newValue, PreferencesMessages.ProblemSeveritiesConfigurationBlock_nonnullbydefault_annotation_error);
+			} else if (INTR_DEFAULT_NULL_ANNOTATIONS.equals(changedKey)) {
+				if (ENABLED.equals(newValue)) {
+					setValue(PREF_NULLABLE_ANNOTATION_NAME, NULL_ANNOTATIONS_DEFAULTS[0]);
+					setValue(PREF_NONNULL_ANNOTATION_NAME, NULL_ANNOTATIONS_DEFAULTS[1]);
+					setValue(PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME, NULL_ANNOTATIONS_DEFAULTS[2]);
+				} else {
+					openNullAnnotationsConfigurationDialog();
+				}
+				
 			} else {
 				return;
 			}
 		} else {
 			updateEnableStates();
+			updateNullAnnotationsSetting();
 		}
-		IStatus status= StatusUtil.getMostSevere(new IStatus[] { fNullableStatus, fNonNullStatus, fNonNullByDefaultStatus });
-		fContext.statusChanged(status);
+	}
+
+	private void updateNullAnnotationsSetting() {
+		String[] annotationNames= {
+				getValue(PREF_NULLABLE_ANNOTATION_NAME),
+				getValue(PREF_NONNULL_ANNOTATION_NAME),
+				getValue(PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME)
+		};
+		String defaultNullAnnotationsValue= Arrays.equals(annotationNames, NULL_ANNOTATIONS_DEFAULTS) ? ENABLED : DISABLED;
+		setValue(INTR_DEFAULT_NULL_ANNOTATIONS, defaultNullAnnotationsValue);
+		updateCheckBox(getCheckBox(INTR_DEFAULT_NULL_ANNOTATIONS));
 	}
 
 	private void updateEnableStates() {
@@ -707,11 +895,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		
 		boolean enableAnnotationNullAnalysis= checkValue(PREF_ANNOTATION_NULL_ANALYSIS, ENABLED);
 		getCheckBox(PREF_NONNULL_IS_DEFAULT).setEnabled(enableAnnotationNullAnalysis);
-		Link link= getLink(NULL_ANNOTATIONS_LINK);
-		link.setEnabled(enableAnnotationNullAnalysis);
-		setTextFieldEnabled(PREF_NULLABLE_ANNOTATION_NAME, enableAnnotationNullAnalysis);
-		setTextFieldEnabled(PREF_NONNULL_ANNOTATION_NAME, enableAnnotationNullAnalysis);
-		setTextFieldEnabled(PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME, enableAnnotationNullAnalysis);
+		getCheckBox(INTR_DEFAULT_NULL_ANNOTATIONS).setEnabled(enableAnnotationNullAnalysis);
+		getCheckBoxLink(INTR_DEFAULT_NULL_ANNOTATIONS).setEnabled(enableAnnotationNullAnalysis);
 		setComboEnabled(PREF_PB_NULL_SPECIFICATION_VIOLATION, enableAnnotationNullAnalysis);
 		setComboEnabled(PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION, enableAnnotationNullAnalysis);
 		setComboEnabled(PREF_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO, enableAnnotationNullAnalysis);
@@ -720,8 +905,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 	private IStatus validateNullnessAnnotation(String value, String errorMessage) {
 		StatusInfo status= new StatusInfo();
-		if (value.length() == 0)
-			return status;
 		if (JavaConventions.validateJavaTypeName(value, JavaCore.VERSION_1_5, JavaCore.VERSION_1_5).matches(IStatus.ERROR)
 				|| value.indexOf('.') == -1)
 			status.setError(errorMessage);
