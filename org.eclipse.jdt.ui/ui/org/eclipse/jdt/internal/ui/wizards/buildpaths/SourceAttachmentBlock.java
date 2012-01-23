@@ -200,7 +200,6 @@ public class SourceAttachmentBlock {
 
 		if (isVariableEntry()) {
 			fVariableFileNameField.setText(path);
-			fEncodingCombo.setText(encoding);
 		} else {
 			if (isWorkspacePath(path)) {
 				fWorkspaceRadio.setSelection(true);
@@ -208,12 +207,12 @@ public class SourceAttachmentBlock {
 			} else if (path.length() != 0) {
 				fExternalRadio.setSelection(true);
 				fExternalFileNameField.setText(path);
-				fEncodingCombo.setText(encoding);
 			} else {
 				fWorkspaceRadio.setSelection(true);
 				fExternalRadio.setSelection(false);
 			}
 		}
+		fEncodingCombo.setText(encoding);
 	}
 
 	private boolean isWorkspacePath(String path) {
