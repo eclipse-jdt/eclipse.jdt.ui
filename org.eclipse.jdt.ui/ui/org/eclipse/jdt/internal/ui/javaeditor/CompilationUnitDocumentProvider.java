@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -496,7 +496,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		private int fStateCount= 0;
 
 		private ICompilationUnit fCompilationUnit;
-		private List<ProblemAnnotation> fGeneratedAnnotations= new ArrayList<ProblemAnnotation>();
+		private final List<ProblemAnnotation> fGeneratedAnnotations= new ArrayList<ProblemAnnotation>();
 		private IProgressMonitor fProgressMonitor;
 		private boolean fIsActive= false;
 		private boolean fIsHandlingTemporaryProblems;
@@ -739,8 +739,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		 * Tells this annotation model to no longer collect temporary problems.
 		 */
 		private void stopCollectingProblems() {
-			if (fGeneratedAnnotations != null)
-				removeAnnotations(fGeneratedAnnotations, true, true);
+			removeAnnotations(fGeneratedAnnotations, true, true);
 			fGeneratedAnnotations.clear();
 		}
 
