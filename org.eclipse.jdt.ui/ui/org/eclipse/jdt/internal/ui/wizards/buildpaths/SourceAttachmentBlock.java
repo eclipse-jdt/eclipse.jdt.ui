@@ -256,7 +256,7 @@ public class SourceAttachmentBlock {
 	public IClasspathEntry getNewEntry() {
 		CPListElement elem= CPListElement.createFromExisting(fEntry, fProject);
 		IPath sourceAttachmentPath= getSourceAttachmentPath();
-		String encoding= (sourceAttachmentPath == null) ? null : getEncoding();
+		String encoding= getEncoding();
 		encoding= (encoding == null || encoding.length() == 0 || encoding.equals(fDefaultEncoding)) ? null : encoding;
 
 		elem.setAttribute(CPListElement.SOURCEATTACHMENT, sourceAttachmentPath);
