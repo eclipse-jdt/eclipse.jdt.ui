@@ -186,25 +186,17 @@ public class SourceAttachmentBlock {
 	}
 
 	public void setDefaults() {
-		String path= ""; //$NON-NLS-1$
-		String encoding= null;
-
-		if (fEntry.getSourceAttachmentPath() != null) {
-			path= fEntry.getSourceAttachmentPath().toString();
-			encoding= getSourceAttachmentEncoding(fEntry);
-		}
-
-		if (encoding == null) {
-			encoding= fDefaultEncoding;
-		}
+		IPath sourceAttachmentPath= fEntry.getSourceAttachmentPath();
+		String encoding= getSourceAttachmentEncoding(fEntry);
+		String path= (sourceAttachmentPath == null) ? "" : sourceAttachmentPath.toString(); //$NON-NLS-1$
 
 		if (isVariableEntry()) {
 			fVariableFileNameField.setText(path);
 		} else {
-			if (isWorkspacePath(path)) {
+			if (isWorkspacePath(sourceAttachmentPath)) {
 				fWorkspaceRadio.setSelection(true);
 				fWorkspaceFileNameField.setText(path);
-			} else if (path.length() != 0) {
+			} else if (path.length() != 0 || encoding != null) {
 				fExternalRadio.setSelection(true);
 				fExternalFileNameField.setText(path);
 			} else {
@@ -212,17 +204,19 @@ public class SourceAttachmentBlock {
 				fExternalRadio.setSelection(false);
 			}
 		}
+		if (encoding == null) {
+			encoding= fDefaultEncoding;
+		}
 		fEncodingCombo.setText(encoding);
 	}
 
-	private boolean isWorkspacePath(String path) {
-		IPath iPath= Path.fromOSString(path);
-		if (iPath == null || iPath.getDevice() != null)
+	private boolean isWorkspacePath(IPath path) {
+		if (path == null || path.getDevice() != null)
 			return false;
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		if (workspace == null)
 			return false;
-		return workspace.getRoot().findMember(iPath) != null;
+		return workspace.getRoot().findMember(path) != null;
 	}
 
 	private boolean isVariableEntry() {
