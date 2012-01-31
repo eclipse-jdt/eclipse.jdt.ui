@@ -93,11 +93,14 @@ public class FilterTextControl {
 	private Composite fComposite;
 
 	public FilterTextControl(Composite parent) {
-		boolean nativeField= useNativeSearchField(parent);
+		final boolean nativeField= useNativeSearchField(parent);
 		fComposite= new Composite(parent, nativeField ? SWT.NONE : SWT.BORDER) {
 			@Override
 			public void setEnabled(boolean enabled) {
 				super.setEnabled(enabled);
+				
+				if (nativeField)
+					return;
 				
 				Color color= enabled ? getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND) : getParent().getBackground();
 				setBackground(color);
