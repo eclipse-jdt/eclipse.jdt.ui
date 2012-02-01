@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,16 @@ package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
 import org.eclipse.swt.SWT;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IStorage;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -22,6 +32,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IShowInTargetList;
 
@@ -32,6 +43,13 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.ITextEditorHelpContextIds;
 import org.eclipse.ui.editors.text.TextEditor;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
@@ -39,6 +57,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.FindBrokenNLSKeysAction;
 import org.eclipse.jdt.internal.ui.javaeditor.ToggleCommentAction;
 
 
@@ -59,6 +78,11 @@ public class PropertiesFileEditor extends TextEditor {
 	 */
 	private IPropertyChangeListener fPropertyChangeListener;
 
+	private IType fAccessorType;
+
+	private Job fJob;
+
+	private IFile fFile;
 
 	/*
 	 * @see org.eclipse.ui.editors.text.TextEditor#initializeEditor()
@@ -85,6 +109,33 @@ public class PropertiesFileEditor extends TextEditor {
 			}
 		};
 		EditorsUI.getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
+	}
+
+	@Override
+	protected void doSetInput(IEditorInput input) throws CoreException {
+		super.doSetInput(input);
+		if (fJob != null)
+			fJob.cancel();
+		fAccessorType= null;
+
+		fFile= (IFile) getEditorInput().getAdapter(IFile.class);
+		if (fFile == null)
+			return;
+
+		if (fJob == null) {
+			fJob= new Job(PropertiesFileEditorMessages.PropertiesFileEditor_find_accessor_type) {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						fAccessorType= findAccessorType(monitor);
+					} catch (JavaModelException e) {
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			fJob.setSystem(true);
+		}
+		fJob.schedule();
 	}
 
 	/*
@@ -242,6 +293,46 @@ public class PropertiesFileEditor extends TextEditor {
 	@Override
 	public void dispose() {
 		EditorsUI.getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
+		if (fJob != null)
+			fJob.cancel();
 		super.dispose();
+	}
+
+	public IType getAccessorType() {
+		return fAccessorType;
+	}
+
+	private IType findAccessorType(IProgressMonitor pm) throws JavaModelException {
+		IType accessorType= FindBrokenNLSKeysAction.getAccessorType(fFile);
+		if (accessorType != null)
+			return accessorType;
+		if (pm != null && pm.isCanceled()) {
+			return null;
+		}
+
+		IContainer parent= fFile.getParent();
+		IJavaElement javaElement= JavaCore.create(parent);
+
+		if (!(javaElement instanceof IPackageFragment))
+			return null;
+
+		ICompilationUnit[] compilationUnits= ((IPackageFragment) javaElement).getCompilationUnits();
+		for (int i= 0; i < compilationUnits.length; i++) {
+			if (evaluateCU(compilationUnits[i], fFile)) {
+				return compilationUnits[i].getTypes()[0];
+			}
+			if (pm != null && pm.isCanceled()) {
+				return null;
+			}
+		}
+		return null;
+	}
+
+	private boolean evaluateCU(ICompilationUnit compilationUnit, IFile file) throws JavaModelException {
+		IStorage bundle= FindBrokenNLSKeysAction.getResourceBundle(compilationUnit);
+		if (!(bundle instanceof IFile))
+			return false;
+
+		return file.equals(bundle);
 	}
 }

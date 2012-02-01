@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,6 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.actions.FindBrokenNLSKeysAction;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.EditAnnotator;
@@ -160,11 +159,7 @@ public class PropertiesQuickAssistProcessor {
 		int selectionLength= invocationContext.getLength();
 		List<String> fields= new ArrayList<String>();
 
-		IFile file= invocationContext.getFile();
-		if (file == null)
-			return false;
-
-		IType accessorClass= FindBrokenNLSKeysAction.getAccessorType(file);
+		IType accessorClass= invocationContext.getAccessorType();
 		if (accessorClass == null || !isEclipseNLSUsed(accessorClass))
 			return false;
 
@@ -191,7 +186,6 @@ public class PropertiesQuickAssistProcessor {
 		try {
 			Change change= AccessorClassModifier.addFields(cu, fields);
 			String name= Messages.format(fields.size() == 1 ? PropertiesFileEditorMessages.PropertiesCorrectionProcessor_create_field_in_accessor_label : PropertiesFileEditorMessages.PropertiesCorrectionProcessor_create_fields_in_accessor_label, BasicElementLabels.getFileName(cu));
-			//resultingCollections.add(new CreateFieldsInaccessorProposal(name, cu, 5, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), change));
 			resultingCollections.add(new CUCorrectionProposal(name, cu, (TextChange) change, 5, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)));
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
@@ -222,7 +216,7 @@ public class PropertiesQuickAssistProcessor {
 		if (file == null)
 			return false;
 
-		IType accessorClass= FindBrokenNLSKeysAction.getAccessorType(file);
+		IType accessorClass= invocationContext.getAccessorType();
 		if (accessorClass == null || !isEclipseNLSUsed(accessorClass))
 			return false;
 
@@ -269,11 +263,7 @@ public class PropertiesQuickAssistProcessor {
 		int selectionLength= invocationContext.getLength();
 		IField field= null;
 
-		IFile file= invocationContext.getFile();
-		if (file == null)
-			return false;
-
-		IType accessorClass= FindBrokenNLSKeysAction.getAccessorType(file);
+		IType accessorClass= invocationContext.getAccessorType();
 		if (accessorClass == null || !isEclipseNLSUsed(accessorClass))
 			return false;
 

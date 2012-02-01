@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -354,6 +354,14 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	}
 
 	private SearchPatternData tryIfPropertyCuSelected(ICompilationUnit compilationUnit) throws JavaModelException {
+		IStorage bundle= getResourceBundle(compilationUnit);
+		if (!(bundle instanceof IFile))
+			return null;
+
+		return new SearchPatternData(compilationUnit.getTypes()[0], (IFile) bundle);
+	}
+
+	public static IStorage getResourceBundle(ICompilationUnit compilationUnit) throws JavaModelException {
 		if (compilationUnit == null)
 			return null;
 
@@ -367,11 +375,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 		if (!isPotentialNLSAccessor(compilationUnit))
 			return null;
 
-		IStorage bundle= NLSHintHelper.getResourceBundle(compilationUnit);
-		if (!(bundle instanceof IFile))
-			return null;
-
-		return new SearchPatternData(types[0], (IFile)bundle);
+		return NLSHintHelper.getResourceBundle(compilationUnit);
 	}
 
 	/*

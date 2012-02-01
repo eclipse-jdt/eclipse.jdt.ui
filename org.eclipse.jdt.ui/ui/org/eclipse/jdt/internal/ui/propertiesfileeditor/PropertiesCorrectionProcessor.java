@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.spelling.SpellingCorrectionProcessor;
 
 import org.eclipse.ltk.core.refactoring.NullChange;
+
+import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
@@ -139,6 +141,7 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 		IEditorPart editorPart= fAssistant.getEditor();
 		IFile file= (IFile) editorPart.getEditorInput().getAdapter(IFile.class);
 		ISourceViewer sourceViewer= invocationContext.getSourceViewer();
-		return new PropertiesAssistContext(sourceViewer, invocationContext.getOffset(), invocationContext.getLength(), file, sourceViewer.getDocument());
+		IType accessorType= ((PropertiesFileEditor) editorPart).getAccessorType();
+		return new PropertiesAssistContext(sourceViewer, invocationContext.getOffset(), invocationContext.getLength(), file, sourceViewer.getDocument(), accessorType);
 	}
 }

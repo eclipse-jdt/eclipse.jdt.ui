@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -57,6 +58,7 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesAssistContext;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditor;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesQuickAssistProcessor;
 
 public class PropertiesFileQuickAssistTest extends TestCase {
@@ -175,7 +177,8 @@ public class PropertiesFileQuickAssistTest extends TestCase {
 	private PropertiesAssistContext createAssistContext(IFile file, int offset, int length) throws Exception {
 		IEditorPart editorPart= openEditor(file);
 		ISourceViewer sourceViewer= (ISourceViewer)editorPart.getAdapter(ITextOperationTarget.class);
-		return new PropertiesAssistContext(sourceViewer, offset, length, file, sourceViewer.getDocument());
+		IType accessorType= ((PropertiesFileEditor)editorPart).getAccessorType();
+		return new PropertiesAssistContext(sourceViewer, offset, length, file, sourceViewer.getDocument(), accessorType);
 	}
 
 	public void testCreateFieldInAccessor1() throws Exception {
@@ -458,6 +461,56 @@ public class PropertiesFileQuickAssistTest extends TestCase {
 		buf.append("    public static String Test_4;\n");
 		buf.append("    public static String Test_5;\n");
 		buf.append("    public static String Test_6;\n");
+		buf.append("}\n");
+		checkContentOfCu("nls file", cu, buf.toString());
+	}
+
+	public void testCreateFieldInAccessor6() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=361535
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		// Accessor class
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import org.eclipse.osgi.util.NLS;\n");
+		buf.append("public class RandomName extends NLS {\n");
+		buf.append("    private static final String BUNDLE_NAME = \"test.Accessor\";//$NON-NLS-1$\n");
+		buf.append("    static {\n");
+		buf.append("        NLS.initializeMessages(BUNDLE_NAME, RandomName.class);\n");
+		buf.append("    }\n");
+		buf.append("    private RandomName() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("RandomName.java", buf.toString(), false, null);
+
+		// property file
+		buf= new StringBuffer();
+		buf.append("Test_1=Hello1\n");
+		buf.append("Test_2=Hello2\n");
+		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
+
+		int offset= buf.toString().indexOf("est_1");
+		PropertiesAssistContext context= createAssistContext(file, offset, 0);
+		List<ICompletionProposal> proposals= collectAssists(context);
+
+		QuickFixTest.assertNumberOfProposals(proposals, 2);
+		QuickFixTest.assertCorrectLabels(proposals);
+
+		ICompletionProposal proposal= proposals.get(0);
+		proposal.apply(context.getDocument());
+
+		// Accessor class
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import org.eclipse.osgi.util.NLS;\n");
+		buf.append("public class RandomName extends NLS {\n");
+		buf.append("    private static final String BUNDLE_NAME = \"test.Accessor\";//$NON-NLS-1$\n");
+		buf.append("    static {\n");
+		buf.append("        NLS.initializeMessages(BUNDLE_NAME, RandomName.class);\n");
+		buf.append("    }\n");
+		buf.append("    private RandomName() {\n");
+		buf.append("    }\n");
+		buf.append("    public static String Test_1;\n");
 		buf.append("}\n");
 		checkContentOfCu("nls file", cu, buf.toString());
 	}
