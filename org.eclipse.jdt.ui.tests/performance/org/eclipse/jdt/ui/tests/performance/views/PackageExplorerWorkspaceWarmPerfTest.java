@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,8 @@ package org.eclipse.jdt.ui.tests.performance.views;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+
+import org.eclipse.test.OrderedTestSuite;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -55,8 +56,9 @@ public class PackageExplorerWorkspaceWarmPerfTest extends JdtPerformanceTestCase
 	}
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite("PackageExplorerWorkspaceWarmPerfTest");
-		suite.addTest(new PackageExplorerWorkspaceWarmPerfTest("testOpen"));
+		OrderedTestSuite suite= new OrderedTestSuite(PackageExplorerWorkspaceWarmPerfTest.class, new String[] {
+			"testOpen"
+		});
 		return new MyTestSetup(suite);
 	}
 

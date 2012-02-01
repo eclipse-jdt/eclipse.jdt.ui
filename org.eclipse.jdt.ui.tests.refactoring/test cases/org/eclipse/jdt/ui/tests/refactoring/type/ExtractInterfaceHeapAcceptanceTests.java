@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
+
+import org.eclipse.test.OrderedTestSuite;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
@@ -39,8 +40,9 @@ public class ExtractInterfaceHeapAcceptanceTests extends RefactoringHeapTestCase
 
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
-		TestSuite suite= new TestSuite("ExtractInterfaceHeapAcceptanceTests");
-		suite.addTest(new ExtractInterfaceHeapAcceptanceTests("testExtractControl"));
+		OrderedTestSuite suite= new OrderedTestSuite(ExtractInterfaceHeapAcceptanceTests.class, new String[] {
+			"testExtractControl",
+		});
         return new RefactoringPerformanceTestSetup(suite);
 	}
 

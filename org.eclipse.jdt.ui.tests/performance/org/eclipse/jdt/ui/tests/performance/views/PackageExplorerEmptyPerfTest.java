@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.performance.views;
 
-import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+
+import org.eclipse.test.OrderedTestSuite;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -26,9 +26,9 @@ import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 public class PackageExplorerEmptyPerfTest extends JdtPerformanceTestCase {
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite("PackageExplorerEmptyPerfTest");
-		suite.addTest(new PackageExplorerEmptyPerfTest("testOpen"));
-		return new TestSetup(suite);
+		return new OrderedTestSuite(PackageExplorerEmptyPerfTest.class, new String[] {
+			"testOpen"
+		});
 	}
 
 	public PackageExplorerEmptyPerfTest(String name) {

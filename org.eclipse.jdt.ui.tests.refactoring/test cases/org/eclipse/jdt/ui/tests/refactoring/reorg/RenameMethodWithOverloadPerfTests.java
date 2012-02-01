@@ -11,8 +11,8 @@
 package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
+import org.eclipse.test.OrderedTestSuite;
 import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -30,11 +30,12 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
-		TestSuite suite= new TestSuite("RenameMethodWithOverloadPerfTests");
-		suite.addTest(new RenameMethodWithOverloadPerfTests("testCold_10_10"));
-		suite.addTest(new RenameMethodWithOverloadPerfTests("test_10_10"));
-		suite.addTest(new RenameMethodWithOverloadPerfTests("test_100_10"));
-		suite.addTest(new RenameMethodWithOverloadPerfTests("test_1000_10"));
+		OrderedTestSuite suite= new OrderedTestSuite(RenameMethodWithOverloadPerfTests.class, new String[] {
+			"testCold_10_10",
+			"test_10_10",
+			"test_100_10",
+			"test_1000_10",
+		});
 		return new RefactoringPerformanceTestSetup(suite);
 	}
 

@@ -11,8 +11,8 @@
 package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
+import org.eclipse.test.OrderedTestSuite;
 import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
@@ -21,11 +21,12 @@ public class MoveCompilationUnitPerfTests2 extends AbstractMoveCompilationUnitPr
 
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
-		TestSuite suite= new TestSuite("MoveCompilationUnitPerfTests2");
-		suite.addTest(new MoveCompilationUnitPerfTests2("testCold_10_10"));
-		suite.addTest(new MoveCompilationUnitPerfTests2("test_10_10"));
-		suite.addTest(new MoveCompilationUnitPerfTests2("test_10_100"));
-		suite.addTest(new MoveCompilationUnitPerfTests2("test_10_1000"));
+		OrderedTestSuite suite= new OrderedTestSuite(MoveCompilationUnitPerfTests2.class, new String[] {
+			"testCold_10_10",
+			"test_10_10",
+			"test_10_100",
+			"test_10_1000",
+		});
 		return new RefactoringPerformanceTestSetup(suite);
 	}
 

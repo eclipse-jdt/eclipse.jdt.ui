@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,10 +16,10 @@ import java.util.List;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.test.OrderedTestSuite;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
@@ -63,7 +63,9 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 	}
 
 	public static Test suite() {
-		return new MyTestSetup(new TestSuite(OrganizeImportsPerfTest.class));
+		return new MyTestSetup(new OrderedTestSuite(OrganizeImportsPerfTest.class, new String[] {
+			"testOrganizeImport"
+		}));
 	}
 
 	public static Test setUpTest(Test someTest) {

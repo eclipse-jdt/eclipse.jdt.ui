@@ -11,8 +11,8 @@
 package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
+import org.eclipse.test.OrderedTestSuite;
 import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
@@ -22,11 +22,12 @@ public class RenameTypePerfTests1 extends AbstractRenameTypePerfTest {
 
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
-		TestSuite suite= new TestSuite("RenameTypePerfTests1");
-		suite.addTest(new RenameTypePerfTests1("testCold_10_10"));
-		suite.addTest(new RenameTypePerfTests1("test_10_10"));
-		suite.addTest(new RenameTypePerfTests1("test_100_10"));
-		suite.addTest(new RenameTypePerfTests1("test_1000_10"));
+		OrderedTestSuite suite= new OrderedTestSuite(RenameTypePerfTests1.class, new String[] {
+			"testCold_10_10",
+			"test_10_10",
+			"test_100_10",
+			"test_1000_10",
+		});
 		return new RefactoringPerformanceTestSetup(suite);
 	}
 

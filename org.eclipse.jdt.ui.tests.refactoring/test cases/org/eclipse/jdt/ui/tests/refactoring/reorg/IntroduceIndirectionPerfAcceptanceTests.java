@@ -12,7 +12,8 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
 import junit.framework.Assert;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+
+import org.eclipse.test.OrderedTestSuite;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -33,8 +34,9 @@ public class IntroduceIndirectionPerfAcceptanceTests extends RefactoringPerforma
 	private IntroduceIndirectionRefactoring fRefactoring;
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite("IntroduceIndirectionPerfAcceptanceTests");
-		suite.addTest(new IntroduceIndirectionPerfAcceptanceTests("testIntroduceIndirection"));
+		OrderedTestSuite suite= new OrderedTestSuite(IntroduceIndirectionPerfAcceptanceTests.class, new String[] {
+			"testIntroduceIndirection",
+		});
         return new SWTProjectTestSetup(suite);
 	}
 

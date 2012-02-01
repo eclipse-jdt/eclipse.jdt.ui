@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,10 +20,10 @@ import java.util.Map;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.test.OrderedTestSuite;
 import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.core.runtime.CoreException;
@@ -96,7 +96,22 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 	}
 
 	public static Test suite() {
-		return new MyTestSetup(new TestSuite(CleanUpPerfTest.class));
+		return new MyTestSetup(new OrderedTestSuite(CleanUpPerfTest.class, new String[] {
+			"testNullCleanUp",
+			"testAllCleanUps",
+			"testCodeStyleCleanUp",
+			"testControlStatementsCleanUp",
+			"testConvertLoopCleanUp",
+			"testExpressionsCleanUp",
+			"testJava50CleanUp",
+			"testStringCleanUp",
+			"testSortMembersCleanUp",
+			"testUnnecessaryCodeCleanUp",
+			"testUnusedCodeCleanUp",
+			"testVariableDeclarationCleanUp",
+			"testCodeFormatCleanUp",
+			"testOrganizeImports",
+		}));
 	}
 
 	public static Test setUpTest(Test someTest) {

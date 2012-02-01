@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
+import org.eclipse.test.OrderedTestSuite;
 import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -41,8 +41,9 @@ public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceT
 
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
-		TestSuite suite= new TestSuite("ExtractInterfacePerfAcceptanceTests");
-		suite.addTest(new ExtractInterfacePerfAcceptanceTests("testExtractControl"));
+		OrderedTestSuite suite= new OrderedTestSuite(ExtractInterfacePerfAcceptanceTests.class, new String[] {
+			"testExtractControl",
+		});
         return new RefactoringPerformanceTestSetup(suite);
 	}
 
