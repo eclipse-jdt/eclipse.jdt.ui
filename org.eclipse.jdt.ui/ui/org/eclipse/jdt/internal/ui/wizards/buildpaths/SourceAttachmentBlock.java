@@ -105,7 +105,7 @@ public class SourceAttachmentBlock {
 	private IJavaProject fProject;
 	private final IClasspathEntry fEntry;
 	private final boolean fCanEditEncoding;
-	private String fDefaultEncoding;
+	private String fDefaultEncodingName;
 
 	/**
 	 * @param context listeners for status updates
@@ -128,7 +128,8 @@ public class SourceAttachmentBlock {
 		fCanEditEncoding= canEditEncoding;
 
 		try {
-			fDefaultEncoding = ResourcesPlugin.getWorkspace().getRoot().getDefaultCharset();
+			String defaultEncoding = ResourcesPlugin.getWorkspace().getRoot().getDefaultCharset();
+			fDefaultEncodingName= Messages.format(NewWizardMessages.SourceAttachmentBlock_encoding_default, defaultEncoding);
 		} catch (CoreException e) {
 			//do nothing
 		}
@@ -179,7 +180,10 @@ public class SourceAttachmentBlock {
 		fEncodingCombo.setDialogFieldListener(adapter);
 		fEncodingCombo.setLabelText(NewWizardMessages.SourceAttachmentBlock_encoding_label);
 		List<String> encodings= IDEEncoding.getIDEEncodings();
-		fEncodingCombo.setItems(encodings.toArray(new String[encodings.size()]));
+		String[] encodingsArray= encodings.toArray(new String[encodings.size() + 1]);
+		System.arraycopy(encodingsArray, 0, encodingsArray, 1, encodingsArray.length - 1);
+		encodingsArray[0]= fDefaultEncodingName;
+		fEncodingCombo.setItems(encodingsArray);
 
 		// set the old settings
 		setDefaults();
@@ -205,7 +209,7 @@ public class SourceAttachmentBlock {
 			}
 		}
 		if (encoding == null) {
-			encoding= fDefaultEncoding;
+			encoding= fDefaultEncodingName;
 		}
 		fEncodingCombo.setText(encoding);
 	}
@@ -242,7 +246,9 @@ public class SourceAttachmentBlock {
 
 	private String getEncoding() {
 		if (isVariableEntry() || (fExternalRadio != null && fExternalRadio.isSelected())) {
-			return fEncodingCombo.getText();
+			String encoding= fEncodingCombo.getText();
+			if (encoding.length() != 0 && !encoding.equals(fDefaultEncodingName))
+				return encoding;
 		}
 		return null;
 	}
@@ -251,7 +257,6 @@ public class SourceAttachmentBlock {
 		CPListElement elem= CPListElement.createFromExisting(fEntry, fProject);
 		IPath sourceAttachmentPath= getSourceAttachmentPath();
 		String encoding= getEncoding();
-		encoding= (encoding == null || encoding.length() == 0 || encoding.equals(fDefaultEncoding)) ? null : encoding;
 
 		elem.setAttribute(CPListElement.SOURCEATTACHMENT, sourceAttachmentPath);
 		elem.setAttribute(CPListElement.SOURCE_ATTACHMENT_ENCODING, encoding);

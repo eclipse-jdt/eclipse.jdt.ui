@@ -387,6 +387,7 @@ public final class NewWizardMessages extends NLS {
 	public static String SourceAttachmentBlock_filename_workspace_label;
 	public static String SourceAttachmentBlock_intjardialog_title;
 	public static String SourceAttachmentBlock_intjardialog_message;
+	public static String SourceAttachmentBlock_encoding_default;
 	public static String SourceAttachmentBlock_encoding_label;
 	public static String SourceAttachmentBlock_external_radiolabel;
 	public static String SourceAttachmentBlock_extvardialog_title;
