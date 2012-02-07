@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.swt.SWT;
 
 import org.eclipse.core.runtime.CoreException;
@@ -78,7 +81,7 @@ public class PropertiesFileEditor extends TextEditor {
 	 */
 	private IPropertyChangeListener fPropertyChangeListener;
 
-	private IType fAccessorType;
+	private Map<IEditorInput, IType> fAccessorTypes= new HashMap<IEditorInput, IType>();
 
 	private Job fJob;
 
@@ -116,7 +119,6 @@ public class PropertiesFileEditor extends TextEditor {
 		super.doSetInput(input);
 		if (fJob != null)
 			fJob.cancel();
-		fAccessorType= null;
 
 		fFile= (IFile) getEditorInput().getAdapter(IFile.class);
 		if (fFile == null)
@@ -127,8 +129,9 @@ public class PropertiesFileEditor extends TextEditor {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						fAccessorType= findAccessorType(monitor);
+						fAccessorTypes.put(getEditorInput(), findAccessorType(monitor));
 					} catch (JavaModelException e) {
+						JavaPlugin.log(e);
 					}
 					return Status.OK_STATUS;
 				}
@@ -299,7 +302,7 @@ public class PropertiesFileEditor extends TextEditor {
 	}
 
 	public IType getAccessorType() {
-		return fAccessorType;
+		return fAccessorTypes.get(getEditorInput());
 	}
 
 	private IType findAccessorType(IProgressMonitor pm) throws JavaModelException {
