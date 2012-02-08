@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,7 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 
 
 	public JavaPairMatcher(char[] pairs) {
-		super(pairs, IJavaPartitions.JAVA_PARTITIONING);
+		super(pairs, IJavaPartitions.JAVA_PARTITIONING, true);
 	}
 
 	/* @see ICharacterPairMatcher#match(IDocument, int) */
@@ -53,13 +53,14 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 	private IRegion performMatch(IDocument document, int offset) throws BadLocationException {
 		if (offset < 0 || document == null) return null;
 		final char prevChar= document.getChar(Math.max(offset - 1, 0));
-		if ((prevChar == '<' || prevChar == '>') && !fHighlightAngularBrackets)
+		final char currChar= document.getChar(offset);
+		if ((prevChar == '<' || currChar == '>') && !fHighlightAngularBrackets)
 			return null;
 		if (prevChar == '<' && isLessThanOperator(document, offset - 1))
 			return null;
 		final IRegion region= super.match(document, offset);
 		if (region == null) return region;
-		if (prevChar == '>') {
+		if (currChar == '>') {
 			final int peer= region.getOffset();
 			if (isLessThanOperator(document, peer)) return null;
 		}
@@ -75,7 +76,7 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 	 * @param offset an offset within the document
 	 * @return true if the character at the specified offset is not
 	 *   a type parameter start bracket
-	 * @throws BadLocationException
+	 * @throws BadLocationException if offset is invalid in the document
 	 */
 	private boolean isLessThanOperator(IDocument document, int offset) throws BadLocationException {
 		if (offset < 0) return false;
