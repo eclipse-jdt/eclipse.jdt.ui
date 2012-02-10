@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,6 +81,8 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MATCHING_BRACKETS));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ENCLOSING_BRACKETS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS));
@@ -228,7 +230,15 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		spacer.setLayoutData(gd);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_highlightMatchingBrackets;
-		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_MATCHING_BRACKETS, 0);
+		Button master= addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_MATCHING_BRACKETS, 0);
+
+		label= PreferencesMessages.JavaEditorPreferencePage_highlightBothBrackets;
+		Button slave= addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION, 0);
+		createDependency(master, slave);
+
+		label= PreferencesMessages.JavaEditorPreferencePage_highlightEnclosingBrackets;
+		slave= addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_ENCLOSING_BRACKETS, 0);
+		createDependency(master, slave);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_quickassist_lightbulb;
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, 0);

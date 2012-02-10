@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -704,6 +704,27 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public final static String EDITOR_MATCHING_BRACKETS= "matchingBrackets"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether bracket at caret location is highlighted or not.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.8
+	 */
+	public final static String EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION= "highlightBracketAtCaretLocation"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether enclosing bracket matching highlighting is turned on
+	 * or off.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.8
+	 */
+	public final static String EDITOR_ENCLOSING_BRACKETS= "enclosingBrackets"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that holds the color used to highlight matching brackets.
@@ -3707,6 +3728,8 @@ public class PreferenceConstants {
 
 		// JavaEditorPreferencePage
 		store.setDefault(PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
+		store.setDefault(PreferenceConstants.EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION, false);
+		store.setDefault(PreferenceConstants.EDITOR_ENCLOSING_BRACKETS, false);
 
 		store.setDefault(PreferenceConstants.EDITOR_CORRECTION_INDICATION, true);
 		store.setDefault(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE, true);
