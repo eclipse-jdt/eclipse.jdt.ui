@@ -751,8 +751,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 						return;
 					
 					fPackageDialogField.setText(pack);
-					typePageDialogFieldChanged(fPackageDialogField);
-					
 					e.text= e.text.substring(lastDot + 1);
 				}
 			}
