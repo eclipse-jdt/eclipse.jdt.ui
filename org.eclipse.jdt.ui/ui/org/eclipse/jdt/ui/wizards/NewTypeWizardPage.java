@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,8 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -735,6 +737,26 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		Text text= fTypeNameDialogField.getTextControl(null);
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
 		TextFieldNavigationHandler.install(text);
+		
+		text.addVerifyListener(new VerifyListener() {
+			public void verifyText(VerifyEvent e) {
+				if (fCanModifyPackage && ! fEnclosingTypeSelection.isSelected() && e.start == 0 && e.end == ((Text) e.widget).getCharCount()) {
+					String typeNameWithoutParameters= getTypeNameWithoutParameters(e.text);
+					int lastDot= typeNameWithoutParameters.lastIndexOf('.');
+					if (lastDot == -1 || lastDot == typeNameWithoutParameters.length() - 1)
+						return;
+					
+					String pack= typeNameWithoutParameters.substring(0, lastDot);
+					if (validatePackageName(pack, null).getSeverity() == IStatus.ERROR)
+						return;
+					
+					fPackageDialogField.setText(pack);
+					typePageDialogFieldChanged(fPackageDialogField);
+					
+					e.text= e.text.substring(lastDot + 1);
+				}
+			}
+		});
 	}
 
 	/**
@@ -1551,7 +1573,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	private String getTypeNameWithoutParameters() {
-		String typeNameWithParameters= getTypeName();
+		return getTypeNameWithoutParameters(getTypeName());
+	}
+
+	private static String getTypeNameWithoutParameters(String typeNameWithParameters) {
 		int angleBracketOffset= typeNameWithParameters.indexOf('<');
 		if (angleBracketOffset == -1) {
 			return typeNameWithParameters;
