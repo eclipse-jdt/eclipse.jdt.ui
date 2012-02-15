@@ -1526,21 +1526,24 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 
 
-	/** Preference key for matching brackets */
+	/** Preference key for matching brackets. */
 	protected final static String MATCHING_BRACKETS=  PreferenceConstants.EDITOR_MATCHING_BRACKETS;
+
 	/**
-	 * Preference key for highlighting bracket at caret location
+	 * Preference key for highlighting bracket at caret location.
 	 * 
 	 * @since 3.8
 	 */
 	protected final static String HIGHLIGHT_BRACKET_AT_CARET_LOCATION= PreferenceConstants.EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION;
+	
 	/**
-	 * Preference key for enclosing brackets
+	 * Preference key for enclosing brackets.
 	 * 
 	 * @since 3.8
 	 */
 	protected final static String ENCLOSING_BRACKETS= PreferenceConstants.EDITOR_ENCLOSING_BRACKETS;
-	/** Preference key for matching brackets color */
+
+	/** Preference key for matching brackets color. */
 	protected final static String MATCHING_BRACKETS_COLOR=  PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
 	/**
 	 * A named preference that controls whether the editor shows a breadcrumb.
@@ -3670,26 +3673,26 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		sourceCaretOffset+= adjustment;
 
 		if (fPreviousSelections == null)
-			initializePrevSelectionList();
+			initializePreviousSelectionList();
 		IRegion region= fBracketMatcher.match(document, sourceCaretOffset);
 		if (region == null) {
 			region= fBracketMatcher.findEnclosingPeerCharacters(document, sourceCaretOffset);
-			initializePrevSelectionList();
+			initializePreviousSelectionList();
 			fPreviousSelections.add(selection);
 		} else {
 			if (fPreviousSelections.size() == 2) {
 				if (!selection.equals(fPreviousSelections.get(1))) {
-					initializePrevSelectionList();
+					initializePreviousSelectionList();
 				}
 			} else if (fPreviousSelections.size() == 3) {
 				if (selection.equals(fPreviousSelections.get(2)) && !selection.equals(fPreviousSelections.get(0))) {
 					IRegion originalSelection= fPreviousSelections.get(0);
 					sourceViewer.setSelectedRange(originalSelection.getOffset(), originalSelection.getLength());
 					sourceViewer.revealRange(originalSelection.getOffset(), originalSelection.getLength());
-					initializePrevSelectionList();
+					initializePreviousSelectionList();
 					return;
 				}
-				initializePrevSelectionList();
+				initializePreviousSelectionList();
 			}
 		}
 
@@ -3737,7 +3740,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		sourceViewer.revealRange(targetOffset, selection.getLength());
 	}
 
-	private void initializePrevSelectionList() {
+	private void initializePreviousSelectionList() {
 		fPreviousSelections= new ArrayList<IRegion>(3);
 	}
 
