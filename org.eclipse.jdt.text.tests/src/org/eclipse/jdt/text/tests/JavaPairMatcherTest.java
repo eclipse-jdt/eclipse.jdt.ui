@@ -140,6 +140,16 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 		assertNull(match);
 	}
 
+	public void testEnclosingMatch() {
+		IRegion match= fPairMatcher.findEnclosingPeerCharacters(fDocument, 4);
+		assertNotNull(match);
+		assertTrue(match.getOffset() == 2 && match.getLength() == 10);
+
+		match= fPairMatcher.findEnclosingPeerCharacters(fDocument, 7);
+		assertNotNull(match);
+		assertTrue(match.getOffset() == 5 && match.getLength() == 4);
+	}
+
 	public void testAngleBrackets1_4() {
 		final JavaPairMatcher matcher= (JavaPairMatcher) createMatcher("(){}[]<>");
 		matcher.setSourceVersion(JavaCore.VERSION_1_4);

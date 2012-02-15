@@ -1528,9 +1528,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/** Preference key for matching brackets */
 	protected final static String MATCHING_BRACKETS=  PreferenceConstants.EDITOR_MATCHING_BRACKETS;
-	/** Preference key for highlighting bracket at caret location */
+	/**
+	 * Preference key for highlighting bracket at caret location
+	 * 
+	 * @since 3.8
+	 */
 	protected final static String HIGHLIGHT_BRACKET_AT_CARET_LOCATION= PreferenceConstants.EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION;
-	/** Preference key for enclosing brackets */
+	/**
+	 * Preference key for enclosing brackets
+	 * 
+	 * @since 3.8
+	 */
 	protected final static String ENCLOSING_BRACKETS= PreferenceConstants.EDITOR_ENCLOSING_BRACKETS;
 	/** Preference key for matching brackets color */
 	protected final static String MATCHING_BRACKETS_COLOR=  PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
@@ -1777,7 +1785,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * 
 	 * @since 3.8
 	 */
-	private List<IRegion> fPrevSelections;
+	private List<IRegion> fPreviousSelections;
 
 	/**
 	 * Returns the most narrow java element including the given offset.
@@ -3661,21 +3669,21 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		int adjustment= getOffsetAdjustment(document, sourceCaretOffset, selection.getLength()); // handles non-zero selection
 		sourceCaretOffset+= adjustment;
 
-		if (fPrevSelections == null)
+		if (fPreviousSelections == null)
 			initializePrevSelectionList();
 		IRegion region= fBracketMatcher.match(document, sourceCaretOffset);
 		if (region == null) {
 			region= fBracketMatcher.findEnclosingPeerCharacters(document, sourceCaretOffset);
 			initializePrevSelectionList();
-			fPrevSelections.add(selection);
+			fPreviousSelections.add(selection);
 		} else {
-			if (fPrevSelections.size() == 2) {
-				if (!selection.equals(fPrevSelections.get(1))) {
+			if (fPreviousSelections.size() == 2) {
+				if (!selection.equals(fPreviousSelections.get(1))) {
 					initializePrevSelectionList();
 				}
-			} else if (fPrevSelections.size() == 3) {
-				if (selection.equals(fPrevSelections.get(2)) && !selection.equals(fPrevSelections.get(0))) {
-					IRegion originalSelection= fPrevSelections.get(0);
+			} else if (fPreviousSelections.size() == 3) {
+				if (selection.equals(fPreviousSelections.get(2)) && !selection.equals(fPreviousSelections.get(0))) {
+					IRegion originalSelection= fPreviousSelections.get(0);
 					sourceViewer.setSelectedRange(originalSelection.getOffset(), originalSelection.getLength());
 					sourceViewer.revealRange(originalSelection.getOffset(), originalSelection.getLength());
 					initializePrevSelectionList();
@@ -3718,22 +3726,22 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		targetOffset+= adjustment;
-		if (fPrevSelections.size() == 1 && selection.getLength() < 0) {
+		if (fPreviousSelections.size() == 1 && selection.getLength() < 0) {
 			targetOffset++;
 		}
 
-		if (fPrevSelections.size() > 0) {
-			fPrevSelections.add(new Region(targetOffset, selection.getLength()));
+		if (fPreviousSelections.size() > 0) {
+			fPreviousSelections.add(new Region(targetOffset, selection.getLength()));
 		}
 		sourceViewer.setSelectedRange(targetOffset, selection.getLength());
 		sourceViewer.revealRange(targetOffset, selection.getLength());
 	}
 
 	private void initializePrevSelectionList() {
-		fPrevSelections= new ArrayList<IRegion>(3);
+		fPreviousSelections= new ArrayList<IRegion>(3);
 	}
 
-	public static boolean isOpeningBracket(char character) {
+	private static boolean isOpeningBracket(char character) {
 		for (int i= 0; i < BRACKETS.length; i+= 2) {
 			if (character == BRACKETS[i])
 				return true;
@@ -3741,7 +3749,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		return false;
 	}
 
-	public static boolean isClosingBracket(char character) {
+	private static boolean isClosingBracket(char character) {
 		for (int i= 1; i < BRACKETS.length; i+= 2) {
 			if (character == BRACKETS[i])
 				return true;
