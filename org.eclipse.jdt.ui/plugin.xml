@@ -924,6 +924,21 @@
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.classpathcontainer" />
       </page>
+      <page
+            class="org.eclipse.jdt.internal.ui.preferences.JavaCompilerPropertyPage"
+            id="org.eclipse.jdt.ui.propertyPages.JavaCompilerPropertyPage"
+            name="%javaCompilerPageName">
+         <enabledWhen>
+            <and>
+               <instanceof
+                     value="org.eclipse.jdt.core.IPackageFragmentRoot">
+               </instanceof>
+               <test
+                     property="org.eclipse.jdt.core.inSourceFolder">
+               </test>
+            </and>
+         </enabledWhen>
+      </page>
 
    </extension>
    <extension

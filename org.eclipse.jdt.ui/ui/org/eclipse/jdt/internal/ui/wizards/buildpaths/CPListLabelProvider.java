@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -217,6 +217,14 @@ public class CPListLabelProvider extends LabelProvider {
 					return NewWizardMessages.CPListLabelProvider_access_rules_disabled;
 				}
 			}
+		} else if (key.equals(CPListElement.IGNORE_OPTIONAL_PROBLEMS)) {
+			String arg;
+			if ("true".equals(attrib.getValue())) { //$NON-NLS-1$
+				arg= NewWizardMessages.CPListLabelProvider_ignore_optional_problems_yes;
+			} else {
+				arg= NewWizardMessages.CPListLabelProvider_ignore_optional_problems_no;
+			}
+			return Messages.format(NewWizardMessages.CPListLabelProvider_ignore_optional_problems_label, arg);
 		} else {
 			ClasspathAttributeConfiguration config= fAttributeDescriptors.get(key);
 			if (config != null) {
@@ -414,6 +422,8 @@ public class CPListLabelProvider extends LabelProvider {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_INCLUSION_FILTER_ATTRIB);
 			} else if (key.equals(CPListElement.ACCESSRULES)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_ACCESSRULES_ATTRIB);
+			} else if (key.equals(CPListElement.IGNORE_OPTIONAL_PROBLEMS)) {
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_IGNORE_OPTIONAL_PROBLEMS_ATTRIB);
 			} else {
 				ClasspathAttributeConfiguration config= fAttributeDescriptors.get(key);
 				if (config != null) {

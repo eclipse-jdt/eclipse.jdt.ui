@@ -739,6 +739,8 @@ public final class PreferencesMessages extends NLS {
 	public static String ProjectSelectionDialog_title;
 	public static String ProjectSelectionDialog_desciption;
 	public static String ProjectSelectionDialog_filter;
+	public static String JavaCompilerPropertyPage_ignore_optional_problems_label;
+	public static String JavaCompilerPropertyPage_invalid_element_selection;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, PreferencesMessages.class);
@@ -819,6 +821,7 @@ public final class PreferencesMessages extends NLS {
 	public static String OptionsConfigurationBlock_On;
 	public static String OptionsConfigurationBlock_RefreshFilter;
 	public static String OptionsConfigurationBlock_TypeFilterText;
+	public static String OptionsConfigurationBlock_IgnoreOptionalProblemsLink;
 
 	public static String FilterTextControl_Clear;
 	public static String FilterTextControl_ClearFilterField;

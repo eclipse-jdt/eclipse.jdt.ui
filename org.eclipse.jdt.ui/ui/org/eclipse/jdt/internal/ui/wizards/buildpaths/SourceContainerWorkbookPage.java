@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -424,6 +424,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			EditFilterWizard wizard= newEditFilterWizard(elem.getParent(), fFoldersList.getElements(), fOutputLocationField.getText());
 			OpenBuildPathWizardAction action= new OpenBuildPathWizardAction(wizard);
 			action.run();
+		} else if (key.equals(CPListElement.IGNORE_OPTIONAL_PROBLEMS)) {
+			String newValue= "true".equals(elem.getValue()) ? null : "true"; //$NON-NLS-1$ //$NON-NLS-2$
+			elem.setValue(newValue);
+			fFoldersList.refresh(elem);
 		} else {
 			if (editCustomAttribute(getShell(), elem)) {
 				fFoldersList.refresh();
@@ -532,6 +536,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		if (elem instanceof CPListElementAttribute) {
 			CPListElementAttribute attrib= (CPListElementAttribute) elem;
 			if (attrib.isBuiltIn()) {
+				return true;
+			} else if (CPListElement.IGNORE_OPTIONAL_PROBLEMS.equals(attrib.getKey())) {
 				return true;
 			} else {
 				return canEditCustomAttribute(attrib);

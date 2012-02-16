@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -252,6 +252,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewSourceFolderWizardPage_project_button;
 	public static String NewSourceFolderWizardPage_operation;
 	public static String NewSourceFolderWizardPage_exclude_label;
+	public static String NewSourceFolderWizardPage_ignore_optional_problems_label;
 	public static String NewSourceFolderWizardPage_ChooseExistingRootDialog_title;
 	public static String NewSourceFolderWizardPage_ChooseExistingRootDialog_description;
 	public static String NewSourceFolderWizardPage_ChooseProjectDialog_title;
@@ -546,6 +547,9 @@ public final class NewWizardMessages extends NLS {
 	public static String FolderSelectionDialog_button;
 	public static String MultipleFolderSelectionDialog_button;
 
+	public static String CPListLabelProvider_ignore_optional_problems_label;
+	public static String CPListLabelProvider_ignore_optional_problems_yes;
+	public static String CPListLabelProvider_ignore_optional_problems_no;
 	public static String CPListLabelProvider_none;
 	public static String CPListLabelProvider_all;
 	public static String CPListLabelProvider_source_attachment_label;

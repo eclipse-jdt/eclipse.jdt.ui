@@ -74,7 +74,11 @@ import org.eclipse.ui.preferences.IWorkingCopyManager;
 import org.eclipse.ui.preferences.WorkingCopyManager;
 import org.eclipse.ui.progress.WorkbenchJob;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
@@ -85,6 +89,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 /**
  * Abstract options configuration block providing a general implementation for setting up
@@ -1623,7 +1628,54 @@ public abstract class OptionsConfigurationBlock {
 		combo.setEnabled(enabled);
 		label.setEnabled(enabled);
 	}
-	
+
+	protected void createIgnoreOptionalProblemsLink(Composite parent) {
+		if (isIgnoreOptionalProblems()) {
+			Link link= new Link(parent, SWT.NONE);
+			GridData data= new GridData();
+			data.verticalIndent= 5;
+			link.setLayoutData(data);
+			link.setText(PreferencesMessages.OptionsConfigurationBlock_IgnoreOptionalProblemsLink);
+			link.addSelectionListener(new SelectionListener() {
+				public void widgetSelected(SelectionEvent arg0) {
+					getPreferenceContainer().openPage(BuildPathsPropertyPage.PROP_ID, null);
+				}
+
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					getPreferenceContainer().openPage(BuildPathsPropertyPage.PROP_ID, null);
+				}
+			});
+		}
+	}
+
+	private boolean isIgnoreOptionalProblems() {
+		if (fProject == null) {
+			return false;
+		}
+		IJavaProject javaProject= JavaCore.create(fProject);
+		if (javaProject == null) {
+			return false;
+		}
+		try {
+			IClasspathEntry[] classpathEntries= javaProject.getRawClasspath();
+			for (int i= 0; i < classpathEntries.length; i++) {
+				IClasspathEntry entry= classpathEntries[i];
+				if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+					IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
+					for (int j= 0; j < extraAttributes.length; j++) {
+						IClasspathAttribute attrib= extraAttributes[j];
+						if (CPListElement.IGNORE_OPTIONAL_PROBLEMS.equals(attrib.getName())) {
+							return "true".equals(attrib.getValue()); //$NON-NLS-1$
+						}
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			return false;
+		}
+		return false;
+	}
+
 	protected void setTextFieldEnabled(Key key, boolean enabled) {
 		Text text= getTextControl(key);
 		Label label= fLabels.get(text);

@@ -415,6 +415,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		gridData.heightHint= fPixelConverter.convertHeightInCharsToPixels(30);
 		commonComposite.setLayoutData(gridData);
 
+		createIgnoreOptionalProblemsLink(parent);
+
 		validateSettings(null, null, null);
 
 		return mainComp;

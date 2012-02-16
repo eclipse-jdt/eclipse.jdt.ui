@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
@@ -214,6 +216,16 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		if (fBuildPathsBlock != null) {
 			getSettings().put(INDEX, fBuildPathsBlock.getPageIndex());
 			if (fBuildPathsBlock.hasChangesInDialog() || fBuildPathsBlock.isClassfileMissing()) {
+				boolean doBuild= false;
+				MessageDialog dialog= new MessageDialog(getShell(), PreferencesMessages.ComplianceConfigurationBlock_needsbuild_title, null,
+						PreferencesMessages.ComplianceConfigurationBlock_needsprojectbuild_message, MessageDialog.QUESTION,
+						new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
+				int res= dialog.open();
+				if (res == 0) {
+					doBuild= true;
+				} else if (res != 1) {
+					return false; // cancel pressed
+				}
 				IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
 					public void run(IProgressMonitor monitor)	throws CoreException, OperationCanceledException {
 						fBuildPathsBlock.configureJavaProject(monitor);
@@ -231,6 +243,9 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 					}
 				} else {
 					op.runAsUserJob(PreferencesMessages.BuildPathsPropertyPage_job_title, null);
+				}
+				if (doBuild) {
+					CoreUtility.getBuildJob(fBuildPathsBlock.getJavaProject().getProject()).schedule();
 				}
 			}
 		}

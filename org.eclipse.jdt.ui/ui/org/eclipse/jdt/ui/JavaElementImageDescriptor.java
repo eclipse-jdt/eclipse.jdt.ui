@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -96,6 +96,12 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 * @since 3.7
 	 */
 	public final static int NATIVE= 	0x4000;
+
+	/**
+	 * Flag to render ignore optional compile problems adornment.
+	 * @since 3.8
+	 */
+	public final static int IGNORE_OPTIONAL_PROBLEMS= 0x8000;
 
 	private ImageDescriptor fBaseImage;
 	private int fFlags;
@@ -319,6 +325,9 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		}
 		if ((fFlags & WARNING) != 0) {
 			addBottomLeftImage(JavaPluginImages.DESC_OVR_WARNING, pos);
+		}
+		if ((fFlags & IGNORE_OPTIONAL_PROBLEMS) != 0) {
+			addBottomLeftImage(JavaPluginImages.DESC_OVR_IGNORE_OPTIONAL_PROBLEMS, pos);
 		}
 
 	}

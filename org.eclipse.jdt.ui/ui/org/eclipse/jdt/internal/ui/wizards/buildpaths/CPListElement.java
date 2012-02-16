@@ -55,6 +55,7 @@ public class CPListElement {
 
 	public static final String JAVADOC= IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME;
 	public static final String SOURCE_ATTACHMENT_ENCODING= IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING;
+	public static final String IGNORE_OPTIONAL_PROBLEMS= IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS;
 	public static final String NATIVE_LIB_PATH= JavaRuntime.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY;
 
 	private IJavaProject fProject;
@@ -114,6 +115,7 @@ public class CPListElement {
 				createAttributeElement(INCLUSION, new Path[0], true);
 				createAttributeElement(EXCLUSION, new Path[0], true);
 				createAttributeElement(NATIVE_LIB_PATH, null, false);
+				createAttributeElement(IGNORE_OPTIONAL_PROBLEMS, null, false);
 				break;
 			case IClasspathEntry.CPE_LIBRARY:
 			case IClasspathEntry.CPE_VARIABLE:
@@ -361,7 +363,7 @@ public class CPListElement {
 			if (curr.isNotSupported()) {
 				return true;
 			}
-			if (!curr.isBuiltIn() && !key.equals(CPListElement.JAVADOC) && !key.equals(CPListElement.NATIVE_LIB_PATH)) {
+			if (!curr.isBuiltIn() && !key.equals(CPListElement.JAVADOC) && !key.equals(CPListElement.NATIVE_LIB_PATH) && !key.equals(CPListElement.IGNORE_OPTIONAL_PROBLEMS)) {
 				return !JavaPlugin.getDefault().getClasspathAttributeConfigurationDescriptors().containsKey(key);
 			}
 		}

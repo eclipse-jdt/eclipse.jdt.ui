@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceComparator;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatus;
@@ -84,6 +85,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 
 public class NewSourceFolderWizardPage extends NewElementWizardPage {
+	private static final IClasspathAttribute ATTR_IGNORE_OPTIONAL_PROBLEMS_TRUE= JavaCore.newClasspathAttribute(IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS, "true"); //$NON-NLS-1$
 
 	private static final String PAGE_NAME= "NewSourceFolderWizardPage"; //$NON-NLS-1$
 
@@ -94,6 +96,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	private StatusInfo fRootStatus;
 
 	private SelectionButtonDialogField fExcludeInOthersFields;
+	private SelectionButtonDialogField fIgnoreOptionalProblemsField;
 
 	private IWorkspaceRoot fWorkspaceRoot;
 
@@ -131,8 +134,12 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		fExcludeInOthersFields= new SelectionButtonDialogField(SWT.CHECK);
 		fExcludeInOthersFields.setDialogFieldListener(adapter);
 		fExcludeInOthersFields.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_exclude_label);
-
 		fExcludeInOthersFields.setEnabled(JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS)));
+
+		fIgnoreOptionalProblemsField= new SelectionButtonDialogField(SWT.CHECK);
+		fIgnoreOptionalProblemsField.setDialogFieldListener(adapter);
+		fIgnoreOptionalProblemsField.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_ignore_optional_problems_label);
+		fIgnoreOptionalProblemsField.setSelection(false);
 
 		fRootStatus= new StatusInfo();
 		fProjectStatus= new StatusInfo();
@@ -186,6 +193,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		fProjectField.doFillIntoGrid(composite, 3);
 		fRootDialogField.doFillIntoGrid(composite, 3);
 		fExcludeInOthersFields.doFillIntoGrid(composite, 3);
+		fIgnoreOptionalProblemsField.doFillIntoGrid(composite, 3);
 
 		int maxFieldWidth= convertWidthInCharsToPixels(40);
 		LayoutUtil.setWidthHint(fProjectField.getTextControl(null), maxFieldWidth);
@@ -249,6 +257,8 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 			updateProjectStatus();
 			updateRootStatus();
 		} else if (field == fExcludeInOthersFields) {
+			updateRootStatus();
+		} else if (field == fIgnoreOptionalProblemsField) {
 			updateRootStatus();
 		}
 		updateStatus(new IStatus[] { fProjectStatus, fRootStatus });
@@ -358,19 +368,25 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 					newEntries.add(curr);
 				}
 
-				IClasspathEntry newEntry= JavaCore.newSourceEntry(path);
+				IClasspathAttribute[] attributes;
+				if (fIgnoreOptionalProblemsField.isSelected()) {
+					attributes= new IClasspathAttribute[] { ATTR_IGNORE_OPTIONAL_PROBLEMS_TRUE };
+				} else {
+					attributes= new IClasspathAttribute[] {};
+				}
+				IClasspathEntry newEntry= JavaCore.newSourceEntry(path, null, null, null, attributes);
 
 				Set<IClasspathEntry> modified= new HashSet<IClasspathEntry>();
 				if (fExcludeInOthersFields.isSelected()) {
 					addExclusionPatterns(newEntry, newEntries, modified);
-					IClasspathEntry entry= JavaCore.newSourceEntry(path);
+					IClasspathEntry entry= JavaCore.newSourceEntry(path, null, null, null, attributes);
 					insertAtEndOfCategory(entry, newEntries);
 				} else {
 					if (projectEntryIndex != -1) {
 						fIsProjectAsSourceFolder= true;
 						newEntries.set(projectEntryIndex, newEntry);
 					} else {
-						IClasspathEntry entry= JavaCore.newSourceEntry(path);
+						IClasspathEntry entry= JavaCore.newSourceEntry(path, null, null, null, attributes);
 						insertAtEndOfCategory(entry, newEntries);
 					}
 				}
