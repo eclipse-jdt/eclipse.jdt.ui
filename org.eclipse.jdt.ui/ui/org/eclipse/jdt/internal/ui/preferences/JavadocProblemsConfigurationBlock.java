@@ -18,6 +18,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.core.resources.IProject;
 
@@ -109,8 +110,6 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 
 		Composite javadocComposite= createJavadocTabContent(parent);
 
-		createIgnoreOptionalProblemsLink(parent);
-
 		validateSettings(null, null, null);
 
 		return javadocComposite;
@@ -172,12 +171,26 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		Composite spacer= new Composite(outer, SWT.NONE);
 		GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);
 
+		Link ignoreOptionalProblemsLink= createIgnoreOptionalProblemsLink(outer);
+		if (ignoreOptionalProblemsLink != null) {
+			GridData gd= new GridData();
+			gd.horizontalSpan= nColumns;
+			ignoreOptionalProblemsLink.setLayoutData(gd);
+			
+			spacer= new Composite(outer, SWT.NONE);
+			GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);
+		}
+		
 		String label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_javadoc_support_label;
 		addCheckBox(outer, label, PREF_JAVADOC_SUPPORT, enabledDisabled, 0);
 
+		int indent= fPixelConverter.convertWidthInCharsToPixels(4);
+		
 		layout = new GridLayout();
 		layout.numColumns= nColumns;
 		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.marginLeft= indent;
 
 		Composite composite= new Composite(outer, SWT.NONE);
 		composite.setLayout(layout);
@@ -185,13 +198,14 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 
 		fJavadocComposite= composite;
 		
+		spacer= new Composite(composite, SWT.NONE);
+		GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);
+		
 		Label description= new Label(composite, SWT.WRAP);
 		description.setText(PreferencesMessages.JavadocProblemsConfigurationBlock_javadoc_description);
 		GridData gd= new GridData();
 		gd.horizontalSpan= nColumns;
 		description.setLayoutData(gd);
-
-		int indent= fPixelConverter.convertWidthInCharsToPixels(4);
 
 		spacer= new Composite(composite, SWT.NONE);
 		GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);

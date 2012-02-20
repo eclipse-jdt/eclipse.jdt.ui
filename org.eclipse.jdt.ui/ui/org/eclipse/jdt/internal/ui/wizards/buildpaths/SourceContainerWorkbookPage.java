@@ -441,6 +441,12 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	 */
 	protected void sourcePageSelectionChanged(DialogField field) {
 		List<Object> selected= fFoldersList.getSelectedElements();
+		boolean isIgnoreOptionalProblems= selected.size() == 1
+				&& selected.get(0) instanceof CPListElementAttribute
+				&& CPListElement.IGNORE_OPTIONAL_PROBLEMS.equals(((CPListElementAttribute) selected.get(0)).getKey());
+		fFoldersList.getButton(IDX_EDIT).setText(isIgnoreOptionalProblems
+				? NewWizardMessages.SourceContainerWorkbookPage_folders_toggle_button
+				: NewWizardMessages.SourceContainerWorkbookPage_folders_edit_button);
 		fFoldersList.enableButton(IDX_EDIT, canEdit(selected));
 		fFoldersList.enableButton(IDX_REMOVE, canRemove(selected));
 		boolean noAttributes= containsOnlyTopLevelEntries(selected);

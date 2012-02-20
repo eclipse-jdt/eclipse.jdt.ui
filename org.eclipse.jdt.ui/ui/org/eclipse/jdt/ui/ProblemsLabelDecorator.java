@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ListenerList;
 
 import org.eclipse.core.resources.IFile;
@@ -46,6 +47,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
@@ -58,7 +60,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 /**
  * LabelDecorator that decorates an element's image with error and warning overlays that
@@ -111,10 +112,10 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 
 	}
 
-	private static final int ERRORTICK_IGNORE_OPTIONAL_PROBLEMS= JavaElementImageDescriptor.IGNORE_OPTIONAL_PROBLEMS;
 	private static final int ERRORTICK_WARNING= JavaElementImageDescriptor.WARNING;
 	private static final int ERRORTICK_ERROR= JavaElementImageDescriptor.ERROR;
 	private static final int ERRORTICK_BUILDPATH_ERROR= JavaElementImageDescriptor.BUILDPATH_ERROR;
+	private static final int ERRORTICK_IGNORE_OPTIONAL_PROBLEMS= JavaElementImageDescriptor.IGNORE_OPTIONAL_PROBLEMS;
 
 	private ImageDescriptorRegistry fRegistry;
 	private boolean fUseNewRegistry= false;
@@ -191,11 +192,19 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 					case IJavaElement.JAVA_PROJECT:
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 						int flags= getErrorTicksFromMarkers(element.getResource(), IResource.DEPTH_INFINITE, null);
-						if (type == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
-							IPackageFragmentRoot root= (IPackageFragmentRoot) element;
-							if (flags != ERRORTICK_ERROR && root.getKind() == IPackageFragmentRoot.K_SOURCE && isIgnoreOptionalProblems(root)) {
-								flags= ERRORTICK_IGNORE_OPTIONAL_PROBLEMS;
-							}
+						switch (type) {
+							case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+								IPackageFragmentRoot root= (IPackageFragmentRoot) element;
+								if (flags != ERRORTICK_ERROR && root.getKind() == IPackageFragmentRoot.K_SOURCE && isIgnoringOptionalProblems(root.getRawClasspathEntry())) {
+									flags= ERRORTICK_IGNORE_OPTIONAL_PROBLEMS;
+								}
+								break;
+							case IJavaElement.JAVA_PROJECT:
+								IJavaProject project= (IJavaProject) element;
+								if (flags != ERRORTICK_ERROR && flags != ERRORTICK_BUILDPATH_ERROR && isIgnoringOptionalProblems(project)) {
+									flags= ERRORTICK_IGNORE_OPTIONAL_PROBLEMS;
+								}
+								break;
 						}
 						return flags;
 					case IJavaElement.PACKAGE_FRAGMENT:
@@ -246,20 +255,25 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		return 0;
 	}
 
-	private boolean isIgnoreOptionalProblems(IPackageFragmentRoot root) {
-		try {
-			IClasspathEntry entry= root.getRawClasspathEntry();
-			if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-				IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
-				for (int i= 0; i < extraAttributes.length; i++) {
-					IClasspathAttribute attrib= extraAttributes[i];
-					if (CPListElement.IGNORE_OPTIONAL_PROBLEMS.equals(attrib.getName())) {
-						return "true".equals(attrib.getValue()); //$NON-NLS-1$
-					}
+	private boolean isIgnoringOptionalProblems(IClasspathEntry entry) {
+		if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+			IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
+			for (int i= 0; i < extraAttributes.length; i++) {
+				IClasspathAttribute attrib= extraAttributes[i];
+				if (IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS.equals(attrib.getName())) {
+					return "true".equals(attrib.getValue()); //$NON-NLS-1$
 				}
 			}
-		} catch (JavaModelException e) {
-			return false;
+		}
+		return false;
+	}
+	
+	private boolean isIgnoringOptionalProblems(IJavaProject project) throws JavaModelException {
+		IPath projectPath= project.getPath();
+		IClasspathEntry[] rawClasspath= project.getRawClasspath();
+		for (IClasspathEntry entry : rawClasspath) {
+			if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE && projectPath.equals(entry.getPath()) && isIgnoringOptionalProblems(entry))
+				return true;
 		}
 		return false;
 	}

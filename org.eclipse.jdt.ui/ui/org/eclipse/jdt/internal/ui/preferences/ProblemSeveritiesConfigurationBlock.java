@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -410,12 +410,15 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		layout.marginWidth= 0;
 		mainComp.setLayout(layout);
 
+		createIgnoreOptionalProblemsLink(mainComp);
+		
+		Composite spacer= new Composite(mainComp, SWT.NONE);
+		spacer.setLayoutData(new GridData(0, 0));
+		
 		Composite commonComposite= createStyleTabContent(mainComp);
 		GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.heightHint= fPixelConverter.convertHeightInCharsToPixels(30);
 		commonComposite.setLayoutData(gridData);
-
-		createIgnoreOptionalProblemsLink(parent);
 
 		validateSettings(null, null, null);
 

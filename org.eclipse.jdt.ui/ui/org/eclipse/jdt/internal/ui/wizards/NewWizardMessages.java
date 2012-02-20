@@ -311,6 +311,7 @@ public final class NewWizardMessages extends NLS {
 	public static String SourceContainerWorkbookPage_folders_remove_button;
 	public static String SourceContainerWorkbookPage_folders_add_button;
 	public static String SourceContainerWorkbookPage_folders_edit_button;
+	public static String SourceContainerWorkbookPage_folders_toggle_button;
 	public static String SourceContainerWorkbookPage_folders_check;
 	public static String SourceContainerWorkbookPage_ExistingSourceFolderDialog_new_title;
 	public static String SourceContainerWorkbookPage_ChangeOutputLocationDialog_title;

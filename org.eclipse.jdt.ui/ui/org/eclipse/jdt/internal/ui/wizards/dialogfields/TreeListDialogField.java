@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -288,10 +288,18 @@ public class TreeListDialogField<E> extends DialogField {
 	}
 
 	/**
-	* Returns the internally used table viewer.
-	*/
+	 * @return the internally used tree viewer, or <code>null</code> if the UI has not been created yet
+	 */
 	public TreeViewer getTreeViewer() {
 		return fTree;
+	}
+	
+	/**
+	 * @param idx the index of the button
+	 * @return the button control, or <code>null</code> if the UI has not been created yet
+	 */
+	public Button getButton(int idx) {
+		return fButtonControls[idx];
 	}
 
 	/*

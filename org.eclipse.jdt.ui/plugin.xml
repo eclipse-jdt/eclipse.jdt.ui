@@ -891,6 +891,17 @@
             <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
          </enabledWhen>
       </page>
+      <page
+            name="%javaCompilerPageName"
+            class="org.eclipse.jdt.internal.ui.preferences.JavaCompilerPropertyPage"
+            id="org.eclipse.jdt.ui.propertyPages.JavaCompilerPropertyPage">
+         <enabledWhen>
+            <and>
+               <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+               <test property="org.eclipse.jdt.core.inSourceFolder"/>
+            </and>
+         </enabledWhen>
+      </page>
       
       <page
             name="%editorPageName"
@@ -924,23 +935,8 @@
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.classpathcontainer" />
       </page>
-      <page
-            class="org.eclipse.jdt.internal.ui.preferences.JavaCompilerPropertyPage"
-            id="org.eclipse.jdt.ui.propertyPages.JavaCompilerPropertyPage"
-            name="%javaCompilerPageName">
-         <enabledWhen>
-            <and>
-               <instanceof
-                     value="org.eclipse.jdt.core.IPackageFragmentRoot">
-               </instanceof>
-               <test
-                     property="org.eclipse.jdt.core.inSourceFolder">
-               </test>
-            </and>
-         </enabledWhen>
-      </page>
-
    </extension>
+
    <extension
          point="org.eclipse.ui.elementFactories">
       <factory

@@ -22,11 +22,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
-
 import org.eclipse.ui.dialogs.PropertyPage;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -34,7 +32,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
@@ -74,34 +71,6 @@ public class JavaCompilerPropertyPage extends PropertyPage {
 		super.createControl(parent);
 	}
 
-	/**
-	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
-	 */
-	@Override
-	public boolean performOk() {
-		if (fIsValidElement && fIgnoreOptionalProblemsField.isSelected() != isIgnoreOptionalProblems()) {
-			boolean doBuild= false;
-			MessageDialog dialog= new MessageDialog(getShell(), PreferencesMessages.ComplianceConfigurationBlock_needsbuild_title, null,
-					PreferencesMessages.ComplianceConfigurationBlock_needsprojectbuild_message, MessageDialog.QUESTION,
-					new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
-			int res= dialog.open();
-			if (res == 0) {
-				doBuild= true;
-			} else if (res != 1) {
-				return false; // cancel pressed
-			}
-			String newValue= fIgnoreOptionalProblemsField.isSelected() ? "true" : null; //$NON-NLS-1$
-			fElement.setAttribute(CPListElement.IGNORE_OPTIONAL_PROBLEMS, newValue);
-			IWorkspaceRunnable runnable= getRunnable(getShell(), fProject, fElement.getClasspathEntry());
-			WorkbenchRunnableAdapter op= new WorkbenchRunnableAdapter(runnable);
-			op.runAsUserJob(PreferencesMessages.BuildPathsPropertyPage_job_title, null);
-			if (doBuild) {
-				CoreUtility.getBuildJob(fProject.getProject()).schedule();
-			}
-		}
-		return true;
-	}
-
 	/*
 	 * @see PreferencePage#createContents(Composite)
 	 */
@@ -112,14 +81,13 @@ public class JavaCompilerPropertyPage extends PropertyPage {
 		}
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout topLayout= new GridLayout();
-		topLayout.numColumns= 1;
 		topLayout.marginWidth= 0;
 		topLayout.marginHeight= 0;
 		composite.setLayout(topLayout);
 
 		fIgnoreOptionalProblemsField= new SelectionButtonDialogField(SWT.CHECK);
 		fIgnoreOptionalProblemsField.setLabelText(PreferencesMessages.JavaCompilerPropertyPage_ignore_optional_problems_label);
-		fIgnoreOptionalProblemsField.setSelection(isIgnoreOptionalProblems());
+		fIgnoreOptionalProblemsField.setSelection(isIgnoringOptionalProblems());
 		fIgnoreOptionalProblemsField.doFillIntoGrid(composite, 1);
 		return composite;
 	}
@@ -133,6 +101,21 @@ public class JavaCompilerPropertyPage extends PropertyPage {
 		super.performDefaults();
 	}
 
+	/**
+	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
+	 */
+	@Override
+	public boolean performOk() {
+		if (fIsValidElement && fIgnoreOptionalProblemsField.isSelected() != isIgnoringOptionalProblems()) {
+			String newValue= fIgnoreOptionalProblemsField.isSelected() ? "true" : null; //$NON-NLS-1$
+			fElement.setAttribute(IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS, newValue);
+			IWorkspaceRunnable runnable= getRunnable(getShell(), fProject, fElement.getClasspathEntry());
+			WorkbenchRunnableAdapter op= new WorkbenchRunnableAdapter(runnable);
+			op.runAsUserJob(PreferencesMessages.BuildPathsPropertyPage_job_title, null);
+		}
+		return true;
+	}
+
 	private static IWorkspaceRunnable getRunnable(final Shell shell, final IJavaProject project, final IClasspathEntry entry) {
 		return new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
@@ -142,7 +125,7 @@ public class JavaCompilerPropertyPage extends PropertyPage {
 		};
 	}
 
-	private boolean isIgnoreOptionalProblems() {
-		return "true".equals(fElement.getAttribute(CPListElement.IGNORE_OPTIONAL_PROBLEMS)); //$NON-NLS-1$
+	private boolean isIgnoringOptionalProblems() {
+		return "true".equals(fElement.getAttribute(IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS)); //$NON-NLS-1$
 	}
 }

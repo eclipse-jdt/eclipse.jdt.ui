@@ -98,7 +98,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	public final static int NATIVE= 	0x4000;
 
 	/**
-	 * Flag to render ignore optional compile problems adornment.
+	 * Flag to render the 'ignore optional compile problems' adornment.
 	 * @since 3.8
 	 */
 	public final static int IGNORE_OPTIONAL_PROBLEMS= 0x8000;
