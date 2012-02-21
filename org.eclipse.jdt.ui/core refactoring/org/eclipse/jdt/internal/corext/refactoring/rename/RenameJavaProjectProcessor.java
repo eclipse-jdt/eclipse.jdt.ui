@@ -156,7 +156,7 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 
 		if (projectNameAlreadyExists(newName))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameJavaProjectRefactoring_already_exists);
-		if (!newName.equalsIgnoreCase(fProject.getElementName()) && projectFolderAlreadyExists(newName))
+		if (projectFolderAlreadyExists(newName))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameJavaProjectProcessor_folder_already_exists);
 
 		return new RefactoringStatus();
@@ -189,9 +189,15 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 		boolean isNotInWorkpace= fProject.getProject().getDescription().getLocationURI() != null;
 		if (isNotInWorkpace)
 			return false; // projects outside of the workspace are not renamed
+
 		URI locationURI= fProject.getProject().getLocationURI();
 		IFileStore projectStore= EFS.getStore(locationURI);
+
+		if (!projectStore.getFileSystem().isCaseSensitive() && newName.equalsIgnoreCase(fProject.getElementName()))
+			return false; // allow to change case
+
 		IFileStore newProjectStore= projectStore.getParent().getChild(newName);
+
 		return newProjectStore.fetchInfo().exists();
 	}
 
