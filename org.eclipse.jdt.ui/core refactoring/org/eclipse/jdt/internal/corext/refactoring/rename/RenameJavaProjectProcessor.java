@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -156,7 +156,7 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 
 		if (projectNameAlreadyExists(newName))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameJavaProjectRefactoring_already_exists);
-		if (projectFolderAlreadyExists(newName))
+		if (!newName.equalsIgnoreCase(fProject.getElementName()) && projectFolderAlreadyExists(newName))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameJavaProjectProcessor_folder_already_exists);
 
 		return new RefactoringStatus();
