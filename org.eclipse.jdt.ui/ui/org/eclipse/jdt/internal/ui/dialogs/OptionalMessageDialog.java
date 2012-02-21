@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -104,6 +104,17 @@ public class OptionalMessageDialog extends MessageDialog {
 		});
 		applyDialogFont(fHideDialogCheckBox);
 		return fHideDialogCheckBox;
+	}
+
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#close()
+	 * @since 3.8
+	 */
+	@Override
+	public boolean close() {
+		if (getReturnCode() == CANCEL)
+			setDialogEnabled(fId, true); // don't store if cancelled
+		return super.close();
 	}
 
 	//--------------- Configuration handling --------------

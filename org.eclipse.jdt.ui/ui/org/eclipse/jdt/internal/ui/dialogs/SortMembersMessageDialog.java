@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -175,13 +175,8 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 	 */
 	@Override
 	public int open() {
-		if (isDialogEnabled(OPTIONAL_ID)) {
-			int res= super.open();
-			if (res != Window.OK) {
-				setDialogEnabled(OPTIONAL_ID, true); // don't save state on cancel
-			}
-			return res;
-		}
+		if (isDialogEnabled(OPTIONAL_ID))
+			return super.open();
 		return Window.OK;
 	}
 
