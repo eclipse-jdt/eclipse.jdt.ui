@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -927,7 +927,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo(Integer n) {\n");
-		buf.append("        int i = (n).intValue();\n");
+		buf.append("        int i = n.intValue();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -962,6 +962,59 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	public void testUnusedCodeBug371078_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+
+		buf.append("package test1;\n");
+		buf.append("class E1 {\n");
+		buf.append("    public static Object create(final int a, final int b) {\n");
+		buf.append("        return (Double) ((double) (a * Math.pow(10, -b)));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("IntComp.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("class E1 {\n");
+		buf.append("    public static Object create(final int a, final int b) {\n");
+		buf.append("        return (a * Math.pow(10, -b));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testUnusedCodeBug371078_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		
+		buf.append("package test1;\n");
+		buf.append("public class NestedCasts {\n");
+		buf.append("	void foo(Integer i) {\n");
+		buf.append("		Object o= ((((Number) (((Integer) i)))));\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("NestedCasts.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class NestedCasts {\n");
+		buf.append("	void foo(Integer i) {\n");
+		buf.append("		Object o= i;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+	
 	public void testJava5001() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

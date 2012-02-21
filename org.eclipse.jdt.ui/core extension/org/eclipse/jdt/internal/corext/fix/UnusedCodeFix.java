@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -474,26 +474,52 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			while (fUnnecessaryCasts.size() > 0) {
 				CastExpression castExpression= fUnnecessaryCasts.iterator().next();
 				fUnnecessaryCasts.remove(castExpression);
+				
+				/*
+				 * ASTRewrite doesn't allow replacing (deleting) of moved nodes. To solve problems
+				 * with nested casts, we need to replace all casts at once.
+				 * 
+				 * The loops first proceed downwards to find the innermost expression that stays in the result
+				 * and then proceeds towards the top to find the outermost cast that needs to be replaced.
+				 * Both loops also skip unnecessary parenthesized nodes.
+				 */
 				CastExpression down= castExpression;
-				while (fUnnecessaryCasts.contains(down.getExpression())) {
-					down= (CastExpression)down.getExpression();
-					fUnnecessaryCasts.remove(down);
+				ASTNode downChild= down.getExpression();
+				while (true) {
+					if (fUnnecessaryCasts.contains(downChild)) {
+						down= (CastExpression) downChild;
+						fUnnecessaryCasts.remove(down);
+						downChild= down.getExpression();
+					} else if (downChild instanceof ParenthesizedExpression) {
+						if (!NecessaryParenthesesChecker.needsParentheses(castExpression, downChild.getParent(), downChild.getLocationInParent())) {
+							downChild= ((ParenthesizedExpression) downChild).getExpression();
+							if (downChild instanceof CastExpression)
+								down= (CastExpression) downChild;
+						} else {
+							break;
+						}
+					} else {
+						break;
+					}
 				}
 
 				Expression expression= down.getExpression();
 				ASTNode move= rewrite.createMoveTarget(expression);
 
-				CastExpression top= castExpression;
-				while (fUnnecessaryCasts.contains(top.getParent())) {
-					top= (CastExpression)top.getParent();
-					fUnnecessaryCasts.remove(top);
+				ASTNode top= castExpression;
+				while (true) {
+					ASTNode parent= top.getParent();
+					if (fUnnecessaryCasts.contains(parent)) {
+						top= parent;
+						fUnnecessaryCasts.remove(top);
+					} else if (parent instanceof ParenthesizedExpression && !NecessaryParenthesesChecker.needsParentheses(expression, parent, top.getLocationInParent())) {
+						top= parent;
+					} else {
+						break;
+					}
 				}
 
-				ASTNode toReplace= top;
-				if (top.getParent() instanceof ParenthesizedExpression && !NecessaryParenthesesChecker.needsParentheses(expression, top.getParent(), top.getLocationInParent())) {
-					toReplace= top.getParent();
-				}
-				rewrite.replace(toReplace, move, group);
+				rewrite.replace(top, move, group);
 			}
 		}
 	}
