@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -132,9 +132,20 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 
 		}
 
-		public void defaultSelected() {
+		public void defaultSelected(MouseEvent e) {
 			if (fInput.fAnnotationListener != null) {
-				VerticalRulerEvent event= new VerticalRulerEvent(fAnnotation);
+				Event swtEvent= new Event();
+				swtEvent.type= SWT.MouseDown;
+				swtEvent.display= e.display;
+				swtEvent.widget= e.widget;
+				swtEvent.time= e.time;
+				swtEvent.data= e.data;
+				swtEvent.x= e.x;
+				swtEvent.y= e.y;
+				swtEvent.button= e.button;
+				swtEvent.stateMask= e.stateMask;
+				swtEvent.count= e.count;
+				VerticalRulerEvent event= new VerticalRulerEvent(fAnnotation, swtEvent);
 				fInput.fAnnotationListener.annotationDefaultSelected(event);
 			}
 
@@ -252,7 +263,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 			// TODO for now, to make double click work: disable single click on the first item
 			// disable later when the annotationlistener selectively handles input
 			if (item != null && e.button == 1) // && item.fAnnotation != fInput.fAnnotations[0])
-				item.defaultSelected();
+				item.defaultSelected(e);
 		}
 
 	}

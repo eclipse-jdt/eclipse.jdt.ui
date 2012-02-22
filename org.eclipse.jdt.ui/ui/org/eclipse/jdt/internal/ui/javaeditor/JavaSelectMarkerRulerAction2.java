@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,9 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ResourceBundle;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Event;
 
 import org.eclipse.jface.action.IAction;
 
@@ -58,7 +61,7 @@ public class JavaSelectMarkerRulerAction2 extends SelectAnnotationRulerAction {
 		}
 
 		if (isBreakpoint(annotation))
-			triggerAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK);
+			triggerAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK, event.getEvent());
 
 		Position position= model.getPosition(annotation);
 		if (position == null)
@@ -102,7 +105,7 @@ public class JavaSelectMarkerRulerAction2 extends SelectAnnotationRulerAction {
 		return JavaCorrectionProcessor.hasCorrections(a) || a instanceof AssistAnnotation;
 	}
 
-	private void triggerAction(String actionID) {
+	private void triggerAction(String actionID, Event event) {
 		IAction action= getTextEditor().getAction(actionID);
 		if (action != null) {
 			if (action instanceof IUpdate)
@@ -111,8 +114,15 @@ public class JavaSelectMarkerRulerAction2 extends SelectAnnotationRulerAction {
 			if (action instanceof ISelectionListener) {
 				((ISelectionListener)action).selectionChanged(null, null);
 			}
-			if (action.isEnabled())
-				action.run();
+			if (action.isEnabled()) {
+				if (event == null) {
+					action.run();
+				} else {
+					event.type= SWT.MouseDoubleClick;
+					event.count= 2;
+					action.runWithEvent(event);
+				}
+			}
 		}
 	}
 
