@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -4608,7 +4608,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
-		buf.append("        String r = s;\n");
+		buf.append("        String r = (s);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
@@ -4674,7 +4674,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Integer n) {\n");
-		buf.append("        int i = (n).intValue();\n");
+		buf.append("        int i = ((n)).intValue();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());

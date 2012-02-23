@@ -916,6 +916,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo(Integer n) {\n");
 		buf.append("        int i = (((Integer) n)).intValue();\n");
+		buf.append("        foo(((Integer) n));\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
@@ -927,7 +928,8 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo(Integer n) {\n");
-		buf.append("        int i = n.intValue();\n");
+		buf.append("        int i = ((n)).intValue();\n");
+		buf.append("        foo((n));\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -1007,7 +1009,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("package test1;\n");
 		buf.append("public class NestedCasts {\n");
 		buf.append("	void foo(Integer i) {\n");
-		buf.append("		Object o= i;\n");
+		buf.append("		Object o= (((((i)))));\n");
 		buf.append("	}\n");
 		buf.append("}\n");
 		String expected1= buf.toString();

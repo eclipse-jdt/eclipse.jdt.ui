@@ -11,9 +11,9 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -425,11 +425,9 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 	private static class RemoveCastOperation extends CompilationUnitRewriteOperation {
 
 		private final CastExpression fCast;
-		private final ASTNode fSelectedNode;
 
-		public RemoveCastOperation(CastExpression cast, ASTNode selectedNode) {
+		public RemoveCastOperation(CastExpression cast) {
 			fCast= cast;
-			fSelectedNode= selectedNode;
 		}
 
 		/**
@@ -444,21 +442,22 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 
 			CastExpression cast= fCast;
 			Expression expression= cast.getExpression();
-			ASTNode placeholder= rewrite.createCopyTarget(expression);
-
-			if (NecessaryParenthesesChecker.needsParentheses(expression, cast.getParent(), cast.getLocationInParent())) {
-				rewrite.replace(fCast, placeholder, group);
-			} else {
-				rewrite.replace(fCast.getParent() instanceof ParenthesizedExpression ? fCast.getParent() : fSelectedNode, placeholder, group);
+			if (expression instanceof ParenthesizedExpression) {
+				Expression childExpression= ((ParenthesizedExpression) expression).getExpression();
+				if (NecessaryParenthesesChecker.needsParentheses(childExpression, cast, CastExpression.EXPRESSION_PROPERTY)) {
+					expression= childExpression;
+				}
 			}
+			
+			replaceCast(cast, expression, rewrite, group);
 		}
 	}
 
 	private static class RemoveAllCastOperation extends CompilationUnitRewriteOperation {
 
-		private final HashSet<CastExpression> fUnnecessaryCasts;
+		private final LinkedHashSet<CastExpression> fUnnecessaryCasts;
 
-		public RemoveAllCastOperation(HashSet<CastExpression> unnecessaryCasts) {
+		public RemoveAllCastOperation(LinkedHashSet<CastExpression> unnecessaryCasts) {
 			fUnnecessaryCasts= unnecessaryCasts;
 		}
 
@@ -479,47 +478,35 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 				 * ASTRewrite doesn't allow replacing (deleting) of moved nodes. To solve problems
 				 * with nested casts, we need to replace all casts at once.
 				 * 
-				 * The loops first proceed downwards to find the innermost expression that stays in the result
-				 * and then proceeds towards the top to find the outermost cast that needs to be replaced.
-				 * Both loops also skip unnecessary parenthesized nodes.
+				 * The loop proceeds downwards to find the innermost expression that stays in the result (downChild)
+				 * and it also skips necessary parentheses.
 				 */
 				CastExpression down= castExpression;
-				ASTNode downChild= down.getExpression();
+				Expression downChild= down.getExpression();
 				while (true) {
 					if (fUnnecessaryCasts.contains(downChild)) {
 						down= (CastExpression) downChild;
 						fUnnecessaryCasts.remove(down);
 						downChild= down.getExpression();
 					} else if (downChild instanceof ParenthesizedExpression) {
-						if (!NecessaryParenthesesChecker.needsParentheses(castExpression, downChild.getParent(), downChild.getLocationInParent())) {
-							downChild= ((ParenthesizedExpression) downChild).getExpression();
-							if (downChild instanceof CastExpression)
-								down= (CastExpression) downChild;
+						Expression downChildExpression= ((ParenthesizedExpression) downChild).getExpression();
+						// is it justified that downChild is a ParenthesizedExpression?
+						if (NecessaryParenthesesChecker.needsParentheses(downChildExpression, down, CastExpression.EXPRESSION_PROPERTY)) {
+							// yes => continue walking down
+							downChild= downChildExpression;
 						} else {
+							// no => stop walking
 							break;
 						}
 					} else {
 						break;
 					}
 				}
-
-				Expression expression= down.getExpression();
-				ASTNode move= rewrite.createMoveTarget(expression);
-
-				ASTNode top= castExpression;
-				while (true) {
-					ASTNode parent= top.getParent();
-					if (fUnnecessaryCasts.contains(parent)) {
-						top= parent;
-						fUnnecessaryCasts.remove(top);
-					} else if (parent instanceof ParenthesizedExpression && !NecessaryParenthesesChecker.needsParentheses(expression, parent, top.getLocationInParent())) {
-						top= parent;
-					} else {
-						break;
-					}
-				}
-
-				rewrite.replace(top, move, group);
+				
+				// downChild is the innermost CastExpression's expression, stripped of a necessary surrounding ParenthesizedExpression
+				// Move either downChild (if it doesn't need parentheses), or a parenthesized version if necessary
+				
+				replaceCast(castExpression, downChild, rewrite, group);
 			}
 		}
 	}
@@ -581,7 +568,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		if (!(curr instanceof CastExpression))
 			return null;
 
-		return new UnusedCodeFix(FixMessages.UnusedCodeFix_RemoveCast_description, compilationUnit, new CompilationUnitRewriteOperation[] {new RemoveCastOperation((CastExpression)curr, selectedNode)});
+		return new UnusedCodeFix(FixMessages.UnusedCodeFix_RemoveCast_description, compilationUnit, new CompilationUnitRewriteOperation[] {new RemoveCastOperation((CastExpression)curr)});
 	}
 
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
@@ -620,7 +607,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 
 		List<CompilationUnitRewriteOperation> result= new ArrayList<CompilationUnitRewriteOperation>();
 		Hashtable<ASTNode, List<SimpleName>> variableDeclarations= new Hashtable<ASTNode, List<SimpleName>>();
-		HashSet<CastExpression> unnecessaryCasts= new HashSet<CastExpression>();
+		LinkedHashSet<CastExpression> unnecessaryCasts= new LinkedHashSet<CastExpression>();
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= problems[i];
 			int id= problem.getProblemId();
@@ -806,6 +793,29 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			}
 		}
 		return null;
+	}
+
+	private static void replaceCast(CastExpression castExpression, Expression replacement, ASTRewrite rewrite, TextEditGroup group) {
+		boolean castEnclosedInNecessaryParentheses= castExpression.getParent() instanceof ParenthesizedExpression
+				&& NecessaryParenthesesChecker.needsParentheses(castExpression, castExpression.getParent().getParent(), castExpression.getParent().getLocationInParent());
+		
+		ASTNode toReplace= castEnclosedInNecessaryParentheses ? castExpression.getParent() : castExpression;
+		ASTNode move;
+		if (NecessaryParenthesesChecker.needsParentheses(replacement, toReplace.getParent(), toReplace.getLocationInParent())) {
+			if (replacement.getParent() instanceof ParenthesizedExpression) {
+				move= rewrite.createMoveTarget(replacement.getParent());
+			} else if (castEnclosedInNecessaryParentheses) {
+				toReplace= castExpression;
+				move= rewrite.createMoveTarget(replacement);
+			} else {
+				ParenthesizedExpression parentheses= replacement.getAST().newParenthesizedExpression();
+				parentheses.setExpression((Expression) rewrite.createMoveTarget(replacement));
+				move= parentheses;
+			}
+		} else {
+			move= rewrite.createMoveTarget(replacement);
+		}
+		rewrite.replace(toReplace, move, group);
 	}
 
 	private final Map<String, String> fCleanUpOptions;
