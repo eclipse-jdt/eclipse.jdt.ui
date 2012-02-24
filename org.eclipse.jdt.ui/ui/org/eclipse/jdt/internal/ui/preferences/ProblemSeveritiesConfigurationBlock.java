@@ -32,6 +32,7 @@ import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -836,6 +837,43 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 					PREF_PB_SUPPRESS_WARNINGS.equals(changedKey) ||
 					PREF_ANNOTATION_NULL_ANALYSIS.equals(changedKey)) {
 				updateEnableStates();
+			}
+			
+			if (PREF_ANNOTATION_NULL_ANALYSIS.equals(changedKey) && checkValue(PREF_ANNOTATION_NULL_ANALYSIS, ENABLED)
+					|| PREF_PB_NULL_REFERENCE.equals(changedKey)
+					|| PREF_PB_POTENTIAL_NULL_REFERENCE.equals(changedKey)
+					|| PREF_PB_NULL_SPECIFICATION_VIOLATION.equals(changedKey)
+					|| PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION.equals(changedKey)) {
+				boolean badNullRef= lessSevere(getValue(PREF_PB_NULL_REFERENCE), getValue(PREF_PB_NULL_SPECIFICATION_VIOLATION));
+				boolean badPotNullRef= lessSevere(getValue(PREF_PB_POTENTIAL_NULL_REFERENCE), getValue(PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION));
+				boolean ask= false;
+				ask |= badNullRef && (PREF_PB_NULL_REFERENCE.equals(changedKey) || PREF_PB_NULL_SPECIFICATION_VIOLATION.equals(changedKey));
+				ask |= badPotNullRef && (PREF_PB_POTENTIAL_NULL_REFERENCE.equals(changedKey) || PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION.equals(changedKey));
+				ask |= (badNullRef || badPotNullRef) && PREF_ANNOTATION_NULL_ANALYSIS.equals(changedKey);
+				if (ask) {
+					MessageDialog messageDialog= new MessageDialog(
+							getShell(),
+							PreferencesMessages.ProblemSeveritiesConfigurationBlock_adapt_null_pointer_access_settings_dialog_title,
+							null,
+							PreferencesMessages.ProblemSeveritiesConfigurationBlock_adapt_null_pointer_access_settings_dialog_message,
+							MessageDialog.QUESTION,
+							new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL },
+							0);
+					messageDialog.create();
+					Shell messageShell= messageDialog.getShell();
+					messageShell.setLocation(messageShell.getLocation().x, getShell().getLocation().y + 40);
+					if (messageDialog.open() == 0) {
+						if (badNullRef) {
+							setValue(PREF_PB_NULL_REFERENCE, getValue(PREF_PB_NULL_SPECIFICATION_VIOLATION));
+							updateCombo(getComboBox(PREF_PB_NULL_REFERENCE));
+						}
+						if (badPotNullRef) {
+							setValue(PREF_PB_POTENTIAL_NULL_REFERENCE, getValue(PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION));
+							updateCombo(getComboBox(PREF_PB_POTENTIAL_NULL_REFERENCE));
+						}
+					}
+				}
+
 			} else if (PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING.equals(changedKey)) {
 				// merging the two options
 				setValue(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT, newValue);
@@ -856,6 +894,15 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 			updateEnableStates();
 			updateNullAnnotationsSetting();
 		}
+	}
+
+	private static boolean lessSevere(String errorWarningIgnore, String errorWarningIgnore2) {
+		if (IGNORE.equals(errorWarningIgnore))
+			return ! IGNORE.equals(errorWarningIgnore2);
+		else if (WARNING.equals(errorWarningIgnore))
+			return ERROR.equals(errorWarningIgnore2);
+		else
+			return false;
 	}
 
 	private void updateNullAnnotationsSetting() {
