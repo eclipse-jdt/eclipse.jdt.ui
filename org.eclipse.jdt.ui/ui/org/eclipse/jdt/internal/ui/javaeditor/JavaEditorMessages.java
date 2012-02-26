@@ -89,7 +89,6 @@ final class JavaEditorMessages extends NLS {
 	public static String ClassFileDocumentProvider_error_createElementInfo;
 	public static String ExpandSelectionMenu_label;
 	public static String GotoMatchingBracket_label;
-	public static String GotoMatchingBracket_error_invalidSelection;
 	public static String GotoMatchingBracket_error_noMatchingBracket;
 	public static String GotoMatchingBracket_error_bracketOutsideSelectedElement;
 	public static String ShowInBreadcrumbAction_label;

@@ -3660,23 +3660,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return;
 
 		IRegion selection= getSignedSelection(sourceViewer);
-
-		int selectionLength= Math.abs(selection.getLength());
-		if (selectionLength > 1) {
-			setStatusLineErrorMessage(JavaEditorMessages.GotoMatchingBracket_error_invalidSelection);
-			sourceViewer.getTextWidget().getDisplay().beep();
-			return;
-		}
-
-		int sourceCaretOffset= selection.getOffset() + selection.getLength();
-		int adjustment= getOffsetAdjustment(document, sourceCaretOffset, selection.getLength()); // handles non-zero selection
-		sourceCaretOffset+= adjustment;
-
 		if (fPreviousSelections == null)
 			initializePreviousSelectionList();
-		IRegion region= fBracketMatcher.match(document, sourceCaretOffset);
+
+		IRegion region= fBracketMatcher.match(document, selection.getOffset(), selection.getLength());
 		if (region == null) {
-			region= fBracketMatcher.findEnclosingPeerCharacters(document, sourceCaretOffset);
+			region= fBracketMatcher.findEnclosingPeerCharacters(document, selection.getOffset(), selection.getLength());
 			initializePreviousSelectionList();
 			fPreviousSelections.add(selection);
 		} else {
@@ -3728,16 +3717,18 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return;
 		}
 
+		int adjustment= getOffsetAdjustment(document, selection.getOffset() + selection.getLength(), selection.getLength());
 		targetOffset+= adjustment;
-		if (fPreviousSelections.size() == 1 && selection.getLength() < 0) {
+		int direction= (selection.getLength() == 0) ? 0 : ((selection.getLength() > 0) ? 1 : -1);
+		if (fPreviousSelections.size() == 1 && direction < 0) {
 			targetOffset++;
 		}
 
 		if (fPreviousSelections.size() > 0) {
-			fPreviousSelections.add(new Region(targetOffset, selection.getLength()));
+			fPreviousSelections.add(new Region(targetOffset, direction));
 		}
-		sourceViewer.setSelectedRange(targetOffset, selection.getLength());
-		sourceViewer.revealRange(targetOffset, selection.getLength());
+		sourceViewer.setSelectedRange(targetOffset, direction);
+		sourceViewer.revealRange(targetOffset, direction);
 	}
 
 	private void initializePreviousSelectionList() {
@@ -3760,8 +3751,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		return false;
 	}
 
+	/*
+	 * Copy of org.eclipse.jface.text.source.DefaultCharacterPairMatcher.getOffsetAdjustment(IDocument, int, int)
+	 */
 	private static int getOffsetAdjustment(IDocument document, int offset, int length) {
-		if (length == 0)
+		if (length == 0 || Math.abs(length) > 1)
 			return 0;
 		try {
 			if (length < 0) {
@@ -3779,29 +3773,20 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		return 0;
 	}
 
-	/**
-	 * Returns the signed current selection.
-	 * The length will be negative if the resulting selection
-	 * is right-to-left (RtoL).
-	 * <p>
-	 * The selection offset is model based.
-	 * </p>
-	 *
-	 * @param sourceViewer the source viewer
-	 * @return a region denoting the current signed selection, for a resulting RtoL selections length is < 0
+	/*
+	 * Copy of org.eclipse.jface.text.source.MatchingCharacterPainter.getSignedSelection(ISourceViewer)
 	 */
-	protected IRegion getSignedSelection(ISourceViewer sourceViewer) {
+	private static final IRegion getSignedSelection(ISourceViewer sourceViewer) {
+		Point viewerSelection= sourceViewer.getSelectedRange();
+
 		StyledText text= sourceViewer.getTextWidget();
 		Point selection= text.getSelectionRange();
-
 		if (text.getCaretOffset() == selection.x) {
-			selection.x= selection.x + selection.y;
-			selection.y= -selection.y;
+			viewerSelection.x= viewerSelection.x + viewerSelection.y;
+			viewerSelection.y= -viewerSelection.y;
 		}
 
-		selection.x= widgetOffset2ModelOffset(sourceViewer, selection.x);
-
-		return new Region(selection.x, selection.y);
+		return new Region(viewerSelection.x, viewerSelection.y);
 	}
 
 	@Override

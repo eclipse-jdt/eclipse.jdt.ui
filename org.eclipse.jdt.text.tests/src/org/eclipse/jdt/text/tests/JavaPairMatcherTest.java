@@ -141,11 +141,11 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 	}
 
 	public void testEnclosingMatch() {
-		IRegion match= fPairMatcher.findEnclosingPeerCharacters(fDocument, 4);
+		IRegion match= fPairMatcher.findEnclosingPeerCharacters(fDocument, 4, 0);
 		assertNotNull(match);
 		assertTrue(match.getOffset() == 2 && match.getLength() == 10);
 
-		match= fPairMatcher.findEnclosingPeerCharacters(fDocument, 7);
+		match= fPairMatcher.findEnclosingPeerCharacters(fDocument, 7, 0);
 		assertNotNull(match);
 		assertTrue(match.getOffset() == 5 && match.getLength() == 4);
 	}
