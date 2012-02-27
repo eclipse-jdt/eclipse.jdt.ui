@@ -32,13 +32,17 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseTrackAdapter;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -46,7 +50,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -699,13 +702,8 @@ public abstract class OptionsConfigurationBlock {
 		}
 
 		private void setVisible(Control control, boolean visible) {
-			Object layoutData= control.getLayoutData();
-			if (layoutData == null) { // see createComboLabelHighlightBox()
-				control= control.getParent();
-				layoutData= control.getLayoutData();
-			}
 			control.setVisible(visible);
-			((GridData)layoutData).exclude= !visible;
+			((GridData)control.getLayoutData()).exclude= !visible;
 		}
 	}
 
@@ -713,8 +711,6 @@ public abstract class OptionsConfigurationBlock {
 
 	private static final String SETTINGS_EXPANDED= "expanded"; //$NON-NLS-1$
 
-	private static final int COMBO_LABEL_HIGHLIGHT_COLOR= SWT.COLOR_WIDGET_HIGHLIGHT_SHADOW;
-	
 	protected final ArrayList<Button> fCheckBoxes;
 	protected final ArrayList<Combo> fComboBoxes;
 	protected final ArrayList<Text> fTextBoxes;
@@ -999,91 +995,111 @@ public abstract class OptionsConfigurationBlock {
 	}
 
 	protected Combo addComboBox(Composite parent, String label, Key key, String[] values, String[] valueLabels, int indent) {
-		GridData gd= new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1);
+		GridData gd= new GridData(GridData.BEGINNING, GridData.CENTER, true, false, 2, 1);
 		gd.horizontalIndent= indent;
-		
-		Composite labelBox= createComboLabelHighlightBox(parent, gd);
 
-		Label labelControl= new Label(labelBox, SWT.LEFT);
+		Label labelControl= new Label(parent, SWT.LEFT);
 		labelControl.setFont(JFaceResources.getDialogFont());
 		labelControl.setText(label);
+		labelControl.setLayoutData(gd);
 
 		Combo comboBox= newComboControl(parent, key, values, valueLabels);
 		comboBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-		
-		addComboLabelHighlightListeners(labelControl, comboBox);
 
 		fLabels.put(comboBox, labelControl);
+		
+		addHighlight(parent, labelControl, comboBox);
 
 		return comboBox;
 	}
 
-	private Composite createComboLabelHighlightBox(Composite parent, GridData gridData) {
-		Composite highlight= new Composite(parent, SWT.NONE);
-		highlight.setBackgroundMode(SWT.INHERIT_FORCE);
-		highlight.setLayoutData(gridData);
-		
-		highlight.setLayout(new Layout() {
-			@Override
-			protected void layout(Composite composite, boolean flushCache) {
-				Control[] children= composite.getChildren();
-				if (children.length != 1)
-					return;
-				Point c= composite.getSize();
-				Control label= children[0];
-				Point l= label.computeSize(SWT.DEFAULT, SWT.DEFAULT, flushCache);
-				label.setBounds(5, (c.y - l.y) / 2, l.x + 2 * 5, l.y);
-			}
-			
-			@Override
-			protected Point computeSize(Composite composite, int wHint, int hHint, boolean flushCache) {
-				Control[] children= composite.getChildren();
-				if (children.length != 1)
-					return new Point(0, 0);
-				Point size= children[0].computeSize(wHint, hHint, flushCache);
-				size.x+= 10;
-				return size;
-			}
-		});
-		
-		return highlight;
-	}
-
-	private void addComboLabelHighlightListeners(Label label, final Combo comboBox) {
-		final Control labelBox= label.getParent();
-		
+	private void addHighlight(final Composite parent, final Label labelControl, final Combo comboBox) {
 		comboBox.addFocusListener(new FocusListener() {
 			public void focusLost(FocusEvent e) {
-				labelBox.setBackground(null);
+				highlight(parent, labelControl, comboBox, false);
 			}
 			public void focusGained(FocusEvent e) {
-				labelBox.setBackground(labelBox.getDisplay().getSystemColor(COMBO_LABEL_HIGHLIGHT_COLOR));
+				highlight(parent, labelControl, comboBox, true);
 			}
 		});
 		
-		MouseTrackAdapter mouseTrackListener= new MouseTrackAdapter() {
+		MouseTrackAdapter labelComboListener= new MouseTrackAdapter() {
 			@Override
 			public void mouseEnter(MouseEvent e) {
-				labelBox.setBackground(labelBox.getDisplay().getSystemColor(COMBO_LABEL_HIGHLIGHT_COLOR));
+				highlight(parent, labelControl, comboBox, true);
 			}
 			@Override
 			public void mouseExit(MouseEvent e) {
 				if (! comboBox.isFocusControl())
-					labelBox.setBackground(null);
+					highlight(parent, labelControl, comboBox, false);
 			}
 		};
-		comboBox.addMouseTrackListener(mouseTrackListener);
-		labelBox.addMouseTrackListener(mouseTrackListener);
-		label.addMouseTrackListener(mouseTrackListener);
+		comboBox.addMouseTrackListener(labelComboListener);
+		labelControl.addMouseTrackListener(labelComboListener);
 		
-		MouseAdapter mouseListener= new MouseAdapter() {
+		class MouseMoveTrackListener extends MouseTrackAdapter implements MouseMoveListener {
+			public void mouseMove(MouseEvent e) {
+				int lx= labelControl.getLocation().x;
+				Rectangle c= comboBox.getBounds();
+				int x= e.x;
+				int y= e.y;
+				boolean isAroundLabel= lx - 5 < x && x < c.x && c.y - 2 < y && y < c.y + c.height + 2;
+				highlight(parent, labelControl, comboBox, isAroundLabel || comboBox.isFocusControl());
+			}
+			@Override
+			public void mouseExit(MouseEvent e) {
+				if (! comboBox.isFocusControl())
+					highlight(parent, labelControl, comboBox, false);
+			}
+		}
+		MouseMoveTrackListener parentListener= new MouseMoveTrackListener();
+		parent.addMouseMoveListener(parentListener);
+		parent.addMouseTrackListener(parentListener);
+		
+		MouseAdapter labelClickListener= new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent e) {
 				comboBox.setFocus();
 			}
 		};
-		labelBox.addMouseListener(mouseListener);
-		label.addMouseListener(mouseListener);
+		labelControl.addMouseListener(labelClickListener);
+	}
+	
+	private void highlight(final Composite parent, final Label labelControl, final Combo comboBox, boolean show) {
+		Object data= labelControl.getData();
+		if (data == null) {
+			if (show && ! ((GridData) labelControl.getLayoutData()).exclude) {
+				PaintListener painter= new PaintListener() {
+					public void paintControl(PaintEvent e) {
+						int GAP= 7;
+						Rectangle l= labelControl.getBounds();
+						Point c= comboBox.getLocation();
+						
+						e.gc.setForeground(e.display.getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
+						int x2= c.x - GAP;
+						int y= l.y + l.height / 2 + 1;
+						
+						e.gc.drawLine(l.x + l.width + GAP, y, x2, y);
+						e.gc.drawLine(x2 - 3, y - 3, x2, y);
+						e.gc.drawLine(x2 - 3, y + 3, x2, y);
+					}
+				};
+				parent.addPaintListener(painter);
+				labelControl.setData(painter);
+			} else {
+				return;
+			}
+		} else {
+			if (show) {
+				return;
+			} else {
+				parent.removePaintListener((PaintListener) data);
+				labelControl.setData(null);
+			}
+		}
+		
+		parent.redraw();
+		parent.update();
 	}
 
 	protected Combo addInversedComboBox(Composite parent, String label, Key key, String[] values, String[] valueLabels, int indent) {
