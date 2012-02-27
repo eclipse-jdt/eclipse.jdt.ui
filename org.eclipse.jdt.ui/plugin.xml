@@ -4303,33 +4303,11 @@
             contextId="org.eclipse.jdt.ui.propertiesEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <!-- alternative for some gtk input modes -->
-      <key
-            platform="gtk"
-            sequence="ESC CTRL+C"
-            contextId="org.eclipse.jdt.ui.javaEditorScope"
-            commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
-      <key
-            platform="gtk"
-            sequence="ESC CTRL+C"
-            contextId="org.eclipse.jdt.ui.propertiesEditorScope"
-            commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M1+M2+F"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.format"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <!-- alternative for some gtk input modes -->
-      <key
-            platform="gtk"
-            sequence="ESC CTRL+F"
-            contextId="org.eclipse.jdt.ui.javaEditorScope"
-            commandId="org.eclipse.jdt.ui.edit.text.java.format"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
       <key
             sequence="M1+M2+M"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
