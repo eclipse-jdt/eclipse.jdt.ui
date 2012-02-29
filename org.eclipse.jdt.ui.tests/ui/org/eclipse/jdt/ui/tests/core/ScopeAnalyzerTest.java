@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,6 +60,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		Hashtable options= TestOptions.getDefaultOptions();
 		options.put(JavaCore.COMPILER_PB_HIDDEN_CATCH_BLOCK, JavaCore.IGNORE);
+		options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.IGNORE);
 
 		JavaCore.setOptions(options);
 	}
@@ -462,7 +463,6 @@ public class ScopeAnalyzerTest extends CoreTests {
 		}
 	}
 
-
 	public void testSwitchOnEnum() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -502,10 +502,6 @@ public class ScopeAnalyzerTest extends CoreTests {
 			assertVariables(res, new String[] {"e"});
 		}
 	}
-
-
-
-
 
 	public void testDeclarationsAfter() throws Exception {
 

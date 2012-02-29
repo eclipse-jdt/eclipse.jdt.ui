@@ -2044,7 +2044,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2, 1);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 

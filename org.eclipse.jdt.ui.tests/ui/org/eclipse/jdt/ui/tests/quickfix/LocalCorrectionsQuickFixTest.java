@@ -8768,7 +8768,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 3);
+		ArrayList proposals= collectCorrections(cu, astRoot, 4, 1);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -8824,7 +8824,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList proposals= collectCorrections(cu, astRoot, 3, 1);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
