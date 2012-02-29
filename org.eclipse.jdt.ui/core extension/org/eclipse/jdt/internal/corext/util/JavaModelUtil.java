@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,12 +72,6 @@ public final class JavaModelUtil {
 		VERSION_LATEST= JavaCore.VERSION_1_7; // make sure it is not inlined
 	}
 	
-	/**
-	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=309163
-	 * @since 3.7
-	 */
-	public static final boolean HIDE_VERSION_1_7= Boolean.FALSE.booleanValue();
-
 	/**
 	 * Only use this suffix for creating new .java files.
 	 * In general, use one of the three *JavaLike*(..) methods in JavaCore or create
@@ -783,7 +777,7 @@ public final class JavaModelUtil {
 		if (version == null) {
 			return defaultCompliance;
 		} else if (version.startsWith(JavaCore.VERSION_1_7)) {
-			return HIDE_VERSION_1_7 ? JavaCore.VERSION_1_6 : JavaCore.VERSION_1_7;
+			return JavaCore.VERSION_1_7;
 		} else if (version.startsWith(JavaCore.VERSION_1_6)) {
 			return JavaCore.VERSION_1_6;
 		} else if (version.startsWith(JavaCore.VERSION_1_5)) {
@@ -811,7 +805,7 @@ public final class JavaModelUtil {
 		// fallback:
 		String desc= executionEnvironment.getId();
 		if (desc.indexOf(JavaCore.VERSION_1_7) != -1) {
-			return HIDE_VERSION_1_7 ? JavaCore.VERSION_1_6 : JavaCore.VERSION_1_7;
+			return JavaCore.VERSION_1_7;
 		} else if (desc.indexOf(JavaCore.VERSION_1_6) != -1) {
 			return JavaCore.VERSION_1_6;
 		} else if (desc.indexOf(JavaCore.VERSION_1_5) != -1) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -843,12 +843,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			String selectedCompliance= fJREGroup.getSelectedCompilerCompliance();
 			if (selectedCompliance != null) {
 				String defaultCompliance= JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
-				if (JavaModelUtil.HIDE_VERSION_1_7 && fJREGroup.fUseEEJRE.isSelected() && fJREGroup.fEECombo.getText().indexOf(JavaCore.VERSION_1_7) != -1) {
-					fHintText.setText(NewWizardMessages.NewJavaProjectWizardPageOne_DetectGroup_java17_message);
-					fHintText.setVisible(true);
-					fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
-					fIcon.setVisible(true);
-				} else if (selectedCompliance.equals(defaultCompliance)) {
+				if (selectedCompliance.equals(defaultCompliance)) {
 					fHintText.setVisible(false);
 					fIcon.setVisible(false);
 				} else {
