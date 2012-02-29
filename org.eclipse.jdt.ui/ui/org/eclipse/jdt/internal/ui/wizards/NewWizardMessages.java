@@ -209,7 +209,6 @@ public final class NewWizardMessages extends NLS {
 	public static String NewJavaProjectWizardPageOne_NoJREFound_link;
 	public static String NewJavaProjectWizardPageOne_LayoutGroup_link_description;
 	public static String NewJavaProjectWizardPageOne_LayoutGroup_option_oneFolder;
-	public static String NewJavaProjectWizardPageOne_DetectGroup_java17_message;
 	public static String NewJavaProjectWizardPageOne_DetectGroup_differendWorkspaceCC_message;
 	public static String NewJavaProjectWizardPageOne_Message_invalidProjectNameForWorkspaceRoot;
 	public static String NewJavaProjectWizardPageOne_Message_cannotCreateAtExternalLocation;
@@ -374,7 +373,6 @@ public final class NewWizardMessages extends NLS {
 	public static String SourceAttachmentBlock_filename_description;
 	public static String SourceAttachmentBlock_filename_externalfile_button;
 	public static String SourceAttachmentBlock_filename_externalfolder_button;
-	public static String SourceAttachmentBlock_filename_internal_button;
 	public static String SourceAttachmentBlock_filename_varlabel;
 	public static String SourceAttachmentBlock_filename_variable_button;
 	public static String SourceAttachmentBlock_filename_external_label;
