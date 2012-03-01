@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,7 +75,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.CategoryFilterActionGroup;
 import org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter;
-import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
@@ -123,6 +122,9 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		 */
 		@Override
 		public String getText(Object element) {
+			// XXX: This method is NOT USED any more since this is an IStyledLabelProvider.
+			// Furthermore, we have no idea what fShowDefiningType is supposed to do if inherited members are shown...
+			// If this is put into use again, remember that this needs to be considered in setMatcherString(..)!
 			String text= super.getText(element);
 			if (fShowDefiningType) {
 				try {
@@ -134,6 +136,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 						return buf.toString();
 					}
 				} catch (JavaModelException e) {
+					// go with the simple label
 				}
 			}
 			return text;
@@ -526,36 +529,12 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	}
 
 	/**
-	 * String matcher that can match two patterns.
-	 *
-	 * @since 3.2
-	 */
-	private static class OrStringMatcher extends StringMatcher {
-
-		private StringMatcher fMatcher1;
-		private StringMatcher fMatcher2;
-
-		private OrStringMatcher(String pattern1, String pattern2, boolean ignoreCase) {
-			super("", false, false); //$NON-NLS-1$
-			fMatcher1= new StringMatcher(pattern1, ignoreCase, false);
-			fMatcher2= new StringMatcher(pattern2, ignoreCase, false);
-		}
-
-		@Override
-		public boolean match(String text) {
-			return fMatcher2.match(text) || fMatcher1.match(text);
-		}
-
-	}
-
-
-	/**
 	 * Creates a new Java outline information control.
 	 *
-	 * @param parent
-	 * @param shellStyle
-	 * @param treeStyle
-	 * @param commandId
+	 * @param parent the parent shell
+	 * @param shellStyle the additional styles for the shell
+	 * @param treeStyle the additional styles for the tree widget
+	 * @param commandId the id of the command that invoked this control or <code>null</code>
 	 */
 	public JavaOutlineInformationControl(Shell parent, int shellStyle, int treeStyle, String commandId) {
 		super(parent, shellStyle, treeStyle, commandId, true);
@@ -715,18 +694,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	@Override
 	protected void setMatcherString(String pattern, boolean update) {
 		fPattern= pattern;
-		if (pattern.length() == 0 || !fSortByDefiningTypeAction.isChecked()) {
-			super.setMatcherString(pattern, update);
-			return;
-		}
-
-		boolean ignoreCase= pattern.toLowerCase().equals(pattern);
-		String pattern2= "*" + JavaElementLabels.CONCAT_STRING + pattern; //$NON-NLS-1$
-		fStringMatcher= new OrStringMatcher(pattern, pattern2, ignoreCase);
-
-		if (update)
-			stringMatcherUpdated();
-
+		super.setMatcherString(pattern, update);
 	}
 
 	private IJavaElement[] getInputForCategories() {

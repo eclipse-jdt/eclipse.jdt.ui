@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,7 +79,6 @@ import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 /**
  * Abstract class for Show hierarchy in light-weight controls.
@@ -104,14 +103,14 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		 */
 		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
-			StringMatcher matcher= getMatcher();
+			JavaElementPrefixPatternMatcher matcher= getMatcher();
 			if (matcher == null || !(viewer instanceof TreeViewer))
 				return true;
 			TreeViewer treeViewer= (TreeViewer) viewer;
 
 			String matchName= ((ILabelProvider) treeViewer.getLabelProvider()).getText(element);
 			matchName= TextProcessor.deprocess(matchName);
-			if (matchName != null && matcher.match(matchName))
+			if (matchName != null && matcher.matches(matchName))
 				return true;
 
 			return hasUnfilteredChild(treeViewer, element);
@@ -133,7 +132,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	/** The control's tree widget */
 	private TreeViewer fTreeViewer;
 	/** The current string matcher */
-	protected StringMatcher fStringMatcher;
+	protected JavaElementPrefixPatternMatcher fPatternMatcher;
 	private ICommand fInvokingCommand;
 	private KeySequence[] fInvokingCommandKeySequences;
 
@@ -380,10 +379,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		fFilterText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				String text= ((Text) e.widget).getText();
-				int length= text.length();
-				if (length > 0 && text.charAt(length -1 ) != '*') {
-					text= text + '*';
-				}
 				setMatcherString(text, true);
 			}
 		});
@@ -404,29 +399,25 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 	/**
 	 * Sets the patterns to filter out for the receiver.
-	 * <p>
-	 * The following characters have special meaning:
-	 *   ? => any character
-	 *   * => any string
-	 * </p>
 	 *
 	 * @param pattern the pattern
 	 * @param update <code>true</code> if the viewer should be updated
+	 * 
+	 * @see JavaElementPrefixPatternMatcher
 	 */
 	protected void setMatcherString(String pattern, boolean update) {
 		if (pattern.length() == 0) {
-			fStringMatcher= null;
+			fPatternMatcher= null;
 		} else {
-			boolean ignoreCase= pattern.toLowerCase().equals(pattern);
-			fStringMatcher= new StringMatcher(pattern, ignoreCase, false);
+			fPatternMatcher= new JavaElementPrefixPatternMatcher(pattern);
 		}
 
 		if (update)
 			stringMatcherUpdated();
 	}
 
-	protected StringMatcher getMatcher() {
-		return fStringMatcher;
+	protected JavaElementPrefixPatternMatcher getMatcher() {
+		return fPatternMatcher;
 	}
 
 	/**
@@ -480,7 +471,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	}
 
 	private TreeItem findElement(TreeItem[] items, TreeItem[] toBeSkipped, boolean allowToGoUp) {
-		if (fStringMatcher == null)
+		if (fPatternMatcher == null)
 			return items.length > 0 ? items[0] : null;
 
 		ILabelProvider labelProvider= (ILabelProvider)fTreeViewer.getLabelProvider();
@@ -491,7 +482,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			IJavaElement element= (IJavaElement)item.getData();
 			if (element != null) {
 				String label= labelProvider.getText(element);
-				if (fStringMatcher.match(label))
+				if (fPatternMatcher.matches(label))
 					return item;
 			}
 		}
