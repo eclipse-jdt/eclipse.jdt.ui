@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -605,7 +605,7 @@ public class Bindings {
 	 * Tests whether the two methods are erasure-equivalent.
 	 * @param method the first method
 	 * @param methodName the name of the second method
-	 * @param parameters the parameters of the second parameters
+	 * @param parameters the parameters of the second method
 	 * @return return <code>true</code> if the two bindings are equal
 	 * @deprecated use {@link #isSubsignature(IMethodBinding, IMethodBinding)}
 	 */
@@ -772,12 +772,15 @@ public class Bindings {
 		for (int i= 0; i < parameters.length; i++) {
 			first= parameters[i];
 			index= first.indexOf('<');
-			if (index > 0)
-				first= first.substring(0, index);
+			if (index > 0){
+				int lastIndex= first.lastIndexOf('>');
+				StringBuffer buf= new StringBuffer();
+				buf.append(first.substring(0, index));
+				if (lastIndex < first.length() - 1)
+					buf.append(first.substring(lastIndex + 1, first.length()));
+				first= buf.toString();
+			}
 			second= methodParameters[i].getErasure().getQualifiedName();
-			index= second.indexOf('<');
-			if (index > 0)
-				second= second.substring(0, index);
 			if (!first.equals(second))
 				return false;
 		}
@@ -1370,7 +1373,7 @@ public class Bindings {
 	 * @param goIntoCast iff <code>true</code>, go into a CastExpression's expression to resolve
 	 * @return the expression binding, or <code>null</code> if the expression has no binding or the
 	 *         binding could not be resolved
-	 *         
+	 * 
 	 * @see StubUtility#getVariableNameSuggestions(int, IJavaProject, ITypeBinding, Expression, java.util.Collection)
 	 * @since 3.5
 	 */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1435,6 +1435,208 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("    public void foo(Sub sub) {\n");
 		buf.append("        //TODO\n");
 		buf.append("        super.foo(sub);\n");
+		buf.append("    }//here\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testOverrideCompletion7_bug355926() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=355926
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface Z<T> {}\n");
+		buf.append("\n");
+		buf.append("class A {\n");
+		buf.append("    void foo(Z<?>... zs) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class B extends A {\n");
+		buf.append("    //here\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		String str= "//here";
+
+		int offset= contents.indexOf(str);
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		IJavaCompletionProposal toStringProposal= null;
+
+		for (int i= 0; i < proposals.length; i++) {
+			if (proposals[i].getDisplayString().startsWith("foo")) {
+				toStringProposal= proposals[i];
+			}
+		}
+		assertNotNull("no proposal for foo(...)", toStringProposal);
+
+		IDocument doc= new Document(contents);
+		toStringProposal.apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface Z<T> {}\n");
+		buf.append("\n");
+		buf.append("class A {\n");
+		buf.append("    void foo(Z<?>... zs) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class B extends A {\n");
+		buf.append("    /* (non-Javadoc)\n");
+		buf.append("     * @see test1.A#foo(test1.Z<?>[])\n");
+		buf.append("     */\n");
+		buf.append("    @Override\n");
+		buf.append("    void foo(Z<?>... zs) {\n");
+		buf.append("        //TODO\n");
+		buf.append("        super.foo(zs);\n");
+		buf.append("    }//here\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testOverrideCompletion8_bug355926() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=355926
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface Z<T> {}\n");
+		buf.append("\n");
+		buf.append("class A {\n");
+		buf.append("    void foo(Z<?>[] zs) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class B extends A {\n");
+		buf.append("    //here\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		String str= "//here";
+
+		int offset= contents.indexOf(str);
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		IJavaCompletionProposal toStringProposal= null;
+
+		for (int i= 0; i < proposals.length; i++) {
+			if (proposals[i].getDisplayString().startsWith("foo")) {
+				toStringProposal= proposals[i];
+			}
+		}
+		assertNotNull("no proposal for foo(...)", toStringProposal);
+
+		IDocument doc= new Document(contents);
+		toStringProposal.apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface Z<T> {}\n");
+		buf.append("\n");
+		buf.append("class A {\n");
+		buf.append("    void foo(Z<?>[] zs) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class B extends A {\n");
+		buf.append("    /* (non-Javadoc)\n");
+		buf.append("     * @see test1.A#foo(test1.Z<?>[])\n");
+		buf.append("     */\n");
+		buf.append("    @Override\n");
+		buf.append("    void foo(Z<?>[] zs) {\n");
+		buf.append("        //TODO\n");
+		buf.append("        super.foo(zs);\n");
+		buf.append("    }//here\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testOverrideCompletion9_bug355926() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=355926
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("interface Z<T, U> {}\n");
+		buf.append("\n");
+		buf.append("class A {\n");
+		buf.append("    void foo(Z<String, List<String>> zs) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class B extends A {\n");
+		buf.append("    //here\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		String str= "//here";
+
+		int offset= contents.indexOf(str);
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		IJavaCompletionProposal toStringProposal= null;
+
+		for (int i= 0; i < proposals.length; i++) {
+			if (proposals[i].getDisplayString().startsWith("foo")) {
+				toStringProposal= proposals[i];
+			}
+		}
+		assertNotNull("no proposal for foo(...)", toStringProposal);
+
+		IDocument doc= new Document(contents);
+		toStringProposal.apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("interface Z<T, U> {}\n");
+		buf.append("\n");
+		buf.append("class A {\n");
+		buf.append("    void foo(Z<String, List<String>> zs) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class B extends A {\n");
+		buf.append("    /* (non-Javadoc)\n");
+		buf.append("     * @see test1.A#foo(test1.Z)\n");
+		buf.append("     */\n");
+		buf.append("    @Override\n");
+		buf.append("    void foo(Z<String, List<String>> zs) {\n");
+		buf.append("        //TODO\n");
+		buf.append("        super.foo(zs);\n");
 		buf.append("    }//here\n");
 		buf.append("}\n");
 		assertEquals(buf.toString(), doc.get());
