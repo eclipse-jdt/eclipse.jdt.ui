@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -5914,6 +5914,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("                break;\n");
 		buf.append("            case X3 :\n");
 		buf.append("                break;\n");
+		buf.append("            default :\n");
+		buf.append("                break;\n");
 		buf.append("        \n");
 		buf.append("        }\n");
 		buf.append("    }\n");
@@ -5965,6 +5967,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("            case X2 :\n");
 		buf.append("                break;\n");
 		buf.append("            case X3 :\n");
+		buf.append("                break;\n");
+		buf.append("            default :\n");
 		buf.append("                break;\n");
 		buf.append("        \n");
 		buf.append("        }\n");
@@ -6018,6 +6022,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("                break;\n");
 		buf.append("            case X3 :\n");
 		buf.append("                break;\n");
+		buf.append("            default :\n");
+		buf.append("                break;\n");
 		buf.append("        \n");
 		buf.append("        }\n");
 		buf.append("    }\n");
@@ -6070,6 +6076,65 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("                break;\n");
 		buf.append("            case X2 :\n");
 		buf.append("            case X3 :\n");
+		buf.append("            default :\n");
+		buf.append("                break;\n");
+		buf.append("        \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testMissingEnumConstantsInCase5() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=372840
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    enum MyEnum {\n");
+		buf.append("        X1, X2, X3\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("    public void foo(MyEnum x) {\n");
+		buf.append("        switch (x) {\n");
+		buf.append("            case X1 :\n");
+		buf.append("                break;\n");
+		buf.append("            case X2 :\n");
+		buf.append("                break;\n");
+		buf.append("            case X3 :\n");
+		buf.append("                break;\n");
+		buf.append("        \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("switch"), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    enum MyEnum {\n");
+		buf.append("        X1, X2, X3\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("    public void foo(MyEnum x) {\n");
+		buf.append("        switch (x) {\n");
+		buf.append("            case X1 :\n");
+		buf.append("                break;\n");
+		buf.append("            case X2 :\n");
+		buf.append("                break;\n");
+		buf.append("            case X3 :\n");
+		buf.append("                break;\n");
 		buf.append("            default :\n");
 		buf.append("                break;\n");
 		buf.append("        \n");

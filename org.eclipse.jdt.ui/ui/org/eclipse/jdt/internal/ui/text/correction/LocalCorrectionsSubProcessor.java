@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1590,6 +1590,15 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void getMissingEnumConstantCaseProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		for (Iterator<ICommandAccess> iterator= proposals.iterator(); iterator.hasNext();) {
+			ICommandAccess proposal= iterator.next();
+			if (proposal instanceof ChangeCorrectionProposal) {
+				if (CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description.equals(((ChangeCorrectionProposal) proposal).getName())) {
+					return;
+				}
+			}
+		}
+		
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (selectedNode instanceof Name && selectedNode.getParent() instanceof SwitchStatement) {
 			SwitchStatement statement= (SwitchStatement) selectedNode.getParent();
@@ -1599,7 +1608,8 @@ public class LocalCorrectionsSubProcessor {
 			}
 
 			String[] missingEnumCases= evaluateMissingEnumConstantCases(binding, statement.statements());
-			if (missingEnumCases.length == 0)
+			boolean missingDefault= evaluateMissingDefaultCase(statement.statements());
+			if (missingEnumCases.length == 0 && !missingDefault)
 				return;
 
 			proposals.add(createMissingEnumConstantCaseProposals(context, statement, missingEnumCases));
@@ -1626,7 +1636,18 @@ public class LocalCorrectionsSubProcessor {
 			}
 		}
 		return enumConstNames.toArray(new String[enumConstNames.size()]);
+	}
 
+	public static boolean evaluateMissingDefaultCase(List<Statement> switchStatements) {
+		List<Statement> statements= switchStatements;
+		for (int i= 0; i < statements.size(); i++) {
+			Statement curr= statements.get(i);
+			if (curr instanceof SwitchCase) {
+				if (((SwitchCase) curr).getExpression() == null)
+					return false;
+			}
+		}
+		return true;
 	}
 
 	public static ASTRewriteCorrectionProposal createMissingEnumConstantCaseProposals(IInvocationContext context, SwitchStatement switchStatement, String[] enumConstNames) {
@@ -1654,6 +1675,13 @@ public class LocalCorrectionsSubProcessor {
 				listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
 				defaultIndex++;
 			}
+		}
+		if (!hasDefault) {
+			SwitchCase newSwitchCase= ast.newSwitchCase();
+			newSwitchCase.setExpression(null);
+			listRewrite.insertAt(newSwitchCase, defaultIndex, null);
+			defaultIndex++;
+			listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
 		}
 		String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
