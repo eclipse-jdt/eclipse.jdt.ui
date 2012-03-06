@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -453,13 +453,14 @@ public final class JavaUI {
 	 *   is being populated
 	 * @param project the Java project
 	 * @param style flags defining the style of the dialog; the only valid values are
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_INTERFACES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ENUMS</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ALL_TYPES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES</code>
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS</code>. Please note that
+	 *   {@link IJavaElementSearchConstants#CONSIDER_CLASSES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_INTERFACES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_ANNOTATION_TYPES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_ENUMS},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_ALL_TYPES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_CLASSES_AND_INTERFACES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_CLASSES_AND_ENUMS}, and
+	 *   {@link IJavaElementSearchConstants#CONSIDER_INTERFACES_AND_ANNOTATIONS}. Please note that
 	 *   the bitwise OR combination of the elementary constants is not supported.
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
 	 *
@@ -483,13 +484,14 @@ public final class JavaUI {
 	 *   is being populated
 	 * @param scope the scope that limits which types are included
 	 * @param style flags defining the style of the dialog; the only valid values are
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_INTERFACES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ENUMS</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ALL_TYPES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES</code>
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS</code>. Please note that
+	 *   {@link IJavaElementSearchConstants#CONSIDER_CLASSES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_INTERFACES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_ANNOTATION_TYPES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_ENUMS},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_ALL_TYPES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_CLASSES_AND_INTERFACES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_CLASSES_AND_ENUMS}, and
+	 *   {@link IJavaElementSearchConstants#CONSIDER_INTERFACES_AND_ANNOTATIONS}. Please note that
 	 *   the bitwise OR combination of the elementary constants is not supported.
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
 	 *
@@ -512,13 +514,14 @@ public final class JavaUI {
 	 *   is being populated
 	 * @param scope the scope that limits which types are included
 	 * @param style flags defining the style of the dialog; the only valid values are
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_INTERFACES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ENUMS</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ALL_TYPES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES</code>
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS</code>. Please note that
+	 *   {@link IJavaElementSearchConstants#CONSIDER_CLASSES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_INTERFACES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_ANNOTATION_TYPES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_ENUMS},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_ALL_TYPES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_CLASSES_AND_INTERFACES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_CLASSES_AND_ENUMS}, and
+	 *   {@link IJavaElementSearchConstants#CONSIDER_INTERFACES_AND_ANNOTATIONS}. Please note that
 	 *   the bitwise OR combination of the elementary constants is not supported.
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
 	 * @param filter the initial pattern to filter the set of types. For example "Abstract" shows
@@ -547,13 +550,14 @@ public final class JavaUI {
 	 *   is being populated
 	 * @param scope the scope that limits which types are included
 	 * @param style flags defining the style of the dialog; the only valid values are
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_INTERFACES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ENUMS</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ALL_TYPES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES</code>
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS</code>. Please note that
+	 *   {@link IJavaElementSearchConstants#CONSIDER_CLASSES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_INTERFACES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_ANNOTATION_TYPES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_ENUMS},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_ALL_TYPES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_CLASSES_AND_INTERFACES},
+	 *   {@link IJavaElementSearchConstants#CONSIDER_CLASSES_AND_ENUMS}, and
+	 *   {@link IJavaElementSearchConstants#CONSIDER_INTERFACES_AND_ANNOTATIONS}. Please note that
 	 *   the bitwise OR combination of the elementary constants is not supported.
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
 	 * @param filter the initial pattern to filter the set of types. For example "Abstract" shows
@@ -588,6 +592,8 @@ public final class JavaUI {
 			elementKinds= IJavaSearchConstants.CLASS_AND_ENUM;
 		} else if (style == DEPRECATED_CONSIDER_TYPES) {
 			elementKinds= IJavaSearchConstants.CLASS_AND_INTERFACE;
+		} else if (style == IJavaElementSearchConstants.CONSIDER_INTERFACES_AND_ANNOTATIONS) {
+			elementKinds= IJavaSearchConstants.INTERFACE_AND_ANNOTATION;
 		} else {
 			throw new IllegalArgumentException("Invalid style constant."); //$NON-NLS-1$
 		}

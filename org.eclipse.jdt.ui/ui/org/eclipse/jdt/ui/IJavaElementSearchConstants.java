@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -103,4 +103,12 @@ public interface IJavaElementSearchConstants {
 	 * @since 3.1
 	 */
 	public static final int CONSIDER_CLASSES_AND_ENUMS= 1 << 10;
+	
+	/**
+	 * Search scope constant indicating that interfaces and annotation types
+	 * should be considered.
+	 * 
+	 * @since 3.8
+	 */
+	public static final int CONSIDER_INTERFACES_AND_ANNOTATIONS= 1 << 11;
 }

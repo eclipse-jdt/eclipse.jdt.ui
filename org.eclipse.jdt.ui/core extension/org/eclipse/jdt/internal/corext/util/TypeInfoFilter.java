@@ -194,13 +194,15 @@ public class TypeInfoFilter {
 			case IJavaSearchConstants.ANNOTATION_TYPE:
 				return Flags.isAnnotation(modifiers);
 			case IJavaSearchConstants.INTERFACE:
-				return Flags.isInterface(modifiers);
+				return modifiers == Flags.AccInterface;
 			case IJavaSearchConstants.ENUM:
 				return Flags.isEnum(modifiers);
 			case IJavaSearchConstants.CLASS_AND_INTERFACE:
-				return modifiers == 0 || Flags.isInterface(modifiers);
+				return modifiers == 0 || modifiers == Flags.AccInterface;
 			case IJavaSearchConstants.CLASS_AND_ENUM:
 				return modifiers == 0 || Flags.isEnum(modifiers);
+			case IJavaSearchConstants.INTERFACE_AND_ANNOTATION:
+				return Flags.isInterface(modifiers);
 		}
 		return false;
 	}
