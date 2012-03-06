@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,6 @@ import java.util.List;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -242,10 +241,8 @@ public class ImportReferencesCollector extends GenericVisitor {
 	 */
 	@Override
 	public boolean visit(PackageDeclaration node) {
-		if (node.getAST().apiLevel() >= AST.JLS3) {
-			doVisitNode(node.getJavadoc());
-			doVisitChildren(node.annotations());
-		}
+		doVisitNode(node.getJavadoc());
+		doVisitChildren(node.annotations());
 		return false;
 	}
 
@@ -382,10 +379,8 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 		doVisitNode(node.getJavadoc());
 
-		if (node.getAST().apiLevel() >= AST.JLS3) {
-			doVisitChildren(node.modifiers());
-			doVisitChildren(node.typeParameters());
-		}
+		doVisitChildren(node.modifiers());
+		doVisitChildren(node.typeParameters());
 
 		if (!node.isConstructor()) {
 			doVisitNode(node.getReturnType2());

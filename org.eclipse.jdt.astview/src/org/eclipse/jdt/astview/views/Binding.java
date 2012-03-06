@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -460,13 +460,13 @@ public class Binding extends ASTAttribute {
 	}
 	
 	public static String getEscapedStringLiteral(String stringValue) {
-		StringLiteral stringLiteral= AST.newAST(AST.JLS3).newStringLiteral();
+		StringLiteral stringLiteral= AST.newAST(AST.JLS4).newStringLiteral();
 		stringLiteral.setLiteralValue(stringValue);
 		return stringLiteral.getEscapedValue();
 	}
 	
 	public static String getEscapedCharLiteral(char charValue) {
-		CharacterLiteral charLiteral= AST.newAST(AST.JLS3).newCharacterLiteral();
+		CharacterLiteral charLiteral= AST.newAST(AST.JLS4).newCharacterLiteral();
 		charLiteral.setCharValue(charValue);
 		return charLiteral.getEscapedValue();
 	}
