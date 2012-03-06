@@ -1031,7 +1031,7 @@ public abstract class OptionsConfigurationBlock {
 		MouseTrackAdapter labelComboListener= new MouseTrackAdapter() {
 			@Override
 			public void mouseEnter(MouseEvent e) {
-				highlight(parent, labelControl, comboBox, comboBox.isFocusControl() ? HIGHLIGHT_FOCUS : HIGHLIGHT_MOUSE);
+				highlight(parent, labelControl, comboBox, comboBox.isEnabled() ? comboBox.isFocusControl() ? HIGHLIGHT_FOCUS : HIGHLIGHT_MOUSE : HIGHLIGHT_NONE);
 			}
 			@Override
 			public void mouseExit(MouseEvent e) {
@@ -1049,7 +1049,7 @@ public abstract class OptionsConfigurationBlock {
 					highlight(parent, labelControl, comboBox, HIGHLIGHT_NONE);
 			}
 			public void mouseMove(MouseEvent e) {
-				int color= comboBox.isFocusControl() ? HIGHLIGHT_FOCUS : isAroundLabel(e) ? HIGHLIGHT_MOUSE : HIGHLIGHT_NONE;
+				int color= comboBox.isEnabled() ? comboBox.isFocusControl() ? HIGHLIGHT_FOCUS : isAroundLabel(e) ? HIGHLIGHT_MOUSE : HIGHLIGHT_NONE : HIGHLIGHT_NONE;
 				highlight(parent, labelControl, comboBox, color);
 			}
 			public void mouseDown(MouseEvent e) {
@@ -1811,6 +1811,9 @@ public abstract class OptionsConfigurationBlock {
 		Label label= fLabels.get(combo);
 		combo.setEnabled(enabled);
 		label.setEnabled(enabled);
+		if (!enabled) {
+			highlight(combo.getParent(), label, combo, HIGHLIGHT_NONE);
+		}
 	}
 	
 	protected void setTextFieldEnabled(Key key, boolean enabled) {
