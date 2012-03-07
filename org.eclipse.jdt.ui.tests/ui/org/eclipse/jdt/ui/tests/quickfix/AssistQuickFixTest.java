@@ -5895,9 +5895,27 @@ public class AssistQuickFixTest extends QuickFixTest {
 		List proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
-		String[] expected= new String[1];
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    enum MyEnum {\n");
+		buf.append("        X1, X2, X3\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("    public void foo(MyEnum x) {\n");
+		buf.append("        switch (x) {\n");
+		buf.append("            default :\n");
+		buf.append("                break;\n");
+		buf.append("        \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("\n");
@@ -5920,7 +5938,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[1]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -5949,9 +5967,29 @@ public class AssistQuickFixTest extends QuickFixTest {
 		List proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
-		String[] expected= new String[1];
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    enum MyEnum {\n");
+		buf.append("        X1, X2, X3\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("    public void foo(MyEnum x) {\n");
+		buf.append("        switch (x) {\n");
+		buf.append("            case X1 :\n");
+		buf.append("                break;\n");
+		buf.append("            default :\n");
+		buf.append("                break;\n");
+		buf.append("        \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("\n");
@@ -5974,7 +6012,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[1]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -6003,9 +6041,29 @@ public class AssistQuickFixTest extends QuickFixTest {
 		List proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 
-		String[] expected= new String[1];
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    enum MyEnum {\n");
+		buf.append("        X1, X2, X3\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("    public void foo(MyEnum x) {\n");
+		buf.append("        switch (x) {\n");
+		buf.append("            case X1 :\n");
+		buf.append("                break;\n");
+		buf.append("            default :\n");
+		buf.append("                break;\n");
+		buf.append("        \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("\n");
@@ -6028,7 +6086,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[1]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}

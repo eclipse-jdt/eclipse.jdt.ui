@@ -2633,15 +2633,15 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (expressionBinding == null || !expressionBinding.isEnum())
 			return false;
 
-		String[] missingEnumCases= LocalCorrectionsSubProcessor.evaluateMissingEnumConstantCases(expressionBinding, switchStatement.statements());
-		boolean missingDefault= LocalCorrectionsSubProcessor.evaluateMissingDefaultCase(switchStatement.statements());
-		if (missingEnumCases.length == 0 && !missingDefault)
+		ArrayList<String> missingEnumCases= new ArrayList<String>();
+		boolean hasDefault= LocalCorrectionsSubProcessor.evaluateMissingSwitchCases(expressionBinding, switchStatement.statements(), missingEnumCases);
+		if (missingEnumCases.size() == 0 && hasDefault)
 			return false;
 
 		if (proposals == null)
 			return true;
 
-		proposals.add(LocalCorrectionsSubProcessor.createMissingEnumConstantCaseProposals(context, switchStatement, missingEnumCases));
+		LocalCorrectionsSubProcessor.createMissingCaseProposals(context, switchStatement, missingEnumCases, proposals);
 		return true;
 	}
 
