@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
@@ -960,7 +961,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			appendMethodComment(buffer, method);
 		}
 		if (isJUnit4()) {
-			buffer.append('@').append(imports.addImport(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME)).append(getLineDelimiter());
+			ISourceRange typeSourceRange= type.getSourceRange();
+			int pos= typeSourceRange.getOffset() + typeSourceRange.getLength() - 1;
+			buffer.append('@').append(imports.addImport(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME, pos)).append(getLineDelimiter());
 		}
 
 		buffer.append("public ");//$NON-NLS-1$

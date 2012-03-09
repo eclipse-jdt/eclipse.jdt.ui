@@ -101,6 +101,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -109,6 +110,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstructorsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
@@ -181,9 +183,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	public static class ImportsManager {
 
-		private ImportRewrite fImportsRewrite;
+		private final CompilationUnit fAstRoot;
+		private final ImportRewrite fImportsRewrite;
 
 		/* package */ ImportsManager(CompilationUnit astRoot) {
+			fAstRoot= astRoot;
 			fImportsRewrite= StubUtility.createImportRewrite(astRoot, true);
 		}
 
@@ -210,6 +214,24 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		 * If an import already exists or the import would conflict with an import
 		 * of an other type with the same simple name, the import is not added.
 		 *
+		 * @param qualifiedTypeName The fully qualified name of the type to import
+		 * (dot separated).
+		 * @param insertPosition the offset where the import will be used
+		 * @return Returns the simple type name that can be used in the code or the
+		 * fully qualified type name if an import conflict prevented the import.
+		 * 
+		 * @since 3.8
+		 */
+		public String addImport(String qualifiedTypeName, int insertPosition) {
+			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fAstRoot, insertPosition, fImportsRewrite);
+			return fImportsRewrite.addImport(qualifiedTypeName, context);
+		}
+
+		/**
+		 * Adds a new import declaration that is sorted in the existing imports.
+		 * If an import already exists or the import would conflict with an import
+		 * of an other type with the same simple name, the import is not added.
+		 *
 		 * @param typeBinding the binding of the type to import
 		 *
 		 * @return Returns the simple type name that can be used in the code or the
@@ -219,6 +241,24 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			return fImportsRewrite.addImport(typeBinding);
 		}
 
+		/**
+		 * Adds a new import declaration that is sorted in the existing imports.
+		 * If an import already exists or the import would conflict with an import
+		 * of an other type with the same simple name, the import is not added.
+		 *
+		 * @param typeBinding the binding of the type to import
+		 * @param insertPosition the offset where the import will be used
+		 *
+		 * @return Returns the simple type name that can be used in the code or the
+		 * fully qualified type name if an import conflict prevented the import.
+		 * 
+		 * @since 3.8
+		 */
+		public String addImport(ITypeBinding typeBinding, int insertPosition) {
+			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fAstRoot, insertPosition, fImportsRewrite);
+			return fImportsRewrite.addImport(typeBinding, context);
+		}
+		
 		/**
 		 * Adds a new import declaration for a static type that is sorted in the existing imports.
 		 * If an import already exists or the import would conflict with an import
@@ -2140,7 +2180,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private CompilationUnit createASTForImports(ICompilationUnit cu) {
 		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setSource(cu);
-		parser.setResolveBindings(false);
+		parser.setResolveBindings(true);
 		parser.setFocalPosition(0);
 		return (CompilationUnit) parser.createAST(null);
 	}
