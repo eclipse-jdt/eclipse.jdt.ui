@@ -68,37 +68,38 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 	}
 
 	/**
-	 * Returns true if the character at the specified offset is a
-	 * less-than sign, rather than an type parameter list open
-	 * angle bracket.
-	 *
+	 * Returns <code>true</code> if the character at the specified offset is a less-than sign, rather than
+	 * the opening angle bracket of a type parameter list.
+	 * 
 	 * @param document a document
 	 * @param offset an offset within the document
-	 * @return true if the character at the specified offset is not
-	 *   a type parameter start bracket
+	 * @return <code>true</code> if the character at the specified offset is a less-than sign
 	 * @throws BadLocationException if offset is invalid in the document
 	 */
 	private boolean isLessThanOperator(IDocument document, int offset) throws BadLocationException {
 		if (offset < 0) return false;
-		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document, IJavaPartitions.JAVA_PARTITIONING, TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, offset, false));
-		return !isTypeParameterBracket(offset, document, scanner);
+		String contentType= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, offset, false);
+		if (!IDocument.DEFAULT_CONTENT_TYPE.equals(contentType)) {
+			return false;
+		}
+		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document, IJavaPartitions.JAVA_PARTITIONING, contentType);
+		return !isTypeParameterOpeningBracket(offset, document, scanner);
 	}
 
 	/**
-	 * Checks if the angular bracket at <code>offset</code> is a type
-	 * parameter bracket.
-	 *
+	 * Checks if the angular bracket at <code>offset</code> is a type parameter opening bracket.
+	 * 
 	 * @param offset the offset of the opening bracket
 	 * @param document the document
 	 * @param scanner a java heuristic scanner on <code>document</code>
-	 * @return <code>true</code> if the bracket is part of a type parameter,
-	 *         <code>false</code> otherwise
+	 * @return <code>true</code> if the bracket is part of a type parameter, <code>false</code>
+	 *         otherwise
 	 * @since 3.1
 	 */
-	private boolean isTypeParameterBracket(int offset, IDocument document, JavaHeuristicScanner scanner) {
+	private boolean isTypeParameterOpeningBracket(int offset, IDocument document, JavaHeuristicScanner scanner) {
 		/*
 		 * type parameter come after braces (closing or opening), semicolons, or after
-		 * a Type name (heuristic: starts with capital character, or after a modifier
+		 * a Type name (heuristic: starts with capital character), or after a modifier
 		 * keyword in a method declaration (visibility, static, synchronized, final)
 		 */
 
@@ -116,6 +117,61 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 					|| prevToken == Symbols.TokenSTATIC
 					|| (prevToken == Symbols.TokenIDENT && isTypeParameterIntroducer(previous))
 					|| prevToken == Symbols.TokenEOF)
+				return true;
+		} catch (BadLocationException e) {
+			return false;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Returns true if the character at the specified offset is a greater-than sign, rather than an
+	 * type parameter list close angle bracket.
+	 * 
+	 * @param document a document
+	 * @param offset an offset within the document
+	 * @return true if the character at the specified offset is a greater-than sign
+	 * @throws BadLocationException if offset is invalid in the document
+	 */
+	private boolean isGreaterThanOperator(IDocument document, int offset) throws BadLocationException {
+		if (offset < 0)
+			return false;
+		String contentType= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, offset, false);
+		if (!IDocument.DEFAULT_CONTENT_TYPE.equals(contentType)) {
+			return false;
+		}
+		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document, IJavaPartitions.JAVA_PARTITIONING, contentType);
+		return !isTypeParameterClosingBracket(offset, document, scanner);
+	}
+
+	/**
+	 * Checks if the angular bracket at <code>offset</code> is a type parameter closing bracket.
+	 * 
+	 * @param offset the offset of the closing bracket
+	 * @param document the document
+	 * @param scanner a java heuristic scanner on <code>document</code>
+	 * @return <code>true</code> if the bracket is part of a type parameter, <code>false</code>
+	 *         otherwise
+	 * @since 3.8
+	 */
+	private boolean isTypeParameterClosingBracket(int offset, IDocument document, JavaHeuristicScanner scanner) {
+		/*
+		 * type parameter closing brackets come after question marks, other type parameter
+		 * closing brackets, or after a Type name (heuristic: starts with capital character)
+		 */
+
+		try {
+			IRegion line= document.getLineInformationOfOffset(offset);
+
+			int prevToken= scanner.previousToken(offset - 1, line.getOffset());
+			int prevTokenOffset= scanner.getPosition() + 1;
+			String previous= prevToken == Symbols.TokenEOF ? null : document.get(prevTokenOffset, offset - prevTokenOffset).trim();
+
+			if ((prevToken == Symbols.TokenIDENT && (previous.length() > 0 && Character.isUpperCase(previous.charAt(0))))
+					|| prevToken == Symbols.TokenEOF
+					|| prevToken == Symbols.TokenGREATERTHAN
+					|| prevToken == Symbols.TokenQUESTIONMARK)
 				return true;
 		} catch (BadLocationException e) {
 			return false;
@@ -155,5 +211,26 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 			fHighlightAngularBrackets= true;
 		else
 			fHighlightAngularBrackets= false;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.source.ICharacterPairMatcherExtension#isMatchedChar(char, org.eclipse.jface.text.IDocument, int)
+	 */
+	@Override
+	public boolean isMatchedChar(char ch, IDocument document, int offset) {
+		try {
+			if (ch == '<') {
+				if (isLessThanOperator(document, offset)) {
+					return false;
+				}
+			} else if (ch == '>') {
+				if (isGreaterThanOperator(document, offset)) {
+					return false;
+				}
+			}
+		} catch (BadLocationException e) {
+			// do nothing
+		}
+		return super.isMatchedChar(ch, document, offset);
 	}
 }
