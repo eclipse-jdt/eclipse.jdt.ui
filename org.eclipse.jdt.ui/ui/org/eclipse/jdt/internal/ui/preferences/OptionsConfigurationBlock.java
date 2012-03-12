@@ -266,6 +266,7 @@ public abstract class OptionsConfigurationBlock {
 		 * <li> <code>COMBO</code></li>
 		 * <li> <code>EXPANDABLE_COMPOSITE</code></li>
 		 * <li> <code>TEXT_CONTROL</code></li>
+		 * <li> <code>LINK</code></li>
 		 * </ul>
 		 */
 		private final int fControlType;
@@ -525,6 +526,7 @@ public abstract class OptionsConfigurationBlock {
 
 		public PreferenceTreeNode addCheckBoxWithLink(Composite parentComposite, String label, Key key, String[] values, int indent, PreferenceTreeNode parentNode, boolean showAllChildren, int widthHint, SelectionListener listener) {
 			fConfigBlock.addCheckBoxWithLink(parentComposite, label, key, values, indent, widthHint, listener);
+			addChild(parentNode, label, key, PreferenceTreeNode.LINK, false);
 			return addChild(parentNode, label, key, PreferenceTreeNode.CHECKBOX, showAllChildren);
 		}
 
@@ -981,6 +983,7 @@ public abstract class OptionsConfigurationBlock {
 		Link link= new Link(composite, SWT.NONE);
 		link.setText(label);
 		link.setLayoutData(gd);
+		link.setData(key);
 		data.setLink(link);
 		
 		// toggle checkbox when user clicks unlinked text in link:
@@ -1027,6 +1030,7 @@ public abstract class OptionsConfigurationBlock {
 		updateCheckBox(checkBox);
 
 		fCheckBoxes.add(checkBox);
+		fLinks.add(link);
 
 		return checkBox;
 	}
