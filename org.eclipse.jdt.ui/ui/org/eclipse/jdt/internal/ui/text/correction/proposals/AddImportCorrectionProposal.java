@@ -24,6 +24,8 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 
+import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
+
 public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 
 	private final String fTypeName;

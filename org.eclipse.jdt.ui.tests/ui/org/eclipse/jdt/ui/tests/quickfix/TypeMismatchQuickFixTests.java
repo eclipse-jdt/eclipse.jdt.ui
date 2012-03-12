@@ -47,10 +47,10 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 

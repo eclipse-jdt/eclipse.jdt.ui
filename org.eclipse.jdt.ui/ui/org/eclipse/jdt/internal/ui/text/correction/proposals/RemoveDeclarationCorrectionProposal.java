@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;

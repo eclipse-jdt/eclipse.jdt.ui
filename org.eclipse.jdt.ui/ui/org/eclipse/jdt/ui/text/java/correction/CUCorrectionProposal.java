@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.text.correction.proposals;
+package org.eclipse.jdt.ui.text.java.correction;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -47,17 +47,19 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.EditAnnotator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * A proposal for quick fixes and quick assist that work on a single compilation unit.
- * Either a {@link TextChange text change} is directly passed in the constructor or method
- * {@link #addEdits(IDocument, TextEdit)} is overridden to provide the text edits that are
- * applied to the document when the proposal is evaluated.
+ * A proposal for quick fixes and quick assists that work on a single compilation unit. Either a
+ * {@link TextChange text change} is directly passed in the constructor or method
+ * {@link #addEdits(IDocument, TextEdit)} is overridden to provide the text edits that are applied
+ * to the document when the proposal is evaluated.
  * <p>
  * The proposal takes care of the preview of the changes as proposal information.
  * </p>
- * @since 3.2
+ * 
+ * @since 3.8
  */
 public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
@@ -65,16 +67,16 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	private boolean fSwitchedEditor;
 
 	/**
-	 * Constructs a correction proposal working on a compilation unit with a given text change
-	 *
-	 * @param name the name that is displayed in the proposal selection dialog.
-	 * @param cu the compilation unit on that the change works.
+	 * Constructs a correction proposal working on a compilation unit with a given text change.
+	 * 
+	 * @param name the name that is displayed in the proposal selection dialog
+	 * @param cu the compilation unit to which the change can be applied
 	 * @param change the change that is executed when the proposal is applied or <code>null</code>
-	 * if implementors override {@link #addEdits(IDocument, TextEdit)} to provide
-	 * the text edits or {@link #createTextChange()} to provide a text change.
-	 * @param relevance the relevance of this proposal.
-	 * @param image the image that is displayed for this proposal or <code>null</code> if no
-	 * image is desired.
+	 *            if implementors override {@link #addEdits(IDocument, TextEdit)} to provide the
+	 *            text edits or {@link #createTextChange()} to provide a text change
+	 * @param relevance the relevance of this proposal
+	 * @param image the image that is displayed for this proposal or <code>null</code> if no image
+	 *            is desired
 	 */
 	public CUCorrectionProposal(String name, ICompilationUnit cu, TextChange change, int relevance, Image image) {
 		super(name, change, relevance, image);
@@ -88,12 +90,12 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 * Constructs a correction proposal working on a compilation unit with a given text change. Uses
 	 * the default image for this proposal.
 	 * 
-	 * @param name the name that is displayed in the proposal selection dialog.
-	 * @param cu the compilation unit on that the change works.
+	 * @param name the name that is displayed in the proposal selection dialog
+	 * @param cu the compilation unit to which the change can be applied
 	 * @param change the change that is executed when the proposal is applied or <code>null</code>
 	 *            if implementors override {@link #addEdits(IDocument, TextEdit)} to provide the
 	 *            text edits or {@link #createTextChange()} to provide a text change.
-	 * @param relevance the relevance of this proposal.
+	 * @param relevance the relevance of this proposal
 	 */
 	public CUCorrectionProposal(String name, ICompilationUnit cu, TextChange change, int relevance) {
 		this(name, cu, change, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
@@ -101,31 +103,35 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	/**
 	 * Constructs a correction proposal working on a compilation unit.
-	 * <p>Users have to override {@link #addEdits(IDocument, TextEdit)} to provide
-	 * the text edits or {@link #createTextChange()} to provide a text change.
+	 * <p>
+	 * Users have to override {@link #addEdits(IDocument, TextEdit)} to provide the text edits or
+	 * {@link #createTextChange()} to provide a text change.
 	 * </p>
-	 *
-	 * @param name The name that is displayed in the proposal selection dialog.
-	 * @param cu The compilation unit on that the change works.
-	 * @param relevance The relevance of this proposal.
-	 * @param image The image that is displayed for this proposal or <code>null</code> if no
-	 * image is desired.
+	 * 
+	 * @param name the name that is displayed in the proposal selection dialog
+	 * @param cu the compilation unit on that the change works
+	 * @param relevance the relevance of this proposal
+	 * @param image the image that is displayed for this proposal or <code>null</code> if no image
+	 *            is desired
 	 */
 	protected CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image) {
 		this(name, cu, null, relevance, image);
 	}
 
 	/**
-	 * Called when the {@link CompilationUnitChange} is initialized. Subclasses can override to
-	 * add text edits to the root edit of the change. Implementors must not access the proposal,
-	 * e.g getting the change.
-	 * <p>The default implementation does not add any edits</p>
-	 *
+	 * Called when the {@link CompilationUnitChange} is initialized. Subclasses can override to add
+	 * text edits to the root edit of the change. Implementors must not access the proposal, e.g.
+	 * not call {@link #getChange()}.
+	 * <p>
+	 * The default implementation does not add any edits
+	 * </p>
+	 * 
 	 * @param document content of the underlying compilation unit. To be accessed read only.
 	 * @param editRoot The root edit to add all edits to
 	 * @throws CoreException can be thrown if adding the edits is failing.
 	 */
 	protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
+		// empty default implementation
 	}
 
 	@Override
@@ -197,8 +203,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 * This method is only called once and only when no text change has been passed in
 	 * {@link #CUCorrectionProposal(String, ICompilationUnit, TextChange, int, Image)}.
 	 *
-	 * @return returns the created text change.
-	 * @throws CoreException thrown if the creation of the text change failed.
+	 * @return the created text change
+	 * @throws CoreException if the creation of the text change failed
 	 */
 	protected TextChange createTextChange() throws CoreException {
 		ICompilationUnit cu= getCompilationUnit();
@@ -239,19 +245,19 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	}
 
 	/**
-	 * Gets the text change that is invoked when the change is applied.
+	 * Returns the text change that is invoked when the change is applied.
 	 *
-	 * @return returns the text change that is invoked when the change is applied.
-	 * @throws CoreException throws an exception if accessing the change failed
+	 * @return the text change that is invoked when the change is applied
+	 * @throws CoreException if accessing the change failed
 	 */
 	public final TextChange getTextChange() throws CoreException {
 		return (TextChange) getChange();
 	}
 
 	/**
-	 * The compilation unit on that the change works.
+	 * The compilation unit on which the change works.
 	 *
-	 * @return the compilation unit on that the change works.
+	 * @return the compilation unit on which the change works
 	 */
 	public final ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
@@ -260,8 +266,10 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	/**
 	 * Creates a preview of the content of the compilation unit after applying the change.
 	 *
-	 * @return returns the preview of the changed compilation unit.
-	 * @throws CoreException thrown if the creation of the change failed.
+	 * @return the preview of the changed compilation unit
+	 * @throws CoreException if the creation of the change failed
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public String getPreviewContent() throws CoreException {
 		return getTextChange().getPreviewContent(new NullProgressMonitor());
@@ -275,18 +283,21 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		try {
 			return getPreviewContent();
 		} catch (CoreException e) {
+			// didn't work out
 		}
 		return super.toString();
 	}
 
 	/**
-	 * Returns whether the changed compilation unit was previously open in an editor or not.
+	 * Returns whether the changed compilation unit was not previously open in an editor.
 	 * 
 	 * @return <code>true</code> if the changed compilation unit was not previously open in an
 	 *         editor, <code>false</code> if the changed compilation unit was already open in an
 	 *         editor
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
-	protected boolean isSwitchedEditor() {
+	protected boolean didOpenEditor() {
 		return fSwitchedEditor;
 	}
 }

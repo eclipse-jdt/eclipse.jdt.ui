@@ -19,6 +19,8 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class ReplaceCorrectionProposal extends CUCorrectionProposal {

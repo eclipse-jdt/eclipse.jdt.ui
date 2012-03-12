@@ -67,14 +67,15 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldWizard;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 

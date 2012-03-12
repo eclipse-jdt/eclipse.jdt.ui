@@ -24,7 +24,9 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+
 import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 

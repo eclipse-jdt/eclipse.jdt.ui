@@ -31,6 +31,8 @@ import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 
+import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
+
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.viewsupport.LinkedProposalModelPresenter;
@@ -154,7 +156,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 				if (fLinkedProposalModel.hasLinkedPositions() && part instanceof JavaEditor) {
 					// enter linked mode
 					ITextViewer viewer= ((JavaEditor) part).getViewer();
-					new LinkedProposalModelPresenter().enterLinkedMode(viewer, part, isSwitchedEditor(), fLinkedProposalModel);
+					new LinkedProposalModelPresenter().enterLinkedMode(viewer, part, didOpenEditor(), fLinkedProposalModel);
 				} else if (part instanceof ITextEditor) {
 					LinkedProposalPositionGroup.PositionInformation endPosition= fLinkedProposalModel.getEndPosition();
 					if (endPosition != null) {

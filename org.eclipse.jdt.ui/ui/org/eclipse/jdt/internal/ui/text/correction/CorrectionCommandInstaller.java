@@ -23,20 +23,12 @@ import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.handlers.IHandlerActivation;
 import org.eclipse.ui.handlers.IHandlerService;
 
+import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 public class CorrectionCommandInstaller {
-
-	/**
-	 * All correction commands must start with the following prefix.
-	 */
-	public static final String COMMAND_PREFIX= "org.eclipse.jdt.ui.correction."; //$NON-NLS-1$
-
-	/**
-	 * Commands for quick assist must have the following suffix.
-	 */
-	public static final String ASSIST_SUFFIX= ".assist"; //$NON-NLS-1$
 
 	private List<IHandlerActivation> fCorrectionHandlerActivations;
 
@@ -60,8 +52,8 @@ public class CorrectionCommandInstaller {
 		Collection<String> definedCommandIds= commandService.getDefinedCommandIds();
 		for (Iterator<String> iter= definedCommandIds.iterator(); iter.hasNext();) {
 			String id= iter.next();
-			if (id.startsWith(COMMAND_PREFIX)) {
-				boolean isAssist= id.endsWith(ASSIST_SUFFIX);
+			if (id.startsWith(ICommandAccess.COMMAND_ID_PREFIX)) {
+				boolean isAssist= id.endsWith(ICommandAccess.ASSIST_SUFFIX);
 				CorrectionCommandHandler handler= new CorrectionCommandHandler(editor, id, isAssist);
 				IHandlerActivation activation= handlerService.activateHandler(id, handler, new LegacyHandlerSubmissionExpression(null, null, editor.getSite()));
 				fCorrectionHandlerActivations.add(activation);

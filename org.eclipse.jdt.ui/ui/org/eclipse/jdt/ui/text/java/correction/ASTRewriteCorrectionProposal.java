@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.correction.proposals;
+package org.eclipse.jdt.ui.text.java.correction;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -31,12 +31,11 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
- * A proposal for quick fixes and quick assists that works on a AST rewriter.
- * Either a rewriter is directly passed in the constructor or method {@link #getRewrite()}
- * is overridden to provide the AST rewriter that is evaluated to the document when the
- * proposal is applied.
- *
- * @since 3.2
+ * A proposal for quick fixes and quick assists that works on an AST rewrite. Either a rewrite is
+ * directly passed in the constructor or the method {@link #getRewrite()} is overridden to provide
+ * the AST rewrite that is evaluated on the document when the proposal is applied.
+ * 
+ * @since 3.8
  */
 public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
@@ -44,15 +43,15 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	private ImportRewrite fImportRewrite;
 
 	/**
-	 * Constructs a AST rewrite correction proposal.
-	 *
-	 * @param name the display name of the proposal.
-	 * @param cu the compilation unit that is modified.
+	 * Constructs an AST rewrite correction proposal.
+	 * 
+	 * @param name the display name of the proposal
+	 * @param cu the compilation unit that is modified
 	 * @param rewrite the AST rewrite that is invoked when the proposal is applied or
-	 *  <code>null</code> if {@link #getRewrite()} is overridden.
-	 * @param relevance The relevance of this proposal.
-	 * @param image The image that is displayed for this proposal or <code>null</code> if no
-	 * image is desired.
+	 *            <code>null</code> if {@link #getRewrite()} is overridden
+	 * @param relevance the relevance of this proposal
+	 * @param image the image that is displayed for this proposal or <code>null</code> if no image
+	 *            is desired
 	 */
 	public ASTRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
 		super(name, cu, relevance, image);
@@ -60,22 +59,22 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	}
 
 	/**
-	 * Constructs a AST rewrite correction proposal. Uses the default image for this proposal.
+	 * Constructs an AST rewrite correction proposal. Uses the default image for this proposal.
 	 * 
-	 * @param name the display name of the proposal.
-	 * @param cu the compilation unit that is modified.
+	 * @param name the display name of the proposal
+	 * @param cu the compilation unit that is modified
 	 * @param rewrite the AST rewrite that is invoked when the proposal is applied or
-	 *            <code>null</code> if {@link #getRewrite()} is overridden.
-	 * @param relevance The relevance of this proposal.
+	 *            <code>null</code> if {@link #getRewrite()} is overridden
+	 * @param relevance The relevance of this proposal
 	 */
 	public ASTRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance) {
 		this(name, cu, rewrite, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
 
 	/**
-	 * Returns the import rewriter used for this compilation unit. <code>
+	 * Returns the import rewrite used for this compilation unit. <code>
 	 * 
-	 * @return the import rewriter or <code>null</code> if no import rewriter is set
+	 * @return the import rewrite or <code>null</code> if no import rewrite has been set
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
 	public ImportRewrite getImportRewrite() {
@@ -83,9 +82,9 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	}
 
 	/**
-	 * Sets the import rewriter used for this compilation unit.
+	 * Sets the import rewrite used for this compilation unit.
 	 * 
-	 * @param rewrite the import rewriter
+	 * @param rewrite the import rewrite
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
 	public void setImportRewrite(ImportRewrite rewrite) {
@@ -93,10 +92,10 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	}
 
 	/**
-	 * Sets the import rewriter used for this compilation unit.
+	 * Creates and sets the import rewrite used for this compilation unit.
 	 * 
 	 * @param astRoot the AST for the current CU
-	 * @return returns the create import rewriter
+	 * @return the created import rewrite
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
 	public ImportRewrite createImportRewrite(CompilationUnit astRoot) {
@@ -126,15 +125,15 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	}
 
 	/**
-	 * Returns the rewriter that has been passed in the constructor. Implementors can override this
-	 * method to create the rewriter lazy. This method will only be called once.
+	 * Returns the rewrite that has been passed in the constructor. Implementors can override this
+	 * method to create the rewrite lazily. This method will only be called once.
 	 *
-	 * @return returns the rewriter to be used.
-	 * @throws CoreException an exception is thrown when the rewriter could not be created.
+	 * @return the rewrite to be used
+	 * @throws CoreException when the rewrite could not be created
 	 */
 	protected ASTRewrite getRewrite() throws CoreException {
 		if (fRewrite == null) {
-			IStatus status= JavaUIStatus.createError(IStatus.ERROR, "Rewriter not initialized", null); //$NON-NLS-1$
+			IStatus status= JavaUIStatus.createError(IStatus.ERROR, "Rewrite not initialized", null); //$NON-NLS-1$
 			throw new CoreException(status);
 		}
 		return fRewrite;

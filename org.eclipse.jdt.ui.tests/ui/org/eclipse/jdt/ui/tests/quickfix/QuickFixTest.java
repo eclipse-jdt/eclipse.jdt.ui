@@ -51,15 +51,15 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.GetterSetterCorrectionSubProcessor.SelfEncapsulateFieldProposal;
-import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.ReorgCorrectionsSubProcessor;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;

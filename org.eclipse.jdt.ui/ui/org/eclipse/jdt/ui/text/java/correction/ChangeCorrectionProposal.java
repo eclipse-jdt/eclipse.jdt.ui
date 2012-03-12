@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.correction.proposals;
+package org.eclipse.jdt.ui.text.java.correction;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -52,16 +52,15 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandHandler;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 /**
- * Implementation of a Java completion proposal to be used for quick fix and quick assist
- * proposals that invoke a {@link Change}. The proposal offers a proposal information but no context
- * information.
- *
- * @since 3.2
+ * Implementation of a Java completion proposal to be used for quick fix and quick assist proposals
+ * that are based on a {@link Change}. The proposal offers additional proposal information (based on
+ * the {@link Change}).
+ * 
+ * @since 3.8
  */
 public class ChangeCorrectionProposal implements IJavaCompletionProposal, ICommandAccess, ICompletionProposalExtension5, ICompletionProposalExtension6 {
 
@@ -75,13 +74,13 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 
 	/**
 	 * Constructs a change correction proposal.
-	 *
-	 * @param name The name that is displayed in the proposal selection dialog.
-	 * @param change The change that is executed when the proposal is applied or <code>null</code>
-	 * if the change will be created by implementors of {@link #createChange()}.
-	 * @param relevance The relevance of this proposal.
-	 * @param image The image that is displayed for this proposal or <code>null</code> if no
-	 * image is desired.
+	 * 
+	 * @param name the name that is displayed in the proposal selection dialog
+	 * @param change the change that is executed when the proposal is applied or <code>null</code>
+	 *            if the change will be created by implementors of {@link #createChange()}
+	 * @param relevance the relevance of this proposal
+	 * @param image the image that is displayed for this proposal or <code>null</code> if no image
+	 *            is desired
 	 */
 	public ChangeCorrectionProposal(String name, Change change, int relevance, Image image) {
 		if (name == null) {
@@ -119,12 +118,13 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 
 	/**
 	 * Performs the change associated with this proposal.
-	 *
-	 * @param activeEditor The editor currently active or <code>null</code> if no
-	 * editor is active.
-	 * @param document The document of the editor currently active or <code>null</code> if
-	 * no editor is visible.
-	 * @throws CoreException Thrown when the invocation of the change failed.
+	 * <p>
+ 	 * Subclasses may extend, but must call the super implementation.
+	 * 
+	 * @param activeEditor the editor currently active or <code>null</code> if no editor is active
+	 * @param document the document of the editor currently active or <code>null</code> if no editor
+	 *            is visible
+	 * @throws CoreException when the invocation of the change failed
 	 */
 	protected void performChange(IEditorPart activeEditor, IDocument document) throws CoreException {
 		StyledText disabledStyledText= null;
@@ -218,7 +218,6 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
-	 * @since 3.5
 	 */
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 		StringBuffer buf= new StringBuffer();
@@ -278,7 +277,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	/**
 	 * Returns the name of the proposal.
 	 *
-	 * @return return the name of the proposal
+	 * @return the name of the proposal
 	 */
 	public String getName() {
 		return fName;
@@ -309,9 +308,11 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 
 	/**
 	 * Returns the change that will be executed when the proposal is applied.
-	 *
-	 * @return returns the change for this proposal.
-	 * @throws CoreException thrown when the change could not be created
+	 * This method calls {@link #createChange()} to compute the change.
+	 * 
+	 * @return the change for this proposal, can be <code>null</code> in rare cases if creation of
+	 *         the change failed
+	 * @throws CoreException when the change could not be created
 	 */
 	public final Change getChange() throws CoreException {
 		if (Util.isGtk()) {
@@ -332,6 +333,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 						Display display= Display.getCurrent();
 						if (display != null) {
 							while (! display.isDisposed() && display.readAndDispatch()) {
+								// empty the display loop
 							}
 							display.sleep();
 						} else {
@@ -375,12 +377,14 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	}
 
 	/**
-	 * Creates the text change for this proposal.
-	 * This method is only called once and only when no text change has been passed in
+	 * Creates the change for this proposal.
+	 * This method is only called once and only when no change has been passed in
  	 * {@link #ChangeCorrectionProposal(String, Change, int, Image)}.
  	 *
-	 * @return returns the created change.
-	 * @throws CoreException thrown if the creation of the change failed.
+ 	 * Subclasses may override.
+ 	 * 
+	 * @return the created change
+	 * @throws CoreException if the creation of the change failed
 	 */
 	protected Change createChange() throws CoreException {
 		return new NullChange();
@@ -407,14 +411,19 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 
 	/**
 	 * Sets the relevance.
+	 * 
 	 * @param relevance the relevance to set
+	 * 
+	 * @see #getRelevance()
 	 */
 	public void setRelevance(int relevance) {
 		fRelevance= relevance;
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.IShortcutProposal#getProposalId()
+	 * @see org.eclipse.jdt.ui.text.java.correction.ICommandAccess#getCommandId()
+
+
 	 */
 	public String getCommandId() {
 		return fCommandId;
@@ -429,7 +438,5 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	public void setCommandId(String commandId) {
 		fCommandId= commandId;
 	}
-
-
 
 }

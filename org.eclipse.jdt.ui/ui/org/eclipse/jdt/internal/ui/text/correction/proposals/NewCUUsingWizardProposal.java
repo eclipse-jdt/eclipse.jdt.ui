@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.ui.wizards.NewAnnotationWizardPage;
 import org.eclipse.jdt.ui.wizards.NewClassWizardPage;
 import org.eclipse.jdt.ui.wizards.NewEnumWizardPage;

@@ -52,11 +52,11 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSPropertyFileModifier;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.EditAnnotator;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 

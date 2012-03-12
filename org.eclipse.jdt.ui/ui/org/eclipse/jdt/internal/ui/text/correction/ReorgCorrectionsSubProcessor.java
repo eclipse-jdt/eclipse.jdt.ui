@@ -97,6 +97,9 @@ import org.eclipse.jdt.ui.actions.OrganizeImportsAction;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -105,8 +108,6 @@ import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectMainTypeNameProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectPackageDeclarationProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;

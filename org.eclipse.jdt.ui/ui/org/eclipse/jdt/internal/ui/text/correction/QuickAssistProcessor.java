@@ -27,8 +27,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-
-
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 
 import org.eclipse.ui.IEditorPart;
@@ -141,6 +139,9 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
+import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -148,9 +149,7 @@ import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;

@@ -30,9 +30,9 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 
 public class ContributedQuickFixTest extends QuickFixTest {
 

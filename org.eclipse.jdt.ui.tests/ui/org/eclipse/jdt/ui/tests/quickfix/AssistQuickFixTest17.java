@@ -35,10 +35,10 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.Java17ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 
 public class AssistQuickFixTest17 extends QuickFixTest {
 

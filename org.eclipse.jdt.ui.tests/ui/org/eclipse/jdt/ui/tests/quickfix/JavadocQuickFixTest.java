@@ -33,8 +33,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-
-import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 public class JavadocQuickFixTest extends QuickFixTest {
 

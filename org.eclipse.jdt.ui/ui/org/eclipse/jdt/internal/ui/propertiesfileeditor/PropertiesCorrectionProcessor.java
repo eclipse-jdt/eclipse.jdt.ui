@@ -34,9 +34,9 @@ import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 
 /**
  * The properties file correction processor. Clients can set pre-computed proposals, and if set the
