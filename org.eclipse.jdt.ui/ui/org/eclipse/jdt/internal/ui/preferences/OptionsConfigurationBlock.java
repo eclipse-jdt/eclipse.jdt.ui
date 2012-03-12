@@ -708,6 +708,42 @@ public abstract class OptionsConfigurationBlock {
 		}
 	}
 
+	private static class HighlightPainter implements PaintListener {
+		
+		private final Composite fParent;
+		private final Label fLabelControl;
+		private final Combo fComboBox;
+		int fColor;
+		
+		public HighlightPainter(Composite parent, Label labelControl, Combo comboBox, int color) {
+			fParent= parent;
+			fLabelControl= labelControl;
+			fComboBox= comboBox;
+			fColor= color;
+		}
+
+		public void paintControl(PaintEvent e) {
+			if (((GridData) fLabelControl.getLayoutData()).exclude) {
+				fParent.removePaintListener(this);
+				fLabelControl.setData(null);
+				return;
+			}
+			
+			int GAP= 7;
+			int ARROW= 3;
+			Rectangle l= fLabelControl.getBounds();
+			Point c= fComboBox.getLocation();
+			
+			e.gc.setForeground(e.display.getSystemColor(fColor));
+			int x2= c.x - GAP;
+			int y= l.y + l.height / 2 + 1;
+			
+			e.gc.drawLine(l.x + l.width + GAP, y, x2, y);
+			e.gc.drawLine(x2 - ARROW, y - ARROW, x2, y);
+			e.gc.drawLine(x2 - ARROW, y + ARROW, x2, y);
+		}
+	}
+	
 	private static final String REBUILD_COUNT_KEY= "preferences_build_requested"; //$NON-NLS-1$
 
 	private static final String SETTINGS_EXPANDED= "expanded"; //$NON-NLS-1$
@@ -1014,9 +1050,9 @@ public abstract class OptionsConfigurationBlock {
 		return comboBox;
 	}
 	
-	private static final int HIGHLIGHT_FOCUS = SWT.COLOR_WIDGET_DARK_SHADOW;
-	private static final int HIGHLIGHT_MOUSE = SWT.COLOR_WIDGET_NORMAL_SHADOW;
-	private static final int HIGHLIGHT_NONE = SWT.NONE;
+	protected static final int HIGHLIGHT_FOCUS = SWT.COLOR_WIDGET_DARK_SHADOW;
+	protected static final int HIGHLIGHT_MOUSE = SWT.COLOR_WIDGET_NORMAL_SHADOW;
+	protected static final int HIGHLIGHT_NONE = SWT.NONE;
 
 	private void addHighlight(final Composite parent, final Label labelControl, final Combo comboBox) {
 		comboBox.addFocusListener(new FocusListener() {
@@ -1085,38 +1121,11 @@ public abstract class OptionsConfigurationBlock {
 		labelControl.addMouseListener(labelClickListener);
 	}
 	
-	private void highlight(final Composite parent, final Label labelControl, final Combo comboBox, final int color) {
-		
-		class HighlightPainter implements PaintListener {
-			
-			private int fColor= color;
-
-			public void paintControl(PaintEvent e) {
-				if (((GridData) labelControl.getLayoutData()).exclude) {
-					parent.removePaintListener(this);
-					labelControl.setData(null);
-					return;
-				}
-				
-				int GAP= 7;
-				int ARROW= 3;
-				Rectangle l= labelControl.getBounds();
-				Point c= comboBox.getLocation();
-				
-				e.gc.setForeground(e.display.getSystemColor(fColor));
-				int x2= c.x - GAP;
-				int y= l.y + l.height / 2 + 1;
-				
-				e.gc.drawLine(l.x + l.width + GAP, y, x2, y);
-				e.gc.drawLine(x2 - ARROW, y - ARROW, x2, y);
-				e.gc.drawLine(x2 - ARROW, y + ARROW, x2, y);
-			}
-		}
-		
+	protected void highlight(final Composite parent, final Label labelControl, final Combo comboBox, final int color) {
 		Object data= labelControl.getData();
 		if (data == null) {
 			if (color != HIGHLIGHT_NONE) {
-				PaintListener painter= new HighlightPainter();
+				PaintListener painter= new HighlightPainter(parent, labelControl, comboBox, color);
 				parent.addPaintListener(painter);
 				labelControl.setData(painter);
 			} else {
@@ -1135,6 +1144,13 @@ public abstract class OptionsConfigurationBlock {
 		
 		parent.redraw();
 		parent.update();
+	}
+	
+	protected int getHighlight(Label labelControl) {
+		Object data= labelControl.getData();
+		if (data == null)
+			return HIGHLIGHT_NONE;
+		return ((HighlightPainter) data).fColor;
 	}
 
 	protected Combo addInversedComboBox(Composite parent, String label, Key key, String[] values, String[] valueLabels, int indent) {

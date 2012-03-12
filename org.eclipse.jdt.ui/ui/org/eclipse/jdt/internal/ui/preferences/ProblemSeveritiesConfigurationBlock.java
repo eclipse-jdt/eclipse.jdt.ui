@@ -19,6 +19,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -837,11 +838,12 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				updateEnableStates();
 			}
 			
-			if (PREF_ANNOTATION_NULL_ANALYSIS.equals(changedKey) && checkValue(PREF_ANNOTATION_NULL_ANALYSIS, ENABLED)
-					|| PREF_PB_NULL_REFERENCE.equals(changedKey)
-					|| PREF_PB_POTENTIAL_NULL_REFERENCE.equals(changedKey)
-					|| PREF_PB_NULL_SPECIFICATION_VIOLATION.equals(changedKey)
-					|| PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION.equals(changedKey)) {
+			if (checkValue(PREF_ANNOTATION_NULL_ANALYSIS, ENABLED)
+					&& (PREF_ANNOTATION_NULL_ANALYSIS.equals(changedKey)
+							|| PREF_PB_NULL_REFERENCE.equals(changedKey)
+							|| PREF_PB_POTENTIAL_NULL_REFERENCE.equals(changedKey)
+							|| PREF_PB_NULL_SPECIFICATION_VIOLATION.equals(changedKey)
+							|| PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION.equals(changedKey))) {
 				boolean badNullRef= lessSevere(getValue(PREF_PB_NULL_REFERENCE), getValue(PREF_PB_NULL_SPECIFICATION_VIOLATION));
 				boolean badPotNullRef= lessSevere(getValue(PREF_PB_POTENTIAL_NULL_REFERENCE), getValue(PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION));
 				boolean ask= false;
@@ -849,6 +851,20 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				ask |= badPotNullRef && (PREF_PB_POTENTIAL_NULL_REFERENCE.equals(changedKey) || PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION.equals(changedKey));
 				ask |= (badNullRef || badPotNullRef) && PREF_ANNOTATION_NULL_ANALYSIS.equals(changedKey);
 				if (ask) {
+					final Combo comboBoxNullRef= getComboBox(PREF_PB_NULL_REFERENCE);
+					final Label labelNullRef= fLabels.get(comboBoxNullRef);
+					int highlightNullRef= getHighlight(labelNullRef);
+					final Combo comboBoxPotNullRef= getComboBox(PREF_PB_POTENTIAL_NULL_REFERENCE);
+					final Label labelPotNullRef= fLabels.get(comboBoxPotNullRef);
+					int highlightPotNullRef= getHighlight(labelPotNullRef);
+					
+					getShell().getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							highlight(comboBoxNullRef.getParent(), labelNullRef, comboBoxNullRef, HIGHLIGHT_FOCUS);
+							highlight(comboBoxPotNullRef.getParent(), labelPotNullRef, comboBoxPotNullRef, HIGHLIGHT_FOCUS);
+						}
+					});
+					
 					MessageDialog messageDialog= new MessageDialog(
 							getShell(),
 							PreferencesMessages.ProblemSeveritiesConfigurationBlock_adapt_null_pointer_access_settings_dialog_title,
@@ -870,6 +886,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 							updateCombo(getComboBox(PREF_PB_POTENTIAL_NULL_REFERENCE));
 						}
 					}
+					
+					highlight(comboBoxNullRef.getParent(), labelNullRef, comboBoxNullRef, highlightNullRef);
+					highlight(comboBoxPotNullRef.getParent(), labelPotNullRef, comboBoxPotNullRef, highlightPotNullRef);
 				}
 
 			} else if (PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING.equals(changedKey)) {
