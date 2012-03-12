@@ -101,7 +101,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -161,6 +160,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionPro
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingAnnotationAttributesProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
@@ -207,7 +207,7 @@ public class LocalCorrectionsSubProcessor {
 		if (refactoring.checkActivationBasics(astRoot).isOK()) {
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_trycatch_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, (CompilationUnitChange) refactoring.createChange(null), 6, image);
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, refactoring, 6, image);
 			proposal.setLinkedProposalModel(refactoring.getLinkedProposalModel());
 			proposals.add(proposal);
 		}
@@ -221,7 +221,7 @@ public class LocalCorrectionsSubProcessor {
 			if (refactoring.checkActivationBasics(astRoot).isOK()) {
 				String label= CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_trymulticatch_description;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-				CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, (CompilationUnitChange) refactoring.createChange(null), 7, image);
+				RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, refactoring, 7, image);
 				proposal.setLinkedProposalModel(refactoring.getLinkedProposalModel());
 				proposals.add(proposal);
 			}

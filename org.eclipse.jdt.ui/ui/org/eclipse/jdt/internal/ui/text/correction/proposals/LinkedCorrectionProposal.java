@@ -12,10 +12,28 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextViewer;
+
+import org.eclipse.ui.IEditorPart;
+
+import org.eclipse.ui.texteditor.ITextEditor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.viewsupport.LinkedProposalModelPresenter;
 
 
 /**
@@ -27,6 +45,8 @@ import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
  * @since 3.0
  */
 public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
+
+	private LinkedProposalModel fLinkedProposalModel;
 
 	/**
 	 * Constructs a linked correction proposal.
@@ -40,6 +60,18 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 */
 	public LinkedCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
 		super(name, cu, rewrite, relevance, image);
+		fLinkedProposalModel= null;
+	}
+
+	protected LinkedProposalModel getLinkedProposalModel() {
+		if (fLinkedProposalModel == null) {
+			fLinkedProposalModel= new LinkedProposalModel();
+		}
+		return fLinkedProposalModel;
+	}
+
+	public void setLinkedProposalModel(LinkedProposalModel model) {
+		fLinkedProposalModel= model;
 	}
 
 	/**
@@ -105,5 +137,35 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 */
 	public void addLinkedPositionProposal(String groupID, ITypeBinding type) {
 		getLinkedProposalModel().getPositionGroup(groupID, true).addProposal(type, getCompilationUnit(), 10);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.jface.text.IDocument, org.eclipse.ui.IEditorPart)
+	 */
+	@Override
+	protected void performChange(IEditorPart part, IDocument document) throws CoreException {
+		try {
+			super.performChange(part, document);
+			if (part == null) {
+				return;
+			}
+
+			if (fLinkedProposalModel != null) {
+				if (fLinkedProposalModel.hasLinkedPositions() && part instanceof JavaEditor) {
+					// enter linked mode
+					ITextViewer viewer= ((JavaEditor) part).getViewer();
+					new LinkedProposalModelPresenter().enterLinkedMode(viewer, part, isSwitchedEditor(), fLinkedProposalModel);
+				} else if (part instanceof ITextEditor) {
+					LinkedProposalPositionGroup.PositionInformation endPosition= fLinkedProposalModel.getEndPosition();
+					if (endPosition != null) {
+						// select a result
+						int pos= endPosition.getOffset() + endPosition.getLength();
+						((ITextEditor) part).selectAndReveal(pos, 0);
+					}
+				}
+			}
+		} catch (BadLocationException e) {
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
+		}
 	}
 }

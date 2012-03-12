@@ -23,15 +23,11 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
-
-import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
@@ -43,19 +39,15 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.viewsupport.LinkedProposalModelPresenter;
 
 /**
  * A proposal for quick fixes and quick assist that work on a single compilation unit.
@@ -70,9 +62,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.LinkedProposalModelPresenter;
 public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	private ICompilationUnit fCompilationUnit;
-	private LinkedProposalModel fLinkedProposalModel;
 	private boolean fSwitchedEditor;
-
 
 	/**
 	 * Constructs a correction proposal working on a compilation unit with a given text change
@@ -92,7 +82,21 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			throw new IllegalArgumentException("Compilation unit must not be null"); //$NON-NLS-1$
 		}
 		fCompilationUnit= cu;
-		fLinkedProposalModel= null;
+	}
+
+	/**
+	 * Constructs a correction proposal working on a compilation unit with a given text change. Uses
+	 * the default image for this proposal.
+	 * 
+	 * @param name the name that is displayed in the proposal selection dialog.
+	 * @param cu the compilation unit on that the change works.
+	 * @param change the change that is executed when the proposal is applied or <code>null</code>
+	 *            if implementors override {@link #addEdits(IDocument, TextEdit)} to provide the
+	 *            text edits or {@link #createTextChange()} to provide a text change.
+	 * @param relevance the relevance of this proposal.
+	 */
+	public CUCorrectionProposal(String name, ICompilationUnit cu, TextChange change, int relevance) {
+		this(name, cu, change, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
 
 	/**
@@ -122,17 +126,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 * @throws CoreException can be thrown if adding the edits is failing.
 	 */
 	protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
-	}
-
-	protected LinkedProposalModel getLinkedProposalModel() {
-		if (fLinkedProposalModel == null) {
-			fLinkedProposalModel= new LinkedProposalModel();
-		}
-		return fLinkedProposalModel;
-	}
-
-	public void setLinkedProposalModel(LinkedProposalModel model) {
-		fLinkedProposalModel= model;
 	}
 
 	@Override
@@ -197,36 +190,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			return false;
 		}
 		return true;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.jface.text.IDocument, org.eclipse.ui.IEditorPart)
-	 */
-	@Override
-	protected void performChange(IEditorPart part, IDocument document) throws CoreException {
-		try {
-			super.performChange(part, document);
-			if (part == null) {
-				return;
-			}
-
-			if (fLinkedProposalModel != null) {
-				if (fLinkedProposalModel.hasLinkedPositions() && part instanceof JavaEditor) {
-					// enter linked mode
-					ITextViewer viewer= ((JavaEditor) part).getViewer();
-					new LinkedProposalModelPresenter().enterLinkedMode(viewer, part, fSwitchedEditor, fLinkedProposalModel);
-				} else if (part instanceof ITextEditor) {
-					LinkedProposalPositionGroup.PositionInformation endPosition= fLinkedProposalModel.getEndPosition();
-					if (endPosition != null) {
-						// select a result
-						int pos= endPosition.getOffset() + endPosition.getLength();
-						((ITextEditor) part).selectAndReveal(pos, 0);
-					}
-				}
-			}
-		} catch (BadLocationException e) {
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
-		}
 	}
 
 	/**
@@ -314,5 +277,16 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		} catch (CoreException e) {
 		}
 		return super.toString();
+	}
+
+	/**
+	 * Returns whether the changed compilation unit was previously open in an editor or not.
+	 * 
+	 * @return <code>true</code> if the changed compilation unit was not previously open in an
+	 *         editor, <code>false</code> if the changed compilation unit was already open in an
+	 *         editor
+	 */
+	protected boolean isSwitchedEditor() {
+		return fSwitchedEditor;
 	}
 }

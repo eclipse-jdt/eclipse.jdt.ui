@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandHandler;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
@@ -91,6 +92,18 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 		fRelevance= relevance;
 		fImage= image;
 		fCommandId= null;
+	}
+
+	/**
+	 * Constructs a change correction proposal. Uses the default image for this proposal.
+	 * 
+	 * @param name The name that is displayed in the proposal selection dialog.
+	 * @param change The change that is executed when the proposal is applied or <code>null</code>
+	 *            if the change will be created by implementors of {@link #createChange()}.
+	 * @param relevance The relevance of this proposal.
+	 */
+	public ChangeCorrectionProposal(String name, Change change, int relevance) {
+		this(name, change, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
 
 	/*

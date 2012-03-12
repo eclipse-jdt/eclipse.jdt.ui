@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
@@ -59,8 +60,23 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	}
 
 	/**
+	 * Constructs a AST rewrite correction proposal. Uses the default image for this proposal.
+	 * 
+	 * @param name the display name of the proposal.
+	 * @param cu the compilation unit that is modified.
+	 * @param rewrite the AST rewrite that is invoked when the proposal is applied or
+	 *            <code>null</code> if {@link #getRewrite()} is overridden.
+	 * @param relevance The relevance of this proposal.
+	 */
+	public ASTRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance) {
+		this(name, cu, rewrite, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+	}
+
+	/**
 	 * Returns the import rewriter used for this compilation unit. <code>
+	 * 
 	 * @return the import rewriter or <code>null</code> if no import rewriter is set
+	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
 	public ImportRewrite getImportRewrite() {
 		return fImportRewrite;
@@ -68,7 +84,9 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	/**
 	 * Sets the import rewriter used for this compilation unit.
+	 * 
 	 * @param rewrite the import rewriter
+	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
 	public void setImportRewrite(ImportRewrite rewrite) {
 		fImportRewrite= rewrite;
@@ -76,8 +94,10 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	/**
 	 * Sets the import rewriter used for this compilation unit.
+	 * 
 	 * @param astRoot the AST for the current CU
 	 * @return returns the create import rewriter
+	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
 	public ImportRewrite createImportRewrite(CompilationUnit astRoot) {
 		fImportRewrite= StubUtility.createImportRewrite(astRoot, true);

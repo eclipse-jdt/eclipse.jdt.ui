@@ -25,21 +25,15 @@ import java.util.Map;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.core.resources.IFile;
 
-import org.eclipse.text.edits.InsertEdit;
 
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
@@ -156,12 +150,12 @@ import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -2678,49 +2672,5 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			proposals.add(proposal);
 		}
 		return true;
-	}
-
-	private static class RefactoringCorrectionProposal extends CUCorrectionProposal {
-		private final Refactoring fRefactoring;
-		private RefactoringStatus fRefactoringStatus;
-
-		public RefactoringCorrectionProposal(String name, ICompilationUnit cu, Refactoring refactoring, int relevance, Image image) {
-			super(name, cu, null, relevance, image);
-			fRefactoring= refactoring;
-		}
-
-		/**
-		 * Can be overridden by clients to perform expensive initializations of the refactoring
-		 * 
-		 * @param refactoring the refactoring
-		 * @throws CoreException if something goes wrong during init
-		 */
-		protected void init(Refactoring refactoring) throws CoreException {
-			// empty default implementation
-		}
-
-		@Override
-		protected TextChange createTextChange() throws CoreException {
-			init(fRefactoring);
-			fRefactoringStatus= fRefactoring.checkFinalConditions(new NullProgressMonitor());
-			if (fRefactoringStatus.hasFatalError()) {
-				TextFileChange dummyChange= new TextFileChange("fatal error", (IFile) getCompilationUnit().getResource()); //$NON-NLS-1$
-				dummyChange.setEdit(new InsertEdit(0, "")); //$NON-NLS-1$
-				return dummyChange;
-			}
-			return (TextChange) fRefactoring.createChange(new NullProgressMonitor());
-		}
-		
-		/*
-		 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
-		 * @since 3.6
-		 */
-		@Override
-		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-			if (fRefactoringStatus != null && fRefactoringStatus.hasFatalError()) {
-				return fRefactoringStatus.getEntryWithHighestSeverity().getMessage();
-			}
-			return super.getAdditionalProposalInfo(monitor);
-		}
 	}
 }

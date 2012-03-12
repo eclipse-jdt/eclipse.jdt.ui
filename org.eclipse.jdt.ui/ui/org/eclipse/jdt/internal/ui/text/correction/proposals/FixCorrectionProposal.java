@@ -42,9 +42,9 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
+import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring.MultiFixTarget;
 import org.eclipse.jdt.internal.corext.fix.ILinkedFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
-import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring.MultiFixTarget;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
@@ -66,7 +66,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
  * fix a problem. A fix correction proposal may have an {@link ICleanUp}
  * attached which can be executed instead of the provided IFix.
  */
-public class FixCorrectionProposal extends CUCorrectionProposal implements ICompletionProposalExtension2, IStatusLineProposal {
+public class FixCorrectionProposal extends LinkedCorrectionProposal implements ICompletionProposalExtension2, IStatusLineProposal {
 
 	private final IProposableFix fFix;
 	private final ICleanUp fCleanUp;
