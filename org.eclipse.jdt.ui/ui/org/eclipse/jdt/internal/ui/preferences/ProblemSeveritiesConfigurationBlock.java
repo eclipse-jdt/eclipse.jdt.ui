@@ -289,8 +289,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_MISSING_NONNULL_BY_DEFAULT_ANNOTATION= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION);
 	
 	private static final Key PREF_PB_NULL_SPECIFICATION_VIOLATION= getJDTCoreKey(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION);
-	private static final Key PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION= getJDTCoreKey(JavaCore.COMPILER_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION);
-	private static final Key PREF_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO= getJDTCoreKey(JavaCore.COMPILER_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO);
+	private static final Key PREF_PB_POTENTIAL_NULL_ANNOTATION_INFERENCE_CONFLICT= getJDTCoreKey(JavaCore.COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT);
+	private static final Key PREF_PB_NULL_UNCHECKED_CONVERSION= getJDTCoreKey(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION);
 	private static final Key PREF_PB_REDUNDANT_NULL_ANNOTATION= getJDTCoreKey(JavaCore.COMPILER_PB_REDUNDANT_NULL_ANNOTATION);	
 
 	private static final Key PREF_PB_REDUNDANT_NULL_CHECK= getJDTCoreKey(JavaCore.COMPILER_PB_REDUNDANT_NULL_CHECK);
@@ -376,8 +376,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME,
 				PREF_MISSING_NONNULL_BY_DEFAULT_ANNOTATION,
 				PREF_PB_NULL_SPECIFICATION_VIOLATION,
-				PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION,
-				PREF_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO,
+				PREF_PB_POTENTIAL_NULL_ANNOTATION_INFERENCE_CONFLICT,
+				PREF_PB_NULL_UNCHECKED_CONVERSION,
 				PREF_PB_REDUNDANT_NULL_ANNOTATION,	
 				PREF_PB_REDUNDANT_NULL_CHECK, PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS,
 				PREF_PB_UNCLOSED_CLOSEABLE, PREF_PB_POTENTIALLY_UNCLOSED_CLOSEABLE, PREF_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE,
@@ -760,11 +760,11 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_null_spec_violation;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NULL_SPECIFICATION_VIOLATION, errorWarning, errorWarningLabels, extraIndent, node);
 		
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_potential_null_spec_violation;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION, errorWarningIgnore, errorWarningIgnoreLabels, extraIndent, node);
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_null_annotation_inference_conflict;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIAL_NULL_ANNOTATION_INFERENCE_CONFLICT, errorWarningIgnore, errorWarningIgnoreLabels, extraIndent, node);
 		
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_null_spec_violation_insufficient_info;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO, errorWarningIgnore, errorWarningIgnoreLabels, extraIndent, node);
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_null_unchecked_conversion;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NULL_UNCHECKED_CONVERSION, errorWarningIgnore, errorWarningIgnoreLabels, extraIndent, node);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_redundant_null_annotation;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_REDUNDANT_NULL_ANNOTATION, errorWarningIgnore, errorWarningIgnoreLabels, extraIndent, node);
@@ -843,12 +843,12 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 							|| PREF_PB_NULL_REFERENCE.equals(changedKey)
 							|| PREF_PB_POTENTIAL_NULL_REFERENCE.equals(changedKey)
 							|| PREF_PB_NULL_SPECIFICATION_VIOLATION.equals(changedKey)
-							|| PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION.equals(changedKey))) {
+							|| PREF_PB_POTENTIAL_NULL_ANNOTATION_INFERENCE_CONFLICT.equals(changedKey))) {
 				boolean badNullRef= lessSevere(getValue(PREF_PB_NULL_REFERENCE), getValue(PREF_PB_NULL_SPECIFICATION_VIOLATION));
-				boolean badPotNullRef= lessSevere(getValue(PREF_PB_POTENTIAL_NULL_REFERENCE), getValue(PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION));
+				boolean badPotNullRef= lessSevere(getValue(PREF_PB_POTENTIAL_NULL_REFERENCE), getValue(PREF_PB_POTENTIAL_NULL_ANNOTATION_INFERENCE_CONFLICT));
 				boolean ask= false;
 				ask |= badNullRef && (PREF_PB_NULL_REFERENCE.equals(changedKey) || PREF_PB_NULL_SPECIFICATION_VIOLATION.equals(changedKey));
-				ask |= badPotNullRef && (PREF_PB_POTENTIAL_NULL_REFERENCE.equals(changedKey) || PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION.equals(changedKey));
+				ask |= badPotNullRef && (PREF_PB_POTENTIAL_NULL_REFERENCE.equals(changedKey) || PREF_PB_POTENTIAL_NULL_ANNOTATION_INFERENCE_CONFLICT.equals(changedKey));
 				ask |= (badNullRef || badPotNullRef) && PREF_ANNOTATION_NULL_ANALYSIS.equals(changedKey);
 				if (ask) {
 					final Combo comboBoxNullRef= getComboBox(PREF_PB_NULL_REFERENCE);
@@ -882,7 +882,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 							updateCombo(getComboBox(PREF_PB_NULL_REFERENCE));
 						}
 						if (badPotNullRef) {
-							setValue(PREF_PB_POTENTIAL_NULL_REFERENCE, getValue(PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION));
+							setValue(PREF_PB_POTENTIAL_NULL_REFERENCE, getValue(PREF_PB_POTENTIAL_NULL_ANNOTATION_INFERENCE_CONFLICT));
 							updateCombo(getComboBox(PREF_PB_POTENTIAL_NULL_REFERENCE));
 						}
 					}
@@ -961,8 +961,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		getCheckBox(INTR_DEFAULT_NULL_ANNOTATIONS).setEnabled(enableAnnotationNullAnalysis);
 		getCheckBoxLink(INTR_DEFAULT_NULL_ANNOTATIONS).setEnabled(enableAnnotationNullAnalysis);
 		setComboEnabled(PREF_PB_NULL_SPECIFICATION_VIOLATION, enableAnnotationNullAnalysis);
-		setComboEnabled(PREF_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION, enableAnnotationNullAnalysis);
-		setComboEnabled(PREF_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO, enableAnnotationNullAnalysis);
+		setComboEnabled(PREF_PB_POTENTIAL_NULL_ANNOTATION_INFERENCE_CONFLICT, enableAnnotationNullAnalysis);
+		setComboEnabled(PREF_PB_NULL_UNCHECKED_CONVERSION, enableAnnotationNullAnalysis);
 		setComboEnabled(PREF_PB_REDUNDANT_NULL_ANNOTATION, enableAnnotationNullAnalysis);
 		setComboEnabled(PREF_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, enableAnnotationNullAnalysis);
 	}
