@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Marcel Bruch <bruch@cs.tu-darmstadt.de> - [content assist] Allow to re-sort proposals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=350991
  *******************************************************************************/
 package org.eclipse.jdt.ui.text.java;
 
@@ -15,6 +16,7 @@ import java.util.Comparator;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
 
 /**
  * Abstract base class for sorters contributed to the
@@ -30,7 +32,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
  *
  * @since 3.2
  */
-public abstract class AbstractProposalSorter implements Comparator<ICompletionProposal> {
+public abstract class AbstractProposalSorter implements Comparator<ICompletionProposal>, ICompletionProposalSorter {
 
 	/**
 	 * Creates a new sorter. Note that subclasses must provide a zero-argument constructor to be
@@ -40,7 +42,9 @@ public abstract class AbstractProposalSorter implements Comparator<ICompletionPr
 	}
 
 	/**
-	 * Called once before sorting.
+	 * Called once before initial sorting starts the first time. Note that if a completion engine
+	 * needs subsequent sorting of its proposals (e.g., after some proposals get filtered due to
+	 * changes in the completion prefix), this method is <i>not</i> called again.
 	 * <p>
 	 * Clients may override, the default implementation does nothing.
 	 * </p>
@@ -63,7 +67,8 @@ public abstract class AbstractProposalSorter implements Comparator<ICompletionPr
 	public abstract int compare(ICompletionProposal p1, ICompletionProposal p2);
 
 	/**
-	 * Called once after sorting.
+	 * Called once after the initial sorting finished. Note that even if a completion engine causes
+	 * a subsequent sorting of its proposals, this method is <i>not</i> called again.
 	 * <p>
 	 * Clients may override, the default implementation does nothing.
 	 * </p>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Marcel Bruch <bruch@cs.tu-darmstadt.de> - [content assist] Allow to re-sort proposals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=350991
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -133,7 +134,7 @@ public final class ProposalSorterHandle {
 	 * @throws InvalidRegistryObjectException if the extension is not valid any longer (e.g. due to
 	 *         plug-in unloading)
 	 */
-	private synchronized AbstractProposalSorter getSorter() throws CoreException, InvalidRegistryObjectException {
+	synchronized AbstractProposalSorter getSorter() throws CoreException, InvalidRegistryObjectException {
 		if (fSorter == null)
 			fSorter= createSorter();
 		return fSorter;
@@ -213,21 +214,21 @@ public final class ProposalSorterHandle {
 		return stats;
 	}
 
-	private Status createExceptionStatus(InvalidRegistryObjectException x) {
+	Status createExceptionStatus(InvalidRegistryObjectException x) {
 		// extension has become invalid - log & disable
 		String disable= createBlameMessage();
 		String reason= JavaTextMessages.CompletionProposalComputerDescriptor_reason_invalid;
 		return new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, disable + " " + reason, x); //$NON-NLS-1$
 	}
 
-	private Status createExceptionStatus(CoreException x) {
+	Status createExceptionStatus(CoreException x) {
 		// unable to instantiate the extension - log & disable
 		String disable= createBlameMessage();
 		String reason= JavaTextMessages.CompletionProposalComputerDescriptor_reason_instantiation;
 		return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, disable + " " + reason, x); //$NON-NLS-1$
 	}
 
-	private Status createExceptionStatus(RuntimeException x) {
+	Status createExceptionStatus(RuntimeException x) {
 		// misbehaving extension - log & disable
 		String disable= createBlameMessage();
 		String reason= JavaTextMessages.CompletionProposalComputerDescriptor_reason_runtime_ex;

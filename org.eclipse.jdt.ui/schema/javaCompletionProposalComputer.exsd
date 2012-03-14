@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.eclipse.jdt.ui">
+<schema targetNamespace="org.eclipse.jdt.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
          <meta.schema plugin="org.eclipse.jdt.ui" id="javaCompletionProposalComputer" name="Java Completion Proposal Computer"/>
@@ -93,6 +93,15 @@ and must have a public 0-argument constructor.
                <appInfo>
                   <meta.attribute kind="identifier" basedOn="org.eclipse.jdt.ui.javaCompletionProposalComputer/@id"/>
                </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="needsSortingAfterFiltering" type="boolean" use="default" value="false">
+            <annotation>
+               <documentation>
+                  if the attribute is set to &quot;true&quot; it forces the content assist processor to resort the list of proposals every time a new token is entered or removed to the completion prefix.
+
+@since 3.8
+               </documentation>
             </annotation>
          </attribute>
       </complexType>

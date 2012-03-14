@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Paul Fullbright <paul.fullbright@oracle.com> - content assist category enablement - http://bugs.eclipse.org/345213
+ *     Marcel Bruch <bruch@cs.tu-darmstadt.de> - [content assist] Allow to re-sort proposals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=350991
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -75,6 +76,15 @@ public final class CompletionProposalCategory {
 
 	private int fSortOrder= 0xffff - 1;
 	private String fLastError= null;
+
+	/**
+	 * Flag indicating whether any completion engine associated with this category requests
+	 * resorting of its proposals after filtering is triggered. Filtering is, e.g., triggered when a
+	 * user continues typing with an open completion window.
+	 * 
+	 * @since 3.8
+	 */
+	private boolean fNeedsSortingAfterFiltering;
 
 	CompletionProposalCategory(IConfigurationElement element, CompletionProposalComputerRegistry registry) throws CoreException {
 		fElement= element;
@@ -365,8 +375,10 @@ public final class CompletionProposalCategory {
 		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<CompletionProposalComputerDescriptor>(fRegistry.getProposalComputerDescriptors());
 		for (Iterator<CompletionProposalComputerDescriptor> it= descriptors.iterator(); it.hasNext();) {
 			CompletionProposalComputerDescriptor desc= it.next();
-			if (desc.getCategory() == this)
+			if (desc.getCategory() == this){
 				desc.sessionStarted();
+				fNeedsSortingAfterFiltering= fNeedsSortingAfterFiltering || desc.isSortingAfterFilteringNeeded();
+		    }
 			if (fLastError == null)
 				fLastError= desc.getErrorMessage();
 		}
@@ -376,6 +388,7 @@ public final class CompletionProposalCategory {
 	 * Notifies the computers in this category of a proposal computation session end.
 	 */
 	public void sessionEnded() {
+		fNeedsSortingAfterFiltering= false;
 		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<CompletionProposalComputerDescriptor>(fRegistry.getProposalComputerDescriptors());
 		for (Iterator<CompletionProposalComputerDescriptor> it= descriptors.iterator(); it.hasNext();) {
 			CompletionProposalComputerDescriptor desc= it.next();
@@ -386,4 +399,14 @@ public final class CompletionProposalCategory {
 		}
 	}
 
+	/**
+	 * Returns whether any completion proposal computer associated with this category requires
+	 * proposals to be sorted again after filtering.
+	 * 
+	 * @return <code>true</code> if any completion proposal computer in this category requires
+	 *         proposals to be sorted.
+	 */
+	public boolean isSortingAfterFilteringNeeded() {
+		return fNeedsSortingAfterFiltering;
+	}
 }

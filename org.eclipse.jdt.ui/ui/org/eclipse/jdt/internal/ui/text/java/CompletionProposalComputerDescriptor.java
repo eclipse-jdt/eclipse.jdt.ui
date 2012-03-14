@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Marcel Bruch <bruch@cs.tu-darmstadt.de> - [content assist] Allow to re-sort proposals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=350991
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -61,6 +62,8 @@ final class CompletionProposalComputerDescriptor {
 	private static final String CLASS= "class"; //$NON-NLS-1$
 	/** The extension schema name of the activate attribute. */
 	private static final String ACTIVATE= "activate"; //$NON-NLS-1$
+	/** The extension schema name of the needsSortingAfterFiltering attribute. */
+	private static final String NEEDS_SORTING_AFTER_FILTERING= "needsSortingAfterFiltering"; //$NON-NLS-1$
 	/** The extension schema name of the partition child elements. */
 	private static final String PARTITION= "partition"; //$NON-NLS-1$
 	/** Set of Java partition types. */
@@ -131,6 +134,15 @@ final class CompletionProposalComputerDescriptor {
 	 * @since 3.4
 	 */
 	boolean fTriedLoadingComputer= false;
+	
+	/**
+	 * Tells whether this proposal engine provides dynamic content that needs to be sorted after its
+	 * proposal have been filtered. Filtering happens, e.g., when a user continues typing with an
+	 * open completion window.
+	 * 
+	 * @since 3.8
+	 */
+	private boolean fNeedsSortingAfterFiltering;
 
 
 	/**
@@ -173,6 +185,9 @@ final class CompletionProposalComputerDescriptor {
 
 		String activateAttribute= element.getAttribute(ACTIVATE);
 		fActivate= Boolean.valueOf(activateAttribute).booleanValue();
+
+		String needsSortingAfterFilteringAttribute= element.getAttribute(NEEDS_SORTING_AFTER_FILTERING);
+		fNeedsSortingAfterFiltering= Boolean.valueOf(needsSortingAfterFilteringAttribute).booleanValue();
 
 		fClass= element.getAttribute(CLASS);
 		checkNotNull(fClass, CLASS);
@@ -564,4 +579,13 @@ final class CompletionProposalComputerDescriptor {
         }
     }
 
+	/**
+	 * Returns the <code>needsSortingAfterFiltering</code> flag of the described extension.
+	 * 
+	 * @return the needsSortingAfterFiltering flag of the described extension
+	 * @since 3.8
+	 */
+	public boolean isSortingAfterFilteringNeeded() {
+		return fNeedsSortingAfterFiltering;
+	}
 }

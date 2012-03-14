@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Paul Fullbright <paul.fullbright@oracle.com> - content assist category enablement - http://bugs.eclipse.org/345213
+ *     Marcel Bruch <bruch@cs.tu-darmstadt.de> - [content assist] Allow to re-sort proposals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=350991
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -29,7 +30,9 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -63,6 +66,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.AbstractProposalSorter;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -277,16 +281,18 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 * @return the list of proposals
 	 */
 	private List<ICompletionProposal> collectProposals(ITextViewer viewer, int offset, IProgressMonitor monitor, ContentAssistInvocationContext context) {
+		boolean needsSortingAfterFiltering= false;
 		List<ICompletionProposal> proposals= new ArrayList<ICompletionProposal>();
 		List<CompletionProposalCategory> providers= getCategories();
 		for (Iterator<CompletionProposalCategory> it= providers.iterator(); it.hasNext();) {
 			CompletionProposalCategory cat= it.next();
 			List<ICompletionProposal> computed= cat.computeCompletionProposals(context, fPartition, new SubProgressMonitor(monitor, 1));
 			proposals.addAll(computed);
+			needsSortingAfterFiltering= needsSortingAfterFiltering || (cat.isSortingAfterFilteringNeeded() && !computed.isEmpty());
 			if (fErrorMessage == null)
 				fErrorMessage= cat.getErrorMessage();
 		}
-
+		installProposalSorter(needsSortingAfterFiltering);
 		return proposals;
 	}
 
@@ -630,4 +636,35 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			return (KeySequence) binding;
 		return null;
     }
+
+	/**
+	 * Installs the proposal sorter to be used by the content assistant for resorting proposals
+	 * after filtering. Sets the sorter to the system's default sorter if
+	 * <code>needsSortingAfterFiltering</code> is <code>true</code>, <code>null</code> otherwise.
+	 * 
+	 * @param needsSortingAfterFiltering the flag indicating whether a sorter should be passed to
+	 *            the content assistant
+	 * @since 3.8
+	 * @see ProposalSorterRegistry#getCurrentSorter() the sorter used if <code>true</code>
+	 */
+	private void installProposalSorter(boolean needsSortingAfterFiltering) {
+		if (!needsSortingAfterFiltering) {
+			fAssistant.setSorter(null);
+			return;
+		}
+
+		AbstractProposalSorter sorter= null;
+		ProposalSorterHandle currentSorter= ProposalSorterRegistry.getDefault().getCurrentSorter();
+		try {
+			sorter= currentSorter.getSorter();
+		} catch (InvalidRegistryObjectException x) {
+			JavaPlugin.log(currentSorter.createExceptionStatus(x));
+		} catch (CoreException x) {
+			JavaPlugin.log(currentSorter.createExceptionStatus(x));
+		} catch (RuntimeException x) {
+			JavaPlugin.log(currentSorter.createExceptionStatus(x));
+		}
+		fAssistant.setSorter(sorter);
+	}
+
 }
