@@ -66,7 +66,6 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.AbstractProposalSorter;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -219,6 +218,15 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 */
 	private CompletionProposalComputerRegistry fComputerRegistry;
 
+	/**
+	 * Flag indicating whether any completion engine associated with this processor requests
+	 * resorting of its proposals after filtering is triggered. Filtering is, e.g., triggered when a
+	 * user continues typing with an open completion window.
+	 * 
+	 * @since 3.8
+	 */
+	private boolean fNeedsSortingAfterFiltering;
+
 
 	public ContentAssistProcessor(ContentAssistant assistant, String partition) {
 		Assert.isNotNull(partition);
@@ -249,11 +257,14 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		long collect= DEBUG ? System.currentTimeMillis() : 0;
 
 		monitor.subTask(JavaTextMessages.ContentAssistProcessor_sorting_proposals);
-		List<ICompletionProposal> filtered= filterAndSortProposals(proposals, monitor, context);
-		fNumberOfComputedResults= filtered.size();
+		if (fNeedsSortingAfterFiltering)
+			setContentAssistSorter();
+		else
+			proposals= sortProposals(proposals, monitor, context);
+		fNumberOfComputedResults= proposals.size();
 		long filter= DEBUG ? System.currentTimeMillis() : 0;
 
-		ICompletionProposal[] result= filtered.toArray(new ICompletionProposal[filtered.size()]);
+		ICompletionProposal[] result= proposals.toArray(new ICompletionProposal[proposals.size()]);
 		monitor.done();
 
 		if (DEBUG) {
@@ -292,7 +303,9 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			if (fErrorMessage == null)
 				fErrorMessage= cat.getErrorMessage();
 		}
-		installProposalSorter(needsSortingAfterFiltering);
+		if (fNeedsSortingAfterFiltering && !needsSortingAfterFiltering)
+			fAssistant.setSorter(null);
+		fNeedsSortingAfterFiltering= needsSortingAfterFiltering;
 		return proposals;
 	}
 
@@ -307,7 +320,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 * @return the list of filtered and sorted proposals, ready for
 	 *         display (element type: {@link ICompletionProposal})
 	 */
-	protected List<ICompletionProposal> filterAndSortProposals(List<ICompletionProposal> proposals, IProgressMonitor monitor, ContentAssistInvocationContext context) {
+	protected List<ICompletionProposal> sortProposals(List<ICompletionProposal> proposals, IProgressMonitor monitor, ContentAssistInvocationContext context) {
 		return proposals;
 	}
 
@@ -638,25 +651,15 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
     }
 
 	/**
-	 * Installs the proposal sorter to be used by the content assistant for resorting proposals
-	 * after filtering. Sets the sorter to the system's default sorter if
-	 * <code>needsSortingAfterFiltering</code> is <code>true</code>, <code>null</code> otherwise.
+	 * Sets the current proposal sorter into the content assistant.
 	 * 
-	 * @param needsSortingAfterFiltering the flag indicating whether a sorter should be passed to
-	 *            the content assistant
 	 * @since 3.8
 	 * @see ProposalSorterRegistry#getCurrentSorter() the sorter used if <code>true</code>
 	 */
-	private void installProposalSorter(boolean needsSortingAfterFiltering) {
-		if (!needsSortingAfterFiltering) {
-			fAssistant.setSorter(null);
-			return;
-		}
-
-		AbstractProposalSorter sorter= null;
+	private void setContentAssistSorter() {
 		ProposalSorterHandle currentSorter= ProposalSorterRegistry.getDefault().getCurrentSorter();
 		try {
-			sorter= currentSorter.getSorter();
+			fAssistant.setSorter(currentSorter.getSorter());
 		} catch (InvalidRegistryObjectException x) {
 			JavaPlugin.log(currentSorter.createExceptionStatus(x));
 		} catch (CoreException x) {
@@ -664,7 +667,6 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		} catch (RuntimeException x) {
 			JavaPlugin.log(currentSorter.createExceptionStatus(x));
 		}
-		fAssistant.setSorter(sorter);
 	}
 
 }

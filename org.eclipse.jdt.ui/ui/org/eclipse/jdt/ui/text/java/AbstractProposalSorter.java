@@ -42,13 +42,15 @@ public abstract class AbstractProposalSorter implements Comparator<ICompletionPr
 	}
 
 	/**
-	 * Called once before initial sorting starts the first time. Note that if a completion engine
-	 * needs subsequent sorting of its proposals (e.g., after some proposals get filtered due to
-	 * changes in the completion prefix), this method is <i>not</i> called again.
+	 * Called once before initial sorting starts the first time.
+	 * <p>
+	 * <strong>Note:</strong> As of 3.8 a completion proposal computer can request that proposals
+	 * are resorted. If such a computer is active, then this method will not be called.
+	 * </p>
 	 * <p>
 	 * Clients may override, the default implementation does nothing.
 	 * </p>
-	 *
+	 * 
 	 * @param context the context of the content assist invocation
 	 */
 	public void beginSorting(ContentAssistInvocationContext context) {
@@ -56,19 +58,22 @@ public abstract class AbstractProposalSorter implements Comparator<ICompletionPr
 
 	/**
 	 * The orderings imposed by an implementation need not be consistent with equals.
-	 *
+	 * 
 	 * @param p1 the first proposal to be compared
 	 * @param p2 the second proposal to be compared
 	 * @return a negative integer, zero, or a positive integer as the first argument is less than,
-	 *         equal to, or greater than the second.
+	 *         equal to, or greater than the second
 	 * 
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
 	public abstract int compare(ICompletionProposal p1, ICompletionProposal p2);
 
 	/**
-	 * Called once after the initial sorting finished. Note that even if a completion engine causes
-	 * a subsequent sorting of its proposals, this method is <i>not</i> called again.
+	 * Called once after the initial sorting finished.
+	 * <p>
+	 * <strong>Note:</strong> As of 3.8 a completion proposal computer can request that proposals
+	 * are resorted. If such a computer is active, then this method will not be called.
+	 * </p>
 	 * <p>
 	 * Clients may override, the default implementation does nothing.
 	 * </p>

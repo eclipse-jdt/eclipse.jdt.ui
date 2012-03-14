@@ -113,7 +113,7 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor#filterAndSort(java.util.List, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	protected List<ICompletionProposal> filterAndSortProposals(List<ICompletionProposal> proposals, IProgressMonitor monitor, ContentAssistInvocationContext context) {
+	protected List<ICompletionProposal> sortProposals(List<ICompletionProposal> proposals, IProgressMonitor monitor, ContentAssistInvocationContext context) {
 		ProposalSorterRegistry.getDefault().getCurrentSorter().sortProposals(context, proposals);
 		return proposals;
 	}
