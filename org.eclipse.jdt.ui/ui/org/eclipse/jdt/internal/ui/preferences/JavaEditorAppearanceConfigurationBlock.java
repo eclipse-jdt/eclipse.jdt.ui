@@ -386,17 +386,17 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	}
 
 	private Button addButton(Composite parent, int style, String label, int indentation, SelectionListener listener) {
-		Button checkBox= new Button(parent, style);
-		checkBox.setText(label);
+		Button button= new Button(parent, style);
+		button.setText(label);
 
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= indentation;
 		gd.horizontalSpan= 2;
-		checkBox.setLayoutData(gd);
-		checkBox.addSelectionListener(listener);
-		makeScrollableCompositeAware(checkBox);
+		button.setLayoutData(gd);
+		button.addSelectionListener(listener);
+		makeScrollableCompositeAware(button);
 
-		return checkBox;
+		return button;
 	}
 
 	private void addLink(Composite composite, String text, int indent) {
