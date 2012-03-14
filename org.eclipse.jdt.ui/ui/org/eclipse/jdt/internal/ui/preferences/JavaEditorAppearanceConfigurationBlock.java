@@ -69,6 +69,14 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 
 	private FontMetrics fFontMetrics;
 
+	private Button fBracketHighlightingCheckbox;
+
+	private Button fMatchingBracketRadioButton;
+
+	private Button fMatchingBracketAndCaretLocationRadioButton;
+
+	private Button fEnclosingBracketsRadioButton;
+
 	public JavaEditorAppearanceConfigurationBlock(PreferencePage mainPreferencePage, OverlayPreferenceStore store) {
 		super(store, mainPreferencePage);
 		getPreferenceStore().addKeys(createOverlayStoreKeys());
@@ -229,16 +237,51 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
 		spacer.setLayoutData(gd);
 
-		label= PreferencesMessages.JavaEditorPreferencePage_highlightMatchingBrackets;
-		Button master= addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_MATCHING_BRACKETS, 0);
+		label= PreferencesMessages.JavaEditorPreferencePage_bracketHighlighting;
+		fBracketHighlightingCheckbox= addButton(appearanceComposite, SWT.CHECK, label, 0, new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				getPreferenceStore().setValue(PreferenceConstants.EDITOR_MATCHING_BRACKETS, fBracketHighlightingCheckbox.getSelection());
+			}
+		});
 
-		label= PreferencesMessages.JavaEditorPreferencePage_highlightBothBrackets;
-		Button slave= addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION, 0);
-		createDependency(master, slave);
+		label= PreferencesMessages.JavaEditorPreferencePage_highlightMatchingBracket;
+		fMatchingBracketRadioButton= addButton(appearanceComposite, SWT.RADIO, label, 0, new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (fMatchingBracketRadioButton.getSelection())
+					getPreferenceStore().setValue(PreferenceConstants.EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION, false);
+			}
+		});
+		createDependency(fBracketHighlightingCheckbox, fMatchingBracketRadioButton);
+
+		label= PreferencesMessages.JavaEditorPreferencePage_highlightMatchingBracketAndCaretLocation;
+		fMatchingBracketAndCaretLocationRadioButton= addButton(appearanceComposite, SWT.RADIO, label, 0, new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (fMatchingBracketAndCaretLocationRadioButton.getSelection())
+					getPreferenceStore().setValue(PreferenceConstants.EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION, true);
+			}
+		});
+		createDependency(fBracketHighlightingCheckbox, fMatchingBracketAndCaretLocationRadioButton);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_highlightEnclosingBrackets;
-		slave= addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_ENCLOSING_BRACKETS, 0);
-		createDependency(master, slave);
+		fEnclosingBracketsRadioButton= addButton(appearanceComposite, SWT.RADIO, label, 0, new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				boolean selection= fEnclosingBracketsRadioButton.getSelection();
+				getPreferenceStore().setValue(PreferenceConstants.EDITOR_ENCLOSING_BRACKETS, selection);
+				if (selection)
+					getPreferenceStore().setValue(PreferenceConstants.EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION, true);
+			}
+		});
+		createDependency(fBracketHighlightingCheckbox, fEnclosingBracketsRadioButton);
+
+		spacer= new Label(appearanceComposite, SWT.LEFT);
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
+		spacer.setLayoutData(gd);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_quickassist_lightbulb;
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, 0);
@@ -342,6 +385,19 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		return appearanceComposite;
 	}
 
+	private Button addButton(Composite parent, int style, String label, int indentation, SelectionListener listener) {
+		Button checkBox= new Button(parent, style);
+		checkBox.setText(label);
+
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent= indentation;
+		gd.horizontalSpan= 2;
+		checkBox.setLayoutData(gd);
+		checkBox.addSelectionListener(listener);
+		makeScrollableCompositeAware(checkBox);
+
+		return checkBox;
+	}
 
 	private void addLink(Composite composite, String text, int indent) {
 		GridData gd;
@@ -388,6 +444,17 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	 */
 	@Override
 	public void initialize() {
+		boolean matchingBrackets= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_MATCHING_BRACKETS);
+		boolean highlightBracketAtCaretLocation= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION);
+		boolean enclosingBrackets= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_ENCLOSING_BRACKETS);
+		
+		fBracketHighlightingCheckbox.setSelection(matchingBrackets);
+		fEnclosingBracketsRadioButton.setSelection(enclosingBrackets);
+		if (!enclosingBrackets) {
+			fMatchingBracketRadioButton.setSelection(!highlightBracketAtCaretLocation);
+			fMatchingBracketAndCaretLocationRadioButton.setSelection(highlightBracketAtCaretLocation);
+		}
+
 		super.initialize();
 		initializeDefaultColors();
 
