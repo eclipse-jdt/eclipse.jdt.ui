@@ -444,18 +444,8 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	 */
 	@Override
 	public void initialize() {
-		boolean matchingBrackets= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_MATCHING_BRACKETS);
-		boolean highlightBracketAtCaretLocation= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION);
-		boolean enclosingBrackets= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_ENCLOSING_BRACKETS);
-		
-		fBracketHighlightingCheckbox.setSelection(matchingBrackets);
-		fEnclosingBracketsRadioButton.setSelection(enclosingBrackets);
-		if (!enclosingBrackets) {
-			fMatchingBracketRadioButton.setSelection(!highlightBracketAtCaretLocation);
-			fMatchingBracketAndCaretLocationRadioButton.setSelection(highlightBracketAtCaretLocation);
-		}
-
-		super.initialize();
+		initializeBracketHighlightingPreferences();
+		super.initialize(); // also updates state of slaves, hence it is the second call
 		initializeDefaultColors();
 
 		for (int i= 0; i < fAppearanceColorListModel.length; i++)
@@ -470,6 +460,19 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 			}
 		});
 
+	}
+
+	private void initializeBracketHighlightingPreferences() {
+		boolean matchingBrackets= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_MATCHING_BRACKETS);
+		boolean highlightBracketAtCaretLocation= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION);
+		boolean enclosingBrackets= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_ENCLOSING_BRACKETS);
+		
+		fBracketHighlightingCheckbox.setSelection(matchingBrackets);
+		fEnclosingBracketsRadioButton.setSelection(enclosingBrackets);
+		if (!enclosingBrackets) {
+			fMatchingBracketRadioButton.setSelection(!highlightBracketAtCaretLocation);
+			fMatchingBracketAndCaretLocationRadioButton.setSelection(highlightBracketAtCaretLocation);
+		}
 	}
 
 	/**
@@ -492,6 +495,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	 */
 	@Override
 	public void performDefaults() {
+		initializeBracketHighlightingPreferences();
 		super.performDefaults();
 		initializeDefaultColors();
 		handleAppearanceColorListSelection();
