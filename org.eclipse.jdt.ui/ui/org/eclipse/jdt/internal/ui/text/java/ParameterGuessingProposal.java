@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
@@ -30,6 +32,7 @@ import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.InclusivePositionUpdater;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
+import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.ProposalPosition;
@@ -116,7 +119,7 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 	 * @see ICompletionProposalExtension#apply(IDocument, char)
 	 */
 	@Override
-	public void apply(IDocument document, char trigger, int offset) {
+	public void apply(final IDocument document, char trigger, int offset) {
 		try {
 			super.apply(document, trigger, offset);
 
@@ -150,7 +153,23 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 
 				LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
 				ui.setExitPosition(getTextViewer(), baseOffset + replacement.length(), 0, Integer.MAX_VALUE);
-				ui.setExitPolicy(new ExitPolicy(')', document));
+				ui.setExitPolicy(new ExitPolicy(')', document) {
+					@SuppressWarnings("hiding")
+					@Override
+					public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
+						if (event.character == ',') {
+							for (int i= 0; i < fPositions.length - 1; i++) { // not for the last one
+								Position position= fPositions[i];
+								if (position.offset <= offset && offset + length <= position.offset + position.length) {
+									event.character= '\t';
+									event.keyCode= SWT.TAB;
+									return null;
+								}
+							}
+						}
+						return super.doExit(model, event, offset, length);
+					}
+				});
 				ui.setCyclingMode(LinkedModeUI.CYCLE_WHEN_NO_PARENT);
 				ui.setDoContextInfo(true);
 				ui.enter();
