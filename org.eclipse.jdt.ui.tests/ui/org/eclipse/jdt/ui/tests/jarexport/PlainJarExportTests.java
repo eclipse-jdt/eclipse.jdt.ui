@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,10 +56,11 @@ public class PlainJarExportTests extends TestCase {
 	private static final Class THIS= PlainJarExportTests.class;
 
 	public static Test suite() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		return setUpTest(new TestSuite(THIS));
 	}
 	
 	public static Test setUpTest(Test test) {
+		System.setProperty("jdt.bug.367669", "non-null");
 		return new ProjectTestSetup(test);
 	}
 

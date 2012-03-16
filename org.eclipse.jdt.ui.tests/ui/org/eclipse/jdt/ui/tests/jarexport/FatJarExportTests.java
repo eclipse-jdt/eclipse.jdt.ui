@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,11 +86,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarAntExporter;
 import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarPackageWizardPage;
-import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarRsrcUrlBuilder;
 import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarPackageWizardPage.CopyLibraryHandler;
 import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarPackageWizardPage.ExtractLibraryHandler;
 import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarPackageWizardPage.LibraryHandler;
 import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarPackageWizardPage.PackageLibraryHandler;
+import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarRsrcUrlBuilder;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 public class FatJarExportTests extends TestCase {
@@ -104,6 +104,7 @@ public class FatJarExportTests extends TestCase {
 	}
 
 	public static Test setUpTest(Test test) {
+		System.setProperty("jdt.bug.367669", "non-null");
 		return new ProjectTestSetup(test);
 	}
 
