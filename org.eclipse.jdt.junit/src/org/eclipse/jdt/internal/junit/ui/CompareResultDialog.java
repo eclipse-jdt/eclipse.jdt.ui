@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -110,7 +110,7 @@ public class CompareResultDialog extends TrayDialog {
             	presentation.setDefaultStyleRange(new StyleRange(0, fDocument.getLength(), null, null));
             	int prefix= fPrefixSuffixOffsets2[0];
                 int suffix= fPrefixSuffixOffsets2[1];
-                TextAttribute attr= new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_RED), null, SWT.BOLD);
+                TextAttribute attr= new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_RED));
                 presentation.addStyleRange(new StyleRange(prefix, fDocument.getLength()-suffix-prefix, attr.getForeground(), attr.getBackground(), attr.getStyle()));
             }
         }
