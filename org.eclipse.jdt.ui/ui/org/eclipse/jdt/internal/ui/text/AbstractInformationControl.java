@@ -343,7 +343,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 		fFilterText.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {
-				if (e.keyCode == 0x0D) // return
+				if (e.keyCode == 0x0D || e.keyCode == SWT.KEYPAD_CR) // Enter key
 					gotoSelectedElement();
 				if (e.keyCode == SWT.ARROW_DOWN)
 					fTreeViewer.getTree().setFocus();
