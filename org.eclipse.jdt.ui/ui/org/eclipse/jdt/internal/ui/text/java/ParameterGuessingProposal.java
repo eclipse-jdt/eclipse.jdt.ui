@@ -154,20 +154,19 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 				LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
 				ui.setExitPosition(getTextViewer(), baseOffset + replacement.length(), 0, Integer.MAX_VALUE);
 				ui.setExitPolicy(new ExitPolicy(')', document) {
-					@SuppressWarnings("hiding")
 					@Override
-					public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
+					public ExitFlags doExit(LinkedModeModel model2, VerifyEvent event, int offset2, int length) {
 						if (event.character == ',') {
 							for (int i= 0; i < fPositions.length - 1; i++) { // not for the last one
 								Position position= fPositions[i];
-								if (position.offset <= offset && offset + length <= position.offset + position.length) {
+								if (position.offset <= offset2 && offset2 + length <= position.offset + position.length) {
 									event.character= '\t';
 									event.keyCode= SWT.TAB;
 									return null;
 								}
 							}
 						}
-						return super.doExit(model, event, offset, length);
+						return super.doExit(model2, event, offset2, length);
 					}
 				});
 				ui.setCyclingMode(LinkedModeUI.CYCLE_WHEN_NO_PARENT);
