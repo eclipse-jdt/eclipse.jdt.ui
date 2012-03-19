@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -370,6 +370,8 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			try {
 				ICompilationUnit[] units= pack.getCompilationUnits();
 				for (int i= 0; i < units.length; i++) {
+					if (JavaModelUtil.isPackageInfo(units[i]))
+						result.add(units[i]);
 					IType[] types= units[i].getTypes();
 					for (int j= 0; j < types.length; j++) {
 						if (isValidType(types[j]))
