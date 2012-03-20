@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -164,18 +164,18 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 
 	/**
 	 * Computes the input for this view based on the given element.
-	 *
-	 * @param element the element from which to compute the input
-	 * @return	the input or <code>null</code> if the input was not computed successfully
+	 * 
+	 * @param element the element from which to compute the input, or <code>null</code>
+	 * @return the input or <code>null</code> if the input was not computed successfully
 	 */
 	abstract protected Object computeInput(Object element);
 
 	/**
 	 * Computes the input for this view based on the given elements
-	 *
+	 * 
 	 * @param part the part that triggered the current element update, or <code>null</code>
 	 * @param selection the new selection, or <code>null</code>
-	 * @param element the new java element that will be displayed
+	 * @param element the new java element that will be displayed, or <code>null</code>
 	 * @param monitor a progress monitor
 	 * @return the input or <code>null</code> if the input was not computed successfully
 	 * @since 3.4
@@ -618,13 +618,9 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 						return;
 				}
 
-
 				// The actual computation
 				final Object input= computeInput(part, selection, je, computeProgressMonitor);
-				if (input == null)
-					return;
-
-				final String description= computeDescription(part, selection, je, computeProgressMonitor);
+				final String description= input != null ? computeDescription(part, selection, je, computeProgressMonitor) : ""; //$NON-NLS-1$
 
 				Shell shell= getSite().getShell();
 				if (shell.isDisposed())
@@ -685,8 +681,9 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		fGotoInputAction.setEnabled(true);
 
 		IJavaElement inputElement= getInput();
+		String toolTip= inputElement != null ? JavaElementLabels.getElementLabel(inputElement, TOOLTIP_LABEL_FLAGS) : ""; //$NON-NLS-1$
 
 		setContentDescription(description);
-		setTitleToolTip(JavaElementLabels.getElementLabel(inputElement, TOOLTIP_LABEL_FLAGS));
+		setTitleToolTip(toolTip);
 	}
 }

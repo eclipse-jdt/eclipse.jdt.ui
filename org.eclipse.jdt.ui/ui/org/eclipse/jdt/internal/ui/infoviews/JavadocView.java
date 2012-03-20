@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -923,9 +923,8 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	@Override
 	protected Object computeInput(Object input) {
-		//TODO: never used?
 		if (getControl() == null || ! (input instanceof IJavaElement))
-			return null;
+			return getInputForNull();
 
 		IWorkbenchPart part= null;
 		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
@@ -957,7 +956,7 @@ public class JavadocView extends AbstractInfoView {
 	@Override
 	protected Object computeInput(IWorkbenchPart part, ISelection selection, IJavaElement input, IProgressMonitor monitor) {
 		if (getControl() == null || input == null)
-			return null;
+			return getInputForNull();
 
 		String javadocHtml;
 
@@ -1155,18 +1154,20 @@ public class JavadocView extends AbstractInfoView {
 			}
 		}
 
-		boolean flushContent= true;
-		if (buffer.length() > 0 || flushContent) {
-			HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, fgStyleSheet);
-			if (base != null) {
-				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
-				buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-			HTMLPrinter.addPageEpilog(buffer);
-			return buffer.toString();
+		HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, fgStyleSheet);
+		if (base != null) {
+			int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
+			buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		HTMLPrinter.addPageEpilog(buffer);
+		return buffer.toString();
+	}
 
-		return null;
+	private String getInputForNull() {
+		StringBuffer buffer= new StringBuffer();
+		HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, fgStyleSheet);
+		HTMLPrinter.addPageEpilog(buffer);
+		return buffer.toString();
 	}
 
 	/**
