@@ -11,6 +11,7 @@
  *     Sebastian Davids, sdavids@gmx.de - 187316 [preferences] Mark Occurences Pref Page; Link to
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [preferences] Add preference for new compiler warning: MissingSynchronizedModifierInInheritedMethod - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245240
  *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
+ *     Thomas Reinhardt <thomas@reinhardt.com> - [build path] user library dialog should allow to select JAR from workspace - http://bugs.eclipse.org/300542
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -641,6 +642,7 @@ public final class PreferencesMessages extends NLS {
 	public static String UserLibraryPreferencePage_libraries_new_button;
 	public static String UserLibraryPreferencePage_libraries_edit_button;
 	public static String UserLibraryPreferencePage_libraries_addjar_button;
+	public static String UserLibraryPreferencePage_libraries_addexternaljar_button;
 	public static String UserLibraryPreferencePage_libraries_remove_button;
 	public static String UserLibraryPreferencePage_libraries_load_button;
 	public static String UserLibraryPreferencePage_libraries_save_button;

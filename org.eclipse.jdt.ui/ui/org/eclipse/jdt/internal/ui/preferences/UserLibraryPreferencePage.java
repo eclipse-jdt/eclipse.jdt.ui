@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Thomas Reinhardt <thomas@reinhardt.com> - [build path] user library dialog should allow to select JAR from workspace - http://bugs.eclipse.org/300542
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -60,6 +61,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -76,11 +78,16 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
@@ -767,6 +774,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		}
 	}
 
+	private IWorkbench fWorkbench;
 	private IDialogSettings fDialogSettings;
 	private TreeListDialogField<CPUserLibraryElement> fLibraryList;
 	private IJavaProject fDummyProject;
@@ -775,11 +783,12 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	private static final int IDX_NEW= 0;
 	private static final int IDX_EDIT= 1;
 	private static final int IDX_ADD= 2;
-	private static final int IDX_REMOVE= 3;
-	private static final int IDX_UP= 5;
-	private static final int IDX_DOWN= 6;
-	private static final int IDX_LOAD= 8;
-	private static final int IDX_SAVE= 9;
+	private static final int IDX_ADD_EXTERNAL= 3;
+	private static final int IDX_REMOVE= 4;
+	private static final int IDX_UP= 6;
+	private static final int IDX_DOWN= 7;
+	private static final int IDX_LOAD= 9;
+	private static final int IDX_SAVE= 10;
 
 	/**
 	 * Constructor for ClasspathVariablesPreferencePage
@@ -802,6 +811,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				PreferencesMessages.UserLibraryPreferencePage_libraries_new_button,
 				PreferencesMessages.UserLibraryPreferencePage_libraries_edit_button,
 				PreferencesMessages.UserLibraryPreferencePage_libraries_addjar_button,
+				PreferencesMessages.UserLibraryPreferencePage_libraries_addexternaljar_button,
 				PreferencesMessages.UserLibraryPreferencePage_libraries_remove_button,
 				null,
 				PreferencesMessages.UserLibraryPreferencePage_UserLibraryPreferencePage_libraries_up_button,
@@ -904,6 +914,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	 * @see IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
 	public void init(IWorkbench workbench) {
+		fWorkbench= workbench;
 	}
 
 	/*
@@ -1050,6 +1061,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		field.enableButton(IDX_REMOVE, canRemove(list));
 		field.enableButton(IDX_EDIT, canEdit(list));
 		field.enableButton(IDX_ADD, canAdd(list));
+		field.enableButton(IDX_ADD_EXTERNAL, canAdd(list));
 		field.enableButton(IDX_UP, canMoveUp(list));
 		field.enableButton(IDX_DOWN, canMoveDown(list));
 		field.enableButton(IDX_SAVE, field.getSize() > 0);
@@ -1060,6 +1072,8 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			editUserLibraryElement(null);
 		} else if (index == IDX_ADD) {
 			doAdd(field.getSelectedElements());
+		} else if (index == IDX_ADD_EXTERNAL) {
+			doAddExternal(field.getSelectedElements());
 		} else if (index == IDX_REMOVE) {
 			doRemove(field.getSelectedElements());
 		} else if (index == IDX_EDIT) {
@@ -1121,7 +1135,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	}
 
 	private void editArchiveElement(CPListElement existingElement, CPUserLibraryElement parent) {
-		CPListElement[] elements= openExtJarFileDialog(existingElement, parent);
+		CPListElement[] elements= openJarFileDialog(existingElement, parent);
 		if (elements != null) {
 			for (int i= 0; i < elements.length; i++) {
 				if (existingElement != null) {
@@ -1186,6 +1200,61 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	}
 
 	private void doAdd(List<Object> list) {
+		if (canAdd(list)) {
+			CPUserLibraryElement parentLibrary = getSingleSelectedLibrary(list);
+			
+			IPath selection= getWorkbenchWindowSelection();
+			
+			IPath selectedPaths[] = BuildPathDialogAccess.chooseJAREntries(this.getShell(), selection, new IPath[0]);
+			
+			if (selectedPaths != null) {
+				List<CPListElement> elements = new ArrayList<CPListElement>();
+				for (int i= 0; i < selectedPaths.length; i++) {
+					CPListElement cpElement = new CPListElement(parentLibrary, fDummyProject, IClasspathEntry.CPE_LIBRARY, selectedPaths[i], null);
+					cpElement.setAttribute(CPListElement.SOURCEATTACHMENT, BuildPathSupport.guessSourceAttachment(cpElement));
+					cpElement.setAttribute(CPListElement.JAVADOC, BuildPathSupport.guessJavadocLocation(cpElement));
+					
+					elements.add(cpElement);
+					
+					parentLibrary.add(cpElement);
+				}
+				fLibraryList.refresh(parentLibrary);
+				fLibraryList.selectElements(new StructuredSelection(elements));
+				fLibraryList.expandElement(parentLibrary, 2);
+			}
+		}
+	}
+
+	private IPath getWorkbenchWindowSelection() {
+		IWorkbenchWindow window= fWorkbench.getActiveWorkbenchWindow();
+		if (window != null) {
+			ISelection selection= window.getSelectionService().getSelection();
+			if (selection instanceof IStructuredSelection) {
+				IStructuredSelection structuredSelection= (IStructuredSelection) selection;
+				Object element= structuredSelection.getFirstElement();
+				if (element != null) {
+					Object resource= Platform.getAdapterManager().getAdapter(element, IResource.class);
+					if (resource != null) {
+						return ((IResource) resource).getFullPath();
+					}
+					if (structuredSelection instanceof ITreeSelection) {
+						TreePath treePath= ((ITreeSelection) structuredSelection).getPaths()[0];
+						while ((treePath = treePath.getParentPath()) != null) {
+							element= treePath.getLastSegment();
+							resource= Platform.getAdapterManager().getAdapter(element, IResource.class);
+							if (resource != null) {
+								return ((IResource) resource).getFullPath();
+							}
+						}
+					}
+				}
+				
+			}
+		}
+		return null;
+	}
+
+	private void doAddExternal(List<Object> list) {
 		if (canAdd(list)) {
 			CPUserLibraryElement element= getSingleSelectedLibrary(list);
 			editArchiveElement(null, element);
@@ -1349,9 +1418,40 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		}
 		return false;
 	}
+	
+	private CPListElement[] openJarFileDialog(CPListElement existing, Object parent) {
+		if (existing == null) {
+			return doOpenExternalJarFileDialog(existing, parent);
+		}
+		
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		IPath path = existing.getPath();
+		
+		if (root.exists(path)) {
+			return doOpenInternalJarFileDialog(existing, parent);
+		}
+		return doOpenExternalJarFileDialog(existing, parent);
+	}
 
-
-	private CPListElement[] openExtJarFileDialog(CPListElement existing, Object parent) {
+	private CPListElement[] doOpenInternalJarFileDialog(CPListElement existing, Object parent) {
+		IPath path = existing.getPath();
+		IPath selectedPaths[] = BuildPathDialogAccess.chooseJAREntries(this.getShell(), path, new IPath[0]);
+		
+		if (selectedPaths != null) {
+			List<CPListElement> elements = new ArrayList<CPListElement>();
+			for (int i= 0; i < selectedPaths.length; i++) {
+				CPListElement cpElement = new CPListElement(parent, fDummyProject, IClasspathEntry.CPE_LIBRARY, selectedPaths[i], null);
+				cpElement.setAttribute(CPListElement.SOURCEATTACHMENT, BuildPathSupport.guessSourceAttachment(cpElement));
+				cpElement.setAttribute(CPListElement.JAVADOC, BuildPathSupport.guessJavadocLocation(cpElement));
+				
+				elements.add(cpElement);
+			}
+			return elements.toArray(new CPListElement[0]);
+		}
+		return null;
+	}
+	
+	private CPListElement[] doOpenExternalJarFileDialog(CPListElement existing, Object parent) {
 		String lastUsedPath;
 		if (existing != null) {
 			lastUsedPath= existing.getPath().removeLastSegments(1).toOSString();
