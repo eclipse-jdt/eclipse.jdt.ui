@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -106,19 +105,19 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	private boolean fAssigned= false;
 
 	/** The binding of the element variable */
-	private IBinding fElement= null;
+	private IBinding fElementVariable= null;
 
-	/** The node of the iterable object used in the expression */
+	/** The node of the iterable expression */
 	private Expression fExpression= null;
 
-	/** The binding of the iterable object */
+	/** The type binding of the iterable expression */
 	private IBinding fIterable= null;
 
 	/** Is the iterator method invoked on <code>this</code>? */
 	private boolean fThis= false;
 
 	/** The binding of the iterator variable */
-	private IVariableBinding fIterator= null;
+	private IVariableBinding fIteratorVariable= null;
 
 	/** The nodes of the element variable occurrences */
 	private final List<Expression> fOccurrences= new ArrayList<Expression>(2);
@@ -138,8 +137,8 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
 	@Override
 	public String getIntroducedVariableName() {
-		if (fElement != null) {
-			return fElement.getName();
+		if (fElementVariable != null) {
+			return fElementVariable.getName();
 		} else {
 			return getVariableNameProposals()[0];
 		}
@@ -150,7 +149,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		String[] variableNames= getUsedVariableNames();
 		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(getJavaProject(), FOR_LOOP_ELEMENT_IDENTIFIER, 0, variableNames);
 
-		final ITypeBinding binding= fIterator.getType();
+		final ITypeBinding binding= fIteratorVariable.getType();
 		if (binding != null && binding.isParameterizedType()) {
 			String type= binding.getTypeArguments()[0].getName();
 			String[] typeSuggestions= StubUtility.getLocalNameSuggestions(getJavaProject(), type, 0, variableNames);
@@ -188,13 +187,13 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	}
 
 	/**
-	 * Returns the iterable type from the iterator type binding.
+	 * Returns the type of elements returned by the iterator.
 	 *
 	 * @param iterator
 	 *            the iterator type binding, or <code>null</code>
-	 * @return the iterable type
+	 * @return the element type
 	 */
-	private ITypeBinding getIterableType(final ITypeBinding iterator) {
+	private ITypeBinding getElementType(final ITypeBinding iterator) {
 		if (iterator != null) {
 			final ITypeBinding[] bindings= iterator.getTypeArguments();
 			if (bindings.length > 0) {
@@ -241,13 +240,13 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		String[] names= getVariableNameProposals();
 
 		String name;
-		if (fElement != null) {
-			name= fElement.getName();
+		if (fElementVariable != null) {
+			name= fElementVariable.getName();
 		} else {
 			name= names[0];
 		}
 		final LinkedProposalPositionGroup pg= positionGroups.getPositionGroup(name, true);
-		if (fElement != null)
+		if (fElementVariable != null)
 			pg.addProposal(name, null, 10);
 		for (int i= 0; i < names.length; i++) {
 			pg.addProposal(names[i], null, 10);
@@ -286,11 +285,11 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 						final Expression expression= node.getExpression();
 						if (expression instanceof Name) {
 							final IBinding result= ((Name)expression).resolveBinding();
-							if (result != null && result.equals(fIterator))
+							if (result != null && result.equals(fIteratorVariable))
 								return replace(node);
 						} else if (expression instanceof FieldAccess) {
 							final IBinding result= ((FieldAccess)expression).resolveFieldBinding();
-							if (result != null && result.equals(fIterator))
+							if (result != null && result.equals(fIteratorVariable))
 								return replace(node);
 						}
 					}
@@ -299,9 +298,9 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
 				@Override
 				public final boolean visit(final SimpleName node) {
-					if (fElement != null) {
+					if (fElementVariable != null) {
 						final IBinding binding= node.resolveBinding();
-						if (binding != null && binding.equals(fElement)) {
+						if (binding != null && binding.equals(fElementVariable)) {
 							final Statement parent= (Statement)ASTNodes.getParent(node, Statement.class);
 							if (parent != null && (list == null || list.getRewrittenList().contains(parent)))
 								pg.addPosition(astRewrite.track(node), false);
@@ -317,12 +316,12 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		final SimpleName simple= ast.newSimpleName(name);
 		pg.addPosition(astRewrite.track(simple), true);
 		declaration.setName(simple);
-		final ITypeBinding iterable= getIterableType(fIterator.getType());
-		declaration.setType(importType(iterable, getForStatement(), importRewrite, getRoot()));
+		final ITypeBinding elementType= getElementType(fIteratorVariable.getType());
+		declaration.setType(importType(elementType, getForStatement(), importRewrite, getRoot()));
 		if (fMakeFinal) {
 			ModifierRewrite.create(astRewrite, declaration).setModifiers(Modifier.FINAL, 0, group);
 		}
-		remover.registerAddedImport(iterable.getQualifiedName());
+		remover.registerAddedImport(elementType.getQualifiedName());
 		fEnhancedForLoop.setParameter(declaration);
 		fEnhancedForLoop.setExpression(getExpression(astRewrite));
 
@@ -391,17 +390,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 													final ITypeBinding iterable= getSuperType(resolved, "java.lang.Iterable"); //$NON-NLS-1$
 													if (iterable != null) {
 														fExpression= qualifier;
-														if (qualifier instanceof Name) {
-															final Name name= (Name)qualifier;
-															fIterable= name.resolveBinding();
-														} else if (qualifier instanceof MethodInvocation) {
-															final MethodInvocation invocation= (MethodInvocation)qualifier;
-															fIterable= invocation.resolveMethodBinding();
-														} else if (qualifier instanceof FieldAccess) {
-															final FieldAccess access= (FieldAccess)qualifier;
-															fIterable= access.resolveFieldBinding();
-														} else if (qualifier instanceof ThisExpression)
-															fIterable= resolved;
+														fIterable= resolved;
 													}
 												}
 											} else {
@@ -428,11 +417,11 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 									if (type != null) {
 										ITypeBinding iterator= getSuperType(type, "java.util.Iterator"); //$NON-NLS-1$
 										if (iterator != null)
-											fIterator= binding;
+											fIteratorVariable= binding;
 										else {
 											iterator= getSuperType(type, "java.util.Enumeration"); //$NON-NLS-1$
 											if (iterator != null)
-												fIterator= binding;
+												fIteratorVariable= binding;
 										}
 									}
 								}
@@ -445,25 +434,49 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			final Statement statement= getForStatement().getBody();
 			final boolean[] otherInvocationThenNext= new boolean[] {false};
 			final int[] nextInvocationCount= new int[] {0};
-			if (statement != null && fIterator != null) {
-				final ITypeBinding iterable= getIterableType(fIterator.getType());
+			if (statement != null && fIteratorVariable != null) {
+				final ITypeBinding elementType= getElementType(fIteratorVariable.getType());
 				statement.accept(new ASTVisitor() {
 
 					@Override
-					public final boolean visit(final Assignment node) {
-						return visit(node.getLeftHandSide(), node.getRightHandSide());
-					}
+					public boolean visit(SimpleName node) {
+						IBinding nodeBinding= node.resolveBinding();
+						if (fElementVariable != null && fElementVariable.equals(nodeBinding)) {
+							fMakeFinal= false;
+						}
 
-					private boolean visit(final Expression node) {
+						if (nodeBinding == fIteratorVariable) {
+							if (node.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY) {
+								MethodInvocation invocation= (MethodInvocation) node.getParent();
+								String name= invocation.getName().getIdentifier();
+								if (name.equals("next") || name.equals("nextElement")) { //$NON-NLS-1$ //$NON-NLS-2$
+									nextInvocationCount[0]++;
+									
+									Expression left= null;
+									if (invocation.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+										left= ((Assignment) invocation.getParent()).getLeftHandSide();
+									} else if (invocation.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+										left= ((VariableDeclarationFragment) invocation.getParent()).getName();
+									} 
+									
+									return visitElementVariable(left);
+								}
+							}
+							otherInvocationThenNext[0]= true;
+						}
+						return true;
+					}
+					
+					private boolean visitElementVariable(final Expression node) {
 						if (node != null) {
 							final ITypeBinding binding= node.resolveTypeBinding();
-							if (binding != null && iterable.equals(binding)) {
+							if (binding != null && elementType.equals(binding)) {
 								if (node instanceof Name) {
 									final Name name= (Name)node;
 									final IBinding result= name.resolveBinding();
 									if (result != null) {
 										fOccurrences.add(node);
-										fElement= result;
+										fElementVariable= result;
 										return false;
 									}
 								} else if (node instanceof FieldAccess) {
@@ -471,85 +484,13 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 									final IBinding result= access.resolveFieldBinding();
 									if (result != null) {
 										fOccurrences.add(node);
-										fElement= result;
+										fElementVariable= result;
 										return false;
 									}
 								}
 							}
 						}
 						return true;
-					}
-
-					private boolean visit(final Expression left, final Expression right) {
-						if (fElement != null && left instanceof SimpleName) {
-							IBinding binding= ((SimpleName) left).resolveBinding();
-							if (fElement.equals(binding))
-								fMakeFinal= false;
-						}
-
-						if (right instanceof MethodInvocation) {
-							final MethodInvocation invocation= (MethodInvocation)right;
-							final IMethodBinding binding= invocation.resolveMethodBinding();
-							if (binding != null && (binding.getName().equals("next") || binding.getName().equals("nextElement"))) { //$NON-NLS-1$ //$NON-NLS-2$
-								final Expression expression= invocation.getExpression();
-								if (expression instanceof Name) {
-									final Name qualifier= (Name)expression;
-									final IBinding result= qualifier.resolveBinding();
-									if (result != null && result.equals(fIterator)) {
-										nextInvocationCount[0]++;
-										return visit(left);
-									}
-								} else if (expression instanceof FieldAccess) {
-									final FieldAccess qualifier= (FieldAccess)expression;
-									final IBinding result= qualifier.resolveFieldBinding();
-									if (result != null && result.equals(fIterator)) {
-										nextInvocationCount[0]++;
-										return visit(left);
-									}
-								}
-							} else {
-								return visit(invocation);
-							}
-						}
-						return true;
-					}
-
-					/**
-					 * {@inheritDoc}
-					 */
-					@Override
-					public boolean visit(MethodInvocation invocation) {
-						final IMethodBinding binding= invocation.resolveMethodBinding();
-						if (binding != null) {
-							final Expression expression= invocation.getExpression();
-							if (expression instanceof Name) {
-								final Name qualifier= (Name)expression;
-								final IBinding result= qualifier.resolveBinding();
-								if (result != null && result.equals(fIterator)) {
-									if (!binding.getName().equals("next") && !binding.getName().equals("nextElement")) { //$NON-NLS-1$ //$NON-NLS-2$
-										otherInvocationThenNext[0]= true;
-									} else {
-										nextInvocationCount[0]++;
-									}
-								}
-							} else if (expression instanceof FieldAccess) {
-								final FieldAccess qualifier= (FieldAccess)expression;
-								final IBinding result= qualifier.resolveFieldBinding();
-								if (result != null && result.equals(fIterator)) {
-									if (!binding.getName().equals("next") && !binding.getName().equals("nextElement")) { //$NON-NLS-1$ //$NON-NLS-2$
-										otherInvocationThenNext[0]= true;
-									} else {
-										nextInvocationCount[0]++;
-									}
-								}
-							}
-						}
-						return true;
-					}
-
-					@Override
-					public final boolean visit(final VariableDeclarationFragment node) {
-						return visit(node.getName(), node.getInitializer());
 					}
 				});
 				if (otherInvocationThenNext[0])
@@ -558,13 +499,13 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 				if (nextInvocationCount[0] > 1)
 					return ERROR_STATUS;
 
-				if (fElement != null) {
+				if (fElementVariable != null) {
 					statement.accept(new ASTVisitor() {
 						@Override
 						public final boolean visit(final VariableDeclarationFragment node) {
 							if (node.getInitializer() instanceof NullLiteral) {
 								SimpleName name= node.getName();
-								if (iterable.equals(name.resolveTypeBinding()) && fElement.equals(name.resolveBinding())) {
+								if (elementType.equals(name.resolveTypeBinding()) && fElementVariable.equals(name.resolveBinding())) {
 									fOccurrences.add(name);
 								}
 							}
@@ -586,14 +527,14 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 					@Override
 					public final boolean visit(final SimpleName node) {
 						final IBinding binding= node.resolveBinding();
-						if (binding != null && binding.equals(fElement))
+						if (binding != null && binding.equals(fElementVariable))
 							fAssigned= true;
 						return false;
 					}
 				});
 			}
 		}
-		if ((fExpression != null || fThis) && fIterable != null && fIterator != null && !fAssigned) {
+		if ((fExpression != null || fThis) && fIterable != null && fIteratorVariable != null && !fAssigned) {
 			return resultStatus;
 		} else {
 			return ERROR_STATUS;
