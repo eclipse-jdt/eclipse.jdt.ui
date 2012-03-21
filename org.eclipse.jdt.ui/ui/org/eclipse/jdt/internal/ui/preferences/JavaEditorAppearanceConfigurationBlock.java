@@ -245,8 +245,14 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 			}
 		});
 
+		Composite radioComposite= new Composite(appearanceComposite, SWT.NONE);
+		GridLayout radioLayout= new GridLayout();
+		radioLayout.marginWidth= 0;
+		radioLayout.marginHeight= 0;
+		radioComposite.setLayout(radioLayout);
+
 		label= PreferencesMessages.JavaEditorPreferencePage_highlightMatchingBracket;
-		fMatchingBracketRadioButton= addButton(appearanceComposite, SWT.RADIO, label, 0, new SelectionAdapter() {
+		fMatchingBracketRadioButton= addButton(radioComposite, SWT.RADIO, label, 0, new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (fMatchingBracketRadioButton.getSelection())
@@ -256,7 +262,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		createDependency(fBracketHighlightingCheckbox, fMatchingBracketRadioButton);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_highlightMatchingBracketAndCaretLocation;
-		fMatchingBracketAndCaretLocationRadioButton= addButton(appearanceComposite, SWT.RADIO, label, 0, new SelectionAdapter() {
+		fMatchingBracketAndCaretLocationRadioButton= addButton(radioComposite, SWT.RADIO, label, 0, new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (fMatchingBracketAndCaretLocationRadioButton.getSelection())
@@ -266,7 +272,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		createDependency(fBracketHighlightingCheckbox, fMatchingBracketAndCaretLocationRadioButton);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_highlightEnclosingBrackets;
-		fEnclosingBracketsRadioButton= addButton(appearanceComposite, SWT.RADIO, label, 0, new SelectionAdapter() {
+		fEnclosingBracketsRadioButton= addButton(radioComposite, SWT.RADIO, label, 0, new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean selection= fEnclosingBracketsRadioButton.getSelection();
