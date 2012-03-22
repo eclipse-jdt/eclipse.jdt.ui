@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 
@@ -436,7 +437,9 @@ public class PropertyKeyHyperlink implements IHyperlink {
 										new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), SearchEngine.createWorkspaceScope(), new SearchRequestor() {
 											@Override
 											public void acceptSearchMatch(SearchMatch match) throws CoreException {
-												result.add(new KeyReference((IStorage)match.getResource(), match.getOffset(), match.getLength()));
+												IResource resource= match.getResource();
+												if (resource.getType() == IResource.FILE)
+													result.add(new KeyReference((IFile)resource, match.getOffset(), match.getLength()));
 											}
 										}, new SubProgressMonitor(monitor, 1));
 									} catch (CoreException e) {
