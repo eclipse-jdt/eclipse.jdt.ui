@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -271,7 +271,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 	private static int processAnnotation(Annotation annot, Position pos, int invocationLocation, int bestOffset) {
 		int posBegin= pos.offset;
 		int posEnd= posBegin + pos.length;
-		if (isInside(invocationLocation, posBegin, posEnd)) { // covers invocation location?
+		if (isInside(invocationLocation, posBegin, posEnd) && JavaCorrectionProcessor.hasCorrections(annot)) { // covers invocation location?
 			return invocationLocation;
 		} else if (bestOffset != invocationLocation) {
 			int newClosestPosition= computeBestOffset(posBegin, invocationLocation, bestOffset);
