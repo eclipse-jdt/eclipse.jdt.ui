@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-// AW
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.io.UnsupportedEncodingException;
@@ -66,9 +65,14 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 
-/*
- * The page for defaults for classpath entries in new java projects.
- * See PreferenceConstants to access or change these values through public API.
+
+/**
+ * The preference page for defaults for classpath entries in new java projects.
+ * <p>
+ * See {@link PreferenceConstants} on how to access or change these values through public API.
+ * </p>
+ * 
+ * @since 2.0
  */
 public class NewJavaProjectPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -82,7 +86,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	private static final String CLASSPATH_JRELIBRARY_LIST= PreferenceConstants.NEWPROJECT_JRELIBRARY_LIST;
 
 
-	private static String fgDefaultEncoding= System.getProperty("file.encoding"); //$NON-NLS-1$
+	private static final String ENCODING= "UTF-8"; //$NON-NLS-1$
 
 	public static IClasspathEntry[] getDefaultJRELibrary() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -117,7 +121,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 
 	private static String decode(String str) {
 		try {
-			return URLDecoder.decode(str, fgDefaultEncoding);
+			return URLDecoder.decode(str, ENCODING);
 		} catch (UnsupportedEncodingException e) {
 			JavaPlugin.log(e);
 		}
@@ -126,7 +130,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 
 	private static String encode(String str) {
 		try {
-			return URLEncoder.encode(str, fgDefaultEncoding);
+			return URLEncoder.encode(str, ENCODING);
 		} catch (UnsupportedEncodingException e) {
 			JavaPlugin.log(e);
 		}
