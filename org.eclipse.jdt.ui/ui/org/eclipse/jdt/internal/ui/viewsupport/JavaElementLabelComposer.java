@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -649,15 +649,16 @@ public class JavaElementLabelComposer {
 	 *
 	 * @param typeParameters the type parameters
 	 * @param flags flags with render options
+	 * @throws JavaModelException ...
 	 */
-	private void appendTypeParametersLabels(ITypeParameter[] typeParameters, long flags) {
+	private void appendTypeParametersLabels(ITypeParameter[] typeParameters, long flags) throws JavaModelException {
 		if (typeParameters.length > 0) {
 			fBuffer.append(getLT());
 			for (int i = 0; i < typeParameters.length; i++) {
 				if (i > 0) {
 					fBuffer.append(JavaElementLabels.COMMA_STRING);
 				}
-				fBuffer.append(getElementName(typeParameters[i]));
+				appendTypeParameterWithBounds(typeParameters[i], flags);
 			}
 			fBuffer.append(getGT());
 		}
@@ -763,21 +764,7 @@ public class JavaElementLabelComposer {
 	 */
 	public void appendTypeParameterLabel(ITypeParameter typeParameter, long flags) {
 		try {
-			fBuffer.append(getElementName(typeParameter));
-
-			if (typeParameter.exists()) {
-				String[] bounds= typeParameter.getBoundsSignatures();
-				if (bounds.length > 0 &&
-						! (bounds.length == 1 && "Ljava.lang.Object;".equals(bounds[0]))) { //$NON-NLS-1$
-					fBuffer.append(" extends "); //$NON-NLS-1$
-					for (int j= 0; j < bounds.length; j++) {
-						if (j > 0) {
-							fBuffer.append(JavaElementLabels.COMMA_STRING);
-						}
-						appendTypeSignatureLabel(typeParameter, bounds[j], flags);
-					}
-				}
-			}
+			appendTypeParameterWithBounds(typeParameter, flags);
 
 			// post qualification
 			if (getFlag(flags, JavaElementLabels.TP_POST_QUALIFIED)) {
@@ -788,6 +775,24 @@ public class JavaElementLabelComposer {
 
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e); // NotExistsException will not reach this point
+		}
+	}
+
+	private void appendTypeParameterWithBounds(ITypeParameter typeParameter, long flags) throws JavaModelException {
+		fBuffer.append(getElementName(typeParameter));
+
+		if (typeParameter.exists()) {
+			String[] bounds= typeParameter.getBoundsSignatures();
+			if (bounds.length > 0 &&
+					! (bounds.length == 1 && "Ljava.lang.Object;".equals(bounds[0]))) { //$NON-NLS-1$
+				fBuffer.append(" extends "); //$NON-NLS-1$
+				for (int j= 0; j < bounds.length; j++) {
+					if (j > 0) {
+						fBuffer.append(JavaElementLabels.COMMA_STRING);
+					}
+					appendTypeSignatureLabel(typeParameter, bounds[j], flags);
+				}
+			}
 		}
 	}
 
