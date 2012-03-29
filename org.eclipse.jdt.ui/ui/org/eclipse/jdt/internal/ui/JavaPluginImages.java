@@ -152,8 +152,6 @@ public class JavaPluginImages {
 
 	public static final String IMG_OBJS_ACCESSRULES_ATTRIB= NAME_PREFIX + "access_restriction_attrib.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_IGNORE_OPTIONAL_PROBLEMS_ATTRIB= NAME_PREFIX + "ignore_optional_problems_attrib.gif"; //$NON-NLS-1$
-
 	public static final String IMG_OBJS_REFACTORING_FATAL= NAME_PREFIX + "fatalerror_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_REFACTORING_ERROR= NAME_PREFIX + "error_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_REFACTORING_WARNING= NAME_PREFIX + "warning_obj.gif"; //$NON-NLS-1$
@@ -295,8 +293,6 @@ public class JavaPluginImages {
 
 	public static final ImageDescriptor DESC_OBJS_ACCESSRULES_ATTRIB= createManagedFromKey(T_OBJ, IMG_OBJS_ACCESSRULES_ATTRIB);
 	public static final ImageDescriptor DESC_OBJS_NATIVE_LIB_PATH_ATTRIB= createUnManaged(T_OBJ, "native_lib_path_attrib.gif"); //$NON-NLS-1$
-
-	public static final ImageDescriptor DESC_OBJS_IGNORE_OPTIONAL_PROBLEMS_ATTRIB= createManagedFromKey(T_OBJ, IMG_OBJS_IGNORE_OPTIONAL_PROBLEMS_ATTRIB);
 
 	public static final ImageDescriptor DESC_OBJS_REFACTORING_FATAL= createManagedFromKey(T_OBJ, IMG_OBJS_REFACTORING_FATAL);
 	public static final ImageDescriptor DESC_OBJS_REFACTORING_ERROR= createManagedFromKey(T_OBJ, IMG_OBJS_REFACTORING_ERROR);

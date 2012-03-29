@@ -19,6 +19,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.DecorationOverlayIcon;
+import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.IWorkbench;
@@ -423,7 +425,12 @@ public class CPListLabelProvider extends LabelProvider {
 			} else if (key.equals(CPListElement.ACCESSRULES)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_ACCESSRULES_ATTRIB);
 			} else if (key.equals(CPListElement.IGNORE_OPTIONAL_PROBLEMS)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_IGNORE_OPTIONAL_PROBLEMS_ATTRIB);
+				Image image= fRegistry.get(getCPListElementBaseImage(attribute.getParent()));
+				if (image != null) {
+					ImageDescriptor overlay= JavaPluginImages.DESC_OVR_IGNORE_OPTIONAL_PROBLEMS;
+					ImageDescriptor imageDescriptor= new DecorationOverlayIcon(image, overlay, IDecoration.BOTTOM_LEFT);
+					return fRegistry.get(imageDescriptor);
+				}
 			} else {
 				ClasspathAttributeConfiguration config= fAttributeDescriptors.get(key);
 				if (config != null) {
