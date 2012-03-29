@@ -788,7 +788,7 @@ public class JavaElementLabelComposer {
 				fBuffer.append(" extends "); //$NON-NLS-1$
 				for (int j= 0; j < bounds.length; j++) {
 					if (j > 0) {
-						fBuffer.append(JavaElementLabels.COMMA_STRING);
+						fBuffer.append(" & "); //$NON-NLS-1$
 					}
 					appendTypeSignatureLabel(typeParameter, bounds[j], flags);
 				}

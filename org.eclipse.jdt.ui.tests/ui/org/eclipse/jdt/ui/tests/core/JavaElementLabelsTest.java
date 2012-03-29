@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -175,7 +175,8 @@ public class JavaElementLabelsTest extends CoreTests {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.*;\n");
-		buf.append("public class TypeParams<Q extends ArrayList<? extends Number>, Element extends Map<String, Integer>, NoBound> {\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class TypeParams<Q extends ArrayList<? extends Number>, Element extends Map<String, Integer> & Serializable, NoBound> {\n");
 		buf.append("}\n");
 		String content= buf.toString();
 		ICompilationUnit cu= pack1.createCompilationUnit("TypeParams.java", content, false, null);
@@ -192,9 +193,9 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, "Q extends ArrayList<? extends Number> - org.test.TypeParams");
 
 		lab= JavaElementLabels.getTextLabel(element, 0);
-		assertEqualString(lab, "Element extends Map<String, Integer>");
+		assertEqualString(lab, "Element extends Map<String, Integer> & Serializable");
 		lab= JavaElementLabels.getTextLabel(element, JavaElementLabels.DEFAULT_POST_QUALIFIED);
-		assertEqualString(lab, "Element extends Map<String, Integer> - org.test.TypeParams");
+		assertEqualString(lab, "Element extends Map<String, Integer> & Serializable - org.test.TypeParams");
 
 		lab= JavaElementLabels.getTextLabel(nobound, 0);
 		assertEqualString(lab, "NoBound");
@@ -210,6 +211,14 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, "E"); // no " extends java.lang.Object"!
 		lab= JavaElementLabels.getTextLabel(e, JavaElementLabels.ALL_POST_QUALIFIED);
 		assertEqualString(lab, "E - java.util.ArrayList");
+		
+		
+		lab= JavaElementLabels.getTextLabel(typeParams, 0);
+		assertEqualString(lab, "TypeParams");
+		lab= JavaElementLabels.getTextLabel(typeParams, JavaElementLabels.ALL_DEFAULT);
+		assertEqualString(lab, "TypeParams<Q extends ArrayList<? extends Number>, Element extends Map<String, Integer> & Serializable, NoBound>");
+		lab= JavaElementLabels.getTextLabel(typeParams, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_POST_QUALIFIED);
+		assertEqualString(lab, "TypeParams<Q extends ArrayList<? extends Number>, Element extends Map<String, Integer> & Serializable, NoBound> - org.test");
 	}
 
 	public void testTypeParameterLabelMethod() throws Exception {
