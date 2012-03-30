@@ -33,7 +33,7 @@ public class EmptyInnerPackageFilter extends ViewerFilter {
 			try {
 				if (pkg.isDefaultPackage())
 					return pkg.hasChildren();
-				return !pkg.hasSubpackages() || pkg.hasChildren() || (pkg.getNonJavaResources().length > 0);
+				return !pkg.hasSubpackages() || pkg.hasChildren() || EmptyPackageFilter.hasUnfilteredResources(viewer, pkg);
 			} catch (JavaModelException e) {
 				return false;
 			}

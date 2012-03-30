@@ -49,7 +49,7 @@ public class EmptyPackageFilter extends ViewerFilter {
 	 *             accessing its corresponding resource
 	 * @since 3.4.1
 	 */
-	private boolean hasUnfilteredResources(Viewer viewer, IPackageFragment pkg) throws JavaModelException {
+	static boolean hasUnfilteredResources(Viewer viewer, IPackageFragment pkg) throws JavaModelException {
 		Object[] resources= pkg.getNonJavaResources();
 		int length= resources.length;
 		if (length == 0)
