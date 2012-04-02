@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
@@ -208,6 +209,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 						}
 						return flags;
 					case IJavaElement.PACKAGE_FRAGMENT:
+						return getPackageErrorTicksFromMarkers((IPackageFragment) element);
 					case IJavaElement.COMPILATION_UNIT:
 					case IJavaElement.CLASS_FILE:
 						return getErrorTicksFromMarkers(element.getResource(), IResource.DEPTH_ONE, null);
@@ -312,6 +314,43 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		if (severity == IMarker.SEVERITY_ERROR) {
 			return ERRORTICK_ERROR;
 		} else if (severity == IMarker.SEVERITY_WARNING) {
+			return ERRORTICK_WARNING;
+		}
+		return 0;
+	}
+
+	private int getPackageErrorTicksFromMarkers(IPackageFragment pack) throws CoreException {
+		// Packages are special: They must not consider markers on subpackages.
+		
+		IResource res= pack.getResource();
+		if (res == null || !res.isAccessible()) {
+			return 0;
+		}
+		
+		// markers on package itself (e.g. missing @NonNullByDefault)
+		int severity= res.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+		if (severity == IMarker.SEVERITY_ERROR)
+			return ERRORTICK_ERROR;
+		
+		// markers on CUs
+		for (ICompilationUnit cu : pack.getCompilationUnits()) {
+			severity= Math.max(severity, cu.getResource().findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_ZERO));
+			if (severity == IMarker.SEVERITY_ERROR)
+				return ERRORTICK_ERROR;
+		}
+		
+		// markers on files and folders
+		for (Object object : pack.getNonJavaResources()) {
+			if (object instanceof IResource) {
+				IResource resource= (IResource) object;
+				severity= Math.max(severity, resource.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE));
+				if (severity == IMarker.SEVERITY_ERROR)
+					return ERRORTICK_ERROR;
+			}
+		}
+		
+		// SEVERITY_ERROR already handled above
+		if (severity == IMarker.SEVERITY_WARNING) {
 			return ERRORTICK_WARNING;
 		}
 		return 0;
