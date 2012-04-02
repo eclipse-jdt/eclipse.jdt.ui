@@ -4,7 +4,7 @@
  * @author author
  * @deprecated use <code>OtherClass</code>
  */
-public class ClassName<E> implements InterfaceName<String> {
+public class ClassName<E> extends AnyClass implements InterfaceName<String> {
 	enum Color { RED, GREEN, BLUE };
 	/* This comment may span multiple lines. */
 	static Object staticField;
@@ -14,7 +14,7 @@ public class ClassName<E> implements InterfaceName<String> {
 	// TASK: refactor
 	@SuppressWarnings(value="all")
 	public int foo(Integer parameter) {
-		abstractMethod();
+		abstractMethod(inheritedField);
 		int local= 42*hashCode();
 		staticMethod();
 		return bar(local) + parameter;

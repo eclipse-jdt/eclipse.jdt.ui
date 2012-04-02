@@ -35,7 +35,7 @@ abstract class SHTest {
 		int parentFinalField= SHTest.this.finalField;
 		int parentStaticFinalField= SHTest.staticFinalField;
 	}
-	
+
 	@SuppressWarnings(value="all")
 	class Generic<E extends Number> {
 		E method() {
@@ -44,5 +44,8 @@ abstract class SHTest {
 			ElementType enumRef= null;
 			return null;
 		}
+	}
+	static abstract class NestedSubClass extends SHTest {
+		int inheritedField= field;
 	}
 }

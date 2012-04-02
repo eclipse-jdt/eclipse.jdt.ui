@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Björn Michael <b.michael@gmx.de> - [syntax highlighting] Syntax coloring for abstract classes - https://bugs.eclipse.org/331311
+ *     Björn Michael <b.michael@gmx.de> - [syntax highlighting] Add highlight for inherited fields - https://bugs.eclipse.org/348368
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
@@ -71,21 +72,33 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 	public void testFieldHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.FIELD);
 		Position[] expected= new Position[] {
-				createPosition(3, 5, 5),
-				createPosition(4, 12, 11),
-				createPosition(5, 11, 10),
-				createPosition(6, 18, 16),
-				createPosition(22, 5, 15),
-				createPosition(25, 2, 15),
-				createPosition(31, 9, 6),
-				createPosition(32, 6, 11),
-				createPosition(32, 31, 5),
-				createPosition(33, 6, 17),
+				createPosition( 3,  5,  5),
+				createPosition( 4, 12, 11),
+				createPosition( 5, 11, 10),
+				createPosition( 6, 18, 16),
+				createPosition(22,  5, 15),
+				createPosition(25,  2, 15),
+				createPosition(31,  9,  6),
+				createPosition(32,  6, 11),
+				createPosition(32, 31,  5),
+				createPosition(33,  6, 17),
 				createPosition(33, 32, 11),
-				createPosition(34, 6, 16),
+				createPosition(34,  6, 16),
 				createPosition(34, 36, 10),
-				createPosition(35, 6, 22),
+				createPosition(35,  6, 22),
 				createPosition(35, 37, 16),
+				createPosition(48,  6, 14),
+				createPosition(48, 22,  5),
+		};
+		Position[] actual= getSemanticHighlightingPositions();
+//		System.out.println(toString(actual));
+		assertEqualPositions(expected, actual);
+	}
+
+	public void testInheritedFieldHighlighting() throws Exception {
+		setUpSemanticHighlighting(SemanticHighlightings.INHERITED_FIELD);
+		Position[] expected= new Position[] {
+				createPosition(48, 22,  5),
 		};
 		Position[] actual= getSemanticHighlightingPositions();
 //		System.out.println(toString(actual));
@@ -273,14 +286,16 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 		setUpSemanticHighlighting(SemanticHighlightings.ABSTRACT_CLASS);
 		Position[] actual= getSemanticHighlightingPositions();
 		Position[] expected= new Position[] {
-				createPosition(2, 15, 6),
-				createPosition(31, 2, 6),
-				createPosition(31, 17, 6),
-				createPosition(32, 19, 6),
-				createPosition(33, 25, 6),
-				createPosition(34, 24, 6),
-				createPosition(35, 30, 6),
-				createPosition(39, 25, 6),
+				createPosition( 2, 15,  6),
+				createPosition(31,  2,  6),
+				createPosition(31, 17,  6),
+				createPosition(32, 19,  6),
+				createPosition(33, 25,  6),
+				createPosition(34, 24,  6),
+				createPosition(35, 30,  6),
+				createPosition(39, 25,  6),
+				createPosition(47, 23, 14),
+				createPosition(47, 46,  6),
 		};
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
@@ -290,21 +305,23 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 		setUpSemanticHighlighting(SemanticHighlightings.CLASS);
 		Position[] actual= getSemanticHighlightingPositions();
 		Position[] expected= new Position[] {
-				createPosition(2, 15, 6),
-				createPosition(14, 16, 9),
-				createPosition(24, 1, 13),
+				createPosition( 2, 15,  6),
+				createPosition(14, 16,  9),
+				createPosition(24,  1, 13),
 				createPosition(27, 10, 10),
-				createPosition(30, 7, 10),
+				createPosition(30,  7, 10),
 				createPosition(30, 26, 13),
-				createPosition(31, 2, 6),
-				createPosition(31, 17, 6),
-				createPosition(32, 19, 6),
-				createPosition(33, 25, 6),
-				createPosition(34, 24, 6),
-				createPosition(35, 30, 6),
-				createPosition(39, 7, 7),
-				createPosition(39, 25, 6),
-				createPosition(41, 8, 6),
+				createPosition(31,  2,  6),
+				createPosition(31, 17,  6),
+				createPosition(32, 19,  6),
+				createPosition(33, 25,  6),
+				createPosition(34, 24,  6),
+				createPosition(35, 30,  6),
+				createPosition(39,  7,  7),
+				createPosition(39, 25,  6),
+				createPosition(41,  8,  6),
+				createPosition(47, 23, 14),
+				createPosition(47, 46,  6),
 		};
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Andre Soereng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
  *     Björn Michael <b.michael@gmx.de> - [syntax highlighting] Syntax coloring for abstract classes - https://bugs.eclipse.org/331311
+ *     Björn Michael <b.michael@gmx.de> - [syntax highlighting] Add highlight for inherited fields - https://bugs.eclipse.org/348368
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
@@ -49,7 +50,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-
 
 /**
  * Semantic highlightings
@@ -189,6 +189,13 @@ public class SemanticHighlightings {
 	 * @since 3.7
 	 */
 	public static final String ABSTRACT_CLASS="abstractClass"; //$NON-NLS-1$
+
+	/**
+	 * A named preference part that controls the highlighting of inherited fields.
+	 *
+	 * @since 3.8
+	 */
+	public static final String INHERITED_FIELD="inheritedField"; //$NON-NLS-1$
 
 	/**
 	 * Semantic highlightings
@@ -1915,6 +1922,84 @@ public class SemanticHighlightings {
 	}
 
 	/**
+	 * Semantic highlighting for inherited field access.
+	 * @since 3.8
+	 */
+	private static final class InheritedFieldHighlighting extends SemanticHighlighting {
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		@Override
+		public String getPreferenceKey() {
+			return INHERITED_FIELD;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		@Override
+		public RGB getDefaultDefaultTextColor() {
+			return new RGB(0, 0, 192);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		@Override
+		public boolean isBoldByDefault() {
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		@Override
+		public boolean isItalicByDefault() {
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		@Override
+		public boolean isEnabledByDefault() {
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		@Override
+		public String getDisplayName() {
+			return JavaEditorMessages.SemanticHighlighting_inheritedField;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#isMatched(org.eclipse.jdt.core.dom.ASTNode)
+		 */
+		@Override
+		public boolean consumes(final SemanticToken token) {
+			final SimpleName node= token.getNode();
+			if (node.isDeclaration()) {
+				return false;
+			}
+
+			final IBinding binding= token.getBinding();
+			if (binding == null || binding.getKind() != IBinding.VARIABLE) {
+				return false;
+			}
+
+			ITypeBinding currentType= Bindings.getBindingOfParentType(node);
+			ITypeBinding declaringType= ((IVariableBinding) binding).getDeclaringClass();
+			if (declaringType == null || currentType == declaringType)
+				return false;
+
+			return Bindings.isSuperType(declaringType, currentType);
+		}
+	}
+
+	/**
 	 * A named preference that controls the given semantic highlighting's color.
 	 *
 	 * @param semanticHighlighting the semantic highlighting
@@ -1986,6 +2071,7 @@ public class SemanticHighlightings {
 				new AutoboxHighlighting(),
 				new StaticFinalFieldHighlighting(),
 				new StaticFieldHighlighting(),
+				new InheritedFieldHighlighting(),
 				new FieldHighlighting(),
 				new MethodDeclarationHighlighting(),
 				new StaticMethodInvocationHighlighting(),

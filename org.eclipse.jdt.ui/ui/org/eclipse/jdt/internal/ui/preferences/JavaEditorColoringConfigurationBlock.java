@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Andre Soereng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
  *     Björn Michael <b.michael@gmx.de> - [syntax highlighting] Syntax coloring for abstract classes - https://bugs.eclipse.org/331311
+ *     Björn Michael <b.michael@gmx.de> - [syntax highlighting] Add highlight for inherited fields - https://bugs.eclipse.org/348368
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -897,8 +898,9 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		return new SemanticHighlightingManager.HighlightedRange[][] {
 			{ createHighlightedRange( 6, 13,  9, SemanticHighlightings.DEPRECATED_MEMBER), createHighlightedRange( 6, 13,  9, SemanticHighlightings.CLASS),  },
 			{ createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_VARIABLE), createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_ARGUMENT), },
-			{ createHighlightedRange( 6, 37, 13, SemanticHighlightings.INTERFACE) },
-			{ createHighlightedRange( 6, 51,  6, SemanticHighlightings.TYPE_ARGUMENT), createHighlightedRange( 6, 51,  6, SemanticHighlightings.CLASS) },
+			{ createHighlightedRange( 6, 34,  8, SemanticHighlightings.CLASS) },
+			{ createHighlightedRange( 6, 54, 13, SemanticHighlightings.INTERFACE) },
+			{ createHighlightedRange( 6, 68,  6, SemanticHighlightings.TYPE_ARGUMENT), createHighlightedRange( 6, 68,  6, SemanticHighlightings.CLASS) },
 			{ createHighlightedRange( 7,  6,  5, SemanticHighlightings.ENUM), },
 			{ createHighlightedRange( 7, 14,  3, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange( 7, 14,  3, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 14, 3, SemanticHighlightings.FIELD) },
 			{ createHighlightedRange( 7, 19,  5, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange( 7, 19,  5, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 19, 5, SemanticHighlightings.FIELD) },
@@ -915,6 +917,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			{ createHighlightedRange(15, 16,  7, SemanticHighlightings.CLASS) },
 			{ createHighlightedRange(15, 24,  9, SemanticHighlightings.PARAMETER_VARIABLE) },
 			{ createHighlightedRange(16,  2, 14, SemanticHighlightings.ABSTRACT_METHOD_INVOCATION), createHighlightedRange(16,  2, 14, SemanticHighlightings.METHOD) },
+			{ createHighlightedRange(16, 17, 14, SemanticHighlightings.INHERITED_FIELD), createHighlightedRange(16, 17, 14, SemanticHighlightings.FIELD) },
 			{ createHighlightedRange(17,  6,  5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
 			{ createHighlightedRange(17, 13,  2, SemanticHighlightings.NUMBER) },
 			{ createHighlightedRange(17, 16,  8, SemanticHighlightings.INHERITED_METHOD_INVOCATION), createHighlightedRange(17, 16,  8, SemanticHighlightings.METHOD) },
