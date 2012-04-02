@@ -1766,7 +1766,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			body=((SynchronizedStatement) outer).getBody();
 			label= CorrectionMessages.QuickAssistProcessor_unwrap_synchronizedstatement;
 		} else if (outer instanceof SimpleName && outer.getParent() instanceof LabeledStatement) {
-			body=((LabeledStatement) outer.getParent()).getBody();
+			LabeledStatement labeledStatement= (LabeledStatement) outer.getParent();
+			outer= labeledStatement;
+			body= labeledStatement.getBody();
 			label= CorrectionMessages.QuickAssistProcessor_unwrap_labeledstatement;
 		} else if (outer instanceof LabeledStatement) {
 			body=((LabeledStatement) outer).getBody();
