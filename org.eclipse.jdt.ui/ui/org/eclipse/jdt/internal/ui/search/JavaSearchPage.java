@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -784,16 +784,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 
 
 	private Button createMethodLocationRadio(boolean isSelected) {
-		Composite specificComposite= new Composite(fLimitToGroup, SWT.NONE);
-		specificComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		GridLayout layout= new GridLayout(2, false);
-		layout.marginWidth= 0;
-		layout.marginHeight= 0;
-		layout.horizontalSpacing= 0;
-		specificComposite.setLayout(layout);
+		if (fLimitToGroup.getChildren().length % 2 != 0)
+			new Label(fLimitToGroup, SWT.NONE);
 
-		Button button= createButton(specificComposite, SWT.RADIO, SearchMessages.JavaSearchPage_match_locations_label, SPECIFIC_REFERENCES, isSelected);
-		fMatchLocationsLink= new Link(specificComposite, SWT.NONE);
+		Button button= createButton(fLimitToGroup, SWT.RADIO, SearchMessages.JavaSearchPage_match_locations_label, SPECIFIC_REFERENCES, isSelected);
+		fMatchLocationsLink= new Link(fLimitToGroup, SWT.NONE);
 		fMatchLocationsLink.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		fMatchLocationsLink.addSelectionListener(new SelectionAdapter() {
 			@Override
