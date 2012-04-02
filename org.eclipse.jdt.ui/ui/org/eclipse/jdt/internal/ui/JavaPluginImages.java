@@ -380,7 +380,7 @@ public class JavaPluginImages {
 
 	public static final ImageDescriptor DESC_OVR_RUN= createUnManagedCached(T_OVR, "run_co.gif"); 							//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_WARNING= createUnManagedCached(T_OVR, "warning_co.gif"); 					//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_IGNORE_OPTIONAL_PROBLEMS= createUnManagedCached(T_OVR, "ignore_optional_problems_co.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_IGNORE_OPTIONAL_PROBLEMS= createUnManagedCached(T_OVR, "ignore_optional_problems_ovr.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_ERROR= createUnManagedCached(T_OVR, "error_co.gif"); 						//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_BUILDPATH_ERROR= createUnManagedCached(T_OVR, "error_co_buildpath.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_OVERRIDES= createUnManagedCached(T_OVR, "over_co.gif");  					//$NON-NLS-1$
