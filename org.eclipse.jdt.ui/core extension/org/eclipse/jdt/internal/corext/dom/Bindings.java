@@ -40,7 +40,9 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -1420,6 +1422,24 @@ public class Bindings {
 			default:
 				return null;
 		}
+	}
+
+	public static boolean isClassOrRuntimeAnnotation(ITypeBinding annotationType) {
+		IAnnotationBinding[] metaAnnotations= annotationType.getAnnotations();
+		for (IAnnotationBinding metaAnnotation : metaAnnotations) {
+			if ("java.lang.annotation.Retention".equals(metaAnnotation.getAnnotationType().getQualifiedName())) { //$NON-NLS-1$
+				IMemberValuePairBinding[] mvps= metaAnnotation.getDeclaredMemberValuePairs();
+				if (mvps.length == 1) {
+					Object value= mvps[0].getValue();
+					if (value instanceof IVariableBinding) {
+						String name= ((IVariableBinding) value).getName();
+						if ("RUNTIME".equals(name) || "CLASS".equals(name)) //$NON-NLS-1$ //$NON-NLS-2$
+							return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 }

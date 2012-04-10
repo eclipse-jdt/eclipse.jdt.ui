@@ -2997,6 +2997,89 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	public void testUnimplementedMethodsWithAnnotations() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import java.lang.annotation.Retention;\n");
+		buf.append("import java.lang.annotation.RetentionPolicy;\n");
+		buf.append("\n");
+		buf.append("@Retention(RetentionPolicy.CLASS)\n");
+		buf.append("@interface NonNull {}\n");
+		buf.append("@Retention(RetentionPolicy.CLASS)\n");
+		buf.append("@interface Nullable {}\n");
+		buf.append("\n");
+		buf.append("@Retention(RetentionPolicy.RUNTIME)\n");
+		buf.append("@interface Sour {\n");
+		buf.append("    byte[] value();\n");
+		buf.append("    byte CONST= 12;\n");
+		buf.append("    Class<?> c() default Object[].class;\n");
+		buf.append("    String name() default \"\";\n");
+		buf.append("    RetentionPolicy policy() default RetentionPolicy.SOURCE;\n");
+		buf.append("    Deprecated d() default @Deprecated;\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("abstract class A {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    @Sour(value={- 42, 13}, c= Integer[][].class, name=\"\\u0040hi\", policy=RetentionPolicy.CLASS, d=@Deprecated())\n");
+		buf.append("    public abstract @NonNull Object foo(\n");
+		buf.append("            @SuppressWarnings(\"unused\")\n");
+		buf.append("            @Sour(value={Sour.CONST}) @Nullable(unresolved) Object input);\n");
+		buf.append("}\n");
+		buf.append("class B extends A {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		
+		ArrayList proposals= collectCorrections(cu, astRoot, 3, 2);
+		
+		assertCorrectLabels(proposals);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import java.lang.annotation.Retention;\n");
+		buf.append("import java.lang.annotation.RetentionPolicy;\n");
+		buf.append("\n");
+		buf.append("@Retention(RetentionPolicy.CLASS)\n");
+		buf.append("@interface NonNull {}\n");
+		buf.append("@Retention(RetentionPolicy.CLASS)\n");
+		buf.append("@interface Nullable {}\n");
+		buf.append("\n");
+		buf.append("@Retention(RetentionPolicy.RUNTIME)\n");
+		buf.append("@interface Sour {\n");
+		buf.append("    byte[] value();\n");
+		buf.append("    byte CONST= 12;\n");
+		buf.append("    Class<?> c() default Object[].class;\n");
+		buf.append("    String name() default \"\";\n");
+		buf.append("    RetentionPolicy policy() default RetentionPolicy.SOURCE;\n");
+		buf.append("    Deprecated d() default @Deprecated;\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("abstract class A {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    @Sour(value={- 42, 13}, c= Integer[][].class, name=\"\\u0040hi\", policy=RetentionPolicy.CLASS, d=@Deprecated())\n");
+		buf.append("    public abstract @NonNull Object foo(\n");
+		buf.append("            @SuppressWarnings(\"unused\")\n");
+		buf.append("            @Sour(value={Sour.CONST}) @Nullable(unresolved) Object input);\n");
+		buf.append("}\n");
+		buf.append("class B extends A {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    @Sour(value = {-42, 13}, c = Integer[][].class, name = \"@hi\", policy = RetentionPolicy.CLASS, d = @Deprecated)\n");
+		buf.append("    public @NonNull\n");
+		buf.append("    Object foo(@Sour(12) @Nullable Object input) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
 	public void testUnitializedVariable() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

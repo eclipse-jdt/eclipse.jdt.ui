@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -216,7 +216,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			final IExtendedModifier modifier= (IExtendedModifier) oldField.modifiers().get(index);
 			final List<IExtendedModifier> modifiers= newField.modifiers();
 			if (modifier.isAnnotation() && !modifiers.contains(modifier))
-				modifiers.add(index, (IExtendedModifier) ASTNode.copySubtree(ast, (Annotation) modifier));
+				modifiers.add((IExtendedModifier) ASTNode.copySubtree(ast, (Annotation) modifier));
 		}
 	}
 
@@ -226,7 +226,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			final IExtendedModifier modifier= (IExtendedModifier) oldMethod.modifiers().get(index);
 			final List<IExtendedModifier> modifiers= newMethod.modifiers();
 			if (modifier.isAnnotation() && !modifiers.contains(modifier))
-				modifiers.add(index, (IExtendedModifier) ASTNode.copySubtree(ast, (Annotation) modifier));
+				modifiers.add((IExtendedModifier) ASTNode.copySubtree(ast, (Annotation) modifier));
 		}
 	}
 
@@ -243,13 +243,13 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	protected static void copyThrownExceptions(final MethodDeclaration oldMethod, final MethodDeclaration newMethod) {
 		final AST ast= newMethod.getAST();
 		for (int index= 0, n= oldMethod.thrownExceptions().size(); index < n; index++)
-			newMethod.thrownExceptions().add(index, ASTNode.copySubtree(ast, (Name) oldMethod.thrownExceptions().get(index)));
+			newMethod.thrownExceptions().add(ASTNode.copySubtree(ast, (Name) oldMethod.thrownExceptions().get(index)));
 	}
 
 	protected static void copyTypeParameters(final MethodDeclaration oldMethod, final MethodDeclaration newMethod) {
 		final AST ast= newMethod.getAST();
 		for (int index= 0, n= oldMethod.typeParameters().size(); index < n; index++)
-			newMethod.typeParameters().add(index, ASTNode.copySubtree(ast, (TypeParameter) oldMethod.typeParameters().get(index)));
+			newMethod.typeParameters().add(ASTNode.copySubtree(ast, (TypeParameter) oldMethod.typeParameters().get(index)));
 	}
 
 	protected static String createLabel(final IMember member) {
@@ -620,7 +620,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 				newDeclaration= createPlaceholderForSingleVariableDeclaration(oldDeclaration, unit, mapping, rewrite);
 			else
 				newDeclaration= createPlaceholderForSingleVariableDeclaration(oldDeclaration, unit, rewrite);
-			newMethod.parameters().add(index, newDeclaration);
+			newMethod.parameters().add(newDeclaration);
 		}
 	}
 

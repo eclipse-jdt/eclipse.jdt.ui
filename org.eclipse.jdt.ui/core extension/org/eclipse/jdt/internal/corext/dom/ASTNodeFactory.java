@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,20 +17,34 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
+import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -256,6 +270,107 @@ public class ASTNodeFactory {
 		result.setRightOperand(operands.get(1));
 		result.extendedOperands().addAll(operands.subList(2, operands.size()));
 		return result;
+	}
+
+	public static Annotation newAnnotation(AST ast, IAnnotationBinding annotation, ImportRewrite importRewrite, ImportRewriteContext context) {
+		Type type= importRewrite.addImport(annotation.getAnnotationType(), ast, context);
+		Name name;
+		if (type instanceof SimpleType) {
+			SimpleType simpleType= (SimpleType) type;
+			name= simpleType.getName();
+			// pay ransom to allow reuse of 'name':
+			simpleType.setName(ast.newSimpleName("a")); //$NON-NLS-1$
+		} else {
+			name= ast.newName(ASTNodes.asString(type));
+		}
+		
+		IMemberValuePairBinding[] mvps= annotation.getDeclaredMemberValuePairs();
+		if (mvps.length == 0) {
+			MarkerAnnotation result= ast.newMarkerAnnotation();
+			result.setTypeName(name);
+			return result;
+		} else if (mvps.length == 1 && "value".equals(mvps[0].getName())) { //$NON-NLS-1$
+			SingleMemberAnnotation result= ast.newSingleMemberAnnotation();
+			result.setTypeName(name);
+			Object value= mvps[0].getValue();
+			if (value != null)
+				result.setValue(newAnnotationValue(ast, value, importRewrite, context));
+			return result;
+		} else {
+			NormalAnnotation result= ast.newNormalAnnotation();
+			result.setTypeName(name);
+			List<MemberValuePair> values= result.values();
+			for (int i= 0; i < mvps.length; i++) {
+				IMemberValuePairBinding mvp= mvps[i];
+				MemberValuePair mvpNode= ast.newMemberValuePair();
+				mvpNode.setName(ast.newSimpleName(mvp.getName()));
+				Object value= mvp.getValue();
+				if (value != null)
+					mvpNode.setValue(newAnnotationValue(ast, value, importRewrite, context));
+				values.add(mvpNode);
+			}
+			return result;
+		}
+	}
+
+	public static Expression newAnnotationValue(AST ast, Object value, ImportRewrite importRewrite, ImportRewriteContext context) {
+		if (value instanceof Boolean) {
+			return ast.newBooleanLiteral(((Boolean) value).booleanValue());
+			
+		} else if (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long
+				|| value instanceof Float || value instanceof Double) {
+			return ast.newNumberLiteral(value.toString());
+			
+		} else if (value instanceof Character) {
+			CharacterLiteral result= ast.newCharacterLiteral();
+			result.setCharValue(((Character) value).charValue());
+			return result;
+			
+		} else if (value instanceof ITypeBinding) {
+			TypeLiteral result= ast.newTypeLiteral();
+			result.setType(importRewrite.addImport((ITypeBinding) value, ast, context));
+			return result;
+			
+		} else if (value instanceof String) {
+			StringLiteral result= ast.newStringLiteral();
+			result.setLiteralValue((String) value);
+			return result;
+			
+		} else if (value instanceof IVariableBinding) {
+			IVariableBinding variable= (IVariableBinding) value;
+			
+			FieldAccess result= ast.newFieldAccess();
+			result.setName(ast.newSimpleName(variable.getName()));
+			Type type= importRewrite.addImport(variable.getType(), ast, context);
+			Name name;
+			if (type instanceof SimpleType) {
+				SimpleType simpleType= (SimpleType) type;
+				name= simpleType.getName();
+				// pay ransom to allow reuse of 'name':
+				simpleType.setName(ast.newSimpleName("a")); //$NON-NLS-1$
+			} else {
+				name= ast.newName(ASTNodes.asString(type));
+			}
+			result.setExpression(name);
+			return result;
+			
+		} else if (value instanceof IAnnotationBinding) {
+			return newAnnotation(ast, (IAnnotationBinding) value, importRewrite, context);
+			
+		} else if (value instanceof Object[]) {
+			Object[] values= (Object[]) value;
+			if (values.length == 1)
+				return newAnnotationValue(ast, values[0], importRewrite, context);
+			
+			ArrayInitializer initializer= ast.newArrayInitializer();
+			List<Expression> expressions= initializer.expressions();
+			for (Object val : values)
+				expressions.add(newAnnotationValue(ast, val, importRewrite, context));
+			return initializer;
+			
+		} else {
+			return null;
+		}
 	}
 
 }

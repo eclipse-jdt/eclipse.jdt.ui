@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,16 +25,21 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -44,6 +49,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -61,9 +67,12 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperat
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
+
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * Utilities for code generation based on AST rewrite.
@@ -366,14 +375,15 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean deferred) throws CoreException {
+	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports,
+			ImportRewriteContext context, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean inInterface) throws CoreException {
 		Assert.isNotNull(imports);
 		Assert.isNotNull(rewrite);
 
 		AST ast= rewrite.getAST();
 
 		MethodDeclaration decl= ast.newMethodDeclaration();
-		decl.modifiers().addAll(getImplementationModifiers(ast, binding, deferred));
+		decl.modifiers().addAll(getImplementationModifiers(ast, binding, inInterface, imports, context));
 
 		decl.setName(ast.newSimpleName(binding.getName()));
 		decl.setConstructor(false);
@@ -413,7 +423,7 @@ public final class StubUtility2 {
 		}
 
 		String delimiter= unit.findRecommendedLineSeparator();
-		if (!deferred) {
+		if (!inInterface) {
 			Map<String, String> options= unit.getJavaProject().getOptions(true);
 
 			Block body= ast.newBlock();
@@ -491,6 +501,11 @@ public final class StubUtility2 {
 				var.setType(imports.addImport(type, ast, context));
 			}
 			var.setName(ast.newSimpleName(paramNames[i]));
+			IAnnotationBinding[] annotations= binding.getParameterAnnotations(i);
+			for (IAnnotationBinding annotation : annotations) {
+				if (Bindings.isClassOrRuntimeAnnotation(annotation.getAnnotationType()))
+					var.modifiers().add(ASTNodeFactory.newAnnotation(ast, annotation, imports, context));
+			}
 			parameters.add(var);
 		}
 		return parameters;
@@ -610,13 +625,62 @@ public final class StubUtility2 {
 		return allMethods.toArray(new IMethodBinding[allMethods.size()]);
 	}
 
-	private static List<Modifier> getImplementationModifiers(AST ast, IMethodBinding method, boolean deferred) {
+	private static List<IExtendedModifier> getImplementationModifiers(AST ast, IMethodBinding method, boolean inInterface, ImportRewrite importRewrite, ImportRewriteContext context) throws JavaModelException {
 		int modifiers= method.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.NATIVE & ~Modifier.PRIVATE;
-		if (deferred) {
+		if (inInterface) {
 			modifiers= modifiers & ~Modifier.PROTECTED;
 			modifiers= modifiers | Modifier.PUBLIC;
 		}
-		return ASTNodeFactory.newModifiers(ast, modifiers);
+		IAnnotationBinding[] annotations= method.getAnnotations();
+		
+		if (modifiers != Modifier.NONE && annotations.length > 0) {
+			// need an AST of the source method to preserve order of modifiers
+			IMethod iMethod= (IMethod) method.getJavaElement();
+			if (iMethod != null && JavaElementUtil.isSourceAvailable(iMethod)) {
+				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+				parser.setSource(iMethod.getTypeRoot());
+				parser.setIgnoreMethodBodies(true);
+				CompilationUnit otherCU= (CompilationUnit) parser.createAST(null);
+				ASTNode otherMethod= NodeFinder.perform(otherCU, iMethod.getSourceRange());
+				if (otherMethod instanceof MethodDeclaration) {
+					MethodDeclaration otherMD= (MethodDeclaration) otherMethod;
+					ArrayList<IExtendedModifier> result= new ArrayList<IExtendedModifier>();
+					List<IExtendedModifier> otherModifiers= otherMD.modifiers();
+					for (IExtendedModifier otherModifier : otherModifiers) {
+						if (otherModifier instanceof Modifier) {
+							int otherFlag= ((Modifier) otherModifier).getKeyword().toFlagValue();
+							if ((otherFlag & modifiers) != 0) {
+								result.addAll(ast.newModifiers(otherFlag));
+							}
+						} else {
+							Annotation otherAnnotation= (Annotation) otherModifier;
+							String n= otherAnnotation.getTypeName().getFullyQualifiedName();
+							for (IAnnotationBinding annotation : annotations) {
+								ITypeBinding otherAnnotationType= annotation.getAnnotationType();
+								String qn= otherAnnotationType.getQualifiedName();
+								if (qn.endsWith(n) && (qn.length() == n.length() || qn.charAt(qn.length() - n.length() - 1) == '.')) {
+									if (Bindings.isClassOrRuntimeAnnotation(otherAnnotationType))
+										result.add(ASTNodeFactory.newAnnotation(ast, annotation, importRewrite, context));
+									break;
+								}
+							}
+						}
+					}
+					return result;
+				}
+			}
+		}
+		
+		ArrayList<IExtendedModifier> result= new ArrayList<IExtendedModifier>();
+		
+		for (IAnnotationBinding annotation : annotations) {
+			if (Bindings.isClassOrRuntimeAnnotation(annotation.getAnnotationType()))
+				result.add(ASTNodeFactory.newAnnotation(ast, annotation, importRewrite, context));
+		}
+		
+		result.addAll(ASTNodeFactory.newModifiers(ast, modifiers));
+		
+		return result;
 	}
 
 	public static IMethodBinding[] getOverridableMethods(AST ast, ITypeBinding typeBinding, boolean isSubType) {

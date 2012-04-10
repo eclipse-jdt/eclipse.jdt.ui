@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -640,21 +640,17 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(declaration);
 		ImportRewriteUtil.collectImports(fSubType.getJavaProject(), declaration, fTypeBindings, fStaticBindings, true);
-		final ASTRewrite rewrite= ASTRewrite.create(declaration.getAST());
-		final ITrackedNodePosition position= rewrite.track(declaration);
+		ASTRewrite rewrite= ASTRewrite.create(declaration.getAST());
+		ITrackedNodePosition position= rewrite.track(declaration);
 		if (declaration.getBody() != null)
 			rewrite.remove(declaration.getBody(), null);
-		final ListRewrite list= rewrite.getListRewrite(declaration, declaration.getModifiersProperty());
+		ListRewrite list= rewrite.getListRewrite(declaration, declaration.getModifiersProperty());
 		boolean publicFound= false;
 		boolean abstractFound= false;
-		ITypeBinding binding= null;
-		Modifier modifier= null;
 		Annotation annotation= null;
-		IExtendedModifier extended= null;
-		for (final Iterator<IExtendedModifier> iterator= declaration.modifiers().iterator(); iterator.hasNext();) {
-			extended= iterator.next();
+		for (IExtendedModifier extended : (List<IExtendedModifier>) declaration.modifiers()) {
 			if (!extended.isAnnotation()) {
-				modifier= (Modifier) extended;
+				Modifier modifier= (Modifier) extended;
 				if (fPublic && modifier.getKeyword().equals(Modifier.ModifierKeyword.PUBLIC_KEYWORD)) {
 					publicFound= true;
 					continue;
@@ -666,20 +662,36 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				list.remove(modifier, null);
 			} else if (extended.isAnnotation()) {
 				annotation= (Annotation) extended;
-				binding= annotation.resolveTypeBinding();
-				if (binding.getQualifiedName().equals("java.lang.Override")) //$NON-NLS-1$
+				ITypeBinding binding= annotation.resolveTypeBinding();
+				if (binding.getQualifiedName().equals("java.lang.Override") || ! Bindings.isClassOrRuntimeAnnotation(binding)) //$NON-NLS-1$
 					list.remove(annotation, null);
 			}
 		}
-		final ModifierRewrite rewriter= ModifierRewrite.create(rewrite, declaration);
+		ModifierRewrite rewriter= ModifierRewrite.create(rewrite, declaration);
 		if (fPublic && !publicFound)
 			rewriter.setVisibility(Modifier.PUBLIC, null);
 		if (fAbstract && !abstractFound)
 			rewriter.setModifiers(Modifier.ABSTRACT, 0, null);
-		final ICompilationUnit unit= sourceRewrite.getCu();
-		final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(unit);
+		
+		for (SingleVariableDeclaration param : (List<SingleVariableDeclaration>) declaration.parameters()) {
+			ListRewrite modifierRewrite= rewrite.getListRewrite(param, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
+			for (IExtendedModifier extended : (List<IExtendedModifier>) param.modifiers()) {
+				if (!extended.isAnnotation()) {
+					Modifier modifier= (Modifier) extended;
+					modifierRewrite.remove(modifier, null);
+				} else if (extended.isAnnotation()) {
+					annotation= (Annotation) extended;
+					ITypeBinding binding= annotation.resolveTypeBinding();
+					if (! Bindings.isClassOrRuntimeAnnotation(binding))
+						modifierRewrite.remove(annotation, null);
+				}
+			}
+		}
+		
+		ICompilationUnit unit= sourceRewrite.getCu();
+		ITextFileBuffer buffer= RefactoringFileBuffers.acquire(unit);
 		try {
-			final IDocument document= new Document(buffer.getDocument().get());
+			IDocument document= new Document(buffer.getDocument().get());
 			try {
 				rewrite.rewriteAST(document, unit.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 				targetRewrite.getListRewrite(targetDeclaration, targetDeclaration.getBodyDeclarationsProperty()).insertFirst(targetRewrite.createStringPlaceholder(normalizeText(document.get(position.getStartPosition(), position.getLength())), ASTNode.METHOD_DECLARATION), null);
