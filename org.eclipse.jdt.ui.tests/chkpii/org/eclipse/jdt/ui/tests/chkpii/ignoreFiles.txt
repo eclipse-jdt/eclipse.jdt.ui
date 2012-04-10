@@ -47,6 +47,7 @@ org.eclipse.pde.ui/*
 org.eclipse.pde.ui.templates/templates_3.0/help/toc.xml
 org.eclipse.pde.build/*
 org.eclipse.releng.tools/*
+eclipse.platform.releng.eclipsebuilder/*
 org.eclipse.sdk.tests-feature/*
 org.eclipse.sdk-feature/*
 org.eclipse.perfmsr.core/*
