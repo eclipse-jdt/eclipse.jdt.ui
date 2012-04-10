@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,7 +83,10 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 		GridData layoutData= new GridData(SWT.FILL, SWT.FILL, true, true);
 		layoutData.horizontalSpan= numColumns;
 		parent.setLayoutData(layoutData);
-		parent.setLayout(new GridLayout(1, false));
+		GridLayout layout= new GridLayout(1, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		parent.setLayout(layout);
 
 		SafeRunner.run(new ISafeRunnable() {
 			public void handleException(Throwable exception) {
