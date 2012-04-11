@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -138,6 +138,21 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 			String implementorName= SignatureUtil.stripSignatureToFQN(signature);
 			if (implementorName.length() == 0)
 				return false;
+			
+			int implementorDims= Signature.getArrayCount(signature);
+			int superDimsIndex= supertype.indexOf("[]"); //$NON-NLS-1$
+			int superDims;
+			if (superDimsIndex != -1) {
+				superDims= (supertype.length() - superDimsIndex) / 2;
+				supertype= supertype.substring(0, superDimsIndex);
+			} else {
+				superDims= 0;
+			}
+			if (implementorDims > superDims) {
+				return "java.lang.Object".equals(supertype); //$NON-NLS-1$
+			} else if (superDims != implementorDims) {
+				return false;
+			}
 
 			boolean qualified= supertype.indexOf('.') != -1;
 
