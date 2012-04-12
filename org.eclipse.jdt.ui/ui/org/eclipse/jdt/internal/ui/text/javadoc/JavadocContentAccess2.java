@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.SourceRange;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -57,7 +56,6 @@ import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 
@@ -1204,9 +1202,7 @@ public class JavadocContentAccess2 {
 						Object constantValue= variableBinding.getConstantValue();
 						if (constantValue != null) {
 							if (constantValue instanceof String) {
-								StringLiteral stringLiteral= AST.newAST(ASTProvider.SHARED_AST_LEVEL).newStringLiteral();
-								stringLiteral.setLiteralValue((String) constantValue);
-								text= stringLiteral.getEscapedValue();
+								text= ASTNodes.getEscapedStringLiteral((String) constantValue);
 							} else {
 								text= constantValue.toString(); // Javadoc tool is even worse for chars...
 							}
