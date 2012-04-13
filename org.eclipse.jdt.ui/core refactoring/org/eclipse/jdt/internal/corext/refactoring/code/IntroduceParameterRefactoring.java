@@ -219,6 +219,8 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 							String msg= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_cannot_introduce, entry.getMessage());
 							return RefactoringStatus.createFatalErrorStatus(msg);
 						}
+						fChangeSignatureRefactoring= new ProcessorBasedRefactoring(fChangeSignatureProcessor);
+						fChangeSignatureRefactoring.setValidationContext(getValidationContext());
 						result= fChangeSignatureProcessor.checkInitialConditions(new SubProgressMonitor(pm, 1));
 						if (result.hasFatalError())
 							return result;
