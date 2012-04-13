@@ -314,6 +314,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_15_PB_ANNOTATION_SUPER_INTERFACE= getJDTCoreKey(JavaCore.COMPILER_PB_ANNOTATION_SUPER_INTERFACE);
 	private static final Key PREF_15_PB_TYPE_PARAMETER_HIDING= getJDTCoreKey(JavaCore.COMPILER_PB_TYPE_PARAMETER_HIDING);
 	private static final Key PREF_15_PB_INCOMPLETE_ENUM_SWITCH= getJDTCoreKey(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH);
+	private static final Key PREF_15_PB_MISSING_ENUM_CASE_DESPITE_DEFAULT= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_ENUM_CASE_DESPITE_DEFAULT);
+	private static final Key PREF_15_PB_SWITCH_MISSING_DEFAULT_CASE= getJDTCoreKey(JavaCore.COMPILER_PB_SWITCH_MISSING_DEFAULT_CASE);
 	private static final Key PREF_15_PB_RAW_TYPE_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE);
 	private static final Key PREF_17_PB_REDUNDANT_TYPE_ARGUMENTS= getJDTCoreKey(JavaCore.COMPILER_PB_REDUNDANT_TYPE_ARGUMENTS);
 	private static final Key PREF_15_PB_UNAVOIDABLE_GENERIC_TYPE_PROBLEMS= getJDTCoreKey(JavaCore.COMPILER_PB_UNAVOIDABLE_GENERIC_TYPE_PROBLEMS);
@@ -385,7 +387,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_15_PB_UNCHECKED_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST,
 				PREF_15_PB_AUTOBOXING_PROBLEM, PREF_15_PB_MISSING_OVERRIDE_ANNOTATION, PREF_16_PB_MISSING_OVERRIDE_ANNOTATION_FOR_INTERFACE_METHOD_IMPLEMENTATION,
 				PREF_15_PB_ANNOTATION_SUPER_INTERFACE,
-				PREF_15_PB_TYPE_PARAMETER_HIDING, PREF_15_PB_INCOMPLETE_ENUM_SWITCH, PREF_PB_MISSING_DEPRECATED_ANNOTATION,
+				PREF_15_PB_TYPE_PARAMETER_HIDING,
+				PREF_15_PB_INCOMPLETE_ENUM_SWITCH, PREF_15_PB_MISSING_ENUM_CASE_DESPITE_DEFAULT, PREF_15_PB_SWITCH_MISSING_DEFAULT_CASE,
+				PREF_PB_MISSING_DEPRECATED_ANNOTATION,
 				PREF_15_PB_RAW_TYPE_REFERENCE, PREF_15_PB_UNAVOIDABLE_GENERIC_TYPE_PROBLEMS, PREF_17_PB_REDUNDANT_TYPE_ARGUMENTS,
 				PREF_PB_FATAL_OPTIONAL_ERROR,
 				PREF_PB_FORBIDDEN_REFERENCE, PREF_PB_DISCOURRAGED_REFERENCE,
@@ -548,7 +552,13 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_OBJECT_ALLOCATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_incomplete_enum_switch_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_INCOMPLETE_ENUM_SWITCH, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		node= fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_INCOMPLETE_ENUM_SWITCH, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_missing_enum_case_despite_default;
+		fFilteredPrefTree.addCheckBox(inner, label, PREF_15_PB_MISSING_ENUM_CASE_DESPITE_DEFAULT, enabledDisabled, extraIndent, node);
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_switch_missing_default_case_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_SWITCH_MISSING_DEFAULT_CASE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_fall_through_case;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_FALLTHROUGH_CASE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
@@ -840,6 +850,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 			if (PREF_PB_UNUSED_PARAMETER.equals(changedKey) ||
 					PREF_PB_DEPRECATION.equals(changedKey) ||
 					PREF_PB_LOCAL_VARIABLE_HIDING.equals(changedKey) ||
+					PREF_15_PB_INCOMPLETE_ENUM_SWITCH.equals(changedKey) ||
 					PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION.equals(changedKey) ||
 					PREF_15_PB_MISSING_OVERRIDE_ANNOTATION.equals(changedKey) ||
 					PREF_PB_SUPPRESS_WARNINGS.equals(changedKey) ||
@@ -958,6 +969,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		boolean enableHiding= !checkValue(PREF_PB_LOCAL_VARIABLE_HIDING, IGNORE);
 		getCheckBox(PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD).setEnabled(enableHiding);
+		
+		boolean enableMissingEnumDespiteDefault= !checkValue(PREF_15_PB_INCOMPLETE_ENUM_SWITCH, IGNORE);
+		getCheckBox(PREF_15_PB_MISSING_ENUM_CASE_DESPITE_DEFAULT).setEnabled(enableMissingEnumDespiteDefault);
 		
 		boolean enablemissingOverrideAnnotation= !checkValue(PREF_15_PB_MISSING_OVERRIDE_ANNOTATION, IGNORE);
 		getCheckBox(PREF_16_PB_MISSING_OVERRIDE_ANNOTATION_FOR_INTERFACE_METHOD_IMPLEMENTATION).setEnabled(enablemissingOverrideAnnotation);
