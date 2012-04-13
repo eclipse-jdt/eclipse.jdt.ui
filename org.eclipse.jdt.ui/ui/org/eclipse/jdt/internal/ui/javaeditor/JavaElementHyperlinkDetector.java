@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,9 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.AbstractHyperlinkDetector;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
+import org.eclipse.ui.IEditorInput;
+
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICodeAssist;
@@ -53,6 +56,12 @@ import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
  */
 public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 
+	/* cache for the last result from codeSelect(..) */
+	private static ITypeRoot fLastInput;
+	private static long fLastModStamp;
+	private static IRegion fLastWordRegion;
+	private static IJavaElement[] fLastElements;
+
 	/*
 	 * @see org.eclipse.jface.text.hyperlink.IHyperlinkDetector#detectHyperlinks(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion, boolean)
 	 */
@@ -72,7 +81,9 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 			return null;
 
 		try {
-			IDocument document= textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput());
+			IDocumentProvider documentProvider= textEditor.getDocumentProvider();
+			IEditorInput editorInput= textEditor.getEditorInput();
+			IDocument document= documentProvider.getDocument(editorInput);
 			IRegion wordRegion= JavaWordFinder.findWord(document, offset);
 			if (wordRegion == null || wordRegion.getLength() == 0)
 				return null;
@@ -82,9 +93,19 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 
 			if (JavaElementHyperlinkDetector.class == getClass() && findBreakOrContinueTarget(input, region) != null)
 				return new IHyperlink[] { new JavaElementHyperlink(wordRegion, (SelectionDispatchAction)openAction, null, false) };
-
-			IJavaElement[] elements= ((ICodeAssist) input).codeSelect(wordRegion.getOffset(), wordRegion.getLength());
-			elements= selectOpenableElements(elements);
+			
+			IJavaElement[] elements;
+			long modStamp= documentProvider.getModificationStamp(editorInput);
+			if (input.equals(fLastInput) && modStamp == fLastModStamp && wordRegion.equals(fLastWordRegion)) {
+				elements= fLastElements;
+			} else {
+				elements= ((ICodeAssist) input).codeSelect(wordRegion.getOffset(), wordRegion.getLength());
+				elements= selectOpenableElements(elements);
+				fLastInput= input;
+				fLastModStamp= modStamp;
+				fLastWordRegion= wordRegion;
+				fLastElements= elements;
+			}
 			if (elements.length == 0)
 				return null;
 			
@@ -100,6 +121,14 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 		} catch (JavaModelException e) {
 			return null;
 		}
+	}
+	
+	@Override
+	public void dispose() {
+		super.dispose();
+		fLastElements= null;
+		fLastInput= null;
+		fLastWordRegion= null;
 	}
 
 	/**
