@@ -1522,6 +1522,32 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(proposal);
 		}
 	}
+	
+	public static void addCasesOmittedProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode instanceof Expression && selectedNode.getLocationInParent() == SwitchStatement.EXPRESSION_PROPERTY) {
+			AST ast= selectedNode.getAST();
+			SwitchStatement parent= (SwitchStatement) selectedNode.getParent();
+			
+			for (Statement statement : (List<Statement>) parent.statements()) {
+				if (statement instanceof SwitchCase && ((SwitchCase) statement).isDefault()) {
+					
+					// insert //$CASES-OMITTED$:
+					ASTRewrite rewrite= ASTRewrite.create(ast);
+					rewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
+					ListRewrite listRewrite= rewrite.getListRewrite(parent, SwitchStatement.STATEMENTS_PROPERTY);
+					ASTNode casesOmittedComment= rewrite.createStringPlaceholder("//$CASES-OMITTED$", ASTNode.EMPTY_STATEMENT); //$NON-NLS-1$
+					listRewrite.insertBefore(casesOmittedComment, statement, null);
+					
+					String label= CorrectionMessages.LocalCorrectionsSubProcessor_insert_cases_omitted;
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 4, image);
+					proposals.add(proposal);
+					break;
+				}
+			}
+		}
+	}
 
 	public static void addDeprecatedFieldsToMethodsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -1652,7 +1678,6 @@ public class LocalCorrectionsSubProcessor {
 			}
 		}
 		boolean hasDefault= defaultIndex < statements.size();
-		int index= defaultIndex;
 
 		AST ast= switchStatement.getAST();
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -1681,18 +1706,36 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), astRewrite, 10, image));
 		}
 		if (!hasDefault) {
-			ASTRewrite astRewrite= ASTRewrite.create(ast);
-			ListRewrite listRewrite= astRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
-
-			SwitchCase newSwitchCase= ast.newSwitchCase();
-			newSwitchCase.setExpression(null);
-			listRewrite.insertAt(newSwitchCase, index, null);
-			index++;
-			listRewrite.insertAt(ast.newBreakStatement(), index, null);
-
-			String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_default_case_description;
-			proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), astRewrite, 10, image));
+			createMissingDefaultProposal(context, switchStatement, image, proposals);
 		}
+	}
+	
+	public static void addMissingDefaultCaseProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode instanceof Expression && selectedNode.getLocationInParent() == SwitchStatement.EXPRESSION_PROPERTY) {
+			SwitchStatement switchStatement= (SwitchStatement) selectedNode.getParent();
+			for (Statement statement : (List<Statement>) switchStatement.statements()) {
+				if (statement instanceof SwitchCase && ((SwitchCase) statement).isDefault()) {
+					return;
+				}
+			}
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			createMissingDefaultProposal(context, switchStatement, image, proposals);
+		}
+	}
+
+	private static void createMissingDefaultProposal(IInvocationContext context, SwitchStatement switchStatement, Image image, Collection<ICommandAccess> proposals) {
+		AST ast= switchStatement.getAST();
+		ASTRewrite astRewrite= ASTRewrite.create(ast);
+		ListRewrite listRewrite= astRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
+
+		SwitchCase newSwitchCase= ast.newSwitchCase();
+		newSwitchCase.setExpression(null);
+		listRewrite.insertLast(newSwitchCase, null);
+		listRewrite.insertLast(ast.newBreakStatement(), null);
+
+		String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_default_case_description;
+		proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), astRewrite, 10, image));
 	}
 
 	public static void addMissingHashCodeProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {

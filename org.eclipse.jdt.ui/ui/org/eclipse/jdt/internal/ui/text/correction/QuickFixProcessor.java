@@ -218,6 +218,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IncompatibleTypesInForeach:
 			case IProblem.MissingEnumConstantCase:
 			case IProblem.MissingEnumDefaultCase:
+			case IProblem.MissingDefaultCase:
+			case IProblem.MissingEnumConstantCaseDespiteDefault:
 			case IProblem.MissingSynchronizedModifierInInheritedMethod:
 			case IProblem.UnusedObjectAllocation:
 			case IProblem.MethodCanBeStatic:
@@ -633,6 +635,13 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MissingEnumConstantCase:
 			case IProblem.MissingEnumDefaultCase:
 				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals);
+				break;
+			case IProblem.MissingDefaultCase:
+				LocalCorrectionsSubProcessor.addMissingDefaultCaseProposal(context, problem, proposals);
+				break;
+			case IProblem.MissingEnumConstantCaseDespiteDefault:
+				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals);
+				LocalCorrectionsSubProcessor.addCasesOmittedProposals(context, problem, proposals);
 				break;
 			case IProblem.MissingSynchronizedModifierInInheritedMethod:
 				ModifierCorrectionSubProcessor.addSynchronizedMethodProposal(context, problem, proposals);
