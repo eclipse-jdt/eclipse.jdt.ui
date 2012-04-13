@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -169,7 +169,7 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
+	 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractJavaEditorTextHover#getInformationPresenterControlCreator()
 	 * @since 3.0
 	 */
 	@Override
@@ -177,6 +177,9 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 		if (fBestHover instanceof IInformationProviderExtension2) // this is wrong, but left here for backwards compatibility
 			return ((IInformationProviderExtension2)fBestHover).getInformationPresenterControlCreator();
 
+		if (fBestHover instanceof AbstractJavaEditorTextHover) {
+			return ((AbstractJavaEditorTextHover) fBestHover).getInformationPresenterControlCreator();
+		}
 		return null;
 	}
 }
