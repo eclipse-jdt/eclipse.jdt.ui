@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -183,20 +183,8 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
-		if (visible) {
+		if (visible)
 			setFocus();
-		} else {
-			IDialogSettings dialogSettings= getDialogSettings();
-			if (dialogSettings != null) {
-				IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
-				if (section == null) {
-					section= dialogSettings.addNewSection(PAGE_NAME);
-				}
-				section.put(SETTINGS_CREATEMAIN, isCreateMain());
-				section.put(SETTINGS_CREATECONSTR, isCreateConstructors());
-				section.put(SETTINGS_CREATEUNIMPLEMENTED, isCreateInherited());
-			}
-		}
 	}
 
 	private void createMethodStubSelectionControls(Composite composite, int nColumns) {
@@ -284,6 +272,17 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 			buf.append(lineDelim);
 			buf.append("}"); //$NON-NLS-1$
 			type.createMethod(buf.toString(), null, false, null);
+		}
+
+		IDialogSettings dialogSettings= getDialogSettings();
+		if (dialogSettings != null) {
+			IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
+			if (section == null) {
+				section= dialogSettings.addNewSection(PAGE_NAME);
+			}
+			section.put(SETTINGS_CREATEMAIN, isCreateMain());
+			section.put(SETTINGS_CREATECONSTR, isCreateConstructors());
+			section.put(SETTINGS_CREATEUNIMPLEMENTED, isCreateInherited());
 		}
 
 		if (monitor != null) {
