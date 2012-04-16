@@ -60,6 +60,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
@@ -433,7 +434,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 				&& !(start instanceof ForStatement)
 				&& !(start instanceof DoStatement)
 				&& !(start instanceof WhileStatement)
-				&& !(start instanceof EnhancedForStatement)) {
+				&& !(start instanceof EnhancedForStatement)
+				&& !(start instanceof SwitchStatement)) {
 			start= start.getParent();
 		}
 		if (start instanceof ForStatement) {
@@ -445,7 +447,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		} else if (start instanceof EnhancedForStatement) {
 			stmt= ((EnhancedForStatement)start).getBody();
 		}
-		if (start.getParent() instanceof LabeledStatement) {
+		if (start != null && start.getParent() instanceof LabeledStatement) {
 			LabeledStatement labeledStatement= (LabeledStatement)start.getParent();
 			fEnclosingLoopLabel= labeledStatement.getLabel();
 		}
