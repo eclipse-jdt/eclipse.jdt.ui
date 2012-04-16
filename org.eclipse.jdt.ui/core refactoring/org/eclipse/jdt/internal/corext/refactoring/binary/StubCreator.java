@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.binary;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -63,6 +65,10 @@ public class StubCreator {
 	}
 
 	protected void appendExpression(final String signature) {
+		appendExpression(signature, false);
+	}
+	
+	protected void appendExpression(String signature, boolean castNull) {
 		switch (signature.charAt(0)) {
 			case Signature.C_BOOLEAN:
 				fBuffer.append("false"); //$NON-NLS-1$
@@ -77,9 +83,11 @@ public class StubCreator {
 				fBuffer.append("0"); //$NON-NLS-1$
 				break;
 			default:
-				fBuffer.append("("); //$NON-NLS-1$
-				fBuffer.append(Signature.toString(signature));
-				fBuffer.append(")"); //$NON-NLS-1$
+				if (castNull) {
+					fBuffer.append("("); //$NON-NLS-1$
+					fBuffer.append(Signature.toString(signature));
+					fBuffer.append(")"); //$NON-NLS-1$
+				}
 				fBuffer.append("null"); //$NON-NLS-1$
 				break;
 		}
@@ -112,6 +120,8 @@ public class StubCreator {
 			final IType type= (IType) member;
 			if (!type.isMember())
 				flags&= ~Flags.AccPrivate;
+			if (Flags.isEnum(flags))
+				flags&= ~Flags.AccAbstract;
 		}
 		if (Flags.isEnum(flags))
 			flags&= ~Flags.AccFinal;
@@ -211,6 +221,7 @@ public class StubCreator {
 		}
 	}
 
+	@SuppressWarnings("boxing")
 	protected void appendMethodBody(final IMethod method) throws JavaModelException {
 		if (method.isConstructor()) {
 			final IType declaringType= method.getDeclaringType();
@@ -220,28 +231,66 @@ public class StubCreator {
 				final IType superclass= declaringType.getJavaProject().findType(Signature.getSignatureQualifier(superSignature), Signature.getSignatureSimpleName(superSignature));
 				if (superclass != null) {
 					final IMethod[] superMethods= superclass.getMethods();
+					
+					// collect super constructors by parameter count
+					Map<Integer, List<IMethod>> superConstructorsByParamCount= new TreeMap<Integer, List<IMethod>>();
+					boolean multi= false;
 					IMethod superConstructor= null;
-					final int length= superMethods.length;
-					for (int index= 0; index < length; index++) {
-						final IMethod superMethod= superMethods[index];
-						if (superMethod.isConstructor() && !Flags.isPrivate(superMethod.getFlags())) {
-							superConstructor= superMethod;
-							if (superConstructor.getExceptionTypes().length == 0)
+					for (int i= 0; i < superMethods.length; i++) {
+						IMethod superMethod= superMethods[i];
+						if (superMethod.isConstructor()
+								&& !Flags.isPrivate(superMethod.getFlags())
+								&& !(Flags.isPackageDefault(superMethod.getFlags()) && !declaringType.getPackageFragment().equals(superclass.getPackageFragment()))
+								) {
+							int paramCount= superMethod.getNumberOfParameters();
+							if (paramCount == 0) {
+								superConstructor= superMethod;
 								break;
+							}
+							List<IMethod> constructors= superConstructorsByParamCount.get(paramCount);
+							if (constructors == null) {
+								constructors= new ArrayList<IMethod>();
+								superConstructorsByParamCount.put(paramCount, constructors);
+							}
+							constructors.add(superMethod);
+						}
+					}
+					if (superConstructor == null && superConstructorsByParamCount.size() > 0) {
+						// look for constructors without exceptions and without parameters
+						done: for (List<IMethod> constructors : superConstructorsByParamCount.values()) {
+							for (IMethod constructor : constructors) {
+								if (constructor.getExceptionTypes().length == 0) {
+									superConstructor= constructor;
+									multi= constructors.size() != 1;
+									if (multi)
+										break;
+									else
+										break done;
+								}
+								if (superConstructor == null) {
+									superConstructor= constructor;
+									multi= constructors.size() != 1;
+								}									
+							}
+						}
+						if (superConstructor == null) {
+							// give up, get first
+							superConstructor= superConstructorsByParamCount.values().iterator().next().get(0);
+							multi= true;
 						}
 					}
 					if (superConstructor != null) {
 						final String[] superParameters= superConstructor.getParameterTypes();
 						final int paramLength= superParameters.length;
+						fBuffer.append("super("); //$NON-NLS-1$
 						if (paramLength != 0) {
-							fBuffer.append("super("); //$NON-NLS-1$
 							for (int index= 0; index < paramLength; index++) {
 								if (index > 0)
 									fBuffer.append(","); //$NON-NLS-1$
-								appendExpression(superParameters[index]);
+								appendExpression(superParameters[index], multi);
 							}
-							fBuffer.append(");"); //$NON-NLS-1$
 						}
+						fBuffer.append(");"); //$NON-NLS-1$
 					}
 				}
 			}
