@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,12 +48,6 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 
 public class PackagesViewContentProviderTests2 extends TestCase {
-
-	/**
-	 * Workaround for "IProject#delete(..) should suppress deltas from CharsetDeltaJob"
-	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=243912
-	 */
-	private static final boolean BUG_243912= true;
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite("org.eclipse.jdt.ui.tests.PackagesViewContentProviderTests2"); //$NON-NLS-1$
@@ -253,17 +247,12 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		//force events from display
 		fMyPart.pushDisplay();
 
-		//TODO: avoid test failures, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=243132
-//		assertPack81RefreshedOnce();
+		assertPack81RefreshedOnce();
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 		if (! fMyPart.getRefreshedObject().contains(fPack81))
 			fail("fPack81 not refreshed:\n" + fMyPart.getRefreshedObject());
 		if (fMyPart.getRefreshedObject().size() != 1)
-//			fail("Too many refreshes (" + fMyPart.getRefreshedObject().size() + "):\n" + fMyPart.getRefreshedObject());
-			System.out.println(
-					"PackagesViewContentProviderTests2.testAddCUFromPackageNotLogicalPackage():\n"
-					+ "Too many refreshes (" + fMyPart.getRefreshedObject().size() + "):\n" + fMyPart.getRefreshedObject());
-
+			fail("Too many refreshes (" + fMyPart.getRefreshedObject().size() + "):\n" + fMyPart.getRefreshedObject());
 	}
 
 	public void testAddFragmentToLogicalPackage() throws Exception {
@@ -479,10 +468,6 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		if (fEnableAutoBuildAfterTesting)
 			CoreUtility.setAutoBuilding(true);
 
-		if (BUG_243912) {
-			Thread.sleep(1000);
-			fMyPart.pushDisplay();
-		}
 		super.tearDown();
 	}
 
