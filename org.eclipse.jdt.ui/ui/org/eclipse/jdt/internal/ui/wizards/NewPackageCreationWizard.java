@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,13 +7,20 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Philippe Marschall <philippe.marschall@netcetera.ch> - [type wizards] Allow the creation of a compilation unit called package-info.java - https://bugs.eclipse.org/86168
+ *     Michael Pellaton <michael.pellaton@netcetera.ch> - [type wizards] Allow the creation of a compilation unit called package-info.java - https://bugs.eclipse.org/86168
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.wizards.NewPackageWizardPage;
 
@@ -45,6 +52,7 @@ public class NewPackageCreationWizard extends NewElementWizard {
 		super.addPages();
 		if (fPage == null) {
 			fPage= new NewPackageWizardPage();
+			fPage.setWizard(this);
 			fPage.init(getSelection());
 		}
 		addPage(fPage);
@@ -65,7 +73,11 @@ public class NewPackageCreationWizard extends NewElementWizard {
 	public boolean performFinish() {
 		boolean res= super.performFinish();
 		if (res) {
-			selectAndReveal(fPage.getModifiedResource());
+			IResource resource= fPage.getModifiedResource();
+			selectAndReveal(resource);
+			if (resource instanceof IFile && resource.getName().equals(JavaModelUtil.PACKAGE_INFO_JAVA)) {
+				openResource((IFile) resource);
+			}
 		}
 		return res;
 	}

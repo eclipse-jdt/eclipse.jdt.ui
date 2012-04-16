@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,9 +7,15 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Philippe Marschall <philippe.marschall@netcetera.ch> - [type wizards] Allow the creation of a compilation unit called package-info.java - https://bugs.eclipse.org/86168
+ *     Michael Pellaton <michael.pellaton@netcetera.ch> - [type wizards] Allow the creation of a compilation unit called package-info.java - https://bugs.eclipse.org/86168
  *******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 
@@ -28,34 +34,56 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocCommentReader;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Strings;
+
+import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
+import org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
@@ -72,11 +100,19 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  */
 public class NewPackageWizardPage extends NewContainerWizardPage {
 
+	private static final String PACKAGE_INFO_JAVA_FILENAME= JavaModelUtil.PACKAGE_INFO_JAVA;
+
+	private static final String PACKAGE_HTML_FILENAME= "package.html"; //$NON-NLS-1$
+
 	private static final String PAGE_NAME= "NewPackageWizardPage"; //$NON-NLS-1$
 
 	private static final String PACKAGE= "NewPackageWizardPage.package"; //$NON-NLS-1$
 
+	private final static String SETTINGS_CREATEPACKAGE_INFO_JAVA= "create_package_info_java"; //$NON-NLS-1$
+
 	private StringDialogField fPackageDialogField;
+
+	private SelectionButtonDialogField fCreatePackageInfoJavaDialogField;
 
 	/*
 	 * Status of last validation of the package field
@@ -102,6 +138,10 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		fPackageDialogField.setDialogFieldListener(adapter);
 		fPackageDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_label);
 
+		fCreatePackageInfoJavaDialogField= new SelectionButtonDialogField(SWT.CHECK);
+		fCreatePackageInfoJavaDialogField.setDialogFieldListener(adapter);
+		fCreatePackageInfoJavaDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_CreatePackageInfoJava);
+
 		fPackageStatus= new StatusInfo();
 	}
 
@@ -125,6 +165,16 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 				pName= pf.getElementName();
 		}
 		setPackageText(pName, true);
+
+		IDialogSettings dialogSettings= getDialogSettings();
+		if (dialogSettings != null) {
+			IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
+			if (section != null) {
+				boolean createPackageDocumentation= section.getBoolean(SETTINGS_CREATEPACKAGE_INFO_JAVA);
+				fCreatePackageInfoJavaDialogField.setSelection(createPackageDocumentation);
+			}
+		}
+
 		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });
 	}
 
@@ -186,6 +236,8 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		DialogField.createEmptySpace(composite);
 
 		TextFieldNavigationHandler.install(text);
+		
+		fCreatePackageInfoJavaDialogField.doFillIntoGrid(composite, nColumns);
 	}
 
 	// -------- PackageFieldAdapter --------
@@ -261,10 +313,14 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 					}
 				}
 				if (pack.exists()) {
-					if (pack.containsJavaResources() || !pack.hasSubpackages()) {
-						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExists);
-					} else {
-						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageNotShown);
+					// it's ok for the package to exist as long we want to create package level documentation
+					// and the package level documentation doesn't exist
+					if (!isCreatePackageDocumentation() || packageDocumentationAlreadyExists(pack)) {
+						if (pack.containsJavaResources() || !pack.hasSubpackages()) {
+							status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExists);
+						} else {
+							status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageNotShown);
+						}
 					}
 				} else {
 					IResource resource= pack.getResource();
@@ -286,6 +342,25 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		}
 		return status;
 	}
+	
+	private boolean packageDocumentationAlreadyExists(IPackageFragment pack) throws JavaModelException {
+		ICompilationUnit packageInfoJava= pack.getCompilationUnit(PACKAGE_INFO_JAVA_FILENAME);
+		if (packageInfoJava.exists()) {
+			return true;
+		}
+		Object[] nonJavaResources= pack.getNonJavaResources();
+		for (int i= 0; i < nonJavaResources.length; i++) {
+			Object resource= nonJavaResources[i];
+			if (resource instanceof IFile) {
+				IFile file= (IFile) resource;
+				String fileName= file.getName();
+				if (PACKAGE_HTML_FILENAME.equals(fileName)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Returns the content of the package input field.
@@ -294,6 +369,16 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	 */
 	public String getPackageText() {
 		return fPackageDialogField.getText();
+	}
+
+	/**
+	 * Returns the content of the create package documentation input field.
+	 *
+	 * @return the content of the create package documentation input field
+	 * @since 3.8
+	 */
+	boolean isCreatePackageDocumentation() {
+		return fCreatePackageInfoJavaDialogField.isSelected();
 	}
 
 	/**
@@ -310,7 +395,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
-	 * Returns the resource handle that corresponds to the element to was created or
+	 * Returns the resource handle that corresponds to the element that was created or
 	 * will be created.
 	 * @return A resource or null if the page contains illegal values.
 	 * @since 3.0
@@ -318,7 +403,17 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	public IResource getModifiedResource() {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		if (root != null) {
-			return root.getPackageFragment(getPackageText()).getResource();
+			IPackageFragment pack= root.getPackageFragment(getPackageText());
+			IResource packRes= pack.getResource();
+			if (isCreatePackageDocumentation()) {
+				if (JavaModelUtil.is50OrHigher(getJavaProject())) {
+					return pack.getCompilationUnit(PACKAGE_INFO_JAVA_FILENAME).getResource();
+				} else if (packRes instanceof IFolder){
+					return ((IFolder) packRes).getFile(PACKAGE_HTML_FILENAME);
+				}
+			}
+
+			return packRes;
 		}
 		return null;
 	}
@@ -369,11 +464,175 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		}
 
 		IPackageFragmentRoot root= getPackageFragmentRoot();
-		String packName= getPackageText();
-		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);
+		IPackageFragment pack= root.getPackageFragment(getPackageText());
+		
+		if (pack.exists()) {
+			fCreatedPackageFragment= pack;
+		} else {
+			fCreatedPackageFragment= root.createPackageFragment(getPackageText(), true, monitor);
+		}
+
+		if (isCreatePackageDocumentation()) {
+			if (JavaModelUtil.is50OrHigher(getJavaProject())) {
+				createPackageInfoJava(monitor);
+			} else {
+				createPackageHtml(root, monitor);
+			}
+		}
+
+		// save whether package documentation should be created
+		IDialogSettings dialogSettings= getDialogSettings();
+		if (dialogSettings != null) {
+			IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
+			if (section == null) {
+				section= dialogSettings.addNewSection(PAGE_NAME);
+			}
+			section.put(SETTINGS_CREATEPACKAGE_INFO_JAVA, isCreatePackageDocumentation());
+		}
 
 		if (monitor.isCanceled()) {
 			throw new InterruptedException();
 		}
 	}
+
+	private void createPackageInfoJava(IProgressMonitor monitor) throws CoreException {
+		String lineDelimiter= StubUtility.getLineDelimiterUsed(fCreatedPackageFragment.getJavaProject());
+		StringBuilder content = new StringBuilder();
+		String fileComment= getFileComment(lineDelimiter);
+		String typeComment= getTypeComment(lineDelimiter);
+		
+		if (fileComment != null) {
+			content.append(fileComment);
+			content.append(lineDelimiter);
+		} 
+
+		if (typeComment != null) {
+			content.append(typeComment);
+			content.append(lineDelimiter);
+		} else if (fileComment != null) {
+			// insert an empty file comment to avoid that the file comment becomes the type comment
+			content.append("/**");  //$NON-NLS-1$
+			content.append(lineDelimiter);
+			content.append(" *"); //$NON-NLS-1$
+			content.append(lineDelimiter);
+			content.append(" */"); //$NON-NLS-1$
+			content.append(lineDelimiter);
+		}
+
+		content.append("package "); //$NON-NLS-1$
+		content.append(fCreatedPackageFragment.getElementName());
+		content.append(";"); //$NON-NLS-1$
+
+		ICompilationUnit compilationUnit= fCreatedPackageFragment.createCompilationUnit(PACKAGE_INFO_JAVA_FILENAME, content.toString(), true, monitor);
+
+		JavaModelUtil.reconcile(compilationUnit);
+
+		compilationUnit.becomeWorkingCopy(monitor);
+		try {
+			IBuffer buffer= compilationUnit.getBuffer();
+			ISourceRange sourceRange= compilationUnit.getSourceRange();
+			String originalContent= buffer.getText(sourceRange.getOffset(), sourceRange.getLength());
+
+			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, originalContent, 0, lineDelimiter, fCreatedPackageFragment.getJavaProject());
+			formattedContent= Strings.trimLeadingTabsAndSpaces(formattedContent);
+			buffer.replace(sourceRange.getOffset(), sourceRange.getLength(), formattedContent);
+			compilationUnit.commitWorkingCopy(true, new SubProgressMonitor(monitor, 1));
+		} finally {
+			compilationUnit.discardWorkingCopy();
+		}
+	}
+
+	private String getFileComment(String lineDelimiterUsed) throws CoreException {
+		ICompilationUnit cu= fCreatedPackageFragment.getCompilationUnit(PACKAGE_INFO_JAVA_FILENAME);
+		return CodeGeneration.getFileComment(cu, lineDelimiterUsed);
+	}
+
+	private String getTypeComment(String lineDelimiterUsed) throws CoreException {
+		ICompilationUnit cu= fCreatedPackageFragment.getCompilationUnit(PACKAGE_INFO_JAVA_FILENAME);
+		String typeName= PACKAGE_INFO_JAVA_FILENAME.substring(0, PACKAGE_INFO_JAVA_FILENAME.length() - JavaModelUtil.DEFAULT_CU_SUFFIX.length());
+		return CodeGeneration.getTypeComment(cu, typeName, lineDelimiterUsed);
+	}
+
+	private void createPackageHtml(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		IFolder createdPackage= workspace.getRoot().getFolder(fCreatedPackageFragment.getPath());
+		IFile packageHtml= createdPackage.getFile(PACKAGE_HTML_FILENAME);
+		String charset= packageHtml.getCharset();
+		String content= buildPackageHtmlContent(root, charset);
+		try {
+			packageHtml.create(new ByteArrayInputStream(content.getBytes(charset)), false, monitor);
+		} catch (UnsupportedEncodingException e) {
+			String message= "charset " + charset + " not supported by platform"; //$NON-NLS-1$ //$NON-NLS-2$
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, message, e));
+		}
+	}
+
+	private String buildPackageHtmlContent(IPackageFragmentRoot root, String charset) throws CoreException {
+		String lineDelimiter= StubUtility.getLineDelimiterUsed(root.getJavaProject());
+		StringBuilder content = new StringBuilder();
+		String fileComment= getFileComment(lineDelimiter);
+		String typeComment= getTypeComment(lineDelimiter);
+
+		content.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+		if (fileComment != null) {
+			content.append("<!--"); //$NON-NLS-1$
+			content.append(lineDelimiter);
+			content.append(stripJavaComments(fileComment));
+			content.append(lineDelimiter);
+			content.append("-->"); //$NON-NLS-1$
+			content.append(lineDelimiter);
+		}
+		content.append("<html>"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+		content.append("<head>"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+		content.append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=");  //$NON-NLS-1$
+		content.append(charset);
+		content.append("\">"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+		content.append("<title>"); //$NON-NLS-1$
+		content.append(fCreatedPackageFragment.getElementName());
+		content.append("</title>"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+		content.append("</head>"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+		content.append("<body>"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+
+		if (typeComment != null) {
+			content.append(stripJavaComments(typeComment));
+			content.append(lineDelimiter);
+		}
+
+		content.append("</body>"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+		content.append("</html>"); //$NON-NLS-1$
+
+		return content.toString();
+	}
+
+	private String stripJavaComments(String comment) {
+		DocumentAdapter documentAdapter= new DocumentAdapter(null, fCreatedPackageFragment.getPath());
+		try {
+			documentAdapter.setContents(comment);
+			return getString(new JavaDoc2HTMLTextReader(new JavaDocCommentReader(documentAdapter, 0, comment.length())));
+		} finally {
+			documentAdapter.close();
+		}
+	}
+
+	private static String getString(Reader reader) {
+		StringBuffer buf= new StringBuffer();
+		char[] buffer= new char[1024];
+		int count;
+		try {
+			while ((count= reader.read(buffer)) != -1)
+				buf.append(buffer, 0, count);
+		} catch (IOException e) {
+			return null;
+		}
+		return buf.toString();
+	}
+	
 }

@@ -7,6 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Philippe Marschall <philippe.marschall@netcetera.ch> - [type wizards] Allow the creation of a compilation unit called package-info.java - https://bugs.eclipse.org/86168
+ *     Michael Pellaton <michael.pellaton@netcetera.ch> - [type wizards] Allow the creation of a compilation unit called package-info.java - https://bugs.eclipse.org/86168
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
@@ -80,6 +82,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewPackageCreationWizard_title;
 
 	public static String NewPackageWizardPage_package_label;
+	public static String NewPackageWizardPage_package_CreatePackageInfoJava;
 	public static String NewPackageWizardPage_error_InvalidPackageName;
 	public static String NewPackageWizardPage_error_IsOutputFolder;
 	public static String NewPackageWizardPage_error_PackageExists;
