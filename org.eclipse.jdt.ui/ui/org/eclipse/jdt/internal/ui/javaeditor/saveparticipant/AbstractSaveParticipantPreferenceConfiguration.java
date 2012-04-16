@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 public abstract class AbstractSaveParticipantPreferenceConfiguration implements ISaveParticipantPreferenceConfiguration {
 
 	/**
-     * Preference prefix that is appended to the id of {@link SaveParticipantDescriptor save participants}.
+     * Preference prefix that is prepended to the id of {@link SaveParticipantDescriptor save participants}.
      *
      * <p>
      * Value is of type <code>Boolean</code>.
@@ -44,7 +44,7 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
      * @see SaveParticipantDescriptor
      * @since 3.3
      */
-    private static final String EDITOR_SAVE_PARTICIPANT_PREFIX= "editor_save_participant_";  //$NON-NLS-1$
+    public static final String EDITOR_SAVE_PARTICIPANT_PREFIX= "editor_save_participant_";  //$NON-NLS-1$
 
 	private SelectionButtonDialogField fEnableField;
 	private IScopeContext fContext;

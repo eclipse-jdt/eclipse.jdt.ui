@@ -895,7 +895,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    private final int count;\n");
+		buf.append("    private int count;\n");
 		buf.append("\n");
 		buf.append("    public  E(int count) {\n");
 		buf.append("        this.count = count;\n");
@@ -934,7 +934,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
-		buf.append("    private final Vector[] fVec;\n");
+		buf.append("    private Vector[] fVec;\n");
 		buf.append("\n");
 		buf.append("    public  E(int count, Vector vec[]) {\n");
 		buf.append("        super();\n");
@@ -1193,7 +1193,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E<T> {\n");
-		buf.append("    private final Vector<String>[] fVec;\n");
+		buf.append("    private Vector<String>[] fVec;\n");
 		buf.append("\n");
 		buf.append("    public  E(int count, Vector<String>[] vec) {\n");
 		buf.append("        super();\n");

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,11 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+
+import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -57,9 +62,17 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CleanUpPostSaveListener;
+import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.AbstractSaveParticipantPreferenceConfiguration;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
@@ -209,6 +222,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			return null;
 		}
 
+		IJavaProject project= getCompilationUnit().getJavaProject();
 		boolean isAnonymous= newTypeDecl.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
 		boolean isStatic= Modifier.isStatic(bodyDecl.getModifiers()) && !isAnonymous;
 		boolean isConstructorParam= isParamToField && fNodeToAssign.getParent() instanceof MethodDeclaration && ((MethodDeclaration) fNodeToAssign.getParent()).isConstructor();
@@ -216,7 +230,27 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		if (isStatic) {
 			modifiers |= Modifier.STATIC;
 		} else if (isConstructorParam) {
-			modifiers |= Modifier.FINAL;
+			String saveActionsKey= AbstractSaveParticipantPreferenceConfiguration.EDITOR_SAVE_PARTICIPANT_PREFIX + CleanUpPostSaveListener.POSTSAVELISTENER_ID;
+			IScopeContext[] scopes= { InstanceScope.INSTANCE, new ProjectScope(project.getProject()) };
+			boolean safeActionsEnabled= Platform.getPreferencesService().getBoolean(JavaPlugin.getPluginId(), saveActionsKey, false, scopes);
+			if (safeActionsEnabled
+					&& CleanUpOptions.TRUE.equals(PreferenceConstants.getPreference(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, project))
+					&& CleanUpOptions.TRUE.equals(PreferenceConstants.getPreference(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL, project))
+					&& CleanUpOptions.TRUE.equals(PreferenceConstants.getPreference(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, project))
+					) {
+				int constructors= 0;
+				if (newTypeDecl instanceof AbstractTypeDeclaration) {
+					List<BodyDeclaration> bodyDeclarations= ((AbstractTypeDeclaration) newTypeDecl).bodyDeclarations();
+					for (BodyDeclaration decl : bodyDeclarations) {
+						if (decl instanceof MethodDeclaration && ((MethodDeclaration) decl).isConstructor()) {
+							constructors++;
+						}
+					}
+				}
+				if (constructors == 1) {
+					modifiers |= Modifier.FINAL;
+				}
+			}
 		}
 
 		VariableDeclarationFragment newDeclFrag= addFieldDeclaration(rewrite, newTypeDecl, modifiers, expression);
@@ -225,7 +259,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		Assignment assignment= ast.newAssignment();
 		assignment.setRightHandSide((Expression) rewrite.createCopyTarget(expression));
 
-		boolean needsThis= StubUtility.useThisForFieldAccess(getCompilationUnit().getJavaProject());
+		boolean needsThis= StubUtility.useThisForFieldAccess(project);
 		if (isParamToField) {
 			needsThis |= varName.equals(((SimpleName) expression).getIdentifier());
 		}
