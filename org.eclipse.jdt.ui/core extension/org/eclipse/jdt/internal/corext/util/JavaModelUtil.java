@@ -88,6 +88,12 @@ public final class JavaModelUtil {
 	public static final String DEFAULT_CU_SUFFIX= ".java"; //$NON-NLS-1$
 
 	/**
+	 * The name of the package-info.java file.
+	 * @since 3.8
+	 */
+	public static final String PACKAGE_INFO_JAVA= "package-info.java"; //$NON-NLS-1$
+	
+	/**
 	 * Finds a type container by container name.
 	 * The returned element will be of type <code>IType</code> or a <code>IPackageFragment</code>.
 	 * <code>null</code> is returned if the type container could not be found.
@@ -896,7 +902,7 @@ public final class JavaModelUtil {
 	 * @since 3.4
 	 */
 	public static boolean isPackageInfo(ICompilationUnit cu) {
-		return "package-info.java".equals(cu.getElementName()); //$NON-NLS-1$
+		return PACKAGE_INFO_JAVA.equals(cu.getElementName()); //$NON-NLS-1$
 	}
 
 	public static boolean isPolymorphicSignature(IMethod method) {
