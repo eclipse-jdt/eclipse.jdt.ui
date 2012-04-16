@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,11 +45,11 @@ public class JavaDocCommentReader extends SingleCharReader {
 	@Override
 	public int read() {
 		if (fCurrPos < fEndPos) {
-			char ch;
-			if (fWasNewLine) {
-				do {
+			char ch= fBuffer.getChar(fCurrPos++);
+			if (fWasNewLine && !IndentManipulation.isLineDelimiterChar(ch)) {
+				while (fCurrPos < fEndPos && Character.isWhitespace(ch)) {
 					ch= fBuffer.getChar(fCurrPos++);
-				} while (fCurrPos < fEndPos && Character.isWhitespace(ch));
+				}
 				if (ch == '*') {
 					if (fCurrPos < fEndPos) {
 						do {
@@ -59,8 +59,6 @@ public class JavaDocCommentReader extends SingleCharReader {
 						return -1;
 					}
 				}
-			} else {
-				ch= fBuffer.getChar(fCurrPos++);
 			}
 			fWasNewLine= IndentManipulation.isLineDelimiterChar(ch);
 
@@ -84,6 +82,13 @@ public class JavaDocCommentReader extends SingleCharReader {
 	public void reset() {
 		fCurrPos= fStartPos;
 		fWasNewLine= true;
+		// skip first line delimiter:
+		if (fCurrPos < fEndPos && '\r' == fBuffer.getChar(fCurrPos)) {
+			fCurrPos++;
+		}
+		if (fCurrPos < fEndPos && '\n' == fBuffer.getChar(fCurrPos)) {
+			fCurrPos++;
+		}
 	}
 
 

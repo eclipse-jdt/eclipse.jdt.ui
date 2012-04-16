@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -194,8 +194,8 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 	}
 
     public void test18(){
-    	String string= "/**\n* Method foo.\n* @param bar\n* @custom fooBar\n*/"; // $NON-NLS-1$
-        String expected= " Method foo.\n <dl><dt>Parameters:</dt><dd><b>bar</b></dd><dt>@custom</dt><dd>fooBar</dd></dl>"; //$NON-NLS-1$
+    	String string= "/**\r\n* Method foo.\r\n* @param bar\t\n* @custom fooBar\t\n*/"; // $NON-NLS-1$
+        String expected= " Method foo.\r\n <dl><dt>Parameters:</dt><dd><b>bar</b></dd><dt>@custom</dt><dd>fooBar</dd></dl>"; //$NON-NLS-1$
         verify(string, expected);
 	}
 
