@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,8 +44,10 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -528,7 +530,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		if (path.segmentCount() > 0 && ensureAntScriptFileIsValid(path.toFile()) && path.getFileExtension() == null)
 			path= path.addFileExtension(ANTSCRIPT_EXTENSION);
 
-		fAntScriptLocation= path;
+		fAntScriptLocation= getAbsoluteLocation(path);
 	}
 
 	@Override
@@ -587,9 +589,35 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	}
 
 	/**
-	 * Returns a boolean indicating whether the passed File handle is
-	 * is valid and available for use.
-	 *
+	 * Gets the absolute location relative to the workspace.
+	 * 
+	 * @param location the location
+	 * @return the absolute path for the location of the file
+	 * 
+	 * @since 3.8
+	 */
+	private IPath getAbsoluteLocation(IPath location) {
+		if (location.isAbsolute())
+			return location;
+
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		if (location.segmentCount() >= 2 && !"..".equals(location.segment(0))) { //$NON-NLS-1$
+			IFile file= root.getFile(location);
+			IPath absolutePath= file.getLocation();
+			if (absolutePath != null) {
+				return absolutePath;
+			}
+		}
+		// The path does not exist in the workspace (e.g. because there's no such project).
+		// Fallback is to just append the path to the workspace root.
+		return root.getLocation().append(location);
+
+	}
+
+	/**
+	 * Returns a boolean indicating whether the passed File handle is is valid and available for
+	 * use.
+	 * 
 	 * @param antScriptFile the ant script
 	 * @return boolean
 	 */
