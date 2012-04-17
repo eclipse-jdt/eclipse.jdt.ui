@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -135,7 +135,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 	private int getInsertPosition() throws BadLocationException {
 		IDocument document= EditorTestHelper.getDocument(fEditor);
 		int lines= document.getNumberOfLines();
-		int offset= document.getLineOffset(lines - 2);
+		int offset= document.getLineOffset(lines - 1);
 		return offset;
 	}
 }
