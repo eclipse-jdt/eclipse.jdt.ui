@@ -40,7 +40,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 
 	private static final int WARM_UP_RUNS= 3;
 
-	private static final int MEASURED_RUNS= 2;
+	private static final int MEASURED_RUNS= 100;
 
 	private ITextEditor fEditor;
 
