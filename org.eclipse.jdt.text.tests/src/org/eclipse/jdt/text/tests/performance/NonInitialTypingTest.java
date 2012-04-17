@@ -22,6 +22,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 /**
  * Measures the time to type in one single method into a large file. Abstract
@@ -39,7 +40,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 
 	private static final int WARM_UP_RUNS= 3;
 
-	private static final int MEASURED_RUNS= 100;
+	private static final int MEASURED_RUNS= 2;
 
 	private ITextEditor fEditor;
 
@@ -107,6 +108,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 		int measuredRuns= getMeasuredRuns();
 		for (int i= 0; i < warmUpRuns + measuredRuns; i++) {
 			fEditor.getSelectionProvider().setSelection(new TextSelection(offset, 0));
+			fEditor.getAction(ITextEditorActionConstants.SMART_ENTER_INVERSE).run();
 			EditorTestHelper.runEventQueue(display, 1000);
 			KeyboardProbe keyboardProbe= getKeyboardProbe();
 
@@ -135,7 +137,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 	private int getInsertPosition() throws BadLocationException {
 		IDocument document= EditorTestHelper.getDocument(fEditor);
 		int lines= document.getNumberOfLines();
-		int offset= document.getLineOffset(lines - 1);
+		int offset= document.getLineOffset(lines - 2);
 		return offset;
 	}
 }
