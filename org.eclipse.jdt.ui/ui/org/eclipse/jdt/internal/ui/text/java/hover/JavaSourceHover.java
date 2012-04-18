@@ -317,7 +317,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 							//bracket hover is rendered above '}'
 							int y= location.y - size.y - 5; //AbstractInformationControlManager.fMarginY = 5
 							Rectangle trim= computeTrim();
-							loc= new Point(location.x + trim.x - getViewer().getTextWidget().getLeftMargin(), y - trim.height + trim.y);
+							loc= new Point(location.x + trim.x - getViewer().getTextWidget().getLeftMargin(), y - trim.height - trim.y);
 						}
 						super.setLocation(loc);
 					}
