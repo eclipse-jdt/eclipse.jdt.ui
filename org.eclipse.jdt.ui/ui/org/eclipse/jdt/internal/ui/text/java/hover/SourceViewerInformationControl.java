@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -565,7 +565,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		GC gc= new GC(fText);
 		gc.setFont(fTextFont);
 		int width= gc.getFontMetrics().getAverageCharWidth();
-		int height= gc.getFontMetrics().getHeight();
+		int height= fText.getLineHeight(); //https://bugs.eclipse.org/bugs/show_bug.cgi?id=377109
 		gc.dispose();
 
 		return new Point(widthInChars * width, heightInChars * height);
