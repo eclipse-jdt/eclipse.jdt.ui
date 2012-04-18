@@ -4218,4 +4218,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			extension.collapseComments();
 		}
 	}
+
+	/**
+	 * Returns the bracket matcher.
+	 * 
+	 * @return the bracket matcher
+	 * @since 3.8
+	 */
+	public JavaPairMatcher getBracketMatcher() {
+		return fBracketMatcher;
+	}
 }

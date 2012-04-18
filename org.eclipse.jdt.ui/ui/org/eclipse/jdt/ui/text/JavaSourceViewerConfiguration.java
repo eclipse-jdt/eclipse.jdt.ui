@@ -796,7 +796,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			presenter.setInformationProvider(provider, contentTypes[i]);
 
 		// sizes: see org.eclipse.jface.text.TextViewer.TEXT_HOVER_*_CHARS
-		presenter.setSizeConstraints(100, 12, true, true);
+		presenter.setSizeConstraints(100, 12, false, true);
 		return presenter;
 	}
 

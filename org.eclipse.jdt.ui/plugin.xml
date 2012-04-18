@@ -491,16 +491,16 @@
             id="org.eclipse.jdt.ui.JavadocHover">
       </hover>
       <hover
-            label="%sourceHover"
-            description="%sourceHoverDescription"
-            class="org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover"
-            id="org.eclipse.jdt.ui.JavaSourceHover">
-      </hover>
-      <hover
             label="%annotationHover"
             description="%annotationHoverDescription"
             class="org.eclipse.jdt.internal.ui.text.java.hover.AnnotationHover"
             id="org.eclipse.jdt.ui.AnnotationHover">
+      </hover>
+      <hover
+            label="%sourceHover"
+            description="%sourceHoverDescription"
+            class="org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover"
+            id="org.eclipse.jdt.ui.JavaSourceHover">
       </hover>
    </extension>
    <extension

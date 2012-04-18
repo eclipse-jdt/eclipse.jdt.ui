@@ -42,6 +42,7 @@ final class JavaHoverMessages extends NLS {
 	public static String JavadocHover_forward_toolTip;
 	public static String JavadocHover_openDeclaration;
 	public static String JavadocHover_showInJavadoc;
+	public static String JavaSourceHover_skippedLines;
 
 	public static String JavaTextHover_createTextHover;
 
