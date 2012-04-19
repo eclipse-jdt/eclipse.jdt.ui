@@ -782,9 +782,12 @@ public class Bindings {
 					buf.append(first.substring(lastIndex + 1, first.length()));
 				first= buf.toString();
 			}
-			second= methodParameters[i].getErasure().getQualifiedName();
-			if (!first.equals(second))
-				return false;
+			second= methodParameters[i].getQualifiedName();
+			if (!first.equals(second)) {
+				second= methodParameters[i].getErasure().getQualifiedName();
+				if (!first.equals(second))
+					return false;
+			}
 		}
 		return true;
 	}

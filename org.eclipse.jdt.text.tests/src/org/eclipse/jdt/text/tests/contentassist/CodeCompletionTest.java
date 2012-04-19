@@ -1642,6 +1642,66 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	public void testOverrideCompletion10_bug377184() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=377184
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+	
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("class Super<T> {\n");
+		buf.append("    void foo(T t) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("public class Impl<T2 extends Number> extends Super<T2> {\n");
+		buf.append("    foo//here\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+	
+		ICompilationUnit cu= pack1.createCompilationUnit("Impl.java", contents, false, null);
+	
+		String str= "//here";
+	
+		int offset= contents.indexOf(str);
+	
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+	
+		codeComplete(cu, offset, collector);
+	
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+	
+		IJavaCompletionProposal toStringProposal= null;
+	
+		for (int i= 0; i < proposals.length; i++) {
+			if (proposals[i].getDisplayString().startsWith("foo")) {
+				toStringProposal= proposals[i];
+			}
+		}
+		assertNotNull("no proposal for foo(...)", toStringProposal);
+	
+		IDocument doc= new Document(contents);
+		toStringProposal.apply(doc);
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("class Super<T> {\n");
+		buf.append("    void foo(T t) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("public class Impl<T2 extends Number> extends Super<T2> {\n");
+		buf.append("    /* (non-Javadoc)\n");
+		buf.append("     * @see test1.Super#foo(java.lang.Object)\n");
+		buf.append("     */\n");
+		buf.append("    @Override\n");
+		buf.append("    void foo(T2 t) {\n");
+		buf.append("        //TODO\n");
+		buf.append("        super.foo(t);\n");
+		buf.append("    }//here\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
 	public void testSetterCompletion1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
