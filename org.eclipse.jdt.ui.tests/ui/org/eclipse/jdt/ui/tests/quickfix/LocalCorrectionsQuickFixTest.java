@@ -8829,6 +8829,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	public void testMissingEnumConstantsInCase1() throws Exception {
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);
 
 		JavaCore.setOptions(options);
@@ -8851,7 +8852,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 4, 1);
+		ArrayList proposals= collectCorrections(cu, astRoot, 3);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -8927,7 +8928,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 3, 1);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -8982,6 +8983,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=372840
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_SWITCH_MISSING_DEFAULT_CASE, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);
 		JavaCore.setOptions(options);
 
