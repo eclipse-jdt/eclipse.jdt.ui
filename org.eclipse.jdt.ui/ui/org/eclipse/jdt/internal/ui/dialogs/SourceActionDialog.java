@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -691,4 +691,14 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	protected IDialogSettings getDialogSettings() {
 		return fSettings;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.Dialog#getDialogBoundsSettings()
+	 * @since 3.8
+	 */
+	@Override
+	protected IDialogSettings getDialogBoundsSettings() {
+		return JavaPlugin.getDefault().getDialogSettingsSection("DialogBounds_" + getClass().getSimpleName()); //$NON-NLS-1$
+	}
+
 }
