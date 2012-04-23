@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * This is a {@link org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal} which includes templates
  * that represent the best guess completion for each parameter of a method.
  */
-public final class ParameterGuessingProposal extends JavaMethodCompletionProposal {
+public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 
 	/**
 	 * Creates a {@link ParameterGuessingProposal} or <code>null</code> if the core context isn't available or extended.

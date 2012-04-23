@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
  *
  * @since 3.2
  */
-public final class JavadocInlineTagCompletionProposal extends LazyJavaCompletionProposal {
+public class JavadocInlineTagCompletionProposal extends LazyJavaCompletionProposal {
 	/** Triggers for types in javadoc. Do not modify. */
 	protected static final char[] JDOC_INLINE_TAG_TRIGGERS= new char[] { '#', '}', ' ' };
 
