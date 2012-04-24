@@ -211,6 +211,29 @@ public final class JavaModelUtil {
 	}
 
 	/**
+	 * Returns whether the two names match. They match if they
+	 * are equal, or if they are the same name but one is missing a dot-separated qualifier.
+	 * 
+	 * @param nameA a potentially qualified name 
+	 * @param nameB a potentially qualified name
+	 * @return <code>true</code> iff the given names match
+	 * @since 3.8
+	 */
+	public static boolean isMatchingName(String nameA, String nameB) {
+		int a= nameA.length();
+		int b= nameB.length();
+		if (a == b) {
+			return nameA.equals(nameB);
+		} else if (a < b - 1) {
+			return nameB.endsWith(nameA) && nameB.charAt(b - a - 1) == '.';
+		} else if (b < a - 1) {
+			return nameA.endsWith(nameB) && nameA.charAt(a - b - 1) == '.';
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * Evaluates if a member (possible from another package) is visible from
 	 * elements in a package.
 	 * @param member The member to test the visibility for
@@ -902,7 +925,7 @@ public final class JavaModelUtil {
 	 * @since 3.4
 	 */
 	public static boolean isPackageInfo(ICompilationUnit cu) {
-		return PACKAGE_INFO_JAVA.equals(cu.getElementName()); //$NON-NLS-1$
+		return PACKAGE_INFO_JAVA.equals(cu.getElementName());
 	}
 
 	public static boolean isPolymorphicSignature(IMethod method) {

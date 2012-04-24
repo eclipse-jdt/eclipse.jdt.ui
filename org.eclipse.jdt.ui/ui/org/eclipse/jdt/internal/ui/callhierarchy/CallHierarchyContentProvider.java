@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.corext.callhierarchy.MethodCall;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 import org.eclipse.jdt.internal.corext.callhierarchy.RealCallers;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -261,12 +262,12 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 					return true;
 				}
 			}
-			if (superClassName != null && typeNameMatches(superClassName, defaultTypeName)) {
+			if (superClassName != null && JavaModelUtil.isMatchingName(superClassName, defaultTypeName)) {
 				return true;
 			}
 			for (int j= 0; j < superInterfaceNames.length; j++) {
 				String superInterfaceName= superInterfaceNames[j];
-				if (typeNameMatches(superInterfaceName, defaultTypeName)) {
+				if (JavaModelUtil.isMatchingName(superInterfaceName, defaultTypeName)) {
 					return true;
 				}
 			}
@@ -287,26 +288,6 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 		if (pos != -1)
 			return typeName.substring(0, pos);
 		return typeName;
-	}
-
-	/**
-	 * Checks whether the two type names match. They match if they
-	 * are equal, or if could be the same type but one is missing the package.
-	 * 
-	 * @param nameA type name (can be qualified) 
-	 * @param nameB type name (can be qualified)
-	 * @return <code>true</code> iff the given type names match
-	 * @since 3.5
-	 */
-	private static boolean typeNameMatches(String nameA, String nameB) {
-		if (nameA.equals(nameB))
-			return true;
-		if (nameB.endsWith(nameA) && nameB.lastIndexOf('.') == nameB.length() - nameA.length() - 1)
-			return true;
-		if (nameA.endsWith(nameB) && nameA.lastIndexOf('.') == nameA.length() - nameB.length() - 1)
-			return true;
-		
-		return false;
 	}
 
 	protected Object[] fetchChildren(final MethodWrapper methodWrapper) {

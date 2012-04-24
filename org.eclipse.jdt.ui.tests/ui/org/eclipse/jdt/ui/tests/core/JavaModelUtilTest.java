@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -112,6 +112,26 @@ public class JavaModelUtilTest extends TestCase {
 			CoreUtility.setAutoBuilding(true);
 	}
 
+    public void testIsMatchingName() {
+        assertMatching(true, "org.junit.Test", "org.junit.Test");
+        assertMatching(true, "org.junit.Test", "Test");
+        assertMatching(true, "X.Test", "Test");
+        assertMatching(true, "Test", "Test");
+        
+        assertMatching(true, "java.lang.Thread.State", "Thread.State");
+        
+        assertMatching(false, "org.junit.Test", "org.junitX.Test");
+        assertMatching(false, "org.junit.Test", "X.Test");
+        assertMatching(false, "org.junit.Test", "Xorg.junit.Test");
+        assertMatching(false, "org.junit.Test", "Test.X");
+        assertMatching(false, "Test", "Test.X");
+        assertMatching(false, "Test", ".Test");
+    }
+    
+    private void assertMatching(boolean matching, String nameA, String nameB) {
+    	assertEquals(matching, JavaModelUtil.isMatchingName(nameA, nameB));
+    	assertEquals(matching, JavaModelUtil.isMatchingName(nameB, nameA));
+    }
 
 	private void assertElementName(String name, IJavaElement elem, int type) {
 		assertNotNull(name, elem);
