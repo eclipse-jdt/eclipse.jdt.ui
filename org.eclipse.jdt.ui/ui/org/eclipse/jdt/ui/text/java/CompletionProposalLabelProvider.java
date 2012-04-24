@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -493,6 +493,14 @@ public class CompletionProposalLabelProvider {
 			declaration= Signature.getSignatureSimpleName(declaration);
 			if (declaration.length > 0) {
 				buf.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER);
+				if (proposal.getRequiredProposals() != null) {
+					String declaringType= extractDeclaringTypeFQN(proposal);
+					String qualifier= Signature.getQualifier(declaringType);
+					if (qualifier.length() > 0) {
+						buf.append(qualifier, StyledString.QUALIFIER_STYLER);
+						buf.append('.', StyledString.QUALIFIER_STYLER);
+					}
+				}
 				buf.append(declaration, StyledString.QUALIFIER_STYLER);
 			}
 		}
