@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,16 +11,52 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import org.osgi.framework.Bundle;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
+
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.MultiTextEdit;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.ISharedImages;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.NullChange;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.ltk.core.refactoring.resource.DeleteResourceChange;
+import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -28,6 +64,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
@@ -80,6 +117,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ClasspathChange;
+import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateFileChange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
@@ -91,6 +130,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -577,8 +617,138 @@ public class UnresolvedElementsSubProcessor {
 			kind &= ~SimilarElementsRequestor.ANNOTATIONS; // only propose annotations when there are no other suggestions
 		}
 		addNewTypeProposals(cu, node, kind, 0, proposals);
+		
+		if (kind == SimilarElementsRequestor.ANNOTATIONS)
+			addNullityAnnotationTypesProposals(cu, node, proposals);
 
 		ReorgCorrectionsSubProcessor.addProjectSetupFixProposal(context, problem, node.getFullyQualifiedName(), proposals);
+	}
+
+	private static void addNullityAnnotationTypesProposals(ICompilationUnit cu, Name node, Collection<ICommandAccess> proposals) {
+		if (!(node.getParent() instanceof Annotation))
+			return;
+		if (((Annotation) node.getParent()).getTypeNameProperty() != node.getLocationInParent())
+			return;
+		
+		final IJavaProject javaProject= cu.getJavaProject();
+		String name= node.getFullyQualifiedName();
+		
+		boolean isNullityAnnotation= false;
+		String[] annotationNameOptions= { JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME };
+		for (String annotationNameOption : annotationNameOptions) {
+			String annotationName= javaProject.getOption(annotationNameOption, true);
+			if (! annotationName.equals(JavaCore.getDefaultOptions().get(annotationNameOption)))
+				return;
+			if (JavaModelUtil.isMatchingName(name, annotationName)) {
+				isNullityAnnotation= true;
+			}
+		}
+		if (! isNullityAnnotation)
+			return;
+		Bundle annotationsBundle= Platform.getBundle("org.eclipse.jdt.annotation"); //$NON-NLS-1$
+		if (annotationsBundle == null)
+			return;
+		
+		addAddToBuildPropertiesProposal(javaProject, proposals);
+		addCopyAnnotationsJarProposal(javaProject, annotationsBundle, proposals);
+	}
+
+	private static void addAddToBuildPropertiesProposal(IJavaProject javaProject, Collection<ICommandAccess> proposals) {
+		IProject project= javaProject.getProject();
+		final IFile buildProperties= project.getFile("build.properties"); //$NON-NLS-1$
+		if (!buildProperties.exists() && !project.getFile(new Path("META-INF/MANIFEST.MF")).exists()) //$NON-NLS-1$
+			return;
+		
+		final String changeName= CorrectionMessages.UnresolvedElementsSubProcessor_add_annotation_bundle_description;
+		
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(changeName, null, 0) {
+			@Override
+			protected Change createChange() throws CoreException {
+				String buildPropertiesEntry= "additional.bundles = org.eclipse.jdt.annotation"; //$NON-NLS-1$
+				if (!buildProperties.exists()) {
+					return new CreateFileChange(buildProperties.getFullPath(), buildPropertiesEntry, null);
+					
+				} else {
+					TextFileChange change= new TextFileChange(changeName, buildProperties);
+					change.setEdit(new MultiTextEdit());
+					
+					ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+					manager.connect(buildProperties.getFullPath(), LocationKind.IFILE, null);
+					try {
+						ITextFileBuffer textFileBuffer= manager.getTextFileBuffer(buildProperties.getFullPath(), LocationKind.IFILE);
+						IDocument document= textFileBuffer.getDocument();
+						String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
+						String entry= buildPropertiesEntry + lineDelim;
+						int len= document.getLength();
+						if (len > 0 && document.getLineInformation(document.getNumberOfLines() - 1).getLength() != 0) {
+							entry= lineDelim + entry;
+						}
+						change.addEdit(new InsertEdit(len, entry));
+						return change;
+					} catch (BadLocationException e) {
+						JavaPlugin.log(e);
+						return new NullChange();
+					} finally {
+						manager.disconnect(buildProperties.getFullPath(), LocationKind.IFILE, null);
+					}
+				}
+			}
+			@Override
+			public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+				return CorrectionMessages.UnresolvedElementsSubProcessor_add_annotation_bundle_info;
+			}
+		};
+		proposals.add(proposal);
+	}
+	
+
+	private static void addCopyAnnotationsJarProposal(final IJavaProject javaProject, Bundle annotationsBundle, Collection<ICommandAccess> proposals) {
+		final File bundleFile;
+		try {
+			bundleFile= FileLocator.getBundleFile(annotationsBundle);
+		} catch (IOException e) {
+			JavaPlugin.log(e);
+			return;
+		}
+		if (!bundleFile.isFile() || !bundleFile.canRead())
+			return; // we only support a JAR'd bundle, so this won't work in the runtime if you have org.eclipse.jdt.annotation in source.
+
+		final String changeName= CorrectionMessages.UnresolvedElementsSubProcessor_copy_annotation_jar_description;
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(changeName, null, 0) {
+			@Override
+			protected Change createChange() throws CoreException {
+				final IFile file= javaProject.getProject().getFile(bundleFile.getName());
+				ResourceChange copyFileChange= new ResourceChange() {
+					@Override
+					public Change perform(IProgressMonitor pm) throws CoreException {
+						try {
+							if (file.exists())
+								file.delete(false, pm);
+							file.create(new BufferedInputStream(new FileInputStream(bundleFile)), false, pm);
+							return new DeleteResourceChange(file.getFullPath(), false);
+						} catch (FileNotFoundException e) {
+							throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), e.getMessage()));
+						}
+					}
+					@Override
+					public String getName() {
+						return changeName;
+					}
+					@Override
+					protected IResource getModifiedResource() {
+						return javaProject.getProject();
+					}
+				};
+				ClasspathChange addEntryChange= ClasspathChange.addEntryChange(javaProject, JavaCore.newLibraryEntry(file.getFullPath(), null, null));
+				return new CompositeChange(changeName, new Change[] { copyFileChange, addEntryChange });
+			}
+			
+			@Override
+			public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+				return CorrectionMessages.UnresolvedElementsSubProcessor_copy_annotation_jar_info;
+			}
+		};
+		proposals.add(proposal);
 	}
 
 	private static void addSimilarTypeProposals(int kind, ICompilationUnit cu, Name node, int relevance, Collection<ICommandAccess> proposals) throws CoreException {
