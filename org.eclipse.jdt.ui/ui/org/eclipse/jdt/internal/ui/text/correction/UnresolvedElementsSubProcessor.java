@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 
 import org.osgi.framework.Bundle;
@@ -46,7 +47,9 @@ import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.ISharedImages;
@@ -624,7 +627,7 @@ public class UnresolvedElementsSubProcessor {
 		ReorgCorrectionsSubProcessor.addProjectSetupFixProposal(context, problem, node.getFullyQualifiedName(), proposals);
 	}
 
-	private static void addNullityAnnotationTypesProposals(ICompilationUnit cu, Name node, Collection<ICommandAccess> proposals) {
+	private static void addNullityAnnotationTypesProposals(ICompilationUnit cu, Name node, Collection<ICommandAccess> proposals) throws JavaModelException {
 		if (!(node.getParent() instanceof Annotation))
 			return;
 		if (((Annotation) node.getParent()).getTypeNameProperty() != node.getLocationInParent())
@@ -635,9 +638,10 @@ public class UnresolvedElementsSubProcessor {
 		
 		boolean isNullityAnnotation= false;
 		String[] annotationNameOptions= { JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME };
+		Hashtable<String, String> defaultOptions= JavaCore.getDefaultOptions();
 		for (String annotationNameOption : annotationNameOptions) {
 			String annotationName= javaProject.getOption(annotationNameOption, true);
-			if (! annotationName.equals(JavaCore.getDefaultOptions().get(annotationNameOption)))
+			if (! annotationName.equals(defaultOptions.get(annotationNameOption)))
 				return;
 			if (JavaModelUtil.isMatchingName(name, annotationName)) {
 				isNullityAnnotation= true;
@@ -645,26 +649,29 @@ public class UnresolvedElementsSubProcessor {
 		}
 		if (! isNullityAnnotation)
 			return;
+		if (javaProject.findType(defaultOptions.get(annotationNameOptions[0])) != null)
+			return;
 		Bundle annotationsBundle= Platform.getBundle("org.eclipse.jdt.annotation"); //$NON-NLS-1$
 		if (annotationsBundle == null)
 			return;
 		
-		addAddToBuildPropertiesProposal(javaProject, proposals);
-		addCopyAnnotationsJarProposal(javaProject, annotationsBundle, proposals);
+		if (! addAddToBuildPropertiesProposal(javaProject, proposals))
+			addCopyAnnotationsJarProposal(javaProject, annotationsBundle, proposals);
 	}
 
-	private static void addAddToBuildPropertiesProposal(IJavaProject javaProject, Collection<ICommandAccess> proposals) {
+	private static boolean addAddToBuildPropertiesProposal(IJavaProject javaProject, Collection<ICommandAccess> proposals) {
 		IProject project= javaProject.getProject();
 		final IFile buildProperties= project.getFile("build.properties"); //$NON-NLS-1$
-		if (!buildProperties.exists() && !project.getFile(new Path("META-INF/MANIFEST.MF")).exists()) //$NON-NLS-1$
-			return;
+		boolean isBundle= buildProperties.exists() || project.getFile(new Path("META-INF/MANIFEST.MF")).exists(); //$NON-NLS-1$
+		if (!isBundle)
+			return false;
 		
 		final String changeName= CorrectionMessages.UnresolvedElementsSubProcessor_add_annotation_bundle_description;
+		final String buildPropertiesEntry= "additional.bundles = org.eclipse.jdt.annotation"; //$NON-NLS-1$
 		
 		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(changeName, null, 0) {
 			@Override
 			protected Change createChange() throws CoreException {
-				String buildPropertiesEntry= "additional.bundles = org.eclipse.jdt.annotation"; //$NON-NLS-1$
 				if (!buildProperties.exists()) {
 					return new CreateFileChange(buildProperties.getFullPath(), buildPropertiesEntry, null);
 					
@@ -678,12 +685,22 @@ public class UnresolvedElementsSubProcessor {
 						ITextFileBuffer textFileBuffer= manager.getTextFileBuffer(buildProperties.getFullPath(), LocationKind.IFILE);
 						IDocument document= textFileBuffer.getDocument();
 						String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
-						String entry= buildPropertiesEntry + lineDelim;
-						int len= document.getLength();
-						if (len > 0 && document.getLineInformation(document.getNumberOfLines() - 1).getLength() != 0) {
-							entry= lineDelim + entry;
-						}
-						change.addEdit(new InsertEdit(len, entry));
+						
+						IRegion match= new FindReplaceDocumentAdapter(document).find(0, "additional\\.bundles\\s*=\\s*", true, false, false, true); //$NON-NLS-1$
+						if (match != null) {
+							StringBuilder buf= new StringBuilder("org.eclipse.jdt.annotation,\\").append(lineDelim); //$NON-NLS-1$
+							int spaces= match.getOffset() + match.getLength() - document.getLineOffset(match.getOffset());
+							while (spaces-- > 0)
+								buf.append(' ');
+							change.addEdit(new InsertEdit(match.getOffset() + match.getLength(), buf.toString()));
+						} else {
+							String entry= buildPropertiesEntry + lineDelim;
+							int len= document.getLength();
+							if (len > 0 && document.getLineInformation(document.getNumberOfLines() - 1).getLength() != 0) {
+								entry= lineDelim + entry;
+							}
+							change.addEdit(new InsertEdit(len, entry));
+						}						
 						return change;
 					} catch (BadLocationException e) {
 						JavaPlugin.log(e);
@@ -695,10 +712,12 @@ public class UnresolvedElementsSubProcessor {
 			}
 			@Override
 			public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-				return CorrectionMessages.UnresolvedElementsSubProcessor_add_annotation_bundle_info;
+				return CorrectionMessages.UnresolvedElementsSubProcessor_add_annotation_bundle_info
+						+ "<br><code>" + buildPropertiesEntry + "</code>"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		};
 		proposals.add(proposal);
+		return true;
 	}
 	
 
