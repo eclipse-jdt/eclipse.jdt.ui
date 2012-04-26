@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
@@ -627,7 +626,7 @@ public class UnresolvedElementsSubProcessor {
 		ReorgCorrectionsSubProcessor.addProjectSetupFixProposal(context, problem, node.getFullyQualifiedName(), proposals);
 	}
 
-	private static void addNullityAnnotationTypesProposals(ICompilationUnit cu, Name node, Collection<ICommandAccess> proposals) throws JavaModelException {
+	private static void addNullityAnnotationTypesProposals(ICompilationUnit cu, Name node, Collection<ICommandAccess> proposals) throws CoreException {
 		if (!(node.getParent() instanceof Annotation))
 			return;
 		if (((Annotation) node.getParent()).getTypeNameProperty() != node.getLocationInParent())
@@ -659,10 +658,10 @@ public class UnresolvedElementsSubProcessor {
 			addCopyAnnotationsJarProposal(javaProject, annotationsBundle, proposals);
 	}
 
-	private static boolean addAddToBuildPropertiesProposal(IJavaProject javaProject, Collection<ICommandAccess> proposals) {
+	private static boolean addAddToBuildPropertiesProposal(IJavaProject javaProject, Collection<ICommandAccess> proposals) throws CoreException {
 		IProject project= javaProject.getProject();
 		final IFile buildProperties= project.getFile("build.properties"); //$NON-NLS-1$
-		boolean isBundle= buildProperties.exists() || project.getFile(new Path("META-INF/MANIFEST.MF")).exists(); //$NON-NLS-1$
+		boolean isBundle= project.hasNature("org.eclipse.pde.PluginNature"); //$NON-NLS-1$
 		if (!isBundle)
 			return false;
 		
