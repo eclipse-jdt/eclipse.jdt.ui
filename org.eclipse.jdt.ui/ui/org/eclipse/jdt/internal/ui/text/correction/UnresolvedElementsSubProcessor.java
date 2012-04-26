@@ -689,7 +689,7 @@ public class UnresolvedElementsSubProcessor {
 						IRegion match= new FindReplaceDocumentAdapter(document).find(0, "additional\\.bundles\\s*=\\s*", true, false, false, true); //$NON-NLS-1$
 						if (match != null) {
 							StringBuilder buf= new StringBuilder("org.eclipse.jdt.annotation,\\").append(lineDelim); //$NON-NLS-1$
-							int spaces= match.getOffset() + match.getLength() - document.getLineOffset(match.getOffset());
+							int spaces= match.getOffset() + match.getLength() - document.getLineOffset(document.getLineOfOffset(match.getOffset()));
 							while (spaces-- > 0)
 								buf.append(' ');
 							change.addEdit(new InsertEdit(match.getOffset() + match.getLength(), buf.toString()));
@@ -700,7 +700,7 @@ public class UnresolvedElementsSubProcessor {
 								entry= lineDelim + entry;
 							}
 							change.addEdit(new InsertEdit(len, entry));
-						}						
+						}
 						return change;
 					} catch (BadLocationException e) {
 						JavaPlugin.log(e);
