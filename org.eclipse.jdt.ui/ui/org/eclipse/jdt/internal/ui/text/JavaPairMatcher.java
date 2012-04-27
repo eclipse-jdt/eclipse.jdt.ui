@@ -52,8 +52,19 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 	 */
 	private IRegion performMatch(IDocument document, int offset) throws BadLocationException {
 		if (offset < 0 || document == null) return null;
-		final char prevChar= document.getChar(Math.max(offset - 1, 0));
-		final char currChar= document.getChar(offset);
+		char prevChar= document.getChar(Math.max(offset - 1, 0));
+		char currChar= (offset != document.getLength()) ? document.getChar(offset) : Character.MIN_VALUE;
+
+		if (prevChar == '>' && currChar != '>') { //https://bugs.eclipse.org/bugs/show_bug.cgi?id=372516
+			offset--;
+			currChar= prevChar;
+			prevChar= document.getChar(Math.max(offset - 1, 0));
+		} else if (currChar == '<' && (prevChar != '>' && prevChar != '<')) {
+			offset++;
+			prevChar= currChar;
+			currChar= document.getChar(offset);
+		}
+
 		if ((prevChar == '<' || currChar == '>') && !fHighlightAngularBrackets)
 			return null;
 		if (prevChar == '<' && isLessThanOperator(document, offset - 1))

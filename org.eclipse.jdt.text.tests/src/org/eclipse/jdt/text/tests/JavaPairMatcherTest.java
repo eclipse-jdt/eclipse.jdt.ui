@@ -79,10 +79,12 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 
 	public void testBeforeOpeningMatch() {
 		IRegion match= fPairMatcher.match(fDocument, 2);
-		assertNull(match);
+		assertNotNull(match);
+		assertTrue(match.getOffset() == 2 && match.getLength() == 10);
 
 		match= fPairMatcher.match(fDocument, 5);
-		assertNull(match);
+		assertNotNull(match);
+		assertTrue(match.getOffset() == 5 && match.getLength() == 4);
 	}
 
 	public void testAfterOpeningMatch() {
@@ -108,10 +110,12 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 
 	public void testAfterClosingMatch() {
 		IRegion match= fPairMatcher.match(fDocument, 12);
-		assertNull(match);
+		assertNotNull(match);
+		assertTrue(match.getOffset() == 2 && match.getLength() == 10);
 
 		match= fPairMatcher.match(fDocument, 9);
-		assertNull(match);
+		assertNotNull(match);
+		assertTrue(match.getOffset() == 5 && match.getLength() == 4);
 	}
 
 	public void testBeforeClosingMatchWithNL() {
@@ -124,7 +128,8 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 	public void testAfterClosingMatchWithNL() {
 		fDocument.set("x(y\ny)x");
 		IRegion match= fPairMatcher.match(fDocument, 6);
-		assertNull(match);
+		assertNotNull(match);
+		assertTrue(match.getOffset() == 1 && match.getLength() == 5);
 	}
 
 	public void testBeforeClosingMatchWithNLAndSingleLineComment() {
@@ -137,7 +142,8 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 	public void testAfterClosingMatchWithNLAndSingleLineComment() {
 		fDocument.set("x\nx(y\nx //(x\ny)x");
 		IRegion match= fPairMatcher.match(fDocument, 15);
-		assertNull(match);
+		assertNotNull(match);
+		assertTrue(match.getOffset() == 3 && match.getLength() == 12);
 	}
 
 	public void testEnclosingMatch() {
