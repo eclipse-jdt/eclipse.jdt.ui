@@ -667,7 +667,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 							access.setName(ast.newSimpleName(node.getFullyQualifiedName()));
 							rewrite.replace(node, access, null);
 						}
-					} else if (!(node.getParent() instanceof QualifiedName) && JdtFlags.isStatic(variable) && !fStaticImports.contains(variable)) {
+					} else if (!(node.getParent() instanceof QualifiedName) && JdtFlags.isStatic(variable) && !fStaticImports.contains(variable) && !Checks.isEnumCase(node.getParent())) {
 						rewrite.replace(node, ast.newQualifiedName(ASTNodeFactory.newName(ast, fTargetRewrite.getImportRewrite().addImport(declaring)), ast.newSimpleName(node.getFullyQualifiedName())), null);
 					}
 				}
