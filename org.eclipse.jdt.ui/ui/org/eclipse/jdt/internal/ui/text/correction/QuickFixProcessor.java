@@ -31,6 +31,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
+import org.eclipse.jdt.internal.ui.fix.NullQuickFixes;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.TaskMarkerProposal;
 
@@ -235,6 +236,16 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnsafeGenericArrayForVarargs:
 			case IProblem.SafeVarargsOnFixedArityMethod :
 			case IProblem.SafeVarargsOnNonFinalInstanceMethod:
+			case IProblem.RequiredNonNullButProvidedNull:
+			case IProblem.RequiredNonNullButProvidedPotentialNull:
+			case IProblem.RequiredNonNullButProvidedUnknown:
+			case IProblem.IllegalReturnNullityRedefinition:
+			case IProblem.IllegalRedefinitionToNonNullParameter:
+			case IProblem.IllegalDefinitionToNonNullParameter:
+			case IProblem.ParameterLackingNonNullAnnotation:
+			case IProblem.ParameterLackingNullableAnnotation:
+			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
+			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId);
@@ -662,6 +673,21 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.SafeVarargsOnFixedArityMethod :
 			case IProblem.SafeVarargsOnNonFinalInstanceMethod:
 				VarargsWarningsSubProcessor.addRemoveSafeVarargsProposals(context, problem, proposals);
+				break;
+			case IProblem.IllegalReturnNullityRedefinition:
+			case IProblem.IllegalDefinitionToNonNullParameter:
+			case IProblem.IllegalRedefinitionToNonNullParameter:
+				NullQuickFixes.addNullAnnotationInSignatureProposal(context, problem, proposals, false);
+				NullQuickFixes.addNullAnnotationInSignatureProposal(context, problem, proposals, true);
+				break;
+			case IProblem.RequiredNonNullButProvidedNull:
+			case IProblem.RequiredNonNullButProvidedPotentialNull:
+			case IProblem.RequiredNonNullButProvidedUnknown:
+			case IProblem.ParameterLackingNonNullAnnotation:
+			case IProblem.ParameterLackingNullableAnnotation:
+			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
+			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
+				NullQuickFixes.addReturnAndArgumentTypeProposal(context, problem, proposals);
 				break;
 			default:
 		}
