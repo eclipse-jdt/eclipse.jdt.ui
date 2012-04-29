@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -166,6 +166,7 @@ public final class CorrectionMessages extends NLS {
 	public static String UnresolvedElementsSubProcessor_swaparguments_description;
 	public static String UnresolvedElementsSubProcessor_add_annotation_bundle_description;
 	public static String UnresolvedElementsSubProcessor_add_annotation_bundle_info;
+	public static String UnresolvedElementsSubProcessor_add_static_import_description;
 	public static String UnresolvedElementsSubProcessor_addargumentcast_description;
 	public static String UnresolvedElementsSubProcessor_changemethod_description;
 	public static String UnresolvedElementsSubProcessor_changetoouter_description;
@@ -344,6 +345,7 @@ public final class CorrectionMessages extends NLS {
 	public static String ReorgCorrectionsSubProcessor_50_compliance_changeWorkspaceJRE_description;
 	public static String ReorgCorrectionsSubProcessor_50_compliance_changeProjectJRE_description;
 	public static String ModifierCorrectionSubProcessor_default_visibility_label;
+	public static String UnresolvedElementsSubProcessor_change_to_static_import_description;
 	public static String ReorgCorrectionsSubProcessor_configure_buildpath_label;
 	public static String ReorgCorrectionsSubProcessor_configure_buildpath_description;
 	public static String QuickAssistProcessor_extract_to_local_all_description;

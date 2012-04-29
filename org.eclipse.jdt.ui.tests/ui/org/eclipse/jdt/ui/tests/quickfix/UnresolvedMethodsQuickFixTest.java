@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -4864,6 +4864,83 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+	
+	public void testStaticImportFavorite1() throws Exception {
+		IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
+		preferenceStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "java.lang.Math.*");
+		try {		
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package pack;\n");
+			buf.append("\n");
+			buf.append("public class E {\n");
+			buf.append("    private int foo() {\n");
+			buf.append("        return max(1, 2);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+	
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList proposals= collectCorrections(cu, astRoot);
+	
+			assertCorrectLabels(proposals);
+	
+			String[] expected= new String[1];
+			buf= new StringBuffer();
+			buf.append("package pack;\n");
+			buf.append("\n");
+			buf.append("import static java.lang.Math.max;\n");
+			buf.append("\n");
+			buf.append("public class E {\n");
+			buf.append("    private int foo() {\n");
+			buf.append("        return max(1, 2);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+	
+			assertExpectedExistInProposals(proposals, expected);
+		} finally {
+			preferenceStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "");
+		}
+	}
+	
+	public void testStaticImportFavorite2() throws Exception {
+		IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
+		preferenceStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "java.lang.Math.max");
+		try {		
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package pack;\n");
+			buf.append("\n");
+			buf.append("public class E {\n");
+			buf.append("    private int max() {\n");
+			buf.append("        return max(1, 2);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+	
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList proposals= collectCorrections(cu, astRoot);
+	
+			assertCorrectLabels(proposals);
+	
+			String[] expected= new String[1];
+			buf= new StringBuffer();
+			buf.append("package pack;\n");
+			buf.append("\n");
+			buf.append("public class E {\n");
+			buf.append("    private int max() {\n");
+			buf.append("        return Math.max(1, 2);\n"); // naming conflict
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+	
+			assertExpectedExistInProposals(proposals, expected);
+		} finally {
+			preferenceStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "");
+		}
+	}
+
 
 
 }

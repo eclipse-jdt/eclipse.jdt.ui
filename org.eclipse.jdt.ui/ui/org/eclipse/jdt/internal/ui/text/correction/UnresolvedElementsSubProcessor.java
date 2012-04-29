@@ -128,6 +128,7 @@ import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
@@ -293,6 +294,10 @@ public class UnresolvedElementsSubProcessor {
 
 		// similar variables
 		addSimilarVariableProposals(cu, astRoot, binding, simpleName, isWriteAccess, proposals);
+		
+		if (binding == null) {
+			addStaticImportFavoriteProposals(context, simpleName, false, proposals);
+		}
 
 		if (resolvedField == null || binding == null || resolvedField.getDeclaringClass() != binding.getTypeDeclaration() && Modifier.isPrivate(resolvedField.getModifiers())) {
 
@@ -1056,6 +1061,10 @@ public class UnresolvedElementsSubProcessor {
 			}
 			addParameterMissmatchProposals(context, problem, parameterMismatchs, invocationNode, arguments, proposals);
 		}
+		
+		if (sender == null) {
+			addStaticImportFavoriteProposals(context, nameNode, true, proposals);
+		}
 
 		// new method
 		addNewMethodProposals(cu, astRoot, sender, arguments, isSuperInvocation, invocationNode, methodName, proposals);
@@ -1073,6 +1082,50 @@ public class UnresolvedElementsSubProcessor {
 		}
 
 	}
+	
+	private static void addStaticImportFavoriteProposals(IInvocationContext context, SimpleName node, boolean isMethod, Collection<ICommandAccess> proposals) throws JavaModelException {
+		IJavaProject project= context.getCompilationUnit().getJavaProject();
+		if (JavaModelUtil.is50OrHigher(project)) {
+			String pref= PreferenceConstants.getPreference(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, project);
+			String[] favourites= pref.split(";"); //$NON-NLS-1$
+			if (favourites.length == 0) {
+				return;
+			}
+
+			CompilationUnit root= context.getASTRoot();
+			AST ast= root.getAST();
+			
+			String name= node.getIdentifier();
+			String[] staticImports= SimilarElementsRequestor.getStaticImportFavorites(context.getCompilationUnit(), name, isMethod, favourites);
+			for (int i= 0; i < staticImports.length; i++) {
+				String curr= staticImports[i];
+				
+				ImportRewrite importRewrite= StubUtility.createImportRewrite(root, true);
+				ASTRewrite astRewrite= ASTRewrite.create(ast);
+				
+				String label;
+				String qualifiedTypeName= Signature.getQualifier(curr);
+				String elementLabel= BasicElementLabels.getJavaElementName(JavaModelUtil.concatenateName(Signature.getSimpleName(qualifiedTypeName), name));
+				
+				String res= importRewrite.addStaticImport(qualifiedTypeName, name, isMethod, new ContextSensitiveImportRewriteContext(root, node.getStartPosition(), importRewrite));
+				int dot= res.lastIndexOf('.');
+				if (dot != -1) {
+					String usedTypeName= importRewrite.addImport(qualifiedTypeName);
+					Name newName= ast.newQualifiedName(ast.newName(usedTypeName), ast.newSimpleName(name));
+					astRewrite.replace(node, newName, null);
+					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_change_to_static_import_description, elementLabel);
+				} else {
+					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_static_import_description, elementLabel);
+				}
+
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), astRewrite, 5, image);
+				proposal.setImportRewrite(importRewrite);
+				proposals.add(proposal);
+			}
+		}
+	}
+	
 
 	private static void addNewMethodProposals(ICompilationUnit cu, CompilationUnit astRoot, Expression sender, List<Expression> arguments, boolean isSuperInvocation, ASTNode invocationNode, String methodName, Collection<ICommandAccess> proposals) throws JavaModelException {
 		ITypeBinding nodeParentType= Bindings.getBindingOfParentType(invocationNode);
