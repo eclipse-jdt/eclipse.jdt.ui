@@ -83,6 +83,9 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 		// TODO(SH): might set depending on this.handledProblemID, not sure about the benefit
 		result.put(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION, JavaCore.WARNING);
 		result.put(JavaCore.COMPILER_PB_REDUNDANT_NULL_CHECK, JavaCore.WARNING);
+		result.put(JavaCore.COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT, JavaCore.WARNING);
+		result.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.WARNING);
+		result.put(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.WARNING);
 		return result;
 	}
 
@@ -124,14 +127,12 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	 */
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		int id= problem.getProblemId();
-
 		if (id == this.handledProblemID) {
 			// FIXME search specifically: return param (which??)
 //			if (QuickFixes.hasExplicitNullnessAnnotation(compilationUnit, problem.getOffset()))
 //				return false;
 			return true;
 		}
-
 		return false;
 	}
 
@@ -142,7 +143,6 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
-
 		IProblem[] problems= compilationUnit.getProblems();
 		for (int i= 0; i < problems.length; i++) {
 			int id= problems[i].getID();

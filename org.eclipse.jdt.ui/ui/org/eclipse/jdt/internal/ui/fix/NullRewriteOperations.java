@@ -58,15 +58,10 @@ public class NullRewriteOperations {
 
 	static abstract class SignatureAnnotationRewriteOperation extends CompilationUnitRewriteOperation {
 		String fAnnotationToAdd;
-
 		String fAnnotationToRemove;
-
 		boolean fAllowRemove;
-
 		CompilationUnit fUnit;
-
 		protected String fKey;
-
 		protected String fMessage;
 
 		/* A globally unique key that identifies the position being annotated (for avoiding double annotations). */
@@ -77,7 +72,6 @@ public class NullRewriteOperations {
 		public CompilationUnit getCompilationUnit() {
 			return fUnit;
 		}
-
 
 		boolean checkExisting(List<IExtendedModifier> existingModifiers, ListRewrite listRewrite, TextEditGroup editGroup) {
 			for (Object mod : existingModifiers) {
@@ -211,12 +205,11 @@ public class NullRewriteOperations {
 		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 		if (selectedNode == null)
 			return null;
-
 		ASTNode declaringNode= getDeclaringNode(selectedNode);
 
 		switch (problem.getProblemId()) {
 			case IProblem.IllegalDefinitionToNonNullParameter:
-//		case IllegalRedefinitionToNonNullParameter:
+//			case IllegalRedefinitionToNonNullParameter:
 				// these affect another method
 				break;
 			case IProblem.IllegalReturnNullityRedefinition:
@@ -229,8 +222,6 @@ public class NullRewriteOperations {
 					return null;
 		}
 
-		SignatureAnnotationRewriteOperation result= null;
-		String message= null;
 		String annotationNameLabel= annotationToAdd;
 		int lastDot= annotationToAdd.lastIndexOf('.');
 		if (lastDot != -1)
@@ -250,14 +241,11 @@ public class NullRewriteOperations {
 			ASTNode methodDecl= compilationUnit.findDeclaringNode(methodBinding.getKey());
 			if (methodDecl == null)
 				return null;
-			message= Messages.format(NullFixMessages.QuickFixes_declare_method_parameter_nullness, annotationNameLabel);
-			result= new ParameterAnnotationRewriteOperation(compilationUnit, (MethodDeclaration) methodDecl, annotationToAdd, annotationToRemove, paramIdx, allowRemove, message);
+			String message= Messages.format(NullFixMessages.QuickFixes_change_method_parameter_nullness, annotationNameLabel);
+			return new ParameterAnnotationRewriteOperation(compilationUnit, (MethodDeclaration) methodDecl, annotationToAdd, annotationToRemove, paramIdx, allowRemove, message);
 		} else if (declaringNode instanceof MethodDeclaration) {
-
 			// complaint is in signature of this method
-
 			MethodDeclaration declaration= (MethodDeclaration) declaringNode;
-
 			switch (problem.getProblemId()) {
 				case IProblem.ParameterLackingNonNullAnnotation:
 				case IProblem.ParameterLackingNullableAnnotation:
@@ -269,8 +257,8 @@ public class NullRewriteOperations {
 					if (declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
 						String paramName= findAffectedParameterName(selectedNode);
 						if (paramName != null) {
-							message= Messages.format(NullFixMessages.QuickFixes_declare_method_parameter_nullness, annotationNameLabel);
-							result= new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
+							String message= Messages.format(NullFixMessages.QuickFixes_change_method_parameter_nullness, annotationNameLabel);
+							return new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
 						}
 					}
 					break;
@@ -283,26 +271,23 @@ public class NullRewriteOperations {
 						if (declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
 							String paramName= findAffectedParameterName(selectedNode);
 							if (paramName != null) {
-								message= Messages.format(NullFixMessages.QuickFixes_declare_method_parameter_nullness, annotationNameLabel);
-								result= new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
+								String message= Messages.format(NullFixMessages.QuickFixes_change_method_parameter_nullness, annotationNameLabel);
+								return new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
 							}
 						}
 						break;
 					}
 					//$FALL-THROUGH$
 				case IProblem.IllegalReturnNullityRedefinition:
-					message= Messages.format(NullFixMessages.QuickFixes_declare_method_return_nullness, annotationNameLabel);
-					result= new ReturnAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, allowRemove, message);
-					break;
+					String message= Messages.format(NullFixMessages.QuickFixes_change_method_return_nullness, new String[] { declaration.getName().getIdentifier(), annotationNameLabel });
+					return new ReturnAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, allowRemove, message);
 			}
-
 		}
-		return result;
+		return null;
 	}
 
 	private static SignatureAnnotationRewriteOperation createAddAnnotationToOverriddenOperation(CompilationUnit compilationUnit, IProblemLocation problem, String annotationToAdd,
-			String annotationToRemove,
-			Set<String> handledPositions, boolean thisUnitOnly, boolean allowRemove) {
+			String annotationToRemove, Set<String> handledPositions, boolean thisUnitOnly, boolean allowRemove) {
 		ICompilationUnit cu= (ICompilationUnit) compilationUnit.getJavaElement();
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
 			return null;
@@ -312,7 +297,6 @@ public class NullRewriteOperations {
 			return null;
 
 		ASTNode declaringNode= getDeclaringNode(selectedNode);
-
 		switch (problem.getProblemId()) {
 			case IProblem.IllegalDefinitionToNonNullParameter:
 			case IProblem.IllegalRedefinitionToNonNullParameter:
@@ -332,11 +316,8 @@ public class NullRewriteOperations {
 		annotationNameLabel= BasicElementLabels.getJavaElementName(annotationNameLabel);
 
 		if (declaringNode instanceof MethodDeclaration) {
-
 			// complaint is in signature of this method
-
 			MethodDeclaration declaration= (MethodDeclaration) declaringNode;
-
 			switch (problem.getProblemId()) {
 				case IProblem.IllegalDefinitionToNonNullParameter:
 				case IProblem.IllegalRedefinitionToNonNullParameter:
@@ -346,15 +327,12 @@ public class NullRewriteOperations {
 						return createChangeOverriddenReturnOperation(compilationUnit, cu, declaration, allowRemove, annotationToAdd, annotationToRemove, annotationNameLabel);
 					}
 			}
-
 		}
 		return null;
 	}
 
 	private static SignatureAnnotationRewriteOperation createChangeOverriddenParameterOperation(CompilationUnit compilationUnit, ICompilationUnit cu, MethodDeclaration declaration,
 			ASTNode selectedNode, boolean allowRemove, String annotationToAdd, String annotationToRemove, String annotationNameLabel) {
-		SignatureAnnotationRewriteOperation result;
-		String message;
 		IMethodBinding methodDeclBinding= declaration.resolveBinding();
 		if (methodDeclBinding == null)
 			return null;
@@ -369,15 +347,13 @@ public class NullRewriteOperations {
 		if (methodDecl == null)
 			return null;
 		declaration= (MethodDeclaration) methodDecl;
-		message= Messages.format(NullFixMessages.QuickFixes_declare_overridden_parameter_as_nonnull,
-				new String[] { annotationNameLabel, BasicElementLabels.getJavaElementName(overridden.getDeclaringClass().getName()) });
+		String message= Messages.format(NullFixMessages.QuickFixes_change_overridden_parameter_nullness, new String[] { overridden.getName(), annotationNameLabel });
 		String paramName= findAffectedParameterName(selectedNode);
-		result= new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
-		return result;
+		return new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
 	}
 
 	private static String findAffectedParameterName(ASTNode selectedNode) {
-		VariableDeclaration argDecl= selectedNode instanceof VariableDeclaration ? (VariableDeclaration) selectedNode : (VariableDeclaration) ASTNodes.getParent(selectedNode,
+		VariableDeclaration argDecl= (selectedNode instanceof VariableDeclaration) ? (VariableDeclaration) selectedNode : (VariableDeclaration) ASTNodes.getParent(selectedNode,
 				VariableDeclaration.class);
 		if (argDecl != null)
 			return argDecl.getName().getIdentifier();
@@ -408,8 +384,6 @@ public class NullRewriteOperations {
 
 	private static SignatureAnnotationRewriteOperation createChangeOverriddenReturnOperation(CompilationUnit compilationUnit, ICompilationUnit cu, MethodDeclaration declaration, boolean allowRemove,
 			String annotationToAdd, String annotationToRemove, String annotationNameLabel) {
-		SignatureAnnotationRewriteOperation result;
-		String message;
 		IMethodBinding methodDeclBinding= declaration.resolveBinding();
 		if (methodDeclBinding == null)
 			return null;
@@ -427,10 +401,8 @@ public class NullRewriteOperations {
 // TODO(SH): decide whether we want to propose overwriting existing annotations in super
 //		if (hasNullAnnotation(declaration)) // if overridden has explicit declaration don't propose to change it
 //			return null;
-		message= Messages.format(NullFixMessages.QuickFixes_declare_overridden_return_as_nullable,
-				new String[] { annotationNameLabel, BasicElementLabels.getJavaElementName(overridden.getDeclaringClass().getName()) });
-		result= new ReturnAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, allowRemove, message);
-		return result;
+		String message= Messages.format(NullFixMessages.QuickFixes_change_overridden_return_nullness, new String[] { overridden.getName(), annotationNameLabel });
+		return new ReturnAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, allowRemove, message);
 	}
 
 	private static CompilationUnit findCUForMethod(CompilationUnit compilationUnit, ICompilationUnit cu, IMethodBinding methodBinding) {

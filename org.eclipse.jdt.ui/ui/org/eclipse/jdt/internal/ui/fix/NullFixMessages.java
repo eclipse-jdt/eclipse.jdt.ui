@@ -21,10 +21,10 @@ public class NullFixMessages extends NLS {
 	public static String NullAnnotationsCleanUp_add_nonnull_annotation;
 	
 	public static String QuickFixes_add_annotation_change_name;
-	public static String QuickFixes_declare_method_parameter_nullness;
-	public static String QuickFixes_declare_method_return_nullness;
-	public static String QuickFixes_declare_overridden_parameter_as_nonnull;
-	public static String QuickFixes_declare_overridden_return_as_nullable;
+	public static String QuickFixes_change_method_parameter_nullness;
+	public static String QuickFixes_change_method_return_nullness;
+	public static String QuickFixes_change_overridden_parameter_nullness;
+	public static String QuickFixes_change_overridden_return_nullness;
 
 	static {
 		// initialize resource bundle

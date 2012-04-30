@@ -112,9 +112,8 @@ public class NullQuickFixes {
 	}
 
 	public static boolean isComplainingAboutArgument(ASTNode selectedNode) {
-		if (!(selectedNode instanceof SimpleName)) {
+		if (!(selectedNode instanceof SimpleName))
 			return false;
-		}
 		SimpleName nameNode= (SimpleName) selectedNode;
 		IBinding binding= nameNode.resolveBinding();
 		if (binding.getKind() == IBinding.VARIABLE && ((IVariableBinding) binding).isParameter())
@@ -173,13 +172,11 @@ public class NullQuickFixes {
 
 	// Entry for NullAnnotationsCleanup:
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] locations, int problemID) {
-
 		ICompilationUnit cu= (ICompilationUnit) compilationUnit.getJavaElement();
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
 			return null;
 
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
-
 		if (locations == null) {
 			org.eclipse.jdt.core.compiler.IProblem[] problems= compilationUnit.getProblems();
 			locations= new IProblemLocation[problems.length];
@@ -190,10 +187,8 @@ public class NullQuickFixes {
 		}
 
 		createAddNullAnnotationOperations(compilationUnit, locations, operations);
-
 		if (operations.size() == 0)
 			return null;
-
 		CompilationUnitRewriteOperation[] operationsArray= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
 		return new MyCURewriteOperationsFix(NullFixMessages.QuickFixes_add_annotation_change_name, compilationUnit, operationsArray);
 	}
@@ -215,7 +210,13 @@ public class NullQuickFixes {
 				case IProblem.IllegalReturnNullityRedefinition:
 					annotationToAdd= nonNullAnnotationName;
 					annotationToRemove= nullableAnnotationName;
-					// all others propose to add @Nullable
+					break;
+				case IProblem.RequiredNonNullButProvidedNull:
+				case IProblem.RequiredNonNullButProvidedPotentialNull:
+				case IProblem.RequiredNonNullButProvidedUnknown:
+					annotationToAdd= nonNullAnnotationName;
+					break;
+			// all others propose to add @Nullable
 			}
 			// when performing multiple changes we can only modify the one CU that the CleanUp infrastructure provides to the operation.
 			CompilationUnitRewriteOperation fix= NullRewriteOperations.createAddAnnotationOperation(compilationUnit, problem, annotationToAdd, annotationToRemove, handledPositions,
