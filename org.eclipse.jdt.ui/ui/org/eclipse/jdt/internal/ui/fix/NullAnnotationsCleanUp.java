@@ -38,7 +38,7 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 
 	public NullAnnotationsCleanUp(Map<String, String> options, int handledProblemID) {
 		super(options);
-		this.handledProblemID = handledProblemID;
+		this.handledProblemID= handledProblemID;
 	}
 
 	/**
@@ -66,14 +66,14 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
-		IProblemLocation[] locations = null;
-		ArrayList<IProblemLocation> filteredLocations = new ArrayList<IProblemLocation>();
+		IProblemLocation[] locations= null;
+		ArrayList<IProblemLocation> filteredLocations= new ArrayList<IProblemLocation>();
 		if (problems != null) {
-			for (int i = 0; i < problems.length; i++) {
+			for (int i= 0; i < problems.length; i++) {
 				if (problems[i].getProblemId() == this.handledProblemID)
 					filteredLocations.add(problems[i]);
 			}
-			locations = filteredLocations.toArray(new IProblemLocation[filteredLocations.size()]);
+			locations= filteredLocations.toArray(new IProblemLocation[filteredLocations.size()]);
 		}
 		return NullQuickFixes.createCleanUp(compilationUnit, locations, this.handledProblemID);
 	}
@@ -93,19 +93,19 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	public String[] getStepDescriptions() {
 		List<String> result= new ArrayList<String>();
 		switch (this.handledProblemID) {
-		case IProblem.NonNullLocalVariableComparisonYieldsFalse:
-		case IProblem.RedundantNullCheckOnNonNullLocalVariable:
-		case IProblem.RequiredNonNullButProvidedNull:
-		case IProblem.RequiredNonNullButProvidedPotentialNull:
-		case IProblem.RequiredNonNullButProvidedUnknown:
-		case IProblem.ParameterLackingNullableAnnotation:
-			result.add(NullFixMessages.NullAnnotationsCleanUp_add_nullable_annotation);
-			break;
-		case IProblem.IllegalDefinitionToNonNullParameter:
-		case IProblem.IllegalRedefinitionToNonNullParameter:
-		case IProblem.ParameterLackingNonNullAnnotation:
-			result.add(NullFixMessages.NullAnnotationsCleanUp_add_nonnull_annotation);
-			break;	
+			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
+			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
+			case IProblem.RequiredNonNullButProvidedNull:
+			case IProblem.RequiredNonNullButProvidedPotentialNull:
+			case IProblem.RequiredNonNullButProvidedUnknown:
+			case IProblem.ParameterLackingNullableAnnotation:
+				result.add(NullFixMessages.NullAnnotationsCleanUp_add_nullable_annotation);
+				break;
+			case IProblem.IllegalDefinitionToNonNullParameter:
+			case IProblem.IllegalRedefinitionToNonNullParameter:
+			case IProblem.ParameterLackingNonNullAnnotation:
+				result.add(NullFixMessages.NullAnnotationsCleanUp_add_nonnull_annotation);
+				break;
 		}
 		return result.toArray(new String[result.size()]);
 	}
@@ -124,12 +124,12 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	 */
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		int id= problem.getProblemId();
-		
+
 		if (id == this.handledProblemID) {
 			// FIXME search specifically: return param (which??)
 //			if (QuickFixes.hasExplicitNullnessAnnotation(compilationUnit, problem.getOffset()))
 //				return false;
-			return true;			
+			return true;
 		}
 
 		return false;
@@ -142,14 +142,14 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
-		
+
 		IProblem[] problems= compilationUnit.getProblems();
 		for (int i= 0; i < problems.length; i++) {
 			int id= problems[i].getID();
 			if (id == this.handledProblemID) {
 				// FIXME search specifically: return param (which??)
 //				if (!QuickFixes.hasExplicitNullnessAnnotation(compilationUnit, problems[i].getSourceStart()))
-					result++;
+				result++;
 			}
 		}
 		return result;
