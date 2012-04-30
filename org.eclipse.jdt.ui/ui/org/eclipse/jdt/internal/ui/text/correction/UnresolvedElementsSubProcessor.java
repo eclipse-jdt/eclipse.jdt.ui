@@ -826,7 +826,8 @@ public class UnresolvedElementsSubProcessor {
 		String packName= Signature.getQualifier(fullName);
 		if (packName.length() > 0) { // no imports for primitive types, type variables
 			importRewrite= StubUtility.createImportRewrite((CompilationUnit) node.getRoot(), true);
-			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(node), importRewrite);
+			BodyDeclaration scope= ASTResolving.findParentBodyDeclaration(node); // can be null in package-info.java
+			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(scope != null ? scope : node, importRewrite);
 			simpleName= importRewrite.addImport(fullName, context);
 		}
 
