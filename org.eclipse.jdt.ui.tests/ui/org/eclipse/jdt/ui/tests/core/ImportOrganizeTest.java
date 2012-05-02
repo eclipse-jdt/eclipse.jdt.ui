@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -629,6 +629,69 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("import java.util.*;\n");
 		buf.append("\n");
 		buf.append("import pack.List;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    Vector v;\n");
+		buf.append("    Set v2;\n");
+		buf.append("    Map v3;\n");
+		buf.append("    List v4;\n");
+		buf.append("    String v5;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testImportToStarWithComments() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class List {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("List.java", buf.toString(), false, null);
+
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("// comment 1\n");
+		buf.append("/*lead 1*/import java.util.Set;//test1\n");
+		buf.append("/*lead 2*/ import java.util.Vector;/*test2*/\n");
+		buf.append("/**lead 3*/import java.util.Map; //test3\n");
+		buf.append("/**comment 2*/\n");
+		buf.append("import pack.List;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    Vector v;\n");
+		buf.append("    Set v2;\n");
+		buf.append("    Map v3;\n");
+		buf.append("    List v4;\n");
+		buf.append("    String v5;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] { "java", "pack" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 2, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("// comment 1\n");
+		buf.append("/*lead 1*/");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("import pack.List;\n");
+		buf.append("//test1\n");
+		buf.append("/*lead 2*/ \n"); 
+		buf.append("/*test2*/\n");
+		buf.append("/**lead 3*/\n");
+		buf.append("//test3\n");
+		buf.append("/**comment 2*/\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    Vector v;\n");
@@ -2353,6 +2416,51 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("import java.util.HashMap;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+
+		assertEquals(2, op.getNumberOfImportsAdded());
+		assertEquals(1, op.getNumberOfImportsRemoved());
+	}
+	
+	public void testImportCountAddandRemoveWithComments() throws Exception {
+	    IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("/**comment1*/\n");
+		buf.append("/*lead1*/import java.util.*;// trail 1\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] { "java", "pack" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("/**comment1*/\n");
+		buf.append("/*lead1*/");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("// trail 1\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    public void foo() {\n");
