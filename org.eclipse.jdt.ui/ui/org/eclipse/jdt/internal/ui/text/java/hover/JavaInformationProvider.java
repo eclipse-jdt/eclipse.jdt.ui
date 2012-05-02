@@ -64,7 +64,7 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 	public Object getInformation2(ITextViewer textViewer, IRegion subject) {
 		if (fImplementation == null)
 			return null;
-		return fImplementation.getHoverInfo2(textViewer, subject);
+		return fImplementation.getHoverInfo2(textViewer, subject, true);
 	}
 
 	/*

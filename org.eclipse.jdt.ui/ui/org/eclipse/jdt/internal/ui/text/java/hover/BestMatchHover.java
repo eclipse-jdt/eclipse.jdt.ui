@@ -126,6 +126,27 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 	 */
 	@Override
 	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
+		return getHoverInfo2(textViewer, hoverRegion, false);
+	}
+	
+	/**
+	 * Returns the information which should be presented when a hover or persistent popup is shown
+	 * for the specified hover region.
+	 * 
+	 * @param textViewer the viewer on which the hover popup should be shown
+	 * @param hoverRegion the text range in the viewer which is used to determine the hover display
+	 *            information
+	 * @param forInformationProvider <code>true</code> iff the hover info is requested by the
+	 *            information presenter. In this case, the method only considers text hovers for
+	 *            which a proper IInformationControlCreator is available that can supply focusable
+	 *            and resizable information controls.
+	 * 
+	 * @return the hover popup display information, or <code>null</code> if none available
+	 * 
+	 * @see ITextHoverExtension2#getHoverInfo2(ITextViewer, IRegion)
+	 * @since 3.8
+	 */
+	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion, boolean forInformationProvider) {
 
 		checkTextHovers();
 		fBestHover= null;
@@ -140,7 +161,7 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 
 			if (hover instanceof ITextHoverExtension2) {
 				Object info= ((ITextHoverExtension2) hover).getHoverInfo2(textViewer, hoverRegion);
-				if (info != null) {
+				if (info != null && !(forInformationProvider && getInformationPresenterControlCreator(hover) == null)) {
 					fBestHover= hover;
 					return info;
 				}
@@ -174,11 +195,15 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 	 */
 	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
-		if (fBestHover instanceof IInformationProviderExtension2) // this is wrong, but left here for backwards compatibility
-			return ((IInformationProviderExtension2)fBestHover).getInformationPresenterControlCreator();
+		return getInformationPresenterControlCreator(fBestHover);
+	}
 
-		if (fBestHover instanceof AbstractJavaEditorTextHover) {
-			return ((AbstractJavaEditorTextHover) fBestHover).getInformationPresenterControlCreator();
+	private static IInformationControlCreator getInformationPresenterControlCreator(ITextHover hover) {
+		if (hover instanceof IInformationProviderExtension2) // this is wrong, but left here for backwards compatibility
+			return ((IInformationProviderExtension2)hover).getInformationPresenterControlCreator();
+
+		if (hover instanceof AbstractJavaEditorTextHover) {
+			return ((AbstractJavaEditorTextHover) hover).getInformationPresenterControlCreator();
 		}
 		return null;
 	}
