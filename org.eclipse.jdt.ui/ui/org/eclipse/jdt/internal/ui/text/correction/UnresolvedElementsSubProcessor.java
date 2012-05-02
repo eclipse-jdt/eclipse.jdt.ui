@@ -112,6 +112,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -640,7 +641,7 @@ public class UnresolvedElementsSubProcessor {
 		final IJavaProject javaProject= cu.getJavaProject();
 		String name= node.getFullyQualifiedName();
 		
-		boolean isNullityAnnotation= false;
+		String nullityAnnotation= null;
 		String[] annotationNameOptions= { JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME };
 		Hashtable<String, String> defaultOptions= JavaCore.getDefaultOptions();
 		for (String annotationNameOption : annotationNameOptions) {
@@ -648,10 +649,10 @@ public class UnresolvedElementsSubProcessor {
 			if (! annotationName.equals(defaultOptions.get(annotationNameOption)))
 				return;
 			if (JavaModelUtil.isMatchingName(name, annotationName)) {
-				isNullityAnnotation= true;
+				nullityAnnotation= annotationName;
 			}
 		}
-		if (! isNullityAnnotation)
+		if (nullityAnnotation == null)
 			return;
 		if (javaProject.findType(defaultOptions.get(annotationNameOptions[0])) != null)
 			return;
@@ -659,12 +660,12 @@ public class UnresolvedElementsSubProcessor {
 		if (annotationsBundle == null)
 			return;
 		
-		if (! addAddToBuildPropertiesProposal(javaProject, proposals))
-			addCopyAnnotationsJarProposal(javaProject, annotationsBundle, proposals);
+		if (! addAddToBuildPropertiesProposal(cu, node, nullityAnnotation, proposals))
+			addCopyAnnotationsJarProposal(cu, node, nullityAnnotation, annotationsBundle, proposals);
 	}
 
-	private static boolean addAddToBuildPropertiesProposal(IJavaProject javaProject, Collection<ICommandAccess> proposals) throws CoreException {
-		IProject project= javaProject.getProject();
+	private static boolean addAddToBuildPropertiesProposal(final ICompilationUnit cu, final Name name, final String fullyQualifiedName, Collection<ICommandAccess> proposals) throws CoreException {
+		IProject project= cu.getJavaProject().getProject();
 		final IFile buildProperties= project.getFile("build.properties"); //$NON-NLS-1$
 		boolean isBundle= project.hasNature("org.eclipse.pde.PluginNature"); //$NON-NLS-1$
 		if (!isBundle)
@@ -705,7 +706,8 @@ public class UnresolvedElementsSubProcessor {
 							}
 							change.addEdit(new InsertEdit(len, entry));
 						}
-						return change;
+						CompilationUnitChange addImportChange= createAddImportChange(cu, name, fullyQualifiedName);
+						return new CompositeChange(changeName, new Change[] { change, addImportChange});
 					} catch (BadLocationException e) {
 						JavaPlugin.log(e);
 						return new NullChange();
@@ -725,7 +727,8 @@ public class UnresolvedElementsSubProcessor {
 	}
 	
 
-	private static void addCopyAnnotationsJarProposal(final IJavaProject javaProject, Bundle annotationsBundle, Collection<ICommandAccess> proposals) {
+	private static void addCopyAnnotationsJarProposal(final ICompilationUnit cu, final Name name, final String fullyQualifiedName, Bundle annotationsBundle, Collection<ICommandAccess> proposals) {
+		final IJavaProject javaProject= cu.getJavaProject();
 		final File bundleFile;
 		try {
 			bundleFile= FileLocator.getBundleFile(annotationsBundle);
@@ -763,7 +766,8 @@ public class UnresolvedElementsSubProcessor {
 					}
 				};
 				ClasspathChange addEntryChange= ClasspathChange.addEntryChange(javaProject, JavaCore.newLibraryEntry(file.getFullPath(), null, null));
-				return new CompositeChange(changeName, new Change[] { copyFileChange, addEntryChange });
+				CompilationUnitChange addImportChange= createAddImportChange(cu, name, fullyQualifiedName);
+				return new CompositeChange(changeName, new Change[] { copyFileChange, addEntryChange, addImportChange});
 			}
 			
 			@Override
@@ -772,6 +776,18 @@ public class UnresolvedElementsSubProcessor {
 			}
 		};
 		proposals.add(proposal);
+	}
+
+	static CompilationUnitChange createAddImportChange(ICompilationUnit cu, Name name, String fullyQualifiedName) throws CoreException {
+		String[] args= { BasicElementLabels.getJavaElementName(Signature.getSimpleName(fullyQualifiedName)),
+				BasicElementLabels.getJavaElementName(Signature.getQualifier(fullyQualifiedName)) };
+		String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_importtype_description, args);
+
+		CompilationUnitChange cuChange= new CompilationUnitChange(label, cu);
+		ImportRewrite importRewrite= StubUtility.createImportRewrite((CompilationUnit) name.getRoot(), true);
+		importRewrite.addImport(fullyQualifiedName);
+		cuChange.setEdit(importRewrite.rewriteImports(null));
+		return cuChange;
 	}
 
 	private static void addSimilarTypeProposals(int kind, ICompilationUnit cu, Name node, int relevance, Collection<ICommandAccess> proposals) throws CoreException {
