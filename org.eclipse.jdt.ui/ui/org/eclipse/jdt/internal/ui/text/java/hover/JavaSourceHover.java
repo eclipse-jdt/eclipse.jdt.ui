@@ -62,7 +62,8 @@ import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 
 
 /**
- * Provides source as hover info for Java elements.
+ * Provides as hover info the source of the selected JavaElement, or the source near the matching
+ * opening curly brace.
  */
 public class JavaSourceHover extends AbstractJavaEditorTextHover {
 
