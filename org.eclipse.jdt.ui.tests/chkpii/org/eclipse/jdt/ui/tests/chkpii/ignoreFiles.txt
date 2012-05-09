@@ -84,6 +84,7 @@ org.eclipse.help.ui/*
 org.eclipse.jdt.core.tests.model/workspace/*
 org.eclipse.jdt.debug/*
 org.eclipse.jdt.debug.ui/*
+org.eclipse.jdt.debug.tests/testresources/*
 org.eclipse.jdt.launching/*
 org.eclipse.jdt.launching.j9/*
 org.eclipse.jetty.*/*
