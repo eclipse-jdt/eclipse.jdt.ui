@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -144,8 +145,9 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			if (bracketNode == null)
 				return null;
 			ASTNode node;
-			if (bracketNode instanceof Block && !(bracketNode.getParent() instanceof Block)) {
-				node= bracketNode.getParent();
+			ASTNode parent= bracketNode.getParent();
+			if (bracketNode instanceof Block && !(parent instanceof Block) && !(parent instanceof SwitchStatement)) {
+				node= parent;
 			} else {
 				node= bracketNode;
 			}
