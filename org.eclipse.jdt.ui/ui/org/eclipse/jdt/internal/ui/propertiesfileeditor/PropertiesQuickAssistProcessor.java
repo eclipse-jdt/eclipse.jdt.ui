@@ -140,13 +140,15 @@ public class PropertiesQuickAssistProcessor {
 		if (PropertiesFileEscapes.containsUnescapedBackslash(text)) {
 			if (resultingCollections == null)
 				return true;
-			resultingCollections.add(new EscapeBackslashCompletionProposal(PropertiesFileEscapes.escape(text, false, true, false), proposalOffset, proposalLength, true));
+			resultingCollections.add(new EscapeBackslashCompletionProposal(PropertiesFileEscapes.escape(text, false, true, false), proposalOffset, proposalLength,
+					PropertiesFileEditorMessages.EscapeBackslashCompletionProposal_escapeBackslashes));
 			return true;
 		}
 		if (PropertiesFileEscapes.containsEscapedBackslashes(text)) {
 			if (resultingCollections == null)
 				return true;
-			resultingCollections.add(new EscapeBackslashCompletionProposal(PropertiesFileEscapes.unescapeBackslashes(text), proposalOffset, proposalLength, false));
+			resultingCollections.add(new EscapeBackslashCompletionProposal(PropertiesFileEscapes.unescapeBackslashes(text), proposalOffset, proposalLength,
+					PropertiesFileEditorMessages.EscapeBackslashCompletionProposal_unescapeBackslashes));
 			return true;
 		}
 		return false;

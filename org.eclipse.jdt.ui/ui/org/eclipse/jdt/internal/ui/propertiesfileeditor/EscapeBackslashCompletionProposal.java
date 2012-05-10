@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,7 +33,7 @@ public class EscapeBackslashCompletionProposal implements ICompletionProposal {
 
 	private final int fLength;
 
-	private final boolean fEscapeBackslashes;
+	private final String fDisplayString;
 
 	/**
 	 * Constructor for EscapeBackslashCompletionProposal.
@@ -41,14 +41,13 @@ public class EscapeBackslashCompletionProposal implements ICompletionProposal {
 	 * @param proposalText the proposal text
 	 * @param offset offset of the proposal
 	 * @param length length of the proposal
-	 * @param escapeBackslashes if <code>true</code> create 'Escape backslashes' proposal, otherwise
-	 *            create 'Unescape backslashes' proposal
+	 * @param displayString the display string
 	 */
-	public EscapeBackslashCompletionProposal(String proposalText, int offset, int length, boolean escapeBackslashes) {
+	public EscapeBackslashCompletionProposal(String proposalText, int offset, int length, String displayString) {
 		fProposalText= proposalText;
 		fOffset= offset;
 		fLength= length;
-		fEscapeBackslashes= escapeBackslashes;
+		fDisplayString= displayString;
 	}
 
 	public void apply(IDocument document) {
@@ -69,9 +68,7 @@ public class EscapeBackslashCompletionProposal implements ICompletionProposal {
 	}
 
 	public String getDisplayString() {
-		return fEscapeBackslashes
-				? PropertiesFileEditorMessages.EscapeBackslashCompletionProposal_escapeBackslashes
-				: PropertiesFileEditorMessages.EscapeBackslashCompletionProposal_unescapeBackslashes;
+		return fDisplayString;
 	}
 
 	public Image getImage() {

@@ -42,6 +42,8 @@ final class PropertiesFileEditorMessages extends NLS {
 	}
 
 	public static String EscapeBackslashCompletionProposal_escapeBackslashes;
+	public static String EscapeBackslashCompletionProposal_escapeBackslashesInOriginalString;
+	public static String EscapeBackslashCompletionProposal_unescapeBackslashes;
 	public static String OpenAction_label;
 	public static String OpenAction_tooltip;
 	public static String OpenAction_error_title;
@@ -68,7 +70,6 @@ final class PropertiesFileEditorMessages extends NLS {
 	public static String PropertiesFileAutoEditStrategy_showQuickAssist;
 	public static String PropertiesFileEditor_find_accessor_type;
 	public static String PropertiesFileHover_MalformedEncoding;
-	public static String EscapeBackslashCompletionProposal_unescapeBackslashes;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, PropertiesFileEditorMessages.class);

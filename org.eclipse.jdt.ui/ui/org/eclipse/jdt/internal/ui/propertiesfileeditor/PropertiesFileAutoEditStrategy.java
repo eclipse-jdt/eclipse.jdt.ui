@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -97,7 +97,8 @@ public class PropertiesFileAutoEditStrategy implements IAutoEditStrategy {
 		command.text= PropertiesFileEscapes.escape(text, false, false, escapeUnicodeChars);
 		if (escapeBackslash) {
 			String proposalText= PropertiesFileEscapes.escape(text, false, true, escapeUnicodeChars);
-			return new EscapeBackslashCompletionProposal(proposalText, command.offset, command.text.length(), true);
+			return new EscapeBackslashCompletionProposal(proposalText, command.offset, command.text.length(),
+					PropertiesFileEditorMessages.EscapeBackslashCompletionProposal_escapeBackslashesInOriginalString);
 		}
 		return null;
 	}
