@@ -1627,7 +1627,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 		
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		if (selectedNode instanceof Name && selectedNode.getParent() instanceof SwitchStatement) {
+		if (selectedNode instanceof Expression && selectedNode.getLocationInParent() == SwitchStatement.EXPRESSION_PROPERTY) {
 			SwitchStatement statement= (SwitchStatement) selectedNode.getParent();
 			ITypeBinding binding= statement.getExpression().resolveTypeBinding();
 			if (binding == null || !binding.isEnum()) {

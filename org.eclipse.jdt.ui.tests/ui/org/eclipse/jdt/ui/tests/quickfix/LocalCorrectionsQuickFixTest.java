@@ -8829,7 +8829,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	public void testMissingEnumConstantsInCase1() throws Exception {
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.WARNING);
-		options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);
 
 		JavaCore.setOptions(options);
@@ -9038,6 +9037,92 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testMissingEnumConstantsInCase4() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=379086
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);
+
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    enum MyEnum {\n");
+		buf.append("        X1, X2, X3\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("    public void foo() {\n");
+		buf.append("        switch (bar()) {\n");
+		buf.append("        \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public MyEnum bar() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 3);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    enum MyEnum {\n");
+		buf.append("        X1, X2, X3\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("    public void foo() {\n");
+		buf.append("        switch (bar()) {\n");
+		buf.append("            default :\n");
+		buf.append("                break;\n");
+		buf.append("        \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public MyEnum bar() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    enum MyEnum {\n");
+		buf.append("        X1, X2, X3\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("    public void foo() {\n");
+		buf.append("        switch (bar()) {\n");
+		buf.append("            case X1 :\n");
+		buf.append("                break;\n");
+		buf.append("            case X2 :\n");
+		buf.append("                break;\n");
+		buf.append("            case X3 :\n");
+		buf.append("                break;\n");
+		buf.append("            default :\n");
+		buf.append("                break;\n");
+		buf.append("        \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public MyEnum bar() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
