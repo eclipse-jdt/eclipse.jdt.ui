@@ -226,14 +226,14 @@ public class NullQuickFixes {
 		}
 	}
 
-	private static boolean isMissingNullAnnotationProblem(int id) {
-		return id == IProblem.RequiredNonNullButProvidedNull || id == IProblem.RequiredNonNullButProvidedPotentialNull || id == IProblem.IllegalReturnNullityRedefinition
-				|| mayIndicateParameterNullcheck(id);
-	}
-
-	private static boolean mayIndicateParameterNullcheck(int problemId) {
-		return problemId == IProblem.NonNullLocalVariableComparisonYieldsFalse || problemId == IProblem.RedundantNullCheckOnNonNullLocalVariable;
-	}
+//	private static boolean isMissingNullAnnotationProblem(int id) {
+//		return id == IProblem.RequiredNonNullButProvidedNull || id == IProblem.RequiredNonNullButProvidedPotentialNull || id == IProblem.IllegalReturnNullityRedefinition
+//				|| mayIndicateParameterNullcheck(id);
+//	}
+//
+//	private static boolean mayIndicateParameterNullcheck(int problemId) {
+//		return problemId == IProblem.NonNullLocalVariableComparisonYieldsFalse || problemId == IProblem.RedundantNullCheckOnNonNullLocalVariable;
+//	}
 
 	public static boolean hasExplicitNullAnnotation(ICompilationUnit compilationUnit, int offset) {
 // FIXME(SH): check for existing annotations disabled due to lack of precision:
