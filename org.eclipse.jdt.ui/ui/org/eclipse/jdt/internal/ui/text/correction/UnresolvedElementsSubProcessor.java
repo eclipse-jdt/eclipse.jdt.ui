@@ -718,8 +718,7 @@ public class UnresolvedElementsSubProcessor {
 			}
 			@Override
 			public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-				return CorrectionMessages.UnresolvedElementsSubProcessor_add_annotation_bundle_info
-						+ "<br><code>" + buildPropertiesEntry + "</code>"; //$NON-NLS-1$ //$NON-NLS-2$
+				return Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_annotation_bundle_info, buildPropertiesEntry);
 			}
 		};
 		proposals.add(proposal);
