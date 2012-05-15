@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -217,21 +217,36 @@ public class JavaElementLinks {
 					return;
 				}
 
-				URI uri;
+				URI uri= null;
 				try {
 					uri= new URI(loc);
 				} catch (URISyntaxException e) {
-					// try it with a file (workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=237903 ):
-					File file= new File(loc);
-					if (! file.exists()) {
-						JavaPlugin.log(e);
-						return;
+					// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=368629 :
+					if (event.widget instanceof Browser
+							&& "ie".equals(((Browser) event.widget).getBrowserType()) //$NON-NLS-1$
+							&& loc.startsWith("file://")) { //$NON-NLS-1$
+						
+						String path= loc.substring(7).replace('/', '\\');
+						loc = new File(path).toURI().toString();
+						/*
+						 * Bug in File#toURI(): Format should be file:///C:/segment1/etc but is file:/C:/segment1/etc
+						 */
+						if (loc.length() > 7 && loc.startsWith("file:/") && !"//".equals(loc.substring(6, 8))) { //$NON-NLS-1$ //$NON-NLS-2$
+							loc= "file://" + loc.substring(5); //$NON-NLS-1$
+						}
+						try {
+							uri= new URI(loc);
+						} catch (URISyntaxException e2) {
+							JavaPlugin.log(e); // log original exception
+							return;
+						}
+						
+					} else {
+						JavaPlugin.log(e); // log bad URL, but proceed in the hope that handleExternalLink(..) can deal with it 
 					}
-					uri= file.toURI();
-					loc= uri.toASCIIString();
 				}
 
-				String scheme= uri.getScheme();
+				String scheme= uri == null ? null : uri.getScheme();
 				if (JavaElementLinks.JAVADOC_VIEW_SCHEME.equals(scheme)) {
 					IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
 					if (linkTarget == null)
