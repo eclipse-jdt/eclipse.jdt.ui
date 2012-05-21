@@ -24,6 +24,8 @@ com.oti.zrh.eclipse.tools-updateSite/*
 
 javax.servlet/*
 
+com.jcraft.jsch/meta-inf/maven/com.jcraft/jsch/pom.xml
+
 org.eclipse.jdt.ui.tests.refactoring/resources/*
 org.eclipse.jdt.ui/core*extension\org/eclipse/jdt/internal/corext/template/default-codetemplates.xml
 org.eclipse.pde.doc.isv/buildDoc.xml
