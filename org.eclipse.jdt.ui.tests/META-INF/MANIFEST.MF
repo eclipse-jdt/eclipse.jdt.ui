@@ -65,3 +65,4 @@ Require-Bundle:
  org.eclipse.text.tests,
  org.junit;bundle-version="4.8.1"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Eclipse-BundleShape: dir
