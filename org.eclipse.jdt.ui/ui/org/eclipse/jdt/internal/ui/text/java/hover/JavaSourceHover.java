@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 import java.io.IOException;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -26,7 +27,6 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.IWorkbenchPartOrientation;
@@ -118,24 +118,26 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 		return null;
 	}
 
-	private String getBracketHoverInfo(ITextViewer textViewer, IRegion region, ITypeRoot editorInput) {
+	private String getBracketHoverInfo(final ITextViewer textViewer, IRegion region, ITypeRoot editorInput) {
 		IEditorPart editor= getEditor();
 		if (!(editor instanceof JavaEditor))
 			return null;
 
 		int offset= region.getOffset();
 		IDocument document= textViewer.getDocument();
+		if (document == null)
+			return null;
 		try {
 			char c= document.getChar(offset);
 			if (c != '}')
 				return null;
 			JavaPairMatcher matcher= ((JavaEditor) editor).getBracketMatcher();
+			if (matcher == null)
+				return null;
 			IRegion match= matcher.match(document, offset);
 			if (match == null)
 				return null;
 
-			int sourceOffset;
-			int sourceLength;
 			String delim= StubUtility.getLineDelimiterUsed(editorInput);
 
 			CompilationUnit ast= SharedASTProvider.getAST(editorInput, SharedASTProvider.WAIT_NO, null);
@@ -167,27 +169,37 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			}
 
 			int line1= document.getLineOfOffset(nodeStart);
-			sourceOffset= document.getLineOffset(line1);
+			int sourceOffset= document.getLineOffset(line1);
 			int line2= document.getLineOfOffset(nodeStart + nodeLength);
 			int hoveredLine= document.getLineOfOffset(offset);
 			if (line2 > hoveredLine)
 				line2= hoveredLine;
 
 			//check if line1 is visible
-			JavaEditor javaEditor= (JavaEditor) editor;
-			final ISourceViewer viewer= javaEditor.getViewer();
 			final int[] topIndex= new int[1];
-			StyledText textWidget= viewer.getTextWidget();
-			if (textWidget != null) {
-				Display display= textWidget.getDisplay();
-				display.syncExec(new Runnable() {
-					public void run() {
-						topIndex[0]= viewer.getTopIndex();
-					}
-				});
+			StyledText textWidget= textViewer.getTextWidget();
+			if (textWidget == null)
+				return null;
+
+			Display display;
+			try {
+				display= textWidget.getDisplay();
+			} catch (SWTException ex) {
+				if (ex.code == SWT.ERROR_WIDGET_DISPOSED)
+					return null;
+				else
+					throw ex;
 			}
-			
+
+			display.syncExec(new Runnable() {
+				public void run() {
+					topIndex[0]= textViewer.getTopIndex();
+				}
+			});
+
 			int topLine= topIndex[0];
+			if (topLine == -1)
+				return null;
 			int noOfSourceLines;
 			IRegion endLine;
 			if (line1 < topLine) {
@@ -208,10 +220,10 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 				endLine= document.getLineInformation(line2);
 				fUpwardShiftInLines= line2 - line1;
 			}
-			sourceLength= (endLine.getOffset() + endLine.getLength()) - sourceOffset;
 			if (fUpwardShiftInLines == 0)
 				return null;
 
+			int sourceLength= (endLine.getOffset() + endLine.getLength()) - sourceOffset;
 			String source= document.get(sourceOffset, sourceLength);
 			String[] sourceLines= getTrimmedSource(source, editorInput);
 			if (sourceLines == null)
