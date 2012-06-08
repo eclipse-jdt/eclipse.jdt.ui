@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,17 +17,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.layout.PixelConverter;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.JFaceResources;
-
-import org.eclipse.jface.text.Document;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -40,11 +34,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefactoring;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -74,7 +64,6 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 		private String[] fParamNameProposals;
 
 		private JavaSourceViewer fSignaturePreview;
-		private Document fSignaturePreviewDocument;
 		private Button fLeaveDelegateCheckBox;
 		private Button fDeprecateDelegateCheckBox;
 
@@ -83,7 +72,6 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			setDescription(DESCRIPTION);
 			Assert.isNotNull(tempNameProposals);
 			fParamNameProposals= tempNameProposals;
-			fSignaturePreviewDocument= new Document();
 		}
 
 		private IntroduceParameterRefactoring getIntroduceParameterRefactoring(){
@@ -161,21 +149,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			Label previewLabel= new Label(composite, SWT.NONE);
 			previewLabel.setText(RefactoringMessages.ChangeSignatureInputPage_method_Signature_Preview);
 
-			IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-			fSignaturePreview= new JavaSourceViewer(composite, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP /*| SWT.BORDER*/, store);
-			fSignaturePreview.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
-			fSignaturePreview.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
-			fSignaturePreview.adaptBackgroundColor(composite);
-			fSignaturePreview.setDocument(fSignaturePreviewDocument);
-			fSignaturePreview.setEditable(false);
-
-			//Layouting problems with wrapped text: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=9866
-			Control signaturePreviewControl= fSignaturePreview.getControl();
-			PixelConverter pixelConverter= new PixelConverter(signaturePreviewControl);
-			GridData gdata= new GridData(GridData.FILL_BOTH);
-			gdata.widthHint= pixelConverter.convertWidthInCharsToPixels(50);
-			gdata.heightHint= pixelConverter.convertHeightInCharsToPixels(2);
-			signaturePreviewControl.setLayoutData(gdata);
+			fSignaturePreview= InputPageUtil.createSignaturePreview(composite);
 		}
 
 		private void update(boolean displayErrorMessage){
@@ -196,7 +170,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 		private void updateSignaturePreview() {
 			try{
 				int top= fSignaturePreview.getTextWidget().getTopPixel();
-				fSignaturePreviewDocument.set(getIntroduceParameterRefactoring().getMethodSignaturePreview());
+				fSignaturePreview.getDocument().set(getIntroduceParameterRefactoring().getMethodSignaturePreview());
 				fSignaturePreview.getTextWidget().setTopPixel(top);
 			} catch (JavaModelException e){
 				ExceptionHandler.handle(e, RefactoringMessages.IntroduceParameterWizard_defaultPageTitle, RefactoringMessages.ChangeSignatureInputPage_exception);

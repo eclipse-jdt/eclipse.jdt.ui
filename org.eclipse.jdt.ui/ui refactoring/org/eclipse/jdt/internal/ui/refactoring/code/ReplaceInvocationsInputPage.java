@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.refactoring.InputPageUtil;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 
@@ -96,20 +97,9 @@ public class ReplaceInvocationsInputPage extends UserInputWizardPage {
 	}
 
 	private void createMethodSignature(Composite parent) {
-		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-		JavaSourceViewer signatureViewer= new JavaSourceViewer(parent, null, null, false, SWT.READ_ONLY | SWT.WRAP /*| SWT.BORDER*/, store);
-		signatureViewer.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
-		signatureViewer.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
-		signatureViewer.adaptBackgroundColor(parent);
+		JavaSourceViewer signatureViewer= InputPageUtil.createSignaturePreview(parent);
 		String signatureLabel= JavaElementLabels.getElementLabel(fRefactoring.getMethod(), LABEL_FLAGS);
-		signatureViewer.setDocument(new Document(signatureLabel));
-		signatureViewer.setEditable(false);
-
-		Control signatureControl= signatureViewer.getControl();
-		PixelConverter pixelConverter= new PixelConverter(signatureControl);
-		GridData gdata= new GridData(GridData.FILL_HORIZONTAL);
-		gdata.widthHint= pixelConverter.convertWidthInCharsToPixels(50);
-		signatureControl.setLayoutData(gdata);
+		signatureViewer.getDocument().set(signatureLabel);
 	}
 
 	private void createBody(Composite parent) {

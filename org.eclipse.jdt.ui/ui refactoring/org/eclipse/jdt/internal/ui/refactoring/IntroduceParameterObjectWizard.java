@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
@@ -39,10 +38,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.layout.TableColumnLayout;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -63,9 +59,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
@@ -83,10 +76,7 @@ import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -195,7 +185,6 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 		private IntroduceParameterObjectProcessor fProcessor;
 		private JavaSourceViewer fSignaturePreview;
-		private IDocument fSignaturePreviewDocument= new Document();
 		private Button fLeaveDelegateCheckBox;
 		private Button fDeprecateDelegateCheckBox;
 
@@ -331,39 +320,10 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			gridData.horizontalSpan= 2;
 			previewLabel.setLayoutData(gridData);
 
-			// //XXX: use ViewForm to draw a flat border. Beware of common
-			// problems
-			// with wrapping layouts
-			// //inside GridLayout. GridData must be constrained to force
-			// wrapping.
-			// See bug 9866 et al.
-			// ViewForm border= new ViewForm(composite, SWT.BORDER | SWT.FLAT);
-
-			IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-			fSignaturePreview= new JavaSourceViewer(composite, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP, store);
-			fSignaturePreview.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
-			fSignaturePreview.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
-			fSignaturePreview.adaptBackgroundColor(composite);
-			fSignaturePreview.setDocument(fSignaturePreviewDocument);
-			fSignaturePreview.setEditable(false);
-
-			// Layouting problems with wrapped text: see
-			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=9866
-			Control signaturePreviewControl= fSignaturePreview.getControl();
-			PixelConverter pixelConverter= new PixelConverter(signaturePreviewControl);
-			GridData gdata= new GridData(GridData.FILL_BOTH);
-			gdata.widthHint= pixelConverter.convertWidthInCharsToPixels(50);
-			gdata.heightHint= pixelConverter.convertHeightInCharsToPixels(2);
-			gdata.horizontalSpan= 2;
-			signaturePreviewControl.setLayoutData(gdata);
+			fSignaturePreview= InputPageUtil.createSignaturePreview(composite);
+			((GridData) fSignaturePreview.getControl().getLayoutData()).horizontalSpan= 2;
 
 			updateSignaturePreview();
-			// //XXX must force JavaSourceViewer text widget to wrap:
-			// border.setContent(signaturePreviewControl);
-			// GridData borderData= new GridData(GridData.FILL_BOTH);
-			// borderData.widthHint= gdata.widthHint;
-			// borderData.heightHint= gdata.heightHint;
-			// border.setLayoutData(borderData);
 		}
 
 		private void createDelegateInput(Group group) {
@@ -728,7 +688,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 		private void updateSignaturePreview() {
 			try {
 				int top= fSignaturePreview.getTextWidget().getTopPixel();
-				fSignaturePreviewDocument.set(fProcessor.getNewMethodSignature());
+				fSignaturePreview.getDocument().set(fProcessor.getNewMethodSignature());
 				fSignaturePreview.getTextWidget().setTopPixel(top);
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, RefactoringMessages.IntroduceParameterObjectWizard_error_title, RefactoringMessages.IntroduceParameterObjectWizard_error_description);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,17 +24,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.layout.PixelConverter;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.JFaceResources;
-
-import org.eclipse.jface.text.Document;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -53,17 +47,14 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeParametersControl;
 import org.eclipse.jdt.internal.ui.refactoring.IParameterListChangeListener;
+import org.eclipse.jdt.internal.ui.refactoring.InputPageUtil;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -78,7 +69,6 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 	private Text fTextField;
 	private boolean fFirstTime;
 	private JavaSourceViewer fSignaturePreview;
-	private Document fSignaturePreviewDocument;
 	private IDialogSettings fSettings;
 
 	private static final String DESCRIPTION = RefactoringMessages.ExtractMethodInputPage_description;
@@ -91,7 +81,6 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_CU);
 		setDescription(DESCRIPTION);
 		fFirstTime= true;
-		fSignaturePreviewDocument= new Document();
 	}
 
 	public void createControl(Composite parent) {
@@ -311,23 +300,9 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		Label previewLabel= new Label(composite, SWT.NONE);
 		previewLabel.setText(RefactoringMessages.ExtractMethodInputPage_signature_preview);
 		layouter.perform(previewLabel);
-
-		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-		fSignaturePreview= new JavaSourceViewer(composite, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP /*| SWT.BORDER*/, store);
-		fSignaturePreview.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
-		fSignaturePreview.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
-		fSignaturePreview.adaptBackgroundColor(composite);
-		fSignaturePreview.setDocument(fSignaturePreviewDocument);
-		fSignaturePreview.setEditable(false);
-
-		//Layouting problems with wrapped text: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=9866
-		Control signaturePreviewControl= fSignaturePreview.getControl();
-		PixelConverter pixelConverter= new PixelConverter(signaturePreviewControl);
-		GridData gdata= new GridData(GridData.FILL_BOTH);
-		gdata.widthHint= pixelConverter.convertWidthInCharsToPixels(50);
-		gdata.heightHint= pixelConverter.convertHeightInCharsToPixels(2);
-		signaturePreviewControl.setLayoutData(gdata);
-		layouter.perform(signaturePreviewControl);
+		
+		fSignaturePreview= InputPageUtil.createSignaturePreview(composite);
+		layouter.perform(fSignaturePreview.getControl());
 	}
 
 	private void updatePreview(String text) {
@@ -344,7 +319,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		} catch (IllegalArgumentException e) {
 			signature= ""; //$NON-NLS-1$
 		}
-		fSignaturePreviewDocument.set(signature);
+		fSignaturePreview.getDocument().set(signature);
 		fSignaturePreview.getTextWidget().setTopPixel(top);
 	}
 
@@ -386,7 +361,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		if (!status.hasFatalError()) {
 			updatePreview(text);
 		} else {
-			fSignaturePreviewDocument.set(""); //$NON-NLS-1$
+			fSignaturePreview.getDocument().set(""); //$NON-NLS-1$
 		}
 		setPageComplete(status);
 	}

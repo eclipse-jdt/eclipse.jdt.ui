@@ -223,7 +223,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 				public void modifierChanged(int modifier, boolean isChecked) {
 				}
 			};
-			Composite visibilityComposite= VisibilityControlUtil.createVisibilityControl(result, visibilityChangeListener, availableVisibilities, currectVisibility);
+			Composite visibilityComposite= InputPageUtil.createVisibilityControl(result, visibilityChangeListener, availableVisibilities, currectVisibility);
 			GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan= 2;
 			visibilityComposite.setLayoutData(gd);

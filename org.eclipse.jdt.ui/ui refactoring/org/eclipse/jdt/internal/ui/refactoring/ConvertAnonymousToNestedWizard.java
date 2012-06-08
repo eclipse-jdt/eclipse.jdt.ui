@@ -172,7 +172,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 				public void modifierChanged(int modifier, boolean isChecked) {
 				}
 			};
-			Composite visibilityComposite= VisibilityControlUtil.createVisibilityControl(result, visibilityChangeListener, availableVisibilities, currectVisibility);
+			Composite visibilityComposite= InputPageUtil.createVisibilityControl(result, visibilityChangeListener, availableVisibilities, currectVisibility);
 			if(visibilityComposite != null) {
 			    GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 			    gd.horizontalSpan= 2;

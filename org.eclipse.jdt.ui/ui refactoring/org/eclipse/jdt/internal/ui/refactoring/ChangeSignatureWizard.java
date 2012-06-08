@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,11 +27,6 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.layout.PixelConverter;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.JFaceResources;
-
-import org.eclipse.jface.text.Document;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -47,9 +42,6 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -78,7 +70,6 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 
 		public static final String PAGE_NAME= "ChangeSignatureInputPage"; //$NON-NLS-1$
 		private JavaSourceViewer fSignaturePreview;
-		private Document fSignaturePreviewDocument;
 		private Button fLeaveDelegateCheckBox;
 		private Button fDeprecateDelegateCheckBox;
 
@@ -88,7 +79,6 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			super(PAGE_NAME);
 			fProcessor= processor;
 			setMessage(RefactoringMessages.ChangeSignatureInputPage_change);
-			fSignaturePreviewDocument= new Document();
 		}
 
 		/*
@@ -339,32 +329,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			Label previewLabel= new Label(composite, SWT.NONE);
 			previewLabel.setText(RefactoringMessages.ChangeSignatureInputPage_method_Signature_Preview);
 
-//			//XXX: use ViewForm to draw a flat border. Beware of common problems with wrapping layouts
-//			//inside GridLayout. GridData must be constrained to force wrapping. See bug 9866 et al.
-//			ViewForm border= new ViewForm(composite, SWT.BORDER | SWT.FLAT);
-
-			IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-			fSignaturePreview= new JavaSourceViewer(composite, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP /*| SWT.BORDER*/, store);
-			fSignaturePreview.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
-			fSignaturePreview.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
-			fSignaturePreview.adaptBackgroundColor(composite);
-			fSignaturePreview.setDocument(fSignaturePreviewDocument);
-			fSignaturePreview.setEditable(false);
-
-			//Layouting problems with wrapped text: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=9866
-			Control signaturePreviewControl= fSignaturePreview.getControl();
-			PixelConverter pixelConverter= new PixelConverter(signaturePreviewControl);
-			GridData gdata= new GridData(GridData.FILL_BOTH);
-			gdata.widthHint= pixelConverter.convertWidthInCharsToPixels(50);
-			gdata.heightHint= pixelConverter.convertHeightInCharsToPixels(2);
-			signaturePreviewControl.setLayoutData(gdata);
-
-//			//XXX must force JavaSourceViewer text widget to wrap:
-//			border.setContent(signaturePreviewControl);
-//			GridData borderData= new GridData(GridData.FILL_BOTH);
-//			borderData.widthHint= gdata.widthHint;
-//			borderData.heightHint= gdata.heightHint;
-//			border.setLayoutData(borderData);
+			fSignaturePreview= InputPageUtil.createSignaturePreview(composite);
 		}
 
 		private ChangeSignatureProcessor getChangeMethodSignatureProcessor() {
@@ -403,7 +368,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		private void updateSignaturePreview() {
 			try{
 				int top= fSignaturePreview.getTextWidget().getTopPixel();
-				fSignaturePreviewDocument.set(getChangeMethodSignatureProcessor().getNewMethodSignature());
+				fSignaturePreview.getDocument().set(getChangeMethodSignatureProcessor().getNewMethodSignature());
 				fSignaturePreview.getTextWidget().setTopPixel(top);
 			} catch (JavaModelException e){
 				ExceptionHandler.handle(e, RefactoringMessages.ChangeSignatureRefactoring_modify_Parameters, RefactoringMessages.ChangeSignatureInputPage_exception);

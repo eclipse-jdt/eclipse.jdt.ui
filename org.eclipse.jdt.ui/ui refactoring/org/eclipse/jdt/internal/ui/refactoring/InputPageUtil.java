@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -22,10 +23,24 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
+import org.eclipse.jface.layout.PixelConverter;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
+
+import org.eclipse.jface.text.Document;
+
 import org.eclipse.jdt.core.dom.Modifier;
 
-public class VisibilityControlUtil {
-	private VisibilityControlUtil(){}
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+
+public final class InputPageUtil {
+	private InputPageUtil() {
+		// static helper class
+	}
 
 	public static Composite createVisibilityControl(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
 		List<Integer> allowedVisibilities= convertToIntegerList(availableVisibilities);
@@ -77,5 +92,31 @@ public class VisibilityControlUtil {
 			result.add(new Integer(array[i]));
 		}
 		return result;
+	}
+
+	/**
+	 * Creates a signature preview viewer in a parent composite with a 1-column GridLayout.
+	 * 
+	 * @param parent the parent 
+	 * @return the preview viewer
+	 * @since 3.9
+	 */
+	public static JavaSourceViewer createSignaturePreview(Composite parent) {
+		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+		JavaSourceViewer signaturePreview= new JavaSourceViewer(parent, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP, store);
+		signaturePreview.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
+		StyledText textWidget= signaturePreview.getTextWidget();
+		textWidget.setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
+		textWidget.setAlwaysShowScrollBars(false);
+		signaturePreview.adaptBackgroundColor(parent);
+		signaturePreview.setDocument(new Document());
+		signaturePreview.setEditable(false);
+	
+		GridData gdata= new GridData(GridData.FILL_BOTH);
+		gdata.widthHint= new PixelConverter(textWidget).convertWidthInCharsToPixels(50);
+		gdata.heightHint= textWidget.getLineHeight() * 2;
+		textWidget.setLayoutData(gdata);
+		
+		return signaturePreview;
 	}
 }
