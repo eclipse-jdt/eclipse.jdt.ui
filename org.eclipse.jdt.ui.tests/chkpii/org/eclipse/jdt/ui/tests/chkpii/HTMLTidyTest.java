@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,7 +75,7 @@ public class HTMLTidyTest extends TestCase {
 	public void testHTML() throws Exception {
 		URL testBundleRoot= JavaTestPlugin.getDefault().getBundle().getEntry("/");
 		URL testBundleFile= FileLocator.toFileURL(testBundleRoot);
-		File hostWorkspace= new File(testBundleFile.getFile()).getParentFile();
+		File hostWorkspace= new File(testBundleFile.getFile()).getParentFile().getParentFile().getParentFile();
 		String workspacePath= hostWorkspace.getAbsolutePath();
 		fworkspacePathLength= workspacePath.length();
 		File chkpiiResults= new File(hostWorkspace, "chkpiiResults");
@@ -193,7 +193,7 @@ public class HTMLTidyTest extends TestCase {
 			return process.exitValue() == 0;
 		} catch (IllegalThreadStateException e) {
 			process.destroy();
-			fail("'" + command + "' killed after " + TIDY_TIMEOUT +" ms");
+			fTidyResults.write("Error: '" + command + "' killed after " + TIDY_TIMEOUT +" ms\n");
 			return false;
 		}
 	}
