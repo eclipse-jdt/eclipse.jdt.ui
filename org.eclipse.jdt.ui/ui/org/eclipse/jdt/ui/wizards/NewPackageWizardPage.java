@@ -375,9 +375,9 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	 * Returns the content of the create package documentation input field.
 	 *
 	 * @return the content of the create package documentation input field
-	 * @since 3.8
+	 * @since 3.9
 	 */
-	boolean isCreatePackageDocumentation() {
+	public boolean isCreatePackageDocumentation() {
 		return fCreatePackageInfoJavaDialogField.isSelected();
 	}
 
