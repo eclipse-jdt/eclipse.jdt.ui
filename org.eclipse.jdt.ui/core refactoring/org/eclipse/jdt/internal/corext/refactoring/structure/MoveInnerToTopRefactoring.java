@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -310,18 +310,22 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		@Override
 		public boolean visit(final ThisExpression node) {
 			Assert.isNotNull(node);
-			final Name name= node.getQualifier();
-			if (name != null && name.isSimpleName()) {
-				final AST ast= node.getAST();
-				Expression expression= null;
-				if (fCodeGenerationSettings.useKeywordThis || fEnclosingInstanceFieldName.equals(fNameForEnclosingInstanceConstructorParameter)) {
-					final FieldAccess access= ast.newFieldAccess();
-					access.setExpression(ast.newThisExpression());
-					access.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
-					expression= access;
-				} else
-					expression= ast.newSimpleName(fEnclosingInstanceFieldName);
-				fSourceRewrite.getASTRewrite().replace(node, expression, null);
+			Name name= node.getQualifier();
+			if (fCreateInstanceField && name != null) {
+				ITypeBinding binding= node.resolveTypeBinding();
+				if (binding != null && Bindings.equals(binding, fTypeBinding.getDeclaringClass())) {
+					AST ast= node.getAST();
+					Expression expression= null;
+					if (fCodeGenerationSettings.useKeywordThis || fEnclosingInstanceFieldName.equals(fNameForEnclosingInstanceConstructorParameter)) {
+						FieldAccess access= ast.newFieldAccess();
+						access.setExpression(ast.newThisExpression());
+						access.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
+						expression= access;
+					} else {
+						expression= ast.newSimpleName(fEnclosingInstanceFieldName);
+					}
+					fSourceRewrite.getASTRewrite().replace(node, expression, null);
+				}
 			}
 			return super.visit(node);
 		}

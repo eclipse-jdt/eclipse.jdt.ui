@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -375,6 +375,14 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	// change visibility: https://bugs.eclipse.org/319069
 	public void test42() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
+	}
+	
+	public void test43() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, "", false, true, false, false);
+	}
+	
+	public void test44() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, "a", true, true, true, true);
 	}
 	
 	// --- Non static
