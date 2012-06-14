@@ -20,7 +20,7 @@ import org.eclipse.osgi.util.NLS;
  *
  * @since 3.1
  */
-final class PropertiesFileEditorMessages extends NLS {
+public final class PropertiesFileEditorMessages extends NLS {
 
 	private static final String BUNDLE_FOR_CONSTRUCTED_KEYS= "org.eclipse.jdt.internal.ui.propertiesfileeditor.ConstructedPropertiesFileEditorMessages";//$NON-NLS-1$
 	private static ResourceBundle fgBundleForConstructedKeys= ResourceBundle.getBundle(BUNDLE_FOR_CONSTRUCTED_KEYS);

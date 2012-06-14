@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,10 +36,10 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.Java17ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 
-	private static final String ADD_SAFE_VARARGS= "Add @SafeVarargs";
 	private static final Class THIS= ModifierCorrectionsQuickFixTest17.class;
 
 	private IJavaProject fJProject1;
@@ -231,7 +231,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
 
-		assertProposalDoesNotExist(proposals, ADD_SAFE_VARARGS);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.VarargsWarningsSubProcessor_add_safevarargs_label);
 	}
 
 	public void testAddSafeVarargsToDeclaration1() throws Exception {

@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -52,7 +53,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	private static final Class THIS= AssistQuickFixTest.class;
 
-	private static final String CHANGE_MODIFIER_TO_FINAL= "Change modifier to final";
+	private static final String CHANGE_MODIFIER_TO_FINAL= FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
