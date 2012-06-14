@@ -39,14 +39,15 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class AssistQuickFixTest17 extends QuickFixTest {
 
-	private static final String REMOVE_CATCH_CLAUSE= "Remove catch clause";
-	private static final String REPLACE_CATCH_CLAUSE_WITH_THROWS= "Replace catch clause with throws";
-	private static final String REMOVE_SURROUNDING_TRY_BLOCK= "Remove surrounding 'try' block";
-	private static final String CONVERT_TO_A_SINGLE_MULTI_CATCH_BLOCK= "Combine catch blocks";
-	private static final String CONVERT_TO_SEPARATE_CATCH_BLOCKS= "Use separate catch blocks";
+	private static final String REMOVE_CATCH_CLAUSE= CorrectionMessages.QuickAssistProcessor_removecatchclause_description;
+	private static final String REPLACE_CATCH_CLAUSE_WITH_THROWS= CorrectionMessages.QuickAssistProcessor_catchclausetothrows_description;
+	private static final String REMOVE_SURROUNDING_TRY_BLOCK= CorrectionMessages.QuickAssistProcessor_unwrap_trystatement;
+	private static final String CONVERT_TO_A_SINGLE_MULTI_CATCH_BLOCK= CorrectionMessages.QuickAssistProcessor_convert_to_single_multicatch_block;
+	private static final String CONVERT_TO_SEPARATE_CATCH_BLOCKS= CorrectionMessages.QuickAssistProcessor_convert_to_multiple_singletype_catch_blocks;
 
 	private static final Class THIS= AssistQuickFixTest17.class;
 

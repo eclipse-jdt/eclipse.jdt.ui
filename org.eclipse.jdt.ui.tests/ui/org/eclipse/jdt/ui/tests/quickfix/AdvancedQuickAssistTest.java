@@ -45,6 +45,7 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.QuickTemplateProcessor;
 
 public class AdvancedQuickAssistTest extends QuickFixTest {
@@ -4224,6 +4225,418 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 
+	}
+
+	public void testConvertIfToSwitch1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a) {\n");
+		buf.append("        if (a == 1) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        } else if (a == 2 || a == 3 || a == 4 || a == 5) {\n");
+		buf.append("            System.out.println(2);\n");
+		buf.append("        } else if (a == 6) {\n");
+		buf.append("            System.out.println(4);\n");
+		buf.append("        } else {\n");
+		buf.append("            System.out.println(-1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a) {\n");
+		buf.append("        switch (a) {\n");
+		buf.append("            case 1 :\n");
+		buf.append("                System.out.println(1);\n");
+		buf.append("                break;\n");
+		buf.append("            case 2 :\n");
+		buf.append("            case 3 :\n");
+		buf.append("            case 4 :\n");
+		buf.append("            case 5 :\n");
+		buf.append("                System.out.println(2);\n");
+		buf.append("                break;\n");
+		buf.append("            case 6 :\n");
+		buf.append("                System.out.println(4);\n");
+		buf.append("                break;\n");
+		buf.append("            default :\n");
+		buf.append("                System.out.println(-1);\n");
+		buf.append("                break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertIfToSwitch2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("        if (\"abc\".equals(s)) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        } else if (\"xyz\".equals(s)) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        } else {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch);
+	}
+
+	public void testConvertIfToSwitch3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public enum TimeUnit {\n");
+		buf.append("        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS\n");
+		buf.append("    }\n");
+		buf.append("    public static int getPower(TimeUnit unit) {\n");
+		buf.append("        if (unit == TimeUnit.SECONDS) {\n");
+		buf.append("            return 0;\n");
+		buf.append("        } else if (unit == TimeUnit.MILLISECONDS) {\n");
+		buf.append("            return -3;\n");
+		buf.append("        } else if (unit == TimeUnit.MICROSECONDS) {\n");
+		buf.append("            return -6;\n");
+		buf.append("        } else if (unit == TimeUnit.NANOSECONDS) {\n");
+		buf.append("            return -9;\n");
+		buf.append("        } else {\n");
+		buf.append("            throw new InternalError();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public enum TimeUnit {\n");
+		buf.append("        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS\n");
+		buf.append("    }\n");
+		buf.append("    public static int getPower(TimeUnit unit) {\n");
+		buf.append("        switch (unit) {\n");
+		buf.append("            case SECONDS :\n");
+		buf.append("                return 0;\n");
+		buf.append("            case MILLISECONDS :\n");
+		buf.append("                return -3;\n");
+		buf.append("            case MICROSECONDS :\n");
+		buf.append("                return -6;\n");
+		buf.append("            case NANOSECONDS :\n");
+		buf.append("                return -9;\n");
+		buf.append("            default :\n");
+		buf.append("                throw new InternalError();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertIfToSwitch4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public enum TimeUnit {\n");
+		buf.append("        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS\n");
+		buf.append("    }\n");
+		buf.append("    public static int getPower(TimeUnit unit) {\n");
+		buf.append("        if (unit.equals(TimeUnit.SECONDS)) {\n");
+		buf.append("            return 0;\n");
+		buf.append("        } else if (unit.equals(TimeUnit.MILLISECONDS)) {\n");
+		buf.append("            return -3;\n");
+		buf.append("        } else if (unit.equals(TimeUnit.MICROSECONDS)) {\n");
+		buf.append("            return -6;\n");
+		buf.append("        } else if (unit.equals(TimeUnit.NANOSECONDS)) {\n");
+		buf.append("            return -9;\n");
+		buf.append("        } else {\n");
+		buf.append("            throw new InternalError();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public enum TimeUnit {\n");
+		buf.append("        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS\n");
+		buf.append("    }\n");
+		buf.append("    public static int getPower(TimeUnit unit) {\n");
+		buf.append("        switch (unit) {\n");
+		buf.append("            case SECONDS :\n");
+		buf.append("                return 0;\n");
+		buf.append("            case MILLISECONDS :\n");
+		buf.append("                return -3;\n");
+		buf.append("            case MICROSECONDS :\n");
+		buf.append("                return -6;\n");
+		buf.append("            case NANOSECONDS :\n");
+		buf.append("                return -9;\n");
+		buf.append("            default :\n");
+		buf.append("                throw new InternalError();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertIfToSwitch5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    final static int SECONDS=1, MILLISECONDS=2, MICROSECONDS=4,NANOSECONDS=8;\n");
+		buf.append("    public static int getPower(int unit) {\n");
+		buf.append("        if (unit == SECONDS) {\n");
+		buf.append("            return 0;\n");
+		buf.append("        } else if (unit == MILLISECONDS) {\n");
+		buf.append("            return -3;\n");
+		buf.append("        } else if (unit == MICROSECONDS) {\n");
+		buf.append("            return -6;\n");
+		buf.append("        } else if (unit == NANOSECONDS) {\n");
+		buf.append("            return -9;\n");
+		buf.append("        } else {\n");
+		buf.append("            throw new InternalError();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    final static int SECONDS=1, MILLISECONDS=2, MICROSECONDS=4,NANOSECONDS=8;\n");
+		buf.append("    public static int getPower(int unit) {\n");
+		buf.append("        switch (unit) {\n");
+		buf.append("            case SECONDS :\n");
+		buf.append("                return 0;\n");
+		buf.append("            case MILLISECONDS :\n");
+		buf.append("                return -3;\n");
+		buf.append("            case MICROSECONDS :\n");
+		buf.append("                return -6;\n");
+		buf.append("            case NANOSECONDS :\n");
+		buf.append("                return -9;\n");
+		buf.append("            default :\n");
+		buf.append("                throw new InternalError();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertIfToSwitch6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int a= 10;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (this.a == 1) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        } else if (this.a == 2 || this.a == 3 || this.a == 4) {\n");
+		buf.append("            System.out.println(2);\n");
+		buf.append("        } else if (this.a == 5) {\n");
+		buf.append("            System.out.println(4);\n");
+		buf.append("        } else {\n");
+		buf.append("            System.out.println(-1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int a= 10;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        switch (this.a) {\n");
+		buf.append("            case 1 :\n");
+		buf.append("                System.out.println(1);\n");
+		buf.append("                break;\n");
+		buf.append("            case 2 :\n");
+		buf.append("            case 3 :\n");
+		buf.append("            case 4 :\n");
+		buf.append("                System.out.println(2);\n");
+		buf.append("                break;\n");
+		buf.append("            case 5 :\n");
+		buf.append("                System.out.println(4);\n");
+		buf.append("                break;\n");
+		buf.append("            default :\n");
+		buf.append("                System.out.println(-1);\n");
+		buf.append("                break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertIfToSwitch7() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int a= 10;\n");
+		buf.append("    public int getA() {\n");
+		buf.append("        return a;\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (getA() == 1) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        } else if (getA() == 2) {\n");
+		buf.append("            System.out.println(2);\n");
+		buf.append("        } else if (getA() == 3) {\n");
+		buf.append("            System.out.println(3);\n");
+		buf.append("        } else {\n");
+		buf.append("            System.out.println(-1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int a= 10;\n");
+		buf.append("    public int getA() {\n");
+		buf.append("        return a;\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        switch (getA()) {\n");
+		buf.append("            case 1 :\n");
+		buf.append("                System.out.println(1);\n");
+		buf.append("                break;\n");
+		buf.append("            case 2 :\n");
+		buf.append("                System.out.println(2);\n");
+		buf.append("                break;\n");
+		buf.append("            case 3 :\n");
+		buf.append("                System.out.println(3);\n");
+		buf.append("                break;\n");
+		buf.append("            default :\n");
+		buf.append("                System.out.println(-1);\n");
+		buf.append("                break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertIfToSwitch8() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int a= 10;\n");
+		buf.append("    public int getA() {\n");
+		buf.append("        return a;\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (getA() == 1) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        } else if (this.a == 2) {\n");
+		buf.append("            System.out.println(2);\n");
+		buf.append("        } else if (getA() == 3) {\n");
+		buf.append("            System.out.println(3);\n");
+		buf.append("        } else {\n");
+		buf.append("            System.out.println(-1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch);
 	}
 
 	public void testSurroundWithTemplate01() throws Exception {

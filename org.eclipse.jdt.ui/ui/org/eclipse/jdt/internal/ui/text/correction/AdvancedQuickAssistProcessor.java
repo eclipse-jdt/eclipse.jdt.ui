@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AssertStatement;
@@ -74,6 +75,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -150,6 +152,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					|| getPullNegationUpProposals(context, coveredNodes, null)
 					|| getJoinIfListInIfElseIfProposals(context, coveringNode, coveredNodes, null)
 					|| getConvertSwitchToIfProposals(context, coveringNode, null)
+					|| getConvertIfElseToSwitchProposals(context, coveringNode, null)
 					|| GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, null, null);
 		}
 		return false;
@@ -191,6 +194,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getPullNegationUpProposals(context, coveredNodes, resultingCollections);
 				getJoinIfListInIfElseIfProposals(context, coveringNode, coveredNodes, resultingCollections);
 				getConvertSwitchToIfProposals(context, coveringNode, resultingCollections);
+				getConvertIfElseToSwitchProposals(context, coveringNode, resultingCollections);
 				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, locations, resultingCollections);
 			}
 
@@ -2408,4 +2412,199 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		return (Statement) rewrite.createMoveTarget(source);
 	}
+
+	private static boolean getConvertIfElseToSwitchProposals(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections) {
+		if (!(coveringNode instanceof IfStatement)) {
+			return false;
+		}
+		//  we could produce quick assist
+		if (resultingCollections == null) {
+			return true;
+		}
+
+		final AST ast= coveringNode.getAST();
+		final ASTRewrite rewrite= ASTRewrite.create(ast);
+		final ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
+		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(coveringNode), importRewrite);
+		IfStatement ifStatement= (IfStatement) coveringNode;
+		IfStatement currentIf= ifStatement;
+		Statement currentStatement= ifStatement;
+		Expression currentExpression= currentIf.getExpression();
+		SwitchStatement switchStatement= ast.newSwitchStatement();
+		Expression switchExpression= null;
+
+		while (currentStatement != null) {
+			Expression expression= null;
+			List<ASTNode> caseExpressions= new ArrayList<ASTNode>();
+			while (currentExpression != null && currentIf != null) {//loop for fall through cases - multiple expressions with || operator
+				Expression leftOperand;
+				Expression rightOperand;
+				if (currentExpression instanceof MethodInvocation) {
+					if (!(((MethodInvocation) currentExpression).getName().getIdentifier()).equals("equals")) { //$NON-NLS-1$
+						return false;
+					}
+
+					MethodInvocation invocation= (MethodInvocation) currentExpression;
+					List<Expression> arguments= invocation.arguments();
+					if (arguments.size() != 1)
+						return false;
+					leftOperand= (Expression) invocation.getStructuralProperty(MethodInvocation.EXPRESSION_PROPERTY);
+					rightOperand= arguments.get(0);
+
+					ITypeBinding typeBinding= leftOperand.resolveTypeBinding();
+					if (typeBinding != null && typeBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
+						if (!JavaModelUtil.is17OrHigher(context.getCompilationUnit().getJavaProject()))
+							return false;
+					}
+
+				} else if (currentExpression instanceof InfixExpression) {
+					InfixExpression infixExpression= (InfixExpression) currentExpression;
+					Operator operator= infixExpression.getOperator();
+					if (!(operator.equals(InfixExpression.Operator.CONDITIONAL_OR) || operator.equals(InfixExpression.Operator.EQUALS)))
+						return false;
+
+					leftOperand= infixExpression.getLeftOperand();
+					rightOperand= infixExpression.getRightOperand();
+
+					if (operator.equals(InfixExpression.Operator.EQUALS)) {
+						ITypeBinding typeBinding= leftOperand.resolveTypeBinding();
+						if (typeBinding != null && typeBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
+							return false; // don't propose quick assist when == is used to compare strings, since switch will use equals()
+						}
+					}
+
+					if (operator.equals(InfixExpression.Operator.CONDITIONAL_OR)) {
+						currentExpression= leftOperand;
+						continue;
+					}
+				} else {
+					return false;
+				}
+
+				if (leftOperand.resolveConstantExpressionValue() != null) {
+					caseExpressions.add(leftOperand);
+					expression= rightOperand;
+				} else if (rightOperand.resolveConstantExpressionValue() != null) {
+					caseExpressions.add(rightOperand);
+					expression= leftOperand;
+				} else if (leftOperand instanceof QualifiedName) {
+					QualifiedName qualifiedName= (QualifiedName) leftOperand;
+					IVariableBinding binding= (IVariableBinding) qualifiedName.resolveBinding();
+					if (binding.isEnumConstant()) {
+						importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext);
+						caseExpressions.add(qualifiedName.getName());
+						expression= rightOperand;
+					}
+				} else if (rightOperand instanceof QualifiedName) {
+					QualifiedName qualifiedName= (QualifiedName) rightOperand;
+					IVariableBinding binding= (IVariableBinding) qualifiedName.resolveBinding();
+					if (binding.isEnumConstant()) {
+						importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext);
+						caseExpressions.add(qualifiedName.getName());
+						expression= leftOperand;
+					}
+				} else {
+					return false;
+				}
+
+				if (caseExpressions.size() > 0 && currentExpression.getParent() instanceof InfixExpression) {
+					currentExpression= getNextSiblingExpression(currentExpression);
+				} else if (caseExpressions.size() > 0) {
+					currentExpression= null;
+				}
+
+				if (switchExpression == null) {
+					switchExpression= expression;
+				}
+
+				if (switchExpression != null && !switchExpression.subtreeMatch(new ASTMatcher(), expression)) {
+					return false;
+				}
+			}
+
+			Statement thenStatement= currentIf == null ? currentStatement : currentIf.getThenStatement(); //currentStatement has the default else block
+			SwitchCase[] switchCaseStatements= createSwitchCaseStatements(ast, rewrite, caseExpressions);
+			for (int i= 0; i < switchCaseStatements.length; i++) {
+				switchStatement.statements().add(switchCaseStatements[i]);
+			}
+			boolean isBreakRequired= true;
+			if (thenStatement instanceof Block) {
+				Statement statement= null;
+				for (Iterator<Statement> iter= ((Block) thenStatement).statements().iterator(); iter.hasNext();) {
+					statement= iter.next();
+					switchStatement.statements().add(rewrite.createCopyTarget(statement));
+				}
+				if (statement instanceof ReturnStatement || statement instanceof ThrowStatement)
+					isBreakRequired= false;
+			} else {
+				if (thenStatement instanceof ReturnStatement || thenStatement instanceof ThrowStatement)
+					isBreakRequired= false;
+				switchStatement.statements().add(rewrite.createCopyTarget(thenStatement));
+			}
+			if (isBreakRequired)
+				switchStatement.statements().add(ast.newBreakStatement());
+
+			if (currentIf != null && currentIf.getElseStatement() != null) {
+				Statement elseStatement= currentIf.getElseStatement();
+				if (elseStatement instanceof IfStatement) {
+					currentIf= (IfStatement) elseStatement;
+					currentStatement= currentIf;
+					currentExpression= currentIf.getExpression();
+				} else {
+					currentIf= null;
+					currentStatement= elseStatement;
+					currentExpression= null;
+				}
+			} else {
+				currentStatement= null;
+			}
+		}
+
+		if (switchExpression == null)
+			return false;
+		switchStatement.setExpression((Expression) rewrite.createCopyTarget(switchExpression));
+
+		// replace if-else-if with 'switch' statement
+		rewrite.replace(ifStatement, switchStatement, null);
+
+		// add correction proposal
+		String label= CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch;
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1);
+		proposal.setImportRewrite(importRewrite);
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private static Expression getNextSiblingExpression(Expression expression) {
+		InfixExpression parentInfixExpression= (InfixExpression) expression.getParent();
+		Expression sibiling;
+		if (expression.equals(parentInfixExpression.getLeftOperand())) {
+			sibiling= parentInfixExpression.getRightOperand();
+		} else if (expression.equals(parentInfixExpression.getRightOperand())) {
+			if (parentInfixExpression.getParent() instanceof InfixExpression)
+				sibiling= getNextSiblingExpression(parentInfixExpression);
+			else
+				sibiling= null;
+		} else {
+			sibiling= null;
+		}
+		return sibiling;
+	}
+
+	private static SwitchCase[] createSwitchCaseStatements(AST ast, ASTRewrite rewrite, List<ASTNode> caseExpressions) {
+		int len= (caseExpressions.size() == 0) ? 1 : caseExpressions.size();
+		SwitchCase[] switchCaseStatements= new SwitchCase[len];
+		if (caseExpressions.size() == 0) {
+			switchCaseStatements[0]= ast.newSwitchCase();
+			switchCaseStatements[0].setExpression(null);
+		} else {
+			for (int i= 0; i < caseExpressions.size(); i++) {
+				ASTNode astNode= caseExpressions.get(i);
+				switchCaseStatements[i]= ast.newSwitchCase();
+				switchCaseStatements[i].setExpression((Expression) rewrite.createCopyTarget(astNode));
+			}
+		}
+		return switchCaseStatements;
+	}
+
 }
