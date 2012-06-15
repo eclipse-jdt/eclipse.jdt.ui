@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -166,7 +166,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private void initialize(IField field) throws JavaModelException {
 		fGetterName= GetterSetterUtil.getGetterName(field, null);
 		fSetterName= GetterSetterUtil.getSetterName(field, null);
-		fArgName= StubUtility.getBaseName(field);
+		String argBaseName= StubUtility.getBaseName(field);
+		fArgName= StubUtility.suggestArgumentName(field.getJavaProject(), argBaseName, new String[0]);
 		checkArgName();
 	}
 
@@ -303,6 +304,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		try {
 			isStatic= Flags.isStatic(field.getFlags());
 		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
 		}
 		status.merge(Checks.checkMethodName(name, field));
 		for (Iterator<IMethodBinding> iter= usedNames.iterator(); iter.hasNext(); ) {
@@ -740,7 +742,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		boolean isStatic= true;
 		try {
 			isStatic= JdtFlags.isStatic(fField);
-		} catch(JavaModelException e) {
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
 		}
 		if ( (isStatic && fArgName.equals(fieldName) && fieldName.equals(fField.getDeclaringType().getElementName()))
 				|| JavaConventionsUtil.validateIdentifier(fArgName, fField).getSeverity() == IStatus.ERROR) {
