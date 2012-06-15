@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.wizards;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -38,6 +39,8 @@ import org.eclipse.ui.views.navigator.ResourceComparator;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -152,6 +155,14 @@ public final class BuildPathDialogAccess {
 	public static URL[] configureJavadocLocation(Shell shell, String libraryName, URL initialURL) {
 		if (libraryName == null) {
 			throw new IllegalArgumentException();
+		}
+		
+		if (initialURL != null) {
+			try {
+				initialURL.toURI();
+			} catch (URISyntaxException e) {
+				initialURL= JavaDocLocations.parseURL(initialURL.toExternalForm());
+			}
 		}
 
 		JavadocLocationDialog dialog=  new JavadocLocationDialog(shell, libraryName, initialURL);

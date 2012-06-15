@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -267,13 +267,13 @@ public class JavadocConfigurationBlock {
 
 		if (isArchive) {
 			String jarPathStr;
-			String insidePath= ""; //$NON-NLS-1$
+			String insidePathStr= ""; //$NON-NLS-1$
 			int excIndex= initialValue.indexOf("!/"); //$NON-NLS-1$
 			if (excIndex == -1) {
 				jarPathStr= initialValue.substring(prefix.length());
 			} else {
 				jarPathStr= initialValue.substring(prefix.length(), excIndex);
-				insidePath= initialValue.substring(excIndex + 2);
+				insidePathStr= initialValue.substring(excIndex + 2);
 			}
 
 			final String fileProtocol= "file:/"; //$NON-NLS-1$
@@ -288,12 +288,22 @@ public class JavadocConfigurationBlock {
 				fURLField.setText(initialValue);
 				return;
 			}
-			IPath jarPath= new Path(decodeExclamationMarks(jarPathStr));
-			fArchivePathField.setText(decodeExclamationMarks(insidePath));
-			if (isWorkspaceArchive) {
-				fArchiveField.setText(jarPath.makeRelative().toString());
-			} else {
-				fArchiveField.setText(jarPath.makeAbsolute().toOSString());
+			try {
+				URI jarPathUri= new URI(jarPathStr);
+				IPath jarPath= new Path(jarPathUri.getSchemeSpecificPart());
+				URI insidePathUri= new URI(insidePathStr);
+				String insidePath= insidePathUri.getSchemeSpecificPart();
+				
+				fArchivePathField.setText(insidePath);
+				if (isWorkspaceArchive) {
+					fArchiveField.setText(jarPath.makeRelative().toString());
+				} else {
+					fArchiveField.setText(jarPath.makeAbsolute().toOSString());
+				}
+			} catch (URISyntaxException e) {
+				JavaPlugin.log(e);
+				fURLField.setText(initialValue);
+				return;
 			}
 		} else {
 			fURLField.setText(initialValue);
@@ -354,13 +364,13 @@ public class JavadocConfigurationBlock {
 		}
 
 		private void validateFile(URL location) throws MalformedURLException {
-			File folder = new File(location.getFile());
+			File folder = JavaDocLocations.toFile(location);
 			if (folder.isDirectory()) {
 				File indexFile= new File(folder, "index.html"); //$NON-NLS-1$
 				if (indexFile.isFile()) {
 					File packageList= new File(folder, "package-list"); //$NON-NLS-1$
 					if (packageList.exists()) {
-						showConfirmValidationDialog(indexFile.toURL());
+						showConfirmValidationDialog(indexFile.toURI().toURL());
 						return;
 					}
 				}
@@ -407,6 +417,7 @@ public class JavadocConfigurationBlock {
 				is= connection.getInputStream();
 				byte[] buffer= new byte[256];
 				while (is.read(buffer) != -1) {
+					// just read
 				}
 			} finally {
 				if (is != null)
@@ -510,23 +521,6 @@ public class JavadocConfigurationBlock {
 		}
 		return buf.toString();
 	}
-
-	private String decodeExclamationMarks(String str) {
-		StringBuffer buf= new StringBuffer(str.length());
-		int length= str.length();
-		for (int i= 0; i < length; i++) {
-			char ch= str.charAt(i);
-			if (ch == '%' && (i < length - 2) && str.charAt(i + 1) == '2' && str.charAt(i + 2) == '1') {
-				buf.append('!');
-				i+= 2;
-			} else {
-				buf.append(ch);
-			}
-		}
-		return buf.toString();
-	}
-
-
 
 	private String internalChooseArchivePath() {
 		ZipFile zipFile= null;
@@ -644,7 +638,7 @@ public class JavadocConfigurationBlock {
 	private String chooseJavaDocFolder() {
 		String initPath= ""; //$NON-NLS-1$
 		if (fURLResult != null && "file".equals(fURLResult.getProtocol())) { //$NON-NLS-1$
-			initPath= (new File(fURLResult.getFile())).getPath();
+			initPath= JavaDocLocations.toFile(fURLResult).getPath();
 		}
 		DirectoryDialog dialog= new DirectoryDialog(fShell);
 		dialog.setText(PreferencesMessages.JavadocConfigurationBlock_javadocFolderDialog_label);
@@ -653,7 +647,7 @@ public class JavadocConfigurationBlock {
 		String result= dialog.open();
 		if (result != null) {
 			try {
-				URL url= new File(result).toURL();
+				URL url= new File(result).toURI().toURL();
 				return url.toExternalForm();
 			} catch (MalformedURLException e) {
 				JavaPlugin.log(e);
@@ -754,28 +748,32 @@ public class JavadocConfigurationBlock {
 		String jarLoc= fArchiveField.getText();
 		String innerPath= fArchivePathField.getText().trim();
 
-		StringBuffer buf= new StringBuffer();
-		buf.append("jar:"); //$NON-NLS-1$
+		try {
+			URI baseUri;
 
-		if (fWorkspaceRadio.isSelected()) {
-			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-			IResource res= root.findMember(new Path(jarLoc));
-			if (res != null) {
-				buf.append("platform:/resource").append(encodeExclamationMarks(res.getFullPath().toString())); //$NON-NLS-1$
+			if (fWorkspaceRadio.isSelected()) {
+				IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+				IResource res= root.findMember(new Path(jarLoc));
+				if (res != null) {
+					// 3-arg constructor of URI is broken, see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7177117
+					baseUri= new URI("platform", null, "/resource" + res.getFullPath().toString(), null, null); //$NON-NLS-1$ //$NON-NLS-2$
+				} else {
+					throw new URISyntaxException(jarLoc, ""); //$NON-NLS-1$
+				}
+			} else {
+				baseUri= new File(jarLoc).toURI();
 			}
-		} else {
-			buf.append(encodeExclamationMarks(new File(jarLoc).toURL().toExternalForm()));
-		}
-		buf.append('!');
-		if (innerPath.length() > 0) {
-			if (innerPath.charAt(0) != '/') {
-				buf.append('/');
+			
+			if (innerPath.length() == 0 || innerPath.charAt(0) != '/') {
+				innerPath= '/' + innerPath;
 			}
-			buf.append(innerPath);
-		} else {
-			buf.append('/');
+			String encodedInnerPath= new URI(null, null, innerPath, null, null).getRawSchemeSpecificPart();
+			
+			return new URI("jar:" + encodeExclamationMarks(baseUri.toString()) + '!' + encodeExclamationMarks(encodedInnerPath)).toURL(); //$NON-NLS-1$
+			
+		} catch (URISyntaxException e) {
+			throw new MalformedURLException(e.getMessage());
 		}
-		return new URL(buf.toString());
 	}
 
 
@@ -813,6 +811,7 @@ public class JavadocConfigurationBlock {
 		 * @see ITreeContentProvider#inputChanged
 		 */
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			// nothing to do
 		}
 
 		/* non java-doc
@@ -872,6 +871,7 @@ public class JavadocConfigurationBlock {
 		 * @see IContentProvider#dispose
 		 */
 		public void dispose() {
+			// nothing to do
 		}
 	}
 

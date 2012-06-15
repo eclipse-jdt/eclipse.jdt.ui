@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -221,29 +220,7 @@ public class JavaElementLinks {
 				try {
 					uri= new URI(loc);
 				} catch (URISyntaxException e) {
-					// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=368629 :
-					if (event.widget instanceof Browser
-							&& "ie".equals(((Browser) event.widget).getBrowserType()) //$NON-NLS-1$
-							&& loc.startsWith("file://")) { //$NON-NLS-1$
-						
-						String path= loc.substring(7).replace('/', '\\');
-						loc = new File(path).toURI().toString();
-						/*
-						 * Bug in File#toURI(): Format should be file:///C:/segment1/etc but is file:/C:/segment1/etc
-						 */
-						if (loc.length() > 7 && loc.startsWith("file:/") && !"//".equals(loc.substring(6, 8))) { //$NON-NLS-1$ //$NON-NLS-2$
-							loc= "file://" + loc.substring(5); //$NON-NLS-1$
-						}
-						try {
-							uri= new URI(loc);
-						} catch (URISyntaxException e2) {
-							JavaPlugin.log(e); // log original exception
-							return;
-						}
-						
-					} else {
-						JavaPlugin.log(e); // log bad URL, but proceed in the hope that handleExternalLink(..) can deal with it 
-					}
+					JavaPlugin.log(e); // log bad URL, but proceed in the hope that handleExternalLink(..) can deal with it 
 				}
 
 				String scheme= uri == null ? null : uri.getScheme();

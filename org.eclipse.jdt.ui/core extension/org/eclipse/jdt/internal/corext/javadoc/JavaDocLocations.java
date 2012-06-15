@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,8 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +46,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IResource;
@@ -260,15 +263,12 @@ public class JavaDocLocations {
 			if (prop == null) {
 				return null;
 			}
-			return new URL(prop);
+			return parseURL(prop);
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		} catch (MalformedURLException e) {
 			JavaPlugin.log(e);
 		}
 		return null;
 	}
-
 
 	public static URL getLibraryJavadocLocation(IClasspathEntry entry) {
 		if (entry == null) {
@@ -284,11 +284,7 @@ public class JavaDocLocations {
 		for (int i= 0; i < extraAttributes.length; i++) {
 			IClasspathAttribute attrib= extraAttributes[i];
 			if (IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME.equals(attrib.getName())) {
-				try {
-					return new URL(attrib.getValue());
-				} catch (MalformedURLException e) {
-					return null;
-				}
+				return parseURL(attrib.getValue());
 			}
 		}
 		return null;
@@ -322,8 +318,6 @@ public class JavaDocLocations {
 			return getProjectJavadocLocation(root.getJavaProject());
 		}
 	}
-
-	// loading for compatibility
 
 	private static JavaUIException createException(Throwable t, String message) {
 		return new JavaUIException(JavaUIStatus.createError(IStatus.ERROR, message, t));
@@ -438,7 +432,7 @@ public class JavaDocLocations {
 				Element element= (Element) node;
 				if (element.getNodeName().equalsIgnoreCase(NODE_ENTRY)) {
 					String varPath = element.getAttribute(NODE_PATH);
-					String varURL = element.getAttribute(NODE_URL);
+					String varURL = parseURL(element.getAttribute(NODE_URL)).toExternalForm();
 
 					oldLocations.put(Path.fromPortableString(varPath), varURL);
 				}
@@ -622,11 +616,59 @@ public class JavaDocLocations {
 				 */
 				IPath location= resource.getLocation();
 				if (location != null)
-					return location.toFile().toURI().toASCIIString();
+					return location.toFile().toURI().toString();
 			}
 		}
 		return null;
 	}
 
+	/**
+	 * Parse a URL from a String. This method first tries to treat <code>url</code> as a valid, encoded URL.
+	 * If that didn't work, it tries to recover from bad URLs, e.g. the unencoded form we used to use in persistent storage.
+	 * 
+	 * @param url a URL
+	 * @return the parsed URL or <code>null</code> if the URL couldn't be parsed
+	 * @since 3.9
+	 */
+	public static URL parseURL(String url) {
+		try {
+			try {
+				return new URI(url).toURL();
+			} catch (URISyntaxException e) {
+				try {
+					// don't log, since we used to store bad (unencoded) URLs
+					if (url.startsWith("file:/")) { //$NON-NLS-1$
+						// workaround for a bug in the 3-arg URI constructor for paths that contain '[' or ']':
+						return new URI("file", null, url.substring(5), null).toURL(); //$NON-NLS-1$
+					} else {
+						return URIUtil.fromString(url).toURL();
+					}
+				} catch (URISyntaxException e1) {
+					// last try, not expected to happen
+					JavaPlugin.log(e);
+					return new URL(url);
+				}
+			}
+		} catch (MalformedURLException e) {
+			JavaPlugin.log(e);
+			return null;
+		}
+	}
 
+	/**
+	 * Returns the {@link File} of a <code>file:</code> URL. This method tries to recover from bad URLs,
+	 * e.g. the unencoded form we used to use in persistent storage.
+	 * 
+	 * @param url a <code>file:</code> URL
+	 * @return the file
+	 * @since 3.9
+	 */
+	public static File toFile(URL url) {
+		try {
+			return URIUtil.toFile(url.toURI());
+		} catch (URISyntaxException e) {
+			JavaPlugin.log(e);
+			return new File(url.getFile());
+		}
+	}
 }

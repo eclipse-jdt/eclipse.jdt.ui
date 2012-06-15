@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javadocexport;
 
-import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,6 +27,8 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -229,7 +230,7 @@ public class RecentSettingsStore {
 					return path.append("doc").toOSString(); //$NON-NLS-1$
 			} else {
 				//must do this to remove leading "/"
-				return (new File(url.getFile())).getPath();
+				return JavaDocLocations.toFile(url).getPath();
 			}
 		}
 
