@@ -2432,6 +2432,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Expression currentExpression= currentIf.getExpression();
 		SwitchStatement switchStatement= ast.newSwitchStatement();
 		Expression switchExpression= null;
+		boolean executeDefaultOnNullExpression= false;
+		Statement defaultStatement=null;
 
 		while (currentStatement != null) {
 			Expression expression= null;
@@ -2439,7 +2441,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			while (currentExpression != null && currentIf != null) {//loop for fall through cases - multiple expressions with || operator
 				Expression leftOperand;
 				Expression rightOperand;
+				boolean isMethodInvocationCase= false;
 				if (currentExpression instanceof MethodInvocation) {
+					isMethodInvocationCase= true;
 					if (!(((MethodInvocation) currentExpression).getName().getIdentifier()).equals("equals")) { //$NON-NLS-1$
 						return false;
 					}
@@ -2484,6 +2488,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				if (leftOperand.resolveConstantExpressionValue() != null) {
 					caseExpressions.add(leftOperand);
 					expression= rightOperand;
+					executeDefaultOnNullExpression|= isMethodInvocationCase;
 				} else if (rightOperand.resolveConstantExpressionValue() != null) {
 					caseExpressions.add(rightOperand);
 					expression= leftOperand;
@@ -2495,6 +2500,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 						caseExpressions.add(qualifiedName.getName());
 						expression= rightOperand;
 					}
+					executeDefaultOnNullExpression|= isMethodInvocationCase;
 				} else if (rightOperand instanceof QualifiedName) {
 					QualifiedName qualifiedName= (QualifiedName) rightOperand;
 					IVariableBinding binding= (IVariableBinding) qualifiedName.resolveBinding();
@@ -2522,7 +2528,14 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				}
 			}
 
-			Statement thenStatement= currentIf == null ? currentStatement : currentIf.getThenStatement(); //currentStatement has the default else block
+			Statement thenStatement;
+			if (currentIf == null) {
+				thenStatement= currentStatement; //currentStatement has the default else block
+				defaultStatement= currentStatement;
+			} else {
+				thenStatement= currentIf.getThenStatement();
+			}
+			
 			SwitchCase[] switchCaseStatements= createSwitchCaseStatements(ast, rewrite, caseExpressions);
 			for (int i= 0; i < switchCaseStatements.length; i++) {
 				switchStatement.statements().add(switchCaseStatements[i]);
@@ -2563,9 +2576,33 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (switchExpression == null)
 			return false;
 		switchStatement.setExpression((Expression) rewrite.createCopyTarget(switchExpression));
+		
+		if (executeDefaultOnNullExpression && defaultStatement != null) {
+			IfStatement newIfStatement= ast.newIfStatement();
 
-		// replace if-else-if with 'switch' statement
-		rewrite.replace(ifStatement, switchStatement, null);
+			InfixExpression infixExpression= ast.newInfixExpression();
+			infixExpression.setLeftOperand((Expression) rewrite.createCopyTarget(switchExpression));
+			infixExpression.setRightOperand(ast.newNullLiteral());
+			infixExpression.setOperator(InfixExpression.Operator.EQUALS);
+			newIfStatement.setExpression(infixExpression);
+
+			if (defaultStatement instanceof Block) {
+				Block block= ast.newBlock();
+				for (Iterator<Statement> iter= ((Block) defaultStatement).statements().iterator(); iter.hasNext();) {
+					block.statements().add(rewrite.createCopyTarget(iter.next()));
+				}
+				newIfStatement.setThenStatement(block);
+			} else {
+				newIfStatement.setThenStatement((Statement) rewrite.createCopyTarget(defaultStatement));
+			}
+			Block block= ast.newBlock();
+			block.statements().add(switchStatement);
+			newIfStatement.setElseStatement(block);
+
+			rewrite.replace(ifStatement, newIfStatement, null);
+		} else {
+			rewrite.replace(ifStatement, switchStatement, null);
+		}
 
 		// add correction proposal
 		String label= CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch;

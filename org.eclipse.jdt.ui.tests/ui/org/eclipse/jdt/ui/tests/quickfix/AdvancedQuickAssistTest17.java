@@ -143,9 +143,9 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
-		buf.append("        if (\"abc\".equals(s)) {\n");
+		buf.append("        if (s.equals(\"abc\")) {\n");
 		buf.append("            System.out.println();\n");
-		buf.append("        } else if (\"xyz\".equals(s)) {\n");
+		buf.append("        } else if (s.equals(\"xyz\")) {\n");
 		buf.append("            System.out.println();\n");
 		buf.append("        } else {\n");
 		buf.append("            System.out.println();\n");
@@ -211,6 +211,153 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch);
+	}
+
+	public void testConvertIfToSwitch3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("        if (\"abc\".equals(s)) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        } else if (\"xyz\".equals(s)) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        } else {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("        if (s == null) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        } else {\n");
+		buf.append("            switch (s) {\n");
+		buf.append("                case \"abc\" :\n");
+		buf.append("                    System.out.println();\n");
+		buf.append("                    break;\n");
+		buf.append("                case \"xyz\" :\n");
+		buf.append("                    System.out.println();\n");
+		buf.append("                    break;\n");
+		buf.append("                default :\n");
+		buf.append("                    System.out.println();\n");
+		buf.append("                    break;\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertIfToSwitch4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("        if (s.equals(\"abc\")) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        } else if (\"xyz\".equals(s)) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        } else {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("        if (s == null) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        } else {\n");
+		buf.append("            switch (s) {\n");
+		buf.append("                case \"abc\" :\n");
+		buf.append("                    System.out.println();\n");
+		buf.append("                    break;\n");
+		buf.append("                case \"xyz\" :\n");
+		buf.append("                    System.out.println();\n");
+		buf.append("                    break;\n");
+		buf.append("                default :\n");
+		buf.append("                    System.out.println();\n");
+		buf.append("                    break;\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertIfToSwitch5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("        if (\"abc\".equals(s)) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        } else if (\"xyz\".equals(s)) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("        switch (s) {\n");
+		buf.append("            case \"abc\" :\n");
+		buf.append("                System.out.println();\n");
+		buf.append("                break;\n");
+		buf.append("            case \"xyz\" :\n");
+		buf.append("                System.out.println();\n");
+		buf.append("                break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
 	public void testReplaceReturnConditionWithIf4() throws Exception {

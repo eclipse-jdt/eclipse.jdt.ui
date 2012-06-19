@@ -4639,6 +4639,70 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch);
 	}
 
+	public void testConvertIfToSwitch9() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public enum TimeUnit {\n");
+		buf.append("        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS\n");
+		buf.append("    }\n");
+		buf.append("    public static int getPower(TimeUnit unit) {\n");
+		buf.append("        if (TimeUnit.SECONDS.equals(unit)) {\n");
+		buf.append("            return 0;\n");
+		buf.append("        } else if (TimeUnit.MILLISECONDS.equals(unit)) {\n");
+		buf.append("            return -3;\n");
+		buf.append("        } else if (TimeUnit.MICROSECONDS.equals(unit)) {\n");
+		buf.append("            return -6;\n");
+		buf.append("        } else if (TimeUnit.NANOSECONDS.equals(unit)) {\n");
+		buf.append("            return -9;\n");
+		buf.append("        } else {\n");
+		buf.append("            throw new InternalError();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public enum TimeUnit {\n");
+		buf.append("        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS\n");
+		buf.append("    }\n");
+		buf.append("    public static int getPower(TimeUnit unit) {\n");
+		buf.append("        if (unit == null) {\n");
+		buf.append("            throw new InternalError();\n");
+		buf.append("        } else {\n");
+		buf.append("            switch (unit) {\n");
+		buf.append("                case SECONDS :\n");
+		buf.append("                    return 0;\n");
+		buf.append("                case MILLISECONDS :\n");
+		buf.append("                    return -3;\n");
+		buf.append("                case MICROSECONDS :\n");
+		buf.append("                    return -6;\n");
+		buf.append("                case NANOSECONDS :\n");
+		buf.append("                    return -9;\n");
+		buf.append("                default :\n");
+		buf.append("                    throw new InternalError();\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
 	public void testSurroundWithTemplate01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
