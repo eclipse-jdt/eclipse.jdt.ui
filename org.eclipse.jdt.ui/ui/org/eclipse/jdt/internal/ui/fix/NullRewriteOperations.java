@@ -264,6 +264,7 @@ public class NullRewriteOperations {
 					break;
 				case IProblem.RequiredNonNullButProvidedNull:
 				case IProblem.RequiredNonNullButProvidedPotentialNull:
+				case IProblem.RequiredNonNullButProvidedSpecdNullable:
 				case IProblem.RequiredNonNullButProvidedUnknown:
 					if (NullQuickFixes.isComplainingAboutArgument(selectedNode)) {
 						//TODO: duplication

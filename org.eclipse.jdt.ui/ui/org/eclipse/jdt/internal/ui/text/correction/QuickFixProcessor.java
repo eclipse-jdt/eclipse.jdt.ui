@@ -238,6 +238,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.SafeVarargsOnNonFinalInstanceMethod:
 			case IProblem.RequiredNonNullButProvidedNull:
 			case IProblem.RequiredNonNullButProvidedPotentialNull:
+			case IProblem.RequiredNonNullButProvidedSpecdNullable:
 			case IProblem.RequiredNonNullButProvidedUnknown:
 			case IProblem.IllegalReturnNullityRedefinition:
 			case IProblem.IllegalRedefinitionToNonNullParameter:
@@ -687,6 +688,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ParameterLackingNullableAnnotation:
 			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
+			case IProblem.RequiredNonNullButProvidedSpecdNullable:
 				NullQuickFixes.addReturnAndArgumentTypeProposal(context, problem, proposals);
 				break;
 			default:

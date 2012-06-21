@@ -100,6 +100,7 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 			case IProblem.RequiredNonNullButProvidedNull:
 			case IProblem.RequiredNonNullButProvidedPotentialNull:
+			case IProblem.RequiredNonNullButProvidedSpecdNullable:
 			case IProblem.RequiredNonNullButProvidedUnknown:
 			case IProblem.ParameterLackingNullableAnnotation:
 				result.add(NullFixMessages.NullAnnotationsCleanUp_add_nullable_annotation);
