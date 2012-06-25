@@ -2647,20 +2647,20 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		SimpleName name= (SimpleName) node;
 		IBinding binding= name.resolveBinding();
-		if (!(binding instanceof IVariableBinding) || name.getLocationInParent() != VariableDeclarationFragment.NAME_PROPERTY)
+		if (!(binding instanceof IVariableBinding))
 			return false;
 		IVariableBinding varBinding= (IVariableBinding) binding;
 		if (varBinding.isField() || varBinding.isParameter())
 			return false;
-		VariableDeclarationFragment decl= (VariableDeclarationFragment) name.getParent();
-		if (decl.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY)
+		ASTNode decl= context.getASTRoot().findDeclaringNode(varBinding);
+		if (decl == null || decl.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY)
 			return false;
 
 		if (proposals == null) {
 			return true;
 		}
 
-		PromoteTempToFieldRefactoring refactoring= new PromoteTempToFieldRefactoring(decl);
+		PromoteTempToFieldRefactoring refactoring= new PromoteTempToFieldRefactoring((VariableDeclaration) decl);
 		if (refactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
 			String label= CorrectionMessages.QuickAssistProcessor_convert_local_to_field_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
