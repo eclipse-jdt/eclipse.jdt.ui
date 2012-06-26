@@ -522,24 +522,30 @@ public class SourceAttachmentBlock {
 				}
 
 			} else {
-				// JDT/Core only supports source attachments in archives on the
+				// JDT/Core only supports source attachments on the
 				// local file system. So using getLocation is save here.
 				File file= filePath.toFile();
 				IResource res= fWorkspaceRoot.findMember(filePath);
-				if (res != null && res.getLocation() != null) {
-					file= res.getLocation().toFile();
+				boolean exists;
+				if (res != null) {
+					IPath location= res.getLocation();
+					if (location != null) {
+						exists= location.toFile().exists();
+					} else {
+						exists= res.exists();
+					}
+				} else {
+					exists= file.exists();
 				}
-				if (!file.exists()) {
+				if (!exists) {
 					String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_filenotexists, BasicElementLabels.getPathLabel(filePath, false));
 					status.setError(message);
 					return status;
 				}
-				if (res == null) {
-					if (!filePath.isAbsolute()) {
-						String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_notabsolute, BasicElementLabels.getPathLabel(filePath, false));
-						status.setError(message);
-						return status;
-					}
+				if (!filePath.isAbsolute()) {
+					String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_notabsolute, BasicElementLabels.getPathLabel(filePath, false));
+					status.setError(message);
+					return status;
 				}
 			}
 
