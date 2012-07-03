@@ -66,6 +66,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.InvalidUnionTypeReferenceSequence:
 			case IProblem.VoidMethodReturnsValue:
 			case IProblem.ShouldReturnValue:
+			case IProblem.ShouldReturnValueHintMissingDefault:
 			case IProblem.MissingReturnType:
 			case IProblem.NonExternalizedStringLiteral:
 			case IProblem.NonStaticAccessToStaticField:
@@ -89,6 +90,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.BodyForNativeMethod:
 			case IProblem.OuterLocalMustBeFinal:
 			case IProblem.UninitializedLocalVariable:
+			case IProblem.UninitializedLocalVariableHintMissingDefault:
 			case IProblem.UndefinedConstructorInDefaultConstructor:
 			case IProblem.UnhandledExceptionInDefaultConstructor:
 			case IProblem.NotVisibleConstructorInDefaultConstructor:
@@ -377,6 +379,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				ReturnTypeSubProcessor.addMissingReturnTypeProposals(context, problem, proposals);
 				break;
 			case IProblem.ShouldReturnValue:
+			case IProblem.ShouldReturnValueHintMissingDefault:
 				ReturnTypeSubProcessor.addMissingReturnStatementProposals(context, problem, proposals);
 				break;
 			case IProblem.NonExternalizedStringLiteral:
@@ -478,6 +481,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				ModifierCorrectionSubProcessor.addNonFinalLocalProposal(context, problem, proposals);
 				break;
 			case IProblem.UninitializedLocalVariable:
+			case IProblem.UninitializedLocalVariableHintMissingDefault:
 				LocalCorrectionsSubProcessor.addUninitializedLocalVariableProposal(context, problem, proposals);
 				break;
 			case IProblem.UnhandledExceptionInDefaultConstructor:
