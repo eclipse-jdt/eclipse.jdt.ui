@@ -80,6 +80,7 @@ public class JavaCompilerPropertyPage extends PropertyPage {
 			return new Composite(parent, SWT.NONE);
 		}
 		Composite composite= new Composite(parent, SWT.NONE);
+		composite.setFont(parent.getFont());
 		GridLayout topLayout= new GridLayout();
 		topLayout.marginWidth= 0;
 		topLayout.marginHeight= 0;
