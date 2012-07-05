@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,9 +35,11 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 
 	private boolean fListenerRegistered= false;
 	private RefactoringStatus fValidationState= null;
-	private long fTimeStamp;
+	private long fTimeStamp= DO_NOT_EXPIRE;
 	private ISchedulingRule fSchedulingRule;
 
+	private static final long DO_NOT_EXPIRE= -1;
+	
 	// 30 minutes
 	private static final long LIFE_TIME= 30 * 60 * 1000;
 
@@ -60,15 +62,24 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 		fSchedulingRule= ResourcesPlugin.getWorkspace().getRoot();
 	}
 
+	private DynamicValidationStateChange(String name, boolean expire) {
+		this(name);
+		if (expire) {
+			fTimeStamp= 0;
+		}
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void initializeValidationData(IProgressMonitor pm) {
 		super.initializeValidationData(pm);
-		WorkspaceTracker.INSTANCE.addListener(this);
-		fListenerRegistered= true;
-		fTimeStamp= System.currentTimeMillis();
+		if (fTimeStamp != DO_NOT_EXPIRE) {
+			WorkspaceTracker.INSTANCE.addListener(this);
+			fListenerRegistered= true;
+			fTimeStamp= System.currentTimeMillis();
+		}
 	}
 
 	@Override
@@ -111,7 +122,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 	 */
 	@Override
 	protected Change createUndoChange(Change[] childUndos) {
-		DynamicValidationStateChange result= new DynamicValidationStateChange(getName());
+		DynamicValidationStateChange result= new DynamicValidationStateChange(getName(), true);
 		for (int i= 0; i < childUndos.length; i++) {
 			result.add(childUndos[i]);
 		}
