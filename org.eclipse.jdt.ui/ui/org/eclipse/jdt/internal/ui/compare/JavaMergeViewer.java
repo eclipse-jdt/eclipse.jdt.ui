@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,7 +78,6 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator.ITokenComparatorFactory;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 
@@ -191,11 +190,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 
 	@Override
 	public ITokenComparator createTokenComparator(String s) {
-		return new JavaTokenComparator(s, new ITokenComparatorFactory() {
-			public ITokenComparator createTokenComparator(String text) {
-				return JavaMergeViewer.super.createTokenComparator(text);
-			}
-		});
+		return new JavaTokenComparator(s);
 	}
 
 	@Override

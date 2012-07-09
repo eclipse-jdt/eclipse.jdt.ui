@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.compare;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.compare.contentmergeviewer.ITokenComparator;
+import org.eclipse.compare.contentmergeviewer.TokenComparator;
 import org.eclipse.compare.rangedifferencer.IRangeComparator;
 
 import org.eclipse.jdt.core.ToolFactory;
@@ -28,22 +29,9 @@ import org.eclipse.jdt.internal.corext.dom.TokenScanner;
  */
 public class JavaTokenComparator implements ITokenComparator {
 
-	/**
-	 * Factory to create text token comparators.
-	 * This is a workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=183224 .
-	 */
-	public static interface ITokenComparatorFactory {
-		/**
-		 * @param text text to be tokenized
-		 * @return a token comparator
-		 */
-		public ITokenComparator createTokenComparator(String text);
-	}
-
 	private static final boolean DEBUG= false;
 
 	private final String fText;
-	private final ITokenComparatorFactory fTextTokenComparatorFactory;
 	private int fCount;
 	private int[] fStarts;
 	private int[] fLengths;
@@ -54,18 +42,6 @@ public class JavaTokenComparator implements ITokenComparator {
 	 * @param text the text to be tokenized
 	 */
 	public JavaTokenComparator(String text) {
-		this(text, null);
-	}
-
-	/**
-	 * Creates a token comparator for the given string.
-	 *
-	 * @param text the text to be tokenized
-	 * @param textTokenComparatorFactory a factory to create text token comparators
-	 */
-	public JavaTokenComparator(String text, ITokenComparatorFactory textTokenComparatorFactory) {
-
-		fTextTokenComparatorFactory= textTokenComparatorFactory;
 		Assert.isLegal(text != null);
 
 		fText= text;
@@ -83,12 +59,14 @@ public class JavaTokenComparator implements ITokenComparator {
 			while ((tokenType= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 				int start= scanner.getCurrentTokenStartPosition();
 				int end= scanner.getCurrentTokenEndPosition()+1;
-				// Comments are treated as a single token (see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=78063)
+				// Comments and strings should not be treated as a single token, see https://bugs.eclipse.org/78063
 				if (TokenScanner.isComment(tokenType) || tokenType == ITerminalSymbols.TokenNameStringLiteral) {
-					int dl= fTextTokenComparatorFactory == null ? getCommentStartTokenLength(tokenType) : 0;
+					// Line comments are often commented code, so lets treat them as code. See https://bugs.eclipse.org/216707
+					boolean parseAsJava= tokenType == ITerminalSymbols.TokenNameCOMMENT_LINE;
+					int dl= parseAsJava ? getCommentStartTokenLength(tokenType) : 0;
 					if (dl > 0)
 						recordTokenRange(start, dl);
-					parseText(start + dl, text.substring(start + dl, end));
+					parseSubrange(start + dl, text.substring(start + dl, end), parseAsJava);
 				} else {
 					recordTokenRange(start, end - start);
 				}
@@ -118,13 +96,11 @@ public class JavaTokenComparator implements ITokenComparator {
 		fCount++;
 	}
 
-	private void parseText(int start, String text) {
+	private void parseSubrange(int start, String text, boolean javaCode) {
 		if (DEBUG)
 			System.out.println("parsingText>" + text + "<(" + start + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
-		ITokenComparator subTokenizer= fTextTokenComparatorFactory == null
-				? new JavaTokenComparator(text)
-				: fTextTokenComparatorFactory.createTokenComparator(text);
+		ITokenComparator subTokenizer= javaCode ? new JavaTokenComparator(text) : new TokenComparator(text);
 		int count= subTokenizer.getRangeCount();
 		for (int i= 0; i < count; i++) {
 			int subStart= subTokenizer.getTokenStart(i);
@@ -140,7 +116,7 @@ public class JavaTokenComparator implements ITokenComparator {
 	 * Returns the length of the token that
 	 * initiates the given comment type.
 	 *
-	 * @param tokenType
+	 * @param tokenType an {@link ITerminalSymbols} constant
 	 * @return the length of the token that start a comment
 	 * @since 3.3
 	 */
