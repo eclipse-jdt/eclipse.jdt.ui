@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -300,16 +300,21 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 	private int[] computeCommaPositions(String code) {
 		final int length= code.length();
 	    int pos= 0;
+	    int angleLevel= 0;
 		List<Integer> positions= new ArrayList<Integer>();
 		positions.add(new Integer(-1));
 		while (pos < length && pos != -1) {
 			char ch= code.charAt(pos);
 			switch (ch) {
 	            case ',':
-		            positions.add(new Integer(pos));
+	            	if (angleLevel == 0)
+	            		positions.add(new Integer(pos));
 		            break;
 	            case '<':
-	            	pos= code.indexOf('>', pos);
+	            	angleLevel++;
+	            	break;
+	            case '>':
+	            	angleLevel--;
 	            	break;
 	            case '[':
 	            	pos= code.indexOf(']', pos);

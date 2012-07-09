@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,6 +98,10 @@ public class JavaParameterListValidatorTest extends TestCase {
 		assertParameterInfoStyles(code, "MAX<?,?>", new int[0]);
 	}
 
+	public void testParameterStylingWithNestedGenerics() {
+		final String code= "null, null";
+		assertParameterInfoStyles(code, "ICallback<List<ETypedElement>, T2, D> callback, Shell shell", computeCommaPositions(code));
+	}
 	private void assertParameterInfoStyles(String code, String infostring, int[] argumentCommas) {
 		fDocument.set(code);
 		fTextViewer.setDocument(fDocument);
@@ -114,16 +118,21 @@ public class JavaParameterListValidatorTest extends TestCase {
     }
 
 	private int[] computeCommaPositions(String code) {
+	    int angleLevel= 0;
 	    int pos= 0;
 		List positions= new ArrayList();
 		while (pos < code.length() && pos != -1) {
 			char ch= code.charAt(pos);
 			switch (ch) {
 	            case ',':
-		            positions.add(new Integer(pos));
+	            	if (angleLevel == 0)
+	            		positions.add(new Integer(pos));
 		            break;
 	            case '<':
-	            	pos= code.indexOf('>', pos);
+	        	    angleLevel++;
+	        	    break;
+	            case '>':
+	            	angleLevel--;
 	            	break;
 	            case '(':
 	            	pos= code.indexOf(')', pos);
