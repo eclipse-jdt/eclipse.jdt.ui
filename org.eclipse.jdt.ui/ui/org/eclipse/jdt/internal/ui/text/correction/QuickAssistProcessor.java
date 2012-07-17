@@ -324,7 +324,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			extractMethodRefactoring.setLinkedProposalModel(linkedProposalModel);
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
-			int relevance= problemsAtLocation ? 1 : 4;
+			int relevance= problemsAtLocation ? IProposalRelevance.EXTRACT_METHOD_ERROR : IProposalRelevance.EXTRACT_METHOD;
 			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractMethodRefactoring, relevance, image);
 			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
@@ -357,15 +357,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 
-		int relevanceDrop;
-		if (context.getSelectionLength() == 0) {
-			relevanceDrop= 6;
-		} else if (problemsAtLocation) {
-			relevanceDrop= 3;
-		} else {
-			relevanceDrop= 0;
-		}
-
 		final ICompilationUnit cu= context.getCompilationUnit();
 		ExtractTempRefactoring extractTempRefactoring= new ExtractTempRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
 		if (extractTempRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
@@ -375,7 +366,15 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_all_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractTempRefactoring, 6 - relevanceDrop, image) {
+			int relevance;
+			if (context.getSelectionLength() == 0) {
+				relevance= IProposalRelevance.EXTRACT_LOCAL_ALL_ZERO_SELECTION;
+			} else if (problemsAtLocation) {
+				relevance= IProposalRelevance.EXTRACT_LOCAL_ALL_ERROR;
+			} else {
+				relevance= IProposalRelevance.EXTRACT_LOCAL_ALL;
+			}
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractTempRefactoring, relevance, image) {
 				@Override
 				protected void init(Refactoring refactoring) throws CoreException {
 					ExtractTempRefactoring etr= (ExtractTempRefactoring) refactoring;
@@ -396,7 +395,15 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractTempRefactoringSelectedOnly, 5 - relevanceDrop, image) {
+			int relevance;
+			if (context.getSelectionLength() == 0) {
+				relevance= IProposalRelevance.EXTRACT_LOCAL_ZERO_SELECTION;
+			} else if (problemsAtLocation) {
+				relevance= IProposalRelevance.EXTRACT_LOCAL_ERROR;
+			} else {
+				relevance= IProposalRelevance.EXTRACT_LOCAL;
+			}
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractTempRefactoringSelectedOnly, relevance, image) {
 				@Override
 				protected void init(Refactoring refactoring) throws CoreException {
 					ExtractTempRefactoring etr= (ExtractTempRefactoring) refactoring;
@@ -416,7 +423,15 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 			String label= CorrectionMessages.QuickAssistProcessor_extract_to_constant_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractConstRefactoring, 4 - relevanceDrop, image) {
+			int relevance;
+			if (context.getSelectionLength() == 0) {
+				relevance= IProposalRelevance.EXTRACT_CONSTANT_ZERO_SELECTION;
+			} else if (problemsAtLocation) {
+				relevance= IProposalRelevance.EXTRACT_CONSTANT_ERROR;
+			} else {
+				relevance= IProposalRelevance.EXTRACT_CONSTANT;
+			}
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractConstRefactoring, relevance, image) {
 				@Override
 				protected void init(Refactoring refactoring) throws CoreException {
 					ExtractConstantRefactoring etr= (ExtractConstantRefactoring) refactoring;
@@ -473,7 +488,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 			String label= CorrectionMessages.QuickAssistProcessor_convert_anonym_to_nested;
 			Image image= JavaPlugin.getImageDescriptorRegistry().get(JavaElementImageProvider.getTypeImageDescriptor(true, false, Flags.AccPrivate, false));
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, refactoring, 5, image);
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, refactoring, IProposalRelevance.CONVERT_ANONYMOUS_TO_NESTED, image);
 			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposal.setCommandId(CONVERT_ANONYMOUS_TO_LOCAL_ID);
 			proposals.add(proposal);
@@ -537,7 +552,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		String label= CorrectionMessages.QuickAssistProcessor_infer_diamond_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		int relevance= locations == null ? 7 : 1; // if error -> higher than ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals()
+		int relevance= locations == null ? IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS : IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS_ERROR; // if error -> higher than ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals()
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, relevance, image);
 
 		ListRewrite argumentsRewrite= rewrite.getListRewrite(createdType, ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
@@ -619,7 +634,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		String label= CorrectionMessages.QuickAssistProcessor_joindeclaration_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.JOIN_VARIABLE_DECLARATION, image);
 		proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
 
 		Expression placeholder= (Expression) rewrite.createMoveTarget(assignment.getRightHandSide());
@@ -690,7 +705,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		String label= CorrectionMessages.QuickAssistProcessor_splitdeclaration_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.SPLIT_VARIABLE_DECLARATION, image);
 		boolean commandConflict= false;
 		for (Iterator<ICommandAccess> iterator= resultingCollections.iterator(); iterator.hasNext();) {
 			Object completionProposal= iterator.next();
@@ -810,7 +825,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		String mechanismName= BasicElementLabels.getJavaElementName(existingBuffer == null ? bufferOrBuilderName : existingBuffer.getIdentifier());
 		String label= Messages.format(CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description, mechanismName);
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 1, image);
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, IProposalRelevance.CONVERT_TO_STRING_BUFFER, image);
 		proposal.setCommandId(CONVERT_TO_STRING_BUFFER_ID);
 
 		Statement insertAfter;
@@ -1042,7 +1057,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		String label= CorrectionMessages.QuickAssistProcessor_convert_to_message_format;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 0, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, IProposalRelevance.CONVERT_TO_MESSAGE_FORMAT, image);
 		proposal.setCommandId(CONVERT_TO_MESSAGE_FORMAT_ID);
 
 		proposal.setImportRewrite(importRewrite);
@@ -1113,13 +1128,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		
 		ICompilationUnit cu= context.getCompilationUnit();
 
-		AssignToVariableAssistProposal localProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.LOCAL, expressionStatement, typeBinding, 3);
+		AssignToVariableAssistProposal localProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.LOCAL, expressionStatement, typeBinding, IProposalRelevance.ASSIGN_TO_LOCAL);
 		localProposal.setCommandId(ASSIGN_TO_LOCAL_ID);
 		resultingCollections.add(localProposal);
 
 		ASTNode type= ASTResolving.findParentType(expression);
 		if (type != null) {
-			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.FIELD, expressionStatement, typeBinding, 2);
+			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.FIELD, expressionStatement, typeBinding, IProposalRelevance.ASSIGN_TO_FIELD);
 			fieldProposal.setCommandId(ASSIGN_TO_FIELD_ID);
 			resultingCollections.add(fieldProposal);
 		}
@@ -1175,14 +1190,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					if (fieldDeclFrag instanceof VariableDeclarationFragment) {
 						VariableDeclarationFragment fragment= (VariableDeclarationFragment) fieldDeclFrag;
 						if (fragment.getInitializer() == null) {
-							resultingCollections.add(new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, fragment, typeBinding, 1));
+							resultingCollections.add(new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, fragment, typeBinding, IProposalRelevance.ASSIGN_PARAM_TO_EXISTING_FIELD));
 						}
 					}
 				}
 			}
 		}
 
-		AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, null, typeBinding, 3);
+		AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, null, typeBinding, IProposalRelevance.ASSIGN_PARAM_TO_NEW_FIELD);
 		fieldProposal.setCommandId(ASSIGN_PARAM_TO_FIELD_ID);
 		resultingCollections.add(fieldProposal);
 		return true;
@@ -1210,7 +1225,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		String label= CorrectionMessages.QuickAssistProcessor_addfinallyblock_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.ADD_FINALLY_BLOCK, image);
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -1236,7 +1251,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		String label= CorrectionMessages.QuickAssistProcessor_addelseblock_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.ADD_ELSE_BLOCK, image);
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -1286,7 +1301,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				removeException(rewrite, (UnionType) type, selectedMultiCatchType);
 				addExceptionToThrows(ast, methodDeclaration, rewrite, selectedMultiCatchType);
 				String label= CorrectionMessages.QuickAssistProcessor_exceptiontothrows_description;
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REPLACE_EXCEPTION_WITH_THROWS, image);
 				resultingCollections.add(proposal);
 			} else {
 				removeCatchBlock(rewrite, catchClause);
@@ -1302,7 +1317,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					addExceptionToThrows(ast, methodDeclaration, rewrite, (SimpleType) type);
 				}
 				String label= CorrectionMessages.QuickAssistProcessor_catchclausetothrows_description;
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 4, image);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REPLACE_CATCH_CLAUSE_WITH_THROWS, image);
 				resultingCollections.add(proposal);
 			}
 		}
@@ -1311,12 +1326,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (selectedMultiCatchType != null) {
 				removeException(rewrite, (UnionType) type, selectedMultiCatchType);
 				String label= CorrectionMessages.QuickAssistProcessor_removeexception_description;
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_EXCEPTION, image);
 				resultingCollections.add(proposal);
 			} else {
 				removeCatchBlock(rewrite, catchClause);
 				String label= CorrectionMessages.QuickAssistProcessor_removecatchclause_description;
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_CATCH_CLAUSE, image);
 				resultingCollections.add(proposal);
 			}
 		}
@@ -1456,7 +1471,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		String label= !multipleExceptions
 				? CorrectionMessages.QuickAssistProcessor_move_exception_to_separate_catch_block
 				: CorrectionMessages.QuickAssistProcessor_move_exceptions_to_separate_catch_block;
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.MOVE_EXCEPTION_TO_SEPERATE_CATCH_BLOCK, image);
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -1547,7 +1562,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		String label= CorrectionMessages.QuickAssistProcessor_convert_to_single_multicatch_block;
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 2, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.COMBINE_CATCH_BLOCKS, image);
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -1609,7 +1624,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		String label= CorrectionMessages.QuickAssistProcessor_convert_to_multiple_singletype_catch_blocks;
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 2, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.USE_SEPARATE_CATCH_BLOCKS, image);
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -1646,7 +1661,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		LinkedNamesAssistProposal proposal= new LinkedNamesAssistProposal(context, name);
 		if (locations.length != 0) {
-			proposal.setRelevance(1);
+			proposal.setRelevance(IProposalRelevance.LINKED_NAMES_ASSIST_ERROR);
 		}
 
 		resultingCollections.add(proposal);
@@ -1682,9 +1697,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		
 		RenameRefactoringProposal proposal= new RenameRefactoringProposal((JavaEditor) editor);
 		if (locations.length != 0) {
-			proposal.setRelevance(1);
+			proposal.setRelevance(IProposalRelevance.RENAME_REFACTORING_ERROR);
 		} else if (containsQuickFixableRenameLocal(locations)) {
-			proposal.setRelevance(7);
+			proposal.setRelevance(IProposalRelevance.RENAME_REFACTORING_QUICK_FIX);
 		}
 		
 
@@ -1840,7 +1855,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		rewrite.replace(outer, inner, null);
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.UNWRAP_STATEMENTS, image);
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -1871,7 +1886,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			for (int i= 0; i < fixes.length; i++) {
 				IProposableFix fix= fixes[i];
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 0, image, context);
+				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.REMOVE_BLOCK_FIX, image, context);
 				resultingCollections.add(proposal);
 			}
 			return true;
@@ -1998,7 +2013,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.ADD_BLOCK, image);
 			proposal.setCommandId(ADD_BLOCK_ID);
 			proposal.setEndPosition(rewrite.track(child));
 			resultingCollections.add(proposal);
@@ -2051,7 +2066,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (missingBlockFound && foundElse) {
 				String label = CorrectionMessages.QuickAssistProcessor_replacethenelsewithblock_description;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CHANGE_IF_ELSE_TO_BLOCK, image);
 				resultingCollections.add(proposal);
 			}
 		}
@@ -2120,7 +2135,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		String label= CorrectionMessages.QuickAssistProcessor_invertequals_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 
-		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.INVERT_EQUALS, image);
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -2150,7 +2165,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		String label= CorrectionMessages.QuickAssistProcessor_typetoarrayInitializer_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 
-		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.ADD_TYPE_TO_ARRAY_INITIALIZER, image);
 
 		ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
 		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, imports);
@@ -2208,7 +2223,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, typeDecl);
 					if (targetCU != null) {
 						String label= Messages.format(CorrectionMessages.QuickAssistProcessor_createmethodinsuper_description, new String[] { BasicElementLabels.getJavaElementName(curr.getName()), BasicElementLabels.getJavaElementName(binding.getName()) });
-						resultingCollections.add(new NewDefiningMethodProposal(label, targetCU, astRoot, typeDecl, binding, paramNames, 6));
+						resultingCollections.add(new NewDefiningMethodProposal(label, targetCU, astRoot, typeDecl, binding, paramNames, IProposalRelevance.CREATE_METHOD_IN_SUPER));
 					}
 				}
 			}
@@ -2256,7 +2271,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			
 			String iterNameKey= "iterName"; //$NON-NLS-1$
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_TO_ITERATOR_FOR_LOOP, image);
 			
 			// convert 'for' statement
 			ForStatement forStatement= ast.newForStatement();
@@ -2340,7 +2355,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			String varNameKey= "varName"; //$NON-NLS-1$
 			String indexNameKey= "indexName"; //$NON-NLS-1$
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 2, image);
+			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_TO_INDEXED_FOR_LOOP, image);
 			
 			// create temp variable from initializer if necessary
 			String varName;
@@ -2506,7 +2521,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Map<String, String> options= new HashMap<String, String>();
 		options.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
 		ICleanUp cleanUp= new ConvertLoopCleanUp(options);
-		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 1, image, context);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.CONVERT_FOR_LOOP_TO_ENHANCED, image, context);
 		proposal.setCommandId(CONVERT_FOR_LOOP_ID);
 
 		resultingCollections.add(proposal);
@@ -2529,7 +2544,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Map<String, String> options= new HashMap<String, String>();
 		options.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
 		ICleanUp cleanUp= new ConvertLoopCleanUp(options);
-		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 1, image, context);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.CONVERT_ITERABLE_LOOP_TO_ENHANCED, image, context);
 		proposal.setCommandId(CONVERT_FOR_LOOP_ID);
 
 		resultingCollections.add(proposal);
@@ -2580,7 +2595,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, CleanUpOptions.TRUE);
 		VariableDeclarationCleanUp cleanUp= new VariableDeclarationCleanUp(options);
-		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 5, image, context);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.MAKE_VARIABLE_DECLARATION_FINAL, image, context);
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -2608,7 +2623,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (refactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
 			String label= CorrectionMessages.QuickAssistProcessor_inline_local_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, context.getCompilationUnit(), refactoring, 5, image);
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, context.getCompilationUnit(), refactoring, IProposalRelevance.INLINE_LOCAL, image);
 			proposal.setCommandId(INLINE_LOCAL_ID);
 			proposals.add(proposal);
 
@@ -2667,7 +2682,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
 			refactoring.setLinkedProposalModel(linkedProposalModel);
 
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, context.getCompilationUnit(), refactoring, 5, image);
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, context.getCompilationUnit(), refactoring, IProposalRelevance.CONVERT_LOCAL_TO_FIELD, image);
 			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposal.setCommandId(CONVERT_LOCAL_TO_FIELD_ID);
 			proposals.add(proposal);

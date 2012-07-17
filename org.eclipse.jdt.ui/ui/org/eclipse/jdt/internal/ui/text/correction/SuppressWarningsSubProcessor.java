@@ -109,7 +109,7 @@ public class SuppressWarningsSubProcessor {
 		}
 		
 		ASTNode target= node;
-		int relevance= -2;
+		int relevance= IProposalRelevance.ADD_SUPPRESSWARNINGS;
 		do {
 			relevance= addSuppressWarningsProposalIfPossible(context.getCompilationUnit(), target, warningToken, relevance, proposals);
 			if (relevance == 0)
@@ -121,7 +121,7 @@ public class SuppressWarningsSubProcessor {
 		if (importStatement != null && !context.getASTRoot().types().isEmpty()) {
 			target= (ASTNode) context.getASTRoot().types().get(0);
 			if (target != null) {
-				addSuppressWarningsProposalIfPossible(context.getCompilationUnit(), target, warningToken, -2, proposals);
+				addSuppressWarningsProposalIfPossible(context.getCompilationUnit(), target, warningToken, IProposalRelevance.ADD_SUPPRESSWARNINGS, proposals);
 			}
 		}
 	}
@@ -343,7 +343,7 @@ public class SuppressWarningsSubProcessor {
 				rewrite.replace(literal, newLiteral, null);
 				String label= Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_fix_suppress_token_label, new String[] { curr });
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.FIX_SUPPRESS_TOKEN, image);
 				proposals.add(proposal);
 			}
 		}
@@ -381,7 +381,7 @@ public class SuppressWarningsSubProcessor {
 		}
 		String label= Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_remove_annotation_label, literal.getLiteralValue());
 		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_ANNOTATION, image);
 		proposals.add(proposal);
 	}
 

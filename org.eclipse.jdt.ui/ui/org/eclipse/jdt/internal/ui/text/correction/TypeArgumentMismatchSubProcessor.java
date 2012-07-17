@@ -63,7 +63,7 @@ public class TypeArgumentMismatchSubProcessor {
 			rewrite.replace(pt, mt, null);
 			String label= CorrectionMessages.TypeArgumentMismatchSubProcessor_removeTypeArguments;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, IProposalRelevance.REMOVE_TYPE_ARGUMENTS, image);
 			proposals.add(proposal);
 		}
 	}

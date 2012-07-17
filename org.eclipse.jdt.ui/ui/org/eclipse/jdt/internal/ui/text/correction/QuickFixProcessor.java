@@ -300,7 +300,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnterminatedString:
 				String quoteLabel= CorrectionMessages.JavaCorrectionProcessor_addquote_description;
 				int pos= moveBack(problem.getOffset() + problem.getLength(), problem.getOffset(), "\n\r", context.getCompilationUnit()); //$NON-NLS-1$
-				proposals.add(new ReplaceCorrectionProposal(quoteLabel, context.getCompilationUnit(), pos, 0, "\"", 0)); //$NON-NLS-1$
+				proposals.add(new ReplaceCorrectionProposal(quoteLabel, context.getCompilationUnit(), pos, 0, "\"", IProposalRelevance.ADD_QUOTE)); //$NON-NLS-1$
 				break;
 			case IProblem.UnusedImport:
 			case IProblem.DuplicateImport:
@@ -399,7 +399,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NonStaticFieldFromStaticInvocation:
 			case IProblem.InstanceMethodDuringConstructorInvocation:
 			case IProblem.InstanceFieldDuringConstructorInvocation:
-				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_STATIC, 5);
+				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_STATIC, IProposalRelevance.CHANGE_MODIFIER_TO_STATIC);
 				break;
 			case IProblem.NonBlankFinalLocalAssignment:
 			case IProblem.DuplicateFinalLocalInitialization:
@@ -407,7 +407,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.DuplicateBlankFinalFieldInitialization:
 			case IProblem.AnonymousClassCannotExtendFinalClass:
 			case IProblem.ClassExtendFinalClass:
-				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_FINAL, 9);
+				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_FINAL, IProposalRelevance.REMOVE_FINAL_MODIFIER);
 				break;
 			case IProblem.InheritedMethodReducesVisibility:
 			case IProblem.MethodReducesVisibility:
@@ -441,17 +441,17 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalModifierForMemberEnum:
 			case IProblem.IllegalVisibilityModifierForInterfaceMemberType:
 			case IProblem.UnexpectedStaticModifierForMethod:
-				ModifierCorrectionSubProcessor.addRemoveInvalidModifiersProposal(context, problem, proposals, 5);
+				ModifierCorrectionSubProcessor.addRemoveInvalidModifiersProposal(context, problem, proposals, IProposalRelevance.REMOVE_INVALID_MODIFIERS);
 				break;
 			case IProblem.NotVisibleField:
-				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, problem, proposals, 9);
-				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, 10);
+				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, problem, proposals, IProposalRelevance.GETTER_SETTER_NOT_VISIBLE_FIELD);
+				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, IProposalRelevance.CHANGE_VISIBILITY);
 				break;
 			case IProblem.NotVisibleMethod:
 			case IProblem.NotVisibleConstructor:
 			case IProblem.NotVisibleType:
 			case IProblem.JavadocNotVisibleType:
-				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, 10);
+				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, IProposalRelevance.CHANGE_VISIBILITY);
 				break;
 			case IProblem.BodyForAbstractMethod:
 			case IProblem.AbstractMethodInAbstractClass:
@@ -502,7 +502,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NeedToEmulateFieldWriteAccess:
 			case IProblem.NeedToEmulateMethodAccess:
 			case IProblem.NeedToEmulateConstructorAccess:
-				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_PRIVATE, 5);
+				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_PRIVATE, IProposalRelevance.CHANGE_VISIBILITY_TO_NON_PRIVATE);
 				break;
 			case IProblem.SuperfluousSemicolon:
 				LocalCorrectionsSubProcessor.addSuperfluousSemicolonProposal(context, problem, proposals);
@@ -518,7 +518,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				LocalCorrectionsSubProcessor.addUnnecessaryThrownExceptionProposal(context, problem, proposals);
 				break;
 			case IProblem.UnqualifiedFieldAccess:
-				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, problem, proposals, 5);
+				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, problem, proposals, IProposalRelevance.GETTER_SETTER_UNQUALIFIED_FIELD_ACCESS);
 				LocalCorrectionsSubProcessor.addUnqualifiedFieldAccessProposal(context, problem, proposals);
 				break;
 			case IProblem.Task:

@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RenameJavaElementAction;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandHandler;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
 
 
 /**
@@ -48,7 +49,7 @@ public class RenameRefactoringProposal implements IJavaCompletionProposal, IComp
 		Assert.isNotNull(editor);
 		fEditor= editor;
 		fLabel= CorrectionMessages.RenameRefactoringProposal_name;
-		fRelevance= 8;
+		fRelevance= IProposalRelevance.RENAME_REFACTORING;
 	}
 
 	/*

@@ -45,7 +45,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	/**
 	 * Constructor for CorrectTypeNameProposal.
 	 * @param cu the compilation unit
-	 * @param context the invocation contect
+	 * @param context the invocation context
 	 * @param oldTypeName the old type name
 	 * @param newTypeName the new type name
 	 * @param relevance the relevance

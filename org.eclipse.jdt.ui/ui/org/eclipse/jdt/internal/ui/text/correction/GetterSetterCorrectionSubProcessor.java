@@ -212,7 +212,7 @@ public class GetterSetterCorrectionSubProcessor {
 					return false;
 			}
 		}
-		return addGetterSetterProposal(context, coveringNode, resultingCollections, 7);
+		return addGetterSetterProposal(context, coveringNode, resultingCollections, IProposalRelevance.GETTER_SETTER_QUICK_ASSIST);
 	}
 
 	public static void addGetterSetterProposal(IInvocationContext context, IProblemLocation location, Collection<ICommandAccess> proposals, int relevance) {

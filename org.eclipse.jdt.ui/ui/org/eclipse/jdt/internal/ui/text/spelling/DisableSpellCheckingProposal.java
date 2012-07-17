@@ -27,6 +27,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
 
 
 /**
@@ -87,7 +88,7 @@ public class DisableSpellCheckingProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
 	 */
 	public final int getRelevance() {
-		return Integer.MIN_VALUE + 1;
+		return IProposalRelevance.DISABLE_SPELL_CHECKING;
 	}
 
 	/*

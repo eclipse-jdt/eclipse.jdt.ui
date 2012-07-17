@@ -140,7 +140,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 							String[] args= { BasicElementLabels.getResourceName(other.getElementName()), BasicElementLabels.getResourceName(project.getElementName()) };
 							String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_project_description, args);
 							String desc= label;
-							DefaultClasspathFixProposal proposal= new DefaultClasspathFixProposal(label, change, desc, 8);
+							DefaultClasspathFixProposal proposal= new DefaultClasspathFixProposal(label, change, desc, IProposalRelevance.ADD_PROJECT_TO_BUILDPATH);
 							proposals.add(proposal);
 						}
 					}
@@ -177,7 +177,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 			if (label != null) {
 				Change change= ClasspathFixProposal.newAddClasspathChange(project, entry);
 				if (change != null) {
-					DefaultClasspathFixProposal proposal= new DefaultClasspathFixProposal(label, change, label, 7);
+					DefaultClasspathFixProposal proposal= new DefaultClasspathFixProposal(label, change, label, IProposalRelevance.ADD_TO_BUILDPATH);
 					proposals.add(proposal);
 				}
 			}

@@ -376,11 +376,11 @@ public class JavadocTagsSubProcessor {
 	 	} else {
 	 		return;
 	 	}
-	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), bodyDeclaration, node, 4);
+	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), bodyDeclaration, node, IProposalRelevance.ADD_MISSING_TAG);
 	 	proposals.add(proposal);
 
 	 	String label2= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_allmissing_description;
-	 	ASTRewriteCorrectionProposal addAllMissing= new AddAllMissingJavadocTagsProposal(label2, context.getCompilationUnit(), bodyDeclaration, 5);
+	 	ASTRewriteCorrectionProposal addAllMissing= new AddAllMissingJavadocTagsProposal(label2, context.getCompilationUnit(), bodyDeclaration, IProposalRelevance.ADD_ALL_MISSING_TAGS);
 	 	proposals.add(addAllMissing);
 	}
 
@@ -415,7 +415,7 @@ public class JavadocTagsSubProcessor {
 		} else {
 			label= CorrectionMessages.JavadocTagsSubProcessor_document_exception_description;
 		}
-	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), methodDecl, node, 1);
+	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), methodDecl, node, IProposalRelevance.DOCUMENT_UNUSED_ITEM);
 	 	proposals.add(proposal);
 	}
 
@@ -445,7 +445,7 @@ public class JavadocTagsSubProcessor {
 			String string= CodeGeneration.getMethodComment(cu, binding.getName(), methodDecl, overridden, String.valueOf('\n'));
 			if (string != null) {
 				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_method_description;
-				proposals.add(new AddJavadocCommentProposal(label, cu, 1, declaration.getStartPosition(), string));
+				proposals.add(new AddJavadocCommentProposal(label, cu, IProposalRelevance.ADD_JAVADOC_METHOD, declaration.getStartPosition(), string));
 			}
 		} else if (declaration instanceof AbstractTypeDeclaration) {
 			String typeQualifiedName= Bindings.getTypeQualifiedName(binding);
@@ -462,7 +462,7 @@ public class JavadocTagsSubProcessor {
 			String string= CodeGeneration.getTypeComment(cu, typeQualifiedName, typeParamNames, String.valueOf('\n'));
 			if (string != null) {
 				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_type_description;
-				proposals.add(new AddJavadocCommentProposal(label, cu, 1, declaration.getStartPosition(), string));
+				proposals.add(new AddJavadocCommentProposal(label, cu, IProposalRelevance.ADD_JAVADOC_TYPE, declaration.getStartPosition(), string));
 			}
 		} else if (declaration instanceof FieldDeclaration) {
 			String comment= "/**\n *\n */\n"; //$NON-NLS-1$
@@ -475,14 +475,14 @@ public class JavadocTagsSubProcessor {
 			}
 			if (comment != null) {
 				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_field_description;
-				proposals.add(new AddJavadocCommentProposal(label, cu, 1, declaration.getStartPosition(), comment));
+				proposals.add(new AddJavadocCommentProposal(label, cu, IProposalRelevance.ADD_JAVADOC_FIELD, declaration.getStartPosition(), comment));
 			}
 		} else if (declaration instanceof EnumConstantDeclaration) {
 			EnumConstantDeclaration enumDecl= (EnumConstantDeclaration) declaration;
 			String id= enumDecl.getName().getIdentifier();
 			String comment= CodeGeneration.getFieldComment(cu, binding.getName(), id, String.valueOf('\n'));
 			String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_enumconst_description;
-			proposals.add(new AddJavadocCommentProposal(label, cu, 1, declaration.getStartPosition(), comment));
+			proposals.add(new AddJavadocCommentProposal(label, cu, IProposalRelevance.ADD_JAVADOC_ENUM, declaration.getStartPosition(), comment));
 		}
 	}
 
@@ -673,7 +673,7 @@ public class JavadocTagsSubProcessor {
 
 		String label= CorrectionMessages.JavadocTagsSubProcessor_removetag_description;
 		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-		proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image));
+		proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_TAG, image));
 	}
 
 	public static void getInvalidQualificationProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
@@ -694,7 +694,7 @@ public class JavadocTagsSubProcessor {
 
 		String label= CorrectionMessages.JavadocTagsSubProcessor_qualifylinktoinner_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.QUALIFY_INNER_TYPE_NAME, image);
 
 		proposals.add(proposal);
 	}

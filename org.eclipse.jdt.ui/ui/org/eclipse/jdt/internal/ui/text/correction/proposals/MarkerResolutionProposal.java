@@ -30,6 +30,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
 
 public class MarkerResolutionProposal implements IJavaCompletionProposal {
 
@@ -106,7 +107,7 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 		if (fResolution instanceof IJavaCompletionProposal) {
 			return ((IJavaCompletionProposal) fResolution).getRelevance();
 		}
-		return 10;
+		return IProposalRelevance.MARKER_RESOLUTION;
 	}
 
 	/* (non-Javadoc)

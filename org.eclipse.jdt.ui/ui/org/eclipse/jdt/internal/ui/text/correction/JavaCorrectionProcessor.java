@@ -248,7 +248,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		}
 
 		if (res == null || res.length == 0) {
-			return new ICompletionProposal[] { new ChangeCorrectionProposal(CorrectionMessages.NoCorrectionProposal_description, new NullChange(""), 0, null) }; //$NON-NLS-1$
+			return new ICompletionProposal[] { new ChangeCorrectionProposal(CorrectionMessages.NoCorrectionProposal_description, new NullChange(""), IProposalRelevance.NO_SUGGESSTIONS_AVAILABLE, null) }; //$NON-NLS-1$
 		}
 		if (res.length > 1) {
 			Arrays.sort(res, new CompletionProposalComparator());

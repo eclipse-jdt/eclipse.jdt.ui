@@ -60,6 +60,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandHandler;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
 
 
 /**
@@ -120,7 +121,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 		fNode= node;
 		fContext= context;
 		fValueSuggestion= valueSuggestion;
-		fRelevance= 8;
+		fRelevance= IProposalRelevance.LINKED_NAMES_ASSIST;
 	}
 
 	/* (non-Javadoc)

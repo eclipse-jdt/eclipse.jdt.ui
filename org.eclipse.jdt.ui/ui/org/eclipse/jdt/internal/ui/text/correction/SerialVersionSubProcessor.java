@@ -93,8 +93,8 @@ public final class SerialVersionSubProcessor {
 
 		IProposableFix[] fixes= PotentialProgrammingProblemsFix.createMissingSerialVersionFixes(context.getASTRoot(), location);
 		if (fixes != null) {
-			proposals.add(new SerialVersionProposal(fixes[0], 9, context, true));
-			proposals.add(new SerialVersionProposal(fixes[1], 9, context, false));
+			proposals.add(new SerialVersionProposal(fixes[0], IProposalRelevance.MISSING_SERIAL_VERSION_DEFAULT, context, true));
+			proposals.add(new SerialVersionProposal(fixes[1], IProposalRelevance.MISSING_SERIAL_VERSION, context, false));
 		}
 	}
 }

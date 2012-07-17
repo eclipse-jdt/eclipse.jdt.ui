@@ -104,7 +104,7 @@ public class VarargsWarningsSubProcessor {
 			return; 
 		
 		String label= CorrectionMessages.VarargsWarningsSubProcessor_add_safevarargs_label;
-		AddSafeVarargsProposal proposal= new AddSafeVarargsProposal(label, context.getCompilationUnit(), methodDeclaration, null, -2);
+		AddSafeVarargsProposal proposal= new AddSafeVarargsProposal(label, context.getCompilationUnit(), methodDeclaration, null, IProposalRelevance.ADD_SAFEVARARGS);
 		proposals.add(proposal);
 	}
 
@@ -132,7 +132,7 @@ public class VarargsWarningsSubProcessor {
 			try {
 				ICompilationUnit targetCu= ASTResolving.findCompilationUnitForBinding(context.getCompilationUnit(), astRoot, declaringType);
 				if (targetCu != null) {
-					AddSafeVarargsProposal proposal= new AddSafeVarargsProposal(label, targetCu, null, methodBinding.getMethodDeclaration(), -2);
+					AddSafeVarargsProposal proposal= new AddSafeVarargsProposal(label, targetCu, null, methodBinding.getMethodDeclaration(), IProposalRelevance.ADD_SAFEVARARGS);
 					proposals.add(proposal);
 				}
 			} catch (JavaModelException e) {
@@ -168,7 +168,7 @@ public class VarargsWarningsSubProcessor {
 
 		String label= CorrectionMessages.VarargsWarningsSubProcessor_remove_safevarargs_label;
 		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_SAFEVARARGS, image);
 		proposals.add(proposal);
 	}
 
