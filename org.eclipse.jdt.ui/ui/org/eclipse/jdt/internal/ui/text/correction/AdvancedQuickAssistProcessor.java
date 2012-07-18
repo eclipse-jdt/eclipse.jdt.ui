@@ -25,7 +25,6 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -2357,8 +2356,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		// add correction proposal
-		IBuffer buffer= context.getCompilationUnit().getBuffer();
-		String source= buffer.getText(switchExpression.getStartPosition(), switchExpression.getLength());
+		String source= ASTNodes.asString(switchExpression).replaceAll("\r\n?|\n", " "); //$NON-NLS-1$ //$NON-NLS-2$
 		String label= preserveNPE ? Messages.format(CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIf_preserveNPE, source) : CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIf;
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_SWITCH_TO_IF_ELSE);
 		proposal.setImportRewrite(importRewrite);
@@ -2629,8 +2627,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 				rewrite.replace(ifStatement, newIfStatement, null);
 
-				IBuffer buffer= context.getCompilationUnit().getBuffer();
-				String source= buffer.getText(switchExpression.getStartPosition(), switchExpression.getLength());
+				String source= ASTNodes.asString(switchExpression).replaceAll("\r\n?|\n", " "); //$NON-NLS-1$ //$NON-NLS-2$
 				String label= Messages.format(CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch_handleNullArg, source);
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_IF_ELSE_TO_SWITCH);
 				proposal.setImportRewrite(importRewrite);
