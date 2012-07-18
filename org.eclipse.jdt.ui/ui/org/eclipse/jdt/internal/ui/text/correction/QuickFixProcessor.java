@@ -682,8 +682,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalReturnNullityRedefinition:
 			case IProblem.IllegalDefinitionToNonNullParameter:
 			case IProblem.IllegalRedefinitionToNonNullParameter:
-				NullQuickFixes.addNullAnnotationInSignatureProposal(context, problem, proposals, false);
-				NullQuickFixes.addNullAnnotationInSignatureProposal(context, problem, proposals, true);
+				NullQuickFixes.addNullAnnotationInSignatureProposal(context, problem, proposals, false, true);
+				NullQuickFixes.addNullAnnotationInSignatureProposal(context, problem, proposals, true, true);
 				break;
 			case IProblem.RequiredNonNullButProvidedNull:
 			case IProblem.RequiredNonNullButProvidedPotentialNull:

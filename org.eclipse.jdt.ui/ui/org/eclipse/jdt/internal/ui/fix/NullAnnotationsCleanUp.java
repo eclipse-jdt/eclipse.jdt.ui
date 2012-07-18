@@ -103,12 +103,12 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 			case IProblem.RequiredNonNullButProvidedSpecdNullable:
 			case IProblem.RequiredNonNullButProvidedUnknown:
 			case IProblem.ParameterLackingNullableAnnotation:
-				result.add(NullFixMessages.NullAnnotationsCleanUp_add_nullable_annotation);
+				result.add(MultiFixMessages.NullAnnotationsCleanUp_add_nullable_annotation);
 				break;
 			case IProblem.IllegalDefinitionToNonNullParameter:
 			case IProblem.IllegalRedefinitionToNonNullParameter:
 			case IProblem.ParameterLackingNonNullAnnotation:
-				result.add(NullFixMessages.NullAnnotationsCleanUp_add_nonnull_annotation);
+				result.add(MultiFixMessages.NullAnnotationsCleanUp_add_nonnull_annotation);
 				break;
 		}
 		return result.toArray(new String[result.size()]);

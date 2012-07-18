@@ -241,7 +241,7 @@ public class NullRewriteOperations {
 			ASTNode methodDecl= compilationUnit.findDeclaringNode(methodBinding.getKey());
 			if (methodDecl == null)
 				return null;
-			String message= Messages.format(NullFixMessages.QuickFixes_change_method_parameter_nullness, annotationNameLabel);
+			String message= Messages.format(MultiFixMessages.NullRewriteOperations_change_method_parameter_nullness, annotationNameLabel);
 			return new ParameterAnnotationRewriteOperation(compilationUnit, (MethodDeclaration) methodDecl, annotationToAdd, annotationToRemove, paramIdx, allowRemove, message);
 		} else if (declaringNode instanceof MethodDeclaration) {
 			// complaint is in signature of this method
@@ -257,7 +257,7 @@ public class NullRewriteOperations {
 					if (declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
 						String paramName= findAffectedParameterName(selectedNode);
 						if (paramName != null) {
-							String message= Messages.format(NullFixMessages.QuickFixes_change_method_parameter_nullness, annotationNameLabel);
+							String message= Messages.format(MultiFixMessages.NullRewriteOperations_change_method_parameter_nullness, annotationNameLabel);
 							return new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
 						}
 					}
@@ -272,7 +272,7 @@ public class NullRewriteOperations {
 						if (declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
 							String paramName= findAffectedParameterName(selectedNode);
 							if (paramName != null) {
-								String message= Messages.format(NullFixMessages.QuickFixes_change_method_parameter_nullness, annotationNameLabel);
+								String message= Messages.format(MultiFixMessages.NullRewriteOperations_change_method_parameter_nullness, annotationNameLabel);
 								return new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
 							}
 						}
@@ -280,7 +280,7 @@ public class NullRewriteOperations {
 					}
 					//$FALL-THROUGH$
 				case IProblem.IllegalReturnNullityRedefinition:
-					String message= Messages.format(NullFixMessages.QuickFixes_change_method_return_nullness, new String[] { declaration.getName().getIdentifier(), annotationNameLabel });
+					String message= Messages.format(MultiFixMessages.NullRewriteOperations_change_method_return_nullness, new String[] { declaration.getName().getIdentifier(), annotationNameLabel });
 					return new ReturnAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, allowRemove, message);
 			}
 		}
@@ -348,7 +348,7 @@ public class NullRewriteOperations {
 		if (methodDecl == null)
 			return null;
 		declaration= (MethodDeclaration) methodDecl;
-		String message= Messages.format(NullFixMessages.QuickFixes_change_overridden_parameter_nullness, new String[] { overridden.getName(), annotationNameLabel });
+		String message= Messages.format(MultiFixMessages.NullRewriteOperations_change_overridden_parameter_nullness, new String[] { overridden.getName(), annotationNameLabel });
 		String paramName= findAffectedParameterName(selectedNode);
 		return new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
 	}
@@ -402,7 +402,7 @@ public class NullRewriteOperations {
 // TODO(SH): decide whether we want to propose overwriting existing annotations in super
 //		if (hasNullAnnotation(declaration)) // if overridden has explicit declaration don't propose to change it
 //			return null;
-		String message= Messages.format(NullFixMessages.QuickFixes_change_overridden_return_nullness, new String[] { overridden.getName(), annotationNameLabel });
+		String message= Messages.format(MultiFixMessages.NullRewriteOperations_change_overridden_return_nullness, new String[] { overridden.getName(), annotationNameLabel });
 		return new ReturnAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, allowRemove, message);
 	}
 

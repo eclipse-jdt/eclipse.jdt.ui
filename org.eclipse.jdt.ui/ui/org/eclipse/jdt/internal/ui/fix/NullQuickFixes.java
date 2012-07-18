@@ -65,12 +65,14 @@ public class NullQuickFixes {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 
-		if (isComplainingAboutArgument(selectedNode) || isComplainingAboutReturn(selectedNode))
-			addNullAnnotationInSignatureProposal(context, problem, proposals, false);
+		boolean isArgumentProblem= isComplainingAboutArgument(selectedNode);
+		if (isArgumentProblem || isComplainingAboutReturn(selectedNode))
+			addNullAnnotationInSignatureProposal(context, problem, proposals, false, isArgumentProblem);
 	}
 
-	public static void addNullAnnotationInSignatureProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals, boolean modifyOverridden) {
-		MyCURewriteOperationsFix fix= createNullAnnotationInSignatureFix(context.getASTRoot(), problem, modifyOverridden);
+	public static void addNullAnnotationInSignatureProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals, boolean modifyOverridden,
+			boolean isArgumentProblem) {
+		MyCURewriteOperationsFix fix= createNullAnnotationInSignatureFix(context.getASTRoot(), problem, modifyOverridden, isArgumentProblem);
 
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -130,7 +132,7 @@ public class NullQuickFixes {
 		return selectedNode.getParent().getNodeType() == ASTNode.RETURN_STATEMENT;
 	}
 
-	private static MyCURewriteOperationsFix createNullAnnotationInSignatureFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean modifyOverridden) {
+	private static MyCURewriteOperationsFix createNullAnnotationInSignatureFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean modifyOverridden, boolean isArgumentProblem) {
 		String nullableAnnotationName= getNullableAnnotationName(compilationUnit.getJavaElement(), false);
 		String nonNullAnnotationName= getNonNullAnnotationName(compilationUnit.getJavaElement(), false);
 		String annotationToAdd= nullableAnnotationName;
@@ -155,7 +157,11 @@ public class NullQuickFixes {
 			case IProblem.RequiredNonNullButProvidedNull:
 			case IProblem.RequiredNonNullButProvidedPotentialNull:
 			case IProblem.RequiredNonNullButProvidedUnknown:
-				annotationToAdd= nonNullAnnotationName;
+			case IProblem.RequiredNonNullButProvidedSpecdNullable:
+				if (isArgumentProblem) {
+					annotationToAdd= nonNullAnnotationName;
+					annotationToRemove= nullableAnnotationName;
+				}
 				break;
 		// all others propose to add @Nullable
 		}
@@ -190,7 +196,7 @@ public class NullQuickFixes {
 		if (operations.size() == 0)
 			return null;
 		CompilationUnitRewriteOperation[] operationsArray= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
-		return new MyCURewriteOperationsFix(NullFixMessages.QuickFixes_add_annotation_change_name, compilationUnit, operationsArray);
+		return new MyCURewriteOperationsFix(MultiFixMessages.NullQuickFixes_add_annotation_change_name, compilationUnit, operationsArray);
 	}
 
 	private static void createAddNullAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
@@ -214,7 +220,12 @@ public class NullQuickFixes {
 				case IProblem.RequiredNonNullButProvidedNull:
 				case IProblem.RequiredNonNullButProvidedPotentialNull:
 				case IProblem.RequiredNonNullButProvidedUnknown:
-					annotationToAdd= nonNullAnnotationName;
+				case IProblem.RequiredNonNullButProvidedSpecdNullable:
+					ASTNode selectedNode= problem.getCoveredNode(compilationUnit);
+					if (isComplainingAboutArgument(selectedNode)) {
+						annotationToAdd= nonNullAnnotationName;
+						annotationToRemove= nullableAnnotationName;
+					}
 					break;
 			// all others propose to add @Nullable
 			}
