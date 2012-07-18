@@ -305,7 +305,9 @@ public final class CorrectionMessages extends NLS {
 	public static String AdvancedQuickAssistProcessor_pushNegationDown;
 	public static String AdvancedQuickAssistProcessor_putConditionalExpressionInParentheses;
 	public static String AdvancedQuickAssistProcessor_convertSwitchToIf;
+	public static String AdvancedQuickAssistProcessor_convertSwitchToIf_preserveNPE;
 	public static String AdvancedQuickAssistProcessor_convertIfElseToSwitch;
+	public static String AdvancedQuickAssistProcessor_convertIfElseToSwitch_handleNullArg;
 	public static String AdvancedQuickAssistProcessor_inverseIfContinue_description;
 	public static String AdvancedQuickAssistProcessor_inverseIfToContinue_description;
 	public static String AdvancedQuickAssistProcessor_exchangeInnerAndOuterIfConditions_description;

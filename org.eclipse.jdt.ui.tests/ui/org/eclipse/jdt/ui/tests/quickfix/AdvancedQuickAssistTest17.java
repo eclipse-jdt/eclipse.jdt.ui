@@ -116,6 +116,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -131,10 +132,24 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-
 		String expected1= buf.toString();
 
-		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("        if (s.equals(\"abc\")) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        } else if (s.equals(\"xyz\")) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        } else {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 
 	public void testConvertIfToSwitch1() throws Exception {
@@ -235,8 +250,27 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("        switch (s) {\n");
+		buf.append("            case \"abc\" :\n");
+		buf.append("                System.out.println();\n");
+		buf.append("                break;\n");
+		buf.append("            case \"xyz\" :\n");
+		buf.append("                System.out.println();\n");
+		buf.append("                break;\n");
+		buf.append("            default :\n");
+		buf.append("                System.out.println();\n");
+		buf.append("                break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -259,10 +293,9 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
+		String expected2= buf.toString();
 
-		String expected1= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 
 	public void testConvertIfToSwitch4() throws Exception {
@@ -287,8 +320,27 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("        switch (s) {\n");
+		buf.append("            case \"abc\" :\n");
+		buf.append("                System.out.println();\n");
+		buf.append("                break;\n");
+		buf.append("            case \"xyz\" :\n");
+		buf.append("                System.out.println();\n");
+		buf.append("                break;\n");
+		buf.append("            default :\n");
+		buf.append("                System.out.println();\n");
+		buf.append("                break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -311,10 +363,9 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
+		String expected2= buf.toString();
 
-		String expected1= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 
 	public void testConvertIfToSwitch5() throws Exception {
@@ -337,7 +388,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -354,10 +405,28 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-
 		String expected1= buf.toString();
 
-		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("        if (s == null) {\n");
+		buf.append("        } else {\n");
+		buf.append("            switch (s) {\n");
+		buf.append("                case \"abc\" :\n");
+		buf.append("                    System.out.println();\n");
+		buf.append("                    break;\n");
+		buf.append("                case \"xyz\" :\n");
+		buf.append("                    System.out.println();\n");
+		buf.append("                    break;\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 
 	public void testReplaceReturnConditionWithIf4() throws Exception {

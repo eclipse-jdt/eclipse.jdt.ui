@@ -3875,6 +3875,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -3931,6 +3932,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -3988,6 +3990,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -4043,6 +4046,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -4093,6 +4097,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -4144,6 +4149,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -4200,6 +4206,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -4669,8 +4676,32 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public enum TimeUnit {\n");
+		buf.append("        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS\n");
+		buf.append("    }\n");
+		buf.append("    public static int getPower(TimeUnit unit) {\n");
+		buf.append("        switch (unit) {\n");
+		buf.append("            case SECONDS :\n");
+		buf.append("                return 0;\n");
+		buf.append("            case MILLISECONDS :\n");
+		buf.append("                return -3;\n");
+		buf.append("            case MICROSECONDS :\n");
+		buf.append("                return -6;\n");
+		buf.append("            case NANOSECONDS :\n");
+		buf.append("                return -9;\n");
+		buf.append("            default :\n");
+		buf.append("                throw new InternalError();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
 
 		buf= new StringBuffer();
 		buf.append("package pack;\n");
@@ -4698,9 +4729,9 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected2= buf.toString();
 
-		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 
 	public void testSurroundWithTemplate01() throws Exception {

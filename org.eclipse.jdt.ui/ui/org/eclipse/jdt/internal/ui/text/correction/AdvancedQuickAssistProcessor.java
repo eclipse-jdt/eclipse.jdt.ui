@@ -25,8 +25,10 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
@@ -2206,7 +2208,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) throws JavaModelException {
 		if (!(covering instanceof SwitchStatement)) {
 			return false;
 		}
@@ -2214,7 +2216,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null) {
 			return true;
 		}
-		//
+		if (!getConvertSwitchToIfProposals(context, covering, resultingCollections, false))
+			return false;
+		return getConvertSwitchToIfProposals(context, covering, resultingCollections, true);
+	}
+
+	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections, boolean preserveNPE) throws JavaModelException {
 		final AST ast= covering.getAST();
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
 		final ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
@@ -2222,6 +2229,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		SwitchStatement switchStatement= (SwitchStatement) covering;
 		ITypeBinding expressionType= switchStatement.getExpression().resolveTypeBinding();
 		boolean isStringsInSwitch= expressionType != null && "java.lang.String".equals(expressionType.getQualifiedName()); //$NON-NLS-1$
+
+		if (!isStringsInSwitch && preserveNPE)
+			return false;
+
 		IfStatement firstIfStatement= null;
 		IfStatement currentIfStatement= null;
 		Block currentBlock= null;
@@ -2275,7 +2286,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					return false;
 				}
 				// prepare condition
-				Expression switchCaseCondition= createSwitchCaseCondition(ast, rewrite, importRewrite, importRewriteContext, varName, switchCase, isStringsInSwitch);
+				Expression switchCaseCondition= createSwitchCaseCondition(ast, rewrite, importRewrite, importRewriteContext, varName, switchCase, isStringsInSwitch, preserveNPE);
 				if (currentCondition == null) {
 					currentCondition= switchCaseCondition;
 				} else {
@@ -2320,7 +2331,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					hasStopAsLastExecutableStatement= hasStopAsLastExecutableStatement(statement);
 					Statement copyStatement= copyStatementExceptBreak(ast, rewrite, statement);
 
-
 					currentBlock.statements().add(copyStatement);
 				}
 			}
@@ -2347,21 +2357,28 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		// add correction proposal
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIf, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_SWITCH_TO_IF_ELSE, image);
+		IBuffer buffer= context.getCompilationUnit().getBuffer();
+		String source= buffer.getText(switchExpression.getStartPosition(), switchExpression.getLength());
+		String label= preserveNPE ? Messages.format(CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIf_preserveNPE, source) : CorrectionMessages.AdvancedQuickAssistProcessor_convertSwitchToIf;
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_SWITCH_TO_IF_ELSE);
 		proposal.setImportRewrite(importRewrite);
 		resultingCollections.add(proposal);
 		return true;
 	}
 
 	private static Expression createSwitchCaseCondition(AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, ImportRewriteContext importRewriteContext, Name switchExpression,
-			SwitchCase switchCase, boolean isStringsInSwitch) {
+			SwitchCase switchCase, boolean isStringsInSwitch, boolean preserveNPE) {
 		Expression expression= switchCase.getExpression();
 		if (isStringsInSwitch) {
 			MethodInvocation methodInvocation= ast.newMethodInvocation();
-			methodInvocation.setExpression((Expression) rewrite.createCopyTarget(expression));
 			methodInvocation.setName(ast.newSimpleName("equals")); //$NON-NLS-1$
-			methodInvocation.arguments().add(rewrite.createStringPlaceholder(switchExpression.getFullyQualifiedName(), ASTNode.QUALIFIED_NAME));
+			if (preserveNPE) {
+				methodInvocation.setExpression((Expression) rewrite.createStringPlaceholder(switchExpression.getFullyQualifiedName(), ASTNode.QUALIFIED_NAME));
+				methodInvocation.arguments().add(rewrite.createCopyTarget(expression));
+			} else {
+				methodInvocation.setExpression((Expression) rewrite.createCopyTarget(expression));
+				methodInvocation.arguments().add(rewrite.createStringPlaceholder(switchExpression.getFullyQualifiedName(), ASTNode.QUALIFIED_NAME));
+			}
 			return methodInvocation;
 		} else {
 			InfixExpression condition= ast.newInfixExpression();
@@ -2413,7 +2430,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return (Statement) rewrite.createMoveTarget(source);
 	}
 
-	private static boolean getConvertIfElseToSwitchProposals(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections) {
+	private static boolean getConvertIfElseToSwitchProposals(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections) throws JavaModelException {
 		if (!(coveringNode instanceof IfStatement)) {
 			return false;
 		}
@@ -2422,6 +2439,13 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 
+		if(!getConvertIfElseToSwitchProposals(context, coveringNode, resultingCollections, true))
+			return false;
+		return getConvertIfElseToSwitchProposals(context, coveringNode, resultingCollections, false);
+	}
+
+	private static boolean getConvertIfElseToSwitchProposals(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections, boolean handleNullArg)
+			throws JavaModelException {
 		final AST ast= coveringNode.getAST();
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
 		final ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
@@ -2577,38 +2601,49 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		switchStatement.setExpression((Expression) rewrite.createCopyTarget(switchExpression));
 		
-		if (executeDefaultOnNullExpression && defaultStatement != null) {
-			IfStatement newIfStatement= ast.newIfStatement();
+		if (handleNullArg) {
+			if (executeDefaultOnNullExpression) {
+				IfStatement newIfStatement= ast.newIfStatement();
 
-			InfixExpression infixExpression= ast.newInfixExpression();
-			infixExpression.setLeftOperand((Expression) rewrite.createCopyTarget(switchExpression));
-			infixExpression.setRightOperand(ast.newNullLiteral());
-			infixExpression.setOperator(InfixExpression.Operator.EQUALS);
-			newIfStatement.setExpression(infixExpression);
+				InfixExpression infixExpression= ast.newInfixExpression();
+				infixExpression.setLeftOperand((Expression) rewrite.createCopyTarget(switchExpression));
+				infixExpression.setRightOperand(ast.newNullLiteral());
+				infixExpression.setOperator(InfixExpression.Operator.EQUALS);
+				newIfStatement.setExpression(infixExpression);
 
-			if (defaultStatement instanceof Block) {
-				Block block= ast.newBlock();
-				for (Iterator<Statement> iter= ((Block) defaultStatement).statements().iterator(); iter.hasNext();) {
-					block.statements().add(rewrite.createCopyTarget(iter.next()));
+				if (defaultStatement == null) {
+					Block block= ast.newBlock();
+					newIfStatement.setThenStatement(block);
+				} else if (defaultStatement instanceof Block) {
+					Block block= ast.newBlock();
+					for (Iterator<Statement> iter= ((Block) defaultStatement).statements().iterator(); iter.hasNext();) {
+						block.statements().add(rewrite.createCopyTarget(iter.next()));
+					}
+					newIfStatement.setThenStatement(block);
+				} else {
+					newIfStatement.setThenStatement((Statement) rewrite.createCopyTarget(defaultStatement));
 				}
-				newIfStatement.setThenStatement(block);
-			} else {
-				newIfStatement.setThenStatement((Statement) rewrite.createCopyTarget(defaultStatement));
-			}
-			Block block= ast.newBlock();
-			block.statements().add(switchStatement);
-			newIfStatement.setElseStatement(block);
+				Block block= ast.newBlock();
+				block.statements().add(switchStatement);
+				newIfStatement.setElseStatement(block);
 
-			rewrite.replace(ifStatement, newIfStatement, null);
+				rewrite.replace(ifStatement, newIfStatement, null);
+
+				IBuffer buffer= context.getCompilationUnit().getBuffer();
+				String source= buffer.getText(switchExpression.getStartPosition(), switchExpression.getLength());
+				String label= Messages.format(CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch_handleNullArg, source);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_IF_ELSE_TO_SWITCH);
+				proposal.setImportRewrite(importRewrite);
+				resultingCollections.add(proposal);
+			}
 		} else {
 			rewrite.replace(ifStatement, switchStatement, null);
-		}
 
-		// add correction proposal
-		String label= CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch;
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_IF_ELSE_TO_SWITCH);
-		proposal.setImportRewrite(importRewrite);
-		resultingCollections.add(proposal);
+			String label= CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch;
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_IF_ELSE_TO_SWITCH);
+			proposal.setImportRewrite(importRewrite);
+			resultingCollections.add(proposal);
+		}
 		return true;
 	}
 
