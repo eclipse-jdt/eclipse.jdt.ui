@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
@@ -2207,7 +2206,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) throws JavaModelException {
+	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		if (!(covering instanceof SwitchStatement)) {
 			return false;
 		}
@@ -2220,7 +2219,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return getConvertSwitchToIfProposals(context, covering, resultingCollections, true);
 	}
 
-	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections, boolean preserveNPE) throws JavaModelException {
+	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections, boolean preserveNPE) {
 		final AST ast= covering.getAST();
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
 		final ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
@@ -2272,19 +2271,15 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					}
 					currentBlock= null;
 				}
-				// for 'default' we just will not create condition
-				if (switchCase.isDefault()) {
-					defaultFound= true;
-					if (currentCondition != null) {
-						// we can not convert one or more 'case' statements and 'default' nor in conditional if, nor in 'else' without code duplication
-						return false;
-					}
-					continue;
-				}
+				
 				if (defaultFound) {
+					// This gets too complicated. We only support 'default' as last SwitchCase. 
 					return false;
 				}
-				// prepare condition
+				if (switchCase.isDefault()) {
+					defaultFound= true;
+				}
+				// prepare condition (is null for 'default')
 				Expression switchCaseCondition= createSwitchCaseCondition(ast, rewrite, importRewrite, importRewriteContext, varName, switchCase, isStringsInSwitch, preserveNPE);
 				if (currentCondition == null) {
 					currentCondition= switchCaseCondition;
@@ -2292,13 +2287,14 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					InfixExpression condition= ast.newInfixExpression();
 					condition.setOperator(InfixExpression.Operator.CONDITIONAL_OR);
 					condition.setLeftOperand(currentCondition);
+					if (switchCaseCondition == null)
+						switchCaseCondition= ast.newBooleanLiteral(true);
 					condition.setRightOperand(switchCaseCondition);
 					currentCondition= condition;
 				}
 			} else {
 				// ensure that current block exists as 'then' statement of 'if'
 				if (currentBlock == null) {
-					defaultFound= false;
 					if (currentCondition != null) {
 						IfStatement ifStatement;
 						if (firstIfStatement == null) {
@@ -2367,6 +2363,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	private static Expression createSwitchCaseCondition(AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, ImportRewriteContext importRewriteContext, Name switchExpression,
 			SwitchCase switchCase, boolean isStringsInSwitch, boolean preserveNPE) {
 		Expression expression= switchCase.getExpression();
+		if (expression == null)
+			return null;
+		
 		if (isStringsInSwitch) {
 			MethodInvocation methodInvocation= ast.newMethodInvocation();
 			methodInvocation.setName(ast.newSimpleName("equals")); //$NON-NLS-1$
@@ -2428,7 +2427,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return (Statement) rewrite.createMoveTarget(source);
 	}
 
-	private static boolean getConvertIfElseToSwitchProposals(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections) throws JavaModelException {
+	private static boolean getConvertIfElseToSwitchProposals(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections) {
 		if (!(coveringNode instanceof IfStatement)) {
 			return false;
 		}
@@ -2442,8 +2441,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return getConvertIfElseToSwitchProposals(context, coveringNode, resultingCollections, false);
 	}
 
-	private static boolean getConvertIfElseToSwitchProposals(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections, boolean handleNullArg)
-			throws JavaModelException {
+	private static boolean getConvertIfElseToSwitchProposals(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections, boolean handleNullArg) {
 		final AST ast= coveringNode.getAST();
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
 		final ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
