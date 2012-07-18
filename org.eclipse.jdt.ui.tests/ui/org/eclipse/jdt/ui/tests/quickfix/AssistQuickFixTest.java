@@ -2396,7 +2396,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	
 	private static final Class[] FILTER_EQ= { LinkedNamesAssistProposal.class, RenameRefactoringProposal.class, AssignToVariableAssistProposal.class };
 
-    public void testInvertEquals() throws Exception {
+	public void testInvertEquals1() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuffer buf= new StringBuffer();
         buf.append("package test1;\n");
@@ -3388,6 +3388,65 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertEqualString(preview, buf.toString());
     }
 
+	public void testInvertEquals24() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=385389
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Enum e) {\n");
+		buf.append("        e.equals(Enum.e1);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("enum Enum {\n");
+		buf.append("    e1, e2;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "equals";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List proposals= collectAssists(context, FILTER_EQ);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Enum e) {\n");
+		buf.append("        Enum.e1.equals(e);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("enum Enum {\n");
+		buf.append("    e1, e2;\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+
+		cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+		context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		proposals= collectAssists(context, FILTER_EQ);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		proposal= (CUCorrectionProposal)proposals.get(0);
+		preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Enum e) {\n");
+		buf.append("        e.equals(Enum.e1);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("enum Enum {\n");
+		buf.append("    e1, e2;\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
 
 	public void testAddTypeToArrayInitializer() throws Exception {
 
