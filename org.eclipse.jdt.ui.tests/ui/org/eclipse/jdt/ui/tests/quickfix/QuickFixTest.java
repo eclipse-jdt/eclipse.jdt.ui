@@ -98,6 +98,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(SurroundWithTemplateTest.suite());
 		suite.addTest(TypeParameterMismatchTest.suite());
 		suite.addTest(PropertiesFileQuickAssistTest.suite());
+		suite.addTest(NullAnnotationsQuickFixTest.suite());
 
 		return new ProjectTestSetup(suite);
 	}
