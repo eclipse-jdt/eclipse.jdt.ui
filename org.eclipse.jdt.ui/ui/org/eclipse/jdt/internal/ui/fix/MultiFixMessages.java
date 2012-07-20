@@ -96,18 +96,7 @@ public class MultiFixMessages extends NLS {
 	public static String CodeFormatFix_description;
 
 	public static String NullAnnotationsCleanUp_add_nullable_annotation;
-
 	public static String NullAnnotationsCleanUp_add_nonnull_annotation;
-
-	public static String NullQuickFixes_add_annotation_change_name;
-
-	public static String NullRewriteOperations_change_method_parameter_nullness;
-
-	public static String NullRewriteOperations_change_method_return_nullness;
-
-	public static String NullRewriteOperations_change_overridden_parameter_nullness;
-
-	public static String NullRewriteOperations_change_overridden_return_nullness;
 
 	static {
 		// initialize resource bundle

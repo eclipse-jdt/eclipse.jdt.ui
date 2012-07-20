@@ -31,7 +31,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
-import org.eclipse.jdt.internal.ui.fix.NullQuickFixes;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.TaskMarkerProposal;
 
@@ -682,8 +681,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalReturnNullityRedefinition:
 			case IProblem.IllegalDefinitionToNonNullParameter:
 			case IProblem.IllegalRedefinitionToNonNullParameter:
-				NullQuickFixes.addNullAnnotationInSignatureProposal(context, problem, proposals, false, true);
-				NullQuickFixes.addNullAnnotationInSignatureProposal(context, problem, proposals, true, true);
+				NullAnnotationsCorrectionProcessor.addNullAnnotationInSignatureProposal(context, problem, proposals, false, true);
+				NullAnnotationsCorrectionProcessor.addNullAnnotationInSignatureProposal(context, problem, proposals, true, true);
 				break;
 			case IProblem.RequiredNonNullButProvidedNull:
 			case IProblem.RequiredNonNullButProvidedPotentialNull:
@@ -693,7 +692,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 			case IProblem.RequiredNonNullButProvidedSpecdNullable:
-				NullQuickFixes.addReturnAndArgumentTypeProposal(context, problem, proposals);
+				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, proposals);
 				break;
 			default:
 		}

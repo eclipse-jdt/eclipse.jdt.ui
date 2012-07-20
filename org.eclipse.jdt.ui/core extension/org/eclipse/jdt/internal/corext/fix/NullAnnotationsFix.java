@@ -9,17 +9,12 @@
  *     Stephan Herrmann <stephan@cs.tu-berlin.de> - [quick fix] Add quick fixes for null annotations - https://bugs.eclipse.org/337977
  *     IBM Corporation - bug fixes
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.fix;
+package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -33,84 +28,24 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
-import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 
-/**
- * Quick Fixes for null-annotation related problems.
- */
-public class NullQuickFixes {
+public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 
-	/** Small adaptation just to make available the 'compilationUnit' passed at instantiation time. */
-	private static class MyCURewriteOperationsFix extends CompilationUnitRewriteOperationsFix {
-		CompilationUnit cu;
+	private CompilationUnit cu;
 
-		public MyCURewriteOperationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] operations) {
-			super(name, compilationUnit, operations);
-			this.cu= compilationUnit;
-		}
+	public NullAnnotationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] operations) {
+		super(name, compilationUnit, operations);
+		this.cu= compilationUnit;
 	}
 
-	public static void addReturnAndArgumentTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		CompilationUnit astRoot= context.getASTRoot();
-		ASTNode selectedNode= problem.getCoveringNode(astRoot);
-
-		boolean isArgumentProblem= isComplainingAboutArgument(selectedNode);
-		if (isArgumentProblem || isComplainingAboutReturn(selectedNode))
-			addNullAnnotationInSignatureProposal(context, problem, proposals, false, isArgumentProblem);
-	}
-
-	public static void addNullAnnotationInSignatureProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals, boolean modifyOverridden,
-			boolean isArgumentProblem) {
-		MyCURewriteOperationsFix fix= createNullAnnotationInSignatureFix(context.getASTRoot(), problem, modifyOverridden, isArgumentProblem);
-
-		if (fix != null) {
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			Map<String, String> options= new Hashtable<String, String>();
-			if (fix.cu != context.getASTRoot()) {
-				// workaround: adjust the unit to operate on, depending on the findings of RewriteOperations.createAddAnnotationOperation(..)
-				final CompilationUnit cu= fix.cu;
-				final IInvocationContext originalContext= context;
-				context= new IInvocationContext() {
-					public int getSelectionOffset() {
-						return originalContext.getSelectionOffset();
-					}
-
-					public int getSelectionLength() {
-						return originalContext.getSelectionLength();
-					}
-
-					public ASTNode getCoveringNode() {
-						return originalContext.getCoveringNode();
-					}
-
-					public ASTNode getCoveredNode() {
-						return originalContext.getCoveredNode();
-					}
-
-					public ICompilationUnit getCompilationUnit() {
-						return (ICompilationUnit) cu.getJavaElement();
-					}
-
-					public CompilationUnit getASTRoot() {
-						return cu;
-					}
-				};
-			}
-			int relevance= modifyOverridden ? 9 : 10; //raise local change above change in overridden method
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, problem.getProblemId()), relevance, image, context);
-			proposals.add(proposal);
-		}
+	public CompilationUnit getCu() {
+		return cu;
 	}
 
 	public static boolean isComplainingAboutArgument(ASTNode selectedNode) {
@@ -132,7 +67,7 @@ public class NullQuickFixes {
 		return selectedNode.getParent().getNodeType() == ASTNode.RETURN_STATEMENT;
 	}
 
-	private static MyCURewriteOperationsFix createNullAnnotationInSignatureFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean modifyOverridden, boolean isArgumentProblem) {
+	public static NullAnnotationsFix createNullAnnotationInSignatureFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean modifyOverridden, boolean isArgumentProblem) {
 		String nullableAnnotationName= getNullableAnnotationName(compilationUnit.getJavaElement(), false);
 		String nonNullAnnotationName= getNonNullAnnotationName(compilationUnit.getJavaElement(), false);
 		String annotationToAdd= nullableAnnotationName;
@@ -167,13 +102,13 @@ public class NullQuickFixes {
 		}
 
 		// when performing one change at a time we can actually modify another CU than the current one:
-		NullRewriteOperations.SignatureAnnotationRewriteOperation operation= NullRewriteOperations.createAddAnnotationOperation(compilationUnit, problem, annotationToAdd, annotationToRemove, null,
+		NullAnnotationsRewriteOperations.SignatureAnnotationRewriteOperation operation= NullAnnotationsRewriteOperations.createAddAnnotationOperation(compilationUnit, problem, annotationToAdd, annotationToRemove, null,
 				false/*thisUnitOnly*/, true/*allowRemove*/, modifyOverridden);
 		if (operation == null)
 			return null;
 
-		return new MyCURewriteOperationsFix(operation.getMessage(), operation.getCompilationUnit(), // note that this uses the findings from createAddAnnotationOperation(..)
-				new NullRewriteOperations.SignatureAnnotationRewriteOperation[] { operation });
+		return new NullAnnotationsFix(operation.getMessage(), operation.getCompilationUnit(), // note that this uses the findings from createAddAnnotationOperation(..)
+				new NullAnnotationsRewriteOperations.SignatureAnnotationRewriteOperation[] { operation });
 	}
 
 	// Entry for NullAnnotationsCleanup:
@@ -196,7 +131,7 @@ public class NullQuickFixes {
 		if (operations.size() == 0)
 			return null;
 		CompilationUnitRewriteOperation[] operationsArray= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
-		return new MyCURewriteOperationsFix(MultiFixMessages.NullQuickFixes_add_annotation_change_name, compilationUnit, operationsArray);
+		return new NullAnnotationsFix(FixMessages.NullAnnotationsFix_add_annotation_change_name, compilationUnit, operationsArray);
 	}
 
 	private static void createAddNullAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
@@ -230,7 +165,7 @@ public class NullQuickFixes {
 			// all others propose to add @Nullable
 			}
 			// when performing multiple changes we can only modify the one CU that the CleanUp infrastructure provides to the operation.
-			CompilationUnitRewriteOperation fix= NullRewriteOperations.createAddAnnotationOperation(compilationUnit, problem, annotationToAdd, annotationToRemove, handledPositions,
+			CompilationUnitRewriteOperation fix= NullAnnotationsRewriteOperations.createAddAnnotationOperation(compilationUnit, problem, annotationToAdd, annotationToRemove, handledPositions,
 					true/*thisUnitOnly*/, false/*allowRemove*/, false/*modifyOverridden*/);
 			if (fix != null)
 				result.add(fix);

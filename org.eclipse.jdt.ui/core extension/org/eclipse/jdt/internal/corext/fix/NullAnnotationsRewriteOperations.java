@@ -9,7 +9,7 @@
  *     Stephan Herrmann <stephan@cs.tu-berlin.de> - [quick fix] Add quick fixes for null annotations - https://bugs.eclipse.org/337977
  *     IBM Corporation - bug fixes
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.fix;
+package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.List;
 import java.util.Set;
@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -54,7 +53,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
-public class NullRewriteOperations {
+public class NullAnnotationsRewriteOperations {
 
 	static abstract class SignatureAnnotationRewriteOperation extends CompilationUnitRewriteOperation {
 		String fAnnotationToAdd;
@@ -218,7 +217,7 @@ public class NullRewriteOperations {
 				break; // do propose changes even if we already have an annotation
 			default:
 				// if this method has annotations, don't change'em
-				if (NullQuickFixes.hasExplicitNullAnnotation(cu, problem.getOffset()))
+				if (NullAnnotationsFix.hasExplicitNullAnnotation(cu, problem.getOffset()))
 					return null;
 		}
 
@@ -241,7 +240,7 @@ public class NullRewriteOperations {
 			ASTNode methodDecl= compilationUnit.findDeclaringNode(methodBinding.getKey());
 			if (methodDecl == null)
 				return null;
-			String message= Messages.format(MultiFixMessages.NullRewriteOperations_change_method_parameter_nullness, annotationNameLabel);
+			String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness, annotationNameLabel);
 			return new ParameterAnnotationRewriteOperation(compilationUnit, (MethodDeclaration) methodDecl, annotationToAdd, annotationToRemove, paramIdx, allowRemove, message);
 		} else if (declaringNode instanceof MethodDeclaration) {
 			// complaint is in signature of this method
@@ -257,7 +256,7 @@ public class NullRewriteOperations {
 					if (declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
 						String paramName= findAffectedParameterName(selectedNode);
 						if (paramName != null) {
-							String message= Messages.format(MultiFixMessages.NullRewriteOperations_change_method_parameter_nullness, annotationNameLabel);
+							String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness, annotationNameLabel);
 							return new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
 						}
 					}
@@ -266,13 +265,13 @@ public class NullRewriteOperations {
 				case IProblem.RequiredNonNullButProvidedPotentialNull:
 				case IProblem.RequiredNonNullButProvidedSpecdNullable:
 				case IProblem.RequiredNonNullButProvidedUnknown:
-					if (NullQuickFixes.isComplainingAboutArgument(selectedNode)) {
+					if (NullAnnotationsFix.isComplainingAboutArgument(selectedNode)) {
 						//TODO: duplication
 						// statements suggest changing parameters:
 						if (declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
 							String paramName= findAffectedParameterName(selectedNode);
 							if (paramName != null) {
-								String message= Messages.format(MultiFixMessages.NullRewriteOperations_change_method_parameter_nullness, annotationNameLabel);
+								String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness, annotationNameLabel);
 								return new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
 							}
 						}
@@ -280,7 +279,7 @@ public class NullRewriteOperations {
 					}
 					//$FALL-THROUGH$
 				case IProblem.IllegalReturnNullityRedefinition:
-					String message= Messages.format(MultiFixMessages.NullRewriteOperations_change_method_return_nullness, new String[] { declaration.getName().getIdentifier(), annotationNameLabel });
+					String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_return_nullness, new String[] { declaration.getName().getIdentifier(), annotationNameLabel });
 					return new ReturnAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, allowRemove, message);
 			}
 		}
@@ -348,7 +347,7 @@ public class NullRewriteOperations {
 		if (methodDecl == null)
 			return null;
 		declaration= (MethodDeclaration) methodDecl;
-		String message= Messages.format(MultiFixMessages.NullRewriteOperations_change_overridden_parameter_nullness, new String[] { overridden.getName(), annotationNameLabel });
+		String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_overridden_parameter_nullness, new String[] { overridden.getName(), annotationNameLabel });
 		String paramName= findAffectedParameterName(selectedNode);
 		return new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
 	}
@@ -368,8 +367,8 @@ public class NullRewriteOperations {
 
 	private static boolean hasNullAnnotation(MethodDeclaration decl) {
 		List<IExtendedModifier> modifiers= decl.modifiers();
-		String nonnull= NullQuickFixes.getNonNullAnnotationName(decl.resolveBinding().getJavaElement(), false);
-		String nullable= NullQuickFixes.getNullableAnnotationName(decl.resolveBinding().getJavaElement(), false);
+		String nonnull= NullAnnotationsFix.getNonNullAnnotationName(decl.resolveBinding().getJavaElement(), false);
+		String nullable= NullAnnotationsFix.getNullableAnnotationName(decl.resolveBinding().getJavaElement(), false);
 		for (Object mod : modifiers) {
 			if (mod instanceof Annotation) {
 				Name annotationName= ((Annotation) mod).getTypeName();
@@ -402,7 +401,7 @@ public class NullRewriteOperations {
 // TODO(SH): decide whether we want to propose overwriting existing annotations in super
 //		if (hasNullAnnotation(declaration)) // if overridden has explicit declaration don't propose to change it
 //			return null;
-		String message= Messages.format(MultiFixMessages.NullRewriteOperations_change_overridden_return_nullness, new String[] { overridden.getName(), annotationNameLabel });
+		String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_overridden_return_nullness, new String[] { overridden.getName(), annotationNameLabel });
 		return new ReturnAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, allowRemove, message);
 	}
 

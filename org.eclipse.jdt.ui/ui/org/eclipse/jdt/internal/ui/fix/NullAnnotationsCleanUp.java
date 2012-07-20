@@ -23,6 +23,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.fix.NullAnnotationsFix;
+
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -75,7 +77,7 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 			}
 			locations= filteredLocations.toArray(new IProblemLocation[filteredLocations.size()]);
 		}
-		return NullQuickFixes.createCleanUp(compilationUnit, locations, this.handledProblemID);
+		return NullAnnotationsFix.createCleanUp(compilationUnit, locations, this.handledProblemID);
 	}
 
 	private Map<String, String> getRequiredOptions() {

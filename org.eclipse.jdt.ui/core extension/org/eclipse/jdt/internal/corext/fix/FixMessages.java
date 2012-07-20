@@ -117,6 +117,12 @@ public final class FixMessages extends NLS {
 	public static String VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
 	public static String VariableDeclarationFix_ChangeMidifiersToFinalWherPossible_description;
 
+	public static String NullAnnotationsFix_add_annotation_change_name;
+	public static String NullAnnotationsRewriteOperations_change_method_parameter_nullness;
+	public static String NullAnnotationsRewriteOperations_change_method_return_nullness;
+	public static String NullAnnotationsRewriteOperations_change_overridden_parameter_nullness;
+	public static String NullAnnotationsRewriteOperations_change_overridden_return_nullness;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, FixMessages.class);
