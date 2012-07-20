@@ -248,6 +248,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ParameterLackingNullableAnnotation:
 			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
+			case IProblem.RedundantNullAnnotation:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId);
@@ -693,6 +694,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 			case IProblem.RequiredNonNullButProvidedSpecdNullable:
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, proposals);
+				break;
+			case IProblem.RedundantNullAnnotation:
+				NullAnnotationsCorrectionProcessor.addRemoveRedundantAnnotationProposal(context, problem, proposals);
 				break;
 			default:
 		}

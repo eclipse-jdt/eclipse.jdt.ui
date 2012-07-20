@@ -97,6 +97,7 @@ public class MultiFixMessages extends NLS {
 
 	public static String NullAnnotationsCleanUp_add_nullable_annotation;
 	public static String NullAnnotationsCleanUp_add_nonnull_annotation;
+	public static String NullAnnotationsCleanUp_remove_redundant_nullness_annotation;
 
 	static {
 		// initialize resource bundle

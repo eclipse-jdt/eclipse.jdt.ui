@@ -122,6 +122,7 @@ public final class FixMessages extends NLS {
 	public static String NullAnnotationsRewriteOperations_change_method_return_nullness;
 	public static String NullAnnotationsRewriteOperations_change_overridden_parameter_nullness;
 	public static String NullAnnotationsRewriteOperations_change_overridden_return_nullness;
+	public static String NullAnnotationsRewriteOperations_remove_redundant_nullness_annotation;
 
 	static {
 		// initialize resource bundle

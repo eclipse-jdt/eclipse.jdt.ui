@@ -31,8 +31,10 @@ public interface IProposalRelevance {
 	public static final int REMOVE_UNREACHABLE_CODE_INCLUDING_CONDITION= 10;
 	public static final int CHANGE_VISIBILITY= 10;
 	public static final int MARKER_RESOLUTION= 10;
-	public static final int CREATE_LOCAL_PREFIX_OR_SUFFIX_MATCH= 10;	
-
+	public static final int CREATE_LOCAL_PREFIX_OR_SUFFIX_MATCH= 10;
+	public static final int CHANGE_NULLNESS_ANNOTATION= 10;
+	
+	public static final int CHANGE_NULLNESS_ANNOTATION_IN_OVERRIDDEN_METHOD= 9;	
 	public static final int REMOVE_FINAL_MODIFIER= 9;
 	public static final int GETTER_SETTER_NOT_VISIBLE_FIELD= 9;
 	public static final int ADD_MISSING_BODY= 9;
@@ -172,6 +174,7 @@ public interface IProposalRelevance {
 	public static final int CHANGE_PROJECT_COMPLIANCE= 5;
 	public static final int CORRECT_PACKAGE_DECLARATION= 5;
 	public static final int TYPE_ARGUMENTS_FROM_CONTEXT= 5;
+	public static final int REMOVE_REDUNDANT_NULLNESS_ANNOTATION= 5;
 
 	public static final int ADD_MISSING_TAG= 4;
 	public static final int INSERT_FALL_THROUGH= 4;
@@ -276,5 +279,6 @@ public interface IProposalRelevance {
 	public static final int DISABLE_SPELL_CHECKING= Integer.MIN_VALUE + 1;
 	public static final int WORD_IGNORE= Integer.MIN_VALUE + 1;
 	public static final int ADD_WORD= Integer.MIN_VALUE;
+
 
 }

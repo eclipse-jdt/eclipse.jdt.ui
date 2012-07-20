@@ -82,9 +82,20 @@ public class NullAnnotationsCorrectionProcessor {
 					}
 				};
 			}
-			int relevance= modifyOverridden ? 9 : 10; //raise local change above change in overridden method
+			int relevance= modifyOverridden ? IProposalRelevance.CHANGE_NULLNESS_ANNOTATION_IN_OVERRIDDEN_METHOD : IProposalRelevance.CHANGE_NULLNESS_ANNOTATION; //raise local change above change in overridden method
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, problem.getProblemId()), relevance, image, context);
 			proposals.add(proposal);
 		}
+	}
+
+	public static void addRemoveRedundantAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		NullAnnotationsFix fix= NullAnnotationsFix.createRemoveRedundantNullAnnotationsFix(context.getASTRoot(), problem);
+		if (fix == null)
+			return;
+
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		Map<String, String> options= new Hashtable<String, String>();
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, problem.getProblemId()), IProposalRelevance.REMOVE_REDUNDANT_NULLNESS_ANNOTATION, image, context);
+		proposals.add(proposal);
 	}
 }

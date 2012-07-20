@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.RemoveRedundantAnnotationRewriteOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -111,6 +112,11 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 				new NullAnnotationsRewriteOperations.SignatureAnnotationRewriteOperation[] { operation });
 	}
 
+	public static NullAnnotationsFix createRemoveRedundantNullAnnotationsFix(CompilationUnit compilationUnit, IProblemLocation problem) {
+		RemoveRedundantAnnotationRewriteOperation operation= new RemoveRedundantAnnotationRewriteOperation(compilationUnit, problem);
+		return new NullAnnotationsFix(FixMessages.NullAnnotationsRewriteOperations_remove_redundant_nullness_annotation, compilationUnit, new RemoveRedundantAnnotationRewriteOperation[] { operation });
+	}
+
 	// Entry for NullAnnotationsCleanup:
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] locations, int problemID) {
 		ICompilationUnit cu= (ICompilationUnit) compilationUnit.getJavaElement();
@@ -128,6 +134,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		createAddNullAnnotationOperations(compilationUnit, locations, operations);
+		createRemoveRedundantNullAnnotationsOperations(compilationUnit, locations, operations);
 		if (operations.size() == 0)
 			return null;
 		CompilationUnitRewriteOperation[] operationsArray= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
@@ -169,6 +176,19 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 					true/*thisUnitOnly*/, false/*allowRemove*/, false/*modifyOverridden*/);
 			if (fix != null)
 				result.add(fix);
+		}
+	}
+
+	private static void createRemoveRedundantNullAnnotationsOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
+		for (int i= 0; i < locations.length; i++) {
+			IProblemLocation problem= locations[i];
+			if (problem == null)
+				continue; // problem was filtered out by createCleanUp()
+
+			if (problem.getProblemId() == IProblem.RedundantNullAnnotation) {
+				RemoveRedundantAnnotationRewriteOperation operation= new RemoveRedundantAnnotationRewriteOperation(compilationUnit, problem);
+				result.add(operation);
+			}
 		}
 	}
 

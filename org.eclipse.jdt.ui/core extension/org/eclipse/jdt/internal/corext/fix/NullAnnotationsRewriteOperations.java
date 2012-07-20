@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -26,6 +27,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -38,6 +40,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -179,6 +182,49 @@ public class NullAnnotationsRewriteOperations {
 			String resolvableName= importRewrite.addImport(fAnnotationToAdd);
 			newAnnotation.setTypeName(ast.newName(resolvableName));
 			listRewrite.insertLast(newAnnotation, group); // null annotation is last modifier, directly preceding the type
+		}
+	}
+
+	static class RemoveRedundantAnnotationRewriteOperation extends CompilationUnitRewriteOperation {
+
+		private IProblemLocation fProblem;
+		private CompilationUnit fCompilationUnit;
+
+		public RemoveRedundantAnnotationRewriteOperation(CompilationUnit compilationUnit, IProblemLocation problem) {
+			fCompilationUnit= compilationUnit;
+			fProblem= problem;
+		}
+
+		@Override
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
+			TextEditGroup group= createTextEditGroup(FixMessages.NullAnnotationsRewriteOperations_remove_redundant_nullness_annotation, cuRewrite);
+			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+
+			CompilationUnit astRoot= fCompilationUnit;
+			ASTNode selectedNode= fProblem.getCoveringNode(astRoot);
+
+			List<IExtendedModifier> modifiers;
+			if (selectedNode instanceof SingleVariableDeclaration) {
+				SingleVariableDeclaration singleVariableDeclaration= (SingleVariableDeclaration) selectedNode;
+				modifiers= singleVariableDeclaration.modifiers();
+			} else if (selectedNode instanceof MethodDeclaration) {
+				MethodDeclaration methodDeclaration= (MethodDeclaration) selectedNode;
+				modifiers= methodDeclaration.modifiers();
+			} else {
+				return;
+			}
+
+			for (Iterator<IExtendedModifier> iterator= modifiers.iterator(); iterator.hasNext();) {
+				IExtendedModifier modifier= iterator.next();
+				if (modifier instanceof MarkerAnnotation) {
+					MarkerAnnotation annotation= (MarkerAnnotation) modifier;
+					IAnnotationBinding annotationBinding= annotation.resolveAnnotationBinding();
+					String name= annotationBinding.getName();
+					if (name.equals(NullAnnotationsFix.getNonNullAnnotationName(fCompilationUnit.getJavaElement(), true))) {
+						astRewrite.remove((ASTNode) modifier, group);
+					}
+				}
+			}
 		}
 	}
 

@@ -85,6 +85,7 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 		// TODO(SH): might set depending on this.handledProblemID, not sure about the benefit
 		result.put(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION, JavaCore.WARNING);
 		result.put(JavaCore.COMPILER_PB_REDUNDANT_NULL_CHECK, JavaCore.WARNING);
+		result.put(JavaCore.COMPILER_PB_REDUNDANT_NULL_ANNOTATION, JavaCore.WARNING);
 		result.put(JavaCore.COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT, JavaCore.WARNING);
 		result.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.WARNING);
 		result.put(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.WARNING);
@@ -111,6 +112,9 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 			case IProblem.IllegalRedefinitionToNonNullParameter:
 			case IProblem.ParameterLackingNonNullAnnotation:
 				result.add(MultiFixMessages.NullAnnotationsCleanUp_add_nonnull_annotation);
+				break;
+			case IProblem.RedundantNullAnnotation:
+				result.add(MultiFixMessages.NullAnnotationsCleanUp_remove_redundant_nullness_annotation);
 				break;
 		}
 		return result.toArray(new String[result.size()]);
