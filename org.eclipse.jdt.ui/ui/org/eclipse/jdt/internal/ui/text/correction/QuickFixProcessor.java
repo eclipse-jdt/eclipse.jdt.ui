@@ -696,6 +696,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, proposals);
 				break;
 			case IProblem.RedundantNullAnnotation:
+			case IProblem.RedundantNullDefaultAnnotationPackage:
+			case IProblem.RedundantNullDefaultAnnotationType:
+			case IProblem.RedundantNullDefaultAnnotationMethod:
 				NullAnnotationsCorrectionProcessor.addRemoveRedundantAnnotationProposal(context, problem, proposals);
 				break;
 			default:

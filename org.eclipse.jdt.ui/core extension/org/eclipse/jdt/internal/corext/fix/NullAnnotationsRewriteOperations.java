@@ -203,26 +203,37 @@ public class NullAnnotationsRewriteOperations {
 			CompilationUnit astRoot= fCompilationUnit;
 			ASTNode selectedNode= fProblem.getCoveringNode(astRoot);
 
-			List<IExtendedModifier> modifiers;
-			if (selectedNode instanceof SingleVariableDeclaration) {
-				SingleVariableDeclaration singleVariableDeclaration= (SingleVariableDeclaration) selectedNode;
-				modifiers= singleVariableDeclaration.modifiers();
-			} else if (selectedNode instanceof MethodDeclaration) {
-				MethodDeclaration methodDeclaration= (MethodDeclaration) selectedNode;
-				modifiers= methodDeclaration.modifiers();
-			} else {
-				return;
-			}
+			if (fProblem.getProblemId() == IProblem.RedundantNullAnnotation) {
+				List<IExtendedModifier> modifiers;
+				if (selectedNode instanceof SingleVariableDeclaration) {
+					SingleVariableDeclaration singleVariableDeclaration= (SingleVariableDeclaration) selectedNode;
+					modifiers= singleVariableDeclaration.modifiers();
+				} else if (selectedNode instanceof MethodDeclaration) {
+					MethodDeclaration methodDeclaration= (MethodDeclaration) selectedNode;
+					modifiers= methodDeclaration.modifiers();
+				} else {
+					return;
+				}
 
-			for (Iterator<IExtendedModifier> iterator= modifiers.iterator(); iterator.hasNext();) {
-				IExtendedModifier modifier= iterator.next();
-				if (modifier instanceof MarkerAnnotation) {
-					MarkerAnnotation annotation= (MarkerAnnotation) modifier;
-					IAnnotationBinding annotationBinding= annotation.resolveAnnotationBinding();
-					String name= annotationBinding.getName();
-					if (name.equals(NullAnnotationsFix.getNonNullAnnotationName(fCompilationUnit.getJavaElement(), true))) {
-						astRewrite.remove((ASTNode) modifier, group);
+				for (Iterator<IExtendedModifier> iterator= modifiers.iterator(); iterator.hasNext();) {
+					IExtendedModifier modifier= iterator.next();
+					if (modifier instanceof MarkerAnnotation) {
+						MarkerAnnotation annotation= (MarkerAnnotation) modifier;
+						IAnnotationBinding annotationBinding= annotation.resolveAnnotationBinding();
+						String name= annotationBinding.getName();
+						if (name.equals(NullAnnotationsFix.getNonNullAnnotationName(fCompilationUnit.getJavaElement(), true))) {
+							astRewrite.remove(annotation, group);
+						}
 					}
+				}
+			} else {
+				if (!(selectedNode instanceof MarkerAnnotation))
+					return;
+				MarkerAnnotation annotation= (MarkerAnnotation) selectedNode;
+				IAnnotationBinding annotationBinding= annotation.resolveAnnotationBinding();
+				String name= annotationBinding.getName();
+				if (name.equals(NullAnnotationsFix.getNonNullByDefaultAnnotationName(fCompilationUnit.getJavaElement(), true))) {
+					astRewrite.remove(annotation, group);
 				}
 			}
 		}

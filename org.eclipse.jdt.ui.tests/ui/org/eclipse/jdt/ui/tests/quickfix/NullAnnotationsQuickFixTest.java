@@ -600,4 +600,160 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+
+	public void testRemoveRedundantAnnotation4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class E {\n");
+		buf.append("    @NonNullByDefault\n");
+		buf.append("    void foo(Object o) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Object o) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testRemoveRedundantAnnotation5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class E {\n");
+		buf.append("    @NonNullByDefault\n");
+		buf.append("    class E1 {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class E {\n");
+		buf.append("    class E1 {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testRemoveRedundantAnnotation6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @NonNullByDefault\n");
+		buf.append("    void foo(Object o) {\n");
+		buf.append("        @NonNullByDefault\n");
+		buf.append("        class E1 {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @NonNullByDefault\n");
+		buf.append("    void foo(Object o) {\n");
+		buf.append("        class E1 {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testRemoveRedundantAnnotation7() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+		buf.append("package test1;\n");
+		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testRemoveRedundantAnnotation8() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+		buf.append("package test1;\n");
+		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @NonNullByDefault\n");
+		buf.append("    void foo(Object o) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Object o) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
 }

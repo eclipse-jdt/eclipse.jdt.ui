@@ -185,7 +185,9 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 			if (problem == null)
 				continue; // problem was filtered out by createCleanUp()
 
-			if (problem.getProblemId() == IProblem.RedundantNullAnnotation) {
+			int problemId= problem.getProblemId();
+			if (problemId == IProblem.RedundantNullAnnotation || problemId == IProblem.RedundantNullDefaultAnnotationPackage || problemId == IProblem.RedundantNullDefaultAnnotationType
+					|| problemId == IProblem.RedundantNullDefaultAnnotationMethod) {
 				RemoveRedundantAnnotationRewriteOperation operation= new RemoveRedundantAnnotationRewriteOperation(compilationUnit, problem);
 				result.add(operation);
 			}
@@ -223,15 +225,19 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 	}
 
 	public static String getNullableAnnotationName(IJavaElement javaElement, boolean makeSimple) {
-		String qualifiedName= javaElement.getJavaProject().getOption(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, true);
-		int lastDot;
-		if (makeSimple && qualifiedName != null && (lastDot= qualifiedName.lastIndexOf('.')) != -1)
-			return qualifiedName.substring(lastDot + 1);
-		return qualifiedName;
+		return getAnnotationName(javaElement, makeSimple, JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME);
 	}
 
 	public static String getNonNullAnnotationName(IJavaElement javaElement, boolean makeSimple) {
-		String qualifiedName= javaElement.getJavaProject().getOption(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, true);
+		return getAnnotationName(javaElement, makeSimple, JavaCore.COMPILER_NONNULL_ANNOTATION_NAME);
+	}
+
+	public static String getNonNullByDefaultAnnotationName(IJavaElement javaElement, boolean makeSimple) {
+		return getAnnotationName(javaElement, makeSimple, JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME);
+	}
+
+	private static String getAnnotationName(IJavaElement javaElement, boolean makeSimple, String annotation) {
+		String qualifiedName= javaElement.getJavaProject().getOption(annotation, true);
 		int lastDot;
 		if (makeSimple && qualifiedName != null && (lastDot= qualifiedName.lastIndexOf('.')) != -1)
 			return qualifiedName.substring(lastDot + 1);
