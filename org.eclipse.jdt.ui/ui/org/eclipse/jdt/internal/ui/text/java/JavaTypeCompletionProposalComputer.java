@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.Symbols;
 
+
 /**
  *
  * @since 3.2
@@ -59,50 +60,83 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 	@Override
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		List<ICompletionProposal> types= super.computeCompletionProposals(context, monitor);
-		if (context instanceof JavaContentAssistInvocationContext) {
-			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
-			try {
-				if (types.size() > 0 && context.computeIdentifierPrefix().length() == 0) {
-					IType expectedType= javaContext.getExpectedType();
-					if (expectedType != null) {
-						// empty prefix completion - insert LRU types if known, but prune if they already occur in the core list
 
-						// compute minmimum relevance and already proposed list
-						int relevance= Integer.MAX_VALUE;
-						Set<String> proposed= new HashSet<String>();
-						for (Iterator<ICompletionProposal> it= types.iterator(); it.hasNext();) {
-							AbstractJavaCompletionProposal p= (AbstractJavaCompletionProposal) it.next();
-							IJavaElement element= p.getJavaElement();
-							if (element instanceof IType)
-								proposed.add(((IType) element).getFullyQualifiedName());
-							relevance= Math.min(relevance, p.getRelevance());
-						}
+		if (!(context instanceof JavaContentAssistInvocationContext) || !isConstructorCompletion(context))
+			return types;
 
-						// insert history types
-						List<String> history= JavaPlugin.getDefault().getContentAssistHistory().getHistory(expectedType.getFullyQualifiedName()).getTypes();
-						relevance-= history.size() + 1;
-						for (Iterator<String> it= history.iterator(); it.hasNext();) {
-							String type= it.next();
-							if (proposed.contains(type))
-								continue;
+		JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
+		try {
+			if (types.size() > 0 && context.computeIdentifierPrefix().length() == 0) {
+				IType expectedType= javaContext.getExpectedType();
+				if (expectedType != null) {
+					// empty prefix completion - insert LRU types if known, but prune if they already occur in the core list
 
-							IJavaCompletionProposal proposal= createTypeProposal(relevance, type, javaContext);
+					// compute minmimum relevance and already proposed list
+					int relevance= Integer.MAX_VALUE;
+					Set<String> proposed= new HashSet<String>();
+					for (Iterator<ICompletionProposal> it= types.iterator(); it.hasNext();) {
+						AbstractJavaCompletionProposal p= (AbstractJavaCompletionProposal) it.next();
+						IJavaElement element= p.getJavaElement();
+						if (element instanceof IType)
+							proposed.add(((IType) element).getFullyQualifiedName());
+						relevance= Math.min(relevance, p.getRelevance());
+					}
 
-							if (proposal != null)
-								types.add(proposal);
-							relevance++;
-						}
+					// insert history types
+					List<String> history= JavaPlugin.getDefault().getContentAssistHistory().getHistory(expectedType.getFullyQualifiedName()).getTypes();
+					relevance-= history.size() + 1;
+					for (Iterator<String> it= history.iterator(); it.hasNext();) {
+						String type= it.next();
+						if (proposed.contains(type))
+							continue;
+
+						IJavaCompletionProposal proposal= createTypeProposal(relevance, type, javaContext);
+
+						if (proposal != null)
+							types.add(proposal);
+						relevance++;
 					}
 				}
-			} catch (BadLocationException x) {
-				// log & ignore
-				JavaPlugin.log(x);
-			} catch (JavaModelException x) {
-				// log & ignore
-				JavaPlugin.log(x);
 			}
+		} catch (BadLocationException x) {
+			// log & ignore
+			JavaPlugin.log(x);
+		} catch (JavaModelException x) {
+			// log & ignore
+			JavaPlugin.log(x);
 		}
+
 		return types;
+	}
+
+	/**
+	 * Tells whether content assist is invoked after 'new'.
+	 * <p>
+	 * The correct fix would be to use
+	 * {@link org.eclipse.jdt.core.CompletionContext#getTokenLocation()} but currently there is no
+	 * location for constructor completion start, see http://bugs.eclipse.org/385858 .
+	 * </p>
+	 * 
+	 * @param context the content assist invocation context
+	 * @return <code>true</code> if content assist is invoked after 'new', <code>false</code>
+	 *         otherwise
+	 * @since 3.9
+	 */
+	private boolean isConstructorCompletion(ContentAssistInvocationContext context) {
+		IDocument doc= context.getDocument();
+		if (doc == null)
+			return false;
+
+		int invocationOffset= context.getInvocationOffset();
+		int i= invocationOffset;
+		try {
+			while (i > 0 && Character.isWhitespace(doc.getChar(i)))
+				i--;
+			return i < invocationOffset && doc.get(i - 2, 3).equals("new"); //$NON-NLS-1$
+		} catch (BadLocationException e) {
+			return false;
+		}
+
 	}
 
 	private IJavaCompletionProposal createTypeProposal(int relevance, String fullyQualifiedType, JavaContentAssistInvocationContext context) throws JavaModelException {
