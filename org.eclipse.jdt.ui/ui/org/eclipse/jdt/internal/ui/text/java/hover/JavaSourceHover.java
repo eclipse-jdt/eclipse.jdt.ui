@@ -87,13 +87,13 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 	@Deprecated
 	public String getHoverInfo(ITextViewer textViewer, IRegion region) {
 		IJavaElement[] result= getJavaElementsAt(textViewer, region);
-		ITypeRoot editorInput= getEditorInputJavaElement();
 
 		fUpwardShiftInLines= 0;
 		fBracketHoverStatus= null;
 
-		if (result == null || result.length == 0)
-			return getBracketHoverInfo(textViewer, region, editorInput);
+		if (result == null || result.length == 0) {
+			return getBracketHoverInfo(textViewer, region);
+		}
 
 		if (result.length > 1)
 			return null;
@@ -103,7 +103,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			try {
 				String source= ((ISourceReference) curr).getSource();
 
-				String[] sourceLines= getTrimmedSource(source, editorInput);
+				String[] sourceLines= getTrimmedSource(source, curr);
 				if (sourceLines == null)
 					return null;
 
@@ -118,10 +118,12 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 		return null;
 	}
 
-	private String getBracketHoverInfo(final ITextViewer textViewer, IRegion region, ITypeRoot editorInput) {
+	private String getBracketHoverInfo(final ITextViewer textViewer, IRegion region) {
 		IEditorPart editor= getEditor();
-		if (!(editor instanceof JavaEditor))
+		ITypeRoot editorInput= getEditorInputJavaElement();
+		if (!(editor instanceof JavaEditor) || editorInput == null) {
 			return null;
+		}
 
 		int offset= region.getOffset();
 		IDocument document= textViewer.getDocument();
@@ -242,15 +244,15 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 	 * Returns the trimmed source lines.
 	 * 
 	 * @param source the source string, could be <code>null</code>
-	 * @param editorInput the editor input
+	 * @param javaElement the java element
 	 * @return the trimmed source lines or <code>null</code>
 	 */
-	private String[] getTrimmedSource(String source, ITypeRoot editorInput) {
+	private String[] getTrimmedSource(String source, IJavaElement javaElement) {
 		if (source == null)
 			return null;
 		source= removeLeadingComments(source);
 		String[] sourceLines= Strings.convertIntoLines(source);
-		Strings.trimIndentation(sourceLines, editorInput.getJavaProject());
+		Strings.trimIndentation(sourceLines, javaElement.getJavaProject());
 		return sourceLines;
 	}
 
