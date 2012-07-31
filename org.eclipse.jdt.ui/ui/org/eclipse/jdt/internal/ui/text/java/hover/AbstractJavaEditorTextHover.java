@@ -33,10 +33,10 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
@@ -169,7 +169,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	protected ITypeRoot getEditorInputJavaElement() {
 		IEditorPart editor= getEditor();
 		if (editor != null)
-			return JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
+			return EditorUtility.getEditorInputJavaElement(editor, false);
 		return null;
 	}
 }
