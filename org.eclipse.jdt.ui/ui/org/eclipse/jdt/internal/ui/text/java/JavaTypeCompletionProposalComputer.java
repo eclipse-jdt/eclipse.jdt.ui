@@ -21,6 +21,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -61,10 +62,14 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		List<ICompletionProposal> types= super.computeCompletionProposals(context, monitor);
 
-		if (!(context instanceof JavaContentAssistInvocationContext) || !isConstructorCompletion(context))
+		if (!(context instanceof JavaContentAssistInvocationContext))
 			return types;
 
 		JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
+		CompletionContext coreContext= javaContext.getCoreContext();
+		if (coreContext != null && coreContext.getTokenLocation() != CompletionContext.TL_CONSTRUCTOR_START)
+			return types;
+
 		try {
 			if (types.size() > 0 && context.computeIdentifierPrefix().length() == 0) {
 				IType expectedType= javaContext.getExpectedType();
@@ -107,36 +112,6 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 		}
 
 		return types;
-	}
-
-	/**
-	 * Tells whether content assist is invoked after 'new'.
-	 * <p>
-	 * The correct fix would be to use
-	 * {@link org.eclipse.jdt.core.CompletionContext#getTokenLocation()} but currently there is no
-	 * location for constructor completion start, see http://bugs.eclipse.org/385858 .
-	 * </p>
-	 * 
-	 * @param context the content assist invocation context
-	 * @return <code>true</code> if content assist is invoked after 'new', <code>false</code>
-	 *         otherwise
-	 * @since 3.9
-	 */
-	private boolean isConstructorCompletion(ContentAssistInvocationContext context) {
-		IDocument doc= context.getDocument();
-		if (doc == null)
-			return false;
-
-		int invocationOffset= context.getInvocationOffset();
-		int i= invocationOffset;
-		try {
-			while (i > 0 && Character.isWhitespace(doc.getChar(i)))
-				i--;
-			return i < invocationOffset && doc.get(i - 2, 3).equals("new"); //$NON-NLS-1$
-		} catch (BadLocationException e) {
-			return false;
-		}
-
 	}
 
 	private IJavaCompletionProposal createTypeProposal(int relevance, String fullyQualifiedType, JavaContentAssistInvocationContext context) throws JavaModelException {
