@@ -460,6 +460,10 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		helper1(new String[] { "p.A" }, "p.A", 8, 10, 8, 20, PARAMETER, "fooBar", true, true);
 	}
 
+	public void test46() throws Exception {
+		helper1(new String[] { "p.A", "p.B" }, "p.A", 6, 10, 6, 13, PARAMETER, "b", true, true);
+	}
+	
 	// Move mA1 to field fB, do not inline delegator
 	public void test3() throws Exception {
 		helper1(new String[] { "p1.A", "p2.B", "p3.C"}, "p1.A", 9, 17, 9, 20, FIELD, "fB", false, false);

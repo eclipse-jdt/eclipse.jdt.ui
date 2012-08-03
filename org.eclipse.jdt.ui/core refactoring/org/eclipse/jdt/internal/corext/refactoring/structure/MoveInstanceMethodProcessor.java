@@ -636,13 +636,11 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			final ASTRewrite rewrite= fRewrite;
 			final IBinding binding= node.resolveBinding();
 			if (binding instanceof ITypeBinding) {
-				final ITypeBinding type= (ITypeBinding) binding;
-				if (type.isClass() && type.getDeclaringClass() != null) {
-					final String name= fTargetRewrite.getImportRewrite().addImport(type.getTypeDeclaration());
-					if (name != null && name.length() > 0) {
-						fRewrite.replace(node, ASTNodeFactory.newName(ast, name), null);
-						return false;
-					}
+				ITypeBinding type= (ITypeBinding) binding;
+				String name= fTargetRewrite.getImportRewrite().addImport(type.getTypeDeclaration());
+				if (name != null && name.indexOf('.') != -1) {
+					fRewrite.replace(node, ASTNodeFactory.newName(ast, name), null);
+					return false;
 				}
 			}
 			if (Bindings.equals(fTarget, binding))
