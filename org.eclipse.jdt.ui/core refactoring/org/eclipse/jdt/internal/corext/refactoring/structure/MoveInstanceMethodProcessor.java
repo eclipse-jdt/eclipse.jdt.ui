@@ -655,7 +655,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				final IMethodBinding method= fDeclaration.resolveBinding();
 				ITypeBinding declaring= variable.getDeclaringClass();
 				if (method != null) {
-					if (Bindings.equals(method.getDeclaringClass(), declaring)) {
+					if (declaring != null && Bindings.isSuperType(declaring, method.getDeclaringClass(), false)) {
 						declaring= declaring.getTypeDeclaration();
 						if (JdtFlags.isStatic(variable))
 							rewrite.replace(node, ast.newQualifiedName(ASTNodeFactory.newName(ast, fTargetRewrite.getImportRewrite().addImport(declaring)), ast.newSimpleName(node.getFullyQualifiedName())), null);
