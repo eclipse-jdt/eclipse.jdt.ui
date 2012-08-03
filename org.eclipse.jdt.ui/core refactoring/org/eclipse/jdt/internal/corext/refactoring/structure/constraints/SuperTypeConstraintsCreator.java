@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -170,15 +170,17 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 		final ITypeBinding binding= node.resolveTypeBinding();
 		if (binding != null && binding.isArray()) {
 			final ConstraintVariable2 ancestor= fModel.createIndependentTypeVariable(binding.getElementType());
-			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
-			Expression expression= null;
-			ConstraintVariable2 descendant= null;
-			final List<Expression> expressions= node.expressions();
-			for (int index= 0; index < expressions.size(); index++) {
-				expression= expressions.get(index);
-				descendant= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-				if (descendant != null)
-					fModel.createSubtypeConstraint(descendant, ancestor);
+			if (ancestor != null) {
+				node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
+				Expression expression= null;
+				ConstraintVariable2 descendant= null;
+				final List<Expression> expressions= node.expressions();
+				for (int index= 0; index < expressions.size(); index++) {
+					expression= expressions.get(index);
+					descendant= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+					if (descendant != null)
+						fModel.createSubtypeConstraint(descendant, ancestor);
+				}
 			}
 		}
 	}

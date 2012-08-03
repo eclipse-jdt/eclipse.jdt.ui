@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -247,7 +247,7 @@ public final class SuperTypeConstraintsModel {
 	 *
 	 * @param expression the cast expression
 	 * @param variable the associated constraint variable
-	 * @return the created cast variable
+	 * @return the created cast variable, or <code>null</code>
 	 */
 	public final ConstraintVariable2 createCastVariable(final CastExpression expression, final ConstraintVariable2 variable) {
 		ITypeBinding binding= expression.resolveTypeBinding();
@@ -349,7 +349,7 @@ public final class SuperTypeConstraintsModel {
 	 * Creates an exception variable.
 	 *
 	 * @param name the name of the thrown exception
-	 * @return the created exception variable
+	 * @return the created exception variable, or <code>null</code>
 	 */
 	public final ConstraintVariable2 createExceptionVariable(final Name name) {
 		final ITypeBinding binding= name.resolveTypeBinding();
@@ -362,7 +362,7 @@ public final class SuperTypeConstraintsModel {
 	 * Creates an immutable type variable.
 	 *
 	 * @param type the type binding
-	 * @return the created plain type variable
+	 * @return the created plain type variable, or <code>null</code>
 	 */
 	public final ConstraintVariable2 createImmutableTypeVariable(ITypeBinding type) {
 		if (type.isArray())
@@ -379,7 +379,7 @@ public final class SuperTypeConstraintsModel {
 	 * </p>
 	 *
 	 * @param type the type binding
-	 * @return the created independant type variable
+	 * @return the created independant type variable, or <code>null</code>
 	 */
 	public final ConstraintVariable2 createIndependentTypeVariable(ITypeBinding type) {
 		if (type.isArray())
@@ -394,7 +394,7 @@ public final class SuperTypeConstraintsModel {
 	 *
 	 * @param method the method binding
 	 * @param index the index of the parameter
-	 * @return the created method parameter variable
+	 * @return the created method parameter variable, or <code>null</code>
 	 */
 	public final ConstraintVariable2 createMethodParameterVariable(final IMethodBinding method, final int index) {
 		final ITypeBinding[] parameters= method.getParameterTypes();
@@ -419,7 +419,7 @@ public final class SuperTypeConstraintsModel {
 	 * Creates a new return type variable.
 	 *
 	 * @param method the method binding
-	 * @return the created return type variable
+	 * @return the created return type variable, or <code>null</code>
 	 */
 	public final ConstraintVariable2 createReturnTypeVariable(final IMethodBinding method) {
 		if (!method.isConstructor()) {
@@ -475,7 +475,7 @@ public final class SuperTypeConstraintsModel {
 	 *
 	 * @param type the type binding
 	 * @param range the compilation unit range
-	 * @return the created type variable
+	 * @return the created type variable, or <code>null</code>
 	 */
 	public final ConstraintVariable2 createTypeVariable(ITypeBinding type, final CompilationUnitRange range) {
 		if (type.isArray())
@@ -489,7 +489,7 @@ public final class SuperTypeConstraintsModel {
 	 * Creates a type variable.
 	 *
 	 * @param type the type
-	 * @return the created type variable
+	 * @return the created type variable, or <code>null</code>
 	 */
 	public final ConstraintVariable2 createTypeVariable(final Type type) {
 		ITypeBinding binding= type.resolveBinding();
@@ -506,7 +506,7 @@ public final class SuperTypeConstraintsModel {
 	 * Creates a variable type variable.
 	 *
 	 * @param binding the variable binding
-	 * @return the created variable variable
+	 * @return the created variable variable, or <code>null</code>
 	 */
 	public final ConstraintVariable2 createVariableVariable(final IVariableBinding binding) {
 		ITypeBinding type= binding.getType();
