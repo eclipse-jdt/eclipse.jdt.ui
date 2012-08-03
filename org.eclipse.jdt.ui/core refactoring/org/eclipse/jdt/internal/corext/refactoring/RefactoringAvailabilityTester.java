@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1227,14 +1227,14 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isSelfEncapsulateAvailable(IField field) throws JavaModelException {
-		return Checks.isAvailable(field) && !JdtFlags.isEnum(field) && !field.getDeclaringType().isAnnotation();
+		return Checks.isAvailable(field) && !JdtFlags.isEnum(field) && !field.getDeclaringType().isInterface();
 	}
 
 	public static boolean isSelfEncapsulateAvailable(final IStructuredSelection selection) throws JavaModelException {
 		if (selection.size() == 1) {
 			if (selection.getFirstElement() instanceof IField) {
 				final IField field= (IField) selection.getFirstElement();
-				return Checks.isAvailable(field) && !JdtFlags.isEnum(field);
+				return isSelfEncapsulateAvailable(field);
 			}
 		}
 		return false;
