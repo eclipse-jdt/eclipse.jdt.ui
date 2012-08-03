@@ -82,6 +82,12 @@ public class JUnitPropertyTester extends PropertyTester {
 				case IJavaElement.PACKAGE_FRAGMENT:
 					return ((IPackageFragment) element).hasChildren();
 				case IJavaElement.COMPILATION_UNIT:
+					IType[] types= ((ICompilationUnit) element).getAllTypes();
+					for (int i= 0; i < types.length; i++) {
+						if (isJUnitTest(types[i]))
+							return true;
+					}
+					return false;
 				case IJavaElement.CLASS_FILE:
 				case IJavaElement.TYPE:
 				case IJavaElement.METHOD:
