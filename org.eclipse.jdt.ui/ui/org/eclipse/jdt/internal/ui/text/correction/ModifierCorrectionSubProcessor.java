@@ -191,7 +191,7 @@ public class ModifierCorrectionSubProcessor {
 					includedModifiers= Modifier.STATIC;
 					break;
 				case TO_NON_STATIC:
-					if (typeBinding.isInterface())
+					if (typeBinding != null && typeBinding.isInterface())
 						return;
 					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertononstatic_description, name);
 					excludedModifiers= Modifier.STATIC;
@@ -209,7 +209,7 @@ public class ModifierCorrectionSubProcessor {
 					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changevisibility_description, new String[] { name, getVisibilityString(visibility) });
 					break;
 				case TO_NON_FINAL:
-					if (typeBinding.isInterface())
+					if (typeBinding != null && typeBinding.isInterface())
 						return;
 					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertononfinal_description, name);
 					excludedModifiers= Modifier.FINAL;
