@@ -57,6 +57,8 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -81,6 +83,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarpackager.AbstractJarDestinationWizardPage;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
@@ -327,6 +330,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 		Dialog.applyDialogFont(composite);
 		setControl(composite);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.FATJARPACKAGER_WIZARD_PAGE);
 	}
 
 	private void createContentGroup(Composite parent) {

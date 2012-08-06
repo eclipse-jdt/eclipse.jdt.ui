@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -385,6 +385,9 @@ public interface IJavaHelpContextIds {
 	public static final String JAVADOC_SPECIFICS_PAGE= PREFIX + "javadoc_specifics_page_context"; //$NON-NLS-1$
 	public static final String JAVADOC_TREE_PAGE= PREFIX + "javadoc_tree_page_context"; //$NON-NLS-1$
 	public static final String JAVADOC_COMMAND_PAGE= PREFIX + "javadoc_command_page_context"; //$NON-NLS-1$
+
+	// since 3.9
+	public static final String FATJARPACKAGER_WIZARD_PAGE= PREFIX + "fat_jar_packager_wizard_page_context"; //$NON-NLS-1$
 
 	// Same help for all refactoring error pages. Indidivual help can
 	// be provided per a single refactoring status.
