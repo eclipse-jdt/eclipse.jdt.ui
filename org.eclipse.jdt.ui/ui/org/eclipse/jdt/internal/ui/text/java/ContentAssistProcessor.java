@@ -15,10 +15,8 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -114,7 +112,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 			// This may show the warning dialog if all categories are disabled
 			setCategoryIteration();
-			for (Iterator<CompletionProposalCategory> it= getCurrentCategories().iterator(); it.hasNext();) {
+			for (Iterator<CompletionProposalCategory> it= fCategories.iterator(); it.hasNext();) {
 				CompletionProposalCategory cat= it.next();
 				cat.sessionStarted();
 			}
@@ -138,23 +136,6 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 				}
 
 			}
-
-		}
-
-		/**
-		 * Returns the categories for the current session.
-		 * 
-		 * @return the current categories
-		 * @since 3.9
-		 */
-		private Set<CompletionProposalCategory> getCurrentCategories() {
-			Set<CompletionProposalCategory> currentCategories= new HashSet<CompletionProposalCategory>(fCategories.size());
-			if (fCategoryIteration != null) {
-				Iterator<List<CompletionProposalCategory>> it= fCategoryIteration.iterator();
-				while (it.hasNext())
-					currentCategories.addAll(it.next());
-			}
-			return currentCategories;
 		}
 
 		/*
@@ -164,7 +145,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			if (event.processor != ContentAssistProcessor.this)
 				return;
 
-			for (Iterator<CompletionProposalCategory> it= getCurrentCategories().iterator(); it.hasNext();) {
+			for (Iterator<CompletionProposalCategory> it= fCategories.iterator(); it.hasNext();) {
 				CompletionProposalCategory cat= it.next();
 				cat.sessionEnded();
 			}
