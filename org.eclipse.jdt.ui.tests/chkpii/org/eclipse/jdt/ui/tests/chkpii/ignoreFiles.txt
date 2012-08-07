@@ -22,8 +22,6 @@ com.oti.zrh.eclipse.tools/*
 com.oti.zrh.eclipse.doc.tools-feature/*
 com.oti.zrh.eclipse.tools-updateSite/*
 
-javax.servlet/*
-
 com.jcraft.jsch/meta-inf/maven/com.jcraft/jsch/pom.xml
 
 org.eclipse.jdt.ui.tests.refactoring/resources/*
@@ -121,9 +119,12 @@ org.eclipse.update.tests.core/*
 org.eclipse.update.ui/*
 
 com.ibm.icu/*
+javax.servlet/*
 javax.servlet.jsp/*
+javax.xml/*
 org.apache.ant/*
 org.apache.commons.el/*
+org.apache.felix.gogo.*/*
 org.apache.jasper/*
 org.apache.lucene/*
 org.apache.lucene.analysis/*
@@ -131,6 +132,8 @@ org.junit4/*
 org.objectweb.asm/*
 org.sat4j.core/*
 org.sat4j.pb/*
+
+org.w3c.*/*
 
 www*eclipse.org-root/*
 www*eclipse.org-eclipse-root/*
