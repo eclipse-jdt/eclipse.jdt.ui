@@ -1147,7 +1147,6 @@ public abstract class OptionsConfigurationBlock {
 		}
 		
 		parent.redraw();
-		parent.update();
 	}
 	
 	protected int getHighlight(Label labelControl) {
