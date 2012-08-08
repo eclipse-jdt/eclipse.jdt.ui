@@ -107,14 +107,24 @@ public class OptionalMessageDialog extends MessageDialog {
 	}
 
 	/*
-	 * @see org.eclipse.jface.dialogs.Dialog#close()
-	 * @since 3.8
+	 * @see org.eclipse.jface.dialogs.MessageDialog#buttonPressed(int)
+	 * @since 3.8.1
 	 */
 	@Override
-	public boolean close() {
-		if (getReturnCode() == CANCEL)
+	protected void buttonPressed(int buttonId) {
+		super.buttonPressed(buttonId);
+		if (IDialogConstants.CANCEL_LABEL.equals(getButtonLabels()[getReturnCode()]))
 			setDialogEnabled(fId, true); // don't store if cancelled
-		return super.close();
+	}
+
+	/*
+	 * @see org.eclipse.jface.dialogs.MessageDialog#handleShellCloseEvent()
+	 * @since 3.8.1
+	 */
+	@Override
+	protected void handleShellCloseEvent() {
+		super.handleShellCloseEvent();
+		setDialogEnabled(fId, true); // don't store if closed without pressing a button
 	}
 
 	//--------------- Configuration handling --------------
