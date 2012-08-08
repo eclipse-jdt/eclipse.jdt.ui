@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jface.text.IInformationControl;
@@ -125,7 +126,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 				String[] buttons= new String[] {
 						JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_button_project,
 						JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_button_workspace,
-						JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_button_cancel };
+						IDialogConstants.CANCEL_LABEL };
 
 				int result= OptionalMessageDialog.open(
 						CONFIGURE_PROBLEM_SEVERITY_DIALOG_ID, shell, JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_title, null, message, MessageDialog.QUESTION, buttons, 0,
