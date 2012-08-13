@@ -171,6 +171,16 @@ public final class CompletionProposalCategory {
 	}
 
 	/**
+	 * Returns the enablement element of the described extension.
+	 * 
+	 * @return the enablement expression or <code>null</code> if it is not specified
+	 * @since 3.9
+	 */
+	Expression getEnablementExpression() {
+		return fEnablementExpression;
+	}
+
+	/**
 	 * Returns the name of the described extension
 	 * without mnemonic hint in order to be displayed
 	 * in a message.

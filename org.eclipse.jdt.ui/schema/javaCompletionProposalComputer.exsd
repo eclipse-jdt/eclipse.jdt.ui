@@ -81,7 +81,7 @@ and must have a public 0-argument constructor.
          <attribute name="activate" type="boolean" use="default" value="false">
             <annotation>
                <documentation>
-                  if the attribute is set to &quot;true&quot; it will force this plug-in to be loaded on content assist invocation
+                  if the attribute is set to &quot;true&quot; it will force this plug-in to be loaded on content assist invocation. @since 3.8.1 activation will not happen if the enablement expression for the category is not met.
                </documentation>
             </annotation>
          </attribute>
