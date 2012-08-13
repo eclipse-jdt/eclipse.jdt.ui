@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,8 +33,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -89,6 +91,7 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
+import org.eclipse.jdt.internal.corext.util.CollectionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -674,7 +677,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 						SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
 						IJavaSearchConstants.ENUM,
 						SearchEngine.createWorkspaceScope(),
-						new TypeNameRequestor() {},
+						new TypeNameRequestor() { /* dummy */},
 						IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 						monitor);
 			} catch (JavaModelException e) {
@@ -1007,41 +1010,39 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		private final TypeInfoRequestorAdapter fAdapter= new TypeInfoRequestorAdapter();
 
-		private final Map<String, String> fLib2Name= new HashMap<String, String>();
+		private final Map<IPath, String> fLib2Name= new HashMap<IPath, String>();
 
-		private final String[] fInstallLocations;
+		private final IPath[] fInstallLocations;
 
 		private final String[] fVMNames;
 
 		public TypeInfoUtil(ITypeInfoImageProvider extension) {
 			fProviderExtension= extension;
-			List<String> locations= new ArrayList<String>();
+			List<IPath> locations= new ArrayList<IPath>();
 			List<String> labels= new ArrayList<String>();
 			IVMInstallType[] installs= JavaRuntime.getVMInstallTypes();
 			for (int i= 0; i < installs.length; i++) {
 				processVMInstallType(installs[i], locations, labels);
 			}
-			fInstallLocations= locations.toArray(new String[locations.size()]);
+			fInstallLocations= CollectionsUtil.toArray(locations, IPath.class);
 			fVMNames= labels.toArray(new String[labels.size()]);
 
 		}
 
-		private void processVMInstallType(IVMInstallType installType, List<String> locations, List<String> labels) {
+		private void processVMInstallType(IVMInstallType installType, List<IPath> locations, List<String> labels) {
 			if (installType != null) {
 				IVMInstall[] installs= installType.getVMInstalls();
 				boolean isMac= Platform.OS_MACOSX.equals(Platform.getOS());
-				final String HOME_SUFFIX= "/Home"; //$NON-NLS-1$
 				for (int i= 0; i < installs.length; i++) {
 					String label= getFormattedLabel(installs[i].getName());
 					LibraryLocation[] libLocations= installs[i].getLibraryLocations();
 					if (libLocations != null) {
 						processLibraryLocation(libLocations, label);
 					} else {
-						String filePath= installs[i].getInstallLocation().getAbsolutePath();
-						// on MacOS X install locations end in an additional
-						// "/Home" segment; remove it
-						if (isMac && filePath.endsWith(HOME_SUFFIX))
-							filePath= filePath.substring(0, filePath.length() - HOME_SUFFIX.length() + 1);
+						IPath filePath= Path.fromOSString(installs[i].getInstallLocation().getAbsolutePath());
+						// On MacOS X, install locations end in an additional "/Home" segment; remove it.
+						if (isMac && "Home".equals(filePath.lastSegment())) //$NON-NLS-1$
+							filePath= filePath.removeLastSegments(1);
 						locations.add(filePath);
 						labels.add(label);
 					}
@@ -1052,7 +1053,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		private void processLibraryLocation(LibraryLocation[] libLocations, String label) {
 			for (int l= 0; l < libLocations.length; l++) {
 				LibraryLocation location= libLocations[l];
-				fLib2Name.put(location.getSystemLibraryPath().toOSString(), label);
+				fLib2Name.put(location.getSystemLibraryPath(), label);
 			}
 		}
 
@@ -1111,13 +1112,13 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		private String getContainerName(TypeNameMatch type) {
 			IPackageFragmentRoot root= type.getPackageFragmentRoot();
 			if (root.isExternal()) {
-				String name= root.getPath().toOSString();
+				IPath path= root.getPath();
 				for (int i= 0; i < fInstallLocations.length; i++) {
-					if (name.startsWith(fInstallLocations[i])) {
+					if (fInstallLocations[i].isPrefixOf(path)) {
 						return fVMNames[i];
 					}
 				}
-				String lib= fLib2Name.get(name);
+				String lib= fLib2Name.get(path);
 				if (lib != null)
 					return lib;
 			}
@@ -1588,7 +1589,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		 */
 		@Override
 		protected void storeItemToMemento(Object item, IMemento element) {
-
+			// not used
 		}
 
 	}
