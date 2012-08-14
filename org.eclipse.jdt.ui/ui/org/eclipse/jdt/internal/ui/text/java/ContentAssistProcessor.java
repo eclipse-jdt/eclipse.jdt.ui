@@ -144,7 +144,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		 * Returns the categories that need to be notified when a session starts and ends.
 		 * 
 		 * @return the current categories
-		 * @since 3.9
+		 * @since 3.8.1
 		 */
 		private Set<CompletionProposalCategory> getCategoriesToNotify() {
 			Set<CompletionProposalCategory> currentCategories= new HashSet<CompletionProposalCategory>(fCategories.size());

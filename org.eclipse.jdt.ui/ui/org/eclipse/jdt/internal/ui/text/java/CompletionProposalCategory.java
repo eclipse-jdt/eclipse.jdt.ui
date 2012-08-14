@@ -174,7 +174,7 @@ public final class CompletionProposalCategory {
 	 * Returns the enablement element of the described extension.
 	 * 
 	 * @return the enablement expression or <code>null</code> if it is not specified
-	 * @since 3.9
+	 * @since 3.8.1
 	 */
 	Expression getEnablementExpression() {
 		return fEnablementExpression;
