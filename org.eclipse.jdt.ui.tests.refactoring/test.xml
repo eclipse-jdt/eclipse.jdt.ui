@@ -31,13 +31,6 @@
 			<property name="classname" 
                 value="org.eclipse.jdt.ui.tests.refactoring.all.AllAllRefactoringTests"/>
 		</ant>
-		<!-- from library.xml's "init" target:
-[echo] basedir = /opt/users/hudsonbuild/workspace/eclipse-JUnit-Linux2/workarea/N20120816-2100/eclipse-testing/test-eclipse/eclipse
-		-->
-		<copy todir="${basedir}/../../results/crashlogs/">
-			<fileset dir="${basedir}" includes="hs_err_pid*.log"/>
-			<globmapper from="*" to="${classname}.*"/>
-		</copy>
 	</target>
 
 	<!-- performance test target -->
