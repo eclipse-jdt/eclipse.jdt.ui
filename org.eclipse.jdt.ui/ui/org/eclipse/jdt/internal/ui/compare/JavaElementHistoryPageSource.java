@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,10 +29,15 @@ public class JavaElementHistoryPageSource extends ElementLocalHistoryPageSource 
 	}
 
 	/**
-	 * Returns true if the given IJavaElement maps to a JavaNode.
-	 * The JavaHistoryAction uses this function to determine whether
-	 * a selected Java element can be replaced by some piece of
-	 * code from the local history.
+	 * Returns true if the given IJavaElement maps to a JavaNode. The JavaHistoryAction uses this
+	 * function to determine whether a selected Java element can be replaced by some piece of code
+	 * from the local history.
+	 * 
+	 * @param je the Java element
+	 * @return <code>true</code> if there are editions available for the given Java element,
+	 *         <code>false</code> otherwise
+	 * 
+	 * 
 	 */
 	public static boolean hasEdition(IJavaElement je) {
 
