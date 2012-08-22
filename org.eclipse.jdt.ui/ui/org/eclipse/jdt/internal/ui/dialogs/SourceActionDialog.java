@@ -125,6 +125,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	private boolean fSynchronized;
 	private Composite fInsertPositionComposite;
 	private boolean fHasUserChangedPositionIndex;
+	private List<Integer> fAllowedVisibilities;
 
 
 	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type, boolean isConstructor) throws JavaModelException {
@@ -235,7 +236,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	 */
 	@Override
 	public boolean close() {
-		fSettings.put(SETTINGS_VISIBILITY_MODIFIER, StringConverter.asString(fVisibilityModifier));
+		if (fAllowedVisibilities != null && fAllowedVisibilities.size() > 0 && fAllowedVisibilities.contains(new Integer(fVisibilityModifier)))
+			fSettings.put(SETTINGS_VISIBILITY_MODIFIER, StringConverter.asString(fVisibilityModifier));
 		fSettings.put(SETTINGS_FINAL_MODIFIER, StringConverter.asString(fFinal));
 		fSettings.put(SETTINGS_SYNCHRONIZED_MODIFIER, StringConverter.asString(fSynchronized));
 		fSettings.put(SETTINGS_COMMENTS, fGenerateComment);
@@ -520,8 +522,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	}
 
 	protected Composite createVisibilityControl(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
-		List<Integer> allowedVisibilities= convertToIntegerList(availableVisibilities);
-		if (allowedVisibilities.size() == 1)
+		fAllowedVisibilities= convertToIntegerList(availableVisibilities);
+		if (fAllowedVisibilities.size() == 1)
 			return null;
 
 		Group group= new Group(parent, SWT.NONE);
@@ -552,7 +554,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			radio.setText(labels[i]);
 			radio.setData(visibilityCode);
 			radio.setSelection(visibilityCode.equals(initialVisibility));
-			radio.setEnabled(allowedVisibilities.contains(visibilityCode));
+			radio.setEnabled(fAllowedVisibilities.contains(visibilityCode));
 			radio.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent event) {
