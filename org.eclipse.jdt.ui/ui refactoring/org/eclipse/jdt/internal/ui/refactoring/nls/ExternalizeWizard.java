@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,9 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
@@ -25,9 +28,11 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
@@ -72,7 +77,16 @@ public class ExternalizeWizard extends RefactoringWizard {
 		Display display= shell != null ? shell.getDisplay() : Display.getCurrent();
 		BusyIndicator.showWhile(display, new Runnable() {
 			public void run() {
-				NLSRefactoring refactoring= NLSRefactoring.create(unit);
+				NLSRefactoring refactoring= null;
+				try {
+					refactoring= NLSRefactoring.create(unit);
+				} catch (IllegalArgumentException e) {
+					// Loading a properties file can throw an IAE due to malformed Unicode escape sequence, see Properties#load for details.
+					IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), e.getLocalizedMessage());
+					ExceptionHandler.handle(status,
+							NLSUIMessages.ExternalizeWizard_name,
+							NLSUIMessages.ExternalizeWizard_error_message);
+				}
 				if (refactoring != null)
 					new RefactoringStarter().activate(new ExternalizeWizard(refactoring), shell, ActionMessages.ExternalizeStringsAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
 			}
