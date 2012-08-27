@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,17 +15,12 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
-import org.eclipse.ui.IFileEditorInput;
-
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
 
 /**
  * This action opens a tool (internal editor or view or an external application) for the element at
  * the given location.
- * <p>
- * XXX: This does not work for properties files coming from a JAR due to missing J Core
- * functionality. For details see http://bugs.eclipse.org/22376
- * </p>
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
@@ -49,8 +44,7 @@ public class OpenAction extends SelectionDispatchAction {
 		setText(PropertiesFileEditorMessages.OpenAction_label);
 		setToolTipText(PropertiesFileEditorMessages.OpenAction_tooltip);
 
-		 // XXX: Must be removed once support for JARs is available (see class Javadoc for details).
-		setEnabled(fEditor.getEditorInput() instanceof IFileEditorInput);
+		setEnabled(PropertyKeyHyperlinkDetector.checkEnabled(fEditor, 0));
 	}
 
 	/*
@@ -65,8 +59,7 @@ public class OpenAction extends SelectionDispatchAction {
 		if (selection == null || selection.isEmpty())
 			return false;
 
-		// XXX: Must be changed to IStorageEditorInput once support for JARs is available (see class Javadoc for details)
-		return fEditor.getEditorInput() instanceof IFileEditorInput;
+		return PropertyKeyHyperlinkDetector.checkEnabled(fEditor, selection.getOffset());
 	}
 
 	@Override

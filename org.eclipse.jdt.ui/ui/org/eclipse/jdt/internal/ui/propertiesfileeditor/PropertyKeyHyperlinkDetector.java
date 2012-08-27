@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,10 @@ import java.util.Properties;
 
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IStorage;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.IDocument;
@@ -29,6 +33,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.AbstractHyperlinkDetector;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
@@ -36,13 +41,13 @@ import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.core.IJarEntryResource;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
+
 
 /**
  * Properties key hyperlink detector.
- * <p>
- * XXX: This does not work for properties files coming from a JAR due to missing J Core
- * functionality. For details see http://bugs.eclipse.org/22376
- * </p>
  * 
  * @since 3.1
  */
@@ -132,12 +137,34 @@ public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 		return result.toString();
 	}
 
-	private boolean checkEnabled(ITextEditor textEditor, int offset) {
+	static boolean checkEnabled(ITextEditor textEditor, int offset) {
 		if (offset < 0)
 			return false;
 
-		 // XXX: Must be changed to IStorageEditorInput once support for JARs is available (see class Javadoc for details)
-		return textEditor.getEditorInput() instanceof IFileEditorInput;
+		IEditorInput editorInput= textEditor.getEditorInput();
+		return editorInput instanceof IFileEditorInput || (editorInput instanceof IStorageEditorInput && isEclipseNLSAvailable((IStorageEditorInput) editorInput));
+	}
+
+	private static boolean isEclipseNLSAvailable(IStorageEditorInput editorInput) {
+		IStorage storage;
+		try {
+			storage= editorInput.getStorage();
+		} catch (CoreException ex) {
+			return false;
+		}
+		if (!(storage instanceof IJarEntryResource))
+			return false;
+
+		IJavaProject javaProject= ((IJarEntryResource) storage).getPackageFragmentRoot().getJavaProject();
+
+		if (javaProject == null || !javaProject.exists())
+			return false;
+
+		try {
+			return javaProject.findType("org.eclipse.osgi.util.NLS") != null; //$NON-NLS-1$
+		} catch (JavaModelException e) {
+			return false;
+		}
 	}
 
 	private void showErrorInStatusLine(final String message, ITextEditor textEditor) {

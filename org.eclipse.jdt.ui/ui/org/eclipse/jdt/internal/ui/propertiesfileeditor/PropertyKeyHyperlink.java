@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 
@@ -52,6 +51,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.TwoPaneElementSelector;
@@ -66,6 +66,7 @@ import org.eclipse.search.core.text.TextSearchMatchAccess;
 import org.eclipse.search.core.text.TextSearchRequestor;
 import org.eclipse.search.core.text.TextSearchScope;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -76,6 +77,7 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -83,14 +85,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PatternConstructor;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 
 /**
  * Properties key hyperlink.
- * <p>
- * XXX: This does not work for properties files coming from a JAR due to missing J Core
- * functionality. For details see http://bugs.eclipse.org/22376
- * </p>
  * 
  * @since 3.1
  */
@@ -101,16 +100,20 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 		private static final Collator fgCollator= Collator.getInstance();
 
-		private IStorage storage;
+		private IResource resource;
+		private IJavaElement element;
 		private int offset;
 		private int length;
+		private final boolean showLineNumber;
 
 
-		private KeyReference(IStorage storage, int offset, int length) {
-			Assert.isNotNull(storage);
-			this.storage= storage;
+		private KeyReference(IResource resource, IJavaElement element, int offset, int length, boolean showLineNumber) {
+			Assert.isNotNull(resource);
+			this.resource= resource;
 			this.offset= offset;
 			this.length= length;
+			this.element= element;
+			this.showLineNumber= showLineNumber;
 		}
 
 		/*
@@ -133,9 +136,9 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getImageDescriptor(java.lang.Object)
 		 */
 		public ImageDescriptor getImageDescriptor(Object object) {
-			IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter)storage.getAdapter(IWorkbenchAdapter.class);
+			IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter) resource.getAdapter(IWorkbenchAdapter.class);
 			if (wbAdapter != null)
-				return wbAdapter.getImageDescriptor(storage);
+				return wbAdapter.getImageDescriptor(resource);
 			return null;
 		}
 		/*
@@ -145,17 +148,18 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 			try {
-				manager.connect(storage.getFullPath(), LocationKind.NORMALIZE, null);
+				manager.connect(resource.getFullPath(), LocationKind.NORMALIZE, null);
 				try {
-					ITextFileBuffer buffer= manager.getTextFileBuffer(storage.getFullPath(), LocationKind.NORMALIZE);
+					ITextFileBuffer buffer= manager.getTextFileBuffer(resource.getFullPath(), LocationKind.NORMALIZE);
 					IDocument document= buffer.getDocument();
 					if (document != null) {
 						int line= document.getLineOfOffset(offset) + 1;
-						Object[] args= new Object[] { new Integer(line), BasicElementLabels.getPathLabel(storage.getFullPath(), false) };
-						return Messages.format(PropertiesFileEditorMessages.OpenAction_SelectionDialog_elementLabel, args);
+						String pathLabel= BasicElementLabels.getPathLabel(resource.getFullPath(), false);
+						Object[] args= new Object[] { new Integer(line), pathLabel };
+						return showLineNumber ? Messages.format(PropertiesFileEditorMessages.OpenAction_SelectionDialog_elementLabel, args) : pathLabel;
 					}
 				} finally {
-					manager.disconnect(storage.getFullPath(), LocationKind.NORMALIZE, null);
+					manager.disconnect(resource.getFullPath(), LocationKind.NORMALIZE, null);
 				}
 			} catch (CoreException e) {
 				JavaPlugin.log(e.getStatus());
@@ -163,7 +167,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 				JavaPlugin.log(e);
 			}
 
-			return BasicElementLabels.getPathLabel(storage.getFullPath(), false);
+			return BasicElementLabels.getPathLabel(resource.getFullPath(), false);
 		}
 		/*
 		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getParent(java.lang.Object)
@@ -173,8 +177,8 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		}
 
 		public int compareTo(KeyReference otherRef) {
-			String thisPath= storage.getFullPath().toString();
-			String otherPath= otherRef.storage.getFullPath().toString();
+			String thisPath= resource.getFullPath().toString();
+			String otherPath= otherRef.resource.getFullPath().toString();
 			int result= fgCollator.compare(thisPath, otherPath);
 			if (result != 0)
 				return result;
@@ -203,7 +207,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 				start= start + 1;
 				length= length - 2;
 			}
-			fResult.add(new KeyReference(matchAccess.getFile(), start, length));
+			fResult.add(new KeyReference(matchAccess.getFile(), null, start, length, true));
 			return true;
 		}
 	}
@@ -214,7 +218,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 	private Shell fShell;
 	private IStorage fStorage;
 	private ITextEditor fEditor;
-
+	private boolean fIsFileEditorInput;
 
 	/**
 	 * Creates a new properties key hyperlink.
@@ -231,6 +235,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		fRegion= region;
 		fPropertiesKey= key;
 		fEditor= editor;
+		fIsFileEditorInput= fEditor.getEditorInput() instanceof IFileEditorInput;
 		IStorageEditorInput storageEditorInput= (IStorageEditorInput)fEditor.getEditorInput();
 		fShell= fEditor.getEditorSite().getShell();
 		try {
@@ -251,15 +256,8 @@ public class PropertyKeyHyperlink implements IHyperlink {
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#open()
 	 */
 	public void open() {
-		if (!checkEnabled())
-			return;
-
 		// Search the key
-		IResource resource= (IResource)fStorage;
-		KeyReference[] references= null;
-		if (resource != null)
-			references= search(resource.getProject(), fPropertiesKey);
-
+		KeyReference[] references= search(fPropertiesKey);
 		if (references == null)
 			return; // canceled by the user
 
@@ -271,11 +269,6 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 		open(references);
 
-	}
-
-	private boolean checkEnabled() {
-		 // XXX: Can be removed once support for JARs is available (see class Javadoc for details)
-		return fStorage instanceof IResource;
 	}
 
 	private void open(KeyReference[] keyReferences) {
@@ -300,15 +293,24 @@ public class PropertyKeyHyperlink implements IHyperlink {
 			@Override
 			public String decorateText(String input, Object element) {
 				KeyReference keyRef= (KeyReference)element;
-				IStorage storage= keyRef.storage;
-				String name= storage.getName();
+				IJavaElement javaElement= keyRef.element;
+				IResource resource= keyRef.resource;
+
+				String name= javaElement != null ? JavaElementLabels.getElementLabel(javaElement, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED
+						| JavaElementLabels.USE_RESOLVED | JavaElementLabels.P_COMPRESSED) : resource.getName();
+
 				if (name == null)
 					return input;
 
 				int count= 0;
 				for (int i= 0; i < length; i++) {
-					if (keyReferences[i].storage.equals(storage))
-						count++;
+					if (javaElement != null) {
+						if (keyReferences[i].element.equals(javaElement))
+							count++;
+					} else {
+						if (keyReferences[i].resource.equals(resource))
+							count++;
+					}
 				}
 				if (count > 1) {
 					Object[] args= new Object[] { BasicElementLabels.getResourceName(name), new Integer(count) };
@@ -316,6 +318,13 @@ public class PropertyKeyHyperlink implements IHyperlink {
 				}
 
 				return name;
+			}
+			
+			@Override
+			protected ImageDescriptor decorateImage(ImageDescriptor input, Object element) {
+				KeyReference keyRef= (KeyReference)element;
+				IJavaElement javaElement= keyRef.element;
+				return javaElement != null ? new JavaElementImageProvider().getJavaImageDescriptor(javaElement, JavaElementImageProvider.SMALL_ICONS) : super.decorateImage(input, element);
 			}
 		};
 
@@ -344,7 +353,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 			return;
 
 		try {
-			IEditorPart part= EditorUtility.openInEditor(keyReference.storage, true);
+			IEditorPart part= keyReference.element != null ? EditorUtility.openInEditor(keyReference.element, true) : EditorUtility.openInEditor(keyReference.resource, true);
 			if (part != null)
 				EditorUtility.revealInEditor(part, keyReference.offset, keyReference.length);
 		} catch (PartInitException x) {
@@ -408,11 +417,10 @@ public class PropertyKeyHyperlink implements IHyperlink {
 	/**
 	 * Searches references to the given key in the given scope.
 	 *
-	 * @param scope the scope
 	 * @param key the properties key
 	 * @return the references or <code>null</code> if the search has been canceled by the user
 	 */
-	private KeyReference[] search(final IResource scope, final String key) {
+	private KeyReference[] search(final String key) {
 		if (key == null)
 			return new KeyReference[0];
 
@@ -438,8 +446,8 @@ public class PropertyKeyHyperlink implements IHyperlink {
 											@Override
 											public void acceptSearchMatch(SearchMatch match) throws CoreException {
 												IResource resource= match.getResource();
-												if (resource.getType() == IResource.FILE)
-													result.add(new KeyReference((IFile)resource, match.getOffset(), match.getLength()));
+												if (resource != null)
+													result.add(new KeyReference(resource, (IJavaElement) match.getElement(), match.getOffset(), match.getLength(), fIsFileEditorInput));
 											}
 										}, new SubProgressMonitor(monitor, 1));
 									} catch (CoreException e) {
@@ -459,7 +467,15 @@ public class PropertyKeyHyperlink implements IHyperlink {
 									ResultCollector collector= new ResultCollector(result, useDoubleQuotedKey);
 									TextSearchEngine engine= TextSearchEngine.create();
 									Pattern searchPattern= PatternConstructor.createPattern(searchString, true, false);
-									engine.search(createScope(scope), collector, searchPattern, new SubProgressMonitor(monitor, 4));
+
+									/* <p>
+									 * XXX: This does not work for properties files coming from a JAR.
+									 * For details see https://bugs.eclipse.org/bugs/show_bug.cgi?id=23341
+									 * </p>
+									*/
+									if (fStorage instanceof IResource) {
+										engine.search(createScope(((IResource)fStorage).getProject()), collector, searchPattern, new SubProgressMonitor(monitor, 4));
+									}
 								} else {
 									monitor.worked(1);
 								}
