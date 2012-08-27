@@ -846,6 +846,16 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 	}
 
 	@Override
+	public void endVisit(EnhancedForStatement node) {
+		if (getSelection().getEndVisitSelectionMode(node) == Selection.AFTER) {
+			if (node.getParameter() == getFirstSelectedNode()) {
+				invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_for_initializer, JavaStatusContext.create(fCUnit, getSelection()));
+			}
+		}
+		super.endVisit(node);
+	}
+	
+	@Override
 	public void endVisit(VariableDeclarationExpression node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED && getFirstSelectedNode() == node) {
 			if (node.getLocationInParent() == TryStatement.RESOURCES_PROPERTY) {
