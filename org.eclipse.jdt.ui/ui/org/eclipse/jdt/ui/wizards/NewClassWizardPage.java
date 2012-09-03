@@ -54,7 +54,7 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 
 	private final static String PAGE_NAME= "NewClassWizardPage"; //$NON-NLS-1$
 
-	private final static String SETTINGS_CREATEMAIN= "create_main"; //$NON-NLS-1$
+//	private final static String SETTINGS_CREATEMAIN= "create_main"; // not stored any more, see https://bugs.eclipse.org/388342
 	private final static String SETTINGS_CREATECONSTR= "create_constructor"; //$NON-NLS-1$
 	private final static String SETTINGS_CREATEUNIMPLEMENTED= "create_unimplemented"; //$NON-NLS-1$
 
@@ -99,7 +99,6 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 		if (dialogSettings != null) {
 			IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
 			if (section != null) {
-				createMain= section.getBoolean(SETTINGS_CREATEMAIN);
 				createConstructors= section.getBoolean(SETTINGS_CREATECONSTR);
 				createUnimplemented= section.getBoolean(SETTINGS_CREATEUNIMPLEMENTED);
 			}
@@ -283,7 +282,6 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 			if (section == null) {
 				section= dialogSettings.addNewSection(PAGE_NAME);
 			}
-			section.put(SETTINGS_CREATEMAIN, isCreateMain());
 			section.put(SETTINGS_CREATECONSTR, isCreateConstructors());
 			section.put(SETTINGS_CREATEUNIMPLEMENTED, isCreateInherited());
 		}
