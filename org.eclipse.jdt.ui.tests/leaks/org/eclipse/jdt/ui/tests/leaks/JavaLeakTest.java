@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.commands.common.EventManager;
 
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -108,7 +109,9 @@ public class JavaLeakTest extends LeakTestCase {
 
 		assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor1, false));
 		editor1= null;
-		ScreenshotTest.takeScreenshot(THIS, getName(), System.out);
+		
+		int searchBundleState= Platform.getBundle("org.eclipse.search").getState();
+		System.out.println("JavaLeakTest.testTextEditorCloseOneOfTwo(): searchBundleState = 0x" + Integer.toHexString(searchBundleState));
 		assertInstanceCount(TextEditor.class, 0);
 	}
 
