@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -151,6 +151,8 @@ public class RefreshAction extends SelectionDispatchAction {
 	private boolean checkEnabled(IStructuredSelection selection) {
 		if (selection.isEmpty())
 			return true;
+
+		boolean hasOpenProject= false;
 		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IWorkingSet) {
@@ -163,13 +165,12 @@ public class RefreshAction extends SelectionDispatchAction {
 				IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
 				if (resource == null)
 					return false;
-				if (resource.getType() == IResource.PROJECT && !((IProject)resource).isOpen())
-					return false;
+				hasOpenProject|= resource.getType() == IResource.PROJECT && ((IProject) resource).isOpen();
 			} else {
 				return false;
 			}
 		}
-		return true;
+		return hasOpenProject;
 	}
 
 	/* (non-Javadoc)
