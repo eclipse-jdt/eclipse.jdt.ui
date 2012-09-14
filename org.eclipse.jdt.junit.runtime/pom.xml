@@ -20,6 +20,6 @@
   </parent>
   <groupId>eclipse.jdt.ui</groupId>
   <artifactId>org.eclipse.jdt.junit.runtime</artifactId>
-  <version>3.4.300-SNAPSHOT</version>
+  <version>3.4.400-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 </project>
