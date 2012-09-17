@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,6 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 	// shared, do not dispose:
 	private Image fJARImage;
 	private Image fFolderImage;
-	private Color fResolvedBackground;
 
 	private Image fDeprecatedJARImage;
 	private Image fDeprecatedFolderImage;
@@ -57,7 +56,6 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 		fDeprecatedFolderImage= new DecorationOverlayIcon(fFolderImage, JavaPluginImages.DESC_OVR_DEPRECATED, IDecoration.TOP_LEFT).createImage();
 
 		fHighlightReadOnly= highlightReadOnly;
-		fResolvedBackground= null;
 	}
 
 	/*
@@ -122,6 +120,10 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 	 */
 	public Color getForeground(Object element) {
+		if (isUnmodifiable(element)) {
+			Display display= Display.getCurrent();
+			return display.getSystemColor(SWT.COLOR_INFO_FOREGROUND);
+		}
 		return null;
 	}
 
@@ -129,17 +131,21 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 	 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
 	 */
 	public Color getBackground(Object element) {
+		if (isUnmodifiable(element)) {
+			Display display= Display.getCurrent();
+			return display.getSystemColor(SWT.COLOR_INFO_BACKGROUND);
+		}
+		return null;
+	}
+
+	private boolean isUnmodifiable(Object element) {
 		if (element instanceof CPVariableElement) {
 			CPVariableElement curr= (CPVariableElement) element;
 			if (fHighlightReadOnly && curr.isReadOnly()) {
-				if (fResolvedBackground == null) {
-					Display display= Display.getCurrent();
-					fResolvedBackground= display.getSystemColor(SWT.COLOR_INFO_BACKGROUND);
-				}
-				return fResolvedBackground;
+				return true;
 			}
 		}
-		return null;
+		return false;
 	}
 
 	/* (non-Javadoc)
