@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory.RHSHistory;
 public class JavaContentAssistInvocationContext extends ContentAssistInvocationContext {
 	private final IEditorPart fEditor;
 
+	private IJavaProject fJavaProject;
 	private ICompilationUnit fCU= null;
 	private boolean fCUComputed= false;
 
@@ -54,6 +55,7 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 
 	private IJavaCompletionProposal[] fKeywordProposals= null;
 	private CompletionContext fCoreContext= null;
+
 
 	/**
 	 * Creates a new context.
@@ -81,9 +83,21 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 	}
 
 	/**
+	 * Creates a new context.
+	 * 
+	 * @param javaProject the Java project
+	 * @since 3.9
+	 */
+	public JavaContentAssistInvocationContext(IJavaProject javaProject) {
+		super();
+		fJavaProject= javaProject;
+		fEditor= null;
+	}
+
+	/**
 	 * Returns the compilation unit that content assist is invoked in, <code>null</code> if there
 	 * is none.
-	 *
+	 * 
 	 * @return the compilation unit that content assist is invoked in, possibly <code>null</code>
 	 */
 	public ICompilationUnit getCompilationUnit() {
@@ -108,7 +122,7 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 	 */
 	public IJavaProject getProject() {
 		ICompilationUnit unit= getCompilationUnit();
-		return unit == null ? null : unit.getJavaProject();
+		return unit == null ? fJavaProject : unit.getJavaProject();
 	}
 
 	/**
