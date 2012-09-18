@@ -152,25 +152,28 @@ public class RefreshAction extends SelectionDispatchAction {
 		if (selection.isEmpty())
 			return true;
 
-		boolean hasOpenProject= false;
+		boolean okToRefresh= false;
 		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IWorkingSet) {
 				// don't inspect working sets any deeper.
+				okToRefresh= true;
 			} else if (element instanceof IPackageFragmentRoot) {
 				// on internal folders/JARs we do a normal refresh, and Java archive refresh on external
+				okToRefresh= true;
 			} else if (element instanceof PackageFragmentRootContainer) {
 				// too expensive to look at children. assume we can refresh
+				okToRefresh= true;
 			} else if (element instanceof IAdaptable) { // test for IAdaptable last (types before are IAdaptable as well)
 				IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
 				if (resource == null)
-					return false;
-				hasOpenProject|= resource.getType() == IResource.PROJECT && ((IProject) resource).isOpen();
+					return false; // e.g. element inside a JAR
+				okToRefresh|= resource.getType() == IResource.PROJECT && ((IProject) resource).isOpen();
 			} else {
 				return false;
 			}
 		}
-		return hasOpenProject;
+		return okToRefresh;
 	}
 
 	/* (non-Javadoc)
