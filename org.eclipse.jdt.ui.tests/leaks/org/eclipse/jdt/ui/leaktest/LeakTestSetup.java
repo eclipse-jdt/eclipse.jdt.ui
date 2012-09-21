@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,9 @@ package org.eclipse.jdt.ui.leaktest;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.intro.IIntroManager;
 
 /**
  *
@@ -31,7 +34,8 @@ public class LeakTestSetup extends TestSetup {
 		if (fgCurrentSetup != this) {
 			return;
 		}
-		// nothing done at the moment
+		IIntroManager introManager= PlatformUI.getWorkbench().getIntroManager();
+		introManager.closeIntro(introManager.getIntro());
 	}
 
 	protected void tearDown() throws Exception {
