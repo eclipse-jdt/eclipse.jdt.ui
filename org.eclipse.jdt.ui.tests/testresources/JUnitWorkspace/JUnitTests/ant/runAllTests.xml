@@ -40,7 +40,7 @@
 			<fileset dir="${result}">
 				<include name="TEST-*.xml"/>
 			</fileset>
-			<report todir="${report}"/>
+			<report format="noframes" todir="${report}"/>
 		</junitreport>
 	</target>
 
