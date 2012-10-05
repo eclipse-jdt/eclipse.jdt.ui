@@ -873,14 +873,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @since 3.3
 	 */
 	private void refresh() {
-		IJavaElement input= getInput();
-		if (input == null) {
-			StringBuffer buffer= new StringBuffer(""); //$NON-NLS-1$
-			HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, fgStyleSheet);
-			doSetInput(buffer.toString());
-		} else {
-			doSetInput(computeInput(input));
-		}
+		doSetInput(computeInput(getInput()));
 	}
 
 	/*
@@ -924,7 +917,7 @@ public class JavadocView extends AbstractInfoView {
 	@Override
 	protected Object computeInput(Object input) {
 		if (getControl() == null || ! (input instanceof IJavaElement))
-			return getInputForNull();
+			return null;
 
 		IWorkbenchPart part= null;
 		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
@@ -956,7 +949,7 @@ public class JavadocView extends AbstractInfoView {
 	@Override
 	protected Object computeInput(IWorkbenchPart part, ISelection selection, IJavaElement input, IProgressMonitor monitor) {
 		if (getControl() == null || input == null)
-			return getInputForNull();
+			return null;
 
 		String javadocHtml;
 
@@ -974,9 +967,6 @@ public class JavadocView extends AbstractInfoView {
 			default:
 				javadocHtml= getJavadocHtml(new IJavaElement[] { input }, part, selection, monitor);
 		}
-
-		if (javadocHtml == null)
-			return ""; //$NON-NLS-1$
 
 		return javadocHtml;
 	}
@@ -1016,11 +1006,19 @@ public class JavadocView extends AbstractInfoView {
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * @param input a String containing the HTML to be showin in the view
+	 * @param input a String containing the HTML to be shown in the view, or <code>null</code>
 	 */
 	@Override
 	protected void doSetInput(Object input) {
-		String javadocHtml= (String)input;
+		String javadocHtml;
+		if (input instanceof String) {
+			javadocHtml= (String) input;
+		} else {
+			StringBuffer buffer= new StringBuffer();
+			HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, fgStyleSheet);
+			HTMLPrinter.addPageEpilog(buffer);
+			javadocHtml= buffer.toString();
+		}
 		fOriginalInput= javadocHtml;
 
 		if (fInputSelectionProvider != null) {
@@ -1061,7 +1059,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @param activePart the active part if any
 	 * @param selection the selection of the active site if any
 	 * @param monitor a monitor to report progress to
-	 * @return a string with the Javadoc in HTML format.
+	 * @return a string with the Javadoc in HTML format, or <code>null</code> if none
 	 */
 	private String getJavadocHtml(IJavaElement[] result, IWorkbenchPart activePart, ISelection selection, IProgressMonitor monitor) {
 		StringBuffer buffer= new StringBuffer();
@@ -1153,19 +1151,15 @@ public class JavadocView extends AbstractInfoView {
 				}
 			}
 		}
+		
+		if (buffer.length() == 0)
+			return null;
 
 		HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, fgStyleSheet);
 		if (base != null) {
 			int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
 			buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		HTMLPrinter.addPageEpilog(buffer);
-		return buffer.toString();
-	}
-
-	private String getInputForNull() {
-		StringBuffer buffer= new StringBuffer();
-		HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, fgStyleSheet);
 		HTMLPrinter.addPageEpilog(buffer);
 		return buffer.toString();
 	}

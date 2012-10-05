@@ -158,7 +158,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	/**
 	 * Set the input of this view.
 	 *
-	 * @param input the input object
+	 * @param input the input object, can be <code>null</code>
 	 */
 	abstract protected void doSetInput(Object input);
 
@@ -620,6 +620,13 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 
 				// The actual computation
 				final Object input= computeInput(part, selection, je, computeProgressMonitor);
+				if (input == null) {
+					IJavaElement oldElement= fCurrentViewInput;
+					if (oldElement == null || oldElement.exists()) {
+						// leave the last shown documentation until it becomes invalid
+						return;
+					}
+				}
 				final String description= input != null ? computeDescription(part, selection, je, computeProgressMonitor) : ""; //$NON-NLS-1$
 
 				Shell shell= getSite().getShell();
