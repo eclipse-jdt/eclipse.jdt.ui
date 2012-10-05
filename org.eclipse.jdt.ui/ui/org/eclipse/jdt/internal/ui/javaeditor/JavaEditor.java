@@ -2197,7 +2197,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	public Object getAdapter(Class required) {
 
 		if (IContentOutlinePage.class.equals(required)) {
-			if (fOutlinePage == null)
+			if (fOutlinePage == null && getSourceViewer() != null)
 				fOutlinePage= createOutlinePage();
 			return fOutlinePage;
 		}
