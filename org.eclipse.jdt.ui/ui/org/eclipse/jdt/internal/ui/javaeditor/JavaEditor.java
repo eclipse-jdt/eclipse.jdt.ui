@@ -2197,7 +2197,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	public Object getAdapter(Class required) {
 
 		if (IContentOutlinePage.class.equals(required)) {
-			if (fOutlinePage == null && getSourceViewer() != null)
+			if (fOutlinePage == null && getSourceViewer() != null && isCalledByOutline())
 				fOutlinePage= createOutlinePage();
 			return fOutlinePage;
 		}
@@ -2657,7 +2657,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			PlatformUI.getWorkbench().removeWindowListener(fActivationListener);
 			fActivationListener= null;
 		}
-
+		
 		if (fEncodingSupport != null) {
 			fEncodingSupport.dispose();
 			fEncodingSupport= null;
@@ -4228,4 +4228,23 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	public JavaPairMatcher getBracketMatcher() {
 		return fBracketMatcher;
 	}
+
+	/**
+	 * Checks whether called from Outline view.
+	 * 
+	 * @return <code>true</code> if called by Outline view
+	 * @since 3.9
+	 */
+	private static boolean isCalledByOutline() {
+		Class<?>[] elements= new AccessChecker().getClassContext();
+		return elements[5].equals(ContentOutline.class);
+	}
+
+	private static final class AccessChecker extends SecurityManager {
+		@Override
+		public Class<?>[] getClassContext() {
+			return super.getClassContext();
+		}
+	}
+
 }
