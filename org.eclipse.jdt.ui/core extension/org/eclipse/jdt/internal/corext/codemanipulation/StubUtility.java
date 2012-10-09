@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -312,10 +312,7 @@ public class StubUtility {
 		String[] result= new String[typeBindings.length];
 		for (int i= 0; i < result.length; i++) {
 			ITypeBinding curr= typeBindings[i];
-			if (curr.isTypeVariable()) {
-				curr= curr.getErasure(); // in Javadoc only use type variable erasure
-			}
-			curr= curr.getTypeDeclaration(); // no parameterized types
+			curr= curr.getErasure(); // Javadoc references use erased type
 			result[i]= curr.getQualifiedName();
 		}
 		return result;
