@@ -4237,7 +4237,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	private static boolean isCalledByOutline() {
 		Class<?>[] elements= new AccessChecker().getClassContext();
-		return elements[5].equals(ContentOutline.class);
+		return elements[4].equals(ContentOutline.class) || elements[5].equals(ContentOutline.class);
 	}
 
 	private static final class AccessChecker extends SecurityManager {
