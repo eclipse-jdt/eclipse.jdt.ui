@@ -14,7 +14,7 @@
    </license>
 
    <url>
-      <update label="JDT UI update site" url="http://www.eclipse.org/jdt/ui/update-site"/>
+      <update label="JDT UI Tools" url="http://www.eclipse.org/jdt/ui/update-site"/>
    </url>
 
    <requires>
