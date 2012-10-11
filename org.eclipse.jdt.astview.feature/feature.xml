@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.eclipse.jdt.astview.feature"
-      label="org.eclipse.jdt.astview.feature"
+      label="AST View"
       version="1.1.8"
       provider-name="Eclipse.org">
    <install-handler/>
 
    <description>
-      %description
+      AST View for JDT 3.7.1, 3.8, and later
    </description>
 
    <license url="%licenseURL">
@@ -16,10 +16,11 @@
 
    <url>
       <update label="JDT UI update site" url="http://www.eclipse.org/jdt/ui/update-site"/>
-      <discovery label="JDT UI Site" url="http://www.eclipse.org/jdt/ui/update-site"/>
    </url>
 
    <requires>
+      <import plugin="org.eclipse.jdt.core" version="3.7.1" match="compatible"/>
+      <import plugin="org.eclipse.jdt.ui" version="3.7.1" match="compatible"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.ui.views"/>
@@ -28,9 +29,7 @@
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.jdt.core" version="3.7.1" match="compatible"/>
       <import plugin="org.eclipse.core.filebuffers"/>
-      <import plugin="org.eclipse.jdt.ui" version="3.7.1" match="compatible"/>
    </requires>
 
    <plugin
