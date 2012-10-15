@@ -71,6 +71,11 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 public class JavaProjectHelper {
 
 	/**
+	 * XXX: Flag to enable/disable dummy search to synchronize with indexer. See https://bugs.eclipse.org/391927 .
+	 */
+	private static final boolean PERFORM_DUMMY_SEARCH= false;
+	
+	/**
 	 * @deprecated
 	 * @see #RT_STUBS_15
 	 */
@@ -299,6 +304,7 @@ public class JavaProjectHelper {
 					throw e;
 				}
 				try {
+					JavaPlugin.log(new IllegalStateException("sleep before retrying JavaProjectHelper.delete()"));
 					Thread.sleep(1000); // sleep a second
 				} catch (InterruptedException e1) {
 				}
@@ -341,6 +347,9 @@ public class JavaProjectHelper {
 	}
 
 	private static void performDummySearch(IJavaSearchScope searchScope) throws JavaModelException {
+		if (! PERFORM_DUMMY_SEARCH)
+			return;
+		
 		new SearchEngine().searchAllTypeNames(
 				null,
 				SearchPattern.R_EXACT_MATCH,
