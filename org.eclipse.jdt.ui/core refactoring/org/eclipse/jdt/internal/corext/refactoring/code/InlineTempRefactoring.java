@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -373,12 +373,17 @@ public class InlineTempRefactoring extends Refactoring {
 		}
 		
 		Expression copy= (Expression) rewrite.getASTRewrite().createCopyTarget(initializer);
-		
 		AST ast= rewrite.getAST();
+		if (NecessaryParenthesesChecker.needsParentheses(initializer, reference.getParent(), reference.getLocationInParent())) {
+			ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
+			parenthesized.setExpression(copy);
+			copy= parenthesized;
+		}
+		
 		ITypeBinding explicitCast= ASTNodes.getExplicitCast(initializer, reference);
 		if (explicitCast != null) {
 			CastExpression cast= ast.newCastExpression();
-			if (NecessaryParenthesesChecker.needsParentheses(initializer, cast, CastExpression.EXPRESSION_PROPERTY)) {
+			if (NecessaryParenthesesChecker.needsParentheses(copy, cast, CastExpression.EXPRESSION_PROPERTY)) {
 				ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
 				parenthesized.setExpression(copy);
 				copy= parenthesized;

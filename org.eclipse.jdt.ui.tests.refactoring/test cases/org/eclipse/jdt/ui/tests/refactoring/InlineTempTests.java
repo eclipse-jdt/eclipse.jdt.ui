@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -333,6 +333,11 @@ public class InlineTempTests extends RefactoringTest {
 	public void test47() throws Exception {
 		// don't delete comment right before and after the local variable declaration (bug 295200)
 		helper1(5, 18, 5, 22);
+	}
+
+	public void test48() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=388078
+		helper1(6, 16, 6, 18);
 	}
 
 	//------
