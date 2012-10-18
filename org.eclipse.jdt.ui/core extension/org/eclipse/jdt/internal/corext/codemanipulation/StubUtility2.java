@@ -650,6 +650,7 @@ public final class StubUtility2 {
 						if (otherModifier instanceof Modifier) {
 							int otherFlag= ((Modifier) otherModifier).getKeyword().toFlagValue();
 							if ((otherFlag & modifiers) != 0) {
+								modifiers= ~otherFlag & modifiers;
 								result.addAll(ast.newModifiers(otherFlag));
 							}
 						} else {
@@ -666,6 +667,7 @@ public final class StubUtility2 {
 							}
 						}
 					}
+					result.addAll(ASTNodeFactory.newModifiers(ast, modifiers));
 					return result;
 				}
 			}

@@ -3080,6 +3080,43 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 	
+	public void testUnimplementedMethodsWithAnnotations2() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=387940
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class A implements I {\n");
+		buf.append("}\n");
+		buf.append("interface I {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    void foo();\n");
+		buf.append("}");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class A implements I {\n");
+		buf.append("\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    void foo();\n");
+		buf.append("}");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 	public void testUnitializedVariable() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
