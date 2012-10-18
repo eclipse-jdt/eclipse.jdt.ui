@@ -1485,6 +1485,45 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	public void testInverseIfCondition_bug388074() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=388074
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean a, boolean b) {\n");
+		buf.append("        if (!(a || b) || c) {\n");
+		buf.append("        	return 0;\n");
+		buf.append("        } else {\n");
+		buf.append("        	return 1;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if (!");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean a, boolean b) {\n");
+		buf.append("        if ((a || b) && !c) {\n");
+		buf.append("        	return 0;\n");
+		buf.append("        } else {\n");
+		buf.append("        	return 1;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+	}
+
 	public void testInverseConditionalStatement1() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=74746
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

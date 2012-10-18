@@ -543,7 +543,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 						&& NecessaryParenthesesChecker.canRemoveParentheses(operand, expression.getParent(), expression.getLocationInParent())) {
 					operand= ((ParenthesizedExpression)operand).getExpression();
 				}
-				return getRenamedNameCopy(provider, rewrite, operand);
+				Expression renamedNameCopy= getRenamedNameCopy(provider, rewrite, operand);
+				if (renamedNameCopy instanceof InfixExpression) {
+					InfixExpression infixExpression= (InfixExpression) renamedNameCopy;
+					infixExpression.setOperator(((InfixExpression) operand).getOperator());
+				}
+				return renamedNameCopy;
 			}
 		}
 		if (expression instanceof InstanceofExpression) {
@@ -2273,7 +2278,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				}
 				
 				if (defaultFound) {
-					// This gets too complicated. We only support 'default' as last SwitchCase. 
+					// This gets too complicated. We only support 'default' as last SwitchCase.
 					return false;
 				}
 				if (switchCase.isDefault()) {
