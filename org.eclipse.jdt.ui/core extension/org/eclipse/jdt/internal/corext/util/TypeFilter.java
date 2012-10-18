@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,9 @@ import java.util.StringTokenizer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -53,7 +55,19 @@ public class TypeFilter implements IPropertyChangeListener {
 	}
 
 	public static boolean isFiltered(TypeNameMatch match) {
-		return getDefault().filter(match.getFullyQualifiedName());
+		boolean filteredByPattern= getDefault().filter(match.getFullyQualifiedName());
+		if (filteredByPattern)
+			return true;
+		
+		int accessibility= match.getAccessibility();
+		switch (accessibility) {
+			case IAccessRule.K_NON_ACCESSIBLE:
+				return JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_FORBIDDEN_REFERENCE_CHECK));
+			case IAccessRule.K_DISCOURAGED:
+				return JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_DISCOURAGED_REFERENCE_CHECK));
+			default:
+				return false;
+		}
 	}
 
 	private StringMatcher[] fStringMatchers;
@@ -93,6 +107,10 @@ public class TypeFilter implements IPropertyChangeListener {
 		return getStringMatchers().length > 0;
 	}
 
+	/**
+	 * @param fullTypeName fully-qualified type name
+	 * @return <code>true</code> iff the given type is filtered out
+	 */
 	public boolean filter(String fullTypeName) {
 		StringMatcher[] matchers= getStringMatchers();
 		for (int i= 0; i < matchers.length; i++) {
