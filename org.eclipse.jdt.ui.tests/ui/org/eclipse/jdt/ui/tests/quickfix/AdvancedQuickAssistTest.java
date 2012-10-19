@@ -1493,9 +1493,9 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public void foo(boolean a, boolean b) {\n");
 		buf.append("        if (!(a || b) || c) {\n");
-		buf.append("        	return 0;\n");
+		buf.append("            return 0;\n");
 		buf.append("        } else {\n");
-		buf.append("        	return 1;\n");
+		buf.append("            return 1;\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -1512,9 +1512,9 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public void foo(boolean a, boolean b) {\n");
 		buf.append("        if ((a || b) && !c) {\n");
-		buf.append("        	return 0;\n");
+		buf.append("            return 1;\n");
 		buf.append("        } else {\n");
-		buf.append("        	return 1;\n");
+		buf.append("            return 0;\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
