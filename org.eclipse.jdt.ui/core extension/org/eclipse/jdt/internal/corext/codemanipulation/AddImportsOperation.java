@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -163,6 +163,8 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			monitor.beginTask(CodeGenerationMessages.AddImportsOperation_description, 4);
 
 			CompilationUnit astRoot= SharedASTProvider.getAST(fCompilationUnit, SharedASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 1));
+			if (astRoot == null)
+				throw new OperationCanceledException();
 
 			ImportRewrite importRewrite= StubUtility.createImportRewrite(astRoot, true);
 
