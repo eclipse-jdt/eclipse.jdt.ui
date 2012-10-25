@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [preferences] Add preference for new compiler warning: MissingSynchronizedModifierInInheritedMethod - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245240
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - [compiler][null] inheritance of null annotations as an option - https://bugs.eclipse.org/388281
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -272,6 +273,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	
 	private static final Key PREF_ANNOTATION_NULL_ANALYSIS= getJDTCoreKey(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS);
 	
+	private static final Key PREF_INHERIT_NULL_ANNOTATIONS= getJDTCoreKey(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS);
+
 	/**
 	 * Key for the "Use default annotations for null " setting.
 	 * <p>Values are { {@link #ENABLED}, {@link #DISABLED} }.
@@ -382,6 +385,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_PB_NULL_UNCHECKED_CONVERSION,
 				PREF_PB_REDUNDANT_NULL_ANNOTATION,	
 				PREF_PB_REDUNDANT_NULL_CHECK, PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS,
+				PREF_INHERIT_NULL_ANNOTATIONS,
 				PREF_PB_UNCLOSED_CLOSEABLE, PREF_PB_POTENTIALLY_UNCLOSED_CLOSEABLE, PREF_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE,
 				PREF_PB_FALLTHROUGH_CASE, PREF_PB_REDUNDANT_SUPERINTERFACE, PREF_PB_UNUSED_WARNING_TOKEN,
 				PREF_15_PB_UNCHECKED_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST,
@@ -800,6 +804,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 					}
 				});
 		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_inherit_null_annotations;
+		fFilteredPrefTree.addCheckBox(inner, label, PREF_INHERIT_NULL_ANNOTATIONS, enabledDisabled, extraIndent, node);
+		
 		// --- global
 		
 		// add some vertical space before:
@@ -988,6 +995,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		setComboEnabled(PREF_PB_NULL_UNCHECKED_CONVERSION, enableAnnotationNullAnalysis);
 		setComboEnabled(PREF_PB_REDUNDANT_NULL_ANNOTATION, enableAnnotationNullAnalysis);
 		setComboEnabled(PREF_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, enableAnnotationNullAnalysis);
+		getCheckBox(PREF_INHERIT_NULL_ANNOTATIONS).setEnabled(enableAnnotationNullAnalysis);
 	}
 
 	private IStatus validateNullnessAnnotation(String value, String errorMessage) {
