@@ -33,7 +33,13 @@ org.eclipse.platform.doc.isv/buildDoc.xml
 org.eclipse.jdt.doc.isv/buildDoc.xml
 
 org.eclipse.core.resources/build-user.xml
-org.eclipse.core.tests.resources/test.xml
+org.eclipse.core.tests/*
+org.eclipse.core.tests.runtime/*
+org.eclipse.core.tests.resources/*
+org.eclipse.e4.core.tests/*
+org.eclipse.e4.core.tests.services/*
+
+org.eclipse.core.tools/*
 org.eclipse.tomcat/conf/*
 org.eclipse.ui/plugin.xml
 org.eclipse.platform.source/*
