@@ -93,6 +93,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -639,7 +640,8 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		Assert.isNotNull(sourceRewrite);
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(declaration);
-		ImportRewriteUtil.collectImports(fSubType.getJavaProject(), declaration, fTypeBindings, fStaticBindings, true);
+		IJavaProject sourceProject= fSubType.getJavaProject();
+		ImportRewriteUtil.collectImports(sourceProject, declaration, fTypeBindings, fStaticBindings, true);
 		ASTRewrite rewrite= ASTRewrite.create(declaration.getAST());
 		ITrackedNodePosition position= rewrite.track(declaration);
 		if (declaration.getBody() != null)
@@ -663,7 +665,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			} else if (extended.isAnnotation()) {
 				annotation= (Annotation) extended;
 				ITypeBinding binding= annotation.resolveTypeBinding();
-				if (binding.getQualifiedName().equals("java.lang.Override") || ! Bindings.isClassOrRuntimeAnnotation(binding)) //$NON-NLS-1$
+				if (binding.getQualifiedName().equals("java.lang.Override") || ! StubUtility2.isCopyOnInheritAnnotation(binding, sourceProject)) //$NON-NLS-1$
 					list.remove(annotation, null);
 			}
 		}
@@ -682,7 +684,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				} else if (extended.isAnnotation()) {
 					annotation= (Annotation) extended;
 					ITypeBinding binding= annotation.resolveTypeBinding();
-					if (! Bindings.isClassOrRuntimeAnnotation(binding))
+					if (! StubUtility2.isCopyOnInheritAnnotation(binding, sourceProject))
 						modifierRewrite.remove(annotation, null);
 				}
 			}
