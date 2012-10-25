@@ -2998,6 +2998,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnimplementedMethodsWithAnnotations() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, "test.NonNull");
+		hashtable.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "test.Nullable");
+		JavaCore.setOptions(hashtable);
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -3069,9 +3074,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("class B extends A {\n");
 		buf.append("\n");
 		buf.append("    @Override\n");
-		buf.append("    @Sour(value = {-42, 13}, c = Integer[][].class, name = \"@hi\", policy = RetentionPolicy.CLASS, d = @Deprecated)\n");
 		buf.append("    public @NonNull\n");
-		buf.append("    Object foo(@Sour(12) @Nullable Object input) {\n");
+		buf.append("    Object foo(@Nullable Object input) {\n");
 		buf.append("        return null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");

@@ -503,7 +503,7 @@ public final class StubUtility2 {
 			var.setName(ast.newSimpleName(paramNames[i]));
 			IAnnotationBinding[] annotations= binding.getParameterAnnotations(i);
 			for (IAnnotationBinding annotation : annotations) {
-				if (Bindings.isClassOrRuntimeAnnotation(annotation.getAnnotationType()))
+				if (StubUtility2.isCopyOnInheritAnnotation(annotation.getAnnotationType(), project))
 					var.modifiers().add(ASTNodeFactory.newAnnotation(ast, annotation, imports, context));
 			}
 			parameters.add(var);
@@ -626,6 +626,7 @@ public final class StubUtility2 {
 	}
 
 	private static List<IExtendedModifier> getImplementationModifiers(AST ast, IMethodBinding method, boolean inInterface, ImportRewrite importRewrite, ImportRewriteContext context) throws JavaModelException {
+		IJavaProject javaProject= importRewrite.getCompilationUnit().getJavaProject();
 		int modifiers= method.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.NATIVE & ~Modifier.PRIVATE;
 		if (inInterface) {
 			modifiers= modifiers & ~Modifier.PROTECTED;
@@ -659,7 +660,7 @@ public final class StubUtility2 {
 								ITypeBinding otherAnnotationType= annotation.getAnnotationType();
 								String qn= otherAnnotationType.getQualifiedName();
 								if (qn.endsWith(n) && (qn.length() == n.length() || qn.charAt(qn.length() - n.length() - 1) == '.')) {
-									if (Bindings.isClassOrRuntimeAnnotation(otherAnnotationType))
+									if (StubUtility2.isCopyOnInheritAnnotation(otherAnnotationType, javaProject))
 										result.add(ASTNodeFactory.newAnnotation(ast, annotation, importRewrite, context));
 									break;
 								}
@@ -674,7 +675,7 @@ public final class StubUtility2 {
 		ArrayList<IExtendedModifier> result= new ArrayList<IExtendedModifier>();
 		
 		for (IAnnotationBinding annotation : annotations) {
-			if (Bindings.isClassOrRuntimeAnnotation(annotation.getAnnotationType()))
+			if (StubUtility2.isCopyOnInheritAnnotation(annotation.getAnnotationType(), javaProject))
 				result.add(ASTNodeFactory.newAnnotation(ast, annotation, importRewrite, context));
 		}
 		
@@ -876,5 +877,13 @@ public final class StubUtility2 {
 	 */
 	private StubUtility2() {
 		// Not for instantiation
+	}
+
+	public static boolean isCopyOnInheritAnnotation(ITypeBinding annotationType, IJavaProject project) {
+		// not supported in 3.8:
+//		if (JavaCore.ENABLED.equals(project.getOption(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, true)))
+//			return false;
+		
+		return Bindings.isNullAnnotation(annotationType, project);
 	}
 }
