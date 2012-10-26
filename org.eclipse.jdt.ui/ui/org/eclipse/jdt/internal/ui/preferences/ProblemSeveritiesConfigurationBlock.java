@@ -859,7 +859,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 					PREF_PB_LOCAL_VARIABLE_HIDING.equals(changedKey) ||
 					PREF_15_PB_INCOMPLETE_ENUM_SWITCH.equals(changedKey) ||
 					PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION.equals(changedKey) ||
-					PREF_15_PB_MISSING_OVERRIDE_ANNOTATION.equals(changedKey) ||
 					PREF_PB_SUPPRESS_WARNINGS.equals(changedKey) ||
 					PREF_ANNOTATION_NULL_ANALYSIS.equals(changedKey)) {
 				updateEnableStates();
@@ -979,9 +978,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		
 		boolean enableMissingEnumDespiteDefault= !checkValue(PREF_15_PB_INCOMPLETE_ENUM_SWITCH, IGNORE);
 		getCheckBox(PREF_15_PB_MISSING_ENUM_CASE_DESPITE_DEFAULT).setEnabled(enableMissingEnumDespiteDefault);
-		
-		boolean enablemissingOverrideAnnotation= !checkValue(PREF_15_PB_MISSING_OVERRIDE_ANNOTATION, IGNORE);
-		getCheckBox(PREF_16_PB_MISSING_OVERRIDE_ANNOTATION_FOR_INTERFACE_METHOD_IMPLEMENTATION).setEnabled(enablemissingOverrideAnnotation);
 		
 		boolean enableSuppressWarnings= checkValue(PREF_PB_SUPPRESS_WARNINGS, ENABLED);
 		getCheckBox(PREF_PB_SUPPRESS_OPTIONAL_ERRORS).setEnabled(enableSuppressWarnings);

@@ -531,6 +531,7 @@ public final class PreferencesMessages extends NLS {
 	public static String NameConventionConfigurationBlock_arg_dialog_message;
 	public static String NameConventionConfigurationBlock_local_dialog_title;
 	public static String NameConventionConfigurationBlock_local_dialog_message;
+	public static String NameConventionConfigurationBlock_override_link_label;
 	public static String MembersOrderPreferencePage_category_button_up;
 	public static String MembersOrderPreferencePage_category_button_down;
 	public static String MembersOrderPreferencePage_visibility_button_up;

@@ -82,12 +82,17 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 public final class StubUtility2 {
 
 	public static void addOverrideAnnotation(IJavaProject project, ASTRewrite rewrite, MethodDeclaration decl, IMethodBinding binding) {
-		String version= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-		if (!binding.getDeclaringClass().isInterface() || !JavaModelUtil.isVersionLessThan(version, JavaCore.VERSION_1_6)) {
-			final Annotation marker= rewrite.getAST().newMarkerAnnotation();
-			marker.setTypeName(rewrite.getAST().newSimpleName("Override")); //$NON-NLS-1$
-			rewrite.getListRewrite(decl, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(marker, null);
+		if (binding.getDeclaringClass().isInterface()) {
+			String version= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+			if (JavaModelUtil.isVersionLessThan(version, JavaCore.VERSION_1_6))
+				return; // not allowed in 1.5
+			if (JavaCore.DISABLED.equals(project.getOption(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION_FOR_INTERFACE_METHOD_IMPLEMENTATION, true)))
+				return; // user doesn't want to use 1.6 style
 		}
+		
+		Annotation marker= rewrite.getAST().newMarkerAnnotation();
+		marker.setTypeName(rewrite.getAST().newSimpleName("Override")); //$NON-NLS-1$
+		rewrite.getListRewrite(decl, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(marker, null);
 	}
 
 	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context, IMethodBinding binding, String type, int modifiers, boolean omitSuperForDefConst, boolean todo, CodeGenerationSettings settings) throws CoreException {

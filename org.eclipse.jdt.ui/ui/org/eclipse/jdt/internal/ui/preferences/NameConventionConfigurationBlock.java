@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,14 +11,18 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 
@@ -27,6 +31,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.dialogs.StatusDialog;
+import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -403,6 +408,26 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		fUseIsForBooleanGettersBox.doFillIntoGrid(composite, 3);
 
 		fUseOverrideAnnotation.doFillIntoGrid(composite, 3);
+		
+		Link seeProblemSeverity= new Link(composite, SWT.WRAP);
+		data= new GridData(SWT.BEGINNING, SWT.CENTER, true, false, 3, 1);
+		seeProblemSeverity.setLayoutData(data);
+		LayoutUtil.setHorizontalIndent(seeProblemSeverity, new PixelConverter(composite).convertWidthInCharsToPixels(1) * 3);
+		seeProblemSeverity.setText(PreferencesMessages.NameConventionConfigurationBlock_override_link_label);
+		seeProblemSeverity.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IWorkbenchPreferenceContainer preferenceContainer= getPreferenceContainer();
+				if (preferenceContainer != null) {
+					HashMap<String, String> prefsData= new HashMap<String, String>();
+					prefsData.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_KEY, JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION_FOR_INTERFACE_METHOD_IMPLEMENTATION);
+					prefsData.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
+					String id= fProject == null ? ProblemSeveritiesPreferencePage.PREF_ID : ProblemSeveritiesPreferencePage.PROP_ID;
+					preferenceContainer.openPage(id, prefsData);
+				}
+			}
+		});
+		
 		DialogField.createEmptySpace(composite, 3);
 
 		fExceptionName.doFillIntoGrid(composite, 2);
