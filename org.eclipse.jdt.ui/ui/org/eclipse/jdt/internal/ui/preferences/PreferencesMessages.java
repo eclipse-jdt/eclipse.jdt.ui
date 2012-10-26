@@ -417,6 +417,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_unused_imports_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unused_local_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unused_parameter_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_unused_type_parameter;
 	public static String ProblemSeveritiesConfigurationBlock_pb_signal_param_in_overriding_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_suppress_optional_errors_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unused_private_label;
