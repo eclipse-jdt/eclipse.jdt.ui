@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 IBM Corporation and others.
+ * Copyright (c) 2009, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,8 @@ package org.eclipse.jdt.internal.junit.buildpath;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLDecoder;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
@@ -127,10 +128,13 @@ class P2Utils {
 			return null;
 		
 		try {
-			String fileStr= FileLocator.toFileURL(URIUtil.toURL(bundleLocation)).getPath();
-			fileStr= URLDecoder.decode(fileStr, "UTF-8"); //$NON-NLS-1$
-			return new Path(fileStr);
+			URL localFileURL= FileLocator.toFileURL(URIUtil.toURL(bundleLocation));
+			URI localFileURI= new URI(localFileURL.toExternalForm());
+			return new Path(localFileURI.getPath());
 		} catch (IOException e) {
+			JUnitCorePlugin.log(e);
+			return null;
+		} catch (URISyntaxException e) {
 			JUnitCorePlugin.log(e);
 			return null;
 		}
