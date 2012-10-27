@@ -2500,9 +2500,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 						if (typeBinding != null && typeBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
 							return false; // don't propose quick assist when == is used to compare strings, since switch will use equals()
 						}
-					}
-
-					if (operator.equals(InfixExpression.Operator.CONDITIONAL_OR)) {
+					} else if (operator.equals(InfixExpression.Operator.CONDITIONAL_OR)) {
 						currentExpression= leftOperand;
 						continue;
 					}
@@ -2520,21 +2518,24 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				} else if (leftOperand instanceof QualifiedName) {
 					QualifiedName qualifiedName= (QualifiedName) leftOperand;
 					IVariableBinding binding= (IVariableBinding) qualifiedName.resolveBinding();
-					if (binding.isEnumConstant()) {
-						importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext);
-						caseExpressions.add(qualifiedName.getName());
-						expression= rightOperand;
-					}
+					if (binding == null || !binding.isEnumConstant())
+						return false;
+					importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext);
+					caseExpressions.add(qualifiedName.getName());
+					expression= rightOperand;
 					executeDefaultOnNullExpression|= isMethodInvocationCase;
 				} else if (rightOperand instanceof QualifiedName) {
 					QualifiedName qualifiedName= (QualifiedName) rightOperand;
 					IVariableBinding binding= (IVariableBinding) qualifiedName.resolveBinding();
-					if (binding.isEnumConstant()) {
-						importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext);
-						caseExpressions.add(qualifiedName.getName());
-						expression= leftOperand;
-					}
+					if (binding == null || !binding.isEnumConstant())
+						return false;
+					importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext);
+					caseExpressions.add(qualifiedName.getName());
+					expression= leftOperand;
 				} else {
+					return false;
+				}
+				if (expression == null) { //Paranoidal check: this condition should never be true
 					return false;
 				}
 
@@ -2548,7 +2549,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					switchExpression= expression;
 				}
 
-				if (switchExpression != null && !switchExpression.subtreeMatch(new ASTMatcher(), expression)) {
+				if (!switchExpression.subtreeMatch(new ASTMatcher(), expression)) {
 					return false;
 				}
 			}
