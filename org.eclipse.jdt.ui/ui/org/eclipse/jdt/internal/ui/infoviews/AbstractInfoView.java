@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Genady Beryozkin <eclipse@genady.org> - [misc] Display values for constant fields in the Javadoc view - https://bugs.eclipse.org/bugs/show_bug.cgi?id=204914
+ *     Tristan Hume <trishume@gmail.com> -  Javadoc View should show method after code completion - https://bugs.eclipse.org/bugs/show_bug.cgi?id=385642
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.infoviews;
 
@@ -39,7 +40,9 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IPartListener2;
@@ -64,6 +67,8 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
+import org.eclipse.jdt.internal.ui.text.Symbols;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 /**
@@ -459,11 +464,20 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		Object element;
 		try {
 			if (part instanceof JavaEditor && selection instanceof ITextSelection) {
-				IJavaElement[] elements= TextSelectionConverter.codeResolve((JavaEditor)part, (ITextSelection)selection);
-				if (elements != null && elements.length > 0)
+				JavaEditor editor = (JavaEditor)part;
+				IJavaElement[] elements= TextSelectionConverter.codeResolve(editor, (ITextSelection)selection);
+				if (elements != null && elements.length > 0) {
 					return elements[0];
-				else
-					return null;
+				} else {
+					// if we haven't selected anything useful, try the enclosing method call
+					IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
+					ISelection methodSelection = guessMethodNamePosition(document, (ITextSelection)selection);
+					// if an enclosing method call could not be found
+					if (methodSelection == null) 
+						return null;
+					// call this method recursively with the new selection
+					return findSelectedJavaElement(part, methodSelection);
+				}
 			} else if (selection instanceof IStructuredSelection) {
 				element= SelectionUtil.getSingleElement(selection);
 			} else {
@@ -474,6 +488,44 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		}
 
 		return findJavaElement(element);
+	}
+	
+	/**
+	 * Gets the position of the innermost method call from a selection inside the parameters.
+	 * For example, the selection: String.valueOf(4|3543); would return a selection in valueOf.
+	 * 
+	 * @param document the document containing the selection
+	 * @param selection the selection to search from
+	 * @return an offset into the given document, or <code>null</code> if the selection is not in a method call.
+	 * The returned selection is guaranteed to be in front of the given selection.
+	 */
+	private ITextSelection guessMethodNamePosition(IDocument document, ITextSelection selection) {
+		final int contextPosition= selection.getOffset();
+		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
+		int bound= Math.max(-1, contextPosition - 200);
+
+		// try the innermost scope of parentheses that looks like a method call
+		int pos= contextPosition - 1;
+		do {
+			int paren= scanner.findOpeningPeer(pos, bound, '(', ')');
+			if (paren == JavaHeuristicScanner.NOT_FOUND)
+				break;
+			int token= scanner.previousToken(paren - 1, bound);
+			// next token must be a method name (identifier) or the closing angle of a
+			// constructor call of a parameterized type.
+			if (token == Symbols.TokenIDENT) {
+				return new TextSelection(document, paren, 0);
+			} else if (token == Symbols.TokenGREATERTHAN) {
+				// if it is the constructor of a parameterized type, then skip the type parameters to the type name
+				int bracketBound = Math.max(-1, paren - 200);
+				int bracket = scanner.findOpeningPeer(paren - 2, bracketBound, '<', '>');
+				if (bracket != JavaHeuristicScanner.NOT_FOUND)
+					return new TextSelection(document, bracket, 0);
+			}
+			pos= paren - 1;
+		} while (true);
+
+		return null;
 	}
 
 	/**
