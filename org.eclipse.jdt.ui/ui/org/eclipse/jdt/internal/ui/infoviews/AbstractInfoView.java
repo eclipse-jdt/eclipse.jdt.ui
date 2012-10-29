@@ -155,10 +155,11 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	private boolean fLinking= true;
 
 	/**
-	 * The last selected element if linking was disabled.
-	 * @since 3.4
+	 * The last part that from which a selection changed event was received.
+	 * 
+	 * @since 3.9
 	 */
-	private IJavaElement fLastSelection;
+	private IWorkbenchPart fLastSelectionProvider;
 
 	/**
 	 * Set the input of this view.
@@ -408,8 +409,8 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	protected void setLinkingEnabled(boolean enabled) {
 		fLinking= enabled;
 
-		if (fLinking && fLastSelection != null) {
-			setInput(fLastSelection);
+		if (fLinking && fLastSelectionProvider != null) {
+			computeAndSetInput(fLastSelectionProvider);
 		}
 	}
 
@@ -430,14 +431,10 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		if (part.equals(this))
 			return;
 
-		if (!fLinking) {
-			IJavaElement javaElement= findSelectedJavaElement(part, selection);
-			if (javaElement != null)
-				fLastSelection= javaElement;
-		} else {
-			fLastSelection= null;
+		fLastSelectionProvider= part;
+
+		if (fLinking)
 			computeAndSetInput(part);
-		}
 	}
 
 	/**
