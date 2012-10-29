@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,38 +87,31 @@ public class DelegateCreatorTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 
-		try{
-			CompilationUnitRewrite rewrite= new CompilationUnitRewrite(cu);
-			rewrite.setResolveBindings(false);
-			BodyDeclaration d;
-			DelegateCreator creator;
-			if (methodName != null) {
-				IMethod method= classA.getMethod(methodName, args);
-				d= ASTNodeSearchUtil.getMethodDeclarationNode(method, rewrite.getRoot());
-				creator= new DelegateMethodCreator();
-			}
-			else {
-				IField field= classA.getField(fieldName);
-				d= ASTNodeSearchUtil.getFieldDeclarationNode(field, rewrite.getRoot());
-				creator= new DelegateFieldCreator();
-			}
-
-			creator.setDeclaration(d);
-			creator.setSourceRewrite(rewrite);
-			creator.setCopy(copy);
-			if (newName != null) creator.setNewElementName(newName);
-			if (destination != null) creator.setNewLocation(destination);
-			creator.prepareDelegate();
-			creator.createEdit();
-			CompilationUnitChange createChange= rewrite.createChange(true);
-			createChange.initializeValidationData(new NullProgressMonitor());
-			createChange.perform(new NullProgressMonitor());
-			assertEqualLines("invalid delegate created", getFileContents(getOutputTestFileName("A")), cu.getSource());
-
-		} finally{
-			performDummySearch();
-			classA.getCompilationUnit().delete(true, null);
+		CompilationUnitRewrite rewrite= new CompilationUnitRewrite(cu);
+		rewrite.setResolveBindings(false);
+		BodyDeclaration d;
+		DelegateCreator creator;
+		if (methodName != null) {
+			IMethod method= classA.getMethod(methodName, args);
+			d= ASTNodeSearchUtil.getMethodDeclarationNode(method, rewrite.getRoot());
+			creator= new DelegateMethodCreator();
+		} else {
+			IField field= classA.getField(fieldName);
+			d= ASTNodeSearchUtil.getFieldDeclarationNode(field, rewrite.getRoot());
+			creator= new DelegateFieldCreator();
 		}
+
+		creator.setDeclaration(d);
+		creator.setSourceRewrite(rewrite);
+		creator.setCopy(copy);
+		if (newName != null) creator.setNewElementName(newName);
+		if (destination != null) creator.setNewLocation(destination);
+		creator.prepareDelegate();
+		creator.createEdit();
+		CompilationUnitChange createChange= rewrite.createChange(true);
+		createChange.initializeValidationData(new NullProgressMonitor());
+		createChange.perform(new NullProgressMonitor());
+		assertEqualLines("invalid delegate created", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 
 	public void testm01() throws Exception {

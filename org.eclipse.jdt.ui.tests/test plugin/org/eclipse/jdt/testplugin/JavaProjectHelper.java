@@ -269,10 +269,11 @@ public class JavaProjectHelper {
 	}
 
 	/**
-	 * Removes a IJavaElement
+	 * Removes a IJavaElement. Retries if deletion failed (e.g. because the indexer
+	 * still locks the file).
 	 *
-	 * @param elem The element to remove
-	 * @throws CoreException Removing failed
+	 * @param elem the element to delete
+	 * @throws CoreException if operation failed
 	 * @see #ASSERT_NO_MIXED_LINE_DELIMIERS
 	 */
 	public static void delete(final IJavaElement elem) throws CoreException {
@@ -293,6 +294,13 @@ public class JavaProjectHelper {
 		emptyDisplayLoop();
 	}
 
+	/**
+	 * Removes a resource. Retries if deletion failed (e.g. because the indexer
+	 * still locks the file).
+	 * 
+	 * @param resource the resource to delete
+	 * @throws CoreException if operation failed
+	 */
 	public static void delete(IResource resource) throws CoreException {
 		for (int i= 0; i < MAX_RETRY; i++) {
 			try {
