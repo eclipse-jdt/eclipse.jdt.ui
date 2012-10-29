@@ -890,8 +890,6 @@ public final class StubUtility2 {
 		if (JavaCore.ENABLED.equals(project.getOption(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, true)))
 			return false;
 		
-		String qualifiedName= annotationType.getQualifiedName();
-		return qualifiedName.equals(project.getOption(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, true))
-				|| qualifiedName.equals(project.getOption(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, true));
+		return Bindings.isNullAnnotation(annotationType, project);
 	}
 }

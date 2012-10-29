@@ -93,7 +93,6 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -432,7 +431,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				final Set<String> replacements= new HashSet<String>();
 				if (fReplace)
 					rewriteTypeOccurrences(manager, sourceRewrite, copy, replacements, status, new SubProgressMonitor(monitor, 220));
-				createMethodComments(sourceRewrite, replacements);
+				rewriteSourceMethods(sourceRewrite, replacements);
 				manager.manage(fSubType.getCompilationUnit(), sourceRewrite.createChange(true));
 			}
 			return manager;
@@ -584,8 +583,8 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	}
 
 	/**
-	 * Creates the method annotations and comments of the extracted methods in
-	 * the source type.
+	 * Rewrites the extracted methods in the source type.
+	 * Adds/removes method annotations and adds method comments.
 	 *
 	 * @param sourceRewrite
 	 *            the source compilation unit rewrite
@@ -595,18 +594,43 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @throws CoreException
 	 *             if an error occurs
 	 */
-	protected final void createMethodComments(final CompilationUnitRewrite sourceRewrite, final Set<String> replacements) throws CoreException {
+	private void rewriteSourceMethods(final CompilationUnitRewrite sourceRewrite, final Set<String> replacements) throws CoreException {
 		Assert.isNotNull(sourceRewrite);
 		Assert.isNotNull(replacements);
-		if (fMembers.length > 0 && (fAnnotations || fComments)) {
+		if (fMembers.length > 0) {
 			IJavaProject project= fSubType.getJavaProject();
 			boolean annotations= fAnnotations && !JavaModelUtil.isVersionLessThan(project.getOption(JavaCore.COMPILER_SOURCE, true), JavaCore.VERSION_1_6);
+			boolean inheritNullAnnotations= JavaCore.ENABLED.equals(project.getOption(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, true));
 			boolean javadoc= project.getOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, true).equals(JavaCore.ENABLED);
 			IMember member= null;
 			for (int index= 0; index < fMembers.length; index++) {
 				member= fMembers[index];
 				if (member instanceof IMethod) {
 					MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, sourceRewrite.getRoot());
+					if (inheritNullAnnotations) {
+						for (IExtendedModifier extended : (List<IExtendedModifier>) declaration.modifiers()) {
+							if (extended.isAnnotation()) {
+								Annotation annotation= (Annotation) extended;
+								ITypeBinding binding= annotation.resolveTypeBinding();
+								if (binding != null && Bindings.isNullAnnotation(binding, project)) {
+									ASTRewrite rewrite= sourceRewrite.getASTRewrite();
+									rewrite.getListRewrite(declaration, MethodDeclaration.MODIFIERS2_PROPERTY).remove(annotation, null);
+								}
+							}
+						}
+						for (SingleVariableDeclaration parameter : (List<SingleVariableDeclaration>) declaration.parameters()) {
+							for (IExtendedModifier extended : (List<IExtendedModifier>) parameter.modifiers()) {
+								if (extended.isAnnotation()) {
+									Annotation annotation= (Annotation) extended;
+									ITypeBinding binding= annotation.resolveTypeBinding();
+									if (binding != null && Bindings.isNullAnnotation(binding, project)) {
+										ASTRewrite rewrite= sourceRewrite.getASTRewrite();
+										rewrite.getListRewrite(parameter, SingleVariableDeclaration.MODIFIERS2_PROPERTY).remove(annotation, null);
+									}
+								}
+							}
+						}
+					}
 					if (annotations) {
 						ASTRewrite rewrite= sourceRewrite.getASTRewrite();
 						AST ast= rewrite.getAST();
@@ -665,7 +689,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			} else if (extended.isAnnotation()) {
 				annotation= (Annotation) extended;
 				ITypeBinding binding= annotation.resolveTypeBinding();
-				if (binding.getQualifiedName().equals("java.lang.Override") || ! StubUtility2.isCopyOnInheritAnnotation(binding, sourceProject)) //$NON-NLS-1$
+				if (binding != null && binding.getQualifiedName().equals("java.lang.Override") || ! Bindings.isNullAnnotation(binding, sourceProject)) //$NON-NLS-1$
 					list.remove(annotation, null);
 			}
 		}
@@ -684,7 +708,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				} else if (extended.isAnnotation()) {
 					annotation= (Annotation) extended;
 					ITypeBinding binding= annotation.resolveTypeBinding();
-					if (! StubUtility2.isCopyOnInheritAnnotation(binding, sourceProject))
+					if (binding != null && ! Bindings.isNullAnnotation(binding, sourceProject))
 						modifierRewrite.remove(annotation, null);
 				}
 			}

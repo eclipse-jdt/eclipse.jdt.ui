@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
@@ -1423,6 +1424,12 @@ public class Bindings {
 			default:
 				return null;
 		}
+	}
+
+	public static boolean isNullAnnotation(ITypeBinding annotationType, IJavaProject project) {
+		String qualifiedName= annotationType.getQualifiedName();
+		return qualifiedName.equals(project.getOption(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, true))
+				|| qualifiedName.equals(project.getOption(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, true));
 	}
 
 }
