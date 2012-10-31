@@ -40,6 +40,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
@@ -505,8 +506,22 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		int pos= contextPosition - 1;
 		do {
 			int paren= scanner.findOpeningPeer(pos, bound, '(', ')');
-			if (paren == JavaHeuristicScanner.NOT_FOUND)
-				break;
+			if (paren == JavaHeuristicScanner.NOT_FOUND) {
+				try {
+					// see if we're right after a closing parenthesis (e.g. happens on content assist for a method without parameters)
+					if (pos == contextPosition - 1
+							&& document.getChar(pos) == ')') {
+						paren= scanner.findOpeningPeer(pos - 1, bound, '(', ')');
+						if (paren == JavaHeuristicScanner.NOT_FOUND) {
+							break;
+						}
+					} else {
+						break;
+					}
+				} catch (BadLocationException e) {
+					break;
+				}
+			}
 			int token= scanner.previousToken(paren - 1, bound);
 			// next token must be a method name (identifier) or the closing angle of a
 			// constructor call of a parameterized type.
