@@ -490,7 +490,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				});
 			}
 
-			Link proposalLink= new Link(parent, SWT.WRAP);
+			Link proposalLink= new Link(parent, SWT.NONE);
 			GridData layoutData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
 			String linkText;
 			if (isMultiFix) {
