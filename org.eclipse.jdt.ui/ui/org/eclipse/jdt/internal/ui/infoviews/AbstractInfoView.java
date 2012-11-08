@@ -534,6 +534,17 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 				if (bracket != JavaHeuristicScanner.NOT_FOUND)
 					return new TextSelection(document, bracket, 0);
 			}
+			try {
+				// see if we're right after a closing parenthesis (e.g. happens on content assist for a method without parameters)
+				if (pos == contextPosition - 1
+						&& document.getChar(pos) == ')') {
+					paren= pos;
+				} else {
+					break;
+				}
+			} catch (BadLocationException e) {
+				break;
+			}
 			pos= paren - 1;
 		} while (true);
 
