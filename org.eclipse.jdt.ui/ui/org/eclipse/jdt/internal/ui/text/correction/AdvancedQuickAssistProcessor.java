@@ -2462,95 +2462,112 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 		while (currentStatement != null) {
 			Expression expression= null;
-			List<ASTNode> caseExpressions= new ArrayList<ASTNode>();
-			while (currentExpression != null && currentIf != null) {//loop for fall through cases - multiple expressions with || operator
-				Expression leftOperand;
-				Expression rightOperand;
-				boolean isMethodInvocationCase= false;
-				if (currentExpression instanceof MethodInvocation) {
-					isMethodInvocationCase= true;
-					if (!(((MethodInvocation) currentExpression).getName().getIdentifier()).equals("equals")) { //$NON-NLS-1$
-						return false;
-					}
-
-					MethodInvocation invocation= (MethodInvocation) currentExpression;
-					List<Expression> arguments= invocation.arguments();
-					if (arguments.size() != 1)
-						return false;
-					leftOperand= (Expression) invocation.getStructuralProperty(MethodInvocation.EXPRESSION_PROPERTY);
-					rightOperand= arguments.get(0);
-
-					ITypeBinding typeBinding= leftOperand.resolveTypeBinding();
-					if (typeBinding != null && typeBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
-						if (!JavaModelUtil.is17OrHigher(context.getCompilationUnit().getJavaProject()))
+			List<Expression> caseExpressions= new ArrayList<Expression>();
+			if (currentIf != null) {
+				while (currentExpression != null) { // loop for fall through cases - multiple expressions with || operator
+					Expression leftOperand;
+					Expression rightOperand;
+					boolean isMethodInvocationCase= false;
+					if (currentExpression instanceof MethodInvocation) {
+						isMethodInvocationCase= true;
+						if (!(((MethodInvocation) currentExpression).getName().getIdentifier()).equals("equals")) //$NON-NLS-1$
 							return false;
-					}
-
-				} else if (currentExpression instanceof InfixExpression) {
-					InfixExpression infixExpression= (InfixExpression) currentExpression;
-					Operator operator= infixExpression.getOperator();
-					if (!(operator.equals(InfixExpression.Operator.CONDITIONAL_OR) || operator.equals(InfixExpression.Operator.EQUALS)))
-						return false;
-
-					leftOperand= infixExpression.getLeftOperand();
-					rightOperand= infixExpression.getRightOperand();
-
-					if (operator.equals(InfixExpression.Operator.EQUALS)) {
-						ITypeBinding typeBinding= leftOperand.resolveTypeBinding();
-						if (typeBinding != null && typeBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
-							return false; // don't propose quick assist when == is used to compare strings, since switch will use equals()
+	
+						MethodInvocation invocation= (MethodInvocation) currentExpression;
+						leftOperand= invocation.getExpression();
+						if (leftOperand == null)
+							return false;
+						ITypeBinding leftBinding= leftOperand.resolveTypeBinding();
+						if (leftBinding != null) {
+							if (leftBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
+								if (!JavaModelUtil.is17OrHigher(context.getCompilationUnit().getJavaProject()))
+									return false;
+							} else if (!leftBinding.isEnum()) {
+								return false;
+							}
 						}
-					} else if (operator.equals(InfixExpression.Operator.CONDITIONAL_OR)) {
-						currentExpression= leftOperand;
-						continue;
+						
+						List<Expression> arguments= invocation.arguments();
+						if (arguments.size() != 1)
+							return false;
+						rightOperand= arguments.get(0);
+						ITypeBinding rightBinding= leftOperand.resolveTypeBinding();
+						if (rightBinding != null) {
+							if (rightBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
+								if (!JavaModelUtil.is17OrHigher(context.getCompilationUnit().getJavaProject()))
+									return false;
+							} else if (!rightBinding.isEnum()) {
+								return false;
+							}
+						}
+	
+	
+					} else if (currentExpression instanceof InfixExpression) {
+						InfixExpression infixExpression= (InfixExpression) currentExpression;
+						Operator operator= infixExpression.getOperator();
+						if (!(operator.equals(InfixExpression.Operator.CONDITIONAL_OR) || operator.equals(InfixExpression.Operator.EQUALS)))
+							return false;
+	
+						leftOperand= infixExpression.getLeftOperand();
+						rightOperand= infixExpression.getRightOperand();
+	
+						if (operator.equals(InfixExpression.Operator.EQUALS)) {
+							ITypeBinding typeBinding= leftOperand.resolveTypeBinding();
+							if (typeBinding != null && typeBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
+								return false; // don't propose quick assist when == is used to compare strings, since switch will use equals()
+							}
+						} else if (operator.equals(InfixExpression.Operator.CONDITIONAL_OR)) {
+							currentExpression= leftOperand;
+							continue;
+						}
+					} else {
+						return false;
 					}
-				} else {
-					return false;
-				}
-
-				if (leftOperand.resolveConstantExpressionValue() != null) {
-					caseExpressions.add(leftOperand);
-					expression= rightOperand;
-					executeDefaultOnNullExpression|= isMethodInvocationCase;
-				} else if (rightOperand.resolveConstantExpressionValue() != null) {
-					caseExpressions.add(rightOperand);
-					expression= leftOperand;
-				} else if (leftOperand instanceof QualifiedName) {
-					QualifiedName qualifiedName= (QualifiedName) leftOperand;
-					IVariableBinding binding= (IVariableBinding) qualifiedName.resolveBinding();
-					if (binding == null || !binding.isEnumConstant())
+	
+					if (leftOperand.resolveConstantExpressionValue() != null) {
+						caseExpressions.add(leftOperand);
+						expression= rightOperand;
+						executeDefaultOnNullExpression|= isMethodInvocationCase;
+					} else if (rightOperand.resolveConstantExpressionValue() != null) {
+						caseExpressions.add(rightOperand);
+						expression= leftOperand;
+					} else if (leftOperand instanceof QualifiedName) {
+						QualifiedName qualifiedName= (QualifiedName) leftOperand;
+						IVariableBinding binding= (IVariableBinding) qualifiedName.resolveBinding();
+						if (binding == null || !binding.isEnumConstant())
+							return false;
+						importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext);
+						caseExpressions.add(qualifiedName.getName());
+						expression= rightOperand;
+						executeDefaultOnNullExpression|= isMethodInvocationCase;
+					} else if (rightOperand instanceof QualifiedName) {
+						QualifiedName qualifiedName= (QualifiedName) rightOperand;
+						IVariableBinding binding= (IVariableBinding) qualifiedName.resolveBinding();
+						if (binding == null || !binding.isEnumConstant())
+							return false;
+						importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext);
+						caseExpressions.add(qualifiedName.getName());
+						expression= leftOperand;
+					} else {
 						return false;
-					importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext);
-					caseExpressions.add(qualifiedName.getName());
-					expression= rightOperand;
-					executeDefaultOnNullExpression|= isMethodInvocationCase;
-				} else if (rightOperand instanceof QualifiedName) {
-					QualifiedName qualifiedName= (QualifiedName) rightOperand;
-					IVariableBinding binding= (IVariableBinding) qualifiedName.resolveBinding();
-					if (binding == null || !binding.isEnumConstant())
+					}
+					if (expression == null) { // paranoidal check: this condition should never be true
 						return false;
-					importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext);
-					caseExpressions.add(qualifiedName.getName());
-					expression= leftOperand;
-				} else {
-					return false;
-				}
-				if (expression == null) { //Paranoidal check: this condition should never be true
-					return false;
-				}
-
-				if (caseExpressions.size() > 0 && currentExpression.getParent() instanceof InfixExpression) {
-					currentExpression= getNextSiblingExpression(currentExpression);
-				} else if (caseExpressions.size() > 0) {
-					currentExpression= null;
-				}
-
-				if (switchExpression == null) {
-					switchExpression= expression;
-				}
-
-				if (!switchExpression.subtreeMatch(new ASTMatcher(), expression)) {
-					return false;
+					}
+					
+					if (currentExpression.getParent() instanceof InfixExpression) {
+						currentExpression= getNextSiblingExpression(currentExpression);
+					} else {
+						currentExpression= null;
+					}
+	
+					if (switchExpression == null) {
+						switchExpression= expression;
+					}
+	
+					if (!switchExpression.subtreeMatch(new ASTMatcher(), expression)) {
+						return false;
+					}
 				}
 			}
 
@@ -2583,6 +2600,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			if (isBreakRequired)
 				switchStatement.statements().add(ast.newBreakStatement());
 
+			// advance currentStatement to the next "else if" or "else":
 			if (currentIf != null && currentIf.getElseStatement() != null) {
 				Statement elseStatement= currentIf.getElseStatement();
 				if (elseStatement instanceof IfStatement) {
@@ -2664,7 +2682,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return sibiling;
 	}
 
-	private static SwitchCase[] createSwitchCaseStatements(AST ast, ASTRewrite rewrite, List<ASTNode> caseExpressions) {
+	private static SwitchCase[] createSwitchCaseStatements(AST ast, ASTRewrite rewrite, List<Expression> caseExpressions) {
 		int len= (caseExpressions.size() == 0) ? 1 : caseExpressions.size();
 		SwitchCase[] switchCaseStatements= new SwitchCase[len];
 		if (caseExpressions.size() == 0) {
