@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - [refactoring] pull-up with "use the destination type where possible" creates bogus import of nested type - https://bugs.eclipse.org/393932
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure.constraints;
 
@@ -78,6 +79,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -85,6 +87,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
@@ -120,10 +123,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
  */
 public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor {
 
-	// TODO: remove
 	protected static final String ATTRIBUTE_INSTANCEOF= "instanceof"; //$NON-NLS-1$
 
-	// TODO: remove
 	protected static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$
 
 	/** The super type group category set */
@@ -135,15 +136,16 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Returns a new ast node corresponding to the given type.
-	 *
-	 * @param rewrite
-	 *            the compilation unit rewrite to use
-	 * @param type
-	 *            the specified type
+	 * 
+	 * @param rewrite the compilation unit rewrite to use
+	 * @param type the new type
+	 * @param node the old node
 	 * @return A corresponding ast node
 	 */
-	protected static ASTNode createCorrespondingNode(final CompilationUnitRewrite rewrite, final TType type) {
-		return rewrite.getImportRewrite().addImportFromSignature(new BindingKey(type.getBindingKey()).toSignature(), rewrite.getAST());
+	protected static ASTNode createCorrespondingNode(final CompilationUnitRewrite rewrite, final TType type, ASTNode node) {
+		ImportRewrite importRewrite= rewrite.getImportRewrite();
+		ImportRewriteContext context = new ContextSensitiveImportRewriteContext(node, importRewrite);
+		return importRewrite.addImportFromSignature(new BindingKey(type.getBindingKey()).toSignature(), rewrite.getAST(), context);
 	}
 
 	/** Should type occurrences on instanceof's also be rewritten? */
@@ -157,6 +159,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/** The working copy owner */
 	protected final WorkingCopyOwner fOwner= new WorkingCopyOwner() {
+		// use default implementation
 	};
 
 	/** Should occurrences of the type be replaced by the supertype? */
@@ -944,7 +947,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 */
 	protected final void rewriteTypeOccurrence(final TType estimate, final CompilationUnitRewrite rewrite, final ASTNode node, final TextEditGroup group) {
 		rewrite.getImportRemover().registerRemovedNode(node);
-		rewrite.getASTRewrite().replace(node, createCorrespondingNode(rewrite, estimate), group);
+		rewrite.getASTRewrite().replace(node, createCorrespondingNode(rewrite, estimate, node), group);
 	}
 
 	/**
