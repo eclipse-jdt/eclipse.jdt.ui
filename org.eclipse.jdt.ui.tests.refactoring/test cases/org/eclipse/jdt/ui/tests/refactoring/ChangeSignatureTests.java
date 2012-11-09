@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1602,6 +1602,24 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperDoAll(method, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName, false);
 	}
 
+	public void testAnonymous01() throws Exception { // https://bugs.eclipse.org/393829
+		ParameterInfo[] newParamInfo= null;
+		int[] newIndices= null;
+		String[] newParamTypeNames= null;
+		String[] oldParamNames= { "par1", "par2" };
+		String[] newParamNames= oldParamNames;
+		int[] permutation= { 1, 0 };
+		int[] deletedIndices= null;
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= "void";
+		
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		int aStart= cu.getSource().lastIndexOf("a(");
+		IMethod method= (IMethod) cu.getElementAt(aStart);
+		assertTrue(method.exists());
+		helperDoAll(method, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName, false);
+	}
+	
 	public void testAddSyntaxError01()throws Exception{ // https://bugs.eclipse.org/bugs/show_bug.cgi?id=191349
 		String refNameIn= "A_testAddSyntaxError01_Ref_in.java";
 		String refNameOut= "A_testAddSyntaxError01_Ref_out.java";

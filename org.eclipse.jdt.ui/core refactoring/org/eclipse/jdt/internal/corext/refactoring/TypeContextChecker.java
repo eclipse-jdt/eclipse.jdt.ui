@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -554,7 +554,7 @@ public class TypeContextChecker {
 					public boolean visit(ClassInstanceCreation node) {
 						AnonymousClassDeclaration anonDecl= node.getAnonymousClassDeclaration();
 						if (anonDecl == null)
-							return false;
+							return true; // could be in CIC parameter list
 						int anonStart= anonDecl.getStartPosition();
 						int anonEnd= anonDecl.getStartPosition() + anonDecl.getLength();
 						if (! (anonStart < focalPosition && focalPosition < anonEnd))
