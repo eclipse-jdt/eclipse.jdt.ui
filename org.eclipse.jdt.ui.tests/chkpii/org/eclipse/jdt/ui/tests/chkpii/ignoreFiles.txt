@@ -52,6 +52,7 @@ org.eclipse.help.webapp/*
 org.eclipse.pde.ui/*
 org.eclipse.pde.ui.templates/templates_3.0/help/toc.xml
 org.eclipse.pde.build/*
+org.eclipse.releng.basebuilder/plugins/org.eclipse.pde.build_3.8.0.v20120523-1555/templates/*
 org.eclipse.releng.tools/*
 eclipse.platform.releng.eclipsebuilder/*
 eclipse.platform.news/*
@@ -154,6 +155,7 @@ www*platform-text/*
 platform-ui-home/*
 jdt-ui-home/*
 www*jdt-ui/*
+Git/jdt/*
 Text*Team*Documents/*
 Eclipse*JDT*Builds/*
 T*JDT-UI*Team*Documents/*
