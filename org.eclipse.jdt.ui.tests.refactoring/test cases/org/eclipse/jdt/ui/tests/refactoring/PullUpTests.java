@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,33 +85,28 @@ public class PullUpTests extends RefactoringTest {
 
 	private void fieldMethodHelper1(String[] fieldNames, String[] methodNames, String[][] signatures, boolean deleteAllInSourceType, boolean deleteAllMatchingMethods) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
-		try{
-			IType type= getType(cu, "B");
-			IField[] fields= getFields(type, fieldNames);
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+		IType type= getType(cu, "B");
+		IField[] fields= getFields(type, fieldNames);
+		IMethod[] methods= getMethods(type, methodNames, signatures);
 
-			PullUpRefactoringProcessor processor= createRefactoringProcessor(merge(methods, fields));
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(merge(methods, fields));
 
-			Refactoring ref= processor.getRefactoring();
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(processor);
+		Refactoring ref= processor.getRefactoring();
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		setSuperclassAsTargetClass(processor);
 
-			if (deleteAllInSourceType)
-				processor.setDeletedMethods(methods);
-			if (deleteAllMatchingMethods)
-				processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
+		if (deleteAllInSourceType)
+			processor.setDeletedMethods(methods);
+		if (deleteAllMatchingMethods)
+			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
-			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
-			performChange(ref, false);
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
+		performChange(ref, false);
 
-			String expected= getFileContents(getOutputTestFileName("A"));
-			String actual= cu.getSource();
-			assertEqualLines(expected, actual);
-		} finally{
-			performDummySearch();
-			cu.delete(false, null);
-		}
+		String expected= getFileContents(getOutputTestFileName("A"));
+		String actual= cu.getSource();
+		assertEqualLines(expected, actual);
 	}
 
 	private IType[] getPossibleTargetClasses(PullUpRefactoringProcessor processor) throws JavaModelException {
@@ -130,84 +125,69 @@ public class PullUpTests extends RefactoringTest {
 
 	private void addRequiredMembersHelper(String[] fieldNames, String[] methodNames, String[][] methodSignatures, String[] expectedFieldNames, String[] expectedMethodNames, String[][] expectedMethodSignatures) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
-		try{
-			IType type= getType(cu, "B");
-			IField[] fields= getFields(type, fieldNames);
-			IMethod[] methods= getMethods(type, methodNames, methodSignatures);
+		IType type= getType(cu, "B");
+		IField[] fields= getFields(type, fieldNames);
+		IMethod[] methods= getMethods(type, methodNames, methodSignatures);
 
-			IMember[] members= merge(methods, fields);
+		IMember[] members= merge(methods, fields);
 
-			PullUpRefactoringProcessor processor= createRefactoringProcessor(members);
-			Refactoring ref= processor.getRefactoring();
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(members);
+		Refactoring ref= processor.getRefactoring();
 
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(processor);
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		setSuperclassAsTargetClass(processor);
 
-			List additionalRequired= Arrays.asList(processor.getAdditionalRequiredMembersToPullUp(new NullProgressMonitor()));
-			List required= new ArrayList();
-			required.addAll(additionalRequired);
-			required.addAll(Arrays.asList(members));
-			IField[] expectedFields= getFields(type, expectedFieldNames);
-			IMethod[] expectedMethods= getMethods(type, expectedMethodNames, expectedMethodSignatures);
-			List expected= Arrays.asList(merge(expectedFields, expectedMethods));
-			assertEquals("incorrect size", expected.size(), required.size());
-			for (Iterator iter= expected.iterator(); iter.hasNext();) {
-				Object each= iter.next();
-				assertTrue ("required does not contain " + each, required.contains(each));
-			}
-			for (Iterator iter= required.iterator(); iter.hasNext();) {
-				Object each= iter.next();
-				assertTrue ("expected does not contain " + each, expected.contains(each));
-			}
-		} finally{
-			performDummySearch();
-			cu.delete(false, null);
+		List additionalRequired= Arrays.asList(processor.getAdditionalRequiredMembersToPullUp(new NullProgressMonitor()));
+		List required= new ArrayList();
+		required.addAll(additionalRequired);
+		required.addAll(Arrays.asList(members));
+		IField[] expectedFields= getFields(type, expectedFieldNames);
+		IMethod[] expectedMethods= getMethods(type, expectedMethodNames, expectedMethodSignatures);
+		List expected= Arrays.asList(merge(expectedFields, expectedMethods));
+		assertEquals("incorrect size", expected.size(), required.size());
+		for (Iterator iter= expected.iterator(); iter.hasNext();) {
+			Object each= iter.next();
+			assertTrue ("required does not contain " + each, required.contains(each));
+		}
+		for (Iterator iter= required.iterator(); iter.hasNext();) {
+			Object each= iter.next();
+			assertTrue ("expected does not contain " + each, expected.contains(each));
 		}
 	}
 
 	private void fieldHelper1(String[] fieldNames, int targetClassIndex) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
-		try{
-			IType type= getType(cu, "B");
-			IField[] fields= getFields(type, fieldNames);
+		IType type= getType(cu, "B");
+		IField[] fields= getFields(type, fieldNames);
 
-			PullUpRefactoringProcessor processor= createRefactoringProcessor(fields);
-			Refactoring ref= processor.getRefactoring();
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(fields);
+		Refactoring ref= processor.getRefactoring();
 
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setTargetClass(processor, targetClassIndex);
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		setTargetClass(processor, targetClassIndex);
 
-			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
-			performChange(ref, false);
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
+		performChange(ref, false);
 
-			String expected= getFileContents(getOutputTestFileName("A"));
-			String actual= cu.getSource();
-			assertEqualLines(expected, actual);
-		} finally{
-			performDummySearch();
-			cu.delete(false, null);
-		}
+		String expected= getFileContents(getOutputTestFileName("A"));
+		String actual= cu.getSource();
+		assertEqualLines(expected, actual);
 	}
 
 	private void fieldHelper2(String[] fieldNames, int targetClassIndex) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
-		try{
-			IType type= getType(cu, "B");
-			IField[] fields= getFields(type, fieldNames);
+		IType type= getType(cu, "B");
+		IField[] fields= getFields(type, fieldNames);
 
-			PullUpRefactoringProcessor processor= createRefactoringProcessor(fields);
-			Refactoring ref= processor.getRefactoring();
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(fields);
+		Refactoring ref= processor.getRefactoring();
 
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setTargetClass(processor, targetClassIndex);
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		setTargetClass(processor, targetClassIndex);
 
-			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to fail", !checkInputResult.isOK());
-		} finally{
-			performDummySearch();
-			cu.delete(false, null);
-		}
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to fail", !checkInputResult.isOK());
 	}
 
 	private static IMethod[] getMethods(IMember[] members){
@@ -216,12 +196,12 @@ public class PullUpTests extends RefactoringTest {
 	}
 
 	private Refactoring createRefactoringPrepareForInputCheck(String[] selectedMethodNames, String[][] selectedMethodSignatures,
-						String[] selectedFieldNames,
-						String[] selectedTypeNames, String[] namesOfMethodsToPullUp,
-						String[][] signaturesOfMethodsToPullUp,
-						String[] namesOfFieldsToPullUp, String[] namesOfTypesToPullUp,
-						String[] namesOfMethodsToDeclareAbstract, String[][] signaturesOfMethodsToDeclareAbstract,
-						boolean deleteAllPulledUpMethods, boolean deleteAllMatchingMethods, int targetClassIndex, ICompilationUnit cu) throws CoreException {
+			String[] selectedFieldNames,
+			String[] selectedTypeNames, String[] namesOfMethodsToPullUp,
+			String[][] signaturesOfMethodsToPullUp,
+			String[] namesOfFieldsToPullUp, String[] namesOfTypesToPullUp,
+			String[] namesOfMethodsToDeclareAbstract, String[][] signaturesOfMethodsToDeclareAbstract,
+			boolean deleteAllPulledUpMethods, boolean deleteAllMatchingMethods, int targetClassIndex, ICompilationUnit cu) throws CoreException {
 		IType type= getType(cu, "B");
 		IMethod[] selectedMethods= getMethods(type, selectedMethodNames, selectedMethodSignatures);
 		IField[] selectedFields= getFields(type, selectedFieldNames);
@@ -252,135 +232,109 @@ public class PullUpTests extends RefactoringTest {
 	}
 
 	private void declareAbstractFailHelper(String[] selectedMethodNames, String[][] selectedMethodSignatures,
-											String[] selectedFieldNames,
-											String[] selectedTypeNames, String[] namesOfMethodsToPullUp,
-											String[][] signaturesOfMethodsToPullUp, String[] namesOfFieldsToPullUp,
-											String[] namesOfMethodsToDeclareAbstract,
-											String[][] signaturesOfMethodsToDeclareAbstract, String[] namesOfTypesToPullUp,
-											boolean deleteAllPulledUpMethods, boolean deleteAllMatchingMethods, int targetClassIndex) throws Exception{
+			String[] selectedFieldNames,
+			String[] selectedTypeNames, String[] namesOfMethodsToPullUp,
+			String[][] signaturesOfMethodsToPullUp, String[] namesOfFieldsToPullUp,
+			String[] namesOfMethodsToDeclareAbstract,
+			String[][] signaturesOfMethodsToDeclareAbstract, String[] namesOfTypesToPullUp,
+			boolean deleteAllPulledUpMethods, boolean deleteAllMatchingMethods, int targetClassIndex) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
-		try{
-			Refactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, selectedTypeNames, namesOfMethodsToPullUp,
-					signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfTypesToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, deleteAllPulledUpMethods,
-					deleteAllMatchingMethods, targetClassIndex, cu);
+		Refactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfTypesToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, deleteAllPulledUpMethods,
+				deleteAllMatchingMethods, targetClassIndex, cu);
 
-			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to fail", !checkInputResult.isOK());
-		} finally{
-			performDummySearch();
-			cu.delete(false, null);
-		}
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to fail", !checkInputResult.isOK());
 	}
 
 	private void declareAbstractHelper(String[] selectedMethodNames, String[][] selectedMethodSignatures,
-											String[] selectedFieldNames,
-											String[] selectedTypeNames, String[] namesOfMethodsToPullUp,
-											String[][] signaturesOfMethodsToPullUp, String[] namesOfFieldsToPullUp,
-											String[] namesOfMethodsToDeclareAbstract,
-											String[][] signaturesOfMethodsToDeclareAbstract, String[] namesOfTypesToPullUp,
-											boolean deleteAllPulledUpMethods, boolean deleteAllMatchingMethods, int targetClassIndex) throws Exception{
+			String[] selectedFieldNames,
+			String[] selectedTypeNames, String[] namesOfMethodsToPullUp,
+			String[][] signaturesOfMethodsToPullUp, String[] namesOfFieldsToPullUp,
+			String[] namesOfMethodsToDeclareAbstract,
+			String[][] signaturesOfMethodsToDeclareAbstract, String[] namesOfTypesToPullUp,
+			boolean deleteAllPulledUpMethods, boolean deleteAllMatchingMethods, int targetClassIndex) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
-		try{
-			Refactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, selectedTypeNames, namesOfMethodsToPullUp,
-					signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfTypesToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, deleteAllPulledUpMethods,
-					deleteAllMatchingMethods, targetClassIndex, cu);
+		Refactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfTypesToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, deleteAllPulledUpMethods,
+				deleteAllMatchingMethods, targetClassIndex, cu);
 
-			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
-			performChange(ref, false);
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
+		performChange(ref, false);
 
-			String expected= getFileContents(getOutputTestFileName("A"));
-			String actual= cu.getSource();
-			assertEqualLines(expected, actual);
-		} finally{
-			performDummySearch();
-			cu.delete(false, null);
-		}
+		String expected= getFileContents(getOutputTestFileName("A"));
+		String actual= cu.getSource();
+		assertEqualLines(expected, actual);
 	}
 
 	private void helper1(String[] methodNames, String[][] signatures, boolean deleteAllInSourceType, boolean deleteAllMatchingMethods, int targetClassIndex) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
-		try{
-			IType type= getType(cu, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+		IType type= getType(cu, "B");
+		IMethod[] methods= getMethods(type, methodNames, signatures);
 
-			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
-			Refactoring ref= processor.getRefactoring();
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
 
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 
-			setTargetClass(processor, targetClassIndex);
+		setTargetClass(processor, targetClassIndex);
 
-			if (deleteAllInSourceType)
-				processor.setDeletedMethods(methods);
-			if (deleteAllMatchingMethods)
-				processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
+		if (deleteAllInSourceType)
+			processor.setDeletedMethods(methods);
+		if (deleteAllMatchingMethods)
+			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
-			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
-			performChange(ref, false);
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
+		performChange(ref, false);
 
-			String expected= getFileContents(getOutputTestFileName("A"));
-			String actual= cu.getSource();
-			assertEqualLines(expected, actual);
-		} finally{
-			performDummySearch();
-			cu.delete(false, null);
-		}
+		String expected= getFileContents(getOutputTestFileName("A"));
+		String actual= cu.getSource();
+		assertEqualLines(expected, actual);
 	}
 
 	private void helper2(String[] methodNames, String[][] signatures, boolean deleteAllInSourceType, boolean deleteAllMatchingMethods, int targetClassIndex) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
-		try{
-			IType type= getType(cu, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+		IType type= getType(cu, "B");
+		IMethod[] methods= getMethods(type, methodNames, signatures);
 
-			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
-			Refactoring ref= processor.getRefactoring();
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
 
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setTargetClass(processor, targetClassIndex);
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		setTargetClass(processor, targetClassIndex);
 
-			if (deleteAllInSourceType)
-				processor.setDeletedMethods(methods);
-			if (deleteAllMatchingMethods)
-				processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
+		if (deleteAllInSourceType)
+			processor.setDeletedMethods(methods);
+		if (deleteAllMatchingMethods)
+			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
-			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to fail", !checkInputResult.isOK());
-		} finally{
-			performDummySearch();
-			cu.delete(false, null);
-		}
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to fail", !checkInputResult.isOK());
 	}
 
 	private void helper3(String[] methodNames, String[][] signatures, boolean deleteAllInSourceType, boolean deleteAllMatchingMethods, int targetClassIndex, boolean shouldActivationCheckPass) throws Exception {
-		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
-		try{
-			IType type= getType(cuB, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+		IType type= getType(cuB, "B");
+		IMethod[] methods= getMethods(type, methodNames, signatures);
 
-			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
-			Refactoring ref= processor.getRefactoring();
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
 
-			assertEquals("activation", shouldActivationCheckPass, ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			if (! shouldActivationCheckPass)
-				return;
-			setTargetClass(processor, targetClassIndex);
+		assertEquals("activation", shouldActivationCheckPass, ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		if (! shouldActivationCheckPass)
+			return;
+		setTargetClass(processor, targetClassIndex);
 
-			if (deleteAllInSourceType)
-				processor.setDeletedMethods(methods);
-			if (deleteAllMatchingMethods)
-				processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
+		if (deleteAllInSourceType)
+			processor.setDeletedMethods(methods);
+		if (deleteAllMatchingMethods)
+			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
-			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to fail", !checkInputResult.isOK());
-		} finally{
-			performDummySearch();
-			cuA.delete(false, null);
-			cuB.delete(false, null);
-		}
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to fail", !checkInputResult.isOK());
 	}
 
 	//------------------ tests -------------
@@ -405,62 +359,50 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 
-		try{
-			String[] methodNames= new String[]{"m"};
-			String[][] signatures= new String[][]{new String[]{"QList;"}};
+		String[] methodNames= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[]{"QList;"}};
 
-			IType type= getType(cuB, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+		IType type= getType(cuB, "B");
+		IMethod[] methods= getMethods(type, methodNames, signatures);
 
-			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
-			Refactoring ref= processor.getRefactoring();
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
 
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(processor);
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		setSuperclassAsTargetClass(processor);
 
-			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
+		processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
-			RefactoringStatus result= performRefactoring(ref);
-			assertTrue("precondition was supposed to pass", result == null || !result.hasError());
+		RefactoringStatus result= performRefactoring(ref);
+		assertTrue("precondition was supposed to pass", result == null || !result.hasError());
 
-			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
-			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
-		} finally{
-			performDummySearch();
-			cuA.delete(false, null);
-			cuB.delete(false, null);
-		}
+		assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 
 	public void test5() throws Exception{
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 
-		try{
-			String[] methodNames= new String[]{"m"};
-			String[][] signatures= new String[][]{new String[0]};
+		String[] methodNames= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
 
-			IType type= getType(cuB, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+		IType type= getType(cuB, "B");
+		IMethod[] methods= getMethods(type, methodNames, signatures);
 
-			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
-			Refactoring ref= processor.getRefactoring();
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
 
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(processor);
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		setSuperclassAsTargetClass(processor);
 
-			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
+		processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
-			RefactoringStatus result= performRefactoring(ref);
-			assertTrue("precondition was supposed to pass", result == null || !result.hasError());
+		RefactoringStatus result= performRefactoring(ref);
+		assertTrue("precondition was supposed to pass", result == null || !result.hasError());
 
-			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
-			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
-		} finally{
-			performDummySearch();
-			cuA.delete(false, null);
-			cuB.delete(false, null);
-		}
+		assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 
 	public void test6() throws Exception{
@@ -492,31 +434,25 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 
-		try{
-			String[] methodNames= new String[]{"m"};
-			String[][] signatures= new String[][]{new String[0]};
+		String[] methodNames= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
 
-			IType type= getType(cuB, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+		IType type= getType(cuB, "B");
+		IMethod[] methods= getMethods(type, methodNames, signatures);
 
-			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
-			Refactoring ref= processor.getRefactoring();
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
 
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(processor);
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		setSuperclassAsTargetClass(processor);
 
-			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
+		processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
-			RefactoringStatus result= performRefactoring(ref);
-			assertTrue("precondition was supposed to pass", result == null || !result.hasError());
+		RefactoringStatus result= performRefactoring(ref);
+		assertTrue("precondition was supposed to pass", result == null || !result.hasError());
 
-			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
-			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
-		} finally{
-			performDummySearch();
-			cuA.delete(false, null);
-			cuB.delete(false, null);
-		}
+		assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 
 	public void test13() throws Exception{
@@ -589,11 +525,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void test27() throws Exception{
@@ -607,11 +543,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void test28() throws Exception{
@@ -626,11 +562,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void test29() throws Exception{
@@ -644,11 +580,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void test30() throws Exception{
@@ -662,11 +598,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void test31() throws Exception{
@@ -680,11 +616,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void test32() throws Exception{
@@ -698,11 +634,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void test33() throws Exception{
@@ -716,11 +652,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= {new String[0]};
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void test34() throws Exception{
@@ -734,11 +670,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void test35() throws Exception{
@@ -752,11 +688,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void test36() throws Exception{
@@ -770,11 +706,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void test37() throws Exception{
@@ -788,11 +724,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= {new String[0]};
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void test38() throws Exception{
@@ -806,11 +742,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void test39() throws Exception{
@@ -826,11 +762,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								selectedTypeNames, namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+				selectedFieldNames,
+				selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
 	public void test40() throws Exception{
@@ -846,11 +782,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								selectedTypeNames, namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+				selectedFieldNames,
+				selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
 	public void test41() throws Exception{
@@ -866,11 +802,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								selectedTypeNames, namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+				selectedFieldNames,
+				selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
 	public void test42() throws Exception{
@@ -886,11 +822,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								selectedTypeNames, namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+				selectedFieldNames,
+				selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
 	public void test43() throws Exception{
@@ -908,11 +844,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								selectedTypeNames, namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+				selectedFieldNames,
+				selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
 	public void test44() throws Exception{
@@ -928,11 +864,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								selectedTypeNames, namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+				selectedFieldNames,
+				selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
 	public void test45() throws Exception{
@@ -948,11 +884,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								selectedTypeNames, namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+				selectedFieldNames,
+				selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
 	public void test46() throws Exception{
@@ -970,11 +906,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								selectedTypeNames, namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+				selectedFieldNames,
+				selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
 	public void test47() throws Exception{
@@ -992,11 +928,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								selectedTypeNames, namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+				selectedFieldNames,
+				selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
 	public void test48() throws Exception{
@@ -1014,11 +950,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								selectedTypeNames, namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, false, false, 0);
+				selectedFieldNames,
+				selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, false, false, 0);
 	}
 
 	public void test49() throws Exception{
@@ -1036,11 +972,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 
 		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								selectedTypeNames, namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, false, 0);
+				selectedFieldNames,
+				selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, false, 0);
 	}
 
 	public void test50() throws Exception {
@@ -1220,11 +1156,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractFailHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void testFail21() throws Exception{
@@ -1238,11 +1174,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractFailHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void testFail22() throws Exception{
@@ -1256,11 +1192,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractFailHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void testFail23() throws Exception{
@@ -1274,11 +1210,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractFailHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void testFail24() throws Exception{
@@ -1292,11 +1228,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractFailHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								new String[0], namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void testFail25() throws Exception{
@@ -1312,11 +1248,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractFailHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								selectedTypeNames, namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+				selectedFieldNames,
+				selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
 	public void testFail26() throws Exception{
@@ -1332,11 +1268,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractFailHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								selectedTypeNames, namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+				selectedFieldNames,
+				selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
 	public void testFail27() throws Exception{
@@ -1352,11 +1288,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractFailHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								selectedTypeNames, namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+				selectedFieldNames,
+				selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
 	public void testFail28() throws Exception{
@@ -1372,11 +1308,11 @@ public class PullUpTests extends RefactoringTest {
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 
 		declareAbstractFailHelper(selectedMethodNames, selectedMethodSignatures,
-								selectedFieldNames,
-								selectedTypeNames, namesOfMethodsToPullUp,
-								signaturesOfMethodsToPullUp,
-								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
-								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+				selectedFieldNames,
+				selectedTypeNames, namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
 	public void testFail29() throws Exception {
@@ -1736,7 +1672,6 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 
-		try{
 			String[] methodNames= new String[]{"m"};
 			String[][] signatures= new String[][]{new String[] {"QS;"}};
 
@@ -1756,42 +1691,31 @@ public class PullUpTests extends RefactoringTest {
 
 			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
 			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
-		} finally{
-			performDummySearch();
-			cuA.delete(false, null);
-			cuB.delete(false, null);
 		}
-	}
 
 	public void testStaticImports1() throws Exception{
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 
-		try{
-			String[] methodNames= new String[]{"m"};
-			String[][] signatures= new String[][]{new String[] {"QS;"}};
+		String[] methodNames= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[] {"QS;"}};
 
-			IType type= getType(cuB, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+		IType type= getType(cuB, "B");
+		IMethod[] methods= getMethods(type, methodNames, signatures);
 
-			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
-			Refactoring ref= processor.getRefactoring();
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
 
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(processor);
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		setSuperclassAsTargetClass(processor);
 
-			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
+		processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
-			RefactoringStatus result= performRefactoring(ref);
-			assertTrue("precondition was supposed to pass", result == null || !result.hasError());
+		RefactoringStatus result= performRefactoring(ref);
+		assertTrue("precondition was supposed to pass", result == null || !result.hasError());
 
-			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
-			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
-		} finally{
-			performDummySearch();
-			cuA.delete(false, null);
-			cuB.delete(false, null);
-		}
+		assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 
 	public void testGenerics0() throws Exception{
@@ -1816,59 +1740,47 @@ public class PullUpTests extends RefactoringTest {
 //		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 //		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 //
-//		try{
-//			String[] methodNames= new String[]{"m"};
-//			String[][] signatures= new String[][]{new String[]{"QList<QT;>;"}};
+//		String[] methodNames= new String[]{"m"};
+//		String[][] signatures= new String[][]{new String[]{"QList<QT;>;"}};
 //
-//			IType type= getType(cuB, "B");
-//			IMethod[] methods= getMethods(type, methodNames, signatures);
-//			PullUpRefactoring ref= createRefactoring(methods);
-//			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-//			setSuperclassAsTargetClass(ref);
+//		IType type= getType(cuB, "B");
+//		IMethod[] methods= getMethods(type, methodNames, signatures);
+//		PullUpRefactoring ref= createRefactoring(methods);
+//		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+//		setSuperclassAsTargetClass(ref);
 //
-//			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
+//		ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
 //
-//			RefactoringStatus result= performRefactoring(ref);
-//			assertEquals("precondition was supposed to pass", null, result);
+//		RefactoringStatus result= performRefactoring(ref);
+//		assertEquals("precondition was supposed to pass", null, result);
 //
-//			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
-//			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
-//		} finally{
-//			performDummySearch();
-//			cuA.delete(false, null);
-//			cuB.delete(false, null);
-//		}
+//		assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+//		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 
 	public void testGenerics5() throws Exception{
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 
-		try{
-			String[] methodNames= new String[]{"m"};
-			String[][] signatures= new String[][]{new String[] {"QS;"}};
+		String[] methodNames= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[] {"QS;"}};
 
-			IType type= getType(cuB, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+		IType type= getType(cuB, "B");
+		IMethod[] methods= getMethods(type, methodNames, signatures);
 
-			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
-			Refactoring ref= processor.getRefactoring();
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
 
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(processor);
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		setSuperclassAsTargetClass(processor);
 
-			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
+		processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
-			RefactoringStatus result= performRefactoring(ref);
-			assertTrue("precondition was supposed to pass", result == null || !result.hasError());
+		RefactoringStatus result= performRefactoring(ref);
+		assertTrue("precondition was supposed to pass", result == null || !result.hasError());
 
-			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
-			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
-		} finally{
-			performDummySearch();
-			cuA.delete(false, null);
-			cuB.delete(false, null);
-		}
+		assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 
 	public void testGenerics6() throws Exception{
@@ -1905,31 +1817,25 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 
-		try{
-			String[] methodNames= new String[]{"m"};
-			String[][] signatures= new String[][]{new String[]{"QT;"}};
+		String[] methodNames= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[]{"QT;"}};
 
-			IType type= getType(cuB, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+		IType type= getType(cuB, "B");
+		IMethod[] methods= getMethods(type, methodNames, signatures);
 
-			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
-			Refactoring ref= processor.getRefactoring();
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
 
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(processor);
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		setSuperclassAsTargetClass(processor);
 
-			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
+		processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
-			RefactoringStatus result= performRefactoring(ref);
-			assertTrue("precondition was supposed to pass", result == null || !result.hasError());
+		RefactoringStatus result= performRefactoring(ref);
+		assertTrue("precondition was supposed to pass", result == null || !result.hasError());
 
-			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
-			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
-		} finally{
-			performDummySearch();
-			cuA.delete(false, null);
-			cuB.delete(false, null);
-		}
+		assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 
 	public void testGenerics13() throws Exception {

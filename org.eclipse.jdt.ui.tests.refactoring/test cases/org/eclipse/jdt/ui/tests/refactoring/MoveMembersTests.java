@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -152,46 +152,40 @@ public class MoveMembersTests extends RefactoringTest {
 	}
 
 	private void fieldMethodTypePackageHelper_failing(String[] fieldNames,
-												String[] methodNames, String[][] signatures,
-												String[] typeNames,
-												int errorLevel, String destinationTypeName,
-												IPackageFragment packForA,
-												IPackageFragment packForB) throws Exception {
+			String[] methodNames, String[][] signatures,
+			String[] typeNames,
+			int errorLevel, String destinationTypeName,
+			IPackageFragment packForA,
+			IPackageFragment packForB) throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(packForA, "A");
-		ICompilationUnit cuB= createCUfromTestFile(packForB, "B");
-		try{
-			IType typeA= getType(cuA, "A");
-			IField[] fields= getFields(typeA, fieldNames);
-			IMethod[] methods= getMethods(typeA, methodNames, signatures);
-			IType[] types= getMemberTypes(typeA, typeNames);
+		createCUfromTestFile(packForB, "B");
+		IType typeA= getType(cuA, "A");
+		IField[] fields= getFields(typeA, fieldNames);
+		IMethod[] methods= getMethods(typeA, methodNames, signatures);
+		IType[] types= getMemberTypes(typeA, typeNames);
 
-			MoveRefactoring ref= createRefactoring(merge(methods, fields, types), destinationTypeName);
-			if (ref == null){
-				assertEquals(errorLevel, RefactoringStatus.FATAL);
-				return;
-			}
-
-			RefactoringStatus result= performRefactoring(ref);
-			if (fIsVerbose)
-				DebugUtils.dump("status:" + result);
-			assertNotNull("precondition was supposed to fail", result);
-			assertEquals("precondition was supposed to fail", errorLevel, result.getSeverity());
-
-		} finally{
-			performDummySearch();
-			cuA.delete(false, null);
-			cuB.delete(false, null);
+		MoveRefactoring ref= createRefactoring(merge(methods, fields, types), destinationTypeName);
+		if (ref == null){
+			assertEquals(errorLevel, RefactoringStatus.FATAL);
+			return;
 		}
+
+		RefactoringStatus result= performRefactoring(ref);
+		if (fIsVerbose)
+			DebugUtils.dump("status:" + result);
+		assertNotNull("precondition was supposed to fail", result);
+		assertEquals("precondition was supposed to fail", errorLevel, result.getSeverity());
+
 	}
 
 	private void fieldMethodTypeHelper_failing(String[] fieldNames,
-												String[] methodNames, String[][] signatures,
-												String[] typeNames,
-												int errorLevel, String destinationTypeName) throws Exception {
+			String[] methodNames, String[][] signatures,
+			String[] typeNames,
+			int errorLevel, String destinationTypeName) throws Exception {
 		IPackageFragment packForA= getPackageP();
 		IPackageFragment packForB= getPackageP();
 		fieldMethodTypePackageHelper_failing(fieldNames, methodNames, signatures, typeNames,
-												errorLevel, destinationTypeName, packForA, packForB);
+				errorLevel, destinationTypeName, packForA, packForB);
 	}
 
 
@@ -231,15 +225,8 @@ public class MoveMembersTests extends RefactoringTest {
 
 	public void test8() throws Exception{
 //		printTestDisabledMessage("36835");
-		IPackageFragment packageForB= null;
-		try{
-			packageForB= getRoot().createPackageFragment("r", false, null);
-			fieldMethodTypePackageHelper_passing(new String[]{"f"}, new String[0], new String[0][0], new String[0], getPackageP(), packageForB, false);
-		} finally{
-			performDummySearch();
-			if (packageForB != null)
-				packageForB.delete(true, null);
-		}
+		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
+		fieldMethodTypePackageHelper_passing(new String[]{"f"}, new String[0], new String[0][0], new String[0], getPackageP(), packageForB, false);
 	}
 
 	public void test9() throws Exception{
@@ -313,27 +300,13 @@ public class MoveMembersTests extends RefactoringTest {
 	}
 
 	public void test26() throws Exception{
-		IPackageFragment packageForB= null;
-		try{
-			packageForB= getRoot().createPackageFragment("r", false, null);
-			fieldMethodTypePackageHelper_passing(new String[0], new String[]{"n"}, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
-		} finally{
-			performDummySearch();
-			if (packageForB != null)
-				packageForB.delete(true, null);
-		}
+		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
+		fieldMethodTypePackageHelper_passing(new String[0], new String[]{"n"}, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
 	}
 
 	public void test27() throws Exception{
-		IPackageFragment packageForB= null;
-		try{
-			packageForB= getRoot().createPackageFragment("r", false, null);
-			fieldMethodTypePackageHelper_passing(new String[0], new String[]{"n"}, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
-		} finally{
-			performDummySearch();
-			if (packageForB != null)
-				packageForB.delete(true, null);
-		}
+		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
+		fieldMethodTypePackageHelper_passing(new String[0], new String[]{"n"}, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
 	}
 
 	public void test28() throws Exception{
@@ -438,30 +411,16 @@ public class MoveMembersTests extends RefactoringTest {
 
 	public void test48() throws Exception{
 		//Move private unused method which calls another private method into another package
-		IPackageFragment packageForB= null;
-		try{
-			packageForB= getRoot().createPackageFragment("r", false, null);
-			fieldMethodTypePackageHelper_passing(new String[0], new String[]{"bar"}, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
-		} finally{
-			performDummySearch();
-			if (packageForB != null)
-				packageForB.delete(true, null);
-		}
+		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
+		fieldMethodTypePackageHelper_passing(new String[0], new String[]{"bar"}, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
 	}
 
 	// --- Visibility issues of the moved member itself
 
 	public void test49() throws Exception{
 		//Move protected used field into another package
-		IPackageFragment packageForB= null;
-		try{
-			packageForB= getRoot().createPackageFragment("r", false, null);
-			fieldMethodTypePackageHelper_passing(new String[]{"someVar"}, new String[0], new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
-		} finally{
-			performDummySearch();
-			if (packageForB != null)
-				packageForB.delete(true, null);
-		}
+		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
+		fieldMethodTypePackageHelper_passing(new String[]{"someVar"}, new String[0], new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
 	}
 
 	public void test50() throws Exception{
@@ -524,29 +483,15 @@ public class MoveMembersTests extends RefactoringTest {
 	public void test60() throws Exception{
 		// Move a static private "getter" of a static field into another class
 		// only the field should be changed to public (bug 122490)
-		IPackageFragment packageForB= null;
-		try{
-			packageForB= getRoot().createPackageFragment("e", false, null);
-			fieldMethodTypePackageHelper_passing(new String[0], new String[] { "getNAME" }, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
-		} finally{
-			performDummySearch();
-			if (packageForB != null)
-				packageForB.delete(true, null);
-		}
+		IPackageFragment packageForB= getRoot().createPackageFragment("e", false, null);
+		fieldMethodTypePackageHelper_passing(new String[0], new String[] { "getNAME" }, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
 	}
 
 	public void test61() throws Exception{
 		// Move some method which references a field with a getter and a setter
 		// only the field should be changed to public (bug 122490)
-		IPackageFragment packageForB= null;
-		try{
-			packageForB= getRoot().createPackageFragment("e", false, null);
-			fieldMethodTypePackageHelper_passing(new String[0], new String[] { "foo" }, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
-		} finally{
-			performDummySearch();
-			if (packageForB != null)
-				packageForB.delete(true, null);
-		}
+		IPackageFragment packageForB= getRoot().createPackageFragment("e", false, null);
+		fieldMethodTypePackageHelper_passing(new String[0], new String[] { "foo" }, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
 	}
 
 	// parameterized type references
@@ -561,98 +506,91 @@ public class MoveMembersTests extends RefactoringTest {
 	//---
 	public void testFail0() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
-									  new String[]{"m"}, new String[][]{new String[0]},
-									  new String[0],
-									  RefactoringStatus.FATAL, "p.B");
+				new String[]{"m"}, new String[][]{new String[0]},
+				new String[0],
+				RefactoringStatus.FATAL, "p.B");
 	}
 
 
 	public void testFail1() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
-									  new String[]{"m"}, new String[][]{new String[0]},
-									  new String[0],
-									  RefactoringStatus.ERROR, "p.B.X");
+				new String[]{"m"}, new String[][]{new String[0]},
+				new String[0],
+				RefactoringStatus.ERROR, "p.B.X");
 	}
 
 	public void testFail2() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
-									  new String[]{"m"}, new String[][]{new String[0]},
-									  new String[0],
-									  RefactoringStatus.ERROR, "p.B");
+				new String[]{"m"}, new String[][]{new String[0]},
+				new String[0],
+				RefactoringStatus.ERROR, "p.B");
 	}
 
 	public void testFail3() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
-									  new String[]{"m"}, new String[][]{new String[]{"I", "I"}},
-									  new String[0],
-									  RefactoringStatus.ERROR, "p.B");
+				new String[]{"m"}, new String[][]{new String[]{"I", "I"}},
+				new String[0],
+				RefactoringStatus.ERROR, "p.B");
 	}
 
 	public void testFail4() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
-									  new String[]{"m"}, new String[][]{new String[]{"I", "I"}},
-									  new String[0],
-									  RefactoringStatus.WARNING, "p.B");
+				new String[]{"m"}, new String[][]{new String[]{"I", "I"}},
+				new String[0],
+				RefactoringStatus.WARNING, "p.B");
 	}
 
 	public void testFail5() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
-									  new String[]{"m"}, new String[][]{new String[]{"I", "I"}},
-									  new String[0],
-									  RefactoringStatus.WARNING, "p.B");
+				new String[]{"m"}, new String[][]{new String[]{"I", "I"}},
+				new String[0],
+				RefactoringStatus.WARNING, "p.B");
 	}
 
 	public void testFail6() throws Exception{
 		fieldMethodTypeHelper_failing(new String[]{"i"}, new String[0], new String[0][0], new String[0],
-									  RefactoringStatus.ERROR, "p.B");
+				RefactoringStatus.ERROR, "p.B");
 	}
 
 	public void testFail7() throws Exception{
 		fieldMethodTypeHelper_failing(new String[]{"i"}, new String[0], new String[0][0], new String[0],
-									  RefactoringStatus.ERROR, "p.B");
+				RefactoringStatus.ERROR, "p.B");
 	}
 
 	public void testFail8() throws Exception{
 		fieldMethodTypeHelper_failing(new String[]{"i"}, new String[0], new String[0][0], new String[0],
-									  RefactoringStatus.ERROR, "p.B");
+				RefactoringStatus.ERROR, "p.B");
 	}
 
 	public void testFail15() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
-									  new String[]{"m"}, new String[][]{new String[0]}, new String[0],
-									  RefactoringStatus.WARNING, "p.B");
+				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
+				RefactoringStatus.WARNING, "p.B");
 	}
 
 	public void testFail16() throws Exception{
-		IPackageFragment packageForB= null;
-		try{
-			packageForB= getRoot().createPackageFragment("r", false, null);
-			fieldMethodTypePackageHelper_failing(new String[]{"f"}, new String[0], new String[0][0], new String[0],
-										 RefactoringStatus.ERROR, "r.B",
-										 getPackageP(), packageForB);
-		} finally{
-			performDummySearch();
-			if (packageForB != null)
-				packageForB.delete(true, null);
-		}
+		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
+		fieldMethodTypePackageHelper_failing(new String[]{"f"}, new String[0], new String[0][0], new String[0],
+				RefactoringStatus.ERROR, "r.B",
+				getPackageP(), packageForB);
 	}
 
 	public void testFail17() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
-									  new String[]{"m"}, new String[][]{new String[0]}, new String[0],
-									  RefactoringStatus.FATAL, "java.lang.Object");
+				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
+				RefactoringStatus.FATAL, "java.lang.Object");
 	}
 
 	public void testFail18() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
-									  new String[]{"m"}, new String[][]{new String[0]}, new String[0],
-									  RefactoringStatus.FATAL, "p.DontExist");
+				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
+				RefactoringStatus.FATAL, "p.DontExist");
 	}
 
 	public void testFail19() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
-									  new String[]{"m"}, new String[][]{new String[0]}, new String[0],
-									  RefactoringStatus.ERROR, "p.B");
+				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
+				RefactoringStatus.ERROR, "p.B");
 	}
 
 	public void testFail20() throws Exception{
@@ -661,8 +599,8 @@ public class MoveMembersTests extends RefactoringTest {
 
 	public void testFail21() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
-									  new String[]{"m"}, new String[][]{new String[0]}, new String[0],
-									  RefactoringStatus.FATAL, "p.B");
+				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
+				RefactoringStatus.FATAL, "p.B");
 	}
 
 	public void testFail22() throws Exception{
@@ -675,8 +613,8 @@ public class MoveMembersTests extends RefactoringTest {
 
 	public void testFail24() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
-									  new String[]{"m"}, new String[][]{new String[0]}, new String[0],
-									  RefactoringStatus.FATAL, "p.B");
+				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
+				RefactoringStatus.FATAL, "p.B");
 	}
 
 	// Delegate creation
@@ -698,15 +636,8 @@ public class MoveMembersTests extends RefactoringTest {
 
 	public void testDelegate04() throws Exception{
 		// add import when moving to another package
-		IPackageFragment packageForB= null;
-		try{
-			packageForB= getRoot().createPackageFragment("r", false, null);
-			fieldMethodTypePackageHelper_passing(new String[0], new String[] { "foo" }, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, true);
-		} finally{
-			performDummySearch();
-			if (packageForB != null)
-				packageForB.delete(true, null);
-		}
+		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
+		fieldMethodTypePackageHelper_passing(new String[0], new String[] { "foo" }, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, true);
 	}
 
 	public void testDelegate05() throws Exception {
@@ -726,14 +657,7 @@ public class MoveMembersTests extends RefactoringTest {
 
 	public void testDelegate08() throws Exception{
 		// add import when moving to another package
-		IPackageFragment packageForB= null;
-		try{
-			packageForB= getRoot().createPackageFragment("r", false, null);
-			fieldMethodTypePackageHelper_passing(new String[] { "FOO" }, new String[0], new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, true);
-		} finally{
-			performDummySearch();
-			if (packageForB != null)
-				packageForB.delete(true, null);
-		}
+		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
+		fieldMethodTypePackageHelper_passing(new String[] { "FOO" }, new String[0], new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, true);
 	}
 }

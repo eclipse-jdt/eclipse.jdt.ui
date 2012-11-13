@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,7 +62,7 @@ import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 
 
-public class DeleteTest extends RefactoringTest{
+public class DeleteTest extends RefactoringTest {
 
 	private static final boolean BUG_55221= true;
 	private static final Class clazz= DeleteTest.class;
@@ -138,26 +138,15 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	private void checkDelete(IJavaElement[] elems, boolean deleteCu) throws JavaModelException, Exception {
-		ICompilationUnit newCuA= null;
-		try {
-			DeleteRefactoring refactoring= createRefactoring(elems);
-			assertNotNull(refactoring);
-			RefactoringStatus status= performRefactoring(refactoring, true);
-			assertEquals("precondition was supposed to pass", null, status);
+		DeleteRefactoring refactoring= createRefactoring(elems);
+		assertNotNull(refactoring);
+		RefactoringStatus status= performRefactoring(refactoring, true);
+		assertEquals("precondition was supposed to pass", null, status);
 
-			newCuA= getPackageP().getCompilationUnit(CU_NAME + ".java");
-			assertTrue("A.java does not exist", newCuA.exists() == !deleteCu);
-			if (! deleteCu)
-				assertEqualLines("incorrect content of A.java", getFileContents(getOutputTestFileName(CU_NAME)), newCuA.getSource());
-		} finally {
-			performDummySearch();
-			if (newCuA != null && newCuA.exists())
-				newCuA.delete(true, null);
-			if (fCuA != null && fCuA.exists()){
-				fCuA.delete(true, null);
-				fCuA= null;
-			}
-		}
+		ICompilationUnit newCuA= getPackageP().getCompilationUnit(CU_NAME + ".java");
+		assertTrue("A.java does not exist", newCuA.exists() == !deleteCu);
+		if (! deleteCu)
+			assertEqualLines("incorrect content of A.java", getFileContents(getOutputTestFileName(CU_NAME)), newCuA.getSource());
 	}
 
 	private DeleteRefactoring createRefactoring(Object[] elements) {
@@ -198,8 +187,8 @@ public class DeleteTest extends RefactoringTest{
 	 * @param packsToBeDeleted First half of elements which must be deleted after the refactoring
 	 * @param othersToBeDeleted Second half (halfs will be merged).
 	 * @param deleteSubs true if subpackages should be deleted as well.
-	 * @throws CoreException
-	 * @throws Exception
+	 * @throws CoreException xxx
+	 * @throws Exception xxx
 	 */
 	private void executeDeletePackage(Object[] markedForDelete, IPackageFragment[] packsToBeDeleted, Object[] othersToBeDeleted, boolean deleteSubs) throws CoreException, Exception {
 
@@ -336,15 +325,10 @@ public class DeleteTest extends RefactoringTest{
 
 	public void testEnabled_defaultPackage() throws Exception{
 		IPackageFragment defaultPackage= getRoot().getPackageFragment("");
-		ICompilationUnit cu= defaultPackage.createCompilationUnit("A.java", "", false, new NullProgressMonitor());
+		defaultPackage.createCompilationUnit("A.java", "", false, new NullProgressMonitor());
 
-		try{
-			Object[] elements= {defaultPackage};
-			verifyEnabled(elements);
-		} finally{
-			performDummySearch();
-			cu.delete(true, new NullProgressMonitor());
-		}
+		Object[] elements= {defaultPackage};
+		verifyEnabled(elements);
 	}
 
 	public void testDisabled_simpleProject() throws Exception{
@@ -355,45 +339,30 @@ public class DeleteTest extends RefactoringTest{
 	public void testEnabled_cu() throws Exception{
 		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "", false, new NullProgressMonitor());
 
-		try{
-			Object[] elements= {cu};
-			verifyEnabled(elements);
-		} finally{
-			performDummySearch();
-			cu.delete(true, new NullProgressMonitor());
-		}
+		Object[] elements= {cu};
+		verifyEnabled(elements);
 	}
 
 	public void testEnabled_sourceReferences1() throws Exception{
 		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "", false, new NullProgressMonitor());
-		try{
-			IJavaElement importD= cu.createImport("java.lang.*", null, new NullProgressMonitor());
-			IJavaElement packageD= cu.createPackageDeclaration("p", new NullProgressMonitor());
-			IJavaElement type= cu.createType("class A{}", null, false, new NullProgressMonitor());
+		IJavaElement importD= cu.createImport("java.lang.*", null, new NullProgressMonitor());
+		IJavaElement packageD= cu.createPackageDeclaration("p", new NullProgressMonitor());
+		IJavaElement type= cu.createType("class A{}", null, false, new NullProgressMonitor());
 
-			Object[] elements= {packageD, importD, type};
-			verifyEnabled(elements);
-		} finally{
-			performDummySearch();
-			cu.delete(true, new NullProgressMonitor());
-		}
+		Object[] elements= {packageD, importD, type};
+		verifyEnabled(elements);
 	}
 
 	public void testEnabled_sourceReferences2() throws Exception{
 		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "", false, new NullProgressMonitor());
-		try{
-			IType type= cu.createType("class A{}", null, false, new NullProgressMonitor());
-			IJavaElement field= type.createField("int i;", null, false, new NullProgressMonitor());
-			IJavaElement method= type.createMethod("void f(){}", null, false, new NullProgressMonitor());
-			IJavaElement initializer= type.createInitializer("{ int k= 0;}", null, new NullProgressMonitor());
-			IJavaElement innerType= type.createType("class Inner{}", null, false,  new NullProgressMonitor());
+		IType type= cu.createType("class A{}", null, false, new NullProgressMonitor());
+		IJavaElement field= type.createField("int i;", null, false, new NullProgressMonitor());
+		IJavaElement method= type.createMethod("void f(){}", null, false, new NullProgressMonitor());
+		IJavaElement initializer= type.createInitializer("{ int k= 0;}", null, new NullProgressMonitor());
+		IJavaElement innerType= type.createType("class Inner{}", null, false,  new NullProgressMonitor());
 
-			Object[] elements= {field, method, initializer, innerType};
-			verifyEnabled(elements);
-		} finally{
-			performDummySearch();
-			cu.delete(true, new NullProgressMonitor());
-		}
+		Object[] elements= {field, method, initializer, innerType};
+		verifyEnabled(elements);
 	}
 
 
@@ -401,13 +370,8 @@ public class DeleteTest extends RefactoringTest{
 		IFolder folder= (IFolder)getPackageP().getResource();
 		IFile file= folder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
-		try{
-			Object[] elements= {file};
-			verifyEnabled(elements);
-		} finally{
-			performDummySearch();
-			file.delete(true, false, null);
-		}
+		Object[] elements= {file};
+		verifyEnabled(elements);
 	}
 
 	public void testEnabled_folder() throws Exception{
@@ -1152,7 +1116,7 @@ public class DeleteTest extends RefactoringTest{
 		Object[] deleted= new Object[]{a};
 		Object[] exist= new Object[]{defaultP, file};
 		doTestUndoRedo(deleted, exist);
-		
+
 		JavaProjectHelper.delete(newJavaProject);
 	}
 

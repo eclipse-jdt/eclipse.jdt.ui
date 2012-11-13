@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,45 +85,40 @@ public final class ExtractSupertypeTests extends RefactoringTest {
 
 	private void helper1(String[] methodNames, String[][] signatures, boolean deleteAllInSourceType, boolean deleteAllMatchingMethods, boolean replaceOccurences) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
-		try {
-			IType type= getType(cu, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+		IType type= getType(cu, "B");
+		IMethod[] methods= getMethods(type, methodNames, signatures);
 
-			ExtractSupertypeProcessor processor= createRefactoringProcessor(methods);
-			Refactoring refactoring= processor.getRefactoring();
-			processor.setMembersToMove(methods);
+		ExtractSupertypeProcessor processor= createRefactoringProcessor(methods);
+		Refactoring refactoring= processor.getRefactoring();
+		processor.setMembersToMove(methods);
 
-			assertTrue("activation", refactoring.checkInitialConditions(new NullProgressMonitor()).isOK());
+		assertTrue("activation", refactoring.checkInitialConditions(new NullProgressMonitor()).isOK());
 
-			processor.setTypesToExtract(new IType[] { type});
-			processor.setTypeName("Z");
-			processor.setCreateMethodStubs(true);
-			processor.setInstanceOf(false);
-			processor.setReplace(replaceOccurences);
-			if (deleteAllInSourceType)
-				processor.setDeletedMethods(methods);
-			if (deleteAllMatchingMethods)
-				processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
+		processor.setTypesToExtract(new IType[] { type});
+		processor.setTypeName("Z");
+		processor.setCreateMethodStubs(true);
+		processor.setInstanceOf(false);
+		processor.setReplace(replaceOccurences);
+		if (deleteAllInSourceType)
+			processor.setDeletedMethods(methods);
+		if (deleteAllMatchingMethods)
+			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
-			RefactoringStatus status= refactoring.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to pass", !status.hasError());
-			performChange(refactoring, false);
+		RefactoringStatus status= refactoring.checkFinalConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to pass", !status.hasError());
+		performChange(refactoring, false);
 
-			String expected= getFileContents(getOutputTestFileName("A"));
-			String actual= cu.getSource();
-			assertEqualLines(expected, actual);
+		String expected= getFileContents(getOutputTestFileName("A"));
+		String actual= cu.getSource();
+		assertEqualLines(expected, actual);
 
-			expected= getFileContents(getOutputTestFileName("Z"));
-			ICompilationUnit unit= getPackageP().getCompilationUnit("Z.java");
-			if (!unit.exists())
-				assertTrue("extracted compilation unit does not exist", false);
-			actual= unit.getBuffer().getContents();
-			assertEqualLines(expected, actual);
+		expected= getFileContents(getOutputTestFileName("Z"));
+		ICompilationUnit unit= getPackageP().getCompilationUnit("Z.java");
+		if (!unit.exists())
+			assertTrue("extracted compilation unit does not exist", false);
+		actual= unit.getBuffer().getContents();
+		assertEqualLines(expected, actual);
 
-		} finally {
-			performDummySearch();
-			cu.delete(false, null);
-		}
 	}
 
 	public void test0() throws Exception {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,16 +16,11 @@ import junit.framework.TestSuite;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.ISourceManipulation;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
@@ -87,29 +82,7 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		performDummySearch();
 		fClipboard.dispose();
-		delete(fCuA);
-		delete(fCuB);
-		delete(fPackageQ_R);
-		delete(fPackageQ);
-		delete(faTxt);
-	}
-
-	private static void delete(ISourceManipulation element) {
-		try {
-			if (element != null && ((IJavaElement)element).exists())
-				element.delete(false, null);
-		} catch(JavaModelException e) {
-			//ignore, we must keep going
-		}
-	}
-	private static void delete(IFile element) {
-		try {
-			element.delete(true, false, null);
-		} catch(CoreException e) {
-			//ignore, we must keep going
-		}
 	}
 
 	private void checkEnabled(Object[] elements) {

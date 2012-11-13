@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -141,29 +141,19 @@ public class RenamePackageTests extends RefactoringTest {
 	 * the 0th one is the one to rename
 	 */
 	private void helper1(String packageNames[], String[][] packageFiles, String newPackageName) throws Exception{
-		try{
-			IPackageFragment[] packages= new IPackageFragment[packageNames.length];
-			for (int i= 0; i < packageFiles.length; i++){
-				packages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
-				for (int j= 0; j < packageFiles[i].length; j++){
-					createCUfromTestFile(packages[i], packageFiles[i][j], packageNames[i].replace('.', '/') + "/");
-					//DebugUtils.dump(cu.getElementName() + "\n" + cu.getSource());
-				}
-			}
-			IPackageFragment thisPackage= packages[0];
-			RefactoringStatus result= performRefactoring(createRefactoringDescriptor(thisPackage, newPackageName));
-			assertNotNull("precondition was supposed to fail", result);
-			if (fIsVerbose)
-				DebugUtils.dump("" + result);
-		} finally{
-			performDummySearch();
-
-			for (int i= 0; i < packageNames.length; i++){
-				IPackageFragment pack= getRoot().getPackageFragment(packageNames[i]);
-				if (pack.exists())
-					pack.delete(true, null);
+		IPackageFragment[] packages= new IPackageFragment[packageNames.length];
+		for (int i= 0; i < packageFiles.length; i++){
+			packages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
+			for (int j= 0; j < packageFiles[i].length; j++){
+				createCUfromTestFile(packages[i], packageFiles[i][j], packageNames[i].replace('.', '/') + "/");
+				//DebugUtils.dump(cu.getElementName() + "\n" + cu.getSource());
 			}
 		}
+		IPackageFragment thisPackage= packages[0];
+		RefactoringStatus result= performRefactoring(createRefactoringDescriptor(thisPackage, newPackageName));
+		assertNotNull("precondition was supposed to fail", result);
+		if (fIsVerbose)
+			DebugUtils.dump("" + result);
 	}
 
 	private void helper1() throws Exception{

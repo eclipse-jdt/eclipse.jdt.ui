@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,19 +51,14 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	}
 
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
-			IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		try{
-			IMethod method= classA.getMethod(methodName, signatures);
-			RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
-			descriptor.setJavaElement(method);
-			descriptor.setNewName(newMethodName);
-			descriptor.setUpdateReferences(true);
-			RefactoringStatus result= performRefactoring(descriptor);
-			assertNotNull("precondition was supposed to fail", result);
-		} finally{
-			performDummySearch();
-			classA.getCompilationUnit().delete(true, null);
-		}
+		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
+		IMethod method= classA.getMethod(methodName, signatures);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+		descriptor.setJavaElement(method);
+		descriptor.setNewName(newMethodName);
+		descriptor.setUpdateReferences(true);
+		RefactoringStatus result= performRefactoring(descriptor);
+		assertNotNull("precondition was supposed to fail", result);
 	}
 
 	private void helper1() throws Exception{
@@ -72,36 +67,31 @@ public class RenameStaticMethodTests extends RefactoringTest {
 
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean updateReferences, boolean createDelegate) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
-		try{
-			IType classA= getType(cu, "A");
-			IMethod method= classA.getMethod(methodName, signatures);
-			RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
-			descriptor.setUpdateReferences(updateReferences);
-			descriptor.setJavaElement(method);
-			descriptor.setNewName(newMethodName);
-			descriptor.setKeepOriginal(createDelegate);
-			descriptor.setDeprecateDelegate(true);
+		IType classA= getType(cu, "A");
+		IMethod method= classA.getMethod(methodName, signatures);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+		descriptor.setUpdateReferences(updateReferences);
+		descriptor.setJavaElement(method);
+		descriptor.setNewName(newMethodName);
+		descriptor.setKeepOriginal(createDelegate);
+		descriptor.setDeprecateDelegate(true);
 
-			assertEquals("was supposed to pass", null, performRefactoring(descriptor));
-			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		assertEquals("was supposed to pass", null, performRefactoring(descriptor));
+		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 
-			assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
-			assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
-			//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
+		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
+		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
+		//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 
-			RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
-			assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
+		RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
+		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
-			assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
-			assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
-			//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
+		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
+		assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
+		//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 
-			RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
-			assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
-		} finally{
-			performDummySearch();
-			cu.delete(true, null);
-		}
+		RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
+		assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	private void helper2_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		helper2_0(methodName, newMethodName, signatures, true, false);
@@ -216,24 +206,19 @@ public class RenameStaticMethodTests extends RefactoringTest {
 //		if (true)	return;
 		IPackageFragment packageA= getRoot().createPackageFragment("a", false, new NullProgressMonitor());
 		IPackageFragment packageB= getRoot().createPackageFragment("b", false, new NullProgressMonitor());
-		try {
-			ICompilationUnit cuA= createCUfromTestFile(packageA, "A");
-			ICompilationUnit cuB= createCUfromTestFile(packageB, "B");
+		ICompilationUnit cuA= createCUfromTestFile(packageA, "A");
+		ICompilationUnit cuB= createCUfromTestFile(packageB, "B");
 
-			IType classA= getType(cuA, "A");
-			IMethod method= classA.getMethod("method2", new String[0]);
-			RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
-			descriptor.setUpdateReferences(true);
-			descriptor.setJavaElement(method);
-			descriptor.setNewName("fred");
+		IType classA= getType(cuA, "A");
+		IMethod method= classA.getMethod("method2", new String[0]);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+		descriptor.setUpdateReferences(true);
+		descriptor.setJavaElement(method);
+		descriptor.setNewName("fred");
 
-			assertEquals("was supposed to pass", null, performRefactoring(descriptor));
-			assertEqualLines("invalid renaming in A", getFileContents(getOutputTestFileName("A")), cuA.getSource());
-			assertEqualLines("invalid renaming in B", getFileContents(getOutputTestFileName("B")), cuB.getSource());
-		} finally{
-			packageA.delete(true, new NullProgressMonitor());
-			packageB.delete(true, new NullProgressMonitor());
-		}
+		assertEquals("was supposed to pass", null, performRefactoring(descriptor));
+		assertEqualLines("invalid renaming in A", getFileContents(getOutputTestFileName("A")), cuA.getSource());
+		assertEqualLines("invalid renaming in B", getFileContents(getOutputTestFileName("B")), cuB.getSource());
 	}
 
 	public void testUnicode01() throws Exception{

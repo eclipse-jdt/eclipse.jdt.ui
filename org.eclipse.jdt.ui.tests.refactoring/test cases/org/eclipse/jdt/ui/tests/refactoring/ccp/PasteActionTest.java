@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,6 @@ import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
@@ -142,16 +141,6 @@ public class PasteActionTest extends RefactoringTest{
 		assertEqualLines(cuName, getFileContents(getOutputTestFileName(cuName)), getPackageP().getCompilationUnit(cuName + ".java").getSource());
 	}
 
-	private void delete(ICompilationUnit cu) throws Exception {
-		try {
-			performDummySearch();
-			cu.delete(true, new NullProgressMonitor());
-		} catch (JavaModelException e) {
-			e.printStackTrace();
-			//ingore and keep going
-		}
-	}
-
 	public void test0() throws Exception{
 		if (BUG_NOT_IMPLEMENTED_YET) {
 			printTestDisabledMessage("not implemented yet");
@@ -161,50 +150,40 @@ public class PasteActionTest extends RefactoringTest{
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 
-		try {
-			IType typeA= cuA.getType("A");
-			IType typeB= cuB.getType("B");
+		IType typeA= cuA.getType("A");
+		IType typeB= cuB.getType("B");
 
-			assertTrue("A does not exist", typeA.exists());
-			assertTrue("B does not exist", typeB.exists());
+		assertTrue("A does not exist", typeA.exists());
+		assertTrue("B does not exist", typeB.exists());
 
-			IJavaElement[] copyJavaElements= {typeA};
-			IResource[] copyResources= {};
-			IJavaElement[] pasteJavaElements= {typeB};
-			IResource[] pasteResources= {};
-			PasteAction paste= verifyEnabled(copyResources, copyJavaElements, pasteResources, pasteJavaElements);
-			paste.run((IStructuredSelection)paste.getSelection());
-			compareContents("A");
-			compareContents("B");
-		} finally{
-			delete(cuA);
-			delete(cuB);
-		}
+		IJavaElement[] copyJavaElements= {typeA};
+		IResource[] copyResources= {};
+		IJavaElement[] pasteJavaElements= {typeB};
+		IResource[] pasteResources= {};
+		PasteAction paste= verifyEnabled(copyResources, copyJavaElements, pasteResources, pasteJavaElements);
+		paste.run((IStructuredSelection)paste.getSelection());
+		compareContents("A");
+		compareContents("B");
 	}
 
 	public void test2() throws Exception{
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 
-		try {
-			IField fieldY= cuA.getType("A").getField("y");
-			IType typeB= cuB.getType("B");
+		IField fieldY= cuA.getType("A").getField("y");
+		IType typeB= cuB.getType("B");
 
-			assertTrue("y does not exist", fieldY.exists());
-			assertTrue("B does not exist", typeB.exists());
+		assertTrue("y does not exist", fieldY.exists());
+		assertTrue("B does not exist", typeB.exists());
 
-			IJavaElement[] copyJavaElements= {fieldY};
-			IResource[] copyResources= {};
-			IJavaElement[] pasteJavaElements= {typeB};
-			IResource[] pasteResources= {};
-			PasteAction paste= verifyEnabled(copyResources, copyJavaElements, pasteResources, pasteJavaElements);
-			paste.run((IStructuredSelection)paste.getSelection());
-			compareContents("A");
-			compareContents("B");
-		} finally{
-			delete(cuA);
-			delete(cuB);
-		}
+		IJavaElement[] copyJavaElements= {fieldY};
+		IResource[] copyResources= {};
+		IJavaElement[] pasteJavaElements= {typeB};
+		IResource[] pasteResources= {};
+		PasteAction paste= verifyEnabled(copyResources, copyJavaElements, pasteResources, pasteJavaElements);
+		paste.run((IStructuredSelection)paste.getSelection());
+		compareContents("A");
+		compareContents("B");
 	}
 
 	public void test3() throws Exception{
@@ -212,47 +191,38 @@ public class PasteActionTest extends RefactoringTest{
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 
-		try {
-			IJavaElement elem0= cuA.getImport("java.lang.*");
-			IImportContainer importContainer= cuB.getImportContainer();
+		IJavaElement elem0= cuA.getImport("java.lang.*");
+		IImportContainer importContainer= cuB.getImportContainer();
 
-			assertTrue("y does not exist", elem0.exists());
-			assertTrue("B does not exist", importContainer.exists());
+		assertTrue("y does not exist", elem0.exists());
+		assertTrue("B does not exist", importContainer.exists());
 
-			IJavaElement[] copyJavaElements= {elem0};
-			IResource[] copyResources= {};
-			IJavaElement[] pasteJavaElements= {importContainer};
-			IResource[] pasteResources= {};
-			PasteAction paste= verifyEnabled(copyResources, copyJavaElements, pasteResources, pasteJavaElements);
-			paste.run((IStructuredSelection)paste.getSelection());
-			compareContents("A");
-			compareContents("B");
-		} finally{
-			delete(cuA);
-			delete(cuB);
-		}
+		IJavaElement[] copyJavaElements= {elem0};
+		IResource[] copyResources= {};
+		IJavaElement[] pasteJavaElements= {importContainer};
+		IResource[] pasteResources= {};
+		PasteAction paste= verifyEnabled(copyResources, copyJavaElements, pasteResources, pasteJavaElements);
+		paste.run((IStructuredSelection)paste.getSelection());
+		compareContents("A");
+		compareContents("B");
 	}
 
 	public void test4() throws Exception{
 //		printTestDisabledMessage("test for bug 20151");
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
-		try {
-			IJavaElement elem0= cuA.getType("A").getMethod("f", new String[0]);
-			IMethod method= cuA.getType("A").getMethod("f1", new String[0]);
+		IJavaElement elem0= cuA.getType("A").getMethod("f", new String[0]);
+		IMethod method= cuA.getType("A").getMethod("f1", new String[0]);
 
-			assertTrue("y does not exist", elem0.exists());
-			assertTrue("B does not exist", method.exists());
+		assertTrue("y does not exist", elem0.exists());
+		assertTrue("B does not exist", method.exists());
 
-			IJavaElement[] copyJavaElements= {elem0};
-			IResource[] copyResources= {};
-			IJavaElement[] pasteJavaElements= {method};
-			IResource[] pasteResources= {};
-			PasteAction paste= verifyEnabled(copyResources, copyJavaElements, pasteResources, pasteJavaElements);
-			paste.run((IStructuredSelection)paste.getSelection());
-			compareContents("A");
-		} finally{
-			delete(cuA);
-		}
+		IJavaElement[] copyJavaElements= {elem0};
+		IResource[] copyResources= {};
+		IJavaElement[] pasteJavaElements= {method};
+		IResource[] pasteResources= {};
+		PasteAction paste= verifyEnabled(copyResources, copyJavaElements, pasteResources, pasteJavaElements);
+		paste.run((IStructuredSelection)paste.getSelection());
+		compareContents("A");
 	}
 
 	public void testPastingJavaElementIntoWorkingSet() throws Exception {
@@ -281,9 +251,7 @@ public class PasteActionTest extends RefactoringTest{
 			assertEquals("Only one element", 1, ws.getElements().length);
 			assertEquals(folder, ws.getElements()[0]);
 		} finally {
-			performDummySearch();
 			PlatformUI.getWorkbench().getWorkingSetManager().removeWorkingSet(ws);
-			folder.delete(true, false, null);
 		}
 	}
 
@@ -303,7 +271,7 @@ public class PasteActionTest extends RefactoringTest{
 
 	public void testPastingExistingElementIntoWorkingSet() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test",
-			new IAdaptable[] {RefactoringTestSetup.getProject()});
+				new IAdaptable[] {RefactoringTestSetup.getProject()});
 		try {
 			IResource[] resources= {};
 			IJavaElement[] jElements= {RefactoringTestSetup.getProject()};
@@ -318,7 +286,7 @@ public class PasteActionTest extends RefactoringTest{
 
 	public void testPastingChildJavaElementIntoWorkingSet() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test",
-			new IAdaptable[] {RefactoringTestSetup.getProject()});
+				new IAdaptable[] {RefactoringTestSetup.getProject()});
 		try {
 			IResource[] resources= {};
 			IJavaElement[] jElements= {getPackageP()};
@@ -335,7 +303,7 @@ public class PasteActionTest extends RefactoringTest{
 		IFolder folder= RefactoringTestSetup.getProject().getProject().getFolder("folder");
 		folder.create(true, true, null);
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test",
-			new IAdaptable[] {folder});
+				new IAdaptable[] {folder});
 		IFolder sub= folder.getFolder("sub");
 		sub.create(true, true, null);
 		try {
@@ -346,16 +314,13 @@ public class PasteActionTest extends RefactoringTest{
 			assertEquals("Only one element", 1, ws.getElements().length);
 			assertEquals(folder, ws.getElements()[0]);
 		} finally {
-			performDummySearch();
-			folder.delete(true, false, null);
-			sub.delete(true, false, null);
 			PlatformUI.getWorkbench().getWorkingSetManager().removeWorkingSet(ws);
 		}
 	}
 
 	public void testPastingChildResourceIntoWorkingSetContainingParent() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test",
-			new IAdaptable[] {RefactoringTestSetup.getProject()});
+				new IAdaptable[] {RefactoringTestSetup.getProject()});
 		IFolder folder= RefactoringTestSetup.getProject().getProject().getFolder("folder");
 		folder.create(true, true, null);
 		try {
@@ -366,8 +331,6 @@ public class PasteActionTest extends RefactoringTest{
 			assertEquals("Only one element", 1, ws.getElements().length);
 			assertEquals(RefactoringTestSetup.getProject(), ws.getElements()[0]);
 		} finally {
-			performDummySearch();
-			folder.delete(true, false, null);
 			PlatformUI.getWorkbench().getWorkingSetManager().removeWorkingSet(ws);
 		}
 	}
@@ -394,61 +357,45 @@ public class PasteActionTest extends RefactoringTest{
 
 	public void testPastingTypedResources0() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
-		try {
-			IJavaElement methodM= cuA.getType("A").getMethod("m", new String[0]);
-			IJavaElement[] elemsForClipboard= {methodM};
-			IJavaElement[] pasteSelectedJavaElements= {methodM};
-			boolean enabled= true;
-			copyAndPasteTypedSources(elemsForClipboard, pasteSelectedJavaElements, enabled);
-			compareContents("A");
-		} finally{
-			delete(cuA);
-		}
+		IJavaElement methodM= cuA.getType("A").getMethod("m", new String[0]);
+		IJavaElement[] elemsForClipboard= {methodM};
+		IJavaElement[] pasteSelectedJavaElements= {methodM};
+		boolean enabled= true;
+		copyAndPasteTypedSources(elemsForClipboard, pasteSelectedJavaElements, enabled);
+		compareContents("A");
 	}
 
 	public void testPastingTypedResources1() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
-		try {
-			IType typeA= cuA.getType("A");
-			IJavaElement fieldF= typeA.getField("f");
-			IJavaElement[] elemsForClipboard= {fieldF};
-			IJavaElement[] pasteSelectedJavaElements= {typeA};
-			boolean enabled= true;
-			copyAndPasteTypedSources(elemsForClipboard, pasteSelectedJavaElements, enabled);
-			compareContents("A");
-		} finally{
-			delete(cuA);
-		}
+		IType typeA= cuA.getType("A");
+		IJavaElement fieldF= typeA.getField("f");
+		IJavaElement[] elemsForClipboard= {fieldF};
+		IJavaElement[] pasteSelectedJavaElements= {typeA};
+		boolean enabled= true;
+		copyAndPasteTypedSources(elemsForClipboard, pasteSelectedJavaElements, enabled);
+		compareContents("A");
 	}
 
 	public void testPastingTypedResources2() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
-		try {
-			IType typeA= cuA.getType("A");
-			IJavaElement fieldF= typeA.getField("f");
-			IJavaElement[] elemsForClipboard= {fieldF};
-			IJavaElement[] pasteSelectedJavaElements= {typeA};
-			boolean enabled= true;
-			copyAndPasteTypedSources(elemsForClipboard, pasteSelectedJavaElements, enabled);
-			compareContents("A");
-		} finally{
-			delete(cuA);
-		}
+		IType typeA= cuA.getType("A");
+		IJavaElement fieldF= typeA.getField("f");
+		IJavaElement[] elemsForClipboard= {fieldF};
+		IJavaElement[] pasteSelectedJavaElements= {typeA};
+		boolean enabled= true;
+		copyAndPasteTypedSources(elemsForClipboard, pasteSelectedJavaElements, enabled);
+		compareContents("A");
 	}
 
 	public void testPastingTypedResources3() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
-		try {
-			IType typeA= cuA.getType("A");
-			IJavaElement fieldF= typeA.getField("f");
-			IJavaElement fieldG= typeA.getField("g");
-			IJavaElement[] elemsForClipboard= {fieldF, fieldG};
-			IJavaElement[] pasteSelectedJavaElements= {typeA};
-			boolean enabled= true;
-			copyAndPasteTypedSources(elemsForClipboard, pasteSelectedJavaElements, enabled);
-			compareContents("A");
-		} finally{
-			delete(cuA);
-		}
+		IType typeA= cuA.getType("A");
+		IJavaElement fieldF= typeA.getField("f");
+		IJavaElement fieldG= typeA.getField("g");
+		IJavaElement[] elemsForClipboard= {fieldF, fieldG};
+		IJavaElement[] pasteSelectedJavaElements= {typeA};
+		boolean enabled= true;
+		copyAndPasteTypedSources(elemsForClipboard, pasteSelectedJavaElements, enabled);
+		compareContents("A");
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,9 +36,7 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
@@ -127,12 +125,6 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		performDummySearch();
 		fClipboard.dispose();
 		fLabelProvider.dispose();
-		delete(fCuA);
-		delete(fCuB);
-		delete(fPackageQ_R);
-		delete(fPackageQ);
-		delete(faTxt);
-		delete(fOlder);
 	}
 
 	private IFile createFile(IFolder folder, String fileName) throws Exception {
@@ -145,30 +137,6 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		IFolder folder= project.getFolder(name);
 		folder.create(true, true, null);
 		return folder;
-	}
-
-	private static void delete(ISourceManipulation element) {
-		try {
-			if (element != null && ((IJavaElement)element).exists())
-				element.delete(true, null);
-		} catch(JavaModelException e) {
-			//ignore, we must keep going
-		}
-	}
-	private static void delete(IFile element) {
-		try {
-			element.delete(true, false, null);
-		} catch(CoreException e) {
-			//ignore, we must keep going
-		}
-	}
-
-	private static void delete(IFolder element) {
-		try {
-			element.delete(true, false, null);
-		} catch(CoreException e) {
-			//ignore, we must keep going
-		}
 	}
 
 	private void checkDisabled(Object[] elements){
@@ -307,6 +275,9 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 				case IJavaElement.COMPILATION_UNIT :
 				case IJavaElement.CLASS_FILE :
 					count++;
+					break;
+				default:
+					break;
 			}
 		}
 		return count;

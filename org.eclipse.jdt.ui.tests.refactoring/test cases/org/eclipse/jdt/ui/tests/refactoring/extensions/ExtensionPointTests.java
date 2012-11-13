@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,9 +14,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFolder;
@@ -57,8 +54,6 @@ public class ExtensionPointTests extends TestCase {
 		StatusContextViewerDescriptor descriptor= StatusContextViewerDescriptor.get(context);
 		assertNotNull(descriptor);
 		assertNotNull(descriptor.createViewer());
-		JavaProjectHelper.performDummySearch();
-		unit.delete(true, new NullProgressMonitor());
 	}
 
 	private IPackageFragment getTestPackage() {

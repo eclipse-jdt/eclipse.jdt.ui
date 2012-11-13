@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,42 +59,36 @@ public class RippleMethodFinderTests extends AbstractCUTestCase {
 	}
 
 	private void perform() throws Exception {
-		ICompilationUnit cu= null;
-		try {
-			IPackageFragment pack= RefactoringTestSetup.getPackageP();
-			String name= adaptName("A_" + getName());
-			cu= createCU(pack, name, getFileInputStream(getResourceLocation() + "/" + name));
+		IPackageFragment pack= RefactoringTestSetup.getPackageP();
+		String name= adaptName("A_" + getName());
+		ICompilationUnit cu= createCU(pack, name, getFileInputStream(getResourceLocation() + "/" + name));
 
-			String contents= cu.getBuffer().getContents();
+		String contents= cu.getBuffer().getContents();
 
-			IJavaElement[] elements= cu.codeSelect(contents.indexOf(TARGET) + TARGET.length(), 0);
+		IJavaElement[] elements= cu.codeSelect(contents.indexOf(TARGET) + TARGET.length(), 0);
+		assertEquals(1, elements.length);
+		IMethod target= (IMethod) elements[0];
+
+		List/*<IMethod>*/ rippleMethods= new ArrayList();
+		rippleMethods.add(target);
+		int start= 0;
+		while (start < contents.length()) {
+			start= contents.indexOf(RIPPLE, start);
+			if (start == -1)
+				break;
+			elements= cu.codeSelect(start + RIPPLE.length(), 0);
 			assertEquals(1, elements.length);
-			IMethod target= (IMethod) elements[0];
-
-			List/*<IMethod>*/ rippleMethods= new ArrayList();
-			rippleMethods.add(target);
-			int start= 0;
-			while (start < contents.length()) {
-				start= contents.indexOf(RIPPLE, start);
-				if (start == -1)
-					break;
-				elements= cu.codeSelect(start + RIPPLE.length(), 0);
-				assertEquals(1, elements.length);
-				IMethod rippleMethod= (IMethod) elements[0];
-				rippleMethods.add(rippleMethod);
-				start++;
-			}
-
-			IMethod[] result= RippleMethodFinder2.getRelatedMethods(target, new NullProgressMonitor(), null);
-			for (int i= 0; i < result.length; i++) {
-				IMethod method= result[i];
-				assertTrue("method not found: " + method, rippleMethods.remove(method));
-			}
-			assertEquals("found wrong ripple methods: " + rippleMethods, 0, rippleMethods.size());
-		} finally {
-			if (cu != null)
-				cu.delete(true, null);
+			IMethod rippleMethod= (IMethod) elements[0];
+			rippleMethods.add(rippleMethod);
+			start++;
 		}
+
+		IMethod[] result= RippleMethodFinder2.getRelatedMethods(target, new NullProgressMonitor(), null);
+		for (int i= 0; i < result.length; i++) {
+			IMethod method= result[i];
+			assertTrue("method not found: " + method, rippleMethods.remove(method));
+		}
+		assertEquals("found wrong ripple methods: " + rippleMethods, 0, rippleMethods.size());
 	}
 
 	public void test1() throws Exception {

@@ -76,13 +76,11 @@ public class JavaProjectHelper {
 	private static final boolean PERFORM_DUMMY_SEARCH= false;
 	
 	/**
-	 * @deprecated
-	 * @see #RT_STUBS_15
+	 * @deprecated use {@link #RT_STUBS_15}
 	 */
 	public static final IPath RT_STUBS_13= new Path("testresources/rtstubs.jar");
 	/**
-	 * @deprecated
-	 * @see #JUNIT_SRC_381
+	 * @deprecated use {@link #JUNIT_SRC_381}
 	 */
 	public static final IPath JUNIT_SRC= new Path("testresources/junit37-noUI-src.zip");
 
@@ -269,7 +267,7 @@ public class JavaProjectHelper {
 	}
 
 	/**
-	 * Removes a IJavaElement. Retries if deletion failed (e.g. because the indexer
+	 * Removes an IJavaElement's resource. Retries if deletion failed (e.g. because the indexer
 	 * still locks the file).
 	 *
 	 * @param elem the element to delete
@@ -304,7 +302,7 @@ public class JavaProjectHelper {
 	public static void delete(IResource resource) throws CoreException {
 		for (int i= 0; i < MAX_RETRY; i++) {
 			try {
-				resource.delete(true, null);
+				resource.delete(IResource.FORCE | IResource.ALWAYS_DELETE_PROJECT_CONTENT, null);
 				i= MAX_RETRY;
 			} catch (CoreException e) {
 				if (i == MAX_RETRY - 1) {
@@ -312,8 +310,8 @@ public class JavaProjectHelper {
 					throw e;
 				}
 				try {
-					JavaPlugin.log(new IllegalStateException("sleep before retrying JavaProjectHelper.delete()"));
-					Thread.sleep(1000); // sleep a second
+					JavaPlugin.log(new IllegalStateException("sleep before retrying JavaProjectHelper.delete() for " + resource.getLocationURI()));
+					Thread.sleep(1000); // give other threads time to close the file
 				} catch (InterruptedException e1) {
 				}
 			}

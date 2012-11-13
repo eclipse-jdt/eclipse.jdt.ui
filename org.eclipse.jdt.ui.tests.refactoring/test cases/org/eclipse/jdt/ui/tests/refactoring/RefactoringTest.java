@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -141,6 +141,8 @@ public abstract class RefactoringTest extends TestCase {
 			// Restore package 'p'
 			if (!pExists)
 				getRoot().createPackageFragment("p", true, null);
+			
+			tryDeletingAllNonJavaChildResources(getRoot());
 		}
 
 		restoreTestProject();
@@ -197,6 +199,16 @@ public abstract class RefactoringTest extends TestCase {
 		}
 	}
 
+	private static void tryDeletingAllNonJavaChildResources(IPackageFragmentRoot root) throws CoreException {
+		Object[] nonJavaKids= root.getNonJavaResources();
+		for (int i= 0; i < nonJavaKids.length; i++) {
+			if (nonJavaKids[i] instanceof IResource) {
+				IResource resource= (IResource)nonJavaKids[i];
+				JavaProjectHelper.delete(resource);
+			}
+		}
+	}
+	
 	private static void tryDeletingAllJavaChildren(IPackageFragment pack) throws CoreException {
 		IJavaElement[] kids= pack.getChildren();
 		for (int i= 0; i < kids.length; i++){

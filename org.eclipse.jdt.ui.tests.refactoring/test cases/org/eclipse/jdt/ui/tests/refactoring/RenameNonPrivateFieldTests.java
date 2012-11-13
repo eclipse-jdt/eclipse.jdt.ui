@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
-public class RenameNonPrivateFieldTests extends RefactoringTest{
+public class RenameNonPrivateFieldTests extends RefactoringTest {
 
 	private static final Class clazz= RenameNonPrivateFieldTests.class;
 	private static final String REFACTORING_PATH= "RenameNonPrivateField/";
@@ -111,11 +111,11 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 
 	/**
 	 * Configure options by setting instance fields to non-default values.
-	 * @param fieldName
-	 * @param newFieldName
-	 * @throws Exception
+	 * @param fieldName 
+	 * @param newFieldName 
+	 * @throws Exception 
 	 */
-	private void helper2(String fieldName, String newFieldName) throws Exception{
+	private void helper2(String fieldName, String newFieldName) throws Exception {
 		helper2(fieldName, newFieldName, false);
 	}
 
@@ -159,8 +159,8 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 
 		ParticipantTesting.testRename(
-			renameHandles,
-			(RenameArguments[]) args.toArray(new RenameArguments[args.size()]));
+				renameHandles,
+				(RenameArguments[]) args.toArray(new RenameArguments[args.size()]));
 
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
@@ -372,41 +372,26 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		//bug 77622
 		IPackageFragment test1= getRoot().createPackageFragment("test1", true, null);
 		ICompilationUnit cuC= null;
-		try {
-			ICompilationUnit cuB= createCUfromTestFile(test1, "B");
-			cuC= createCUfromTestFile(getRoot().getPackageFragment(""), "C");
+		ICompilationUnit cuB= createCUfromTestFile(test1, "B");
+		cuC= createCUfromTestFile(getRoot().getPackageFragment(""), "C");
 
-			helper2("PI", "e");
+		helper2("PI", "e");
 
-			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("B")), cuB.getSource());
-			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("C")), cuC.getSource());
-		} finally {
-			if (test1.exists())
-				test1.delete(true, null);
-			if (cuC != null && cuC.exists())
-				cuC.delete(true, null);
-		}
+		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("B")), cuB.getSource());
+		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("C")), cuC.getSource());
 	}
 
 	public void testEnumConst() throws Exception {
 		//bug 77619
 		IPackageFragment test1= getRoot().createPackageFragment("test1", true, null);
 		ICompilationUnit cuC= null;
-		try {
-			ICompilationUnit cuB= createCUfromTestFile(test1, "B");
-			cuC= createCUfromTestFile(getRoot().getPackageFragment(""), "C");
+		ICompilationUnit cuB= createCUfromTestFile(test1, "B");
+		cuC= createCUfromTestFile(getRoot().getPackageFragment(""), "C");
 
-			helper2("RED", "REDDISH");
+		helper2("RED", "REDDISH");
 
-			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("B")), cuB.getSource());
-			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("C")), cuC.getSource());
-		} finally {
-			if (test1.exists())
-				test1.delete(true, null);
-			if (cuC != null && cuC.exists())
-				cuC.delete(true, null);
-		}
-
+		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("B")), cuB.getSource());
+		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("C")), cuC.getSource());
 	}
 
 	public void testGenerics1() throws Exception {
