@@ -10,8 +10,7 @@
  *          (reports 71244 & 74746: New Quick Assist's [quick assist])
  *   Benjamin Muskalla (buskalla@innoopract.com) - 104021: [quick fix] Introduce
  *   		new local with casted type applied more than once
- *   Billy Huang (billyhuang31@gmail.com) - [quick assist] concatenate/merge
- *   		string literals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=77632
+ *   Billy Huang <billyhuang31@gmail.com> - [quick assist] concatenate/merge string literals - https://bugs.eclipse.org/77632
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 

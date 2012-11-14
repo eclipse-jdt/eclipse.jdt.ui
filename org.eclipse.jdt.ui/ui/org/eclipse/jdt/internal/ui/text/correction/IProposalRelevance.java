@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Billy Huang (billyhuang31@gmail.com) - [quick assist] concatenate/merge string literals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=77632
+ *     Billy Huang <billyhuang31@gmail.com> - [quick assist] concatenate/merge string literals - https://bugs.eclipse.org/77632
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 

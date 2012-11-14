@@ -9,7 +9,7 @@
  *   Konstantin Scheglov (scheglov_ke@nlmk.ru) - initial API and implementation
  *          (reports 71244 & 74746: New Quick Assist's [quick assist])
  *   IBM Corporation - implementation
- *   Billy Huang (billyhuang31@gmail.com) - [quick assist] concatenate/merge string literals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=77632
+ *   Billy Huang <billyhuang31@gmail.com> - [quick assist] concatenate/merge string literals - https://bugs.eclipse.org/77632
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -1532,20 +1532,25 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static boolean getCombineStringProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		// we work with InfixExpressions
-		if (!(node instanceof InfixExpression))
+		InfixExpression infixExpression;
+		if (node instanceof InfixExpression) {
+			infixExpression= (InfixExpression) node;
+		} else if (node.getParent() instanceof InfixExpression) {
+			infixExpression= (InfixExpression) node.getParent();
+		} else {
 			return false;
+		}
 		
-		InfixExpression infixExpression= (InfixExpression) node;
 		
 		// only + is valid for combining strings
-		if(!(infixExpression.getOperator().equals(InfixExpression.Operator.PLUS))) {
+		if (!(infixExpression.getOperator().equals(InfixExpression.Operator.PLUS))) {
 			return false;
 		}
 		
 		// all expressions must be strings
 		Expression leftOperand= infixExpression.getLeftOperand();
 		Expression rightOperand= infixExpression.getRightOperand();
-		if(!(leftOperand instanceof StringLiteral && rightOperand instanceof StringLiteral)) {
+		if (!(leftOperand instanceof StringLiteral && rightOperand instanceof StringLiteral)) {
 			return false;
 		}
 		
