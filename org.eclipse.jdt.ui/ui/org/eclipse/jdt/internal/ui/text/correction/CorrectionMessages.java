@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [quick fix] Quick fix for missing synchronized modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245250
+ *   Billy Huang (billyhuang31@gmail.com) - [quick assist] concatenate/merge string literals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=77632
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -294,6 +295,7 @@ public final class CorrectionMessages extends NLS {
 	public static String TypeChangeCompletionProposal_method_name;
 	public static String ImplementInterfaceProposal_name;
 	public static String AddUnimplementedMethodsOperation_AddMissingMethod_group;
+	public static String AdvancedQuickAssistProcessor_combineSelectedStrings;
 	public static String AdvancedQuickAssistProcessor_convertToIfElse_description;
 	public static String AdvancedQuickAssistProcessor_inverseIf_description;
 	public static String AdvancedQuickAssistProcessor_inverseBooleanVariable;

@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Billy Huang (billyhuang31@gmail.com) - [quick assist] concatenate/merge string literals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=77632
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -34,7 +35,7 @@ public interface IProposalRelevance {
 	public static final int CREATE_LOCAL_PREFIX_OR_SUFFIX_MATCH= 10;
 	public static final int CHANGE_NULLNESS_ANNOTATION= 10;
 	
-	public static final int CHANGE_NULLNESS_ANNOTATION_IN_OVERRIDDEN_METHOD= 9;	
+	public static final int CHANGE_NULLNESS_ANNOTATION_IN_OVERRIDDEN_METHOD= 9;
 	public static final int REMOVE_FINAL_MODIFIER= 9;
 	public static final int GETTER_SETTER_NOT_VISIBLE_FIELD= 9;
 	public static final int ADD_MISSING_BODY= 9;
@@ -234,6 +235,7 @@ public interface IProposalRelevance {
 	public static final int CONVERT_IF_ELSE_TO_SWITCH= 1;
 	public static final int DOCUMENT_UNUSED_ITEM= 1;
 	public static final int PICK_SELECTED_STRING= 1;
+	public static final int COMBINE_STRINGS= 1;
 	public static final int INVERSE_BOOLEAN_VARIABLE= 1;
 	public static final int REMOVE_UNUSED_ALLOCATED_OBJECT= 1;
 	public static final int UNWRAP_STATEMENTS= 1;

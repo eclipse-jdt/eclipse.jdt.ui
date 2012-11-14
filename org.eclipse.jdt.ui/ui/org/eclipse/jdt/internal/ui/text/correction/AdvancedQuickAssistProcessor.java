@@ -9,6 +9,7 @@
  *   Konstantin Scheglov (scheglov_ke@nlmk.ru) - initial API and implementation
  *          (reports 71244 & 74746: New Quick Assist's [quick assist])
  *   IBM Corporation - implementation
+ *   Billy Huang (billyhuang31@gmail.com) - [quick assist] concatenate/merge string literals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=77632
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -144,6 +145,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					|| getExchangeInnerAndOuterIfConditionsProposals(context, coveringNode, null)
 					|| getExchangeOperandsProposals(context, coveringNode, null)
 					|| getCastAndAssignIfStatementProposals(context, coveringNode, null)
+					|| getCombineStringProposals(context, coveringNode, null)
 					|| getPickOutStringProposals(context, coveringNode, null)
 					|| getReplaceIfElseWithConditionalProposals(context, coveringNode, null)
 					|| getReplaceConditionalWithIfElseProposals(context, coveringNode, null)
@@ -187,6 +189,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getExchangeInnerAndOuterIfConditionsProposals(context, coveringNode, resultingCollections);
 				getExchangeOperandsProposals(context, coveringNode, resultingCollections);
 				getCastAndAssignIfStatementProposals(context, coveringNode, resultingCollections);
+				getCombineStringProposals(context, coveringNode, resultingCollections);
 				getPickOutStringProposals(context, coveringNode, resultingCollections);
 				getReplaceIfElseWithConditionalProposals(context, coveringNode, resultingCollections);
 				getInverseLocalVariableProposals(context, coveringNode, resultingCollections);
@@ -1527,6 +1530,60 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, cu.getJavaProject(), binding, null, excluded);
 	}
 
+	private static boolean getCombineStringProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+		// we work with InfixExpressions
+		if (!(node instanceof InfixExpression))
+			return false;
+		
+		InfixExpression infixExpression= (InfixExpression) node;
+		
+		// only + is valid for combining strings
+		if(!(infixExpression.getOperator().equals(InfixExpression.Operator.PLUS))) {
+			return false;
+		}
+		
+		// all expressions must be strings
+		Expression leftOperand= infixExpression.getLeftOperand();
+		Expression rightOperand= infixExpression.getRightOperand();
+		if(!(leftOperand instanceof StringLiteral && rightOperand instanceof StringLiteral)) {
+			return false;
+		}
+		
+		StringLiteral leftString= (StringLiteral) leftOperand;
+		StringLiteral rightString= (StringLiteral) rightOperand;
+		
+		if (resultingCollections == null) {
+			return true;
+		}
+		
+		// begin building combined string
+		StringBuilder stringBuilder= new StringBuilder(leftString.getLiteralValue());
+		stringBuilder.append(rightString.getLiteralValue());
+		
+		// append extended string literals
+		for (Object operand : infixExpression.extendedOperands()) {
+			if (!(operand instanceof StringLiteral))
+				return false;
+			StringLiteral stringLiteral= (StringLiteral) operand;
+			stringBuilder.append(stringLiteral.getLiteralValue());
+		}
+		
+		// prepare new string literal
+		AST ast= node.getAST();
+		StringLiteral combinedStringLiteral= ast.newStringLiteral();
+		combinedStringLiteral.setLiteralValue(stringBuilder.toString());
+		
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		rewrite.replace(infixExpression, combinedStringLiteral, null);
+		
+		// add correction proposal
+		String label= CorrectionMessages.AdvancedQuickAssistProcessor_combineSelectedStrings;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.COMBINE_STRINGS, image);
+		resultingCollections.add(proposal);
+		return true;
+	}
+	
 	private static boolean getPickOutStringProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		// we work with String's
 		if (!(node instanceof StringLiteral)) {
