@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,8 +46,12 @@ public final class CleanUpRequirements {
 		Assert.isLegal(compilerOptions == null || requiresAST, "Must not provide options if no AST is required"); //$NON-NLS-1$
 		fRequiresAST= requiresAST;
 		fRequiresFreshAST= requiresFreshAST;
-		fCompilerOptions= compilerOptions;
 		fRequiresChangedRegions= requiresChangedRegions;
+
+		fCompilerOptions= compilerOptions;
+		// Make sure that compile warnings are not suppressed since some clean ups work on reported warnings
+		if (fCompilerOptions != null)
+			fCompilerOptions.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);
 	}
 
 	/**
