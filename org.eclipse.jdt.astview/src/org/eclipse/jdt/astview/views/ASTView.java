@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -74,6 +78,7 @@ import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchCommandConstants;
@@ -84,6 +89,7 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.IShowInSource;
+import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -114,18 +120,22 @@ import org.eclipse.jdt.core.dom.IBinding;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.SharedASTProvider;
-import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 
 
 public class ASTView extends ViewPart implements IShowInSource {
 	
+	private static final int JLS8= AST.JLS8;
+	
+	/**
+	 * @deprecated to get rid of deprecation warnings in code
+	 */
 	private static final int JLS4= AST.JLS4;
-	/** (Used to get rid of deprecation warnings in code)
-	 * @deprecated
+	/**
+	 * @deprecated to get rid of deprecation warnings in code
 	 */
 	private static final int JLS3= AST.JLS3;
-	/** (Used to get rid of deprecation warnings in code)
-	 * @deprecated
+	/**
+	 * @deprecated to get rid of deprecation warnings in code
 	 */
 	private static final int JLS2= AST.JLS2;
 
@@ -458,13 +468,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fStatementsRecovery= !fDialogSettings.getBoolean(SETTINGS_NO_STATEMENTS_RECOVERY); // inverse so that default is use recovery
 		fBindingsRecovery= !fDialogSettings.getBoolean(SETTINGS_NO_BINDINGS_RECOVERY); // inverse so that default is use recovery
 		fIgnoreMethodBodies= fDialogSettings.getBoolean(SETTINGS_IGNORE_METHOD_BODIES);
-		fCurrentASTLevel= JLS4;
+		fCurrentASTLevel= JLS8;
 		try {
 			int level= fDialogSettings.getInt(SETTINGS_JLS);
 			switch (level) {
 				case JLS2:
 				case JLS3:
 				case JLS4:
+				case JLS8:
 					fCurrentASTLevel= level;
 			}
 		} catch (NumberFormatException e) {
@@ -1043,9 +1054,10 @@ public class ASTView extends ViewPart implements IShowInSource {
 		ASTViewImages.setImageDescriptors(fLinkWithEditor, ASTViewImages.LINK_WITH_EDITOR);
 			
 		fASTVersionToggleActions= new ASTLevelToggle[] {
-				new ASTLevelToggle("AST Level &2.0", JLS2), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level &3.0", JLS3), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level &4.0", JLS4), //$NON-NLS-1$
+				new ASTLevelToggle("AST Level &2 (1.2)", JLS2), //$NON-NLS-1$
+				new ASTLevelToggle("AST Level &3 (1.5)", JLS3), //$NON-NLS-1$
+				new ASTLevelToggle("AST Level &4 (1.7)", JLS4), //$NON-NLS-1$
+				new ASTLevelToggle("AST Level &8 (1.8)", JLS8), //$NON-NLS-1$
 		};
 		
 		fAddToTrayAction= new Action() {
@@ -1466,8 +1478,15 @@ public class ASTView extends ViewPart implements IShowInSource {
 		} else if (obj instanceof JavaElement) {
 			IJavaElement javaElement= ((JavaElement) obj).getJavaElement();
 			if (javaElement instanceof IPackageFragment) {
-				ShowInPackageViewAction showInPackageViewAction= new ShowInPackageViewAction(getViewSite());
-				showInPackageViewAction.run(javaElement);
+				try {
+					IViewPart packageExplorer= getSite().getPage().showView(JavaUI.ID_PACKAGES);
+					if (packageExplorer instanceof IShowInTarget) {
+						IShowInTarget showInTarget= (IShowInTarget) packageExplorer;
+						showInTarget.show(getShowInContext());
+					}
+				} catch (PartInitException e) {
+					showAndLogError("Could not open Package Explorer.", e); //$NON-NLS-1$
+				}
 			} else {
 				try {
 					IEditorPart editorPart= JavaUI.openInEditor(javaElement);
