@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -231,14 +231,24 @@ public class TypeEnvironment {
 	 * Returns the TType for java.lang.Object.
 	 * <p>
 	 * Warning: currently returns <code>null</code> unless this type environment
-	 * has already created its first hierarchy type.
+	 * has already created its first hierarchy type or it has been initialized explicitly.
 	 *
 	 * @return the TType for java.lang.Object
+	 * 
+	 * @see #initializeJavaLangObject(IJavaProject)
 	 */
 	public TType getJavaLangObject() {
 		return OBJECT_TYPE;
 	}
 
+	public void initializeJavaLangObject(IJavaProject project) {
+		if (OBJECT_TYPE != null)
+			return;
+		
+		TType objectType= createStandardType("java.lang.Object", project); //$NON-NLS-1$
+		Assert.isTrue(objectType.isJavaLangObject());
+	}
+	
 	void initializeJavaLangObject(ITypeBinding object) {
 		if (OBJECT_TYPE != null)
 			return;
@@ -258,6 +268,10 @@ public class TypeEnvironment {
 
 	StandardType createBoxed(PrimitiveType type, IJavaProject focus) {
 		String fullyQualifiedName= BOXED_PRIMITIVE_NAMES[type.getId()];
+		return createStandardType(fullyQualifiedName, focus);
+	}
+
+	private StandardType createStandardType(String fullyQualifiedName, IJavaProject focus) {
 		try {
 			IType javaElementType= focus.findType(fullyQualifiedName);
 			StandardType result= fStandardTypes.get(javaElementType);
