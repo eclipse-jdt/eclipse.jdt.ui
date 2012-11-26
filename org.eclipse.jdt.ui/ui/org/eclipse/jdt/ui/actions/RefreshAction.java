@@ -166,11 +166,9 @@ public class RefreshAction extends SelectionDispatchAction {
 				okToRefresh= true;
 			} else if (element instanceof IAdaptable) { // test for IAdaptable last (types before are IAdaptable as well)
 				IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
-				if (resource == null)
-					return false; // e.g. element inside a JAR
-				okToRefresh|= resource.getType() == IResource.PROJECT && ((IProject) resource).isOpen();
+				okToRefresh|= resource != null && (resource.getType() != IResource.PROJECT || ((IProject) resource).isOpen());
 			} else {
-				return false;
+				// nothing to say;
 			}
 		}
 		return okToRefresh;
