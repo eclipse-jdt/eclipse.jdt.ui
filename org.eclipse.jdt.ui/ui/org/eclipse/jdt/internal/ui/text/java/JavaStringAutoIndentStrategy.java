@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Kelly Campbell <kellyc@google.com> - [typing] String literal splitting should use formatter preferences - http://bugs.eclipse.org/48433
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -28,6 +29,12 @@ import org.eclipse.ui.IWorkbenchPage;
 
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -39,6 +46,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 	private String fPartitioning;
+	private IJavaProject fProject;
 
 	/**
 	 * The input string doesn't contain any line delimiter.
@@ -121,10 +129,12 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 	 * Creates a new Java string auto indent strategy for the given document partitioning.
 	 *
 	 * @param partitioning the document partitioning
+	 * @param project the project for retrieving project specific preferences
 	 */
-	public JavaStringAutoIndentStrategy(String partitioning) {
+	public JavaStringAutoIndentStrategy(String partitioning, IJavaProject project) {
 		super();
 		fPartitioning= partitioning;
+		fProject= project;
 	}
 
 	private boolean isLineDelimiter(IDocument document, String text) {
@@ -166,14 +176,79 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 		IRegion line= document.getLineInformationOfOffset(offset);
 		String string= document.get(line.getOffset(), offset - line.getOffset()).trim();
 		if (string.length() != 0 && !string.equals("+")) //$NON-NLS-1$
-			indentation += String.valueOf("\t\t"); //$NON-NLS-1$
-
-		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+			indentation += getExtraIndentAfterNewLine();
+		
 		boolean isLineDelimiter= isLineDelimiter(document, command.text);
-		if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_WRAP_STRINGS) && isLineDelimiter)
-			command.text= "\" +" + command.text + indentation + "\"";  //$NON-NLS-1$//$NON-NLS-2$
-		else if (command.text.length() > 1 && !isLineDelimiter && preferenceStore.getBoolean(PreferenceConstants.EDITOR_ESCAPE_STRINGS))
+		if (isEditorWrapStrings() && isLineDelimiter) {
+			if (isWrappingBeforeBinaryOperator()) {
+				command.text= "\"" + command.text + indentation + "+ \"";  //$NON-NLS-1$//$NON-NLS-2$
+			} else {
+				command.text= "\" +" + command.text + indentation + "\"";  //$NON-NLS-1$//$NON-NLS-2$
+			}
+		} else if (command.text.length() > 1 && !isLineDelimiter && isEditorEscapeStrings()) {
 			command.text= getModifiedText(command.text, indentation, delimiter);
+		}
+	}
+
+	private boolean isEditorWrapStrings() {
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		return preferenceStore.getBoolean(PreferenceConstants.EDITOR_WRAP_STRINGS);
+	}
+
+	private boolean isEditorEscapeStrings() {
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		return preferenceStore.getBoolean(PreferenceConstants.EDITOR_ESCAPE_STRINGS);
+	}
+
+	private String getCoreFormatterOption(String key) {
+		if (fProject == null)
+			return JavaCore.getOption(key);
+		return fProject.getOption(key, true);
+	}
+
+	private boolean isWrappingBeforeBinaryOperator() {
+		return DefaultCodeFormatterConstants.TRUE.equals(getCoreFormatterOption(
+				DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_BINARY_OPERATOR));
+	}
+
+	private int getContinuationIndentationSize() {
+		int formatterContinuationIndentationSize= 2;
+		try {
+			formatterContinuationIndentationSize= Integer.parseInt(getCoreFormatterOption(
+					DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION));
+		} catch (NumberFormatException ex) {
+			// Ignore, use default of 2
+		}
+		return formatterContinuationIndentationSize;
+	}
+	
+	private int getBinaryOperatorAlignmentStyle() {
+		String binaryAlignmentValue= getCoreFormatterOption(
+				DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_BINARY_EXPRESSION);
+		return DefaultCodeFormatterConstants.getIndentStyle(binaryAlignmentValue);
+	}
+
+	/**
+	 * Returns extra indentation string for strings that are broken by a newline
+	 * based on the value of the formatter preferences for tabs vs. spaces.
+	 *
+	 * @return two tabs or equivalent number of spaces
+	 */
+	private String getExtraIndentAfterNewLine() {
+		// read settings
+		int formatterContinuationIndentationSize= getContinuationIndentationSize();
+		int binaryAlignmentValue= getBinaryOperatorAlignmentStyle();
+		
+		// work out indent
+		int indentSize= formatterContinuationIndentationSize;
+		if (binaryAlignmentValue == DefaultCodeFormatterConstants.INDENT_BY_ONE) {
+			indentSize= 1;
+		} else if (binaryAlignmentValue == DefaultCodeFormatterConstants.INDENT_ON_COLUMN) {
+			// there is no obvious way to work out the current column indent
+		}
+		
+		// generate indentation string with correct size
+		return CodeFormatterUtil.createIndentString(indentSize, fProject);
 	}
 
 	private boolean isSmartMode() {

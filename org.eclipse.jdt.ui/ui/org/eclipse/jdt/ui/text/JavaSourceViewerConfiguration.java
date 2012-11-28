@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Tom Eicher (Avaloq Evolution AG) - block selection mode
+ *     Kelly Campbell <kellyc@google.com> - [typing] String literal splitting should use formatter preferences - http://bugs.eclipse.org/48433
  *******************************************************************************/
 package org.eclipse.jdt.ui.text;
 
@@ -467,7 +468,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		if (IJavaPartitions.JAVA_DOC.equals(contentType) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(contentType))
 			return new IAutoEditStrategy[] { new JavaDocAutoIndentStrategy(partitioning) };
 		else if (IJavaPartitions.JAVA_STRING.equals(contentType))
-			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaStringAutoIndentStrategy(partitioning) };
+			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaStringAutoIndentStrategy(partitioning, getProject()) };
 		else if (IJavaPartitions.JAVA_CHARACTER.equals(contentType) || IDocument.DEFAULT_CONTENT_TYPE.equals(contentType))
 			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaAutoIndentStrategy(partitioning, getProject(), sourceViewer) };
 		else
