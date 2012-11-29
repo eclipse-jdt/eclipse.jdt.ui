@@ -344,16 +344,20 @@ public class JavaProjectHelper {
 	}
 
 
+	public static void mustPerformDummySearch() throws JavaModelException {
+		performDummySearch(SearchEngine.createWorkspaceScope(), true);
+	}
+
 	public static void performDummySearch() throws JavaModelException {
-		performDummySearch(SearchEngine.createWorkspaceScope());
+		performDummySearch(SearchEngine.createWorkspaceScope(), PERFORM_DUMMY_SEARCH);
 	}
 
 	public static void performDummySearch(IJavaElement element) throws JavaModelException {
-		performDummySearch(SearchEngine.createJavaSearchScope(new IJavaElement[] { element }));
+		performDummySearch(SearchEngine.createJavaSearchScope(new IJavaElement[] { element }), PERFORM_DUMMY_SEARCH);
 	}
 
-	private static void performDummySearch(IJavaSearchScope searchScope) throws JavaModelException {
-		if (! PERFORM_DUMMY_SEARCH)
+	private static void performDummySearch(IJavaSearchScope searchScope, boolean doIt) throws JavaModelException {
+		if (!doIt)
 			return;
 		
 		new SearchEngine().searchAllTypeNames(
