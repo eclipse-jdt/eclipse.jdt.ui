@@ -323,8 +323,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 				IJavaElement[] javaElements= new IJavaElement[0];
 				if (getContainer().getActiveEditorInput() != null) {
 					IFile file= (IFile)getContainer().getActiveEditorInput().getAdapter(IFile.class);
-					if (file != null && file.exists())
-						javaElements= new IJavaElement[] { JavaCore.create(file) };
+					if (file != null && file.exists()) {
+						IJavaElement javaElement= JavaCore.create(file);
+						if (javaElement != null)
+							javaElements= new IJavaElement[] { javaElement };
+					}
 				} else
 					javaElements= factory.getJavaElements(getContainer().getSelection());
 				scope= factory.createJavaSearchScope(javaElements, includeMask);
