@@ -20,6 +20,6 @@
   </parent>
   <groupId>eclipse.jdt.ui</groupId>
   <artifactId>org.eclipse.jdt.astview.feature</artifactId>
-  <version>1.1.8</version>
+  <version>1.1.8-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
 </project>
