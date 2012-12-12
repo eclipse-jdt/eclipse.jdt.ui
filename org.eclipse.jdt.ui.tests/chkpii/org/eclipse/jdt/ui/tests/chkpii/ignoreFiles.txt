@@ -55,6 +55,7 @@ org.eclipse.pde.build/*
 org.eclipse.releng.basebuilder/plugins/org.eclipse.pde.build_3.8.0.v20120523-1555/templates/*
 org.eclipse.releng.tools/*
 eclipse.platform.releng.eclipsebuilder/*
+eclipse.platform.releng.basebuilder/*
 eclipse.platform.news/*
 org.eclipse.sdk.tests-feature/*
 org.eclipse.sdk-feature/*
