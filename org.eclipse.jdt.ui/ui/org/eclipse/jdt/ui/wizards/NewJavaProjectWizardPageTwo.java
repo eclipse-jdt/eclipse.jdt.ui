@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -349,12 +349,29 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 	}
 
 	private void restoreExistingFolders(URI projectLocation) {
+		HashSet<IFileStore> foldersToKeep= new HashSet<IFileStore>(fOrginalFolders);
+		// workaround for bug 319054: Eclipse deletes all files when I cancel a project creation (symlink in project location path)
+		for (IFileStore originalFileStore : fOrginalFolders) {
+			try {
+				File localFile= originalFileStore.toLocalFile(EFS.NONE, null);
+				if (localFile != null) {
+					File canonicalFile= localFile.getCanonicalFile();
+					IFileStore canonicalFileStore= originalFileStore.getFileSystem().fromLocalFile(canonicalFile);
+					if (! originalFileStore.equals(canonicalFileStore)) {
+						foldersToKeep.add(canonicalFileStore);
+					}
+				}
+			} catch (IOException e) {
+			} catch (CoreException e) {
+			}
+		}
+
 		try {
 			IFileStore[] children= EFS.getStore(projectLocation).childStores(EFS.NONE, null);
 			for (int i= 0; i < children.length; i++) {
 				IFileStore child= children[i];
 				IFileInfo info= child.fetchInfo();
-				if (info.isDirectory() && info.exists() && !fOrginalFolders.contains(child)) {
+				if (info.isDirectory() && info.exists() && !foldersToKeep.contains(child)) {
 					child.delete(EFS.NONE, null);
 					fOrginalFolders.remove(child);
 				}
