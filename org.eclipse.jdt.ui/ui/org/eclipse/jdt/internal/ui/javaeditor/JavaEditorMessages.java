@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,6 +64,7 @@ final class JavaEditorMessages extends NLS {
 	public static String CompilationUnitDocumentProvider_error_calculatingChangedRegions;
 	public static String CompilationUnitDocumentProvider_error_saveParticipantSavedFile;
 	public static String CompilationUnitDocumentProvider_error_saveParticipantFailed;
+	public static String CompilationUnitDocumentProvider_error_outOfSync;
 	public static String CompilationUnitEditor_error_saving_message1;
 	public static String CompilationUnitEditor_error_saving_title1;
 	public static String CompilationUnitEditor_error_saving_editedLines_calculation_message;

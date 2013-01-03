@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -101,6 +102,7 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaCore;
@@ -1373,13 +1375,20 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				} else
 					subMonitor= getSubProgressMonitor(monitor, listeners.length > 0 ? 70 : 100);
 
-				info.fCopy.commitWorkingCopy(isSynchronized || overwrite, subMonitor);
+				info.fCopy.commitWorkingCopy(overwrite, subMonitor);
 				if (listeners.length > 0)
 					notifyPostSaveListeners(info, changedRegions, listeners, getSubProgressMonitor(monitor, 30));
 
 				if (changedRegionException != null) {
 					throw changedRegionException;
 				}
+			} catch (JavaModelException x) {
+				// inform about the failure
+				fireElementStateChangeFailed(element);
+				if (IJavaModelStatusConstants.UPDATE_CONFLICT == x.getStatus().getCode())
+					// convert JavaModelException to CoreException
+					throw new CoreException(new Status(IStatus.WARNING, JavaUI.ID_PLUGIN, IResourceStatus.OUT_OF_SYNC_LOCAL, JavaEditorMessages.CompilationUnitDocumentProvider_error_outOfSync, null));
+				throw x;
 			} catch (CoreException x) {
 				// inform about the failure
 				fireElementStateChangeFailed(element);
