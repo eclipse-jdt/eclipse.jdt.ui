@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 IBM Corporation and others.
+ * Copyright (c) 2008, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -23,22 +27,45 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
 
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJarEntryResource;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -46,6 +73,7 @@ import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -453,7 +481,7 @@ public class JavadocContentAccess2 {
 	 * 									if there's no source
 	 * @return the Javadoc comment content in HTML or <code>null</code> if the member
 	 * 			does not have a Javadoc comment or if no source is available
-	 * @throws JavaModelException is thrown when the element's Javadoc can not be accessed
+	 * @throws JavaModelException is thrown when the element's Javadoc cannot be accessed
 	 */
 	public static String getHTMLContent(IMember member, boolean useAttachedJavadoc) throws JavaModelException {
 		String sourceJavadoc= getHTMLContentFromSource(member);
@@ -576,23 +604,12 @@ public class JavadocContentAccess2 {
 		return javadoc2HTML(member, rawJavadoc);
 	}
 
-	private static Javadoc getJavadocNode(IMember member, String rawJavadoc) {
+	private static Javadoc getJavadocNode(IJavaElement element, String rawJavadoc) {
 		//FIXME: take from SharedASTProvider if available
 		//Caveat: Javadoc nodes are not available when Javadoc processing has been disabled!
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=212207
 
-		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
-
-		IJavaProject javaProject= member.getJavaProject();
-		parser.setProject(javaProject);
-		Map<String, String> options= javaProject.getOptions(true);
-		options.put(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, JavaCore.ENABLED); // workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=212207
-		parser.setCompilerOptions(options);
-
-		String source= rawJavadoc + "class C{}"; //$NON-NLS-1$
-		parser.setSource(source.toCharArray());
-
-		CompilationUnit root= (CompilationUnit) parser.createAST(null);
+		CompilationUnit root= createAST(element, rawJavadoc);
 		if (root == null)
 			return null;
 		List<AbstractTypeDeclaration> types= root.types();
@@ -602,17 +619,27 @@ public class JavadocContentAccess2 {
 		return type.getJavadoc();
 	}
 
+
 	private static String javadoc2HTML(IMember member, String rawJavadoc) {
 		Javadoc javadoc= getJavadocNode(member, rawJavadoc);
 
 		if (javadoc == null) {
+			Reader contentReader= null;
 			// fall back to JavadocContentAccess:
 			try {
-				Reader contentReader= JavadocContentAccess.getHTMLContentReader(member, false, false);
+				contentReader= JavadocContentAccess.getHTMLContentReader(member, false, false);
 				if (contentReader != null)
 					return getString(contentReader);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
+			}finally{
+				if(contentReader != null){
+					try {
+						contentReader.close();
+					} catch (IOException e) {
+						//ignore
+					}
+				}
 			}
 			return null;
 		}
@@ -1595,6 +1622,335 @@ public class JavadocContentAccess2 {
 				return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Returns the Javadoc for a PackageDeclaration.
+	 * 
+	 * @param packageDeclaration the Java element whose Javadoc has to be retrieved
+	 * @return the package documentation in HTML format or <code>null</code> if there is no
+	 *         associated Javadoc
+	 * @throws CoreException if the Java element does not exists or an exception occurs while
+	 *             accessing the file containing the package Javadoc
+	 * @since 3.9
+	 */
+	public static String getHTMLContent(IPackageDeclaration packageDeclaration) throws CoreException {
+		IJavaElement element= packageDeclaration.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+		if (element instanceof IPackageFragment) {
+			return getHTMLContent((IPackageFragment) element);
+		}
+		return null;
+	}
+
+
+	/**
+	 * Returns the Javadoc for a package which could be present in package.html, package-info.java
+	 * or from an attached Javadoc.
+	 * 
+	 * @param packageFragment the package which is requesting for the document
+	 * @return the document content in HTML format or <code>null</code> if there is no associated
+	 *         Javadoc
+	 * @throws CoreException if the Java element does not exists or an exception occurs while
+	 *             accessing the file containing the package Javadoc
+	 * @since 3.9
+	 */
+	public static String getHTMLContent(IPackageFragment packageFragment) throws CoreException {
+		CompilationUnit astNode= null;
+		IPackageFragmentRoot root= (IPackageFragmentRoot) packageFragment.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+
+		//1==> Handle the case when the documentation is present in package-info.java or package-info.class file
+		ITypeRoot typeRoot= null;
+		boolean isBinary= root.getKind() == IPackageFragmentRoot.K_BINARY;
+		if (isBinary) {
+			typeRoot= packageFragment.getClassFile(JavaModelUtil.PACKAGE_INFO_CLASS);
+		} else {
+			typeRoot= packageFragment.getCompilationUnit(JavaModelUtil.PACKAGE_INFO_JAVA);
+		}
+		if (typeRoot != null && typeRoot.exists()) {
+			String source= typeRoot.getSource();
+			//the source can be null for some of the class files
+			if (source != null) {
+				astNode= createAST(typeRoot);
+				if (astNode != null) {
+					List<Comment> commentList= astNode.getCommentList();
+					if (commentList != null && !commentList.isEmpty()) {
+						for (int i= commentList.size() - 1; i >= 0; i--) {
+							Comment comment= commentList.get(i);
+							if (comment instanceof Javadoc) {
+								JavadocContentAccess2 docacc= new JavadocContentAccess2(null, (Javadoc) comment, source);
+								return docacc.toHTML();
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// 2==> Handle the case when the documentation is done in package.html file. The file can be either in normal source folder or coming from a jar file
+		else {
+			Object[] nonJavaResources= packageFragment.getNonJavaResources();
+			// 2.1 ==>If the package.html file is present in the source or directly in the binary jar
+			for (Object nonJavaResource : nonJavaResources) {
+				if (nonJavaResource instanceof IFile) {
+					IFile iFile= (IFile) nonJavaResource;
+					if (iFile.exists() && JavaModelUtil.PACKAGE_HTML.equals(iFile.getName())) {
+						return getIFileContent(iFile);
+					}
+				}
+			}
+
+			// 2.2==>The file is present in a binary container
+			if (isBinary) {
+				for (Object nonJavaResource : nonJavaResources) {
+					// The content is from an external binary class folder
+					if (nonJavaResource instanceof IJarEntryResource) {
+						IJarEntryResource jarEntryResource= (IJarEntryResource) nonJavaResource;
+						String encoding= getSourceAttachmentEncoding(root);
+						if (JavaModelUtil.PACKAGE_HTML.equals(jarEntryResource.getName()) && jarEntryResource.isFile()) {
+							return getHTMLContent(jarEntryResource, encoding);
+						}
+					}
+				}
+				//2.3 ==>The file is present in the source attachment path.
+				String contents= getHTMLContentFromAttachedSource(root, packageFragment);
+				if (contents != null)
+					return contents;
+			}
+		}
+
+		//3==> Handle the case when the documentation is coming from the attached Javadoc
+		if ((root.isArchive() || root.isExternal())) {
+			return packageFragment.getAttachedJavadoc(null);
+
+		}
+
+		return null;
+	}
+
+
+	private static String getHTMLContent(IJarEntryResource jarEntryResource, String encoding) throws CoreException {
+		InputStream in= jarEntryResource.getContents();
+		try {
+			return getContentsFromInputStream(in, encoding);
+		} finally {
+			if (in != null) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					//ignore
+				}
+			}
+		}
+	}
+
+	private static String getHTMLContentFromAttachedSource(IPackageFragmentRoot root, IPackageFragment packageFragment) throws CoreException {
+		String packagePath= packageFragment.getElementName().replace(".", "/") + "/" + JavaModelUtil.PACKAGE_HTML; //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+		IPath sourceAttachmentPath= root.getSourceAttachmentPath();
+		if (sourceAttachmentPath != null) {
+			File file= sourceAttachmentPath.toFile();
+			if (file.isDirectory()) {
+				//the path could be an absolute path to the source folder
+				IPath packagedocPath= sourceAttachmentPath.append(packagePath);
+				if (packagedocPath.toFile().exists())
+					return getFileContent(packagedocPath.toFile());
+
+			} else {
+				if (!file.exists()) {
+					//the path could be a workspace relative path to a jar or to the source folder
+					IWorkspaceRoot wsRoot= ResourcesPlugin.getWorkspace().getRoot();
+					IResource res= wsRoot.findMember(sourceAttachmentPath.append(packagePath));
+					if (res == null)
+						res= wsRoot.findMember(sourceAttachmentPath);
+
+					if (res != null)
+						file= res.getLocation().toFile();
+
+				}
+				if (file.exists()) {
+					if (JavaModelUtil.PACKAGE_HTML.equals(file.getName()))
+						return getFileContent(file);
+
+					//the package documentation could be in a Jar/Zip
+					IPath sourceAttachmentRootPath= root.getSourceAttachmentRootPath();
+					String packagedocPath;
+					//consider the root path also in the search path if it exists
+					if (sourceAttachmentRootPath != null) {
+						packagedocPath= sourceAttachmentRootPath.append(packagePath).toOSString();
+					} else {
+						packagedocPath= packagePath;
+					}
+					ZipFile zipFile= null;
+					InputStream in= null;
+					try {
+						zipFile= new ZipFile(file, ZipFile.OPEN_READ);
+						ZipEntry packageHtml= zipFile.getEntry(packagedocPath);
+						if (packageHtml != null) {
+							in= zipFile.getInputStream(packageHtml);
+							String encoding= getSourceAttachmentEncoding(root);
+							return getContentsFromInputStream(in, encoding);
+						}
+					} catch (IOException e) {
+						throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), e.getMessage(), e));
+					} finally {
+						try {
+							if (in != null) {
+								in.close();
+							}
+						} catch (IOException e) {
+							//ignore
+						}
+						try {
+							if (zipFile != null) {
+								zipFile.close();//this will close the InputStream also
+							}
+						} catch (IOException e) {
+							//ignore
+						}
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
+
+	private static String getContentsFromInputStream(InputStream in, String encoding) throws CoreException {
+		final int defaultFileSize= 15 * 1024;
+		StringBuffer buffer= new StringBuffer(defaultFileSize);
+		Reader reader= null;
+
+		try {
+			reader= new BufferedReader(new InputStreamReader(in, encoding), defaultFileSize);
+
+			char[] readBuffer= new char[2048];
+			int charCount= reader.read(readBuffer);
+
+			while (charCount > 0) {
+				buffer.append(readBuffer, 0, charCount);
+				charCount= reader.read(readBuffer);
+			}
+
+		} catch (IOException e) {
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), e.getMessage(), e));
+		} finally {
+			try {
+				if (reader != null) {
+					reader.close();//this will also close the InputStream wrapped in the reader
+				}
+			} catch (IOException e) {
+				//ignore
+			}
+		}
+		return buffer.toString();
+	}
+
+
+	private static String getSourceAttachmentEncoding(IPackageFragmentRoot root) throws JavaModelException {
+		String encoding= ResourcesPlugin.getEncoding();
+		IClasspathEntry entry= root.getRawClasspathEntry();
+
+		if (entry != null) {
+			int kind= entry.getEntryKind();
+			if (kind == IClasspathEntry.CPE_LIBRARY || kind == IClasspathEntry.CPE_VARIABLE) {
+				IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
+				for (int i= 0; i < extraAttributes.length; i++) {
+					IClasspathAttribute attrib= extraAttributes[i];
+					if (IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING.equals(attrib.getName())) {
+						return attrib.getValue();
+					}
+				}
+			}
+		}
+
+		return encoding;
+	}
+
+	/**
+	 * Reads a compilation unit and creates the AST DOM for manipulating the Java source.
+	 * 
+	 * @param typeRoot cane be a compilation unit or a class file
+	 * @return parsed compilation unit
+	 */
+
+	private static CompilationUnit createAST(ITypeRoot typeRoot) {
+		ASTParser parser= createASTParser(typeRoot);
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		if (typeRoot instanceof ICompilationUnit) {
+			parser.setSource((ICompilationUnit) typeRoot);
+		} else if (typeRoot instanceof IClassFile) {
+			parser.setSource((IClassFile) typeRoot);
+		}
+		parser.setResolveBindings(true);
+		return (CompilationUnit) parser.createAST(null);
+
+	}
+
+
+	private static CompilationUnit createAST(IJavaElement element, String rawJavadoc) {
+		ASTParser parser= createASTParser(element);
+		String source= rawJavadoc + "class C{}"; //$NON-NLS-1$
+		parser.setSource(source.toCharArray());
+		return (CompilationUnit) parser.createAST(null);
+	}
+
+	private static ASTParser createASTParser(IJavaElement element) {
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		IJavaProject javaProject= element.getJavaProject();
+		parser.setProject(javaProject);
+		Map<String, String> options= javaProject.getOptions(true);
+		options.put(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, JavaCore.ENABLED); // workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=212207
+		parser.setCompilerOptions(options);
+		return parser;
+	}
+
+	/**
+	 * Reads the content of the IFile.
+	 * 
+	 * @param file the file whose content has to be read
+	 * @return the content of the file
+	 * @throws CoreException if the file could not be successfully connected or disconnected
+	 */
+	private static String getIFileContent(IFile file) throws CoreException {
+		String content= null;
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		IPath fullPath= file.getFullPath();
+		manager.connect(fullPath, LocationKind.IFILE, null);
+		try {
+			ITextFileBuffer buffer= manager.getTextFileBuffer(fullPath, LocationKind.IFILE);
+			if (buffer != null) {
+				content= buffer.getDocument().get();
+			}
+		} finally {
+			manager.disconnect(fullPath, LocationKind.IFILE, null);
+		}
+
+		return content;
+	}
+
+
+	/**
+	 * Reads the content of the java.io.File.
+	 * 
+	 * @param file the file whose content has to be read
+	 * @return the content of the file
+	 * @throws CoreException if the file could not be successfully connected or disconnected
+	 */
+	private static String getFileContent(File file) throws CoreException {
+		String content= null;
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+
+		IPath fullPath= new Path(file.getAbsolutePath());
+		manager.connect(fullPath, LocationKind.LOCATION, null);
+		try {
+			ITextFileBuffer buffer= manager.getTextFileBuffer(fullPath, LocationKind.LOCATION);
+			if (buffer != null) {
+				content= buffer.getDocument().get();
+			}
+		} finally {
+			manager.disconnect(fullPath, LocationKind.LOCATION, null);
+		}
+		return content;
 	}
 
 }

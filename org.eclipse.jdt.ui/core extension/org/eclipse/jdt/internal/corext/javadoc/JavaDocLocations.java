@@ -70,6 +70,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -589,11 +590,20 @@ public class JavaDocLocations {
 		buf.append(')');
 	}
 
-	public static String getBaseURL(IMember member) throws JavaModelException {
-		if (member.isBinary()) {
+	/**
+	 * Returns the location of the Javadoc.
+	 * 
+	 * @param element whose Javadoc location has to be found
+	 * @param isBinary <code>true</code> if the Java element is from a binary container
+	 * @return the location URL of the Javadoc or <code>null</code> if the location cannot be found
+	 * @throws JavaModelException thrown when the Java element cannot be accessed
+	 * @since 3.9
+	 */
+	public static String getBaseURL(IJavaElement element, boolean isBinary) throws JavaModelException {
+		if (isBinary) {
 			// Source attachment usually does not include Javadoc resources
 			// => Always use the Javadoc location as base:
-			URL baseURL= JavaUI.getJavadocLocation(member, false);
+			URL baseURL= JavaUI.getJavadocLocation(element, false);
 			if (baseURL != null) {
 				if (baseURL.getProtocol().equals(JAR_PROTOCOL)) {
 					// It's a JarURLConnection, which is not known to the browser widget.
@@ -606,7 +616,7 @@ public class JavaDocLocations {
 				return baseURL.toExternalForm();
 			}
 		} else {
-			IResource resource= member.getResource();
+			IResource resource= element.getResource();
 			if (resource != null) {
 				/*
 				 * Too bad: Browser widget knows nothing about EFS and custom URL handlers,
@@ -620,6 +630,43 @@ public class JavaDocLocations {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns the reason for why the Javadoc of the Java element could not be retrieved.
+	 * 
+	 * @param element whose Javadoc could not be retrieved
+	 * @param root the root of the Java element
+	 * @return the String message for why the Javadoc could not be retrieved for the Java element or
+	 *         <code>null</code> if the Java element is from a source container
+	 * @since 3.9
+	 */
+	public static String getExplanationForMissingJavadoc(IJavaElement element, IPackageFragmentRoot root) {
+		String message= null;
+		try {
+			boolean isBinary= (root.getKind() == IPackageFragmentRoot.K_BINARY);
+			if (isBinary) {
+				boolean hasAttachedJavadoc= JavaDocLocations.getJavadocBaseLocation(element) != null;
+				boolean hasAttachedSource= root.getSourceAttachmentPath() != null;
+				IOpenable openable= element.getOpenable();
+				boolean hasSource= openable.getBuffer() != null;
+
+				// Provide hint why there's no Java doc
+				if (!hasAttachedSource && !hasAttachedJavadoc)
+					message= CorextMessages.JavaDocLocations_noAttachments;
+				else if (!hasAttachedJavadoc && !hasSource)
+					message= CorextMessages.JavaDocLocations_noAttachedJavadoc;
+				else if (!hasAttachedSource)
+					message= CorextMessages.JavaDocLocations_noAttachedSource;
+				else if (!hasSource)
+					message= CorextMessages.JavaDocLocations_noInformation;
+
+			}
+		} catch (JavaModelException e) {
+			message= CorextMessages.JavaDocLocations_error_gettingJavadoc;
+			JavaPlugin.log(e);
+		}
+		return message;
 	}
 
 	/**

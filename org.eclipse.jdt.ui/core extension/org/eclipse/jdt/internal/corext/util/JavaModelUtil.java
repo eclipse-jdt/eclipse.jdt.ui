@@ -94,9 +94,22 @@ public final class JavaModelUtil {
 	public static final String PACKAGE_INFO_JAVA= "package-info.java"; //$NON-NLS-1$
 	
 	/**
-	 * Finds a type container by container name.
-	 * The returned element will be of type <code>IType</code> or a <code>IPackageFragment</code>.
-	 * <code>null</code> is returned if the type container could not be found.
+	 * The name of the package-info.class file.
+	 * @since 3.9
+	 */
+	public static final String PACKAGE_INFO_CLASS= "package-info.class"; //$NON-NLS-1$
+
+	/**
+	 * The name of the package.html file.
+	 * @since 3.9
+	 */
+	public static final String PACKAGE_HTML= "package.html"; //$NON-NLS-1$
+
+	/**
+	 * Finds a type container by container name. The returned element will be of type
+	 * <code>IType</code> or a <code>IPackageFragment</code>. <code>null</code> is returned if the
+	 * type container could not be found.
+	 * 
 	 * @param jproject The Java project defining the context to search
 	 * @param typeContainerName A dot separated name of the type container
 	 * @return returns the container

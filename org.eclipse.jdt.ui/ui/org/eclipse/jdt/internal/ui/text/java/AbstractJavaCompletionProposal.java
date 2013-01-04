@@ -563,7 +563,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 				try {
 					element= getProposalInfo().getJavaElement();
 					if (element instanceof IMember) {
-						String base= JavaDocLocations.getBaseURL((IMember) element);
+						String base= JavaDocLocations.getBaseURL(element, ((IMember) element).isBinary());
 						if (base != null) {
 							int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
 							buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$

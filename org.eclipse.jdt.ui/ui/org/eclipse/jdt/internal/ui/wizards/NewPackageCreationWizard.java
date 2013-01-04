@@ -75,7 +75,7 @@ public class NewPackageCreationWizard extends NewElementWizard {
 		if (res) {
 			IResource resource= fPage.getModifiedResource();
 			selectAndReveal(resource);
-			if (resource instanceof IFile && resource.getName().equals(JavaModelUtil.PACKAGE_INFO_JAVA)) {
+			if (resource instanceof IFile && JavaModelUtil.PACKAGE_INFO_JAVA.equals(resource.getName())) {
 				openResource((IFile) resource);
 			}
 		}

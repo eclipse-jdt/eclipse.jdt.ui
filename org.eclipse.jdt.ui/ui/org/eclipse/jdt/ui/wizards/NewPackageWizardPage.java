@@ -102,7 +102,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	private static final String PACKAGE_INFO_JAVA_FILENAME= JavaModelUtil.PACKAGE_INFO_JAVA;
 
-	private static final String PACKAGE_HTML_FILENAME= "package.html"; //$NON-NLS-1$
+	private static final String PACKAGE_HTML_FILENAME= JavaModelUtil.PACKAGE_HTML;
 
 	private static final String PAGE_NAME= "NewPackageWizardPage"; //$NON-NLS-1$
 

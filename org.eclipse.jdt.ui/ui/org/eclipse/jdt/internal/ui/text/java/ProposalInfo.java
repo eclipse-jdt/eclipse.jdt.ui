@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,10 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import java.io.IOException;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -70,29 +75,30 @@ public class ProposalInfo {
 	private String computeInfo(IProgressMonitor monitor) {
 		try {
 			final IJavaElement javaElement= getJavaElement();
-			if (javaElement instanceof IMember) {
-				IMember member= (IMember) javaElement;
-				return extractJavadoc(member, monitor);
-			}
-		} catch (JavaModelException e) {
+			return extractJavadoc(javaElement);
+		} catch (Exception e) {
 			JavaPlugin.log(e);
 		}
 		return null;
 	}
 
 	/**
-	 * Extracts the javadoc for the given <code>IMember</code> and returns it
-	 * as HTML.
-	 *
-	 * @param member the member to get the documentation for
-	 * @param monitor a progress monitor
-	 * @return the javadoc for <code>member</code> or <code>null</code> if
-	 *         it is not available
-	 * @throws JavaModelException if accessing the javadoc fails
+	 * Extracts the Javadoc for the given Java element and returns it as HTML.
+	 * 
+	 * @param element the Java element to get the documentation for
+	 * @return the Javadoc for Java element or <code>null</code> if the Javadoc is not available
+	 * @throws CoreException if the file containing the package Javadoc could not be successfully
+	 *             connected
+	 * @throws IOException if an I/O error occurs while accessing the file containing the package
+	 *             Javadoc
 	 */
-	private String extractJavadoc(IMember member, IProgressMonitor monitor) throws JavaModelException {
-		if (member != null) {
-			return JavadocContentAccess2.getHTMLContent(member, true);
+	private String extractJavadoc(IJavaElement element) throws IOException, CoreException {
+		if (element instanceof IMember) {
+			return JavadocContentAccess2.getHTMLContent((IMember) element, true);
+		} else if (element instanceof IPackageDeclaration) {
+			return JavadocContentAccess2.getHTMLContent((IPackageDeclaration) element);
+		} else if (element instanceof IPackageFragment) {
+			return JavadocContentAccess2.getHTMLContent((IPackageFragment) element);
 		}
 		return null;
 	}

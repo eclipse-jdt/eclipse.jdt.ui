@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,11 +41,14 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -82,7 +85,9 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPage;
@@ -95,6 +100,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.handlers.IHandlerService;
 
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -102,13 +108,16 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -126,6 +135,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -328,7 +338,7 @@ public class JavadocView extends AbstractInfoView {
 	 * Action to open the selection in an external browser. If the selection is a java element its
 	 * corresponding javadoc is shown if possible. If it is an URL the URL's content is shown.
 	 * 
-	 * The action is disabled if the selection can not be opened.
+	 * The action is disabled if the selection cannot be opened.
 	 * 
 	 * @since 3.6
 	 */
@@ -465,8 +475,7 @@ public class JavadocView extends AbstractInfoView {
 	private LinkAction fToggleLinkAction;
 
 	/**
-	 * Action to open the attached Javadoc.
-	 * 
+	 * Action to open the attached Javadoc. 
 	 * @since 3.4
 	 */
 	private OpenInBrowserAction fOpenBrowserAction;
@@ -956,7 +965,12 @@ public class JavadocView extends AbstractInfoView {
 		switch (input.getElementType()) {
 			case IJavaElement.COMPILATION_UNIT:
 				try {
-					javadocHtml= getJavadocHtml(((ICompilationUnit) input).getTypes(), part, selection, monitor);
+					IType[] types= ((ICompilationUnit) input).getTypes();
+					if (types.length == 0 && JavaModelUtil.PACKAGE_INFO_JAVA.equals(input.getElementName())) {
+						javadocHtml= getJavadocHtml(new IJavaElement[] { input.getParent() }, part, selection, monitor);
+					} else {
+						javadocHtml= getJavadocHtml(types, part, selection, monitor);
+					}
 				} catch (JavaModelException ex) {
 					javadocHtml= null;
 				}
@@ -1053,8 +1067,8 @@ public class JavadocView extends AbstractInfoView {
 	}
 
 	/**
-	 * Returns the Javadoc in HTML format.
-	 *
+	 * Returns the Javadoc of the Java element in HTML format.
+	 * 
 	 * @param result the Java elements for which to get the Javadoc
 	 * @param activePart the active part if any
 	 * @param selection the selection of the active site if any
@@ -1070,20 +1084,52 @@ public class JavadocView extends AbstractInfoView {
 
 		String base= null;
 		if (nResults > 1) {
-
 			for (int i= 0; i < result.length; i++) {
 				HTMLPrinter.startBulletList(buffer);
 				IJavaElement curr= result[i];
-				if (curr instanceof IMember || curr.getElementType() == IJavaElement.LOCAL_VARIABLE)
+				if (curr instanceof IMember || curr instanceof IPackageFragment || curr instanceof IPackageDeclaration || curr.getElementType() == IJavaElement.LOCAL_VARIABLE) {
 					HTMLPrinter.addBullet(buffer, getInfoText(curr, null, false));
-				HTMLPrinter.endBulletList(buffer);
+					HTMLPrinter.endBulletList(buffer);
+				}
 			}
-
 		} else {
-
 			IJavaElement curr= result[0];
-			if (curr instanceof IMember) {
-				final IMember member= (IMember)curr;
+			if (curr instanceof IPackageDeclaration || curr instanceof IPackageFragment) {
+				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr, null, true));
+				buffer.append("<br>"); //$NON-NLS-1$
+				Reader reader= null;
+				String content= null;
+				try {
+					if (curr instanceof IPackageDeclaration) {
+						content= JavadocContentAccess2.getHTMLContent((IPackageDeclaration) curr);
+					} else if (curr instanceof IPackageFragment) {
+						content= JavadocContentAccess2.getHTMLContent((IPackageFragment) curr);
+					}
+				} catch (CoreException e) {
+					reader= new StringReader(InfoViewMessages.JavadocView_error_gettingJavadoc);
+					JavaPlugin.log(e);
+				}
+				IPackageFragmentRoot root= (IPackageFragmentRoot) curr.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+				try {
+					boolean isBinary= root.getKind() == IPackageFragmentRoot.K_BINARY;
+					if (content != null) {
+						base= JavaDocLocations.getBaseURL(curr, isBinary);
+						reader= new StringReader(content);
+					} else {
+						String explanationForMissingJavadoc= JavaDocLocations.getExplanationForMissingJavadoc(curr, root);
+						if (explanationForMissingJavadoc != null) {
+							reader= new StringReader(explanationForMissingJavadoc);
+						}
+					}
+				} catch (JavaModelException e) {
+					reader= new StringReader(InfoViewMessages.JavadocView_error_gettingJavadoc);
+					JavaPlugin.log(e);
+				}
+				if (reader != null) {
+					HTMLPrinter.addParagraph(buffer, reader);
+				}
+			} else if (curr instanceof IMember) {
+				final IMember member= (IMember) curr;
 
 				String constantValue= null;
 				if (member instanceof IField) {
@@ -1095,9 +1141,9 @@ public class JavadocView extends AbstractInfoView {
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(member, constantValue, true));
 
 				try {
-					ISourceRange nameRange= ((IMember)curr).getNameRange();
+					ISourceRange nameRange= ((IMember) curr).getNameRange();
 					if (SourceRange.isAvailable(nameRange)) {
-						ITypeRoot typeRoot= ((IMember)curr).getTypeRoot();
+						ITypeRoot typeRoot= ((IMember) curr).getTypeRoot();
 						Region hoverRegion= new Region(nameRange.getOffset(), nameRange.getLength());
 						buffer.append("<br>"); //$NON-NLS-1$
 						JavadocHover.addAnnotations(buffer, curr, typeRoot, hoverRegion);
@@ -1105,33 +1151,20 @@ public class JavadocView extends AbstractInfoView {
 				} catch (JavaModelException e) {
 					// no annotations this time...
 				}
-				
-				Reader reader;
+
+				Reader reader= null;
 				try {
 					String content= JavadocContentAccess2.getHTMLContent(member, true);
-					reader= content == null ? null : new StringReader(content);
-
-					// Provide hint why there's no Javadoc
-					if (reader == null && member.isBinary()) {
-						boolean hasAttachedJavadoc= JavaDocLocations.getJavadocBaseLocation(member) != null;
-						IPackageFragmentRoot root= (IPackageFragmentRoot)member.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-						boolean hasAttachedSource= root != null && root.getSourceAttachmentPath() != null;
-						IOpenable openable= member.getOpenable();
-						boolean hasSource= openable.getBuffer() != null;
-
-						if (!hasAttachedSource && !hasAttachedJavadoc)
-							reader= new StringReader(InfoViewMessages.JavadocView_noAttachments);
-						else if (!hasAttachedJavadoc && !hasSource)
-							reader= new StringReader(InfoViewMessages.JavadocView_noAttachedJavadoc);
-						else if (!hasAttachedSource)
-							reader= new StringReader(InfoViewMessages.JavadocView_noAttachedSource);
-						else if (!hasSource)
-							reader= new StringReader(InfoViewMessages.JavadocView_noInformation);
-
+					IPackageFragmentRoot root= (IPackageFragmentRoot) member.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					if (content != null) {
+						base= JavaDocLocations.getBaseURL(member, member.isBinary());
+						reader= new StringReader(content);
 					} else {
-						base= JavaDocLocations.getBaseURL(member);
+						String explanationForMissingJavadoc= JavaDocLocations.getExplanationForMissingJavadoc(member, root);
+						if (explanationForMissingJavadoc != null) {
+							reader= new StringReader(explanationForMissingJavadoc);
+						}
 					}
-
 				} catch (JavaModelException ex) {
 					reader= new StringReader(InfoViewMessages.JavadocView_error_gettingJavadoc);
 					JavaPlugin.log(ex.getStatus());
@@ -1151,7 +1184,7 @@ public class JavadocView extends AbstractInfoView {
 				}
 			}
 		}
-		
+
 		if (buffer.length() == 0)
 			return null;
 
@@ -1166,14 +1199,14 @@ public class JavadocView extends AbstractInfoView {
 
 	/**
 	 * Gets the label for the given member.
-	 *
+	 * 
 	 * @param member the Java member
 	 * @param constantValue the constant value if any
-	 * @param allowImage true if the java element image should be shown
+	 * @param allowImage <code>true</code> if the Java element image should be shown
 	 * @return a string containing the member's label
 	 */
 	private String getInfoText(IJavaElement member, String constantValue, boolean allowImage) {
-		StringBuffer label= new StringBuffer(JavaElementLinks.getElementLabel(member, LABEL_FLAGS));
+		StringBuffer label= new StringBuffer(JavaElementLinks.getElementLabel(member, getHeaderFlags(member)));
 		if (member.getElementType() == IJavaElement.FIELD && constantValue != null) {
 			label.append(constantValue);
 		}
@@ -1189,6 +1222,17 @@ public class JavadocView extends AbstractInfoView {
 		StringBuffer buf= new StringBuffer();
 		JavadocHover.addImageAndLabel(buf, member, imageName, 16, 16, label.toString(), 20, 2);
 		return buf.toString();
+	}
+
+
+	private long getHeaderFlags(IJavaElement element) {
+		switch (element.getElementType()) {
+			case IJavaElement.PACKAGE_FRAGMENT:
+			case IJavaElement.PACKAGE_DECLARATION:
+				return LABEL_FLAGS ^ JavaElementLabels.ALL_FULLY_QUALIFIED;
+			default:
+				return LABEL_FLAGS;
+		}
 	}
 
 	/*
@@ -1232,35 +1276,60 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	@Override
 	protected IJavaElement findSelectedJavaElement(IWorkbenchPart part, ISelection selection) {
-		IJavaElement element;
-		try {
-			element= super.findSelectedJavaElement(part, selection);
+		IJavaElement element= super.findSelectedJavaElement(part, selection);
+		try {			
+			//update the Javadoc view when package.html is selected in project explorer view
+			if (element == null && selection instanceof IStructuredSelection) {
+				Object selectedElement= ((IStructuredSelection) selection).getFirstElement();
+				if (selectedElement instanceof IFile) {
+					IFile selectedFile= (IFile) selectedElement;
+					if (JavaModelUtil.PACKAGE_HTML.equals(selectedFile.getName())) {
+						element= JavaCore.create(selectedFile.getParent());
+					}
+				} else if (selectedElement instanceof IJarEntryResource) {
+					IJarEntryResource jarEntryResource= (IJarEntryResource) selectedElement;
+					if (JavaModelUtil.PACKAGE_HTML.equals(jarEntryResource.getName())) {
+						Object parent= jarEntryResource.getParent();
+						if (parent instanceof IJavaElement) {
+							element= (IJavaElement) parent;
+						}
+					}
 
-			if (element == null && part instanceof JavaEditor && selection instanceof ITextSelection) {
+				}
+			}
+			
+			if (element == null && selection instanceof ITextSelection) {
+				ITextSelection textSelection= (ITextSelection) selection;
+				if (part instanceof AbstractDecoratedTextEditor) {
+					AbstractDecoratedTextEditor editor= (AbstractDecoratedTextEditor) part;
+					IDocumentProvider documentProvider= editor.getDocumentProvider();
+					if (documentProvider != null) {
+						IEditorInput editorInput= editor.getEditorInput();
+						IDocument document= documentProvider.getDocument(editorInput);
 
-				JavaEditor editor= (JavaEditor)part;
-				ITextSelection textSelection= (ITextSelection)selection;
+						if (document != null) {
+							ITypedRegion typedRegion= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, textSelection.getOffset(), false);
+							if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType())){
+								element= TextSelectionConverter.getElementAtOffset((JavaEditor) part, textSelection);
+							}
+							else if (editorInput instanceof IFileEditorInput) {
+								IFile file= ((IFileEditorInput) editorInput).getFile();
+								//update the Javadoc view when the content of the package.html is modified in the editor
+								if (JavaModelUtil.PACKAGE_HTML.equals(file.getName())) {
+									element= JavaCore.create(file.getParent());
+								}
+							}
+						}
+					}
+				}
+			}
 
-				IDocumentProvider documentProvider= editor.getDocumentProvider();
-				if (documentProvider == null)
-					return null;
-
-				IDocument document= documentProvider.getDocument(editor.getEditorInput());
-				if (document == null)
-					return null;
-
-				ITypedRegion typedRegion= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, textSelection.getOffset(), false);
-				if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType()))
-					return TextSelectionConverter.getElementAtOffset((JavaEditor)part, textSelection);
-				else
-					return null;
-			} else
-				return element;
 		} catch (JavaModelException e) {
 			return null;
 		} catch (BadLocationException e) {
 			return null;
 		}
+		return element;
 	}
 
 	/*

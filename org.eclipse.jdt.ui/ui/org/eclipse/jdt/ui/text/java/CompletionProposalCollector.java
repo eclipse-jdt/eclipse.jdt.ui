@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaFieldWithCastedReceiverCompleti
 import org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.LazyPackageCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.MethodDeclarationCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.MethodProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.OverrideCompletionProposal;
@@ -843,14 +844,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	private IJavaCompletionProposal createPackageProposal(CompletionProposal proposal) {
-		String completion= String.valueOf(proposal.getCompletion());
-		int start= proposal.getReplaceStart();
-		int length= getLength(proposal);
-		StyledString label= fLabelProvider.createSimpleLabel(proposal);
-		Image image= getImage(fLabelProvider.createPackageImageDescriptor(proposal));
-		int relevance= computeRelevance(proposal);
-
-		return new JavaCompletionProposal(completion, start, length, image, label, relevance);
+		return new LazyPackageCompletionProposal(proposal, getInvocationContext());
 	}
 
 	private IJavaCompletionProposal createTypeProposal(CompletionProposal typeProposal) {

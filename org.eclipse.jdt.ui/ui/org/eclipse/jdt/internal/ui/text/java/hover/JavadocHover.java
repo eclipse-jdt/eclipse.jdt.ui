@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 
@@ -61,7 +62,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -268,7 +269,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 */
 	public static final class PresenterControlCreator extends AbstractReusableInformationControlCreator {
 
-		private IWorkbenchSite fSite;
+		private final IWorkbenchSite fSite;
 
 		/**
 		 * Creates a new PresenterControlCreator.
@@ -544,6 +545,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	/**
 	 * @deprecated see {@link org.eclipse.jface.text.ITextHover#getHoverInfo(ITextViewer, IRegion)}
 	 */
+	@Deprecated
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		JavadocBrowserInformationControlInput info= (JavadocBrowserInformationControlInput) getHoverInfo2(textViewer, hoverRegion);
 		return info != null ? info.getHtml() : null;
@@ -585,11 +587,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		int leadingImageWidth= 0;
 
 		if (nResults > 1) {
-
 			for (int i= 0; i < elements.length; i++) {
 				HTMLPrinter.startBulletList(buffer);
 				IJavaElement curr= elements[i];
-				if (curr instanceof IMember || curr.getElementType() == IJavaElement.LOCAL_VARIABLE) {
+				if (curr instanceof IMember || curr instanceof IPackageFragment || curr.getElementType() == IJavaElement.LOCAL_VARIABLE) {
 					String label= JavaElementLabels.getElementLabel(curr, getHeaderFlags(curr));
 					String link;
 					try {
@@ -608,44 +609,54 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		} else {
 
 			element= elements[0];
-			if (element instanceof IMember) {
+			if(element instanceof IPackageFragment){
+				HTMLPrinter.addSmallHeader(buffer, getInfoText(element, editorInputElement, hoverRegion, true));
+				buffer.append("<br>"); //$NON-NLS-1$
+				IPackageFragment packge = (IPackageFragment)element;
+				Reader reader= null;
+				try {
+					String content= JavadocContentAccess2.getHTMLContent(packge);
+					IPackageFragmentRoot root= (IPackageFragmentRoot) packge.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					boolean isBinary= (root.getKind() == IPackageFragmentRoot.K_BINARY);
+					if (content != null) {
+						base= JavaDocLocations.getBaseURL(element, isBinary);
+						reader= new StringReader(content);
+					} else {
+						String explanationForMissingJavadoc= JavaDocLocations.getExplanationForMissingJavadoc(element, root);
+						if(explanationForMissingJavadoc != null)
+							reader= new StringReader(explanationForMissingJavadoc);
+					}
+				} catch (CoreException e) {
+					reader= new StringReader(JavaHoverMessages.JavadocHover_error_gettingJavadoc);
+					JavaPlugin.log(e);
+				}
+				if(reader != null){
+					HTMLPrinter.addParagraph(buffer, reader);
+				}
+				hasContents= true;
+			} else if (element instanceof IMember) {
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(element, editorInputElement, hoverRegion, true));
 				buffer.append("<br>"); //$NON-NLS-1$
 				addAnnotations(buffer, element, editorInputElement, hoverRegion);
 				IMember member= (IMember) element;
-				Reader reader;
+				Reader reader= null;
 				try {
-//					reader= JavadocContentAccess.getHTMLContentReader(member, true, true);
+					IPackageFragmentRoot root= (IPackageFragmentRoot) member.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					String content= JavadocContentAccess2.getHTMLContent(member, true);
-					reader= content == null ? null : new StringReader(content);
-
-					// Provide hint why there's no Javadoc
-					if (reader == null && member.isBinary()) {
-						boolean hasAttachedJavadoc= JavaDocLocations.getJavadocBaseLocation(member) != null;
-						IPackageFragmentRoot root= (IPackageFragmentRoot)member.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-						boolean hasAttachedSource= root != null && root.getSourceAttachmentPath() != null;
-						IOpenable openable= member.getOpenable();
-						boolean hasSource= openable.getBuffer() != null;
-
-						if (!hasAttachedSource && !hasAttachedJavadoc)
-							reader= new StringReader(JavaHoverMessages.JavadocHover_noAttachments);
-						else if (!hasAttachedJavadoc && !hasSource)
-							reader= new StringReader(JavaHoverMessages.JavadocHover_noAttachedJavadoc);
-						else if (!hasAttachedSource)
-							reader= new StringReader(JavaHoverMessages.JavadocHover_noAttachedSource);
-						else if (!hasSource)
-							reader= new StringReader(JavaHoverMessages.JavadocHover_noInformation);
-
+					boolean isBinary= member.isBinary();
+					if (content != null) {
+						base= JavaDocLocations.getBaseURL(element, isBinary);
+						reader= new StringReader(content);
 					} else {
-						base= JavaDocLocations.getBaseURL(member);
+						String explanationForMissingJavadoc= JavaDocLocations.getExplanationForMissingJavadoc(element, root);
+						if(explanationForMissingJavadoc != null)
+							reader= new StringReader(explanationForMissingJavadoc);
 					}
-
 				} catch (JavaModelException ex) {
 					reader= new StringReader(JavaHoverMessages.JavadocHover_error_gettingJavadoc);
 					JavaPlugin.log(ex);
 				}
-
-				if (reader != null) {
+				if(reader != null){
 					HTMLPrinter.addParagraph(buffer, reader);
 				}
 				hasContents= true;
@@ -716,6 +727,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				return LOCAL_VARIABLE_FLAGS;
 			case IJavaElement.TYPE_PARAMETER:
 				return TYPE_PARAMETER_FLAGS;
+			case IJavaElement.PACKAGE_FRAGMENT:
+				return LABEL_FLAGS ^ JavaElementLabels.ALL_FULLY_QUALIFIED;
 			default:
 				return LABEL_FLAGS;
 		}
