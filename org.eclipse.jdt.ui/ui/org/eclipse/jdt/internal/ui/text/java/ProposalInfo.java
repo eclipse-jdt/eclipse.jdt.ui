@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,8 +87,7 @@ public class ProposalInfo {
 	 * 
 	 * @param element the Java element to get the documentation for
 	 * @return the Javadoc for Java element or <code>null</code> if the Javadoc is not available
-	 * @throws CoreException if the file containing the package Javadoc could not be successfully
-	 *             connected
+	 * @throws CoreException if fetching the Javadoc for the given element failed connected
 	 * @throws IOException if an I/O error occurs while accessing the file containing the package
 	 *             Javadoc
 	 */
