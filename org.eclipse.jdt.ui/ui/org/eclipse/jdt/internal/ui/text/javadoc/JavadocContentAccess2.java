@@ -1655,7 +1655,6 @@ public class JavadocContentAccess2 {
 	 * @since 3.9
 	 */
 	public static String getHTMLContent(IPackageFragment packageFragment) throws CoreException {
-		CompilationUnit astNode= null;
 		IPackageFragmentRoot root= (IPackageFragmentRoot) packageFragment.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 
 		//1==> Handle the case when the documentation is present in package-info.java or package-info.class file
@@ -1670,19 +1669,10 @@ public class JavadocContentAccess2 {
 			String source= typeRoot.getSource();
 			//the source can be null for some of the class files
 			if (source != null) {
-				astNode= createAST(typeRoot);
-				if (astNode != null) {
-					List<Comment> commentList= astNode.getCommentList();
-					if (commentList != null && !commentList.isEmpty()) {
-						for (int i= commentList.size() - 1; i >= 0; i--) {
-							Comment comment= commentList.get(i);
-							if (comment instanceof Javadoc) {
-								JavadocContentAccess2 docacc= new JavadocContentAccess2(null, (Javadoc) comment, source);
-								return docacc.toHTML();
-							}
-						}
-					}
-				}
+				CompilationUnit ast= createAST(typeRoot);
+				String javadoc= getJavadocFromAST(ast, source);
+				if (javadoc != null)
+					return javadoc;
 			}
 		}
 
@@ -1727,6 +1717,19 @@ public class JavadocContentAccess2 {
 		return null;
 	}
 
+	private static String getJavadocFromAST(CompilationUnit ast, String source) {
+		List<Comment> commentList= ast.getCommentList();
+		if (commentList != null && !commentList.isEmpty()) {
+			for (int i= commentList.size() - 1; i >= 0; i--) {
+				Comment comment= commentList.get(i);
+				if (comment instanceof Javadoc) {
+					JavadocContentAccess2 docacc= new JavadocContentAccess2(null, (Javadoc) comment, source);
+					return docacc.toHTML();
+				}
+			}
+		}
+		return null;
+	}
 
 	private static String getHTMLContent(IJarEntryResource jarEntryResource, String encoding) throws CoreException {
 		InputStream in= jarEntryResource.getContents();
@@ -1744,13 +1747,27 @@ public class JavadocContentAccess2 {
 	}
 
 	private static String getHTMLContentFromAttachedSource(IPackageFragmentRoot root, IPackageFragment packageFragment) throws CoreException {
-		String packagePath= packageFragment.getElementName().replace(".", "/") + "/" + JavaModelUtil.PACKAGE_HTML; //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+		String filePath= packageFragment.getElementName().replace(".", "/") + "/" + JavaModelUtil.PACKAGE_INFO_JAVA; //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+		String contents= getHTMLContentFromAttachedSource(root, filePath);
+		if (contents != null) {
+			ASTParser parser= createASTParser(packageFragment);
+			parser.setSource(contents.toCharArray());
+			CompilationUnit ast= (CompilationUnit) parser.createAST(null);
+			String javadoc= getJavadocFromAST(ast, contents);
+			if (javadoc != null)
+				return javadoc;
+		}
+		filePath= packageFragment.getElementName().replace(".", "/") + "/" + JavaModelUtil.PACKAGE_HTML; //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+		return getHTMLContentFromAttachedSource(root, filePath);
+	}
+
+	private static String getHTMLContentFromAttachedSource(IPackageFragmentRoot root, String filePath) throws CoreException {
 		IPath sourceAttachmentPath= root.getSourceAttachmentPath();
 		if (sourceAttachmentPath != null) {
 			File file= sourceAttachmentPath.toFile();
 			if (file.isDirectory()) {
 				//the path could be an absolute path to the source folder
-				IPath packagedocPath= sourceAttachmentPath.append(packagePath);
+				IPath packagedocPath= sourceAttachmentPath.append(filePath);
 				if (packagedocPath.toFile().exists())
 					return getFileContent(packagedocPath.toFile());
 
@@ -1758,7 +1775,7 @@ public class JavadocContentAccess2 {
 				if (!file.exists()) {
 					//the path could be a workspace relative path to a jar or to the source folder
 					IWorkspaceRoot wsRoot= ResourcesPlugin.getWorkspace().getRoot();
-					IResource res= wsRoot.findMember(sourceAttachmentPath.append(packagePath));
+					IResource res= wsRoot.findMember(sourceAttachmentPath.append(filePath));
 					if (res == null)
 						res= wsRoot.findMember(sourceAttachmentPath);
 
@@ -1775,9 +1792,9 @@ public class JavadocContentAccess2 {
 					String packagedocPath;
 					//consider the root path also in the search path if it exists
 					if (sourceAttachmentRootPath != null) {
-						packagedocPath= sourceAttachmentRootPath.append(packagePath).toOSString();
+						packagedocPath= sourceAttachmentRootPath.append(filePath).toString();
 					} else {
-						packagedocPath= packagePath;
+						packagedocPath= filePath;
 					}
 					ZipFile zipFile= null;
 					InputStream in= null;
