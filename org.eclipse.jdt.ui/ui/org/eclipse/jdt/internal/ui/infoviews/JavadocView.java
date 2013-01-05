@@ -976,7 +976,10 @@ public class JavadocView extends AbstractInfoView {
 				}
 				break;
 			case IJavaElement.CLASS_FILE:
-				javadocHtml= getJavadocHtml(new IJavaElement[] { ((IClassFile) input).getType() }, part, selection, monitor);
+				if (JavaModelUtil.PACKAGE_INFO_CLASS.equals(input.getElementName()))
+					javadocHtml= getJavadocHtml(new IJavaElement[] { input.getParent() }, part, selection, monitor);
+				else
+					javadocHtml= getJavadocHtml(new IJavaElement[] { ((IClassFile) input).getType() }, part, selection, monitor);
 				break;
 			default:
 				javadocHtml= getJavadocHtml(new IJavaElement[] { input }, part, selection, monitor);
