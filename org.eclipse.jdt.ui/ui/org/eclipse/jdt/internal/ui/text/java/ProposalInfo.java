@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import java.io.IOException;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -76,7 +74,7 @@ public class ProposalInfo {
 		try {
 			final IJavaElement javaElement= getJavaElement();
 			return extractJavadoc(javaElement);
-		} catch (Exception e) {
+		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
 		return null;
@@ -88,10 +86,8 @@ public class ProposalInfo {
 	 * @param element the Java element to get the documentation for
 	 * @return the Javadoc for Java element or <code>null</code> if the Javadoc is not available
 	 * @throws CoreException if fetching the Javadoc for the given element failed connected
-	 * @throws IOException if an I/O error occurs while accessing the file containing the package
-	 *             Javadoc
 	 */
-	private String extractJavadoc(IJavaElement element) throws IOException, CoreException {
+	private String extractJavadoc(IJavaElement element) throws CoreException {
 		if (element instanceof IMember) {
 			return JavadocContentAccess2.getHTMLContent((IMember) element, true);
 		} else if (element instanceof IPackageDeclaration) {
