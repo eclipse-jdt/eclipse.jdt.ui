@@ -1747,7 +1747,7 @@ public class JavadocContentAccess2 {
 	}
 
 	private static String getHTMLContentFromAttachedSource(IPackageFragmentRoot root, IPackageFragment packageFragment) throws CoreException {
-		String filePath= packageFragment.getElementName().replace(".", "/") + "/" + JavaModelUtil.PACKAGE_INFO_JAVA; //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+		String filePath= packageFragment.getElementName().replace('.', '/') + '/' + JavaModelUtil.PACKAGE_INFO_JAVA;
 		String contents= getHTMLContentFromAttachedSource(root, filePath);
 		if (contents != null) {
 			ASTParser parser= createASTParser(packageFragment);
@@ -1757,7 +1757,7 @@ public class JavadocContentAccess2 {
 			if (javadoc != null)
 				return javadoc;
 		}
-		filePath= packageFragment.getElementName().replace(".", "/") + "/" + JavaModelUtil.PACKAGE_HTML; //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+		filePath= packageFragment.getElementName().replace('.', '/') + '/' + JavaModelUtil.PACKAGE_HTML;
 		return getHTMLContentFromAttachedSource(root, filePath);
 	}
 
