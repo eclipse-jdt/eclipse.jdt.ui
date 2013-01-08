@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+
 
 public class ImportOrganizeTest extends CoreTests {
 
@@ -577,8 +578,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf= new StringBuffer();
 		buf.append("package pack1;\r\n");
 		buf.append("\r\n");
-		buf.append("import java.util.Vector;\r\n");
-		buf.append("// comment\r\n");
+		buf.append("import java.util.Vector; // comment\r\n");
 		buf.append("\r\n");
 		buf.append("public class C {\r\n");
 		buf.append("    Vector v;\r\n");
@@ -682,16 +682,12 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("// comment 1\n");
-		buf.append("/*lead 1*/");
-		buf.append("import java.util.*;\n");
+		buf.append("/*lead 1*//*lead 2*/ /**lead 3*/import java.util.*; //test3\n");
+		buf.append("//test1/*test2*/\n");
+		buf.append("");
 		buf.append("\n");
-		buf.append("import pack.List;\n");
-		buf.append("//test1\n");
-		buf.append("/*lead 2*/ \n"); 
-		buf.append("/*test2*/\n");
-		buf.append("/**lead 3*/\n");
-		buf.append("//test3\n");
 		buf.append("/**comment 2*/\n");
+		buf.append("import pack.List;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    Vector v;\n");
@@ -2459,8 +2455,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("/**comment1*/\n");
 		buf.append("/*lead1*/");
 		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.HashMap;\n");
-		buf.append("// trail 1\n");
+		buf.append("import java.util.HashMap;// trail 1\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    public void foo() {\n");
