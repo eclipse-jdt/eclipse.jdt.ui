@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2012 IBM Corporation and others.
+ * Copyright (c) 2007, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,6 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -800,7 +799,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 * @return all package fragment roots corresponding to each classpath entry start the search at project with projectName
 	 */
 	private static IPackageFragmentRoot[] getRequiredPackageFragmentRoots(IPath[] classpathEntries, final String projectName, MultiStatus status) {
-		HashSet<IPackageFragmentRoot> result= new HashSet<IPackageFragmentRoot>();
+		ArrayList<IPackageFragmentRoot> result= new ArrayList<IPackageFragmentRoot>();
 
 		IJavaProject[] searchOrder= getProjectSearchOrder(projectName);
 

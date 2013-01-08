@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,9 +14,8 @@ package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -38,7 +37,7 @@ public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
 	}
 
 	private void setManifestRsrcClasspath(Manifest ownManifest, JarPackageData jarPackage) {
-		Set<String> jarNames= new HashSet<String>();
+		ArrayList<String> jarNames= new ArrayList<String>();
 		Object[] elements= jarPackage.getElements();
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];
@@ -54,7 +53,7 @@ public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
 		ownManifest.getMainAttributes().putValue(JIJConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME, manifestRsrcClasspath); 
 	}
 
-	public String getManifestRsrcClasspath(Set<String> jarNames) {
+	public String getManifestRsrcClasspath(ArrayList<String> jarNames) {
 		StringBuffer result= new StringBuffer();
 		result.append(JIJConstants.CURRENT_DIR); 
 		for (Iterator<String> iterator= jarNames.iterator(); iterator.hasNext();) {
