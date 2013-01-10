@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -288,7 +288,9 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			IAnnotationModel m= createClassFileAnnotationModel(input);
 
 			if (external != null) {
-				ClassFileInfo info= new ClassFileInfo(d, m,  (_FileSynchronizer) null);
+				_FileSynchronizer f= new _FileSynchronizer(external);
+				f.install();
+				ClassFileInfo info= new ClassFileInfo(d, m, f);
 				info.fModificationStamp= computeModificationStamp(external.getFile());
 				info.fEncoding= getPersistedEncoding(element);
 				return info;
@@ -374,6 +376,18 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 
 		fireElementDeleted(input);
 
+	}
+
+	/*
+	 * @see org.eclipse.ui.editors.text.FileDocumentProvider#handleElementContentChanged(org.eclipse.ui.IFileEditorInput)
+	 * @since 3.9
+	 */
+	@Override
+	protected void handleElementContentChanged(IFileEditorInput fileEditorInput) {
+		super.handleElementContentChanged(fileEditorInput);
+		if (fileEditorInput instanceof ExternalClassFileEditorInput) {
+			fireInputChanged((IClassFileEditorInput) fileEditorInput);
+		}
 	}
 
 	/**
