@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -659,6 +659,15 @@ public class LocalCorrectionsSubProcessor {
 			GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, problem, proposals, IProposalRelevance.GETTER_SETTER_UNUSED_PRIVATE_FIELD);
 		}
 
+	}
+
+	public static void addUnusedTypeParameterProposal(IInvocationContext context, IProblemLocation problemLoc, Collection<ICommandAccess> proposals) {
+		UnusedCodeFix fix= UnusedCodeFix.createUnusedTypeParameterFix(context.getASTRoot(), problemLoc);
+		if (fix != null) {
+			addProposal(context, proposals, fix);
+		}
+
+		JavadocTagsSubProcessor.getUnusedAndUndocumentedParameterOrExceptionProposals(context, problemLoc, proposals);
 	}
 
 	public static void addRedundantSuperInterfaceProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {

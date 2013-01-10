@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,6 +72,7 @@ public final class FixMessages extends NLS {
 	public static String UnusedCodeFix_RemoveImport_description;
 	public static String UnusedCodeFix_RemoveCast_description;
 	public static String UnusedCodeFix_RemoveUnusedType_description;
+	public static String UnusedCodeFix_RemoveUnusedTypeParameter_description;
 	public static String UnusedCodeFix_RemoveUnusedConstructor_description;
 	public static String UnusedCodeFix_RemoveUnusedPrivateMethod_description;
 	public static String UnusedCodeFix_RemoveUnusedField_description;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -148,6 +148,36 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			cuRewrite.getASTRewrite().remove(node, group);
 		}
 
+	}
+
+	/**
+	 * Removes the unused type parameter.
+	 * 
+	 */
+	private static class RemoveUnusedTypeParameterOperation extends CompilationUnitRewriteOperation {
+		private final SimpleName fUnusedName;
+
+		public RemoveUnusedTypeParameterOperation(SimpleName unusedName) {
+			fUnusedName= unusedName;
+		}
+
+		@Override
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
+			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			IBinding binding= fUnusedName.resolveBinding();
+			CompilationUnit root= (CompilationUnit) fUnusedName.getRoot();
+			String displayString= FixMessages.UnusedCodeFix_RemoveUnusedTypeParameter_description;
+			TextEditGroup group= createTextEditGroup(displayString, cuRewrite);
+
+			if (binding.getKind() == IBinding.TYPE) {
+				ITypeBinding decl= ((ITypeBinding) binding).getTypeDeclaration();
+				ASTNode declaration= root.findDeclaringNode(decl);
+				if (declaration.getParent() instanceof TypeDeclarationStatement) {
+					declaration= declaration.getParent();
+				}
+				rewrite.remove(declaration, group);
+			}
+		}
 	}
 
 	private static class RemoveUnusedMemberOperation extends CompilationUnitRewriteOperation {
@@ -542,6 +572,21 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 					String label= getDisplayString(name, binding, removeAllAssignements);
 					RemoveUnusedMemberOperation operation= new RemoveUnusedMemberOperation(new SimpleName[] { name }, removeAllAssignements);
 					return new UnusedCodeFix(label, compilationUnit, new CompilationUnitRewriteOperation[] { operation }, getCleanUpOptions(binding, removeAllAssignements));
+				}
+			}
+		}
+		return null;
+	}
+
+	public static UnusedCodeFix createUnusedTypeParameterFix(CompilationUnit compilationUnit, IProblemLocation problemLoc) {
+		if (problemLoc.getProblemId() == IProblem.UnusedTypeParameter) {
+			SimpleName name= getUnusedName(compilationUnit, problemLoc);
+			if (name != null) {
+				IBinding binding= name.resolveBinding();
+				if (binding != null) {
+					String label= FixMessages.UnusedCodeFix_RemoveUnusedTypeParameter_description;
+					RemoveUnusedTypeParameterOperation operation= new RemoveUnusedTypeParameterOperation(name);
+					return new UnusedCodeFix(label, compilationUnit, new CompilationUnitRewriteOperation[] { operation }, getCleanUpOptions(binding, false));
 				}
 			}
 		}

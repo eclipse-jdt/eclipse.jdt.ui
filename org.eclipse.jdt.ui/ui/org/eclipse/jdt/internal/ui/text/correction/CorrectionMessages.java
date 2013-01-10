@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ public final class CorrectionMessages extends NLS {
 	public static String FixCorrectionProposal_WarningAdditionalProposalInfo;
 	public static String JavadocTagsSubProcessor_document_exception_description;
 	public static String JavadocTagsSubProcessor_document_parameter_description;
+	public static String JavadocTagsSubProcessor_document_type_parameter_description;
 	public static String LocalCorrectionsSubProcessor_renaming_duplicate_method;
 	public static String LocalCorrectionsSubProcessor_replacefieldaccesswithmethod_description;
 	public static String ModifierCorrectionSubProcessor_addstatic_description;

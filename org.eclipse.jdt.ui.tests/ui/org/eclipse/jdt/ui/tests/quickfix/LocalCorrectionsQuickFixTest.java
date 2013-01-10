@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,6 +62,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
@@ -86,6 +87,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
@@ -9227,4 +9229,135 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEquals(0, astRoot.getProblems().length); // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38751#c7
 	}
 	
+	public void testUnusedTypeParameter1() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNUSED_TYPE_PARAMETER, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface E<T extends Exception> {\n");
+		buf.append("    public void foo(Object str);\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[2];
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface E {\n");
+		buf.append("    public void foo(Object str);\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" * @param <T>  \n");
+		buf.append(" */\n");
+		buf.append("public interface E<T extends Exception> {\n");
+		buf.append("    public void foo(Object str);\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUnusedTypeParameter2() throws Exception {
+
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNUSED_TYPE_PARAMETER, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("    /**\n");
+		buf.append("     * @param <X> \n");
+		buf.append("     * @see E\n");
+		buf.append("     */\n");
+		buf.append("public interface E<X, T> {\n");
+		buf.append("    public void foo(Object str);\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[2];
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("    /**\n");
+		buf.append("     * @param <X> \n");
+		buf.append("     * @see E\n");
+		buf.append("     */\n");
+		buf.append("public interface E<X> {\n");
+		buf.append("    public void foo(Object str);\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("    /**\n");
+		buf.append("     * @param <X> \n");
+		buf.append("     * @param <T> \n");
+		buf.append("     * @see E\n");
+		buf.append("     */\n");
+		buf.append("public interface E<X, T> {\n");
+		buf.append("    public void foo(Object str);\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUnusedTypeParameter3() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNUSED_TYPE_PARAMETER, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public <T> void foo(Object str){}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[2];
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object str){}\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    /**\n");
+		buf.append("     * @param <T>  \n");
+		buf.append("     */\n");
+		buf.append("    public <T> void foo(Object str){}\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 }

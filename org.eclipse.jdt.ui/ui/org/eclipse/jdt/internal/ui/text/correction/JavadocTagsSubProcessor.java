@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -126,9 +126,9 @@ public class JavadocTagsSubProcessor {
 		private final BodyDeclaration fBodyDecl; // MethodDecl or TypeDecl
 		private final ASTNode fMissingNode;
 
-		public AddMissingJavadocTagProposal(String label, ICompilationUnit cu, BodyDeclaration methodDecl, ASTNode missingNode, int relevance) {
+		public AddMissingJavadocTagProposal(String label, ICompilationUnit cu, BodyDeclaration bodyDecl, ASTNode missingNode, int relevance) {
 			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG));
-			fBodyDecl= methodDecl;
+			fBodyDecl= bodyDecl;
 			fMissingNode= missingNode;
 		}
 
@@ -392,7 +392,9 @@ public class JavadocTagsSubProcessor {
 			return;
 		}
 
-		boolean isUnusedParam= problem.getProblemId() == IProblem.ArgumentIsNeverUsed;
+		int problemId= problem.getProblemId();
+		boolean isUnusedTypeParam= problemId == IProblem.UnusedTypeParameter;
+		boolean isUnusedParam= problemId == IProblem.ArgumentIsNeverUsed || isUnusedTypeParam;
 		String key= isUnusedParam ? JavaCore.COMPILER_PB_UNUSED_PARAMETER_INCLUDE_DOC_COMMENT_REFERENCE : JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION_INCLUDE_DOC_COMMENT_REFERENCE;
 
 		if (!JavaCore.ENABLED.equals(project.getOption(key, true))) {
@@ -404,19 +406,21 @@ public class JavadocTagsSubProcessor {
 	 		return;
 	 	}
 
-		MethodDeclaration methodDecl= (MethodDeclaration) ASTNodes.getParent(node, ASTNode.METHOD_DECLARATION);
-		if (methodDecl == null || methodDecl.resolveBinding() == null) {
+		BodyDeclaration bodyDecl= ASTResolving.findParentBodyDeclaration(node);
+		if (bodyDecl == null || ASTResolving.getParentMethodOrTypeBinding(bodyDecl) == null) {
 			return;
 		}
 
 		String label;
-		if (isUnusedParam) {
+		if (isUnusedTypeParam) {
+			label= CorrectionMessages.JavadocTagsSubProcessor_document_type_parameter_description;
+		} else if (isUnusedParam) {
 			label= CorrectionMessages.JavadocTagsSubProcessor_document_parameter_description;
 		} else {
 			label= CorrectionMessages.JavadocTagsSubProcessor_document_exception_description;
 		}
-	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), methodDecl, node, IProposalRelevance.DOCUMENT_UNUSED_ITEM);
-	 	proposals.add(proposal);
+		ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), bodyDecl, node, IProposalRelevance.DOCUMENT_UNUSED_ITEM);
+		proposals.add(proposal);
 	}
 
 	public static void getMissingJavadocCommentProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
