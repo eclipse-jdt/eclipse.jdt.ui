@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -723,10 +723,19 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				postRefresh(element, ORIGINAL, element, runnables);
 				return false;
 			}
-			if ((flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN)) == IJavaElementDelta.F_CONTENT) {
-				// TODO: This should never be true for folders (F_CONTENT is only for files)
-				// content change, without children info (for example resource added/removed to class folder package)
-				postRefresh(internalGetParent(element), PARENT, element, runnables);
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=357450
+			int result= flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN);
+			if (result == IJavaElementDelta.F_CONTENT || result == IJavaElementDelta.F_CHILDREN) {
+				Object parent= internalGetParent(element);
+				postRefresh(parent, PARENT, element, runnables);
+				if (parent instanceof LibraryContainer) {
+					IResource resource= element.getResource();
+					if (resource != null) {
+						if (((LibraryContainer) parent).getJavaProject().getResource().equals(resource.getProject())) {
+							postRefresh(resource, ORIGINAL, element, runnables);
+						}
+					}
+				}
 				return true;
 			}
 
