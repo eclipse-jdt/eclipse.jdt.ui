@@ -730,11 +730,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				postRefresh(parent, PARENT, element, runnables);
 				if (parent instanceof LibraryContainer) {
 					IResource resource= element.getResource();
-					if (resource != null) {
-						if (((LibraryContainer) parent).getJavaProject().getResource().equals(resource.getProject())) {
-							postRefresh(resource, ORIGINAL, element, runnables);
-						}
-					}
+					if (resource != null && ((LibraryContainer) parent).getJavaProject().getResource().equals(resource.getProject()))
+						postRefresh(resource, ORIGINAL, element, runnables);
 				}
 				return true;
 			}
