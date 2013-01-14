@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -568,9 +568,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		IType enclosingType= null;
 
 		if (elem != null) {
-			// evaluate the enclosing type
 			project= elem.getJavaProject();
 			pack= (IPackageFragment) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+			if (pack == null && project != null) {
+				pack= getPackage(project);
+			}
+			// evaluate the enclosing type
 			IType typeInCU= (IType) elem.getAncestor(IJavaElement.TYPE);
 			if (typeInCU != null) {
 				if (typeInCU.getCompilationUnit() != null) {
@@ -623,8 +626,59 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		setAddComments(StubUtility.doAddComments(project), true); // from project or workspace
 	}
 
-
-
+	/**
+	 * Checks if the package field has to be pre-filled in this page and returns the package
+	 * fragment to be used for that. The package fragment has the name of the project if the source
+	 * folder does not contain any package and if the project name is a valid package name. If the
+	 * source folder contains exactly one package then the name of that package is used as the
+	 * package fragment's name. <code>null</code> is returned if none of the above is applicable.
+	 * 
+	 * @param javaProject the containing Java project of the selection used to initialize this page
+	 * 
+	 * @return the package fragment to be pre-filled in this page or <code>null</code> if no
+	 *         suitable package can be suggested for the given project
+	 * 
+	 * @since 3.9
+	 */
+	private IPackageFragment getPackage(IJavaProject javaProject) {
+		String packName= null;
+		final IPackageFragmentRoot pkgFragmentRoot= getPackageFragmentRoot();
+		IJavaElement[] packages= null;
+		try {
+			if (pkgFragmentRoot != null && pkgFragmentRoot.exists()) {
+				packages= pkgFragmentRoot.getChildren();
+				if (packages.length == 1) { // only default package -> use Project name
+					packName= javaProject.getElementName();
+					// validate package name
+					IStatus status= validatePackageName(packName, javaProject);
+					if (status.getSeverity() == IStatus.OK) {
+						return pkgFragmentRoot.getPackageFragment(packName);
+					}
+				} else {
+					int noOfPackages= 0;
+					IPackageFragment thePackage= null;
+					for (final IJavaElement pack : packages) {
+						IPackageFragment pkg= (IPackageFragment) pack;
+						// ignoring empty parent packages and default package
+						if ((!pkg.hasSubpackages() || pkg.hasChildren()) && !pkg.isDefaultPackage()) {
+							noOfPackages++;
+							thePackage= pkg;
+							if (noOfPackages > 1) {
+								return null;
+							}
+						}
+					}
+					if (noOfPackages == 1) { // use package name
+						packName= thePackage.getElementName();
+						return pkgFragmentRoot.getPackageFragment(packName);
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			// fall through
+		}
+		return null;
+	}
 
 	private static IStatus validateJavaTypeName(String text, IJavaProject project) {
 		if (project == null || !project.exists()) {
@@ -1509,7 +1563,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				if (resource.isVirtual()){
 					status.setError(NewWizardMessages.NewTypeWizardPage_error_PackageIsVirtual);
 					return status;
-				}			
+				}
 				if (!ResourcesPlugin.getWorkspace().validateFiltered(resource).isOK()) {
 					status.setError(NewWizardMessages.NewTypeWizardPage_error_PackageNameFiltered);
 					return status;

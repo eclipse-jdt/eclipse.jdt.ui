@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -161,8 +161,27 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		String pName= ""; //$NON-NLS-1$
 		if (jelem != null) {
 			IPackageFragment pf= (IPackageFragment) jelem.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
-			if (pf != null && !pf.isDefaultPackage())
+			if (pf != null && !pf.isDefaultPackage()) {
 				pName= pf.getElementName();
+			} else {
+				if (jelem.getJavaProject() != null) {
+					final IPackageFragmentRoot pkgFragmentRoot= getPackageFragmentRoot();
+					if (pkgFragmentRoot != null && pkgFragmentRoot.exists()) {
+						try {
+							IJavaElement[] packages= pkgFragmentRoot.getChildren();
+							if (packages.length == 1) { // only default package
+								String prName= jelem.getJavaProject().getElementName();
+								IStatus status= getPackageStatus(prName);
+								if (status.getSeverity() == IStatus.OK) {
+									pName= prName;
+								}
+							}
+						} catch (JavaModelException e) {
+							// fall through
+						}
+					}
+				}
+			}
 		}
 		setPackageText(pName, true);
 
@@ -247,7 +266,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		// --------- IDialogFieldListener
 
 		public void dialogFieldChanged(DialogField field) {
-			fPackageStatus= packageChanged();
+			fPackageStatus= getPackageStatus(getPackageText());
 			// tell all others
 			handleFieldChanged(PACKAGE);
 		}
@@ -262,7 +281,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 		if (fieldName == CONTAINER) {
-			fPackageStatus= packageChanged();
+			fPackageStatus= getPackageStatus(getPackageText());
 		}
 		// do status line update
 		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });
@@ -278,12 +297,15 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		return JavaConventionsUtil.validatePackageName(text, project);
 	}
 
-	/*
-	 * Verifies the input for the package field.
+	/**
+	 * Validates the package name and returns the status of the validation.
+	 * 
+	 * @param packName the package name
+	 * 
+	 * @return the status of the validation
 	 */
-	private IStatus packageChanged() {
+	private IStatus getPackageStatus(String packName) {
 		StatusInfo status= new StatusInfo();
-		String packName= getPackageText();
 		if (packName.length() > 0) {
 			IStatus val= validatePackageName(packName);
 			if (val.getSeverity() == IStatus.ERROR) {
@@ -504,7 +526,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		if (fileComment != null) {
 			content.append(fileComment);
 			content.append(lineDelimiter);
-		} 
+		}
 
 		if (typeComment != null) {
 			content.append(typeComment);
