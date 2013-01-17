@@ -1375,7 +1375,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				} else
 					subMonitor= getSubProgressMonitor(monitor, listeners.length > 0 ? 70 : 100);
 
-				info.fCopy.commitWorkingCopy(overwrite, subMonitor);
+				info.fCopy.commitWorkingCopy(overwrite || isSynchronized, subMonitor);
 				if (listeners.length > 0)
 					notifyPostSaveListeners(info, changedRegions, listeners, getSubProgressMonitor(monitor, 30));
 
