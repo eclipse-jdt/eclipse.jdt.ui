@@ -206,6 +206,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnnecessaryNLSTag:
 			case IProblem.AssignmentHasNoEffect:
 			case IProblem.UnsafeTypeConversion:
+			case IProblem.UnsafeElementTypeConversion:
 			case IProblem.RawTypeReference:
 			case IProblem.UnsafeRawMethodInvocation:
 			case IProblem.RedundantSpecificationOfTypeArguments:
@@ -635,6 +636,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.RawTypeReference:
 			case IProblem.UnsafeRawMethodInvocation:
 				LocalCorrectionsSubProcessor.addDeprecatedFieldsToMethodsProposals(context, problem, proposals);
+				//$FALL-THROUGH$
+			case IProblem.UnsafeElementTypeConversion:
 				LocalCorrectionsSubProcessor.addTypePrametersToRawTypeReference(context, problem, proposals);
 				break;
 			case IProblem.RedundantSpecificationOfTypeArguments:
