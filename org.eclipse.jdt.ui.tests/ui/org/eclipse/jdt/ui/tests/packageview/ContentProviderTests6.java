@@ -20,16 +20,13 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -39,6 +36,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.core.JavaElementDelta;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.packageview.LibraryContainer;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
@@ -53,10 +51,8 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
  * @since 3.9
  */
 public class ContentProviderTests6 extends TestCase {
-	private IWorkspace fWorkspace;
 	private boolean fEnableAutoBuildAfterTesting;
 
-	private IWorkbench fWorkbench;
 	private IWorkbenchPage page;
 	private MockPluginView fMyPart;
 
@@ -173,10 +169,7 @@ public class ContentProviderTests6 extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-
-		fWorkspace= ResourcesPlugin.getWorkspace();
-		assertNotNull(fWorkspace);
-		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
+		IWorkspaceDescription workspaceDesc= ResourcesPlugin.getWorkspace().getDescription();
 		fEnableAutoBuildAfterTesting= workspaceDesc.isAutoBuilding();
 		if (fEnableAutoBuildAfterTesting)
 			CoreUtility.setAutoBuilding(false);
@@ -193,10 +186,7 @@ public class ContentProviderTests6 extends TestCase {
 	}
 
 	public void setUpMockView() throws Exception{
-		fWorkbench= PlatformUI.getWorkbench();
-		assertNotNull(fWorkbench);
-
-		page= fWorkbench.getActiveWorkbenchWindow().getActivePage();
+		page= JavaPlugin.getActivePage();
 		assertNotNull(page);
 
 		IViewPart myPart= page.showView("org.eclipse.jdt.ui.tests.packageview.MockPluginView"); //$NON-NLS-1$
