@@ -587,11 +587,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			try {
 				if (elements[i] instanceof IPackageFragment) {
 					IPackageFragment packageFragment= (IPackageFragment) elements[i];
-					IJavaElement[] children= packageFragment.getChildren();
-					if (children.length == 0)
-						continue;
-					String content= JavadocContentAccess2.getHTMLContent(packageFragment);
-					if (content != null)
+					if (JavadocContentAccess2.getHTMLContent(packageFragment) != null)
 						return new IJavaElement[] { packageFragment };
 				}
 			} catch (CoreException e) {
