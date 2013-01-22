@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Snjezana Peco <snjezana.peco@redhat.com> - The NewWizardMenu class gets leaked when ever calling a context menu - http://bugs.eclipse.org/33710
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
@@ -43,6 +44,7 @@ import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 public class NewWizardsActionGroup extends ActionGroup {
 
 	private IWorkbenchSite fSite;
+	private NewWizardMenu fNewWizardMenu;
 
 	/**
 	 * Creates a new <code>NewWizardsActionGroup</code>. The group requires
@@ -66,12 +68,19 @@ public class NewWizardsActionGroup extends ActionGroup {
 		ISelection selection= getContext().getSelection();
 		if (selection instanceof IStructuredSelection) {
 			if (canEnable((IStructuredSelection)selection)) {
-		        MenuManager newMenu = new MenuManager(ActionMessages.NewWizardsActionGroup_new);
+		        MenuManager newMenu= new MenuManager(ActionMessages.NewWizardsActionGroup_new);
 		        menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
-		        newMenu.add(new NewWizardMenu(fSite.getWorkbenchWindow()));
+		        newMenu.add(getNewWizardMenu());
 			}
 		}
 
+	}
+
+	private NewWizardMenu getNewWizardMenu() {
+		if (fNewWizardMenu == null) {
+			fNewWizardMenu= new NewWizardMenu(fSite.getWorkbenchWindow());
+		}
+		return fNewWizardMenu;
 	}
 
 	private boolean canEnable(IStructuredSelection sel) {
@@ -109,6 +118,15 @@ public class NewWizardsActionGroup extends ActionGroup {
 				IWorkingSetIDs.OTHERS.equals(workingSetId);
 		}
 		return false;
+	}
+
+	@Override
+	public void dispose() {
+		if (fNewWizardMenu != null) {
+			fNewWizardMenu.dispose();
+			fNewWizardMenu= null;
+		}
+		super.dispose();
 	}
 
 }
