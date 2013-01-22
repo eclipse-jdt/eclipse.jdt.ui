@@ -568,6 +568,41 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	/**
+	 * Returns the first package with a valid Javadoc when there are multiple packages with the same
+	 * name in the project. If no package could be found with a valid Javadoc then returns the first
+	 * package in the array. If the array does not contain package, then return the array unaltered.
+	 * 
+	 * @param elements array from which to filter duplicate packages
+	 * @return the first package with a valid Javadoc. If no package is found with a valid Javadoc
+	 *         then return the first element in the array if the element is of type
+	 *         IPackageFragment, else return the elements array unaltered
+	 * @since 3.9
+	 */
+	private static IJavaElement[] filterDuplicatePackages(IJavaElement[] elements) {
+		if (elements.length <= 1 || !(elements[0] instanceof IPackageFragment)) {
+			return elements;
+		}
+
+		for (int i= 0; i < elements.length; i++) {
+			try {
+				if (elements[i] instanceof IPackageFragment) {
+					IPackageFragment packageFragment= (IPackageFragment) elements[i];
+					IJavaElement[] children= packageFragment.getChildren();
+					if (children.length == 0)
+						continue;
+					String content= JavadocContentAccess2.getHTMLContent(packageFragment);
+					if (content != null)
+						return new IJavaElement[] { packageFragment };
+				}
+			} catch (CoreException e) {
+				//ignore the exception and consider the next element to process
+			}
+		}
+
+		return new IJavaElement[] { elements[0] };
+	}
+
+	/**
 	 * Computes the hover info.
 	 *
 	 * @param elements the resolved elements
@@ -578,19 +613,19 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @since 3.4
 	 */
 	private static JavadocBrowserInformationControlInput getHoverInfo(IJavaElement[] elements, ITypeRoot editorInputElement, IRegion hoverRegion, JavadocBrowserInformationControlInput previousInput) {
-		int nResults= elements.length;
 		StringBuffer buffer= new StringBuffer();
 		boolean hasContents= false;
 		String base= null;
 		IJavaElement element= null;
-
 		int leadingImageWidth= 0;
 
-		if (nResults > 1) {
+		elements= filterDuplicatePackages(elements);
+		
+		if (elements.length > 1) {
 			for (int i= 0; i < elements.length; i++) {
 				HTMLPrinter.startBulletList(buffer);
 				IJavaElement curr= elements[i];
-				if (curr instanceof IMember || curr instanceof IPackageFragment || curr.getElementType() == IJavaElement.LOCAL_VARIABLE) {
+				if (curr instanceof IMember || curr.getElementType() == IJavaElement.LOCAL_VARIABLE) {
 					String label= JavaElementLabels.getElementLabel(curr, getHeaderFlags(curr));
 					String link;
 					try {
@@ -605,14 +640,12 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				}
 				HTMLPrinter.endBulletList(buffer);
 			}
-
 		} else {
-
 			element= elements[0];
 			if(element instanceof IPackageFragment){
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(element, editorInputElement, hoverRegion, true));
 				buffer.append("<br>"); //$NON-NLS-1$
-				IPackageFragment packge = (IPackageFragment)element;
+				IPackageFragment packge= (IPackageFragment) element;
 				Reader reader= null;
 				try {
 					String content= JavadocContentAccess2.getHTMLContent(packge);
@@ -623,14 +656,14 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 						reader= new StringReader(content);
 					} else {
 						String explanationForMissingJavadoc= JavaDocLocations.getExplanationForMissingJavadoc(element, root);
-						if(explanationForMissingJavadoc != null)
+						if (explanationForMissingJavadoc != null)
 							reader= new StringReader(explanationForMissingJavadoc);
 					}
 				} catch (CoreException e) {
 					reader= new StringReader(JavaHoverMessages.JavadocHover_error_gettingJavadoc);
 					JavaPlugin.log(e);
 				}
-				if(reader != null){
+				if (reader != null){
 					HTMLPrinter.addParagraph(buffer, reader);
 				}
 				hasContents= true;
@@ -649,14 +682,14 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 						reader= new StringReader(content);
 					} else {
 						String explanationForMissingJavadoc= JavaDocLocations.getExplanationForMissingJavadoc(element, root);
-						if(explanationForMissingJavadoc != null)
+						if (explanationForMissingJavadoc != null)
 							reader= new StringReader(explanationForMissingJavadoc);
 					}
 				} catch (JavaModelException ex) {
 					reader= new StringReader(JavaHoverMessages.JavadocHover_error_gettingJavadoc);
 					JavaPlugin.log(ex);
 				}
-				if(reader != null){
+				if (reader != null){
 					HTMLPrinter.addParagraph(buffer, reader);
 				}
 				hasContents= true;
