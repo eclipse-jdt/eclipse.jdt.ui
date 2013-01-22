@@ -342,9 +342,9 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 	// Attempt to override a @NonNull argument with an unspec'ed argument
 	// -> change to @NonNull
-	// TODO(stephan): here the underlying error is actually debatable / not necessary.
-	//                @NonNull -> unspec'ed could be seen as safe contravariant overriding
 	public void testChangeParameter3c() throws Exception {
+		// quickfix only offered with this warning enabled, but no need to say, because default is already "warning"
+//		this.fJProject1.setOption(JavaCore.COMPILER_PB_NONNULL_PARAMETER_ANNOTATION_DROPPED, JavaCore.WARNING);
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -366,7 +366,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 3); // one real change plus two @SuppressWarnings proposals
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
