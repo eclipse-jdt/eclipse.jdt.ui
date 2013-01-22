@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -644,7 +644,7 @@ public class JavaDocLocations {
 	public static String getExplanationForMissingJavadoc(IJavaElement element, IPackageFragmentRoot root) {
 		String message= null;
 		try {
-			boolean isBinary= (root.getKind() == IPackageFragmentRoot.K_BINARY);
+			boolean isBinary= (root.exists() && root.getKind() == IPackageFragmentRoot.K_BINARY);
 			if (isBinary) {
 				boolean hasAttachedJavadoc= JavaDocLocations.getJavadocBaseLocation(element) != null;
 				boolean hasAttachedSource= root.getSourceAttachmentPath() != null;
