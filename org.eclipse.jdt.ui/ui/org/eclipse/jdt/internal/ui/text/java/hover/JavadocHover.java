@@ -58,10 +58,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.core.IAnnotatable;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ITypeRoot;
@@ -90,6 +93,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -425,6 +429,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		| JavaElementLabels.USE_RESOLVED;
 	private static final long LOCAL_VARIABLE_FLAGS= LABEL_FLAGS & ~JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
 	private static final long TYPE_PARAMETER_FLAGS= LABEL_FLAGS | JavaElementLabels.TP_POST_QUALIFIED;
+	private static final long PACKAGE_FLAGS= LABEL_FLAGS & ~JavaElementLabels.ALL_FULLY_QUALIFIED;
 
 	/**
 	 * The style sheet (css).
@@ -638,41 +643,18 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			}
 		} else {
 			element= elements[0];
-			if(element instanceof IPackageFragment){
-				HTMLPrinter.addSmallHeader(buffer, getInfoText(element, editorInputElement, hoverRegion, true));
-				buffer.append("<br>"); //$NON-NLS-1$
-				IPackageFragment packge= (IPackageFragment) element;
-				Reader reader= null;
-				try {
-					String content= JavadocContentAccess2.getHTMLContent(packge);
-					IPackageFragmentRoot root= (IPackageFragmentRoot) packge.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-					boolean isBinary= (root.getKind() == IPackageFragmentRoot.K_BINARY);
-					if (content != null) {
-						base= JavaDocLocations.getBaseURL(element, isBinary);
-						reader= new StringReader(content);
-					} else {
-						String explanationForMissingJavadoc= JavaDocLocations.getExplanationForMissingJavadoc(element, root);
-						if (explanationForMissingJavadoc != null)
-							reader= new StringReader(explanationForMissingJavadoc);
-					}
-				} catch (CoreException e) {
-					reader= new StringReader(JavaHoverMessages.JavadocHover_error_gettingJavadoc);
-					JavaPlugin.log(e);
-				}
-				if (reader != null){
-					HTMLPrinter.addParagraph(buffer, reader);
-				}
-				hasContents= true;
-			} else if (element instanceof IMember) {
+			
+			if (element instanceof IPackageFragment || element instanceof IMember) {
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(element, editorInputElement, hoverRegion, true));
 				buffer.append("<br>"); //$NON-NLS-1$
 				addAnnotations(buffer, element, editorInputElement, hoverRegion);
-				IMember member= (IMember) element;
 				Reader reader= null;
 				try {
-					IPackageFragmentRoot root= (IPackageFragmentRoot) member.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-					String content= JavadocContentAccess2.getHTMLContent(member, true);
-					boolean isBinary= member.isBinary();
+					String content= element instanceof IMember
+							? JavadocContentAccess2.getHTMLContent((IMember) element, true)
+							: JavadocContentAccess2.getHTMLContent((IPackageFragment) element);
+					IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					boolean isBinary= root.getKind() == IPackageFragmentRoot.K_BINARY;
 					if (content != null) {
 						base= JavaDocLocations.getBaseURL(element, isBinary);
 						reader= new StringReader(content);
@@ -681,11 +663,12 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 						if (explanationForMissingJavadoc != null)
 							reader= new StringReader(explanationForMissingJavadoc);
 					}
-				} catch (JavaModelException ex) {
+				} catch (CoreException ex) {
 					reader= new StringReader(JavaHoverMessages.JavadocHover_error_gettingJavadoc);
 					JavaPlugin.log(ex);
 				}
-				if (reader != null){
+
+				if (reader != null) {
 					HTMLPrinter.addParagraph(buffer, reader);
 				}
 				hasContents= true;
@@ -693,6 +676,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			} else if (element.getElementType() == IJavaElement.LOCAL_VARIABLE || element.getElementType() == IJavaElement.TYPE_PARAMETER) {
 				addAnnotations(buffer, element, editorInputElement, hoverRegion);
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(element, editorInputElement, hoverRegion, true));
+				// could add info from @param tag here...
 				hasContents= true;
 			}
 			leadingImageWidth= 20;
@@ -757,7 +741,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			case IJavaElement.TYPE_PARAMETER:
 				return TYPE_PARAMETER_FLAGS;
 			case IJavaElement.PACKAGE_FRAGMENT:
-				return LABEL_FLAGS ^ JavaElementLabels.ALL_FULLY_QUALIFIED;
+				return PACKAGE_FLAGS;
 			default:
 				return LABEL_FLAGS;
 		}
@@ -963,30 +947,46 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	public static void addAnnotations(StringBuffer buf, IJavaElement element, ITypeRoot editorInputElement, IRegion hoverRegion) {
-		if (element instanceof IAnnotatable) {
-			try {
+		try {
+			if (element instanceof IAnnotatable) {
 				String annotationString= getAnnotations(element, editorInputElement, hoverRegion);
 				if (annotationString != null) {
 					buf.append("<div style='margin-bottom: 5px;'>"); //$NON-NLS-1$
 					buf.append(annotationString);
 					buf.append("</div>"); //$NON-NLS-1$
 				}
-			} catch (JavaModelException e) {
-				// no annotations this time...
-				buf.append("<br>"); //$NON-NLS-1$
-			} catch (URISyntaxException e) {
-				// no annotations this time...
-				buf.append("<br>"); //$NON-NLS-1$
+			} else if (element instanceof IPackageFragment) {
+				IPackageFragment pack= (IPackageFragment) element;
+				ICompilationUnit cu= pack.getCompilationUnit(JavaModelUtil.PACKAGE_INFO_JAVA);
+				if (cu.exists()) {
+					IPackageDeclaration[] packDecls= cu.getPackageDeclarations();
+					if (packDecls.length > 0) {
+						addAnnotations(buf, packDecls[0], null, null);
+					}
+				} else {
+					IClassFile classFile= pack.getClassFile(JavaModelUtil.PACKAGE_INFO_CLASS);
+					if (classFile.exists()) {
+						addAnnotations(buf, classFile.getType(), null, null);
+					}
+				}
 			}
+		} catch (JavaModelException e) {
+			// no annotations this time...
+			buf.append("<br>"); //$NON-NLS-1$
+		} catch (URISyntaxException e) {
+			// no annotations this time...
+			buf.append("<br>"); //$NON-NLS-1$
 		}
 	}
 
 	private static String getAnnotations(IJavaElement element, ITypeRoot editorInputElement, IRegion hoverRegion) throws URISyntaxException, JavaModelException {
-		if (!(element instanceof IAnnotatable))
-			return null;
-		
-		if (((IAnnotatable)element).getAnnotations().length == 0)
-			return null;
+		if (!(element instanceof IPackageFragment)) {
+			if (!(element instanceof IAnnotatable))
+				return null;
+			
+			if (((IAnnotatable)element).getAnnotations().length == 0)
+				return null;
+		}
 		
 		IBinding binding;
 		ASTNode node= getHoveredASTNode(editorInputElement, hoverRegion);
@@ -994,6 +994,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		if (node == null) {
 			ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 			p.setProject(element.getJavaProject());
+			p.setBindingsRecovery(true);
 			try {
 				binding= p.createBindings(new IJavaElement[] { element }, null)[0];
 			} catch (OperationCanceledException e) {

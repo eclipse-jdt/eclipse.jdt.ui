@@ -1104,8 +1104,21 @@ public class JavadocView extends AbstractInfoView {
 				String content= null;
 				try {
 					if (curr instanceof IPackageDeclaration) {
+						try {
+							ISourceRange nameRange= ((IPackageDeclaration) curr).getNameRange();
+							if (SourceRange.isAvailable(nameRange)) {
+								ITypeRoot typeRoot= (ITypeRoot) ((IPackageDeclaration) curr).getParent();
+								Region hoverRegion= new Region(nameRange.getOffset(), nameRange.getLength());
+								buffer.append("<br>"); //$NON-NLS-1$
+								JavadocHover.addAnnotations(buffer, curr, typeRoot, hoverRegion);
+							}
+						} catch (JavaModelException e) {
+							// no annotations this time...
+						}
+
 						content= JavadocContentAccess2.getHTMLContent((IPackageDeclaration) curr);
 					} else if (curr instanceof IPackageFragment) {
+						JavadocHover.addAnnotations(buffer, curr, null, null);
 						content= JavadocContentAccess2.getHTMLContent((IPackageFragment) curr);
 					}
 				} catch (CoreException e) {
