@@ -274,6 +274,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	
 	private static final Key PREF_ANNOTATION_NULL_ANALYSIS= getJDTCoreKey(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS);
 	
+	private static final Key PREF_PB_SYNTACTIC_NULL_ANLYSIS_FOR_FIELDS= getJDTCoreKey(JavaCore.COMPILER_PB_SYNTACTIC_NULL_ANALYSIS_FOR_FIELDS);
+
 	private static final Key PREF_INHERIT_NULL_ANNOTATIONS= getJDTCoreKey(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS);
 
 	/**
@@ -388,6 +390,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_PB_REDUNDANT_NULL_ANNOTATION,
 				PREF_PB_NONNULL_PARAMETER_ANNOTATION_DROPPED,
 				PREF_PB_REDUNDANT_NULL_CHECK, PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS,
+				PREF_PB_SYNTACTIC_NULL_ANLYSIS_FOR_FIELDS,
 				PREF_INHERIT_NULL_ANNOTATIONS,
 				PREF_PB_UNCLOSED_CLOSEABLE, PREF_PB_POTENTIALLY_UNCLOSED_CLOSEABLE, PREF_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE,
 				PREF_PB_FALLTHROUGH_CASE, PREF_PB_REDUNDANT_SUPERINTERFACE, PREF_PB_UNUSED_WARNING_TOKEN,
@@ -816,6 +819,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_inherit_null_annotations;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_INHERIT_NULL_ANNOTATIONS, enabledDisabled, extraIndent, node);
 		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_enable_syntactic_null_analysis_for_fields;
+		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_SYNTACTIC_NULL_ANLYSIS_FOR_FIELDS, enabledDisabled, extraIndent, node);
+		
 		// --- global
 		
 		// add some vertical space before:
@@ -1001,6 +1007,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		setComboEnabled(PREF_PB_NONNULL_PARAMETER_ANNOTATION_DROPPED, enableAnnotationNullAnalysis);
 		setComboEnabled(PREF_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, enableAnnotationNullAnalysis);
 		getCheckBox(PREF_INHERIT_NULL_ANNOTATIONS).setEnabled(enableAnnotationNullAnalysis);
+		getCheckBox(PREF_PB_SYNTACTIC_NULL_ANLYSIS_FOR_FIELDS).setEnabled(enableAnnotationNullAnalysis);
 	}
 
 	private IStatus validateNullnessAnnotation(String value, String errorMessage) {
