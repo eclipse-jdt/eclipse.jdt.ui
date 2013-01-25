@@ -30,12 +30,14 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -52,7 +54,6 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
@@ -73,7 +74,6 @@ import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -83,6 +83,7 @@ import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
@@ -439,9 +440,14 @@ public class JavadocContentAccess2 {
 		}
 	}
 
-	private final IMember fMember;
 	/**
-	 * The method, or <code>null</code> if {@link #fMember} is not a method where @inheritDoc could work.
+	 * Either an IMember or an IPackageFragment.
+	 */
+	private final IJavaElement fElement;
+	
+	/**
+	 * The method, or <code>null</code> if {@link #fElement} is not a method where @inheritDoc could
+	 * work.
 	 */
 	private final IMethod fMethod;
 	private final Javadoc fJavadoc;
@@ -456,15 +462,17 @@ public class JavadocContentAccess2 {
 	private HashMap<String, StringBuffer> fExceptionDescriptions;
 
 	private JavadocContentAccess2(IMethod method, Javadoc javadoc, String source, JavadocLookup lookup) {
-		fMember= method;
+		Assert.isNotNull(method);
+		fElement= method;
 		fMethod= method;
 		fJavadoc= javadoc;
 		fSource= source;
 		fJavadocLookup= lookup;
 	}
 
-	private JavadocContentAccess2(IMember member, Javadoc javadoc, String source) {
-		fMember= member;
+	private JavadocContentAccess2(IJavaElement element, Javadoc javadoc, String source) {
+		Assert.isTrue(element instanceof IMember || element instanceof IPackageFragment);
+		fElement= element;
 		fMethod= null;
 		fJavadoc= javadoc;
 		fSource= source;
@@ -609,7 +617,8 @@ public class JavadocContentAccess2 {
 		//Caveat: Javadoc nodes are not available when Javadoc processing has been disabled!
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=212207
 
-		CompilationUnit root= createAST(element, rawJavadoc);
+		String source= rawJavadoc + "class C{}"; //$NON-NLS-1$
+		CompilationUnit root= createAST(element, source);
 		if (root == null)
 			return null;
 		List<AbstractTypeDeclaration> types= root.types();
@@ -619,7 +628,31 @@ public class JavadocContentAccess2 {
 		return type.getJavadoc();
 	}
 
+	private static Javadoc getPackageJavadocNode(IJavaElement element, String cuSource) {
+		CompilationUnit cu= createAST(element, cuSource);
+		if (cu != null) {
+			PackageDeclaration packDecl= cu.getPackage();
+			if (packDecl != null) {
+				return packDecl.getJavadoc();
+			}
+		}
+		return null;
+	}
 
+	private static CompilationUnit createAST(IJavaElement element, String cuSource) {
+		Assert.isNotNull(element);
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		
+		IJavaProject javaProject= element.getJavaProject();
+		parser.setProject(javaProject);
+		Map<String, String> options= javaProject.getOptions(true);
+		options.put(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, JavaCore.ENABLED); // workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=212207
+		parser.setCompilerOptions(options);
+		
+		parser.setSource(cuSource.toCharArray());
+		return (CompilationUnit) parser.createAST(null);
+	}
+	
 	private static String javadoc2HTML(IMember member, String rawJavadoc) {
 		Javadoc javadoc= getJavadocNode(member, rawJavadoc);
 
@@ -632,8 +665,8 @@ public class JavadocContentAccess2 {
 					return getString(contentReader);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
-			}finally{
-				if(contentReader != null){
+			} finally {
+				if (contentReader != null) {
 					try {
 						contentReader.close();
 					} catch (IOException e) {
@@ -1066,7 +1099,7 @@ public class JavadocContentAccess2 {
 					// should never happen, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=304826
 					Exception exception= new Exception("Illegal ASTNode positions: previousEnd=" + previousEnd //$NON-NLS-1$
 							+ ", childStart=" + childStart //$NON-NLS-1$
-							+ ", member=" + fMember.getHandleIdentifier() //$NON-NLS-1$
+							+ ", element=" + fElement.getHandleIdentifier() //$NON-NLS-1$
 							+ ", Javadoc:\n" + fSource); //$NON-NLS-1$
 					JavaPlugin.log(exception);
 				} else if (previousEnd != childStart) {
@@ -1183,9 +1216,12 @@ public class JavadocContentAccess2 {
 		
 		List<? extends ASTNode> fragments= node.fragments();
 		try {
+			if (!(fElement instanceof IMember)) {
+				return false;
+			}
 			if (fragments.isEmpty()) {
-				if (fMember instanceof IField && JdtFlags.isStatic(fMember) && JdtFlags.isFinal(fMember)) {
-					IField field= (IField) fMember;
+				if (fElement instanceof IField && JdtFlags.isStatic((IField) fElement) && JdtFlags.isFinal((IField) fElement)) {
+					IField field= (IField) fElement;
 					return handleConstantValue(field, false);
 				}
 			} else if (fragments.size() == 1) {
@@ -1194,7 +1230,7 @@ public class JavadocContentAccess2 {
 					MemberRef memberRef= (MemberRef) first;
 					if (memberRef.getQualifier() == null) {
 						SimpleName name= memberRef.getName();
-						IType type= fMember instanceof IType ? (IType)fMember : fMember.getDeclaringType();
+						IType type= fElement instanceof IType ? (IType) fElement : ((IMember) fElement).getDeclaringType();
 						while (type != null) {
 							IField field= type.getField(name.getIdentifier());
 							if (field != null && field.exists()) {
@@ -1271,13 +1307,13 @@ public class JavadocContentAccess2 {
 
 		try {
 			String url= null;
-			if (fMember.isBinary()) {
-				URL javadocBaseLocation= JavaUI.getJavadocBaseLocation(fMember);
+			if (fElement instanceof IMember && ((IMember) fElement).isBinary()) {
+				URL javadocBaseLocation= JavaUI.getJavadocBaseLocation(fElement);
 				if (javadocBaseLocation != null) {
 					url= javadocBaseLocation.toExternalForm();
 				}
 			} else {
-				IPackageFragmentRoot srcRoot= JavaModelUtil.getPackageFragmentRoot(fMember);
+				IPackageFragmentRoot srcRoot= JavaModelUtil.getPackageFragmentRoot(fElement);
 				if (srcRoot != null) {
 					IResource resource= srcRoot.getResource();
 					if (resource != null) {
@@ -1569,7 +1605,7 @@ public class JavadocContentAccess2 {
 				fBuf.append("<a href='"); //$NON-NLS-1$
 				try {
 					String scheme= JavaElementLinks.JAVADOC_SCHEME;
-					String uri= JavaElementLinks.createURI(scheme, fMember, refTypeName, refMemberName, refMethodParamTypes);
+					String uri= JavaElementLinks.createURI(scheme, fElement, refTypeName, refMemberName, refMethodParamTypes);
 					fBuf.append(uri);
 				} catch (URISyntaxException e) {
 					JavaPlugin.log(e);
@@ -1658,21 +1694,27 @@ public class JavadocContentAccess2 {
 		IPackageFragmentRoot root= (IPackageFragmentRoot) packageFragment.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 
 		//1==> Handle the case when the documentation is present in package-info.java or package-info.class file
-		ITypeRoot typeRoot= null;
+		ITypeRoot packageInfo;
 		boolean isBinary= root.getKind() == IPackageFragmentRoot.K_BINARY;
 		if (isBinary) {
-			typeRoot= packageFragment.getClassFile(JavaModelUtil.PACKAGE_INFO_CLASS);
+			packageInfo= packageFragment.getClassFile(JavaModelUtil.PACKAGE_INFO_CLASS);
 		} else {
-			typeRoot= packageFragment.getCompilationUnit(JavaModelUtil.PACKAGE_INFO_JAVA);
+			packageInfo= packageFragment.getCompilationUnit(JavaModelUtil.PACKAGE_INFO_JAVA);
 		}
-		if (typeRoot != null && typeRoot.exists()) {
-			String source= typeRoot.getSource();
+		if (packageInfo != null && packageInfo.exists()) {
+			String cuSource= packageInfo.getSource();
 			//the source can be null for some of the class files
-			if (source != null) {
-				CompilationUnit ast= createAST(typeRoot);
-				String javadoc= getJavadocFromAST(ast, source);
-				if (javadoc != null)
-					return javadoc;
+			if (cuSource != null) {
+				Javadoc packageJavadocNode= getPackageJavadocNode(packageFragment, cuSource);
+				if (packageJavadocNode != null) {
+					IJavaElement element;
+					if (isBinary) {
+						element= ((IClassFile) packageInfo).getType();
+					} else {
+						element= packageInfo.getParent(); // parent is the IPackageFragment
+					}
+					return new JavadocContentAccess2(element, packageJavadocNode, cuSource).toHTML();
+				}
 			}
 		}
 
@@ -1717,20 +1759,6 @@ public class JavadocContentAccess2 {
 		return null;
 	}
 
-	private static String getJavadocFromAST(CompilationUnit ast, String source) {
-		List<Comment> commentList= ast.getCommentList();
-		if (commentList != null && !commentList.isEmpty()) {
-			for (int i= commentList.size() - 1; i >= 0; i--) {
-				Comment comment= commentList.get(i);
-				if (comment instanceof Javadoc) {
-					JavadocContentAccess2 docacc= new JavadocContentAccess2(null, (Javadoc) comment, source);
-					return docacc.toHTML();
-				}
-			}
-		}
-		return null;
-	}
-
 	private static String getHTMLContent(IJarEntryResource jarEntryResource, String encoding) throws CoreException {
 		InputStream in= jarEntryResource.getContents();
 		try {
@@ -1748,81 +1776,94 @@ public class JavadocContentAccess2 {
 
 	private static String getHTMLContentFromAttachedSource(IPackageFragmentRoot root, IPackageFragment packageFragment) throws CoreException {
 		String filePath= packageFragment.getElementName().replace('.', '/') + '/' + JavaModelUtil.PACKAGE_INFO_JAVA;
-		String contents= getHTMLContentFromAttachedSource(root, filePath);
+		String contents= getFileContentFromAttachedSource(root, filePath);
 		if (contents != null) {
-			ASTParser parser= createASTParser(packageFragment);
-			parser.setSource(contents.toCharArray());
-			CompilationUnit ast= (CompilationUnit) parser.createAST(null);
-			String javadoc= getJavadocFromAST(ast, contents);
-			if (javadoc != null)
-				return javadoc;
+			Javadoc packageJavadocNode= getPackageJavadocNode(packageFragment, contents);
+			if (packageJavadocNode != null)
+				return new JavadocContentAccess2(packageFragment, packageJavadocNode, contents).toHTML();
+
 		}
 		filePath= packageFragment.getElementName().replace('.', '/') + '/' + JavaModelUtil.PACKAGE_HTML;
-		return getHTMLContentFromAttachedSource(root, filePath);
+		return getFileContentFromAttachedSource(root, filePath);
 	}
 
-	private static String getHTMLContentFromAttachedSource(IPackageFragmentRoot root, String filePath) throws CoreException {
+	private static String getFileContentFromAttachedSource(IPackageFragmentRoot root, String filePath) throws CoreException {
 		IPath sourceAttachmentPath= root.getSourceAttachmentPath();
 		if (sourceAttachmentPath != null) {
-			File file= sourceAttachmentPath.toFile();
+			File file= null ;
+			String encoding= null;
+			
+			if (sourceAttachmentPath.getDevice() == null) {
+				//the path could be a workspace relative path to a zip or to the source folder
+				IWorkspaceRoot wsRoot= ResourcesPlugin.getWorkspace().getRoot();
+				IResource res= wsRoot.findMember(sourceAttachmentPath);
+				
+				if (res instanceof IFile) {
+					// zip in the workspace
+					IPath location= res.getLocation();
+					if (location == null)
+						return null;
+					file= location.toFile();
+					encoding= ((IFile) res).getCharset(false);
+					
+				} else if (res instanceof IContainer) {
+					// folder in the workspace
+					res= ((IContainer) res).findMember(filePath);
+					if (!(res instanceof IFile))
+						return null;
+					encoding= ((IFile) res).getCharset(false);
+					if (encoding == null)
+						encoding= getSourceAttachmentEncoding(root);
+					return getContentsFromInputStream(((IFile) res).getContents(), encoding);
+				}
+			}
+			
+			if (file == null || !file.exists())
+				file= sourceAttachmentPath.toFile();
+			
 			if (file.isDirectory()) {
-				//the path could be an absolute path to the source folder
+				//the path is an absolute filesystem path to the source folder
 				IPath packagedocPath= sourceAttachmentPath.append(filePath);
 				if (packagedocPath.toFile().exists())
 					return getFileContent(packagedocPath.toFile());
 
-			} else {
-				if (!file.exists()) {
-					//the path could be a workspace relative path to a jar or to the source folder
-					IWorkspaceRoot wsRoot= ResourcesPlugin.getWorkspace().getRoot();
-					IResource res= wsRoot.findMember(sourceAttachmentPath.append(filePath));
-					if (res == null)
-						res= wsRoot.findMember(sourceAttachmentPath);
-
-					if (res != null)
-						file= res.getLocation().toFile();
-
+			} else if (file.exists()) {
+				//the package documentation is in a Jar/Zip
+				IPath sourceAttachmentRootPath= root.getSourceAttachmentRootPath();
+				String packagedocPath;
+				//consider the root path also in the search path if it exists
+				if (sourceAttachmentRootPath != null) {
+					packagedocPath= sourceAttachmentRootPath.append(filePath).toString();
+				} else {
+					packagedocPath= filePath;
 				}
-				if (file.exists()) {
-					if (JavaModelUtil.PACKAGE_HTML.equals(file.getName()))
-						return getFileContent(file);
-
-					//the package documentation could be in a Jar/Zip
-					IPath sourceAttachmentRootPath= root.getSourceAttachmentRootPath();
-					String packagedocPath;
-					//consider the root path also in the search path if it exists
-					if (sourceAttachmentRootPath != null) {
-						packagedocPath= sourceAttachmentRootPath.append(filePath).toString();
-					} else {
-						packagedocPath= filePath;
+				ZipFile zipFile= null;
+				InputStream in= null;
+				try {
+					zipFile= new ZipFile(file, ZipFile.OPEN_READ);
+					ZipEntry packagedocFile= zipFile.getEntry(packagedocPath);
+					if (packagedocFile != null) {
+						in= zipFile.getInputStream(packagedocFile);
+						if (encoding == null)
+							encoding= getSourceAttachmentEncoding(root);
+						return getContentsFromInputStream(in, encoding);
 					}
-					ZipFile zipFile= null;
-					InputStream in= null;
+				} catch (IOException e) {
+					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), e.getMessage(), e));
+				} finally {
 					try {
-						zipFile= new ZipFile(file, ZipFile.OPEN_READ);
-						ZipEntry packageHtml= zipFile.getEntry(packagedocPath);
-						if (packageHtml != null) {
-							in= zipFile.getInputStream(packageHtml);
-							String encoding= getSourceAttachmentEncoding(root);
-							return getContentsFromInputStream(in, encoding);
+						if (in != null) {
+							in.close();
 						}
 					} catch (IOException e) {
-						throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), e.getMessage(), e));
-					} finally {
-						try {
-							if (in != null) {
-								in.close();
-							}
-						} catch (IOException e) {
-							//ignore
+						//ignore
+					}
+					try {
+						if (zipFile != null) {
+							zipFile.close();//this will close the InputStream also
 						}
-						try {
-							if (zipFile != null) {
-								zipFile.close();//this will close the InputStream also
-							}
-						} catch (IOException e) {
-							//ignore
-						}
+					} catch (IOException e) {
+						//ignore
 					}
 				}
 			}
@@ -1881,44 +1922,6 @@ public class JavadocContentAccess2 {
 		}
 
 		return encoding;
-	}
-
-	/**
-	 * Reads a compilation unit and creates the AST DOM for manipulating the Java source.
-	 * 
-	 * @param typeRoot cane be a compilation unit or a class file
-	 * @return parsed compilation unit
-	 */
-
-	private static CompilationUnit createAST(ITypeRoot typeRoot) {
-		ASTParser parser= createASTParser(typeRoot);
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		if (typeRoot instanceof ICompilationUnit) {
-			parser.setSource((ICompilationUnit) typeRoot);
-		} else if (typeRoot instanceof IClassFile) {
-			parser.setSource((IClassFile) typeRoot);
-		}
-		parser.setResolveBindings(true);
-		return (CompilationUnit) parser.createAST(null);
-
-	}
-
-
-	private static CompilationUnit createAST(IJavaElement element, String rawJavadoc) {
-		ASTParser parser= createASTParser(element);
-		String source= rawJavadoc + "class C{}"; //$NON-NLS-1$
-		parser.setSource(source.toCharArray());
-		return (CompilationUnit) parser.createAST(null);
-	}
-
-	private static ASTParser createASTParser(IJavaElement element) {
-		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
-		IJavaProject javaProject= element.getJavaProject();
-		parser.setProject(javaProject);
-		Map<String, String> options= javaProject.getOptions(true);
-		options.put(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, JavaCore.ENABLED); // workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=212207
-		parser.setCompilerOptions(options);
-		return parser;
 	}
 
 	/**
