@@ -30,6 +30,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
@@ -109,6 +111,8 @@ import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.infoviews.JavadocView;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
@@ -256,7 +260,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 			try {
 				//FIXME: add hover location to editor navigation history?
-				JavaUI.openInEditor(infoInput.getElement());
+				openDeclaration(infoInput.getElement());
 			} catch (PartInitException e) {
 				JavaPlugin.log(e);
 			} catch (JavaModelException e) {
@@ -485,6 +489,42 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		return fHoverControlCreator;
 	}
 
+
+	public static IEditorPart openDeclaration(IJavaElement element) throws PartInitException, JavaModelException {
+		if (!(element instanceof IPackageFragment)) {
+			return JavaUI.openInEditor(element);
+		}
+		
+		IPackageFragment packageFragment= (IPackageFragment) element;
+		ITypeRoot typeRoot;
+		IPackageFragmentRoot root= (IPackageFragmentRoot) packageFragment.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+		if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
+			typeRoot= packageFragment.getClassFile(JavaModelUtil.PACKAGE_INFO_CLASS);
+		} else {
+			typeRoot= packageFragment.getCompilationUnit(JavaModelUtil.PACKAGE_INFO_JAVA);
+		}
+
+		// open the package-info file in editor if one exists
+		if (typeRoot.exists())
+			return JavaUI.openInEditor(typeRoot);
+
+		// open the package.html file in editor if one exists
+		Object[] nonJavaResources= packageFragment.getNonJavaResources();
+		for (Object nonJavaResource : nonJavaResources) {
+			if (nonJavaResource instanceof IFile) {
+				IFile file= (IFile) nonJavaResource;
+				if (file.exists() && JavaModelUtil.PACKAGE_HTML.equals(file.getName())) {
+					return EditorUtility.openInEditor(file, true);
+				}
+			}
+		}
+
+		// select the package in the Package Explorer if there is no associated package Javadoc file
+		PackageExplorerPart view= (PackageExplorerPart) JavaPlugin.getActivePage().showView(JavaUI.ID_PACKAGES);
+		view.tryToReveal(packageFragment);
+		return null;
+	}
+	
 	private static void addLinkListener(final BrowserInformationControl control) {
 		control.addLocationListener(JavaElementLinks.createLocationListener(new JavaElementLinks.ILinkHandler() {
 			/* (non-Javadoc)
@@ -521,7 +561,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				control.dispose(); //FIXME: should have protocol to hide, rather than dispose
 				try {
 					//FIXME: add hover location to editor navigation history?
-					JavaUI.openInEditor(linkTarget);
+					openDeclaration(linkTarget);
 				} catch (PartInitException e) {
 					JavaPlugin.log(e);
 				} catch (JavaModelException e) {

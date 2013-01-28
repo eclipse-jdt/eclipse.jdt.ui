@@ -1109,8 +1109,7 @@ public class JavadocView extends AbstractInfoView {
 							if (SourceRange.isAvailable(nameRange)) {
 								ITypeRoot typeRoot= (ITypeRoot) ((IPackageDeclaration) curr).getParent();
 								Region hoverRegion= new Region(nameRange.getOffset(), nameRange.getLength());
-								buffer.append("<br>"); //$NON-NLS-1$
-								JavadocHover.addAnnotations(buffer, curr, typeRoot, hoverRegion);
+								JavadocHover.addAnnotations(buffer, typeRoot.getParent(), typeRoot, hoverRegion);
 							}
 						} catch (JavaModelException e) {
 							// no annotations this time...
@@ -1620,7 +1619,7 @@ public class JavadocView extends AbstractInfoView {
 			 */
 			public void handleDeclarationLink(IJavaElement target) {
 				try {
-					JavaUI.openInEditor(target);
+					JavadocHover.openDeclaration(target);
 				} catch (PartInitException e) {
 					JavaPlugin.log(e);
 				} catch (JavaModelException e) {

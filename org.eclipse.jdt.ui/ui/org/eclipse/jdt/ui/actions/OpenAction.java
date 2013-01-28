@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -56,6 +58,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkDetector;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -166,9 +169,12 @@ public class OpenAction extends SelectionDispatchAction {
 
 			IJavaElement element= elements[0];
 			if (elements.length > 1) {
-				element= SelectionConverter.selectJavaElement(elements, getShell(), getDialogTitle(), ActionMessages.OpenAction_select_element);
-				if (element == null)
-					return;
+				// If there are multiple IPackageFragments that could be selected, use the first one on the build path.
+				if (!(element instanceof IPackageFragment)) {
+					element= SelectionConverter.selectJavaElement(elements, getShell(), getDialogTitle(), ActionMessages.OpenAction_select_element);
+					if (element == null)
+						return;
+				}
 			}
 
 			run(new Object[] {element} );
@@ -205,7 +211,6 @@ public class OpenAction extends SelectionDispatchAction {
 			IJavaElement element= elements[i];
 			switch (element.getElementType()) {
 				case IJavaElement.PACKAGE_DECLARATION:
-				case IJavaElement.PACKAGE_FRAGMENT:
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				case IJavaElement.JAVA_PROJECT:
 				case IJavaElement.JAVA_MODEL:
@@ -244,11 +249,26 @@ public class OpenAction extends SelectionDispatchAction {
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];
 			try {
-				element= getElementToOpen(element);
-				boolean activateOnOpen= fEditor != null ? true : OpenStrategy.activateOnOpen();
-				IEditorPart part= EditorUtility.openInEditor(element, activateOnOpen);
-				if (part != null && element instanceof IJavaElement)
-					JavaUI.revealInEditor(part, (IJavaElement)element);
+				Object javaElement= getElementToOpen(element);
+				if (javaElement instanceof IPackageFragment) {
+					if (fEditor == null) {
+						try {
+							PackageExplorerPart view= (PackageExplorerPart) JavaPlugin.getActivePage().showView(JavaUI.ID_PACKAGES);
+							view.tryToReveal(element);
+						} catch (PartInitException e) {
+							JavaPlugin.log(e);
+						}
+					} else {
+						setStatusLineMessage();
+						return;
+					}
+					
+				} else {
+					boolean activateOnOpen= fEditor != null ? true : OpenStrategy.activateOnOpen();
+					IEditorPart part= EditorUtility.openInEditor(javaElement, activateOnOpen);
+					if (part != null && javaElement instanceof IJavaElement)
+						JavaUI.revealInEditor(part, (IJavaElement) javaElement);
+				}
 			} catch (PartInitException e) {
 				String message= Messages.format(ActionMessages.OpenAction_error_problem_opening_editor, new String[] { JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_DEFAULT), e.getStatus().getMessage() });
 				status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
@@ -274,7 +294,32 @@ public class OpenAction extends SelectionDispatchAction {
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public Object getElementToOpen(Object object) throws JavaModelException {
+		if (object instanceof IPackageFragment) {
+			return getPackageFragmentObjectToOpen((IPackageFragment) object);
+		}
 		return object;
+	}
+
+	private Object getPackageFragmentObjectToOpen(IPackageFragment packageFragment) throws JavaModelException {
+		ITypeRoot typeRoot= null;
+		IPackageFragmentRoot root= (IPackageFragmentRoot) packageFragment.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+		if (root.getKind() == IPackageFragmentRoot.K_BINARY)
+			typeRoot= (packageFragment).getClassFile(JavaModelUtil.PACKAGE_INFO_CLASS);
+		else
+			typeRoot= (packageFragment).getCompilationUnit(JavaModelUtil.PACKAGE_INFO_JAVA);
+		if (typeRoot.exists())
+			return typeRoot;
+		
+		Object[] nonJavaResources= (packageFragment).getNonJavaResources();
+		for (Object nonJavaResource : nonJavaResources) {
+			if (nonJavaResource instanceof IFile) {
+				IFile file= (IFile) nonJavaResource;
+				if (file.exists() && JavaModelUtil.PACKAGE_HTML.equals(file.getName())) {
+					return file;
+				}
+			}
+		}
+		return packageFragment;
 	}
 
 	private String getDialogTitle() {
