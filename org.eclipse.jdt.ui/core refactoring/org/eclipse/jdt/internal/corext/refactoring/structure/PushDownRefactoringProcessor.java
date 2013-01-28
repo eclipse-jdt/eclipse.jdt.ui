@@ -296,7 +296,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			SearchResultGroup group= groups[i];
 			SearchMatch[] results= group.getSearchResults();
 			for (int j= 0; j < results.length; j++) {
-				SearchMatch searchResult= results[i];
+				SearchMatch searchResult= results[j];
 				result.add(SearchUtils.getEnclosingJavaElement(searchResult));
 			}
 		}
