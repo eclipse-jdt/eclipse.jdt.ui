@@ -694,7 +694,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 							? JavadocContentAccess2.getHTMLContent((IMember) element, true)
 							: JavadocContentAccess2.getHTMLContent((IPackageFragment) element);
 					IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-					boolean isBinary= root.getKind() == IPackageFragmentRoot.K_BINARY;
+					boolean isBinary= root.exists() && root.getKind() == IPackageFragmentRoot.K_BINARY;
 					if (content != null) {
 						base= JavaDocLocations.getBaseURL(element, isBinary);
 						reader= new StringReader(content);
