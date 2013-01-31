@@ -153,12 +153,12 @@ return ${name};</template>
 }</template>
 
 <template name="test" description="%Templates.test" id="org.eclipse.jdt.ui.templates.test" context="java-members" enabled="true" autoinsert="false">public void test${name}() throws Exception {
-	${cursor} 
+	${cursor}
 }</template>
 
 <template name="Test" description="%Templates.test_junit4" id="org.eclipse.jdt.ui.templates.test_junit4" context="java-members" enabled="true" autoinsert="false">@${testType:newType(org.junit.Test)}
 public void ${testName}() throws Exception {
-	${staticImport:importStatic('org.junit.Assert.*')}${cursor} 
+	${staticImport:importStatic('org.junit.Assert.*')}${cursor}
 }</template>
 
 <template name="nls" description="%Templates.non-nls" id="org.eclipse.jdt.ui.templates.non-nls" context="java" enabled="true" autoinsert="false">//$$NON-NLS-${N}$$</template>
