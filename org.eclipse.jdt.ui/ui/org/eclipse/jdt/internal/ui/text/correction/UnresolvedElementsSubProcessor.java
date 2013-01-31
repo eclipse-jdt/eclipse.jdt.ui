@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,6 +87,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -626,17 +627,17 @@ public class UnresolvedElementsSubProcessor {
 		}
 		addNewTypeProposals(cu, node, kind, IProposalRelevance.NEW_TYPE, proposals);
 		
-		if (kind == SimilarElementsRequestor.ANNOTATIONS)
-			addNullityAnnotationTypesProposals(cu, node, proposals);
-
 		ReorgCorrectionsSubProcessor.addProjectSetupFixProposal(context, problem, node.getFullyQualifiedName(), proposals);
 	}
 
 	private static void addNullityAnnotationTypesProposals(ICompilationUnit cu, Name node, Collection<ICommandAccess> proposals) throws CoreException {
-		if (!(node.getParent() instanceof Annotation))
-			return;
-		if (((Annotation) node.getParent()).getTypeNameProperty() != node.getLocationInParent())
-			return;
+		ASTNode parent= node.getParent();
+		boolean isAnnotationName= parent instanceof Annotation && ((Annotation) parent).getTypeNameProperty() == node.getLocationInParent();
+		if (!isAnnotationName) {
+			boolean isImportName= parent instanceof ImportDeclaration && ImportDeclaration.NAME_PROPERTY == node.getLocationInParent();
+			if (!isImportName)
+				return;
+		}
 		
 		final IJavaProject javaProject= cu.getJavaProject();
 		String name= node.getFullyQualifiedName();
@@ -925,7 +926,7 @@ public class UnresolvedElementsSubProcessor {
 		return false;
 	}
 
-	public static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, Collection<ICommandAccess> proposals) throws JavaModelException {
+	public static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, Collection<ICommandAccess> proposals) throws CoreException {
 		Name node= refNode;
 		do {
 			String typeName= ASTNodes.getSimpleNameIdentifier(node);
@@ -979,6 +980,7 @@ public class UnresolvedElementsSubProcessor {
 					}
 					if ((kind & SimilarElementsRequestor.ANNOTATIONS) != 0) {
 						proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_ANNOTATION, enclosing, rel + 1));
+						addNullityAnnotationTypesProposals(cu, node, proposals);
 					}
 				}
 			}
