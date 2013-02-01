@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,11 +13,14 @@ package org.eclipse.jdt.internal.junit.util;
 import java.util.Collection;
 import java.util.Set;
 
+import org.eclipse.jdt.junit.JUnitCore;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -39,9 +42,9 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
-import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 
 
 /**
@@ -104,7 +107,16 @@ public class CoreTestSearchEngine {
 
 	public static boolean hasTestAnnotation(IJavaProject project) {
 		try {
-			return project != null && project.findType(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME) != null;
+			if (project != null) {
+				IType type= project.findType(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME);
+				if (type != null) {
+					// @Test annotation is not accessible if the JUnit classpath container is set to JUnit 3
+					// (although it may resolve to a JUnit 4 JAR)
+					IPackageFragmentRoot root= (IPackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					IClasspathEntry cpEntry= root.getRawClasspathEntry();
+					return ! JUnitCore.JUNIT3_CONTAINER_PATH.equals(cpEntry.getPath());
+				}
+			}
 		} catch (JavaModelException e) {
 			// not available
 		}

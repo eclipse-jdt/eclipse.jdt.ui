@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -123,10 +123,10 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		data.widthHint= converter.convertWidthInCharsToPixels(15);
 		fVersionCombo.setLayoutData(data);
 
-		if (fContainerEntryResult != null && JUnitCore.JUNIT4_CONTAINER_PATH.equals(fContainerEntryResult.getPath())) {
-			fVersionCombo.select(1);
-		} else {
+		if (fContainerEntryResult != null && JUnitCore.JUNIT3_CONTAINER_PATH.equals(fContainerEntryResult.getPath())) {
 			fVersionCombo.select(0);
+		} else {
+			fVersionCombo.select(1);
 		}
 		fVersionCombo.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
@@ -180,6 +180,8 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		} else {
 			containerPath= JUnitCore.JUNIT3_CONTAINER_PATH;
 			libEntry= BuildPathSupport.getJUnit3LibraryEntry();
+			if (libEntry == null)
+				libEntry= BuildPathSupport.getJUnit4as3LibraryEntry(); // JUnit 4 includes most of JUnit 3, so let's cheat
 		}
 
 		if (libEntry == null) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,8 +72,6 @@ public class BuildPathSupport {
 				IPath bundleRootLocation= getLibraryLocation(bundleInfo, bundleLocation);
 				IPath srcLocation= getSourceLocation(bundleInfo);
 				
-				IAccessRule[] accessRules= { };
-
 				String javadocLocation= Platform.getPreferencesService().getString(JUnitCorePlugin.CORE_PLUGIN_ID, javadocPreferenceKey, "", null); //$NON-NLS-1$
 				IClasspathAttribute[] attributes;
 				if (javadocLocation.length() == 0) {
@@ -82,9 +80,13 @@ public class BuildPathSupport {
 					attributes= new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, javadocLocation) };
 				}
 				
-				return JavaCore.newLibraryEntry(bundleRootLocation, srcLocation, null, accessRules, attributes, false);
+				return JavaCore.newLibraryEntry(bundleRootLocation, srcLocation, null, getAccessRules(), attributes, false);
 			}
 			return null;
+		}
+
+		public IAccessRule[] getAccessRules() {
+			return new IAccessRule[0];
 		}
 
 		private IPath getLibraryLocation(BundleInfo bundleInfo, IPath bundleLocation) {
@@ -108,8 +110,11 @@ public class BuildPathSupport {
 			}
 			
 			if (srcLocation == null) {
-				// Try exact version
-				BundleInfo sourceBundleInfo= P2Utils.findBundle(sourceBundleId, new Version(bundleInfo.getVersion()), true);
+				BundleInfo sourceBundleInfo= null;
+				if (bundleInfo != null) {
+					// Try exact version
+					sourceBundleInfo= P2Utils.findBundle(sourceBundleId, new Version(bundleInfo.getVersion()), true);
+				}
 				if (sourceBundleInfo == null) {
 					// Try version range
 					sourceBundleInfo= P2Utils.findBundle(sourceBundleId, versionRange, true);
@@ -157,12 +162,23 @@ public class BuildPathSupport {
 	public static final JUnitPluginDescription JUNIT3_PLUGIN= new JUnitPluginDescription(
 			"org.junit", new VersionRange("[3.8.2,3.9)"), "junit.jar", "junit.jar", "org.junit.source", "source-bundle/", JUnitPreferencesConstants.JUNIT3_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 	
-	private static final JUnitPluginDescription JUNIT4_PLUGIN= new JUnitPluginDescription(
+	public static final JUnitPluginDescription JUNIT4_PLUGIN= new JUnitPluginDescription(
 			"org.junit", new VersionRange("[4.7.0,5.0.0)"), "junit.jar", "junit.jar", "org.junit.source", "source-bundle/", JUnitPreferencesConstants.JUNIT4_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 	
 	private static final JUnitPluginDescription HAMCREST_CORE_PLUGIN= new JUnitPluginDescription(
 			"org.hamcrest.core", new VersionRange("[1.1.0,2.0.0)"), null, "org.hamcrest.core_1.*.jar", "org.hamcrest.core.source", "source-bundle/", JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
+	public static final JUnitPluginDescription JUNIT4_AS_3_PLUGIN= new JUnitPluginDescription(
+			JUNIT4_PLUGIN.bundleId, JUNIT4_PLUGIN.versionRange, JUNIT4_PLUGIN.bundleRoot, JUNIT4_PLUGIN.binaryImportedRoot,
+			JUNIT4_PLUGIN.sourceBundleId, JUNIT4_PLUGIN.repositorySource, JUNIT4_PLUGIN.javadocPreferenceKey) {
+		public IAccessRule[] getAccessRules() {
+			return new IAccessRule[] {
+					JavaCore.newAccessRule(new Path("junit/"), IAccessRule.K_ACCESSIBLE), //$NON-NLS-1$
+					JavaCore.newAccessRule(new Path("**/*"), IAccessRule.K_NON_ACCESSIBLE) //$NON-NLS-1$
+			};
+		}
+	};
+	
 	/**
 	 * @return the JUnit3 classpath container
 	 */
@@ -178,21 +194,28 @@ public class BuildPathSupport {
 	}
 
 	/**
-	 * @return the org.junit library
+	 * @return the org.junit version 3 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnit3LibraryEntry() {
 		return JUNIT3_PLUGIN.getLibraryEntry();
 	}
 
 	/**
-	 * @return the org.junit4 library
+	 * @return the org.junit version 4 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnit4LibraryEntry() {
 		return JUNIT4_PLUGIN.getLibraryEntry();
 	}
 
 	/**
-	 * @return the org.hamcrest.core library
+	 * @return the org.junit version 4 library with access rules for JUnit 3, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnit4as3LibraryEntry() {
+		return JUNIT4_AS_3_PLUGIN.getLibraryEntry();
+	}
+	
+	/**
+	 * @return the org.hamcrest.core library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getHamcrestCoreLibraryEntry() {
 		return HAMCREST_CORE_PLUGIN.getLibraryEntry();

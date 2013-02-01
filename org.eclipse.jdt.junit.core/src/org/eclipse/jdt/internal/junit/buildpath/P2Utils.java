@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * Copyright (c) 2009, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,7 +60,7 @@ class P2Utils {
 	/**
 	 * Finds the bundle info for the given arguments.
 	 * <p>
-	 * The first match will be returned if more than one bundle matches the arguments.
+	 * The best match (latest version) will be returned if more than one bundle matches the arguments.
 	 * </p>
 	 * 
 	 * @param symbolicName the symbolic name
