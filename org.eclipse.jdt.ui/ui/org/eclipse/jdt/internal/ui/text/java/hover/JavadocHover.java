@@ -653,7 +653,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @return the HTML hover info for the given element(s) or <code>null</code> if no information is available
 	 * @since 3.4
 	 */
-	private static JavadocBrowserInformationControlInput getHoverInfo(IJavaElement[] elements, ITypeRoot editorInputElement, IRegion hoverRegion, JavadocBrowserInformationControlInput previousInput) {
+	public static JavadocBrowserInformationControlInput getHoverInfo(IJavaElement[] elements, ITypeRoot editorInputElement, IRegion hoverRegion, JavadocBrowserInformationControlInput previousInput) {
 		StringBuffer buffer= new StringBuffer();
 		boolean hasContents= false;
 		String base= null;
