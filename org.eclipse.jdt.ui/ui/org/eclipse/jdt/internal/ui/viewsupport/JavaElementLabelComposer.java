@@ -1050,12 +1050,13 @@ public class JavaElementLabelComposer {
 	}
 
 	/**
-	 * Returns the string for rendering the {@link IJavaElement#getElementName() element name} of the given element.
+	 * Returns the string for rendering the {@link IJavaElement#getElementName() element name} of
+	 * the given element.
 	 * <p>
-	 * <strong>Note:</strong> This class only calls this helper for those elements where the name
-	 * should be shown as link by {@link JavaElementLinks}.
+	 * <strong>Note:</strong> This class only calls this helper for those elements where
+	 * {@link JavaElementLinks}) has the need to rendered the name differently.
 	 * </p>
-	 *
+	 * 
 	 * @param element the element to render
 	 * @return the string for rendering the element name
 	 */
