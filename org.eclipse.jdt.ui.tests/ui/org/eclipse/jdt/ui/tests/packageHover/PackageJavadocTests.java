@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.tests.packageHover;
 
 import java.io.File;
+import java.net.URL;
 
 import junit.framework.Assert;
 import junit.framework.Test;
@@ -36,6 +37,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.core.JavaElement;
+import org.eclipse.jdt.internal.corext.CorextMessages;
 
 import org.eclipse.jdt.ui.tests.core.CoreTests;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
@@ -221,7 +223,14 @@ public class PackageJavadocTests extends CoreTests {
 		String actualHtmlContent= hoverInfo.getHtml();
 		Assert.assertNotNull(actualHtmlContent);
 
-		Assert.assertTrue(actualHtmlContent.contains("Provides classes for performing arbitrary-precision integer arithmetic"));
+		try {
+			//trying to connect to the internet. Exception will be thrown if there is no net connection.
+			new URL("url:http://download.oracle.com/").openConnection().connect();
+			Assert.assertTrue(actualHtmlContent.contains("Provides classes for performing arbitrary-precision integer arithmetic"));
+		} catch (Exception e) {
+			//there is no internet connection, so the Javadoc cannot be retrieved.
+			Assert.assertTrue(actualHtmlContent.contains(CorextMessages.JavaDocLocations_noAttachedSource));
+		}
 
 	}
 
@@ -278,8 +287,8 @@ public class PackageJavadocTests extends CoreTests {
 		packageFragment= (IPackageFragment)codeSelect[0];
 		JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(new IJavaElement[] { packageFragment }, cu, new Region(offset, length), null);
 		String actualHtmlContent= hoverInfo.getHtml();
-
-		Assert.assertTrue(actualHtmlContent.contains("Note: This element has no attached Javadoc and the Javadoc could not be found in the attached source."));
+		
+		Assert.assertTrue(actualHtmlContent.contains(CorextMessages.JavaDocLocations_noAttachedJavadoc));
 	}
 
 	public static Test setUpTest(Test test) {
