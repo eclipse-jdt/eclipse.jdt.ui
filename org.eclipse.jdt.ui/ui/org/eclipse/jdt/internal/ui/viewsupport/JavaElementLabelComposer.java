@@ -1082,7 +1082,7 @@ public class JavaElementLabelComposer {
 		if (declaration.getElementType() == IJavaElement.IMPORT_CONTAINER) {
 			fBuffer.append(JavaUIMessages.JavaElementLabels_import_container);
 		} else {
-			fBuffer.append(declaration.getElementName());
+			fBuffer.append(getElementName(declaration));
 		}
 		// post qualification
 		if (getFlag(flags, JavaElementLabels.D_POST_QUALIFIED)) {
@@ -1169,7 +1169,7 @@ public class JavaElementLabelComposer {
 			else
 				appendCompressedPackageFragment(pack);
 		} else {
-			fBuffer.append(pack.getElementName());
+			fBuffer.append(getElementName(pack));
 		}
 		if (getFlag(flags, JavaElementLabels.P_POST_QUALIFIED)) {
 			int offset= fBuffer.length();

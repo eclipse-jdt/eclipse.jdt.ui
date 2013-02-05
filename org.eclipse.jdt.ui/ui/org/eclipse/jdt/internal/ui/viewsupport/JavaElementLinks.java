@@ -30,7 +30,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
@@ -103,12 +105,24 @@ public class JavaElementLinks {
 
 		public JavaElementLinkedLabelComposer(IJavaElement member, StringBuffer buf) {
 			super(buf);
-			fElement= member;
+			if (member instanceof IPackageDeclaration) {
+				fElement= member.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+			} else {
+				fElement= member;
+			}
 		}
 
 		@Override
 		public String getElementName(IJavaElement element) {
+			if (element instanceof IPackageFragment || element instanceof IPackageDeclaration) {
+				return getPackageFragmentElementName(element);
+			}
+
 			String elementName= element.getElementName();
+			return getElementName(element, elementName);
+		}
+
+		private String getElementName(IJavaElement element, String elementName) {
 			if (element.equals(fElement)) { // linking to the member itself would be a no-op
 				return elementName;
 			}
@@ -122,6 +136,28 @@ public class JavaElementLinks {
 				JavaPlugin.log(e);
 				return elementName;
 			}
+		}
+
+		private String getPackageFragmentElementName(IJavaElement javaElement) {
+			IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			String javaElementName= javaElement.getElementName();
+			String[] individualSegmentNames= javaElementName.split("\\."); //$NON-NLS-1$
+			String packageName= null;
+			StringBuffer strBuffer= new StringBuffer();
+
+			for (int i= 0; i < individualSegmentNames.length; i++) {
+				String lastSegmentName= individualSegmentNames[i];
+				if (packageName != null) {
+					strBuffer.append('.');
+					packageName= packageName + '.' + lastSegmentName;
+				} else {
+					packageName= lastSegmentName;
+				}
+				IPackageFragment subFragment= root.getPackageFragment(packageName);
+				strBuffer.append(getElementName(subFragment, lastSegmentName));
+			}
+
+			return strBuffer.toString();
 		}
 
 		@Override
