@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1051,6 +1051,10 @@ public class JavaElementLabelComposer {
 
 	/**
 	 * Returns the string for rendering the {@link IJavaElement#getElementName() element name} of the given element.
+	 * <p>
+	 * <strong>Note:</strong> This class only calls this helper for those elements where the name
+	 * should be shown as link by {@link JavaElementLinks}.
+	 * </p>
 	 *
 	 * @param element the element to render
 	 * @return the string for rendering the element name
