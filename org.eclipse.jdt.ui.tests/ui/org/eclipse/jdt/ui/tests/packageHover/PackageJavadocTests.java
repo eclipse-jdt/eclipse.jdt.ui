@@ -229,7 +229,7 @@ public class PackageJavadocTests extends CoreTests {
 			Assert.assertTrue(actualHtmlContent.contains("Provides classes for performing arbitrary-precision integer arithmetic"));
 		} catch (Exception e) {
 			//there is no internet connection, so the Javadoc cannot be retrieved.
-			Assert.assertTrue(actualHtmlContent.contains(CorextMessages.JavaDocLocations_noAttachedSource));
+			Assert.assertTrue(actualHtmlContent.contains(CorextMessages.JavaDocLocations_noAttachedSource) || actualHtmlContent.contains(CorextMessages.JavaDocLocations_error_gettingJavadoc));
 		}
 
 	}
