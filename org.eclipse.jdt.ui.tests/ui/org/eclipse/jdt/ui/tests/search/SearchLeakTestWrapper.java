@@ -61,4 +61,8 @@ public class SearchLeakTestWrapper extends TestCase {
 	public void testRemoveAllQueries() throws Exception {
 		fTest.testRemoveAllQueries();
 	}
+
+	public void testSearchResultEditorClose() throws Exception {
+		fTest.testSearchResultEditorClose();
+	}
 }
