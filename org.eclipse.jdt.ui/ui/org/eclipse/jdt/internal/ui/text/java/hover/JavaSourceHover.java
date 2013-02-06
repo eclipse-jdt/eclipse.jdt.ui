@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -44,12 +46,15 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -119,6 +124,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 	}
 
 	private String getBracketHoverInfo(final ITextViewer textViewer, IRegion region) {
+		boolean isElseBracket= false;
 		IEditorPart editor= getEditor();
 		ITypeRoot editorInput= getEditorInputJavaElement();
 		if (!(editor instanceof JavaEditor) || editorInput == null) {
@@ -151,6 +157,13 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 				return null;
 			ASTNode node;
 			ASTNode parent= bracketNode.getParent();
+			if (parent instanceof IfStatement && ((IfStatement) parent).getElseStatement() != null
+					&& ASTNodes.getInclusiveEnd(((IfStatement) parent).getElseStatement()) == offset) {
+				isElseBracket= true; // if-[else if]*-else
+				while (parent.getParent() instanceof IfStatement) {
+					parent= parent.getParent();
+				}
+			}
 			if (bracketNode instanceof Block && !(parent instanceof Block) && !(parent instanceof SwitchStatement)) {
 				node= parent;
 			} else {
@@ -204,10 +217,17 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 				return null;
 			int noOfSourceLines;
 			IRegion endLine;
+			int skippedLines= 0;
 			if (line1 < topLine) {
 				//match not visible
+				if (isElseBracket) {
+					return getBracketHoverInfoForElse((IfStatement) node, document, editorInput, delim); // see bug:377141
+				}
 				noOfSourceLines= 3;
-				int skippedLines= Math.abs(line2 - line1 - noOfSourceLines);
+				if ((line2 - line1) < noOfSourceLines) {
+					noOfSourceLines= line2 - line1;
+				}
+				skippedLines= Math.abs(line2 - line1 - noOfSourceLines);
 				if (skippedLines == 1) {
 					noOfSourceLines++;
 					skippedLines= 0;
@@ -233,11 +253,124 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			String[] str= new String[noOfSourceLines];
 			System.arraycopy(sourceLines, 0, str, 0, noOfSourceLines);
 			source= Strings.concatenate(str, delim);
+			if (skippedLines > 0) {
+				source= source.concat(delim).concat(JavaHoverMessages.JavaSourceHover_skippedLinesSymbol);
+				fUpwardShiftInLines++;
+			}
 			return source;
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 			return null;
 		}
+	}
+
+	/**
+	 * Creates the hover text for 'else' closing bracket in 'if-[else if]*-else' cases when the
+	 * beginning of the first 'if' is not visible in the text editor by stitching together all the
+	 * headers.
+	 * 
+	 * @param ifNode the first 'if' node in 'if-[else if]*-else' structure
+	 * @param document the input document of the text viewer on which the hover popup should be
+	 *            shown
+	 * @param editorInput the editor's input as {@link ITypeRoot}
+	 * @param delim the line delimiter used for the editorInput
+	 * @return the hover text for 'else' closing bracket in 'if-[else if]*-else' cases
+	 * @throws BadLocationException if an attempt has been performed to access a non-existing
+	 *             position in the document
+	 * @since 3.9
+	 */
+	private String getBracketHoverInfoForElse(IfStatement ifNode, final IDocument document, final ITypeRoot editorInput, final String delim) throws BadLocationException {
+		int totalSkippedLines= 0;
+		String hoverText= null;
+
+		Statement currentStatement= ifNode.getThenStatement();
+		int nodeStart= ifNode.getStartPosition();
+		while (currentStatement != null) {
+			int nodeLength= ASTNodes.getExclusiveEnd(currentStatement) - nodeStart;
+			int line1= document.getLineOfOffset(nodeStart);
+			int sourceOffset= document.getLineOffset(line1);
+			int line2= document.getLineOfOffset(nodeStart + nodeLength);
+			int line3= line2;
+			if (ifNode != null && ifNode.getElseStatement() != null) {
+				int elseStartOffset= getNextElseOffset(ifNode.getThenStatement(), editorInput);
+				if (elseStartOffset != -1) {
+					line3= document.getLineOfOffset(elseStartOffset); // next 'else'
+				}
+			}
+			int noOfTotalLines= (line2 == line3) ? (line2 - line1) : (line2 - line1 + 1);
+			int noOfSourceLines= 3;
+
+			if (noOfTotalLines < noOfSourceLines) {
+				noOfSourceLines= noOfTotalLines;
+			}
+			int noOfSkippedLines= noOfTotalLines - noOfSourceLines;
+			if (noOfSkippedLines == 1) {
+				noOfSourceLines++;
+				noOfSkippedLines= 0;
+			}
+
+			if (noOfSourceLines > 0) {
+				IRegion endLine= document.getLineInformation(line1 + noOfSourceLines - 1);
+				int sourceLength= (endLine.getOffset() + endLine.getLength()) - sourceOffset;
+				String source= document.get(sourceOffset, sourceLength);
+				String[] sourceLines= getTrimmedSource(source, editorInput);
+				if (sourceLines == null)
+					return null;
+				source= Strings.concatenate(sourceLines, delim);
+				if (noOfSkippedLines > 0) {
+					source= source.concat(delim).concat(JavaHoverMessages.JavaSourceHover_skippedLinesSymbol);
+					fUpwardShiftInLines++;
+				}
+
+				fUpwardShiftInLines+= noOfSourceLines;
+				totalSkippedLines+= noOfSkippedLines;
+				if (hoverText == null) {
+					hoverText= source;
+				} else {
+					hoverText= hoverText.concat(delim).concat(source);
+				}
+			}
+			// advance currentStatement to the next 'else if' or 'else' statement; set it to null when no further statement is left for processing
+			// advance ifNode to the 'if' in next 'else if'; set it to null if 'else' is reached
+			if (ifNode != null && ifNode.getElseStatement() != null) {
+				Statement thenStatement= ifNode.getThenStatement();
+				Statement nextStatement= ifNode.getElseStatement();
+				if (nextStatement instanceof IfStatement) {
+					currentStatement= ((IfStatement) nextStatement).getThenStatement();
+					ifNode= (IfStatement) nextStatement;
+				} else {
+					currentStatement= nextStatement;
+					ifNode= null;
+				}
+				// update nodeStart to next 'else' start offset
+				int nextStartOffset= getNextElseOffset(thenStatement, editorInput);
+				if (nextStartOffset != -1) {
+					nodeStart= nextStartOffset;
+				} else {
+					nodeStart= nextStatement.getStartPosition();
+				}
+			} else {
+				currentStatement= null;
+			}
+		}
+
+		if (fUpwardShiftInLines == 0)
+			return null;
+		if ((totalSkippedLines) > 0) {
+			fBracketHoverStatus= Messages.format(JavaHoverMessages.JavaSourceHover_skippedLines, new Integer(totalSkippedLines));
+		}
+		return hoverText;
+	}
+
+	private int getNextElseOffset(Statement then, ITypeRoot editorInput) {
+		int thenEnd= ASTNodes.getExclusiveEnd(then);
+		try {
+			TokenScanner scanner= new TokenScanner(editorInput);
+			return scanner.getNextStartOffset(thenEnd, true);
+		} catch (CoreException e) {
+			// ignore
+		}
+		return -1;
 	}
 
 	/**
