@@ -1053,8 +1053,8 @@ public class JavaElementLabelComposer {
 	 * Returns the string for rendering the {@link IJavaElement#getElementName() element name} of
 	 * the given element.
 	 * <p>
-	 * <strong>Note:</strong> This class only calls this helper for those elements where
-	 * {@link JavaElementLinks}) has the need to rendered the name differently.
+	 * <strong>Note:</strong> This class only calls this helper for those elements where (
+	 * {@link JavaElementLinks}) has the need to render the name differently.
 	 * </p>
 	 * 
 	 * @param element the element to render
@@ -1063,7 +1063,6 @@ public class JavaElementLabelComposer {
 	protected String getElementName(IJavaElement element) {
 		return element.getElementName();
 	}
-
 
 	/**
 	 * Appends the label for a import container, import or package declaration. Considers the D_* flags.
