@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -146,7 +146,7 @@ public class PluginsNotLoadedTest extends TestCase {
 			"org.junit",
 			"org.junit4",
 			"org.mortbay.jetty",
-			"om.ibm.icu.source",
+			"com.ibm.icu.source",
 			"javax.servlet.jsp.source",
 			"javax.servlet.source",
 			"org.apache.ant.source",
@@ -250,7 +250,12 @@ public class PluginsNotLoadedTest extends TestCase {
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < NOT_LOADED_BUNDLES.length; i++) {
 			Bundle bundle= Platform.getBundle(NOT_LOADED_BUNDLES[i]);
-			if (bundle != null && bundle.getState() == Bundle.ACTIVE) {
+			if (bundle == null) {
+				// log bundles that cannot be found:
+//				buf.append("- not found: ");
+//				buf.append(NOT_LOADED_BUNDLES[i]);
+//				buf.append('\n');
+			} else if (bundle.getState() == Bundle.ACTIVE) {
 				buf.append("- ");
 				buf.append(NOT_LOADED_BUNDLES[i]);
 				buf.append('\n');
