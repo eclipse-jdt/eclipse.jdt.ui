@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,12 +87,12 @@ public class JUnit3TestLoader implements ITestLoader {
 		} catch (NoSuchMethodException e) {
 		} catch (ClassCastException e) {
 		}
-		return warning("Could not create test \'" + testName + "\' "); //$NON-NLS-1$ //$NON-NLS-2$
+		return error(testName, "Could not create test \'" + testName + "\' "); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public Test getTest(Class testClass, String testName, RemoteTestRunner failureListener) {
 		if (testName != null) {
-			return setupTest(testClass, createTest(testName, testClass));
+			return setupTest(testClass, createTest(testName, testClass), testName);
 		}
 		Method suiteMethod= null;
 		try {
@@ -102,14 +102,14 @@ public class JUnit3TestLoader implements ITestLoader {
 			return new TestSuite(testClass);
 		}
 		if (!Modifier.isStatic(suiteMethod.getModifiers())) {
-			return warning(JUnitMessages.getString("RemoteTestRunner.error.suite.notstatic"));//$NON-NLS-1$
+			return error(JUnitMessages.getString("RemoteTestRunner.error"), JUnitMessages.getString("RemoteTestRunner.error.suite.notstatic"));//$NON-NLS-1$ //$NON-NLS-2$
 		}
 		try {
 			Test test= (Test) suiteMethod.invoke(null, new Class[0]); // static
 			if (test != null) {
 				return test;
 			}
-			return warning(JUnitMessages.getString("RemoteTestRunner.error.suite.nullreturn")); //$NON-NLS-1$
+			return error(JUnitMessages.getString("RemoteTestRunner.error"), JUnitMessages.getString("RemoteTestRunner.error.suite.nullreturn")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (InvocationTargetException e) {
 			String message= JUnitMessages.getFormattedString("RemoteTestRunner.error.invoke", e.getTargetException().toString()); //$NON-NLS-1$
 			failureListener.runFailed(message, e);
@@ -131,9 +131,10 @@ public class JUnit3TestLoader implements ITestLoader {
 	 *
 	 * @param reloadedTestClass test class
 	 * @param reloadedTest test instance
+	 * @param testName test name
 	 * @return the reloaded test, or the test wrapped with setUpTest(..) if available
 	 */
-	private Test setupTest(Class reloadedTestClass, Test reloadedTest) {
+	private Test setupTest(Class reloadedTestClass, Test reloadedTest, String testName) {
 		if (reloadedTestClass == null)
 			return reloadedTest;
 
@@ -146,31 +147,32 @@ public class JUnit3TestLoader implements ITestLoader {
 			return reloadedTest;
 		}
 		if (setup.getReturnType() != Test.class)
-			return warning(JUnitMessages.getString("RemoteTestRunner.error.notestreturn")); //$NON-NLS-1$
+			return error(testName, JUnitMessages.getString("RemoteTestRunner.error.notestreturn")); //$NON-NLS-1$
 		if (!Modifier.isPublic(setup.getModifiers()))
-			return warning(JUnitMessages.getString("RemoteTestRunner.error.shouldbepublic")); //$NON-NLS-1$
+			return error(testName, JUnitMessages.getString("RemoteTestRunner.error.shouldbepublic")); //$NON-NLS-1$
 		if (!Modifier.isStatic(setup.getModifiers()))
-			return warning(JUnitMessages.getString("RemoteTestRunner.error.shouldbestatic")); //$NON-NLS-1$
+			return error(testName, JUnitMessages.getString("RemoteTestRunner.error.shouldbestatic")); //$NON-NLS-1$
 		try {
 			Test test= (Test) setup.invoke(null, new Object[] { reloadedTest });
 			if (test == null)
-				return warning(JUnitMessages.getString("RemoteTestRunner.error.nullreturn")); //$NON-NLS-1$
+				return error(testName, JUnitMessages.getString("RemoteTestRunner.error.nullreturn")); //$NON-NLS-1$
 			return test;
 		} catch (IllegalArgumentException e) {
-			return warning(JUnitMessages.getFormattedString("RemoteTestRunner.error.couldnotinvoke", e)); //$NON-NLS-1$
+			return error(testName, JUnitMessages.getFormattedString("RemoteTestRunner.error.couldnotinvoke", e)); //$NON-NLS-1$
 		} catch (IllegalAccessException e) {
-			return warning(JUnitMessages.getFormattedString("RemoteTestRunner.error.couldnotinvoke", e)); //$NON-NLS-1$
+			return error(testName, JUnitMessages.getFormattedString("RemoteTestRunner.error.couldnotinvoke", e)); //$NON-NLS-1$
 		} catch (InvocationTargetException e) {
-			return warning(JUnitMessages.getFormattedString("RemoteTestRunner.error.invocationexception", e.getTargetException())); //$NON-NLS-1$
+			return error(testName, JUnitMessages.getFormattedString("RemoteTestRunner.error.invocationexception", e.getTargetException())); //$NON-NLS-1$
 		}
 	}
 
 	/**
-	 * @param message warning message
-	 * @return a test which will fail and log a warning message.
+	 * @param testName test name
+	 * @param message error message
+	 * @return a test which will fail and log an error message.
 	 */
-	private Test warning(final String message) {
-		return new TestCase("warning") { //$NON-NLS-1$
+	private Test error(String testName, final String message) {
+		return new TestCase(testName) {
 			protected void runTest() {
 				fail(message);
 			}
