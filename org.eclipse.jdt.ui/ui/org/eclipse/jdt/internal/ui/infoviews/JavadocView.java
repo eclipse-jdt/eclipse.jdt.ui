@@ -13,14 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.infoviews;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
-
-import org.osgi.framework.Bundle;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
@@ -33,7 +28,6 @@ import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
@@ -46,7 +40,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFile;
 
@@ -129,14 +122,11 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.NodeFinder;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -714,39 +704,9 @@ public class JavadocView extends AbstractInfoView {
 		if (fgStyleSheetLoaded)
 			return;
 		fgStyleSheetLoaded= true;
-		fgStyleSheet= loadStyleSheet();
+		fgStyleSheet= JavadocHover.loadStyleSheet("/JavadocViewStyleSheet.css"); //$NON-NLS-1$
 	}
 
-	private static String loadStyleSheet() {
-		Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
-		URL styleSheetURL= bundle.getEntry("/JavadocViewStyleSheet.css"); //$NON-NLS-1$
-		if (styleSheetURL == null)
-			return null;
-
-		BufferedReader reader= null;
-		try {
-			reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
-			StringBuffer buffer= new StringBuffer(1500);
-			String line= reader.readLine();
-			while (line != null) {
-				buffer.append(line);
-				buffer.append('\n');
-				line= reader.readLine();
-			}
-
-			FontData fontData= JFaceResources.getFontRegistry().getFontData(PreferenceConstants.APPEARANCE_JAVADOC_FONT)[0];
-			return HTMLPrinter.convertTopLevelFont(buffer.toString(), fontData);
-		} catch (IOException ex) {
-			JavaPlugin.log(ex);
-			return null;
-		} finally {
-			try {
-				if (reader != null)
-					reader.close();
-			} catch (IOException e) {
-			}
-		}
-	}
 
 	/*
 	 * @see AbstractInfoView#createActions()
@@ -1212,6 +1172,7 @@ public class JavadocView extends AbstractInfoView {
 		return buffer.toString();
 	}
 
+
 	/**
 	 * Gets the label for the given member.
 	 * 
@@ -1225,18 +1186,8 @@ public class JavadocView extends AbstractInfoView {
 		if (member.getElementType() == IJavaElement.FIELD && constantValue != null) {
 			label.append(constantValue);
 		}
-
-		String imageName= null;
-		if (allowImage) {
-			URL imageUrl= JavaPlugin.getDefault().getImagesOnFSRegistry().getImageURL(member);
-			if (imageUrl != null) {
-				imageName= imageUrl.toExternalForm();
-			}
-		}
-
-		StringBuffer buf= new StringBuffer();
-		JavadocHover.addImageAndLabel(buf, member, imageName, 16, 16, label.toString(), 20, 2);
-		return buf.toString();
+		String imageName= allowImage ? JavadocHover.getImageName(member) : null;
+		return JavadocHover.getImageAndLabel(member, imageName, label.toString()).toString();
 	}
 
 
@@ -1382,7 +1333,7 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	private String computeFieldConstant(IWorkbenchPart activePart, ISelection selection, IField resolvedField, IProgressMonitor monitor) {
 
-		if (!isStaticFinal(resolvedField))
+		if (!JavadocHover.isStaticFinal(resolvedField))
 			return null;
 
 		Object constantValue;
@@ -1401,7 +1352,7 @@ public class JavadocView extends AbstractInfoView {
 		}
 
 		if (constantValue != null)
-			return getFormattedAssignmentOperator(preferenceProject) + formatCompilerConstantValue(constantValue);
+			return JavadocHover.getFormattedAssignmentOperator(preferenceProject) + formatCompilerConstantValue(constantValue);
 
 		return null;
 	}
@@ -1457,67 +1408,30 @@ public class JavadocView extends AbstractInfoView {
 	}
 
 	/**
-	 * Tells whether the given member is static final.
-	 * <p>
-	 * XXX: Copied from {@link JavadocHover}.
-	 * </p>
-	 * @param member the member to test
-	 * @return <code>true</code> if static final
-	 * @since 3.4
-	 */
-	private static boolean isStaticFinal(IJavaElement member) {
-		if (member.getElementType() != IJavaElement.FIELD)
-			return false;
-
-		IField field= (IField)member;
-		try {
-			return JdtFlags.isFinal(field) && JdtFlags.isStatic(field);
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-			return false;
-		}
-	}
-
-	/**
-	 * Returns the constant value for a field that is referenced by the currently active type.
-	 * This method does may not run in the main UI thread.
-	 * <p>
-	 * XXX: This method was part of the JavadocHover#getConstantValue(IField field, IRegion hoverRegion)
-	 * 		method (lines 299-314).
-	 * </p>
+	 * Returns the constant value for a field that is referenced by the currently active type. This
+	 * method does may not run in the main UI thread.
+	 * 
 	 * @param activeType the type that is currently active
-	 * @param field the field that is being referenced (usually not declared in <code>activeType</code>)
+	 * @param field the field that is being referenced (usually not declared in
+	 *            <code>activeType</code>)
 	 * @param selection the region in <code>activeType</code> that contains the field reference
 	 * @param monitor a progress monitor
-	 *
+	 * 
 	 * @return the constant value for the given field or <code>null</code> if none
 	 * @since 3.4
 	 */
 	private static Object getConstantValueFromActiveEditor(ITypeRoot activeType, IField field, ITextSelection selection, IProgressMonitor monitor) {
-		Object constantValue= null;
-
 		CompilationUnit unit= SharedASTProvider.getAST(activeType, SharedASTProvider.WAIT_ACTIVE_ONLY, monitor);
 		if (unit == null)
 			return null;
 
 		ASTNode node= NodeFinder.perform(unit, selection.getOffset(), selection.getLength());
-		if (node != null && node.getNodeType() == ASTNode.SIMPLE_NAME) {
-			IBinding binding= ((SimpleName)node).resolveBinding();
-			if (binding != null && binding.getKind() == IBinding.VARIABLE) {
-				IVariableBinding variableBinding= (IVariableBinding)binding;
-				if (field.equals(variableBinding.getJavaElement())) {
-					constantValue= variableBinding.getConstantValue();
-				}
-			}
-		}
-		return constantValue;
+		return JavadocHover.getVariableBindingConstValue(node, field);
 	}
 
 	/**
 	 * Returns the string representation of the given constant value.
-	 * <p>
-	 * XXX: In {@link JavadocHover} this method was part of JavadocHover#getConstantValue lines 318-361.
-	 * </p>
+	 *
 	 * @param constantValue the constant value
 	 * @return the string representation of the given constant value.
 	 * @since 3.4
@@ -1536,73 +1450,11 @@ public class JavadocView extends AbstractInfoView {
 			result.append('"');
 			return result.toString();
 
-		} else if (constantValue instanceof Character) {
-			String constantResult= '\'' + constantValue.toString() + '\'';
-
-			char charValue= ((Character) constantValue).charValue();
-			String hexString= Integer.toHexString(charValue);
-			StringBuffer hexResult= new StringBuffer("\\u"); //$NON-NLS-1$
-			for (int i= hexString.length(); i < 4; i++) {
-				hexResult.append('0');
-			}
-			hexResult.append(hexString);
-			return formatWithHexValue(constantResult, hexResult.toString());
-
-		} else if (constantValue instanceof Byte) {
-			int byteValue= ((Byte) constantValue).intValue() & 0xFF;
-			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(byteValue)); //$NON-NLS-1$
-
-		} else if (constantValue instanceof Short) {
-			int shortValue= ((Short) constantValue).shortValue() & 0xFFFF;
-			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(shortValue)); //$NON-NLS-1$
-
-		} else if (constantValue instanceof Integer) {
-			int intValue= ((Integer) constantValue).intValue();
-			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(intValue)); //$NON-NLS-1$
-
-		} else if (constantValue instanceof Long) {
-			long longValue= ((Long) constantValue).longValue();
-			return formatWithHexValue(constantValue, "0x" + Long.toHexString(longValue)); //$NON-NLS-1$
-
 		} else {
-			return constantValue.toString();
+			return JavadocHover.getHexConstantValue(constantValue);
 		}
 	}
 
-	/**
-	 * Creates and returns a formatted message for the given
-	 * constant with its hex value.
-	 * <p>
-	 * XXX: Copied from {@link JavadocHover}.
-	 * </p>
-	 *
-	 * @param constantValue the constant value
-	 * @param hexValue the hex value
-	 * @return a formatted string with constant and hex values
-	 * @since 3.4
-	 */
-	private static String formatWithHexValue(Object constantValue, String hexValue) {
-		return Messages.format(InfoViewMessages.JavadocView_constantValue_hexValue, new String[] { constantValue.toString(), hexValue });
-	}
-
-	/**
-	 * Returns the assignment operator string with the project's formatting applied to it.
-	 * <p>
-	 * XXX: This method was extracted from JavadocHover#getInfoText method.
-	 * </p>
-	 * @param javaProject the Java project whose formatting options will be used.
-	 * @return the formatted assignment operator string.
-	 * @since 3.4
-	 */
-	private static String getFormattedAssignmentOperator(IJavaProject javaProject) {
-		StringBuffer buffer= new StringBuffer();
-		if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, true)))
-			buffer.append(' ');
-		buffer.append('=');
-		if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR, true)))
-			buffer.append(' ');
-		return buffer.toString();
-	}
 
 	/**
 	 * see also org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover.addLinkListener(BrowserInformationControl)

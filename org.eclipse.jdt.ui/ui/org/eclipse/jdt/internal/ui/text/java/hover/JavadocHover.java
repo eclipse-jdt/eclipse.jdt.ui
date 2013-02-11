@@ -747,31 +747,29 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			if (constantValue != null) {
 				constantValue= HTMLPrinter.convertToHTMLContentWithWhitespace(constantValue);
 				IJavaProject javaProject= element.getJavaProject();
-				if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, true)))
-					label.append(' ');
-				label.append('=');
-				if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR, true)))
-					label.append(' ');
+				label.append(getFormattedAssignmentOperator(javaProject));
 				label.append(constantValue);
 			}
 		}
-		
+
 //		if (element.getElementType() == IJavaElement.METHOD) {
 //			IMethod method= (IMethod)element;
 //			//TODO: add default value for annotation type members, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=249016
 //		}
 
+		String imageName= allowImage ? getImageName(element) : null;
+		return getImageAndLabel(element, imageName, label.toString()).toString();
+	}
+	
+
+	public static String getImageName(IJavaElement element) {
 		String imageName= null;
-		if (allowImage) {
-			URL imageUrl= JavaPlugin.getDefault().getImagesOnFSRegistry().getImageURL(element);
-			if (imageUrl != null) {
-				imageName= imageUrl.toExternalForm();
-			}
+		URL imageUrl= JavaPlugin.getDefault().getImagesOnFSRegistry().getImageURL(element);
+		if (imageUrl != null) {
+			imageName= imageUrl.toExternalForm();
 		}
 
-		StringBuffer buf= new StringBuffer();
-		addImageAndLabel(buf, element, imageName, 16, 16, label.toString(), 20, 2);
-		return buf.toString();
+		return imageName;
 	}
 
 	private static long getHeaderFlags(IJavaElement element) {
@@ -787,10 +785,14 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		}
 	}
 
-	/*
+	/**
+	 * Tells whether the given field is static final.
+	 * 
+	 * @param field the member to test
+	 * @return <code>true</code> if static final
 	 * @since 3.4
 	 */
-	private static boolean isStaticFinal(IField field) {
+	public static boolean isStaticFinal(IField field) {
 		try {
 			return JdtFlags.isFinal(field) && JdtFlags.isStatic(field);
 		} catch (JavaModelException e) {
@@ -815,53 +817,15 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		ASTNode node= getHoveredASTNode(editorInputElement, hoverRegion);
 		if (node == null)
 			return null;
-		
-		Object constantValue= null;
-		if (node.getNodeType() == ASTNode.SIMPLE_NAME) {
-			IBinding binding= ((SimpleName)node).resolveBinding();
-			if (binding != null && binding.getKind() == IBinding.VARIABLE) {
-				IVariableBinding variableBinding= (IVariableBinding)binding;
-				if (field.equals(variableBinding.getJavaElement())) {
-					constantValue= variableBinding.getConstantValue();
-				}
-			}
-		}
+
+		Object constantValue= getVariableBindingConstValue(node, field);
 		if (constantValue == null)
 			return null;
 
 		if (constantValue instanceof String) {
 			return ASTNodes.getEscapedStringLiteral((String) constantValue);
-
-		} else if (constantValue instanceof Character) {
-			String constantResult= ASTNodes.getEscapedCharacterLiteral(((Character) constantValue).charValue());
-
-			char charValue= ((Character) constantValue).charValue();
-			String hexString= Integer.toHexString(charValue);
-			StringBuffer hexResult= new StringBuffer("\\u"); //$NON-NLS-1$
-			for (int i= hexString.length(); i < 4; i++) {
-				hexResult.append('0');
-			}
-			hexResult.append(hexString);
-			return formatWithHexValue(constantResult, hexResult.toString());
-
-		} else if (constantValue instanceof Byte) {
-			int byteValue= ((Byte) constantValue).intValue() & 0xFF;
-			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(byteValue)); //$NON-NLS-1$
-
-		} else if (constantValue instanceof Short) {
-			int shortValue= ((Short) constantValue).shortValue() & 0xFFFF;
-			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(shortValue)); //$NON-NLS-1$
-
-		} else if (constantValue instanceof Integer) {
-			int intValue= ((Integer) constantValue).intValue();
-			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(intValue)); //$NON-NLS-1$
-
-		} else if (constantValue instanceof Long) {
-			long longValue= ((Long) constantValue).longValue();
-			return formatWithHexValue(constantValue, "0x" + Long.toHexString(longValue)); //$NON-NLS-1$
-
 		} else {
-			return constantValue.toString();
+			return getHexConstantValue(constantValue);
 		}
 	}
 
@@ -895,8 +859,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @since 3.4
 	 */
 	private static String getStyleSheet() {
-		if (fgStyleSheet == null)
-			fgStyleSheet= loadStyleSheet();
+		if (fgStyleSheet == null) {
+			fgStyleSheet= loadStyleSheet("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
+		}
 		String css= fgStyleSheet;
 		if (css != null) {
 			FontData fontData= JFaceResources.getFontRegistry().getFontData(PreferenceConstants.APPEARANCE_JAVADOC_FONT)[0];
@@ -907,40 +872,51 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	/**
-	 * Loads and returns the Javadoc hover style sheet.
+	 * Loads and returns the style sheet associated with either Javadoc hover or the view.
+	 * 
+	 * @param styleSheetName the style sheet name of either the Javadoc hover or the view
 	 * @return the style sheet, or <code>null</code> if unable to load
 	 * @since 3.4
 	 */
-	private static String loadStyleSheet() {
+	public static String loadStyleSheet(String styleSheetName) {
 		Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
-		URL styleSheetURL= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
-		if (styleSheetURL != null) {
-			BufferedReader reader= null;
+		URL styleSheetURL= bundle.getEntry(styleSheetName);
+		if (styleSheetURL == null)
+			return null;
+
+		BufferedReader reader= null;
+		try {
+			reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
+			StringBuffer buffer= new StringBuffer(1500);
+			String line= reader.readLine();
+			while (line != null) {
+				buffer.append(line);
+				buffer.append('\n');
+				line= reader.readLine();
+			}
+
+			FontData fontData= JFaceResources.getFontRegistry().getFontData(PreferenceConstants.APPEARANCE_JAVADOC_FONT)[0];
+			return HTMLPrinter.convertTopLevelFont(buffer.toString(), fontData);
+		} catch (IOException ex) {
+			JavaPlugin.log(ex);
+			return ""; //$NON-NLS-1$
+		} finally {
 			try {
-				reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
-				StringBuffer buffer= new StringBuffer(1500);
-				String line= reader.readLine();
-				while (line != null) {
-					buffer.append(line);
-					buffer.append('\n');
-					line= reader.readLine();
-				}
-				return buffer.toString();
-			} catch (IOException ex) {
-				JavaPlugin.log(ex);
-				return ""; //$NON-NLS-1$
-			} finally {
-				try {
-					if (reader != null)
-						reader.close();
-				} catch (IOException e) {
-				}
+				if (reader != null)
+					reader.close();
+			} catch (IOException e) {
+				//ignore
 			}
 		}
-		return null;
 	}
 
-	public static void addImageAndLabel(StringBuffer buf, IJavaElement element, String imageSrcPath, int imageWidth, int imageHeight, String label, int labelLeft, int labelTop) {
+	public static String getImageAndLabel(IJavaElement element, String imageSrcPath, String label) {
+		StringBuffer buf= new StringBuffer();
+		int imageWidth= 16;
+		int imageHeight= 16;
+		int labelLeft= 20;
+		int labelTop= 2;
+
 		buf.append("<div style='word-wrap: break-word; position: relative; "); //$NON-NLS-1$
 		
 		if (imageSrcPath != null) {
@@ -984,6 +960,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		buf.append(label);
 		
 		buf.append("</div>"); //$NON-NLS-1$
+		return buf.toString();
 	}
 
 	public static void addAnnotations(StringBuffer buf, IJavaElement element, ITypeRoot editorInputElement, IRegion hoverRegion) {
@@ -1175,4 +1152,72 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	private static StringBuffer addLink(StringBuffer buf, String uri, String label) {
 		return buf.append(JavaElementLinks.createLink(uri, label));
 	}
+		
+	/**
+	 * Returns the assignment operator string with the project's formatting applied to it.
+	 * 
+	 * @param javaProject the Java project whose formatting options will be used.
+	 * @return the formatted assignment operator string.
+	 * @since 3.4
+	 */
+	public static String getFormattedAssignmentOperator(IJavaProject javaProject) {
+		StringBuffer buffer= new StringBuffer();
+		if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, true)))
+			buffer.append(' ');
+		buffer.append('=');
+		if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR, true)))
+			buffer.append(' ');
+		return buffer.toString();
+	}
+
+	
+	
+	public static String getHexConstantValue(Object constantValue) {
+		if (constantValue instanceof Character) {
+			String constantResult= '\'' + constantValue.toString() + '\'';
+
+			char charValue= ((Character) constantValue).charValue();
+			String hexString= Integer.toHexString(charValue);
+			StringBuffer hexResult= new StringBuffer("\\u"); //$NON-NLS-1$
+			for (int i= hexString.length(); i < 4; i++) {
+				hexResult.append('0');
+			}
+			hexResult.append(hexString);
+			return formatWithHexValue(constantResult, hexResult.toString());
+
+		} else if (constantValue instanceof Byte) {
+			int byteValue= ((Byte) constantValue).intValue() & 0xFF;
+			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(byteValue)); //$NON-NLS-1$
+
+		} else if (constantValue instanceof Short) {
+			int shortValue= ((Short) constantValue).shortValue() & 0xFFFF;
+			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(shortValue)); //$NON-NLS-1$
+
+		} else if (constantValue instanceof Integer) {
+			int intValue= ((Integer) constantValue).intValue();
+			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(intValue)); //$NON-NLS-1$
+
+		} else if (constantValue instanceof Long) {
+			long longValue= ((Long) constantValue).longValue();
+			return formatWithHexValue(constantValue, "0x" + Long.toHexString(longValue)); //$NON-NLS-1$
+
+		} else {
+			return constantValue.toString();
+		}
+	}
+
+	public static Object getVariableBindingConstValue(ASTNode node, IField field) {
+		if (node != null && node.getNodeType() == ASTNode.SIMPLE_NAME) {
+			IBinding binding= ((SimpleName) node).resolveBinding();
+			if (binding != null && binding.getKind() == IBinding.VARIABLE) {
+				IVariableBinding variableBinding= (IVariableBinding) binding;
+				if (field.equals(variableBinding.getJavaElement())) {
+					return variableBinding.getConstantValue();
+				}
+			}
+		}
+		return null;
+	}
+
+
 }
