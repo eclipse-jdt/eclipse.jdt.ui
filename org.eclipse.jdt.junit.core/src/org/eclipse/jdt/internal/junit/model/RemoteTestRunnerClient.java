@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.SafeRunner;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.runner.MessageIds;
+import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
 
 /**
  * The client side of the RemoteTestRunner. Handles the
@@ -392,7 +393,16 @@ public class RemoteTestRunnerClient {
 		// status: FAILURE, ERROR, OK
 		int i= arg.indexOf(' ');
 		int c= arg.indexOf(' ', i+1);
-		int t= arg.indexOf(' ', c+1);
+		int t; // special treatment, since testName can contain spaces:
+		if (arg.endsWith(RemoteTestRunner.RERAN_ERROR)) {
+			t= arg.length() - RemoteTestRunner.RERAN_ERROR.length() - 1;
+		} else if (arg.endsWith(RemoteTestRunner.RERAN_FAILURE)) {
+			t= arg.length() - RemoteTestRunner.RERAN_FAILURE.length() - 1;
+		} else if (arg.endsWith(RemoteTestRunner.RERAN_OK)) {
+			t= arg.length() - RemoteTestRunner.RERAN_OK.length() - 1;
+		} else {
+			t= arg.indexOf(' ', c+1);
+		}
 		String testId= arg.substring(0, i);
 		String className= arg.substring(i+1, c);
 		String testName= arg.substring(c+1, t);
