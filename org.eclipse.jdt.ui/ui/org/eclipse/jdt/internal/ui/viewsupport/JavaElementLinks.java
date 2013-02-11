@@ -398,6 +398,11 @@ public class JavaElementLinks {
 					IType type= (IType) element;
 					if (refTypeName.length() > 0) {
 						type= resolveType(type, refTypeName);
+						if (type == null) {
+							IPackageFragment pack= JavaModelUtil.getPackageFragmentRoot(element).getPackageFragment(refTypeName);
+							if (pack.exists())
+								return pack;
+						}
 					}
 					if (type != null) {
 						element= type;
