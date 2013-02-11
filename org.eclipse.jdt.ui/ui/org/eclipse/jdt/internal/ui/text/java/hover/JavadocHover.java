@@ -757,12 +757,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 //			//TODO: add default value for annotation type members, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=249016
 //		}
 
-		String imageName= allowImage ? getImageName(element) : null;
-		return getImageAndLabel(element, imageName, label.toString()).toString();
+		return getImageAndLabel(element, allowImage, label.toString());
 	}
 	
-
-	public static String getImageName(IJavaElement element) {
+	private static String getImageURL(IJavaElement element) {
 		String imageName= null;
 		URL imageUrl= JavaPlugin.getDefault().getImagesOnFSRegistry().getImageURL(element);
 		if (imageUrl != null) {
@@ -910,7 +908,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		}
 	}
 
-	public static String getImageAndLabel(IJavaElement element, String imageSrcPath, String label) {
+	public static String getImageAndLabel(IJavaElement element, boolean allowImage, String label) {
 		StringBuffer buf= new StringBuffer();
 		int imageWidth= 16;
 		int imageHeight= 16;
@@ -919,6 +917,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 		buf.append("<div style='word-wrap: break-word; position: relative; "); //$NON-NLS-1$
 		
+		String imageSrcPath= allowImage ? getImageURL(element) : null;
 		if (imageSrcPath != null) {
 			buf.append("margin-left: ").append(labelLeft).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
 			buf.append("padding-top: ").append(labelTop).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$

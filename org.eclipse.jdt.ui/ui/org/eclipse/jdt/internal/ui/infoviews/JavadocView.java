@@ -1186,8 +1186,7 @@ public class JavadocView extends AbstractInfoView {
 		if (member.getElementType() == IJavaElement.FIELD && constantValue != null) {
 			label.append(constantValue);
 		}
-		String imageName= allowImage ? JavadocHover.getImageName(member) : null;
-		return JavadocHover.getImageAndLabel(member, imageName, label.toString()).toString();
+		return JavadocHover.getImageAndLabel(member, allowImage, label.toString());
 	}
 
 
