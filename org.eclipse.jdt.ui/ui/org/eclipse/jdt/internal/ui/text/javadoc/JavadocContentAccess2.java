@@ -1117,6 +1117,8 @@ public class JavadocContentAccess2 {
 				if (skipLeadingWhitespace) {
 					text= text.replaceFirst("^\\s+", ""); //$NON-NLS-1$ //$NON-NLS-2$
 				}
+				// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=233481 :
+				text= text.replaceAll("(\r\n?|\n)([ \t]*\\*)", "$1"); //$NON-NLS-1$ //$NON-NLS-2$
 				handleText(text);
 			} else if (child instanceof TagElement) {
 				handleInlineTagElement((TagElement) child);
