@@ -30,6 +30,8 @@ public class JdtTextTestSuite {
 		//$JUnit-BEGIN$
 		suite.addTestSuite(CompilationUnitDocumentProviderTest.class);
 		suite.addTest(JavaHeuristicScannerTest.suite());
+		suite.addTest(JavaAutoIndentStrategyTest.suite());
+		suite.addTestSuite(JavaBreakIteratorTest.class);
 		suite.addTest(JavaParameterListValidatorTest.suite());
 		suite.addTest(JavaDoc2HTMLTextReaderTester.suite());
 		suite.addTest(JavaPairMatcherTest.suite());
