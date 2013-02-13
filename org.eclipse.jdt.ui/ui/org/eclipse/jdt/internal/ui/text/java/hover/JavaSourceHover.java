@@ -62,6 +62,7 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 
@@ -218,8 +219,10 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			int noOfSourceLines;
 			IRegion endLine;
 			int skippedLines= 0;
-			if (line1 < topLine) {
-				//match not visible
+			int wLine1= ((JavaSourceViewer) textViewer).modelLine2WidgetLine(line1);
+			int wLine2= ((JavaSourceViewer) textViewer).modelLine2WidgetLine(line2);
+			if ((line1 < topLine) || (wLine1 != -1 && (wLine2 - wLine1 != line2 - line1))) {
+				// match not visible or content is folded - see bug 399997
 				if (isElseBracket) {
 					return getBracketHoverInfoForElse((IfStatement) node, document, editorInput, delim); // see bug:377141
 				}
