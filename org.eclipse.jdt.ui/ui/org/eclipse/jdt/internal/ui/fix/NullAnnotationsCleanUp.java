@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - [quick fix] Add quick fixes for null annotations - https://bugs.eclipse.org/337977
+ *     Stephan Herrmann - [quick fix] Add quick fixes for null annotations - https://bugs.eclipse.org/337977
  *     IBM Corporation - bug fixes
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
@@ -106,11 +106,11 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 			case IProblem.RequiredNonNullButProvidedPotentialNull:
 			case IProblem.RequiredNonNullButProvidedSpecdNullable:
 			case IProblem.RequiredNonNullButProvidedUnknown:
+			case IProblem.IllegalDefinitionToNonNullParameter:
+			case IProblem.IllegalRedefinitionToNonNullParameter:
 			case IProblem.ParameterLackingNullableAnnotation:
 				result.add(MultiFixMessages.NullAnnotationsCleanUp_add_nullable_annotation);
 				break;
-			case IProblem.IllegalDefinitionToNonNullParameter:
-			case IProblem.IllegalRedefinitionToNonNullParameter:
 			case IProblem.ParameterLackingNonNullAnnotation:
 				result.add(MultiFixMessages.NullAnnotationsCleanUp_add_nonnull_annotation);
 				break;

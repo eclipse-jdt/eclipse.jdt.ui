@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2012 GK Software AG and others.
+ * Copyright (c) 2011, 2013 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - [quick fix] Add quick fixes for null annotations - https://bugs.eclipse.org/337977
+ *     Stephan Herrmann - [quick fix] Add quick fixes for null annotations - https://bugs.eclipse.org/337977
  *     IBM Corporation - bug fixes
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
@@ -151,9 +151,8 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 				continue; // problem was filtered out by createCleanUp()
 			String annotationToAdd= nullableAnnotationName;
 			String annotationToRemove= nonNullAnnotationName;
+			// cf. createNullAnnotationInSignatureFix() but modifyOverridden is constantly false:
 			switch (problem.getProblemId()) {
-				case IProblem.IllegalDefinitionToNonNullParameter:
-				case IProblem.IllegalRedefinitionToNonNullParameter:
 				case IProblem.ParameterLackingNonNullAnnotation:
 				case IProblem.IllegalReturnNullityRedefinition:
 					annotationToAdd= nonNullAnnotationName;

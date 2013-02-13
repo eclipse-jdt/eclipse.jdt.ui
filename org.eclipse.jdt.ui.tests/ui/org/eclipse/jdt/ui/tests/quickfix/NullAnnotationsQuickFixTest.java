@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 GK Software AG and others.
+ * Copyright (c) 2012, 2013 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -106,6 +106,514 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
+	// ==== Problem:	dereferencing a @Nullable field
+	// ==== Fix:		extract field access to a fresh local variable and add a null-check
+
+	// basic case
+	public void testExtractNullableField1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable String f;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(f.toUpperCase());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable String f;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        final String f2 = f;\n");
+		buf.append("        if (f2 != null) {\n");
+		buf.append("            System.out.println(f2.toUpperCase());\n");
+		buf.append("        } else {\n");
+		buf.append("            // TODO handle null value\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	// statement is not element of a block - need to create a new block - local name f2 already in use
+	public void testExtractNullableField2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable String f;\n");
+		buf.append("    public void foo(boolean b) {\n");
+		buf.append("        @SuppressWarnings(\"unused\") boolean f2 = false;\n");
+		buf.append("        if (b)\n");
+		buf.append("          System.out.println(f.toUpperCase());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable String f;\n");
+		buf.append("    public void foo(boolean b) {\n");
+		buf.append("        @SuppressWarnings(\"unused\") boolean f2 = false;\n");
+		buf.append("        if (b) {\n");
+		buf.append("            final String f3 = f;\n");
+		buf.append("            if (f3 != null) {\n");
+		buf.append("                System.out.println(f3.toUpperCase());\n");
+		buf.append("            } else {\n");
+		buf.append("                // TODO handle null value\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	// field name is part of a qualified field reference - inside a return statement (type: int)
+	public void testExtractNullableField3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable E other;\n");
+		buf.append("    int f;\n");
+		buf.append("    public int foo(E that) {\n");
+		buf.append("        return that.other.f;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable E other;\n");
+		buf.append("    int f;\n");
+		buf.append("    public int foo(E that) {\n");
+		buf.append("        final E other2 = that.other;\n");
+		buf.append("        if (other2 != null) {\n");
+		buf.append("            return other2.f;\n");
+		buf.append("        } else {\n");
+		buf.append("            // TODO handle null value\n");
+		buf.append("            return 0;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	// field name is part of a this-qualified field reference - inside a return statement (type: String)
+	public void testExtractNullableField4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable E other;\n");
+		buf.append("    @Nullable String f;\n");
+		buf.append("    public String foo() {\n");
+		buf.append("        return this.other.f;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable E other;\n");
+		buf.append("    @Nullable String f;\n");
+		buf.append("    public String foo() {\n");
+		buf.append("        final E other2 = this.other;\n");
+		buf.append("        if (other2 != null) {\n");
+		buf.append("            return other2.f;\n");
+		buf.append("        } else {\n");
+		buf.append("            // TODO handle null value\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	// field referenced inside the rhs of an assignment-as-expression
+	public void testExtractNullableField5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable E other;\n");
+		buf.append("    @Nullable String f;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String lo;\n");
+		buf.append("        if ((lo = this.other.f) != null)\n");
+		buf.append("            System.out.println(lo);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable E other;\n");
+		buf.append("    @Nullable String f;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String lo;\n");
+		buf.append("        final E other2 = this.other;\n");
+		buf.append("        if (other2 != null) {\n");
+		buf.append("            if ((lo = other2.f) != null)\n");
+		buf.append("                System.out.println(lo);\n");
+		buf.append("        } else {\n");
+		buf.append("            // TODO handle null value\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	// reference to field of array type - dereferenced by f[0] and f.length
+	public void testExtractNullableField6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable String[] f1;\n");
+		buf.append("    @Nullable String[] f2;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(f1[0]);\n");
+		buf.append("        System.out.println(f2.length);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2, 0); // get correction for first of two problems
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable String[] f1;\n");
+		buf.append("    @Nullable String[] f2;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        final String[] f12 = f1;\n");
+		buf.append("        if (f12 != null) {\n");
+		buf.append("            System.out.println(f12[0]);\n");
+		buf.append("        } else {\n");
+		buf.append("            // TODO handle null value\n");
+		buf.append("        }\n");
+		buf.append("        System.out.println(f2.length);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+
+		proposals= collectCorrections(cu, astRoot, 2, 1); // get correction for second of two problems
+		assertNumberOfProposals(proposals, 1);
+		proposal= (CUCorrectionProposal) proposals.get(0);
+		preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable String[] f1;\n");
+		buf.append("    @Nullable String[] f2;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(f1[0]);\n");
+		buf.append("        final String[] f22 = f2;\n");
+		buf.append("        if (f22 != null) {\n");
+		buf.append("            System.out.println(f22.length);\n");
+		buf.append("        } else {\n");
+		buf.append("            // TODO handle null value\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	// field has a generic type
+	public void testExtractNullableField7() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable List<String> f;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(f.size());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable List<String> f;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        final List<String> f2 = f;\n");
+		buf.append("        if (f2 != null) {\n");
+		buf.append("            System.out.println(f2.size());\n");
+		buf.append("        } else {\n");
+		buf.append("            // TODO handle null value\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	// occurrences inside a class initializer
+	public void testExtractNullableField8() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable Exception e;\n");
+		buf.append("    {\n");
+		buf.append("        e.printStackTrace();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable Exception e;\n");
+		buf.append("    {\n");
+		buf.append("        final Exception e2 = e;\n");
+		buf.append("        if (e2 != null) {\n");
+		buf.append("            e2.printStackTrace();\n");
+		buf.append("        } else {\n");
+		buf.append("            // TODO handle null value\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	// field reference inside a local variable initialization - ensure correct scoping of this local
+	public void testExtractNullableField9() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable String f;\n");
+		buf.append("    public String foo() {\n");
+		buf.append("        String upper = f.toUpperCase();\n");
+		buf.append("        System.out.println(upper);\n");
+		buf.append("        return upper;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable String f;\n");
+		buf.append("    public String foo() {\n");
+		buf.append("        final String f2 = f;\n");
+		buf.append("        if (f2 != null) {\n");
+		buf.append("            String upper = f2.toUpperCase();\n");
+		buf.append("            System.out.println(upper);\n");
+		buf.append("            return upper;\n");
+		buf.append("        } else {\n");
+		buf.append("            // TODO handle null value\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	// ==== Problem:	using a @Nullable or un-annotated field in assignment/return context expecting @NonNull
+	// ==== Fix:		extract field access to a fresh local variable and add a null-check
+
+	// return situation, field reference is this.f
+	public void testExtractPotentiallyNullField1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable String f;\n");
+		buf.append("    public @NonNull String foo() {\n");
+		buf.append("        return this.f;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		// primary proposal: Extract to checked local variable
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable String f;\n");
+		buf.append("    public @NonNull String foo() {\n");
+		buf.append("        final String f2 = this.f;\n");
+		buf.append("        if (f2 != null) {\n");
+		buf.append("            return f2;\n");
+		buf.append("        } else {\n");
+		buf.append("            // TODO handle null value\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+		
+		
+		// secondary proposal: Change return type of 'foo(..)' to '@Nullable'
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable String f;\n");
+		buf.append("    public @Nullable String foo() {\n");
+		buf.append("        return this.f;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	// message send argument situation, field reference is local.f
+	public void testExtractPotentiallyNullField2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable String f;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        E local = this;\n");
+		buf.append("        bar(local.f);\n");
+		buf.append("    }\n");
+		buf.append("    public void bar(@NonNull String s) { }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Nullable String f;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        E local = this;\n");
+		buf.append("        final String f2 = local.f;\n");
+		buf.append("        if (f2 != null) {\n");
+		buf.append("            bar(f2);\n");
+		buf.append("        } else {\n");
+		buf.append("            // TODO handle null value\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void bar(@NonNull String s) { }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+
 	// @Nullable argument is used where @NonNull is required -> change to @NonNull
 	public void testChangeParameter1a() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -154,8 +662,8 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2); // other is add @SW
-		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		assertNumberOfProposals(proposals, 2); // other is add @SW - TODO: check when this is offered
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();

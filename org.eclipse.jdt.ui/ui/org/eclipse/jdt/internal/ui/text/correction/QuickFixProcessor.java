@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [quick fix] Quick fix for missing synchronized modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245250
+ *     Stephan Herrmann - [quick fix] Add quick fixes for null annotations - https://bugs.eclipse.org/337977
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -251,6 +252,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 			case IProblem.RedundantNullAnnotation:
 			case IProblem.UnusedTypeParameter:
+			case IProblem.NullableFieldReference:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId);
@@ -689,14 +691,16 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				NullAnnotationsCorrectionProcessor.addNullAnnotationInSignatureProposal(context, problem, proposals, false, true);
 				NullAnnotationsCorrectionProcessor.addNullAnnotationInSignatureProposal(context, problem, proposals, true, true);
 				break;
+			case IProblem.RequiredNonNullButProvidedSpecdNullable:
+			case IProblem.RequiredNonNullButProvidedUnknown:
+				NullAnnotationsCorrectionProcessor.addExtractCheckedLocalProposal(context, problem, proposals);
+				//$FALL-THROUGH$
 			case IProblem.RequiredNonNullButProvidedNull:
 			case IProblem.RequiredNonNullButProvidedPotentialNull:
-			case IProblem.RequiredNonNullButProvidedUnknown:
 			case IProblem.ParameterLackingNonNullAnnotation:
 			case IProblem.ParameterLackingNullableAnnotation:
 			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
-			case IProblem.RequiredNonNullButProvidedSpecdNullable:
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, proposals);
 				break;
 			case IProblem.RedundantNullAnnotation:
@@ -707,6 +711,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.UnusedTypeParameter:
 				LocalCorrectionsSubProcessor.addUnusedTypeParameterProposal(context, problem, proposals);
+				break;
+			case IProblem.NullableFieldReference:
+				NullAnnotationsCorrectionProcessor.addExtractCheckedLocalProposal(context, problem, proposals);
 				break;
 			default:
 		}
