@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.AbstractSavePartic
 import org.eclipse.jdt.internal.ui.preferences.BulletListBlock;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
 
 /**
@@ -118,7 +119,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 
 		Composite regionFormatingCombo= new Composite(fCleanUpOptionsComposite, SWT.NONE);
 		gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
-		gridData.horizontalIndent= 20;
+		gridData.horizontalIndent= LayoutUtil.getIndent();
 		regionFormatingCombo.setLayoutData(gridData);
 		gridLayout= new GridLayout(1, false);
 		gridLayout.marginHeight= 0;
@@ -159,7 +160,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		fFormatConfigLink= new Link(fCleanUpOptionsComposite, SWT.NONE);
 		fFormatConfigLink.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_ConfigureFormatter_Link);
 		GridData gridData2= new GridData(SWT.LEFT, SWT.TOP, false, false);
-		gridData2.horizontalIndent= 20;
+		gridData2.horizontalIndent= LayoutUtil.getIndent();
 		gridData2.minimumHeight= heightOneHalf;
 		fFormatConfigLink.setLayoutData(gridData2);
 
@@ -179,7 +180,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		fOrganizeImportsConfigLink= new Link(fCleanUpOptionsComposite, SWT.NONE);
 		fOrganizeImportsConfigLink.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_ConfigureImports_Link);
 		GridData gridData3= new GridData(SWT.LEFT, SWT.TOP, false, false);
-		gridData3.horizontalIndent= 20;
+		gridData3.horizontalIndent= LayoutUtil.getIndent();
 		gridData3.minimumHeight= heightOneHalf;
 		fOrganizeImportsConfigLink.setLayoutData(gridData3);
 

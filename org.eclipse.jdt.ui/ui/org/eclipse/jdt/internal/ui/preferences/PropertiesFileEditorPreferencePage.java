@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,6 +80,7 @@ import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartition
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
 import org.eclipse.jdt.internal.ui.text.JavaColorManager;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
 
 /**
@@ -458,7 +459,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		label= new Label(stylesComposite, SWT.LEFT);
 		label.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_color);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= 20;
+		gd.horizontalIndent= LayoutUtil.getIndent();
 		label.setLayoutData(gd);
 
 		fSyntaxForegroundColorEditor= new ColorSelector(stylesComposite);
@@ -469,28 +470,28 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		fBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
 		fBoldCheckBox.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_bold);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= 20;
+		gd.horizontalIndent= LayoutUtil.getIndent();
 		gd.horizontalSpan= 2;
 		fBoldCheckBox.setLayoutData(gd);
 
 		fItalicCheckBox= new Button(stylesComposite, SWT.CHECK);
 		fItalicCheckBox.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_italic);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= 20;
+		gd.horizontalIndent= LayoutUtil.getIndent();
 		gd.horizontalSpan= 2;
 		fItalicCheckBox.setLayoutData(gd);
 
 		fStrikethroughCheckBox= new Button(stylesComposite, SWT.CHECK);
 		fStrikethroughCheckBox.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_strikethrough);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= 20;
+		gd.horizontalIndent= LayoutUtil.getIndent();
 		gd.horizontalSpan= 2;
 		fStrikethroughCheckBox.setLayoutData(gd);
 
 		fUnderlineCheckBox= new Button(stylesComposite, SWT.CHECK);
 		fUnderlineCheckBox.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_underline);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= 20;
+		gd.horizontalIndent= LayoutUtil.getIndent();
 		gd.horizontalSpan= 2;
 		fUnderlineCheckBox.setLayoutData(gd);
 

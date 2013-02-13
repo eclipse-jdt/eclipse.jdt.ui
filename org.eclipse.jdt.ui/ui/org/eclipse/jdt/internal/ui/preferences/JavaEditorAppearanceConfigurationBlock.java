@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore.OverlayKey;
 import org.eclipse.jdt.internal.ui.text.java.hover.SourceViewerInformationControl;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
 
 /**
@@ -229,7 +230,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, 0);
 
 		String text= PreferencesMessages.SmartTypingConfigurationBlock_annotationReporting_link;
-		addLink(appearanceComposite, text, INDENT);
+		addLink(appearanceComposite, text);
 
 		Label spacer= new Label(appearanceComposite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -405,14 +406,14 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		return button;
 	}
 
-	private void addLink(Composite composite, String text, int indent) {
+	private void addLink(Composite composite, String text) {
 		GridData gd;
 		final Link link= new Link(composite, SWT.NONE);
 		link.setText(text);
 		gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gd.widthHint= 300; // don't get wider initially
 		gd.horizontalSpan= 2;
-		gd.horizontalIndent= indent;
+		gd.horizontalIndent= LayoutUtil.getIndent();
 		link.setLayoutData(gd);
 		link.addSelectionListener(new SelectionAdapter() {
 			@Override

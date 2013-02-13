@@ -469,10 +469,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
 
-		int indentStep=  fPixelConverter.convertWidthInCharsToPixels(1);
+		final int defaultIndent= 0;
+		final int extraIndent= LayoutUtil.getIndent();
 
-		int defaultIndent= indentStep * 0;
-		int extraIndent= indentStep * 3;
 		String label;
 		ExpandableComposite excomposite;
 		Composite inner;

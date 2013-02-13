@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.jface.layout.LayoutConstants;
 
 public class LayoutUtil {
 
@@ -111,12 +113,12 @@ public class LayoutUtil {
 	}
 
 	/**
-	 * Sets the horizontal indent of a control. Assumes that GridData is used.
+	 * Sets the horizontal indent of a dependent control. Assumes that GridData is used.
 	 */
-	public static void setHorizontalIndent(Control control, int horizontalIndent) {
+	public static void setHorizontalIndent(Control control) {
 		Object ld= control.getLayoutData();
 		if (ld instanceof GridData) {
-			((GridData)ld).horizontalIndent= horizontalIndent;
+			((GridData) ld).horizontalIndent= LayoutUtil.getIndent();
 		}
 	}
 
@@ -141,6 +143,20 @@ public class LayoutUtil {
 			gd.grabExcessVerticalSpace= true;
 			gd.verticalAlignment= SWT.FILL;
 		}
+	}
+
+	/**
+	 * Returns the indent of dependent controls, in pixels.
+	 * <p>
+	 * <strong>Note:</strong> Use this method instead of {@link LayoutConstants#getIndent()} for
+	 * compatibility reasons.
+	 * </p>
+	 * 
+	 * @return the indent of dependent controls, in pixels.
+	 * @since 3.9
+	 */
+	public static final int getIndent() {
+		return LayoutConstants.getIndent();
 	}
 
 }

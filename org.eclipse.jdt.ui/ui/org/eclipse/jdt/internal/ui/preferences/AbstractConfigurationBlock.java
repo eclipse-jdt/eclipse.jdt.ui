@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
 
 /**
@@ -120,8 +121,12 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		public SectionManager() {
 			this(null, null);
 		}
+
 		/**
 		 * Creates a new section manager.
+		 * 
+		 * @param dialogSettingsStore the dialog store
+		 * @param lastOpenKey the preference key
 		 */
 		public SectionManager(IPreferenceStore dialogSettingsStore, String lastOpenKey) {
 			fDialogSettingsStore= dialogSettingsStore;
@@ -352,20 +357,13 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	}
 
 	protected void createDependency(final Button master, final Control slave) {
-		createDependency(master, new Control[] {slave});
-	}
-
-	protected void createDependency(final Button master, final Control[] slaves) {
-		Assert.isTrue(slaves.length > 0);
-		indent(slaves[0]);
+		Assert.isNotNull(slave);
+		indent(slave);
 		SelectionListener listener= new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				boolean state= master.getSelection();
-				for (int i= 0; i < slaves.length; i++) {
-					slaves[i].setEnabled(state);
-				}
+				slave.setEnabled(state);
 			}
-
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		};
 		master.addSelectionListener(listener);
@@ -373,7 +371,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	}
 
 	protected static void indent(Control control) {
-		((GridData) control.getLayoutData()).horizontalIndent+= INDENT;
+		((GridData) control.getLayoutData()).horizontalIndent+= LayoutUtil.getIndent();
 	}
 
 	public void initialize() {

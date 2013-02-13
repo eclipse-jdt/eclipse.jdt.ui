@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -88,25 +88,23 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 		infoLabel.setLayoutData(gd);
 		infoLabel.setFont(parent.getFont());
 
-		int indent= convertWidthInCharsToPixels(3);
-
 		fExactStrategyRadio= new SelectionButtonDialogField(SWT.RADIO);
 		fExactStrategyRadio.setLabelText(RefactoringMessages.RenameTypeWizardSimilarElementsOptionsDialog_strategy_1);
 		fExactStrategyRadio.doFillIntoGrid(messageComposite, 1);
 		fExactStrategyRadio.setSelection(fSelectedStrategy == RenamingNameSuggestor.STRATEGY_EXACT);
-		LayoutUtil.setHorizontalIndent(fExactStrategyRadio.getSelectionButton(null), indent);
+		LayoutUtil.setHorizontalIndent(fExactStrategyRadio.getSelectionButton(null));
 
 		fEmbeddedStrategyRadio= new SelectionButtonDialogField(SWT.RADIO);
 		fEmbeddedStrategyRadio.setLabelText(RefactoringMessages.RenameTypeWizardSimilarElementsOptionsDialog_strategy_2);
 		fEmbeddedStrategyRadio.doFillIntoGrid(messageComposite, 1);
 		fEmbeddedStrategyRadio.setSelection(fSelectedStrategy == RenamingNameSuggestor.STRATEGY_EMBEDDED);
-		LayoutUtil.setHorizontalIndent(fEmbeddedStrategyRadio.getSelectionButton(null), indent);
+		LayoutUtil.setHorizontalIndent(fEmbeddedStrategyRadio.getSelectionButton(null));
 
 		fSuffixStrategyRadio= new SelectionButtonDialogField(SWT.RADIO);
 		fSuffixStrategyRadio.setLabelText(RefactoringMessages.RenameTypeWizardSimilarElementsOptionsDialog_strategy_3);
 		fSuffixStrategyRadio.doFillIntoGrid(messageComposite, 1);
 		fSuffixStrategyRadio.setSelection(fSelectedStrategy == RenamingNameSuggestor.STRATEGY_SUFFIX);
-		LayoutUtil.setHorizontalIndent(fSuffixStrategyRadio.getSelectionButton(null), indent);
+		LayoutUtil.setHorizontalIndent(fSuffixStrategyRadio.getSelectionButton(null));
 
 		final Composite warningComposite= new Composite(messageComposite, SWT.NONE);
 		layout= new GridLayout();

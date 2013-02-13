@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,6 +87,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
 /**
  *	Page 3 of the JAR Package wizard
@@ -151,8 +152,9 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	private final static String STORE_SEAL_JAR= PAGE_NAME + ".SEAL_JAR"; //$NON-NLS-1$
 
 	/**
-	 *	Create an instance of this class
-	 * @param jarPackage
+	 * Creates an instance of this class.
+	 * 
+	 * @param jarPackage the JAR package data
 	 */
 	public JarManifestWizardPage(JarPackageData jarPackage) {
 		super(PAGE_NAME);
@@ -213,37 +215,37 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		fGenerateManifestRadioButton.setText(JarPackagerMessages.JarManifestWizardPage_genetateManifest_text);
 		fGenerateManifestRadioButton.addListener(SWT.Selection, fUntypedListener);
 
-			Composite saveOptions= new Composite(fManifestGroup, SWT.NONE);
-			GridLayout saveOptionsLayout= new GridLayout();
-			saveOptionsLayout.marginWidth= 0;
-			saveOptions.setLayout(saveOptionsLayout);
+		Composite saveOptions= new Composite(fManifestGroup, SWT.NONE);
+		GridLayout saveOptionsLayout= new GridLayout();
+		saveOptionsLayout.marginWidth= 0;
+		saveOptions.setLayout(saveOptionsLayout);
 
-			GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
-			data.horizontalIndent=20;
-			saveOptions.setLayoutData(data);
+		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
+		data.horizontalIndent= LayoutUtil.getIndent();
+		saveOptions.setLayoutData(data);
 
-			fSaveManifestCheckbox= new Button(saveOptions, SWT.CHECK | SWT.LEFT);
-			fSaveManifestCheckbox.setText(JarPackagerMessages.JarManifestWizardPage_saveManifest_text);
-			fSaveManifestCheckbox.addListener(SWT.MouseUp, fUntypedListener);
+		fSaveManifestCheckbox= new Button(saveOptions, SWT.CHECK | SWT.LEFT);
+		fSaveManifestCheckbox.setText(JarPackagerMessages.JarManifestWizardPage_saveManifest_text);
+		fSaveManifestCheckbox.addListener(SWT.MouseUp, fUntypedListener);
 
-			fReuseManifestCheckbox= new Button(saveOptions, SWT.CHECK | SWT.LEFT);
-			fReuseManifestCheckbox.setText(JarPackagerMessages.JarManifestWizardPage_reuseManifest_text);
-			fReuseManifestCheckbox.addListener(SWT.MouseUp, fUntypedListener);
+		fReuseManifestCheckbox= new Button(saveOptions, SWT.CHECK | SWT.LEFT);
+		fReuseManifestCheckbox.setText(JarPackagerMessages.JarManifestWizardPage_reuseManifest_text);
+		fReuseManifestCheckbox.addListener(SWT.MouseUp, fUntypedListener);
 
-			createNewManifestFileGroup(saveOptions);
+		createNewManifestFileGroup(saveOptions);
 
 		fUseManifestRadioButton= new Button(fManifestGroup, SWT.RADIO | SWT.LEFT);
 		fUseManifestRadioButton.setText(JarPackagerMessages.JarManifestWizardPage_useManifest_text);
 
 		fUseManifestRadioButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			Composite existingManifestGroup= new Composite(fManifestGroup, SWT.NONE);
-			GridLayout existingManifestLayout= new GridLayout();
-			existingManifestLayout.marginWidth= 0;
-			existingManifestGroup.setLayout(existingManifestLayout);
-			data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
-			data.horizontalIndent=20;
-			existingManifestGroup.setLayoutData(data);
-			createManifestFileGroup(existingManifestGroup);
+		Composite existingManifestGroup= new Composite(fManifestGroup, SWT.NONE);
+		GridLayout existingManifestLayout= new GridLayout();
+		existingManifestLayout.marginWidth= 0;
+		existingManifestGroup.setLayout(existingManifestLayout);
+		data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
+		data.horizontalIndent= LayoutUtil.getIndent();
+		existingManifestGroup.setLayoutData(data);
+		createManifestFileGroup(existingManifestGroup);
 	}
 
 	protected void createNewManifestFileGroup(Composite parent) {

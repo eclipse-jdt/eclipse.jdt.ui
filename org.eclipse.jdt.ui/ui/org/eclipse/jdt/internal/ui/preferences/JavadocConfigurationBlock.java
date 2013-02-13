@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -237,10 +237,9 @@ public class JavadocConfigurationBlock {
 			DialogField.createEmptySpace(topComp, 2);
 			fValidateArchiveButton.doFillIntoGrid(topComp, 1);
 
-			int indent= converter.convertWidthInCharsToPixels(2);
-			LayoutUtil.setHorizontalIndent(fArchiveField.getLabelControl(null), indent);
-			LayoutUtil.setHorizontalIndent(fArchivePathField.getLabelControl(null), indent);
-			LayoutUtil.setHorizontalIndent(fURLField.getLabelControl(null), indent);
+			LayoutUtil.setHorizontalIndent(fArchiveField.getLabelControl(null));
+			LayoutUtil.setHorizontalIndent(fArchivePathField.getLabelControl(null));
+			LayoutUtil.setHorizontalIndent(fURLField.getLabelControl(null));
 
 			fURLRadioButton.attachDialogFields(new DialogField[] {fURLField,  fBrowseFolder, fValidateURLButton });
 			fArchiveRadioButton.attachDialogFields(new DialogField[] {fArchiveField,  fBrowseArchive, fExternalRadio, fWorkspaceRadio, fArchivePathField, fBrowseArchivePath, fValidateArchiveButton });

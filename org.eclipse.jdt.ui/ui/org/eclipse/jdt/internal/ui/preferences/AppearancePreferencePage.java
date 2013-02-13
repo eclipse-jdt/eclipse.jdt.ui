@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -174,18 +174,18 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 
 		fCompressPackageNames.doFillIntoGrid(result, nColumns);
 		fPackageNamePattern.doFillIntoGrid(result, 2);
-		LayoutUtil.setHorizontalIndent(fPackageNamePattern.getLabelControl(null), AbstractConfigurationBlock.INDENT);
+		LayoutUtil.setHorizontalIndent(fPackageNamePattern.getLabelControl(null));
 		Text packageNamePatternControl= fPackageNamePattern.getTextControl(null);
-		LayoutUtil.setHorizontalIndent(packageNamePatternControl, AbstractConfigurationBlock.INDENT);
+		LayoutUtil.setHorizontalIndent(packageNamePatternControl);
 		LayoutUtil.setHorizontalGrabbing(packageNamePatternControl);
 		LayoutUtil.setWidthHint(fPackageNamePattern.getLabelControl(null), convertWidthInCharsToPixels(65));
 
 		new Separator().doFillIntoGrid(result, nColumns);
 		fAbbreviatePackageNames.doFillIntoGrid(result, nColumns);
 		fAbbreviatePackageNamePattern.doFillIntoGrid(result, 2);
-		LayoutUtil.setHorizontalIndent(fAbbreviatePackageNamePattern.getLabelControl(null), AbstractConfigurationBlock.INDENT);
+		LayoutUtil.setHorizontalIndent(fAbbreviatePackageNamePattern.getLabelControl(null));
 		Text abbreviatePackageNamePatternControl= fAbbreviatePackageNamePattern.getTextControl(null);
-		LayoutUtil.setHorizontalIndent(abbreviatePackageNamePatternControl, AbstractConfigurationBlock.INDENT);
+		LayoutUtil.setHorizontalIndent(abbreviatePackageNamePatternControl);
 		LayoutUtil.setHorizontalGrabbing(abbreviatePackageNamePatternControl);
 		LayoutUtil.setWidthHint(fAbbreviatePackageNamePattern.getLabelControl(null), convertWidthInCharsToPixels(65));
 		LayoutUtil.setVerticalGrabbing(abbreviatePackageNamePatternControl);
@@ -199,7 +199,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		Composite noteControl= createNoteComposite(JFaceResources.getDialogFont(), result, noteTitle, noteMessage);
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
-		gd.horizontalIndent= AbstractConfigurationBlock.INDENT;
+		gd.horizontalIndent= LayoutUtil.getIndent();
 		noteControl.setLayoutData(gd);
 
 		initFields();

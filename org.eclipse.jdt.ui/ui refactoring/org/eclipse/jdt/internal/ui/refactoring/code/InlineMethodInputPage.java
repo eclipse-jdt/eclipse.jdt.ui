@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
 public class InlineMethodInputPage extends UserInputWizardPage {
 
@@ -85,7 +86,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 
 		fRemove= new Button(result, SWT.CHECK);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalIndent= convertWidthInCharsToPixels(3);
+		gd.horizontalIndent= LayoutUtil.getIndent();
 		fRemove.setLayoutData(gd);
 		fRemove.setText(RefactoringMessages.InlineMethodInputPage_delete_declaration);
 		fRemove.setEnabled(all && fRefactoring.canEnableDeleteSource());

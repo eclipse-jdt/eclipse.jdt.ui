@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,6 +71,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.jarpackager.CheckboxTreeAndListGroup;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
 public class JavadocTreeWizardPage extends JavadocWizardPage {
 
@@ -111,8 +112,9 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 	/**
 	 * Constructor for JavadocTreeWizardPage.
-	 * @param pageName
-	 * @param store
+	 * 
+	 * @param pageName the page name
+	 * @param store the store
 	 */
 	protected JavadocTreeWizardPage(String pageName, JavadocOptionsManager store) {
 		super(pageName);
@@ -235,7 +237,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fPublicVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.JavadocTreeWizardPage_publicbutton_label, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
 
 		fDescriptionLabel= new CLabel(visibilityGroup, SWT.LEFT);
-		fDescriptionLabel.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 4, convertWidthInCharsToPixels(3) -  3)); // INDENT of CLabel
+		fDescriptionLabel.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 4, LayoutUtil.getIndent()));
 
 		fPrivateVisibility.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -311,7 +313,8 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 		fStandardButton= createButton(group, SWT.RADIO, JavadocExportMessages.JavadocTreeWizardPage_standarddocletbutton_label, createGridData(GridData.HORIZONTAL_ALIGN_FILL, numColumns, 0));
 
-		fDestinationLabel= createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_destinationfield_label, createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, convertWidthInCharsToPixels(3)));
+		fDestinationLabel= createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_destinationfield_label,
+				createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, LayoutUtil.getIndent()));
 		fDestinationText= createText(group, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, numColumns - 2, 0));
 		((GridData) fDestinationText.getLayoutData()).widthHint= 0;
 		fDestinationText.addModifyListener(new ModifyListener() {
@@ -327,7 +330,8 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fCustomButton= createButton(group, SWT.RADIO, JavadocExportMessages.JavadocTreeWizardPage_customdocletbutton_label, createGridData(GridData.HORIZONTAL_ALIGN_FILL, numColumns, 0));
 
 		//For Entering location of custom doclet
-		fDocletTypeLabel= createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_docletnamefield_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, convertWidthInCharsToPixels(3)));
+		fDocletTypeLabel= createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_docletnamefield_label,
+				createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, LayoutUtil.getIndent()));
 		fDocletTypeText= createText(group, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL, numColumns - 1, 0));
 		((GridData) fDocletTypeText.getLayoutData()).widthHint= 0;
 
@@ -338,7 +342,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			}
 		});
 
-		fDocletLabel= createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_docletpathfield_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, convertWidthInCharsToPixels(3)));
+		fDocletLabel= createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_docletpathfield_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, LayoutUtil.getIndent()));
 		fDocletText= createText(group, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL, numColumns - 1, 0));
 		((GridData) fDocletText.getLayoutData()).widthHint= 0;
 
@@ -407,11 +411,11 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	/**
-	 * Receives of list of elements selected by the user and passes them
-	 * to the CheckedTree. List can contain multiple projects and elements from
-	 * different projects. If the list of seletected elements is empty a default
-	 * project is selected.
-	 * @param sourceElements
+	 * Receives of list of elements selected by the user and passes them to the CheckedTree. List
+	 * can contain multiple projects and elements from different projects. If the list of seletected
+	 * elements is empty a default project is selected.
+	 * 
+	 * @param sourceElements an array with the source elements
 	 */
 	private void setTreeChecked(IJavaElement[] sourceElements) {
 		for (int i= 0; i < sourceElements.length; i++) {
@@ -494,10 +498,11 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	/**
-	 * Gets a list of elements to generated javadoc for from each project.
-	 * Javadoc can be generated for either a IPackageFragment or a ICompilationUnit.
-	 * @param projects
-	 * @return source elements
+	 * Gets a list of elements to generated javadoc for from each project. Javadoc can be generated
+	 * for either a IPackageFragment or a ICompilationUnit.
+	 * 
+	 * @param projects an array with Java projects
+	 * @return an array with the source elements
 	 */
 	private IJavaElement[] getSourceElements(IJavaProject[] projects) {
 		ArrayList<IJavaElement> res= new ArrayList<IJavaElement>();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterHandle;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
 
 /**
@@ -176,7 +177,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		Composite fillComposite= new Composite(composite, SWT.NONE);
 		GridData gd= new GridData();
 		gd.horizontalSpan= 2;
-		gd.horizontalIndent= 20;
+		gd.horizontalIndent= LayoutUtil.getIndent();
 		fillComposite.setLayoutData(gd);
 		GridLayout layout= new GridLayout();
 		layout.marginWidth= 0;
@@ -377,7 +378,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		Label label= new Label(completionComposite, SWT.NONE);
 		label.setText(PreferencesMessages.JavaEditorPreferencePage_completionToggleHint);
 		GridData gd= new GridData();
-		gd.horizontalIndent= 20;
+		gd.horizontalIndent= LayoutUtil.getIndent();
 		gd.horizontalSpan= 2;
 		label.setLayoutData(gd);
 	}

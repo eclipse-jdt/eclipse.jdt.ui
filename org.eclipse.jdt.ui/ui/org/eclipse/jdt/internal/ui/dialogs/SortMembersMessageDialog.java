@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -129,13 +129,11 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 
 		createLinkControl(messageComposite);
 
-		int indent= convertWidthInCharsToPixels(3);
-
 		fNotSortAllRadio.doFillIntoGrid(messageComposite, 1);
-		LayoutUtil.setHorizontalIndent(fNotSortAllRadio.getSelectionButton(null), indent);
+		LayoutUtil.setHorizontalIndent(fNotSortAllRadio.getSelectionButton(null));
 
 		fSortAllRadio.doFillIntoGrid(messageComposite, 1);
-		LayoutUtil.setHorizontalIndent(fSortAllRadio.getSelectionButton(null), indent);
+		LayoutUtil.setHorizontalIndent(fSortAllRadio.getSelectionButton(null));
 
 		final Composite warningComposite= new Composite(messageComposite, SWT.NONE);
 		layout= new GridLayout();

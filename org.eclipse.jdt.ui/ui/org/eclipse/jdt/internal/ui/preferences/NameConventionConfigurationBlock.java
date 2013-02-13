@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.dialogs.StatusDialog;
-import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -412,7 +411,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		Link seeProblemSeverity= new Link(composite, SWT.WRAP);
 		data= new GridData(SWT.BEGINNING, SWT.CENTER, true, false, 3, 1);
 		seeProblemSeverity.setLayoutData(data);
-		LayoutUtil.setHorizontalIndent(seeProblemSeverity, new PixelConverter(composite).convertWidthInCharsToPixels(1) * 3);
+		LayoutUtil.setHorizontalIndent(seeProblemSeverity);
 		seeProblemSeverity.setText(PreferencesMessages.NameConventionConfigurationBlock_override_link_label);
 		seeProblemSeverity.addSelectionListener(new SelectionAdapter() {
 			@Override
