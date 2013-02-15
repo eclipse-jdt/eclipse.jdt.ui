@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -314,10 +314,16 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				c.caretOffset= c.offset + buf.length();
 				c.shiftsCaret= false;
 
+				int pos= c.offset - 1;
+				char ch= d.getChar(pos);
+				while (ch == ' ' || ch == '\t') {
+					pos--;
+					ch= d.getChar(pos);
+				}
 				// copy old content of line behind insertion point to new line
 				// unless we think we are inserting an anonymous type definition
 
-				if (c.offset == 0 || computeAnonymousPosition(d, c.offset - 1, fPartitioning, lineEnd) == -1) {
+				if (c.offset == 0 || copyContent(d, pos + 1, fPartitioning, lineEnd)) {
 					if (lineEnd - contentStart > 0) {
 						c.length=  lineEnd - c.offset;
 						buf.append(d.get(contentStart, lineEnd - contentStart).toCharArray());
@@ -363,18 +369,19 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	}
 
 	/**
-	 * Computes an insert position for an opening brace if <code>offset</code> maps to a position in
-	 * <code>document</code> with a expression in parenthesis that will take a block after the closing parenthesis.
+	 * Checks if it is required to copy the old content of the line after caret position to new line
+	 * before inserting the closing brace.
 	 *
 	 * @param document the document being modified
 	 * @param offset the offset of the caret position, relative to the line start.
 	 * @param partitioning the document partitioning
 	 * @param max the max position
-	 * @return an insert position relative to the line start if <code>line</code> contains a parenthesized expression that can be followed by a block, -1 otherwise
+	 * @return <code>true</code> if the old content of the line after caret position has to be
+	 *         copied to new line before inserting the closing brace, <code>false</code> otherwise
 	 */
-	private static int computeAnonymousPosition(IDocument document, int offset, String partitioning,  int max) {
+	private boolean copyContent(IDocument document, int offset, String partitioning, int max) {
 		// find the opening parenthesis for every closing parenthesis on the current line after offset
-		// return the position behind the closing parenthesis if it looks like a method declaration
+		// return true if it looks like a method declaration
 		// or an expression for an if, while, for, catch statement
 
 		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
@@ -385,14 +392,21 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			scanTo= length;
 
 		int closingParen= findClosingParenToLeft(scanner, pos) - 1;
-		boolean hasNewToken= looksLikeAnonymousClassDef(document, partitioning, scanner, pos);
 		int openingParen= -1;
 		while (true) {
 			int startScan= closingParen + 1;
 			closingParen= scanner.scanForward(startScan, scanTo, ')');
 			if (closingParen == -1) {
-				if (hasNewToken && openingParen != -1)
-					return openingParen + 1;
+				if (openingParen != -1)
+					return false;
+				try {
+					int p= findEndOfWhiteSpace(document, pos, scanTo);
+					char ch= document.getChar(p);
+					if (ch == ',' || ch == ';')
+						return false;
+				} catch (BadLocationException e) {
+					// ignore
+				}
 				break;
 			}
 
@@ -407,17 +421,16 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				continue;
 
 			if (looksLikeAnonymousClassDef(document, partitioning, scanner, openingParen - 1))
-				return closingParen + 1;
-
+				return false;
 		}
 
-		return -1;
+		return true;
 	}
 
 	/**
 	 * Finds a closing parenthesis to the left of <code>position</code> in document, where that parenthesis is only
 	 * separated by whitespace from <code>position</code>. If no such parenthesis can be found, <code>position</code> is returned.
-	 * 
+	 *
 	 * @param scanner the java heuristic scanner set up on the document
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @return the position of a closing parenthesis left to <code>position</code> separated only by whitespace, or <code>position</code> if no parenthesis can be found
@@ -1326,7 +1339,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * Returns the block balance, i.e. zero if the blocks are balanced at <code>offset</code>, a
 	 * negative number if there are more closing than opening braces, and a positive number if there
 	 * are more opening than closing braces.
-	 * 
+	 *
 	 * @param document the document
 	 * @param offset the offset
 	 * @param partitioning the partitioning
