@@ -221,6 +221,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 
 	public void testSmartIndentAfterNewLine1() {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=29379
+		fDocument.setInitialLineDelimiter("\r\n");
 		fDocument.set("main (new String [] {);");
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 21;
@@ -246,6 +247,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 
 	public void testSmartIndentAfterNewLine2() {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395071
+		fDocument.setInitialLineDelimiter("\r\n");
 		fDocument.set("main (new String [] {\"a\",);");
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 25;
@@ -271,6 +273,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 
 	public void testSmartIndentAfterNewLine3() {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395071
+		fDocument.setInitialLineDelimiter("\r\n");
 		fDocument.set("main (new String [] {\"a\",\"b\",);");
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 29;
@@ -285,6 +288,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 
 	public void testSmartIndentAfterNewLine4() {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=254704
+		fDocument.setInitialLineDelimiter("\r\n");
 		fDocument.set("@NamedQueries({);");
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 15;
@@ -311,6 +315,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 
 	public void testSmartIndentAfterNewLine5() {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=256087
+		fDocument.setInitialLineDelimiter("\r\n");
 		fDocument.set("if (false) {return false;");
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 12;
@@ -336,6 +341,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 
 	public void testSmartIndentAfterNewLine6() {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=200015
+		fDocument.setInitialLineDelimiter("\r\n");
 		StringBuffer inBuf= new StringBuffer();
 		inBuf.append("enum ReviewResult {\n");
 		inBuf.append("    Good{, Bad\n");
@@ -355,6 +361,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 	}
 
 	public void testSmartIndentAfterNewLine7() {
+		fDocument.setInitialLineDelimiter("\r\n");
 		fDocument.set("int[] a= new int[] { ;");
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 21;
@@ -368,6 +375,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 	}
 
 	public void testSmartIndentAfterNewLine8() {
+		fDocument.setInitialLineDelimiter("\r\n");
 		fDocument.set("String[] strs = {\"a\",\"b\",");
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 21;
@@ -381,6 +389,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 	}
 
 	public void testSmartIndentAfterNewLine9() {
+		fDocument.setInitialLineDelimiter("\r\n");
 		fDocument.set("{ int a;");
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 1;
