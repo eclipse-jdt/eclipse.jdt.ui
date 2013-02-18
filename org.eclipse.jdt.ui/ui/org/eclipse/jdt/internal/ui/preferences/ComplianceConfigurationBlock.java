@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -119,6 +123,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String VERSION_1_5= JavaCore.VERSION_1_5;
 	private static final String VERSION_1_6= JavaCore.VERSION_1_6;
 	private static final String VERSION_1_7= JavaCore.VERSION_1_7;
+	private static final String VERSION_1_8= JavaCore.VERSION_1_8;
 	private static final String VERSION_JSR14= "jsr14"; //$NON-NLS-1$
 
 	private static final String ERROR= JavaCore.ERROR;
@@ -254,13 +259,14 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	private Composite createComplianceTabContent(Composite folder) {
 
-		String[] values3456= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6, VERSION_1_7 };
+		String[] values3456= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8 };
 		String[] values3456Labels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_version13,
 			PreferencesMessages.ComplianceConfigurationBlock_version14,
 			PreferencesMessages.ComplianceConfigurationBlock_version15,
 			PreferencesMessages.ComplianceConfigurationBlock_version16,
-			PreferencesMessages.ComplianceConfigurationBlock_version17
+			PreferencesMessages.ComplianceConfigurationBlock_version17,
+			PreferencesMessages.ComplianceConfigurationBlock_version18,
 		};
 
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
@@ -591,6 +597,14 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 					isVisible= true;
 				}
 			}
+			
+			//TODO: Remove once Java SE 8 has been shipped:
+			String source= getValue(PREF_SOURCE_COMPATIBILITY);
+			if (VERSION_1_8.equals(source)) {
+				fJRE50InfoText.setText("This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
+				isVisible= true;
+			}
+			
 			fJRE50InfoText.setVisible(isVisible);
 			fJRE50InfoImage.setImage(isVisible ? JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING) : null);
 			fJRE50InfoImage.getParent().layout();
@@ -817,6 +831,11 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 					enumAsId= ERROR;
 					source= VERSION_1_7;
 					target= VERSION_1_7;
+				} else if (VERSION_1_8.equals(complianceLevel)) {
+					assertAsId= ERROR;
+					enumAsId= ERROR;
+					source= VERSION_1_8;
+					target= VERSION_1_8;
 				} else {
 					assertAsId= IGNORE;
 					enumAsId= IGNORE;
@@ -877,7 +896,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				&& ERROR.equals(getValue(PREF_PB_ASSERT_AS_IDENTIFIER))
 				&& ERROR.equals(getValue(PREF_PB_ENUM_AS_IDENTIFIER))
 				&& VERSION_1_7.equals(getValue(PREF_SOURCE_COMPATIBILITY))
-				&& VERSION_1_7.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))) {
+				&& VERSION_1_7.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))
+			|| (VERSION_1_8.equals(complianceLevel)
+					&& ERROR.equals(getValue(PREF_PB_ASSERT_AS_IDENTIFIER))
+					&& ERROR.equals(getValue(PREF_PB_ENUM_AS_IDENTIFIER))
+					&& VERSION_1_8.equals(getValue(PREF_SOURCE_COMPATIBILITY))
+					&& VERSION_1_8.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))) {
 			return DEFAULT_CONF;
 		}
 		return USER_CONF;
