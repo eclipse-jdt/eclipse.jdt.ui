@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -205,9 +205,9 @@ public class PropertiesFileAutoEditStrategyTest extends TestCase {
 	}
 
 	public void testPasteISO_8859_1_05() throws Exception {
-		fDocumentCommand.text= "ä \u0926";
+		fDocumentCommand.text= "Ã¤ \u0926";
 		Object proposal= performTestISO_8859_1();
-		assertEquals("ä \\u0926", fDocumentCommand.text);
+		assertEquals("Ã¤ \\u0926", fDocumentCommand.text);
 		assertNull(proposal);
 	}
 
