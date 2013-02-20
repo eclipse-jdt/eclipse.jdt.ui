@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -129,7 +130,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null) {
 			ArrayList<ASTNode> coveredNodes= getFullyCoveredNodes(context, coveringNode);
-			return getInverseIfProposals(context, coveringNode, null)
+			return getConvertToIfReturnProposals(context, coveringNode, null)
+					|| getInverseIfProposals(context, coveringNode, null)
 					|| getIfReturnIntoIfElseAtEndOfVoidMethodProposals(context, coveringNode, null)
 					|| getInverseIfContinueIntoIfThenInLoopsProposals(context, coveringNode, null)
 					|| getInverseIfIntoContinueInLoopsProposals(context, coveringNode, null)
@@ -173,6 +175,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			getReplaceConditionalWithIfElseProposals(context, coveringNode, resultingCollections);
 
 			if (QuickAssistProcessor.noErrorsAtLocation(locations)) {
+				getConvertToIfReturnProposals(context, coveringNode, resultingCollections);
 				getInverseIfProposals(context, coveringNode, resultingCollections);
 				getIfReturnIntoIfElseAtEndOfVoidMethodProposals(context, coveringNode, resultingCollections);
 				getInverseIfContinueIntoIfThenInLoopsProposals(context, coveringNode, resultingCollections);
@@ -206,6 +209,101 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return null;
 	}
 
+	private static boolean getConvertToIfReturnProposals(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections) {
+		if (!(coveringNode instanceof IfStatement)) {
+			return false;
+		}
+		IfStatement ifStatement= (IfStatement) coveringNode;
+		if (ifStatement.getElseStatement() != null) {
+			return false;
+		}
+		MethodDeclaration coveringMetod= ASTResolving.findParentMethodDeclaration(ifStatement);
+		if (coveringMetod == null) {
+			return false;
+		}
+		// method should return 'void'
+		Type returnType= coveringMetod.getReturnType2();
+		if (!isVoid(returnType)) {
+			return false;
+		}
+		// should be present in a block
+		if (!(ifStatement.getParent() instanceof Block)) {
+			return false;
+		}
+		// should have at least one statement in 'then' part other than 'return'
+		Statement thenStatement= ifStatement.getThenStatement();
+		if (thenStatement instanceof ReturnStatement) {
+			return false;
+		}
+		if (thenStatement instanceof Block) {
+			List<Statement> thenStatements= ((Block) thenStatement).statements();
+			if (thenStatements.isEmpty() || (thenStatements.size() == 1 && (thenStatements.get(0) instanceof ReturnStatement))) {
+				return false;
+			}
+		}
+		// should have no further executable statement
+		if (!isLastExecutableStatementInMethod(ifStatement)) {
+			return false;
+		}
+		//  we could produce quick assist
+		if (resultingCollections == null) {
+			return true;
+		}
+
+		AST ast= coveringNode.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+
+		// create inverted 'if' statement
+		Expression inversedExpression= getInversedExpression(rewrite, ifStatement.getExpression());
+		IfStatement newIf= ast.newIfStatement();
+		newIf.setExpression(inversedExpression);
+		newIf.setThenStatement(ast.newReturnStatement());
+		ListRewrite listRewriter= rewrite.getListRewrite(ifStatement.getParent(), (ChildListPropertyDescriptor) ifStatement.getLocationInParent());
+		listRewriter.replace(ifStatement, newIf, null);
+		// remove last 'return' in 'then' block
+		ArrayList<Statement> statements= getUnwrappedStatements(ifStatement.getThenStatement());
+		Statement lastStatement= statements.get(statements.size() - 1);
+		if (lastStatement instanceof ReturnStatement) {
+			statements.remove(lastStatement);
+		}
+		// add statements from 'then' to the end of block
+		for (Statement statement : statements) {
+			listRewriter.insertLast(rewrite.createMoveTarget(statement), null);
+		}
+
+		// add correction proposal
+		String label= CorrectionMessages.AdvancedQuickAssistProcessor_convertToIfReturn;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_TO_IF_RETURN, image);
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private static boolean isVoid(Type type) {
+		return type instanceof PrimitiveType && ((PrimitiveType) type).getPrimitiveTypeCode() == PrimitiveType.VOID;
+	}
+
+	private static boolean isLastExecutableStatementInMethod(Statement statement) {
+		ASTNode currentStructure= statement;
+		ASTNode currentParent= statement.getParent();
+		while (!(currentParent instanceof MethodDeclaration)) {
+			// should not be in a loop
+			if (currentParent instanceof ForStatement || currentParent instanceof EnhancedForStatement
+					|| currentParent instanceof WhileStatement || currentParent instanceof DoStatement) {
+				return false;
+			}
+			if (currentParent instanceof Block) {
+				Block parentBlock= (Block) currentParent;
+				if (parentBlock.statements().indexOf(currentStructure) != parentBlock.statements().size() - 1) { // not last statement in the block
+					return false;
+				}
+			}
+			currentStructure= currentParent;
+			currentParent= currentParent.getParent();
+		}
+		return true;
+	}
+
 	private static boolean getIfReturnIntoIfElseAtEndOfVoidMethodProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		if (!(covering instanceof IfStatement)) {
 			return false;
@@ -230,8 +328,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		Type returnType= coveringMetod.getReturnType2();
-		if (!(returnType instanceof PrimitiveType) || ((PrimitiveType) returnType).getPrimitiveTypeCode() != PrimitiveType.VOID)
+		if (!isVoid(returnType)) {
 			return false;
+		}
 		//
 		List<Statement> statements= coveringMetod.getBody().statements();
 		int ifIndex= statements.indexOf(ifStatement);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -5634,5 +5634,288 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_combineSelectedStrings);
 
+	}
+
+	public void testConvertToIfReturn1() throws Exception {
+		// positive cases
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo1() {\n");
+		buf.append("        if (a) {\n");
+		buf.append("            System.out.println(\"1\");\n");
+		buf.append("            System.out.println(\"11\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n\n");
+		buf.append("    public void foo2() {\n");
+		buf.append("        bar();\n");
+		buf.append("        if (b) {\n");
+		buf.append("            System.out.println(\"2\");\n");
+		buf.append("            System.out.println(\"22\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n\n");
+		buf.append("    public void foo3() {\n");
+		buf.append("        if (c) {\n");
+		buf.append("            if (d) {\n");
+		buf.append("                System.out.println(\"3\");\n");
+		buf.append("                System.out.println(\"33\");\n");
+		buf.append("        	}\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "if (a)";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("public class E {\n");
+		buf1.append("    public void foo1() {\n");
+		buf1.append("        if (!a)\n");
+		buf1.append("            return;\n");
+		buf1.append("        System.out.println(\"1\");\n");
+		buf1.append("        System.out.println(\"11\");\n");
+		buf1.append("    }\n\n");
+		buf1.append("    public void foo2() {\n");
+		buf1.append("        bar();\n");
+		buf1.append("        if (b) {\n");
+		buf1.append("            System.out.println(\"2\");\n");
+		buf1.append("            System.out.println(\"22\");\n");
+		buf1.append("        }\n");
+		buf1.append("    }\n\n");
+		buf1.append("    public void foo3() {\n");
+		buf1.append("        if (c) {\n");
+		buf1.append("            if (d) {\n");
+		buf1.append("                System.out.println(\"3\");\n");
+		buf1.append("                System.out.println(\"33\");\n");
+		buf1.append("        	}\n");
+		buf1.append("        }\n");
+		buf1.append("    }\n");
+		buf1.append("}\n");
+		String expected1= buf1.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+		str= "if (b)";
+		context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("public class E {\n");
+		buf1.append("    public void foo1() {\n");
+		buf1.append("        if (a) {\n");
+		buf1.append("            System.out.println(\"1\");\n");
+		buf1.append("            System.out.println(\"11\");\n");
+		buf1.append("        }\n");
+		buf1.append("    }\n\n");
+		buf1.append("    public void foo2() {\n");
+		buf1.append("        bar();\n");
+		buf1.append("        if (!b)\n");
+		buf1.append("            return;\n");
+		buf1.append("        System.out.println(\"2\");\n");
+		buf1.append("        System.out.println(\"22\");\n");
+		buf1.append("    }\n\n");
+		buf1.append("    public void foo3() {\n");
+		buf1.append("        if (c) {\n");
+		buf1.append("            if (d) {\n");
+		buf1.append("                System.out.println(\"3\");\n");
+		buf1.append("                System.out.println(\"33\");\n");
+		buf1.append("        	}\n");
+		buf1.append("        }\n");
+		buf1.append("    }\n");
+		buf1.append("}\n");
+		String expected2= buf1.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected2 });
+
+		str= "if (d)";
+		context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 5);
+		assertCorrectLabels(proposals);
+		buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("public class E {\n");
+		buf1.append("    public void foo1() {\n");
+		buf1.append("        if (a) {\n");
+		buf1.append("            System.out.println(\"1\");\n");
+		buf1.append("            System.out.println(\"11\");\n");
+		buf1.append("        }\n");
+		buf1.append("    }\n\n");
+		buf1.append("    public void foo2() {\n");
+		buf1.append("        bar();\n");
+		buf1.append("        if (b) {\n");
+		buf1.append("            System.out.println(\"2\");\n");
+		buf1.append("            System.out.println(\"22\");\n");
+		buf1.append("        }\n");
+		buf1.append("    }\n\n");
+		buf1.append("    public void foo3() {\n");
+		buf1.append("        if (c) {\n");
+		buf1.append("            if (!d)\n");
+		buf1.append("                return;\n");
+		buf1.append("            System.out.println(\"3\");\n");
+		buf1.append("            System.out.println(\"33\");\n");
+		buf1.append("        }\n");
+		buf1.append("    }\n");
+		buf1.append("}\n");
+		String expected3= buf1.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected3 });
+	}
+
+	public void testConvertToIfReturn2() throws Exception {
+		// negative cases
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo1() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            System.out.println(\"1\");\n");
+		buf.append("            System.out.println(\"2\");\n");
+		buf.append("        }\n");
+		buf.append("        bar();");
+		buf.append("    }\n\n");
+		buf.append("    public void foo2() {\n");
+		buf.append("        if (a) \n");
+		buf.append("            if (b) {\n");
+		buf.append("                System.out.println(\"1\");\n");
+		buf.append("                System.out.println(\"2\");\n");
+		buf.append("        	}\n");
+		buf.append("    }\n\n");
+		buf.append("    public void foo3() {\n");
+		buf.append("        if (c) {\n");
+		buf.append("            return;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "if (true)"; // not the last executable statement in the method
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertToIfReturn);
+
+		str= "if (b)"; // not present in a block
+		context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertToIfReturn);
+
+		str= "if (c)"; // no other statement in 'then' part other than 'return'
+		context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertToIfReturn);
+	}
+
+	public void testConvertToIfReturn3() throws Exception {
+		// 'if' should be in a 'method' returning 'void'
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    static {\n");
+		buf.append("        if (a) {\n");
+		buf.append("            System.out.println(\"1\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public String foo1() {\n");
+		buf.append("        if (b) {\n");
+		buf.append("            System.out.println(\"1\");\n");
+		buf.append("            return \"foo\"\n");
+		buf.append("        }\n");
+		buf.append("    }\n\n");
+
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "if (a)"; // not in a method
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertToIfReturn);
+
+		str= "if (b)"; // method does not return 'void'
+		context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertToIfReturn);
+	}
+
+	public void testConvertToIfReturn4() throws Exception {
+		// 'if' should not be in a loop
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo1() {\n");
+		buf.append("        for (int i; i < 3; i++) {\n");
+		buf.append("            if (a) {\n");
+		buf.append("                System.out.println(\"1\");\n");
+		buf.append("        	}\n");
+		buf.append("        }\n");
+		buf.append("    }\n\n");
+		buf.append("    public void foo2() {\n");
+		buf.append("        List<String> strs= new ArrayList<String>;\n");
+		buf.append("        for (String s : strs) {\n");
+		buf.append("            if (b) {\n");
+		buf.append("                System.out.println(\"2\");\n");
+		buf.append("        	}\n");
+		buf.append("        }\n");
+		buf.append("    }\n\n");
+		buf.append("    public void foo3() {\n");
+		buf.append("        do {\n");
+		buf.append("            if (c) {\n");
+		buf.append("                System.out.println(\"3\");\n");
+		buf.append("        	}\n");
+		buf.append("        } while (true)\n");
+		buf.append("    }\n\n");
+		buf.append("    public void foo4() {\n");
+		buf.append("        while (true) {\n");
+		buf.append("            if (d) {\n");
+		buf.append("                System.out.println(\"4\");\n");
+		buf.append("        	}\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "if (a)";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertToIfReturn);
+
+		str= "if (b)";
+		context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertToIfReturn);
+
+		str= "if (c)";
+		context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertToIfReturn);
+
+		str= "if (d)";
+		context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertToIfReturn);
 	}
 }

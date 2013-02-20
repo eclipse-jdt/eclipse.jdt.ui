@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -255,6 +255,7 @@ public interface IProposalRelevance {
 	public static final int ASSIGN_PARAM_TO_EXISTING_FIELD= 1;
 	public static final int INSERT_INFERRED_TYPE_ARGUMENTS_ERROR= 1;
 	public static final int RETURN_ALLOCATED_OBJECT_VOID= 1;
+	public static final int CONVERT_TO_IF_RETURN= 1;
 
 	public static final int CONVERT_TO_MESSAGE_FORMAT= 0;
 	public static final int COPY_ANNOTATION_JAR= 0;
