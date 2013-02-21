@@ -94,6 +94,8 @@ public class PromoteTempWizard extends RefactoringWizard {
 
 			Dialog.applyDialogFont(result);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.PROMOTE_TEMP_TO_FIELD_WIZARD_PAGE);
+
+			updateStatus();
 		}
 
 		private void addFieldNameField(Composite result) {
