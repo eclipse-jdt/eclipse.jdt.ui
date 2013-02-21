@@ -224,7 +224,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			if ((line1 < topLine) || (wLine1 != -1 && (wLine2 - wLine1 != line2 - line1))) {
 				// match not visible or content is folded - see bug 399997
 				if (isElseBracket) {
-					return getBracketHoverInfoForElse((IfStatement) node, document, editorInput, delim); // see bug:377141
+					return getBracketHoverInfoForElse((IfStatement) node, document, editorInput, delim); // see bug 377141
 				}
 				noOfSourceLines= 3;
 				if ((line2 - line1) < noOfSourceLines) {
