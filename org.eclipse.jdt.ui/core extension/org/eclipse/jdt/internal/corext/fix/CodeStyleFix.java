@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -655,6 +656,14 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 
 					Expression qualifier= op.fQualifier;
 					if (!(qualifier instanceof MethodInvocation) || !isMethodArgument(qualifier)) {
+						for (Iterator<CompilationUnitRewriteOperation> it= result.iterator(); it.hasNext();) { // see bug 346230
+							CompilationUnitRewriteOperation oper= it.next();
+							if (oper instanceof CodeStyleFix.AddThisQualifierOperation
+									&& ((CodeStyleFix.AddThisQualifierOperation) oper).fName.equals(qualifier)) {
+								result.remove(oper);
+								break;
+							}
+						}
 						result.add(op);
 					}
 				}
