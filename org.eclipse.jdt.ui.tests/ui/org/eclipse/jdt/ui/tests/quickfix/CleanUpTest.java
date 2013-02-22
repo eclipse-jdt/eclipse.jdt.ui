@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -3440,6 +3440,96 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected1= buf.toString();
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testCodeStyleBug346230() throws Exception {
+		IJavaProject project= JavaProjectHelper.createJavaProject("CleanUpTestProject", "bin");
+		try {
+			JavaProjectHelper.addRTJar16(project);
+			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(project, "src");
+			IPackageFragment pack1= src.createPackageFragment("test1", false, null);
+
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("interface CinematicEvent {\n");
+			buf.append("    public void stop();\n");
+			buf.append("    public boolean internalUpdate();\n");
+			buf.append("}\n");
+			ICompilationUnit cu1= pack1.createCompilationUnit("CinematicEvent.java", buf.toString(), false, null);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("abstract class E1 implements CinematicEvent {\n");
+			buf.append("\n");
+			buf.append("    protected PlayState playState = PlayState.Stopped;\n");
+			buf.append("    protected LoopMode loopMode = LoopMode.DontLoop;\n");
+			buf.append("\n");
+			buf.append("    public boolean internalUpdate() {\n");
+			buf.append("        return loopMode == loopMode.DontLoop;\n");
+			buf.append("    }\n");
+			buf.append("\n");
+			buf.append("    public void stop() {\n");
+			buf.append("    }\n");
+			buf.append("\n");
+			buf.append("    public void read() {\n");
+			buf.append("        Object ic= new Object();\n");
+			buf.append("        playState.toString();\n");
+			buf.append("    }\n");
+			buf.append("\n");
+			buf.append("    enum PlayState {\n");
+			buf.append("        Stopped\n");
+			buf.append("    }\n");
+			buf.append("    enum LoopMode {\n");
+			buf.append("        DontLoop\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu2= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+			enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+			enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+			enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+			enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
+			enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+			enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
+			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
+			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("abstract class E1 implements CinematicEvent {\n");
+			buf.append("\n");
+			buf.append("    protected PlayState playState = PlayState.Stopped;\n");
+			buf.append("    protected LoopMode loopMode = LoopMode.DontLoop;\n");
+			buf.append("\n");
+			buf.append("    @Override\n");
+			buf.append("    public boolean internalUpdate() {\n");
+			buf.append("        return this.loopMode == LoopMode.DontLoop;\n");
+			buf.append("    }\n");
+			buf.append("\n");
+			buf.append("    @Override\n");
+			buf.append("    public void stop() {\n");
+			buf.append("    }\n");
+			buf.append("\n");
+			buf.append("    public void read() {\n");
+			buf.append("        final Object ic= new Object();\n");
+			buf.append("        this.playState.toString();\n");
+			buf.append("    }\n");
+			buf.append("\n");
+			buf.append("    enum PlayState {\n");
+			buf.append("        Stopped\n");
+			buf.append("    }\n");
+			buf.append("    enum LoopMode {\n");
+			buf.append("        DontLoop\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { cu1.getBuffer().getContents(), expected1 });
+		} finally {
+			JavaProjectHelper.delete(project);
+		}
+
 	}
 
 	public void testCodeStyle_StaticAccessThroughInstance_Bug307407() throws Exception {
