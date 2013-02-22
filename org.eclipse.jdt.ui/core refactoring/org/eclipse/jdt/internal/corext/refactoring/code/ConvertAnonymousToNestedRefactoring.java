@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1040,8 +1040,6 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
     private SingleVariableDeclaration newParameterDeclaration(AST ast, ImportRewrite importRewrite, String paramName, ITypeBinding paramType) {
     	SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
-		param.setExtraDimensions(0);
-		param.setInitializer(null);
 		param.setType(importRewrite.addImport(paramType, ast));
 		param.setName(ast.newSimpleName(paramName));
 		return param;
