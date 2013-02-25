@@ -8,8 +8,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Andre Soereng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
- *     Björn Michael <b.michael@gmx.de> - [syntax highlighting] Syntax coloring for abstract classes - https://bugs.eclipse.org/331311
- *     Björn Michael <b.michael@gmx.de> - [syntax highlighting] Add highlight for inherited fields - https://bugs.eclipse.org/348368
+ *     BjÃ¶rn Michael <b.michael@gmx.de> - [syntax highlighting] Syntax coloring for abstract classes - https://bugs.eclipse.org/331311
+ *     BjÃ¶rn Michael <b.michael@gmx.de> - [syntax highlighting] Add highlight for inherited fields - https://bugs.eclipse.org/348368
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2081,7 +2081,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    /**\n");
         buf.append("     * Constructs a TestSuite from the given class. Adds all the methods\n");
         buf.append("     * starting with \"test\" as test cases to the suite. Parts of this method was\n");
-        buf.append("     * written at 2337 meters in the Hüffihütte, Kanton Uri\n");
+        buf.append("     * written at 2337 meters in the HÃ¼ffihÃ¼tte, Kanton Uri\n");
         buf.append("     */\n");
         buf.append("    public TestSuite(final Class theClass) {\n");
         buf.append("        this.fName = theClass.getName();\n");

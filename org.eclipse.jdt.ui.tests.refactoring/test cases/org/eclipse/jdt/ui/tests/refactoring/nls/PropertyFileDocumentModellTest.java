@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -373,7 +373,7 @@ public class PropertyFileDocumentModellTest extends TestCase {
 
 		insert(props, "key", "\u00e4");
 
-		RefactoringTest.assertEqualLines("key=ä\n", props.get());
+		RefactoringTest.assertEqualLines("key=Ã¤\n", props.get());
 	}
 
 	public void testEscapingOfUniCode() throws Exception {
