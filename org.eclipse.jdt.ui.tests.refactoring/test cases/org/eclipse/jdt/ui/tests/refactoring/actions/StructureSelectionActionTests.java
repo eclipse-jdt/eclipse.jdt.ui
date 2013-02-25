@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -381,15 +381,15 @@ public class StructureSelectionActionTests extends RefactoringTest{
 	//--- offset calculation tests
 
 	public void testOffset0() throws Exception{
-		offsetTest(4, 20, 47);
+		offsetTest(4, 20, 44);
 	}
 
 	public void testOffset1() throws Exception{
-		offsetTest(5, 9, 53);
+		offsetTest(5, 9, 49);
 	}
 
 	public void testOffset2() throws Exception{
-		offsetTest(7, 13, 81);
+		offsetTest(7, 13, 75);
 	}
 
 	public void testTabCount0(){
