@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.javadoc;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,9 +21,12 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -671,20 +675,21 @@ public class JavaDocLocations {
 	}
 
 	/**
-	 * Handles the exception thrown from <code>org.eclipse.jdt.core</code> when the attached Javadoc
+	 * Handles the exception thrown from JDT Core when the attached Javadoc
 	 * cannot be retrieved due to accessibility issues or location URL issue. This exception is not
 	 * logged but the exceptions occurred due to other reasons are logged.
 	 * 
 	 * @param e the exception thrown when retrieving the Javadoc fails
 	 * @return the String message for why the Javadoc could not be retrieved
+	 * @since 3.9
 	 */
 	public static String handleFailedJavadocFetch(CoreException e) {
-		//filter the exception thrown from JavaElement while trying to fetch the attached Javadoc
-		if (e.getCause() instanceof IOException) {
-			IStatus status= e.getStatus();
-			if (status.getCode() == IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC && JavaCore.PLUGIN_ID.equals(status.getPlugin())) {
+		IStatus status= e.getStatus();
+		if (status.getCode() == IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC && JavaCore.PLUGIN_ID.equals(status.getPlugin())) {
+			Throwable cause= e.getCause();
+			// See bug 120559, bug 400060 and bug 400062
+			if (cause instanceof FileNotFoundException || cause instanceof SocketException || cause instanceof UnknownHostException || cause instanceof ProtocolException)
 				return CorextMessages.JavaDocLocations_error_gettingAttachedJavadoc;
-			}
 		}
 		JavaPlugin.log(e);
 		return CorextMessages.JavaDocLocations_error_gettingJavadoc;
