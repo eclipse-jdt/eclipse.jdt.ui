@@ -39,11 +39,7 @@
     <module>org.eclipse.ltk.core.refactoring.tests</module>
     <module>org.eclipse.ltk.ui.refactoring.tests</module>
     <module>org.eclipse.jdt.ui.tests.refactoring</module>
-    <module>org.eclipse.jdt.astview</module>
-    <module>org.eclipse.jdt.astview.feature</module>
     <module>org.eclipse.jdt.core.manipulation</module>
-    <module>org.eclipse.jdt.jeview</module>
-    <module>org.eclipse.jdt.jeview.feature</module>
     <module>org.eclipse.jdt.ui</module>
     <module>org.eclipse.jdt.ui.examples.projects</module>
     <module>org.eclipse.jdt.junit</module>
