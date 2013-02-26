@@ -229,7 +229,8 @@ public class PackageJavadocTests extends CoreTests {
 			Assert.assertTrue(actualHtmlContent.contains("Provides classes for performing arbitrary-precision integer arithmetic"));
 		} catch (Exception e) {
 			//there is no internet connection, so the Javadoc cannot be retrieved.
-			Assert.assertTrue(actualHtmlContent.contains(CorextMessages.JavaDocLocations_noAttachedSource) || actualHtmlContent.contains(CorextMessages.JavaDocLocations_error_gettingJavadoc));
+			Assert.assertTrue(actualHtmlContent.contains(CorextMessages.JavaDocLocations_noAttachedSource) || actualHtmlContent.contains(CorextMessages.JavaDocLocations_error_gettingJavadoc)
+					|| actualHtmlContent.contains(CorextMessages.JavaDocLocations_error_gettingAttachedJavadoc));
 		}
 
 	}
@@ -289,6 +290,42 @@ public class PackageJavadocTests extends CoreTests {
 		String actualHtmlContent= hoverInfo.getHtml();
 		
 		Assert.assertTrue(actualHtmlContent.contains(CorextMessages.JavaDocLocations_noAttachedJavadoc));
+	}
+
+	public void testErrotGettingAttachedJavadoc() throws Exception {
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/PackageJavadocTests/JavadocHover_src.zip"));
+
+		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
+		ICompilationUnit cu= (ICompilationUnit)fJProject1.findElement(new Path("junit/javadochoverhtml/JavaDocHoverTest.java"));
+		assertNotNull("JavaDocHoverTest.java", cu);
+
+		//set a wrong Javadoc location URL
+		IClasspathAttribute attribute=
+				JavaCore.newClasspathAttribute(
+						IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
+						"url:http://download.oracle.com/javase/6/docs/apii/");
+		IClasspathEntry[] rawClasspath= fJProject1.getRawClasspath();
+		IClasspathEntry newEntry= JavaCore.newLibraryEntry(new Path(JavaTestPlugin.getDefault().getFileInPlugin(new Path("/testresources/rtstubs15.jar")).getAbsolutePath()), null, null, null,
+				new IClasspathAttribute[] { attribute }, false);
+		rawClasspath[0]= newEntry;
+		IClasspathEntry[] newPathEntry= new IClasspathEntry[] { rawClasspath[0], rawClasspath[1] };
+		this.fJProject1.setRawClasspath(newPathEntry, null);
+		this.fJProject1.getResolvedClasspath(false);
+
+		int offset= cu.getSource().indexOf("java.math");
+		int length= "java.math".length();
+		IJavaElement[] codeSelect= cu.codeSelect(offset, length);
+		Assert.assertNotNull(codeSelect);
+		Assert.assertTrue("No package found !", codeSelect.length > 0);
+
+		JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(codeSelect, cu, new Region(offset, length), null);
+		String actualHtmlContent= hoverInfo.getHtml();
+		Assert.assertNotNull(actualHtmlContent);
+
+		Assert.assertTrue(actualHtmlContent.contains(CorextMessages.JavaDocLocations_error_gettingAttachedJavadoc));
+
 	}
 
 	public static Test setUpTest(Test test) {

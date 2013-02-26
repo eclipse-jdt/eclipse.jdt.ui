@@ -704,8 +704,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 							reader= new StringReader(explanationForMissingJavadoc);
 					}
 				} catch (CoreException ex) {
-					reader= new StringReader(JavaHoverMessages.JavadocHover_error_gettingJavadoc);
-					JavaPlugin.log(ex);
+					reader= new StringReader(JavaDocLocations.handleFailedJavadocFetch(ex));
 				}
 
 				if (reader != null) {

@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -667,6 +668,26 @@ public class JavaDocLocations {
 			JavaPlugin.log(e);
 		}
 		return message;
+	}
+
+	/**
+	 * Handles the exception thrown from <code>org.eclipse.jdt.core</code> when the attached Javadoc
+	 * cannot be retrieved due to accessibility issues or location URL issue. This exception is not
+	 * logged but the exceptions occurred due to other reasons are logged.
+	 * 
+	 * @param e the exception thrown when retrieving the Javadoc fails
+	 * @return the String message for why the Javadoc could not be retrieved
+	 */
+	public static String handleFailedJavadocFetch(CoreException e) {
+		//filter the exception thrown from JavaElement while trying to fetch the attached Javadoc
+		if (e.getCause() instanceof IOException) {
+			IStatus status= e.getStatus();
+			if (status.getCode() == IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC && JavaCore.PLUGIN_ID.equals(status.getPlugin())) {
+				return CorextMessages.JavaDocLocations_error_gettingAttachedJavadoc;
+			}
+		}
+		JavaPlugin.log(e);
+		return CorextMessages.JavaDocLocations_error_gettingJavadoc;
 	}
 
 	/**

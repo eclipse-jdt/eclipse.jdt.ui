@@ -465,7 +465,7 @@ public class JavadocView extends AbstractInfoView {
 	private LinkAction fToggleLinkAction;
 
 	/**
-	 * Action to open the attached Javadoc. 
+	 * Action to open the attached Javadoc.
 	 * @since 3.4
 	 */
 	private OpenInBrowserAction fOpenBrowserAction;
@@ -1081,8 +1081,7 @@ public class JavadocView extends AbstractInfoView {
 						content= JavadocContentAccess2.getHTMLContent((IPackageFragment) curr);
 					}
 				} catch (CoreException e) {
-					reader= new StringReader(InfoViewMessages.JavadocView_error_gettingJavadoc);
-					JavaPlugin.log(e);
+					reader= new StringReader(JavaDocLocations.handleFailedJavadocFetch(e));
 				}
 				IPackageFragmentRoot root= (IPackageFragmentRoot) curr.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 				try {
@@ -1090,7 +1089,7 @@ public class JavadocView extends AbstractInfoView {
 					if (content != null) {
 						base= JavaDocLocations.getBaseURL(curr, isBinary);
 						reader= new StringReader(content);
-					} else {
+					} else if (reader == null) {
 						String explanationForMissingJavadoc= JavaDocLocations.getExplanationForMissingJavadoc(curr, root);
 						if (explanationForMissingJavadoc != null) {
 							reader= new StringReader(explanationForMissingJavadoc);
@@ -1141,8 +1140,7 @@ public class JavadocView extends AbstractInfoView {
 						}
 					}
 				} catch (JavaModelException ex) {
-					reader= new StringReader(InfoViewMessages.JavadocView_error_gettingJavadoc);
-					JavaPlugin.log(ex.getStatus());
+					reader= new StringReader(JavaDocLocations.handleFailedJavadocFetch(ex));
 				}
 				if (reader != null) {
 					HTMLPrinter.addParagraph(buffer, reader);
@@ -1242,7 +1240,7 @@ public class JavadocView extends AbstractInfoView {
 	@Override
 	protected IJavaElement findSelectedJavaElement(IWorkbenchPart part, ISelection selection) {
 		IJavaElement element= super.findSelectedJavaElement(part, selection);
-		try {			
+		try {
 			//update the Javadoc view when package.html is selected in project explorer view
 			if (element == null && selection instanceof IStructuredSelection) {
 				Object selectedElement= ((IStructuredSelection) selection).getFirstElement();

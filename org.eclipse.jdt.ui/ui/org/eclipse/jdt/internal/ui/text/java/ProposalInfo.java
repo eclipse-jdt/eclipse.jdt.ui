@@ -19,7 +19,8 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 
 
@@ -75,7 +76,7 @@ public class ProposalInfo {
 			final IJavaElement javaElement= getJavaElement();
 			return extractJavadoc(javaElement);
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
+			JavaDocLocations.handleFailedJavadocFetch(e);
 		}
 		return null;
 	}
