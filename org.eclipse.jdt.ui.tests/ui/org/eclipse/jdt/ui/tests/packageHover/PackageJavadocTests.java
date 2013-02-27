@@ -53,8 +53,6 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
  */
 public class PackageJavadocTests extends CoreTests {
 
-	private static final boolean BUG_400060_FIXED= false;
-
 
 	public PackageJavadocTests(String name) {
 		super(name);
@@ -296,10 +294,6 @@ public class PackageJavadocTests extends CoreTests {
 	}
 
 	public void testFailToAccessAttachedJavadoc() throws Exception {
-
-		if (!BUG_400060_FIXED)
-			return;
-
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/PackageJavadocTests/JavadocHover_src.zip"));
 
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
