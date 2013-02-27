@@ -853,10 +853,11 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 			updateLinkImage(false);
 		}
 
-		public void updateLinkImage(final boolean isBroken) {
+		public void updateLinkImage(boolean isBroken) {
 			String iconName= isBroken ? SYNC_BROKEN_GIF : SYNCED_GIF;
 			if (!iconName.equals(fIconName)) {
 				JavaPluginImages.setLocalImageDescriptors(fToggleLinkAction, iconName);
+				setToolTipText(isBroken ? InfoViewMessages.LinkAction_last_input_tooltip : InfoViewMessages.LinkAction_tooltip);
 				fIconName= iconName;
 			}
 		}

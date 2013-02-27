@@ -40,6 +40,7 @@ final class InfoViewMessages extends NLS {
 	public static String OpenInBrowserAction_url_toolTip;
 
 	public static String LinkAction_label;
+	public static String LinkAction_last_input_tooltip;
 	public static String LinkAction_tooltip;
 
 	public static String CopyToClipboard_error_title;
