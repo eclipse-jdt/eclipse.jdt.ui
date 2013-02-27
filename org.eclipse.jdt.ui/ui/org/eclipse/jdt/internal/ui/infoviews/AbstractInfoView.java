@@ -26,12 +26,14 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -48,10 +50,12 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.ViewPart;
 
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -67,6 +71,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.Symbols;
@@ -250,6 +255,10 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		fGotoInputAction.setEnabled(false);
 		fCopyToClipboardAction= new CopyToClipboardAction(getViewSite());
 
+		fToggleLinkAction= new LinkAction();
+		fToggleLinkAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR);
+		fToggleLinkAction.updateLinkImage(false);
+
 		ISelectionProvider provider= getSelectionProvider();
 		if (provider != null)
 			provider.addSelectionChangedListener(fCopyToClipboardAction);
@@ -331,6 +340,9 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		action= getSelectAllAction();
 		if (action != null)
 			actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), action);
+
+		IHandlerService handlerService= (IHandlerService) getSite().getService(IHandlerService.class);
+		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR, new ActionHandler(fToggleLinkAction));
 	}
 
 	/**
@@ -341,6 +353,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 * @param tbm the tool bar manager
 	 */
 	protected void fillToolBar(IToolBarManager tbm) {
+		tbm.add(fToggleLinkAction);
 		tbm.add(fGotoInputAction);
 	}
 
@@ -405,13 +418,13 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 * Sets whether this info view reacts to selection
 	 * changes in the workbench.
 	 *
-	 * @param enabled if true then the input is set on selection changes
+	 * @param enabled if <code>true</code> then the input is set on selection changes
 	 */
 	protected void setLinkingEnabled(boolean enabled) {
 		fLinking= enabled;
 
 		if (fLinking && fLastSelectionProvider != null) {
-			computeAndSetInput(fLastSelectionProvider);
+			computeAndDoSetInput(fLastSelectionProvider, null, true);
 		}
 	}
 
@@ -471,7 +484,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 					IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
 					ISelection methodSelection = guessMethodNamePosition(document, (ITextSelection)selection);
 					// if an enclosing method call could not be found
-					if (methodSelection == null) 
+					if (methodSelection == null)
 						return null;
 					// call this method recursively with the new selection
 					return findSelectedJavaElement(part, methodSelection);
@@ -639,7 +652,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 * @param part the workbench part
 	 */
 	private void computeAndSetInput(final IWorkbenchPart part) {
-		computeAndDoSetInput(part, null);
+		computeAndDoSetInput(part, null, false);
 	}
 
 	/**
@@ -648,7 +661,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 * @param element the java element
 	 */
 	public final void setInput(final IJavaElement element) {
-		computeAndDoSetInput(null, element);
+		computeAndDoSetInput(null, element, false);
 	}
 
 	/**
@@ -657,8 +670,9 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 *
 	 * @param part the workbench part, or <code>null</code> if <code>element</code> not <code>null</code>
 	 * @param element the java element, or <code>null</code> if <code>part</code> not <code>null</code>
+	 * @param resetIfInvalid <code>true</code> if the view should be reset if the input is invalid, <code>false</code> otherwise
 	 */
-	private void computeAndDoSetInput(final IWorkbenchPart part, final IJavaElement element) {
+	private void computeAndDoSetInput(final IWorkbenchPart part, final IJavaElement element, final boolean resetIfInvalid) {
 		Assert.isLegal(part != null || element != null);
 
 		final int currentCount= ++fComputeCount;
@@ -698,10 +712,11 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 
 				// The actual computation
 				final Object input= computeInput(part, selection, je, computeProgressMonitor);
-				if (input == null) {
+				if (input == null && !resetIfInvalid && fCurrentViewInput != null) {
 					IJavaElement oldElement= fCurrentViewInput;
 					if (oldElement == null || oldElement.exists()) {
 						// leave the last shown documentation until it becomes invalid
+						updateLinkImage(true);
 						return;
 					}
 				}
@@ -726,8 +741,28 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 
 						fCurrentViewInput= je;
 						doSetInput(input, description);
+						fToggleLinkAction.updateLinkImage(false);
 
 						fComputeProgressMonitor= null;
+					}
+				});
+			}
+
+			private void updateLinkImage(final boolean isBroken) {
+				Shell shell= getSite().getShell();
+				if (shell.isDisposed())
+					return;
+
+				Display display= shell.getDisplay();
+				if (display.isDisposed())
+					return;
+
+				display.asyncExec(new Runnable() {
+					/*
+					 * @see java.lang.Runnable#run()
+					 */
+					public void run() {
+						fToggleLinkAction.updateLinkImage(isBroken);
 					}
 				});
 			}
@@ -770,5 +805,61 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 
 		setContentDescription(description);
 		setTitleToolTip(toolTip);
+	}
+
+	/**
+	 * Action to enable and disable link with selection.
+	 * 
+	 * @since 3.4 in JavadocView, moved here in 3.9
+	 */
+	protected LinkAction fToggleLinkAction;
+
+	/**
+	 * Name of the link with selection icon when the view and selection is in sync.
+	 * 
+	 * @since 3.9
+	 */
+	private static final String SYNCED_GIF= "synced.gif"; //$NON-NLS-1$
+
+	/**
+	 * Name of the link with selection icon when the view and selection is out of sync.
+	 * 
+	 * @since 3.9
+	 */
+	private static final String SYNC_BROKEN_GIF= "sync_broken.gif"; //$NON-NLS-1$
+
+
+	/**
+	 * Action to toggle linking with selection.
+	 * 
+	 * @since 3.4 in JavadocView, moved here in 3.9
+	 */
+	private class LinkAction extends Action {
+
+		private String fIconName;
+
+		public LinkAction() {
+			super(InfoViewMessages.LinkAction_label, SWT.TOGGLE);
+			setToolTipText(InfoViewMessages.LinkAction_tooltip);
+			setChecked(fLinking);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.action.Action#run()
+		 */
+		@Override
+		public void run() {
+			setLinkingEnabled(!fLinking);
+			updateLinkImage(false);
+		}
+
+		public void updateLinkImage(final boolean isBroken) {
+			String iconName= isBroken ? SYNC_BROKEN_GIF : SYNCED_GIF;
+			if (!iconName.equals(fIconName)) {
+				JavaPluginImages.setLocalImageDescriptors(fToggleLinkAction, iconName);
+				fIconName= iconName;
+			}
+		}
+
 	}
 }

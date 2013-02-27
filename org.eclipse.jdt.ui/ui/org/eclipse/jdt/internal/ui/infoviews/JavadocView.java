@@ -48,7 +48,6 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.internal.text.html.BrowserInput;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
@@ -91,7 +90,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
-import org.eclipse.ui.handlers.IHandlerService;
 
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
@@ -302,29 +300,6 @@ public class JavadocView extends AbstractInfoView {
 	}
 
 	/**
-	 * Action to toggle linking with selection.
-	 *
-	 * @since 3.4
-	 */
-	private class LinkAction extends Action {
-
-		public LinkAction() {
-			super(InfoViewMessages.JavadocView_action_toogleLinking_text, SWT.TOGGLE);
-			setToolTipText(InfoViewMessages.JavadocView_action_toggleLinking_toolTipText);
-			JavaPluginImages.setLocalImageDescriptors(this, "synced.gif"); //$NON-NLS-1$
-			setChecked(isLinkingEnabled());
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.action.Action#run()
-		 */
-		@Override
-		public void run() {
-			setLinkingEnabled(!isLinkingEnabled());
-		}
-	}
-
-	/**
 	 * Action to open the selection in an external browser. If the selection is a java element its
 	 * corresponding javadoc is shown if possible. If it is an URL the URL's content is shown.
 	 * 
@@ -457,12 +432,6 @@ public class JavadocView extends AbstractInfoView {
 	 * @since 3.4
 	 */
 	private ForthAction fForthAction;
-
-	/**
-	 * Action to enable and disable link with selection.
-	 * @since 3.4
-	 */
-	private LinkAction fToggleLinkAction;
 
 	/**
 	 * Action to open the attached Javadoc.
@@ -721,9 +690,6 @@ public class JavadocView extends AbstractInfoView {
 		fForthAction= new ForthAction();
 		fForthAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_FORWARD);
 
-		fToggleLinkAction= new LinkAction();
-		fToggleLinkAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR);
-
 		fInputSelectionProvider= new SimpleSelectionProvider();
 		fOpenBrowserAction= new OpenInBrowserAction(getSite());
 		fOpenBrowserAction.setSpecialSelectionProvider(fInputSelectionProvider);
@@ -759,8 +725,6 @@ public class JavadocView extends AbstractInfoView {
 			}
 		});
 
-		IHandlerService handlerService= (IHandlerService) getSite().getService(IHandlerService.class);
-		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR, new ActionHandler(fToggleLinkAction));
 	}
 
 	/* (non-Javadoc)
@@ -773,7 +737,6 @@ public class JavadocView extends AbstractInfoView {
 		tbm.add(fForthAction);
 		tbm.add(new Separator());
 
-		tbm.add(fToggleLinkAction);
 		super.fillToolBar(tbm);
 		tbm.add(fOpenBrowserAction);
 	}
