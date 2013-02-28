@@ -22,4 +22,16 @@
   <artifactId>org.eclipse.jdt.ui.tests</artifactId>
   <version>3.9.0-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-compiler-plugin</artifactId>
+        <version>${tycho.version}</version>
+        <configuration>
+          <compilerArgument>-warn:-deprecation,raw,unchecked,discouraged,forbidden,warningToken</compilerArgument>
+        </configuration>
+      </plugin>
+    </plugins>
+ </build>
 </project>
