@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.DefaultPhoneticDistanceA
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.RankedWordProposal;
+
 
 public class SpellCheckEngineTestCase extends TestCase {
 
@@ -200,13 +201,18 @@ public class SpellCheckEngineTestCase extends TestCase {
 		final ISpellChecker checker= fEngine.getSpellChecker();
 		assertNotNull(checker);
 
+		System.out.println(System.getProperty("file.encoding"));
+
+		assertTrue(Locale.US.equals(checker.getLocale()));
+
+		assertTrue(fUSDictionary.isLoaded());
+		assertTrue(fGlobalDictionary.isLoaded());
+
 		assertTrue(checker.isCorrect(TRUCK));
 		assertTrue(checker.isCorrect(GLOBAL));
 		assertFalse(checker.isCorrect(LORRY));
 		assertFalse(checker.isCorrect(LASTWAGEN));
 
-		assertTrue(fUSDictionary.isLoaded());
-		assertTrue(fGlobalDictionary.isLoaded());
 	}
 
 	public void testWordProposals() {
