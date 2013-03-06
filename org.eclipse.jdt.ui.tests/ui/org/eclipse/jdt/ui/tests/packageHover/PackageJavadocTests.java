@@ -82,7 +82,7 @@ public class PackageJavadocTests extends CoreTests {
 		String actualHtmlContent= hoverInfo.getHtml();
 
 		//checking for some part of the expected Javadoc which could be retrieved.
-		Assert.assertTrue(actualHtmlContent.contains("Test package documentation in package.html"));
+		Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains("Test package documentation in package.html"));
 	}
 
 
@@ -101,7 +101,7 @@ public class PackageJavadocTests extends CoreTests {
 		JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(21, 12), null);
 		String actualHtmlContent= hoverInfo.getHtml();
 
-		Assert.assertTrue(actualHtmlContent.contains("This is the test content"));
+		Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains("This is the test content"));
 	}
 
 	public void testGetDocFromPackageHtml_archive() throws Exception {
@@ -120,7 +120,7 @@ public class PackageJavadocTests extends CoreTests {
 		JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(67, 10), null);
 		String actualHtmlContent= hoverInfo.getHtml();
 
-		Assert.assertTrue(actualHtmlContent.contains("Test package documentation in package.html"));
+		Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains("Test package documentation in package.html"));
 	}
 
 	public void testGetDocFromPackageInfoJava_archive() throws Exception {
@@ -151,7 +151,7 @@ public class PackageJavadocTests extends CoreTests {
 		JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(new IJavaElement[] { packageFragment }, cu, new Region(offset, length), null);
 		String actualHtmlContent= hoverInfo.getHtml();
 
-		Assert.assertTrue(actualHtmlContent.contains("This is the package documentation for org.eclipse.jdt.ui.tests"));
+		Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains("This is the package documentation for org.eclipse.jdt.ui.tests"));
 
 	}
 
@@ -186,7 +186,7 @@ public class PackageJavadocTests extends CoreTests {
 		String actualHtmlContent= hoverInfo.getHtml();
 
 
-		Assert.assertTrue(actualHtmlContent.contains("This is the package documentation for org.eclipse.jdt.ui.tests.html."));
+		Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains("This is the package documentation for org.eclipse.jdt.ui.tests.html."));
 
 	}
 
@@ -222,15 +222,15 @@ public class PackageJavadocTests extends CoreTests {
 
 		JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(codeSelect, cu, new Region(offset, length), null);
 		String actualHtmlContent= hoverInfo.getHtml();
-		Assert.assertNotNull(actualHtmlContent);
+		Assert.assertNotNull(actualHtmlContent, actualHtmlContent);
 
 		try {
 			//trying to connect to the internet. Exception will be thrown if there is no net connection.
 			new URL("url:http://download.oracle.com/").openConnection().connect();
-			Assert.assertTrue(actualHtmlContent.contains("Provides classes for performing arbitrary-precision integer arithmetic"));
+			Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains("Provides classes for performing arbitrary-precision integer arithmetic"));
 		} catch (Exception e) {
 			//there is no internet connection, so the Javadoc cannot be retrieved.
-			Assert.assertTrue(actualHtmlContent.contains(CorextMessages.JavaDocLocations_noAttachedSource) || actualHtmlContent.contains(CorextMessages.JavaDocLocations_error_gettingJavadoc)
+			Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains(CorextMessages.JavaDocLocations_noAttachedSource) || actualHtmlContent.contains(CorextMessages.JavaDocLocations_error_gettingJavadoc)
 					|| actualHtmlContent.contains(CorextMessages.JavaDocLocations_error_gettingAttachedJavadoc));
 		}
 
@@ -258,7 +258,7 @@ public class PackageJavadocTests extends CoreTests {
 		JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(21, 12), null);
 		String actualHtmlContent= hoverInfo.getHtml();
 
-		Assert.assertTrue(actualHtmlContent.contains("The pack is a test package. This doc contains references"));
+		Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains("The pack is a test package. This doc contains references"));
 	}
 
 	public void testPackageWithNoJavadoc() throws Exception {
@@ -290,7 +290,7 @@ public class PackageJavadocTests extends CoreTests {
 		JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(new IJavaElement[] { packageFragment }, cu, new Region(offset, length), null);
 		String actualHtmlContent= hoverInfo.getHtml();
 		
-		Assert.assertTrue(actualHtmlContent.contains(CorextMessages.JavaDocLocations_noAttachedJavadoc));
+		Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains(CorextMessages.JavaDocLocations_noAttachedJavadoc));
 	}
 
 	public void testFailToAccessAttachedJavadoc() throws Exception {
@@ -325,7 +325,7 @@ public class PackageJavadocTests extends CoreTests {
 		String actualHtmlContent= hoverInfo.getHtml();
 		Assert.assertNotNull(actualHtmlContent);
 
-		Assert.assertTrue(actualHtmlContent.contains(CorextMessages.JavaDocLocations_error_gettingAttachedJavadoc));
+		Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains(CorextMessages.JavaDocLocations_error_gettingAttachedJavadoc));
 
 	}
 
