@@ -23,6 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -685,10 +686,12 @@ public class JavaDocLocations {
 	 */
 	public static String handleFailedJavadocFetch(CoreException e) {
 		IStatus status= e.getStatus();
-		if (status.getCode() == IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC && JavaCore.PLUGIN_ID.equals(status.getPlugin())) {
+		if ((status.getCode() == IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC || status.getCode() == IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC_TIMEOUT)
+				&& JavaCore.PLUGIN_ID.equals(status.getPlugin())) {
 			Throwable cause= e.getCause();
 			// See bug 120559, bug 400060 and bug 400062
-			if (cause instanceof FileNotFoundException || cause instanceof SocketException || cause instanceof UnknownHostException || cause instanceof ProtocolException)
+			if (cause instanceof FileNotFoundException || cause instanceof SocketException || cause instanceof SocketTimeoutException || cause instanceof UnknownHostException
+					|| cause instanceof ProtocolException)
 				return CorextMessages.JavaDocLocations_error_gettingAttachedJavadoc;
 		}
 		JavaPlugin.log(e);
