@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rabea Gransberger <rgransberger@gmx.de> - [quick fix] Fix several visibility issues - https://bugs.eclipse.org/394692
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -2710,6 +2711,51 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[3]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	
+	/**
+	 * Wrong quick fixes when accessing protected field in subclass in different package.
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=280819#c2
+	 * 
+	 * @throws Exception if anything goes wrong
+	 * @since 3.9
+	 */
+	public void testVarParameterAccess() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Base {\n");
+		buf.append("    protected int myField;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Base.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import test1.Base;\n");
+		buf.append("public class Child extends Base {\n");
+		buf.append("    public void aMethod(Base parent) {\n");
+		buf.append("        System.out.println(parent.myField);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		cu = pack2.createCompilationUnit("Child.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String [] expected = new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Base {\n");
+		buf.append("    public int myField;\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}

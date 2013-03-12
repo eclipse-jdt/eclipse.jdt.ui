@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@innoopract.com> - [quick fix] 'Remove invalid modifiers' does not appear for enums and annotations - https://bugs.eclipse.org/bugs/show_bug.cgi?id=110589
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [quick fix] Quick fix for missing synchronized modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245250
+ *     Rabea Gransberger <rgransberger@gmx.de> - [quick fix] Fix several visibility issues - https://bugs.eclipse.org/394692
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -3922,4 +3923,183 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+
+	/**
+	 * Quick Fix proposes wrong visibility for overriding/overridden method.
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=216898
+	 * 
+	 * @throws Exception if anything goes wrong
+	 * @since 3.9
+	 */
+	public void testOverridingMethodIsPrivate() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		StringBuffer buf= new StringBuffer();
+
+		buf.append("package test1;\n");
+		buf.append("public abstract class A1 {\n");
+		buf.append("  protected abstract void m1();\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A1.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+
+		buf.append("package test1;\n");
+		buf.append("public class B1 extends A1 {\n");
+		buf.append("  private void m1() {\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B1 extends A1 {\n");
+		buf.append("  protected void m1() {\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+
+	/**
+	 * Quick Fix proposes wrong visibility for overriding/overridden method.
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=216898#c1
+	 * 
+	 * @throws Exception if anything goes wrong
+	 * @since 3.9
+	 */
+	public void testInvalidVisabilityOverrideMethod() throws Exception {
+		// No simple solution to this problemID IProblem.AbstractMethodCannotBeOverridden
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+
+		StringBuffer buf= new StringBuffer();
+
+		buf.append("package test1;\n");
+		buf.append("public abstract class Abs {\n");
+		buf.append("  abstract String getName();\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("Abs.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+
+		buf.append("package test2;\n");
+		buf.append("public class AbsImpl extends test1.Abs {\n");
+		buf.append("  String getName() {\n");
+		buf.append("    return \"name\";\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("AbsImpl.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 0);
+	}
+
+	/**
+	 * Quick Fix proposes wrong visibility for overriding/overridden method.
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=216898#c1
+	 * 
+	 * @throws Exception if anything goes wrong
+	 * @since 3.9
+	 */
+	public void test216898Comment1Variation() throws Exception {
+		// Changing Abs.getName to protected by hand to allow solution for AbsImpl
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+
+		StringBuffer buf= new StringBuffer();
+
+		buf.append("package test1;\n");
+		buf.append("public abstract class Abs {\n");
+		buf.append("  protected abstract String getName();\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("Abs.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+
+		buf.append("package test2;\n");
+		buf.append("public class AbsImpl extends test1.Abs {\n");
+		buf.append("  String getName() {\n");
+		buf.append("    return \"name\";\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("AbsImpl.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class AbsImpl extends test1.Abs {\n");
+		buf.append("  protected String getName() {\n");
+		buf.append("    return \"name\";\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	/**
+	 * Wrong visibility for overriding method in interface.
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=87239
+	 * 
+	 * @throws Exception if anything goes wrong
+	 * @since 3.9
+	 */
+	public void testImplementExtendSameMethod() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface I {\n");
+		buf.append("  void xxx();\n");
+		buf.append("}\n");
+		buf.append("class A {\n");
+		buf.append("  void xxx() {}\n");
+		buf.append("}\n");
+		buf.append("class B extends A implements I {\n");
+		buf.append("  void xxx() {}//error\n");
+		buf.append("}\n");
+		ICompilationUnit cu=  pack1.createCompilationUnit("I.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface I {\n");
+		buf.append("  void xxx();\n");
+		buf.append("}\n");
+		buf.append("class A {\n");
+		buf.append("  void xxx() {}\n");
+		buf.append("}\n");
+		buf.append("class B extends A implements I {\n");
+		buf.append("  public void xxx() {}//error\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
 }
