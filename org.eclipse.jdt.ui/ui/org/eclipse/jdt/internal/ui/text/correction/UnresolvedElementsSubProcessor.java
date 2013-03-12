@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Renaud Waldura &lt;renaud+eclipse@waldura.com&gt; - New class/interface with wizard
+ *     Rabea Gransberger <rgransberger@gmx.de> - [quick fix] Fix several visibility issues - https://bugs.eclipse.org/394692
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -295,7 +296,7 @@ public class UnresolvedElementsSubProcessor {
 		boolean isWriteAccess= ASTResolving.isWriteAccess(node);
 
 		// similar variables
-		addSimilarVariableProposals(cu, astRoot, binding, simpleName, isWriteAccess, proposals);
+		addSimilarVariableProposals(cu, astRoot, binding, resolvedField, simpleName, isWriteAccess, proposals);
 		
 		if (binding == null) {
 			addStaticImportFavoriteProposals(context, simpleName, false, proposals);
@@ -415,7 +416,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	private static void addSimilarVariableProposals(ICompilationUnit cu, CompilationUnit astRoot, ITypeBinding binding, SimpleName node, boolean isWriteAccess, Collection<ICommandAccess> proposals) {
+	private static void addSimilarVariableProposals(ICompilationUnit cu, CompilationUnit astRoot, ITypeBinding binding, IVariableBinding resolvedField, SimpleName node, boolean isWriteAccess, Collection<ICommandAccess> proposals) {
 		int kind= ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY;
 		if (!isWriteAccess) {
 			kind |= ScopeAnalyzer.METHODS; // also try to find similar methods
@@ -472,6 +473,9 @@ public class UnresolvedElementsSubProcessor {
 					IVariableBinding curr= (IVariableBinding) varOrMeth;
 					String currName= curr.getName();
 					if (currName.equals(otherNameInAssign)) {
+						continue loop;
+					}
+					if (resolvedField != null && Bindings.equals(resolvedField, curr)) {
 						continue loop;
 					}
 					boolean isFinal= Modifier.isFinal(curr.getModifiers());

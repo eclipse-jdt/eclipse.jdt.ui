@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rabea Gransberger <rgransberger@gmx.de> - [quick fix] Fix several visibility issues - https://bugs.eclipse.org/394692
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -4942,5 +4943,51 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 	}
 
 
+	/**
+	 * Visibility: fix for public or protected not appropriate.
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=65876#c5
+	 *
+	 * @throws Exception if anything goes wrong
+	 * @since 3.9
+	 */
+	public void testIndirectProtectedMethod() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    protected void method() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import test1.A;\n");
+		buf.append("public class B extends A {\n");
+		buf.append("    private void bMethod() {\n");
+		buf.append("        A a = new A();\n");
+		buf.append("        a.method();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu = pack2.createCompilationUnit("B.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void method() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rabea Gransberger <rgransberger@gmx.de> - [quick fix] Fix several visibility issues - https://bugs.eclipse.org/394692
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
@@ -340,6 +341,21 @@ public class JdtFlags {
 			return visibility2;
 		else
 			return visibility1;
+	}
+
+	/**
+	 * Gets the higher visibility of the given parameters.
+	 * 
+	 * @param visibility1 First visibility value to compare. Valid inputs are the {@link Modifier} visibility constants.
+	 * @param visibility2 Second visibility value to compare. Valid inputs are the {@link Modifier} visibility constants.
+	 * @return The parameter value with the higher visibility.
+	 * @since 3.9
+	 */
+	public static int getHigherVisibility(int visibility1, int visibility2) {
+		if (isHigherVisibility(visibility1, visibility2))
+			return visibility1;
+		else
+			return visibility2;
 	}
 
 	public static int clearAccessModifiers(int flags) {
