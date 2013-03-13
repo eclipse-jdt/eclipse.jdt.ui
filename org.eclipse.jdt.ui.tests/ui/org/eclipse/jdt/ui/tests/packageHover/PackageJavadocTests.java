@@ -325,7 +325,9 @@ public class PackageJavadocTests extends CoreTests {
 		String actualHtmlContent= hoverInfo.getHtml();
 		Assert.assertNotNull(actualHtmlContent);
 
-		Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains(CorextMessages.JavaDocLocations_error_gettingAttachedJavadoc));
+		// Need to check both conditions for now. See https://bugs.eclipse.org/403036 and https://bugs.eclipse.org/403154 for details.
+		Assert.assertTrue(actualHtmlContent,
+				actualHtmlContent.contains(CorextMessages.JavaDocLocations_error_gettingAttachedJavadoc) || actualHtmlContent.contains(CorextMessages.JavaDocLocations_noAttachedSource));
 
 	}
 
