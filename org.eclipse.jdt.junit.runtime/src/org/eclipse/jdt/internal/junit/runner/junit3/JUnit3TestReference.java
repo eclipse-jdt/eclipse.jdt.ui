@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     David Saff (saff@mit.edu) - initial API and implementation
  *             (bug 102632: [JUnit] Support for JUnit 4.)
+ *     Oliver Masutti <eclipse@masutti.ch> - [JUnit] JUnit3TestReference handles JUnit4TestAdapter incorrectly - https://bugs.eclipse.org/397747
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.runner.junit3;
@@ -142,8 +143,8 @@ public class JUnit3TestReference implements ITestReference {
 				sendTreeOfChild(suite.testAt(i), notified);
 			}
 		} else if (isJUnit4TestSuiteAdapter(fTest)) {
-			notified.visitTreeEntry(getIdentifier(), true, fTest.countTestCases());
 			List tests= (List) callJUnit4GetterMethod(fTest, "getTests"); //$NON-NLS-1$
+			notified.visitTreeEntry(getIdentifier(), true, tests.size());
 			for (Iterator iter= tests.iterator(); iter.hasNext();) {
 				sendTreeOfChild((Test) iter.next(), notified);
 			}
