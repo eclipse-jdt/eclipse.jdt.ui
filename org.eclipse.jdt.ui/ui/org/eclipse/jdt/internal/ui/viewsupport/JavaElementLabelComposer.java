@@ -375,7 +375,7 @@ public class JavaElementLabelComposer {
 			fBuffer.append(getElementName(method));
 
 			// constructor type arguments
-			if (getFlag(flags, JavaElementLabels.T_TYPE_PARAMETERS) && method.isConstructor()) {
+			if (getFlag(flags, JavaElementLabels.T_TYPE_PARAMETERS) && method.exists() && method.isConstructor()) {
 				if (resolvedSig != null && resolvedKey.isParameterizedType()) {
 					BindingKey declaringType= resolvedKey.getDeclaringType();
 					if (declaringType != null) {
