@@ -4,6 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -42,6 +46,9 @@ public class BracesTabPage extends FormatterTabPage {
 	"  int [] myArray= {1,2,3,4,5,6};" + //$NON-NLS-1$
 	"  int [] emptyArray= new int[] {};" + //$NON-NLS-1$
 	"  Example() {" + //$NON-NLS-1$
+	"		Runnable r = () -> {"+ //$NON-NLS-1$
+	"		fField.set(20);"+ //$NON-NLS-1$
+	"	};"+ //$NON-NLS-1$
 	"  }" + //$NON-NLS-1$
 	"  void bar(int p) {" + //$NON-NLS-1$
 	"    for (int i= 0; i<10; i++) {" + //$NON-NLS-1$
@@ -125,6 +132,8 @@ public class BracesTabPage extends FormatterTabPage {
 			}
 		});
 		updateOptionEnablement(arrayInitOption, arrayInitCheckBox);
+		
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_lambda_body, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_LAMBDA_BODY);
 	}
 
 	protected final void updateOptionEnablement(ComboPreference arrayInitOption, CheckboxPreference arrayInitCheckBox) {
