@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
  *       bug "inline method - doesn't handle implicit cast" (see
  *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
+ *     Rabea Gransberger <rgransberger@gmx.de> - [quick fix] Fix several visibility issues - https://bugs.eclipse.org/394692
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
@@ -493,9 +494,31 @@ public class Bindings {
 	 * @return the method binding representing the method
 	 */
 	public static IMethodBinding findOverriddenMethod(IMethodBinding overriding, boolean testVisibility) {
+		List<IMethodBinding> findOverriddenMethods= findOverriddenMethods(overriding, testVisibility, true);
+		if (findOverriddenMethods.isEmpty()) {
+			return null;
+		}
+		return findOverriddenMethods.get(0);
+	}
+	
+	/**
+	 * Finds all methods that are overridden by the given method. The search is bottom-up, so this
+	 * returns the nearest defining/declaring methods in order.
+	 * 
+	 * @param overriding overriding method
+	 * @param testVisibility if <code>true</code> the result is tested on visibility
+	 * @param firstOnly if <code>true</code> this method will return when the first overridden
+	 *            method is found
+	 * @return the method bindings representing the overridden method or an empty list if no result
+	 *         is found
+	 * @since 3.9
+	 */
+	public static List<IMethodBinding> findOverriddenMethods(IMethodBinding overriding, boolean testVisibility, boolean firstOnly) {
+		List<IMethodBinding> methodList= new ArrayList<IMethodBinding>();
+
 		int modifiers= overriding.getModifiers();
 		if (Modifier.isPrivate(modifiers) || Modifier.isStatic(modifiers) || overriding.isConstructor()) {
-			return null;
+			return methodList;
 		}
 
 		ITypeBinding type= overriding.getDeclaringClass();
@@ -503,7 +526,10 @@ public class Bindings {
 			IMethodBinding res= findOverriddenMethodInHierarchy(type.getSuperclass(), overriding);
 			if (res != null && !Modifier.isPrivate(res.getModifiers())) {
 				if (!testVisibility || isVisibleInHierarchy(res, overriding.getDeclaringClass().getPackage())) {
-					return res;
+					methodList.add(res);
+					if (firstOnly) {
+						return methodList;
+					}
 				}
 			}
 		}
@@ -511,10 +537,13 @@ public class Bindings {
 		for (int i= 0; i < interfaces.length; i++) {
 			IMethodBinding res= findOverriddenMethodInHierarchy(interfaces[i], overriding);
 			if (res != null) {
-				return res; // methods from interfaces are always public and therefore visible
+				methodList.add(res); // methods from interfaces are always public and therefore visible
+				if (firstOnly) {
+					return methodList;
+				}
 			}
 		}
-		return null;
+		return methodList;
 	}
 
 

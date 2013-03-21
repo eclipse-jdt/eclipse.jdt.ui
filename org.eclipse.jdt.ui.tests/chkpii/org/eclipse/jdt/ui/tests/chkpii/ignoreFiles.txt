@@ -53,6 +53,7 @@ org.eclipse.help.webapp/*
 org.eclipse.pde.ui/*
 org.eclipse.pde.ui.templates/templates_3.0/help/toc.xml
 org.eclipse.pde.build/*
+org.eclipse.pde.build.tests/*
 org.eclipse.releng.basebuilder/plugins/org.eclipse.pde.build_3.8.0.v20120523-1555/templates/*
 org.eclipse.releng.tools/*
 eclipse.platform.releng.eclipsebuilder/*

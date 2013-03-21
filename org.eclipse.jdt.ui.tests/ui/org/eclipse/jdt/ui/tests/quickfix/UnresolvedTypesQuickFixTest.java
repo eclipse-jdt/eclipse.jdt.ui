@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rabea Gransberger <rgransberger@gmx.de> - [quick fix] Fix several visibility issues - https://bugs.eclipse.org/394692
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -1491,5 +1492,64 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
+	
+	/**
+	 * Offers to raise visibility of method instead of class.
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=94755
+	 * 
+	 * @throws Exception if anything goes wrong
+	 * @since 3.9
+	 */
+	public void testIndirectRefDefaultClass() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+
+		StringBuffer buf= new StringBuffer();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("class B {\n");
+		buf.append("    public Object get(Object c) {\n");
+		buf.append("    	return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    B b = new B();\n");
+		buf.append("    public B getB() {\n");
+		buf.append("    	return b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import test1.A;\n");
+		buf.append("public class C {\n");
+		buf.append("    public Object getSide(A a) {\n");
+		buf.append("    	return a.getB().get(this);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		cu= pack2.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B {\n");
+		buf.append("    public Object get(Object c) {\n");
+		buf.append("    	return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
 
 }

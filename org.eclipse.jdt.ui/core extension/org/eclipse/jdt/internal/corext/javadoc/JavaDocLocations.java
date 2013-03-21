@@ -685,10 +685,14 @@ public class JavaDocLocations {
 	 */
 	public static String handleFailedJavadocFetch(CoreException e) {
 		IStatus status= e.getStatus();
-		if (status.getCode() == IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC && JavaCore.PLUGIN_ID.equals(status.getPlugin())) {
+		if (JavaCore.PLUGIN_ID.equals(status.getPlugin())) {
 			Throwable cause= e.getCause();
+			int code= status.getCode();
 			// See bug 120559, bug 400060 and bug 400062
-			if (cause instanceof FileNotFoundException || cause instanceof SocketException || cause instanceof UnknownHostException || cause instanceof ProtocolException)
+			if (code == IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC_TIMEOUT
+					|| (code == IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC && (cause instanceof FileNotFoundException || cause instanceof SocketException
+							|| cause instanceof UnknownHostException
+							|| cause instanceof ProtocolException)))
 				return CorextMessages.JavaDocLocations_error_gettingAttachedJavadoc;
 		}
 		JavaPlugin.log(e);

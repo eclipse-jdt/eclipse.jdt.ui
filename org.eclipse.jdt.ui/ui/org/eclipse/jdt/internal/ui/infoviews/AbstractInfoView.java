@@ -686,7 +686,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 				return;
 
 			selection= provider.getSelection();
-			if (selection == null || selection.isEmpty())
+			if (selection == null) // if selection is empty then we need to check if the current view input is valid. If not the view should be cleared
 				return;
 		}
 
@@ -706,15 +706,20 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 					je= element;
 				else {
 					je= findSelectedJavaElement(part, selection);
-					if (isIgnoringNewInput(je, part, selection))
+					if (isIgnoringNewInput(je, part, selection)) {
+						// if the link image was broken due to the previous selection then correct it before returning
+						updateLinkImage(false);
 						return;
+					}
 				}
 
 				// The actual computation
 				final Object input= computeInput(part, selection, je, computeProgressMonitor);
 				if (input == null && !resetIfInvalid && fCurrentViewInput != null) {
 					IJavaElement oldElement= fCurrentViewInput;
-					if (oldElement == null || oldElement.exists()) {
+					// update the link image only if the old view input was a valid one
+					Object oldInput= computeInput(null, null, oldElement, computeProgressMonitor);
+					if (oldInput != null && oldElement.exists()) {
 						// leave the last shown documentation until it becomes invalid
 						updateLinkImage(true);
 						return;
