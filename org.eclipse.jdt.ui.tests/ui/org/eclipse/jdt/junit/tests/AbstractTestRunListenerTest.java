@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
-import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 
 
 public class AbstractTestRunListenerTest extends TestCase {
@@ -93,10 +92,9 @@ public class AbstractTestRunListenerTest extends TestCase {
 	}
 
 	private static class TestJUnitLaunchShortcut extends JUnitLaunchShortcut {
-		public static ILaunchConfiguration createConfiguration(IJavaElement element) throws CoreException {
+		public static ILaunchConfigurationWorkingCopy createConfiguration(IJavaElement element) throws CoreException {
 			ILaunchConfigurationWorkingCopy copy= new TestJUnitLaunchShortcut().createLaunchConfiguration(element);
-			copy.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_RUNNER_KIND, TestKindRegistry.JUNIT3_TEST_KIND_ID);
-			return copy.doSave();
+			return copy;
 		}
 	}
 
@@ -108,7 +106,7 @@ public class AbstractTestRunListenerTest extends TestCase {
 		return aTestCase;
 	}
 
-	protected void launchJUnit(IJavaElement aTest) throws CoreException {
+	protected void launchJUnit(IJavaElement aTest, String testKindID) throws CoreException {
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
 		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
@@ -153,7 +151,10 @@ public class AbstractTestRunListenerTest extends TestCase {
 		};
 		lm.addLaunchListener(launchesListener);
 
-		ILaunchConfiguration configuration= TestJUnitLaunchShortcut.createConfiguration(aTest);
+		ILaunchConfigurationWorkingCopy configuration= TestJUnitLaunchShortcut.createConfiguration(aTest);
+		if (testKindID != null) {
+			configuration.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_RUNNER_KIND, testKindID);
+		}
 		try {
 			configuration.launch(ILaunchManager.RUN_MODE, null);
 			new DisplayHelper() {
@@ -171,7 +172,11 @@ public class AbstractTestRunListenerTest extends TestCase {
 	}
 
 	protected String[] launchJUnit(IJavaElement aTest, final TestRunLog log) throws CoreException {
-		launchJUnit(aTest);
+		return launchJUnit(aTest, null, log);
+	}
+	
+	protected String[] launchJUnit(IJavaElement aTest, String testKindID, final TestRunLog log) throws CoreException {
+		launchJUnit(aTest, testKindID);
 
 		boolean success= new DisplayHelper(){
 			protected boolean condition() {

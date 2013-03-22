@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.junit.JUnitMessages;
+import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 
 public class TestRunListenerTest extends AbstractTestRunListenerTest {
 
@@ -42,7 +43,7 @@ public class TestRunListenerTest extends AbstractTestRunListenerTest {
 		final TestRunListener testRunListener= new TestRunListeners.TreeTest(log, step);
 		JUnitCore.addTestRunListener(testRunListener);
 		try {
-			return launchJUnit(typeToLaunch, log);
+			return launchJUnit(typeToLaunch, TestKindRegistry.JUNIT3_TEST_KIND_ID, log);
 		} finally {
 			JUnitCore.removeTestRunListener(testRunListener);
 		}
