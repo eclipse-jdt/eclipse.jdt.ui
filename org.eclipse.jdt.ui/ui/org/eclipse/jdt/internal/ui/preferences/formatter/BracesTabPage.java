@@ -72,12 +72,6 @@ public class BracesTabPage extends FormatterTabPage {
 
 
 	private final String [] fBracePositions= {
-	    DefaultCodeFormatterConstants.END_OF_LINE,
-	    DefaultCodeFormatterConstants.NEXT_LINE,
-	    DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED
-	};
-
-	private final String [] fExtendedBracePositions= {
 		DefaultCodeFormatterConstants.END_OF_LINE,
 	    DefaultCodeFormatterConstants.NEXT_LINE,
 	    DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED,
@@ -85,12 +79,6 @@ public class BracesTabPage extends FormatterTabPage {
 	};
 
 	private final String [] fBracePositionNames= {
-	    FormatterMessages.BracesTabPage_position_same_line,
-	    FormatterMessages.BracesTabPage_position_next_line,
-	    FormatterMessages.BracesTabPage_position_next_line_indented
-	};
-
-	private final String [] fExtendedBracePositionNames= {
 	    FormatterMessages.BracesTabPage_position_same_line,
 	    FormatterMessages.BracesTabPage_position_next_line,
 	    FormatterMessages.BracesTabPage_position_next_line_indented,
@@ -112,15 +100,15 @@ public class BracesTabPage extends FormatterTabPage {
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 
 		final Group group= createGroup(numColumns, composite, FormatterMessages.BracesTabPage_group_brace_positions_title);
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_class_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_TYPE_DECLARATION);
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_anonymous_class_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANONYMOUS_TYPE_DECLARATION);
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_constructor_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_CONSTRUCTOR_DECLARATION);
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_method_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_METHOD_DECLARATION);
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_enum_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ENUM_DECLARATION);
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_enumconst_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ENUM_CONSTANT);
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_annotation_type_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANNOTATION_TYPE_DECLARATION);
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_blocks, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK);
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_blocks_in_case, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK_IN_CASE);
+		createBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_class_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_TYPE_DECLARATION);
+		createBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_anonymous_class_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANONYMOUS_TYPE_DECLARATION);
+		createBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_constructor_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_CONSTRUCTOR_DECLARATION);
+		createBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_method_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_METHOD_DECLARATION);
+		createBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_enum_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ENUM_DECLARATION);
+		createBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_enumconst_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ENUM_CONSTANT);
+		createBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_annotation_type_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANNOTATION_TYPE_DECLARATION);
+		createBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_blocks, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK);
+		createBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_blocks_in_case, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK_IN_CASE);
 		createBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_switch_case, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_SWITCH);
 
 		ComboPreference arrayInitOption= createBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_array_initializer, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ARRAY_INITIALIZER);
@@ -133,7 +121,7 @@ public class BracesTabPage extends FormatterTabPage {
 		});
 		updateOptionEnablement(arrayInitOption, arrayInitCheckBox);
 		
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_lambda_body, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_LAMBDA_BODY);
+		createBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_lambda_body, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_LAMBDA_BODY);
 	}
 
 	protected final void updateOptionEnablement(ComboPreference arrayInitOption, CheckboxPreference arrayInitCheckBox) {
@@ -153,10 +141,6 @@ public class BracesTabPage extends FormatterTabPage {
 
 	private ComboPreference createBracesCombo(Composite composite, int numColumns, String message, String key) {
 		return createComboPref(composite, numColumns, message, key, fBracePositions, fBracePositionNames);
-	}
-
-	private ComboPreference createExtendedBracesCombo(Composite composite, int numColumns, String message, String key) {
-		return createComboPref(composite, numColumns, message, key, fExtendedBracePositions, fExtendedBracePositionNames);
 	}
 
 	private CheckboxPreference createIndentedCheckboxPref(Composite composite, int numColumns, String message, String key, String [] values) {
