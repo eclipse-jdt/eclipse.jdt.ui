@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,7 +53,7 @@ public class ContentProviderTests2 extends TestCase{
 
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite("org.eclipse.jdt.ui.ContentProviderTests2"); //$NON-NLS-1$
+		TestSuite suite= new TestSuite(ContentProviderTests2.class.getName());
 		//$JUnit-BEGIN$
 	   suite.addTestSuite(ContentProviderTests2.class);
 		//$JUnit-END$

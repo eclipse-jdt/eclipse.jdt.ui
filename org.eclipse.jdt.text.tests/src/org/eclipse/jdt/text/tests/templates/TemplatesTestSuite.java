@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,7 @@ import junit.framework.TestSuite;
 public class TemplatesTestSuite {
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite("Test Suite for org.eclipse.jdt.internal.corext.template"); //$NON-NLS-1$
+		TestSuite suite = new TestSuite(TemplatesTestSuite.class.getName());
 		//$JUnit-BEGIN$
 		suite.addTest(TemplateContributionTest.suite());
 		//$JUnit-END$

@@ -17,7 +17,7 @@ import junit.framework.TestSuite;
 public class PackageExplorerTests {
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite("Test for org.eclipse.jdt.ui.tests.packageview");
+		TestSuite suite= new TestSuite(PackageExplorerTests.class.getName());
 		//$JUnit-BEGIN$
 		suite.addTest(ContentProviderTests1.suite());
 		suite.addTest(ContentProviderTests2.suite());

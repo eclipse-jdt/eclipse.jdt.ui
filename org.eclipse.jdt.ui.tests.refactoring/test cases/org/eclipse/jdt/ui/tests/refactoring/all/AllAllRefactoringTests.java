@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ import org.eclipse.jdt.testplugin.TestOptionsSetup;
 
 public class AllAllRefactoringTests {
 	public static Test suite ( ) {
-		TestSuite suite= new TestSuite("All All Refactoring Tests");
+		TestSuite suite= new TestSuite(AllAllRefactoringTests.class.getName());
 		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.actions.AllTests.suite());
 		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.nls.NLSTestSuite.suite());
 		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.AllTests.suite());
