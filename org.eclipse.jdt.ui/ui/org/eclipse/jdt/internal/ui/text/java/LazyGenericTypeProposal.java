@@ -750,20 +750,16 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 				final Position firstBracketPosition;
 				final Position secondBracketPosition;
 
-				int firstBracketOffset;
+				int firstBracketOffset= replacementOffset + offsets[0] - 1;
 				if (prefs.afterOpeningBracket) {
-					firstBracketOffset= replacementOffset + offsets[0] - 2;
-				} else {
-					firstBracketOffset= replacementOffset + offsets[0] - 1;
+					firstBracketOffset--;
 				}
 				firstBracketPosition= new Position(firstBracketOffset, 1);
 				document.addPosition(firstBracketPosition);
 
-				int secondBracketOffset;
+				int secondBracketOffset= replacementOffset + offsets[offsets.length - 1] + lengths[offsets.length - 1] + 1;
 				if (prefs.beforeClosingBracket) {
-					secondBracketOffset= replacementOffset + offsets[offsets.length - 1] + lengths[offsets.length - 1] + 2;
-				} else {
-					secondBracketOffset= replacementOffset + offsets[offsets.length - 1] + lengths[offsets.length - 1] + 1;
+					secondBracketOffset++;
 				}
 				secondBracketPosition= new Position(secondBracketOffset, 1);
 				document.addPosition(secondBracketPosition);
