@@ -402,6 +402,21 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		Assert.assertEquals(buf.toString(), fDocument.get());
 	}
 	
+	public void testSmartIndentAfterNewLine10() {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=404879
+		fDocument.setInitialLineDelimiter("\r\n");
+		fDocument.set("{ foo();");
+		fDocumentCommand.doit= true;
+		fDocumentCommand.offset= 1;
+		fDocumentCommand.text= "\r\n";
+		performSmartIndentAfterNewLine();
+		StringBuffer buf= new StringBuffer();
+		buf.append("{\r\n");
+		buf.append("\tfoo();\r\n");
+		buf.append("}");
+		Assert.assertEquals(buf.toString(), fDocument.get());
+	}
+
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
