@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -145,6 +145,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	
 	private Action fFocusAction;
 	private Action fFindTypeAction;
+	private Action fFindType2Action;
 	private Action fResolveTypeAction;
 	private Action fGetAnnotationAction;
 	private Action fCreateFromBindingKeyAction;
@@ -427,6 +428,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					IJavaElement javaElement= ((JavaElement) first).getJavaElement();
 					if (javaElement instanceof IJavaProject) {
 						manager.add(fFindTypeAction);
+						manager.add(fFindType2Action);
 						manager.add(fCreateFromBindingKeyAction);
 					}
 					if (javaElement instanceof IType) {
@@ -569,6 +571,28 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				Object selected= ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
 				final IJavaProject project= (IJavaProject) ((JavaElement) selected).getJavaElement();
 				
+				InputDialog dialog= new InputDialog(getSite().getShell(), "IJavaProject#findType(String fullyQualifiedName)", "fullyQualifiedName:", "", null);
+				if (dialog.open() != Window.OK)
+					return;
+				
+				final String fullyQualifiedName= dialog.getValue();
+				try {
+					IType type = project.findType(fullyQualifiedName);
+					JavaElement element= new JavaElement(fInput, fullyQualifiedName, type);
+					fViewer.add(fInput, element);
+					fViewer.setSelection(new StructuredSelection(element));
+				} catch (JavaModelException e) {
+					JEViewPlugin.log(e);
+				}
+			}
+		};
+		fFindTypeAction.setText("findType(String)...");
+		
+		fFindType2Action= new Action() {
+			@Override public void run() {
+				Object selected= ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
+				final IJavaProject project= (IJavaProject) ((JavaElement) selected).getJavaElement();
+				
 				InputDialog dialog= new InputDialog(getSite().getShell(), "IJavaProject#findType(String fullyQualifiedName, IProgressMonitor pm)", "fullyQualifiedName:", "", null);
 				if (dialog.open() != Window.OK)
 					return;
@@ -597,7 +621,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				fViewer.setSelection(new StructuredSelection(element));
 			}
 		};
-		fFindTypeAction.setText("findType(..)...");
+		fFindType2Action.setText("findType(String, IProgressMonitor)...");
 		
 		fResolveTypeAction= new Action() {
 			@Override public void run() {
