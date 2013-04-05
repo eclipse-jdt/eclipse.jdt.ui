@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -84,7 +84,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		buf.append(Signature.getSimpleName(node.getClass().getName()));
 		buf.append(" ["); //$NON-NLS-1$
 		buf.append(node.getStartPosition());
-		buf.append(", "); //$NON-NLS-1$
+		buf.append("+"); //$NON-NLS-1$
 		buf.append(node.getLength());
 		buf.append(']');
 		if ((node.getFlags() & ASTNode.MALFORMED) != 0) {
