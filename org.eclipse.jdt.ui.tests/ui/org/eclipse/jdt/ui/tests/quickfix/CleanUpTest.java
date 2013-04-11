@@ -6915,6 +6915,115 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	public void testRemoveParenthesesBug405096_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    final Short cache[] = new Short[-(-128) + 1];\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	public void testRemoveParenthesesBug405096_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    int a= 10\n");
+		buf.append("    final Short cache[] = new Short[-(-a) + 1];\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	public void testRemoveParenthesesBug405096_3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    int a= 10\n");
+		buf.append("    final Short cache[] = new Short[-(--a) + 1];\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	public void testRemoveParenthesesBug405096_4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    int a= 10\n");
+		buf.append("    final Short cache[] = new Short[+(+a) + 1];\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	public void testRemoveParenthesesBug405096_5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    int a= 10\n");
+		buf.append("    final Short cache[] = new Short[+(++a) + +(-127)];\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    int a= 10\n");
+		buf.append("    final Short cache[] = new Short[+(++a) + +-127];\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testRemoveParenthesesBug405096_6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    final Short cache[] = new Short[+(+128) + ~(-127)];\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    final Short cache[] = new Short[+(+128) + ~-127];\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
 	public void testRemoveQualifier01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
