@@ -62,6 +62,14 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+/**
+ * JDT-UI-internal helper methods that deal with {@link IBinding}s:
+ * <ul>
+ * <li>additional operations on {@link IBinding}s and subtypes</li>
+ * <li>finding corresponding elements in the type hierarchy</li>
+ * <li>resolve bindings from a family of {@link ASTNode} types</li>
+ * </ul>
+ */
 public class Bindings {
 
 	public static final String ARRAY_LENGTH_FIELD_BINDING_STRING= "(array type):length";//$NON-NLS-1$

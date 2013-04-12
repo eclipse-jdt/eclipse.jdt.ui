@@ -30,9 +30,15 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 
 /**
- * The methods of this utility class are implemented from a Java language model
- * point of view. They do not only take the declared flags from the source into account
- * but also the implicit properties as defined in the Java Language Specification, version 3 (JLS3).
+ * Java element flags from a Java language model point of view.
+ * <p>
+ * {@link IMember#getFlags()} (and hence {@link Flags}) only take explicitly declared flags
+ * from source into account.
+ * This class also considers the implicit properties as defined in the Java Language Specification.
+ * </p>
+ * <p>
+ * <code>JdtFlags</code> is the right choice for most analysis tasks and for presentation in the UI.
+ * </p>
  */
 public class JdtFlags {
 	private JdtFlags(){
