@@ -34,7 +34,7 @@ import org.eclipse.jdt.ui.tests.wizardapi.NewTypeWizardTest;
 
 
 /**
- * Test all areas of the UI.
+ * Test all areas of JDT UI.
  */
 public class AutomatedSuite extends TestSuite {
 
@@ -48,10 +48,9 @@ public class AutomatedSuite extends TestSuite {
 		return new TestOptionsSetup(new AutomatedSuite());
 	}
 
-	/**
-	 * Construct the test suite.
-	 */
 	public AutomatedSuite() {
+		super(AutomatedSuite.class.getName());
+		
 		addTest(CoreTests.suite());
 		addTest(QuickFixTest.suite());
 
