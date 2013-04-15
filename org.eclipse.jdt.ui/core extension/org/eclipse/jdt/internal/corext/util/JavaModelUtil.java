@@ -64,6 +64,8 @@ import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 
 /**
  * Utility methods for the Java Model.
+ * 
+ * @see JDTUIHelperClasses
  */
 public final class JavaModelUtil {
 	

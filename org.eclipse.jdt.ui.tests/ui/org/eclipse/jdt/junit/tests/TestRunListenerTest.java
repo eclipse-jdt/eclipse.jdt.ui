@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,10 +16,14 @@ import org.eclipse.jdt.junit.TestRunListener;
 import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
 import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.junit.JUnitMessages;
+import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 
 public class TestRunListenerTest extends AbstractTestRunListenerTest {
 
@@ -39,7 +43,7 @@ public class TestRunListenerTest extends AbstractTestRunListenerTest {
 		final TestRunListener testRunListener= new TestRunListeners.TreeTest(log, step);
 		JUnitCore.addTestRunListener(testRunListener);
 		try {
-			return launchJUnit(typeToLaunch, log);
+			return launchJUnit(typeToLaunch, TestKindRegistry.JUNIT3_TEST_KIND_ID, log);
 		} finally {
 			JUnitCore.removeTestRunListener(testRunListener);
 		}
@@ -282,6 +286,67 @@ public class TestRunListenerTest extends AbstractTestRunListenerTest {
 			TestRunListeners.testCaseAsString("myTest2", "pack.ATestCase.RealTest", ProgressState.COMPLETED, Result.FAILURE, new FailureTrace("junit.framework.AssertionFailedError", null, null), 2),
 		};
 		String[] actual= runTreeTest(aTestCase, 6);
+		assertEqualLog(expectedTree, actual);
+	}
+	
+	public void testTreeJUnit4TestAdapter() throws Exception {
+		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397747
+		IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH);
+		JavaProjectHelper.clear(fProject, new IClasspathEntry[] { cpe });
+		JavaProjectHelper.addRTJar15(fProject);
+		
+		String source=
+				"package test;\n" + 
+				"\n" + 
+				"import junit.framework.JUnit4TestAdapter;\n" + 
+				"import junit.framework.TestCase;\n" + 
+				"import junit.framework.TestSuite;\n" + 
+				"\n" + 
+				"import org.junit.Test;\n" + 
+				"import org.junit.runner.RunWith;\n" + 
+				"import org.junit.runners.Suite;\n" + 
+				"import org.junit.runners.Suite.SuiteClasses;\n" + 
+				"\n" + 
+				"public class MyTestSuite {\n" + 
+				"	public static junit.framework.Test suite() {\n" + 
+				"		TestSuite suite = new TestSuite();\n" + 
+				"		suite.addTest(new JUnit4TestAdapter(JUnit4TestSuite.class));\n" + 
+				"		suite.addTestSuite(JUnit3TestCase.class);\n" + 
+				"		return suite;\n" + 
+				"	}\n" + 
+				"	\n" + 
+				"	@RunWith(Suite.class)\n" + 
+				"	@SuiteClasses({JUnit4TestCase.class})\n" + 
+				"	static class JUnit4TestSuite {}\n" + 
+				"	\n" + 
+				"	public static class JUnit4TestCase {\n" + 
+				"		@Test public void testA() {}\n" + 
+				"		@Test public void testB() {}\n" + 
+				"	}\n" + 
+				"	\n" + 
+				"	public static class JUnit3TestCase extends TestCase {\n" + 
+				"		public void testC() {}\n" + 
+				"		public void testD() {}\n" + 
+				"		public void testE() {}\n" + 
+				"	}\n" + 
+				"}\n";
+		IType aTestCase= createType(source, "test", "MyTestSuite.java");
+		
+		String[] expectedTree= new String[] {
+				TestRunListeners.sessionAsString("MyTestSuite", ProgressState.COMPLETED, Result.OK, 0),
+				TestRunListeners.suiteAsString("junit.framework.TestSuite", ProgressState.COMPLETED, Result.OK, null, 1),
+				
+				TestRunListeners.suiteAsString("test.MyTestSuite.JUnit4TestSuite", ProgressState.COMPLETED, Result.OK, null, 2),
+				TestRunListeners.suiteAsString("test.MyTestSuite.JUnit4TestCase", ProgressState.COMPLETED, Result.OK, null, 3),
+				TestRunListeners.testCaseAsString("testA", "test.MyTestSuite.JUnit4TestCase", ProgressState.COMPLETED, Result.OK, null, 4),
+				TestRunListeners.testCaseAsString("testB", "test.MyTestSuite.JUnit4TestCase", ProgressState.COMPLETED, Result.OK, null, 4),
+				
+				TestRunListeners.suiteAsString("test.MyTestSuite.JUnit3TestCase", ProgressState.COMPLETED, Result.OK, null, 2),
+				TestRunListeners.testCaseAsString("testC", "test.MyTestSuite.JUnit3TestCase", ProgressState.COMPLETED, Result.OK, null, 3),
+				TestRunListeners.testCaseAsString("testD", "test.MyTestSuite.JUnit3TestCase", ProgressState.COMPLETED, Result.OK, null, 3),
+				TestRunListeners.testCaseAsString("testE", "test.MyTestSuite.JUnit3TestCase", ProgressState.COMPLETED, Result.OK, null, 3),
+		};
+		String[] actual= runTreeTest(aTestCase, 12);
 		assertEqualLog(expectedTree, actual);
 	}
 }

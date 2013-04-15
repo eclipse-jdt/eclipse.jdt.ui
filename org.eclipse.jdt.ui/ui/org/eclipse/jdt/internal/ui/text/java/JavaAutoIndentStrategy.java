@@ -417,8 +417,10 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				break;
 
 			// only select insert positions for parenthesis currently embracing the caret
-			if (openingParen > pos)
+			if (openingParen > pos) {
+				openingParen= -1;
 				continue;
+			}
 
 			if (looksLikeAnonymousClassDef(document, partitioning, scanner, openingParen - 1))
 				return false;

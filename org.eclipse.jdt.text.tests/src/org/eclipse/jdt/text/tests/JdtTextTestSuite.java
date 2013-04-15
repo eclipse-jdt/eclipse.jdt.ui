@@ -26,7 +26,7 @@ import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
 public class JdtTextTestSuite {
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite("JDT Text Test Suite"); //$NON-NLS-1$
+		TestSuite suite = new TestSuite(JdtTextTestSuite.class.getName());
 		//$JUnit-BEGIN$
 		suite.addTestSuite(CompilationUnitDocumentProviderTest.class);
 		suite.addTest(JavaHeuristicScannerTest.suite());

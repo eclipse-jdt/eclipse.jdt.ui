@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,6 +87,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
+import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -94,6 +95,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
+/**
+ * JDT-UI-internal helper methods to find AST nodes or bindings.
+ * 
+ * @see JDTUIHelperClasses
+ */
 public class ASTResolving {
 
 	public static ITypeBinding guessBindingForReference(ASTNode node) {

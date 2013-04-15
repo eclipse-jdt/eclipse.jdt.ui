@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -86,7 +85,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.text= "default";
 		performPaste();
 		String result= "default";
-		Assert.assertEquals(result, fDocumentCommand.text);
+		assertEquals(result, fDocumentCommand.text);
 	}
 
 	public void testPasteFooAtEnd() {
@@ -97,7 +96,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.text= "foo";
 		performPaste();
 		String result= "foo";
-		Assert.assertEquals(result, fDocumentCommand.text);
+		assertEquals(result, fDocumentCommand.text);
 	}
 
 	public void testPasteAndIndentOfLongStringWithContinuations1() {
@@ -146,7 +145,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 				"\t\t\t\"    public static int b1;\\n\"\n" +
 				"\t\t\t\"}\"\n" +
 				"\t\t\t};";
-		Assert.assertEquals(result, fDocumentCommand.text);
+		assertEquals(result, fDocumentCommand.text);
 	}
 
 	public void testPasteAndIndentOfStringWithContinuations2() {
@@ -162,7 +161,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		String result= "\tString array2= \"this is the 1st string\"\n" +
 				"\t\t\t+ \"this is the 1st string\"\n" +
 				"\t\t\t+ \"this is the 1st string\";\n";
-		Assert.assertEquals(result, fDocumentCommand.text);
+		assertEquals(result, fDocumentCommand.text);
 	}
 
 	public void testPasteAndIndentOfStringWithContinuations3() {
@@ -178,7 +177,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		String result= "\tString array2= \"this is the 1st string\"\n" +
 				"+ \"this is the 1st string\"\n" +
 				"\t+ \"this is the 1st string\";\n";
-		Assert.assertEquals(result, fDocumentCommand.text);
+		assertEquals(result, fDocumentCommand.text);
 	}
 
 	public void testPasteAndIndentOfStringWithContinuations4() {
@@ -194,7 +193,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		String result= "\tString array2= \"this is the 1st string\"\n" +
 				"\t+ \"this is the 1st string\"\n" +
 				"\t+ \"this is the 1st string\";\n";
-		Assert.assertEquals(result, fDocumentCommand.text);
+		assertEquals(result, fDocumentCommand.text);
 	}
 
 	public void testPasteAndIndentOfStringWithContinuations5() {
@@ -210,7 +209,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		String result= "\tString array2= \"this is the 1st string\"\n" +
 				"\t\t\t+ \"this is the 1st string\"\n" +
 				"\t\t\t\t\t+ \"this is the 1st string\";\n";
-		Assert.assertEquals(result, fDocumentCommand.text);
+		assertEquals(result, fDocumentCommand.text);
 	}
 
 	private void performSmartIndentAfterNewLine() {
@@ -231,7 +230,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		buf.append("main (new String [] {\r\n");
 		buf.append("\t\t\r\n");
 		buf.append("});");
-		Assert.assertEquals(buf.toString(), fDocument.get());
+		assertEquals(buf.toString(), fDocument.get());
 
 		fDocument.set("main (new String [] {\"a\");");
 		fDocumentCommand.doit= true;
@@ -242,7 +241,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		buf1.append("main (new String [] {\"a\"\r\n");
 		buf1.append("\t\t\r\n");
 		buf1.append("});");
-		Assert.assertEquals(buf1.toString(), fDocument.get());
+		assertEquals(buf1.toString(), fDocument.get());
 	}
 
 	public void testSmartIndentAfterNewLine2() {
@@ -257,7 +256,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		buf.append("main (new String [] {\"a\",\r\n");
 		buf.append("\t\t\r\n");
 		buf.append("});");
-		Assert.assertEquals(buf.toString(), fDocument.get());
+		assertEquals(buf.toString(), fDocument.get());
 
 		fDocument.set("main (new String [] {\"a\", );");
 		fDocumentCommand.doit= true;
@@ -268,7 +267,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		buf1.append("main (new String [] {\"a\", \r\n");
 		buf1.append("\t\t\r\n");
 		buf1.append("});");
-		Assert.assertEquals(buf1.toString(), fDocument.get());
+		assertEquals(buf1.toString(), fDocument.get());
 	}
 
 	public void testSmartIndentAfterNewLine3() {
@@ -283,7 +282,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		buf.append("main (new String [] {\"a\",\"b\",\r\n");
 		buf.append("\t\t\r\n");
 		buf.append("});");
-		Assert.assertEquals(buf.toString(), fDocument.get());
+		assertEquals(buf.toString(), fDocument.get());
 	}
 
 	public void testSmartIndentAfterNewLine4() {
@@ -298,7 +297,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		buf.append("@NamedQueries({\r\n");
 		buf.append("\t\r\n");
 		buf.append("});");
-		Assert.assertEquals(buf.toString(), fDocument.get());
+		assertEquals(buf.toString(), fDocument.get());
 
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=394467
 		fDocument.set("@MesageDriven( activationConfig ={)");
@@ -310,7 +309,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		buf1.append("@MesageDriven( activationConfig ={\r\n");
 		buf1.append("\t\t\r\n");
 		buf1.append("})");
-		Assert.assertEquals(buf1.toString(), fDocument.get());
+		assertEquals(buf1.toString(), fDocument.get());
 	}
 
 	public void testSmartIndentAfterNewLine5() {
@@ -325,7 +324,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		buf.append("if (false) {\r\n");
 		buf.append("\treturn false;\r\n");
 		buf.append("}");
-		Assert.assertEquals(buf.toString(), fDocument.get());
+		assertEquals(buf.toString(), fDocument.get());
 
 		fDocument.set("if (false) { return false;");
 		fDocumentCommand.doit= true;
@@ -336,7 +335,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		buf1.append("if (false) { \r\n");
 		buf1.append("\treturn false;\r\n");
 		buf1.append("}");
-		Assert.assertEquals(buf1.toString(), fDocument.get());
+		assertEquals(buf1.toString(), fDocument.get());
 	}
 
 	public void testSmartIndentAfterNewLine6() {
@@ -357,7 +356,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		buf.append("    \t\n");
 		buf.append("    }, Bad\n");
 		buf.append("}");
-		Assert.assertEquals(buf.toString(), fDocument.get());
+		assertEquals(buf.toString(), fDocument.get());
 	}
 
 	public void testSmartIndentAfterNewLine7() {
@@ -371,7 +370,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		buf.append("int[] a= new int[] { \r\n");
 		buf.append("\t\t\r\n");
 		buf.append("};");
-		Assert.assertEquals(buf.toString(), fDocument.get());
+		assertEquals(buf.toString(), fDocument.get());
 	}
 
 	public void testSmartIndentAfterNewLine8() {
@@ -385,7 +384,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		buf.append("String[] strs = {\"a\",\r\n");
 		buf.append("\t\t\"b\",\r\n");
 		buf.append("}");
-		Assert.assertEquals(buf.toString(), fDocument.get());
+		assertEquals(buf.toString(), fDocument.get());
 	}
 
 	public void testSmartIndentAfterNewLine9() {
@@ -399,9 +398,24 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		buf.append("{\r\n");
 		buf.append("\tint a;\r\n");
 		buf.append("}");
-		Assert.assertEquals(buf.toString(), fDocument.get());
+		assertEquals(buf.toString(), fDocument.get());
 	}
 	
+	public void testSmartIndentAfterNewLine10() {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=404879
+		fDocument.setInitialLineDelimiter("\r\n");
+		fDocument.set("{ foo();");
+		fDocumentCommand.doit= true;
+		fDocumentCommand.offset= 1;
+		fDocumentCommand.text= "\r\n";
+		performSmartIndentAfterNewLine();
+		StringBuffer buf= new StringBuffer();
+		buf.append("{\r\n");
+		buf.append("\tfoo();\r\n");
+		buf.append("}");
+		assertEquals(buf.toString(), fDocument.get());
+	}
+
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */

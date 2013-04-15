@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,7 @@ import junit.framework.TestSuite;
 public class SpellingTestSuite {
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite("Test Suite org.eclipse.jdt.text.tests.spelling"); //$NON-NLS-1$
+		TestSuite suite = new TestSuite(SpellingTestSuite.class.getName());
 		//$JUnit-BEGIN$
 		suite.addTest(SpellCheckEngineTestCase.suite());
 		//$JUnit-END$

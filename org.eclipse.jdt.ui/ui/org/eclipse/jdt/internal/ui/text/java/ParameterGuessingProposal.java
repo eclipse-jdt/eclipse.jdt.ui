@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -153,7 +153,9 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 
 				LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
 				ui.setExitPosition(getTextViewer(), baseOffset + replacement.length(), 0, Integer.MAX_VALUE);
-				ui.setExitPolicy(new ExitPolicy(')', document) {
+				// exit character can be either ')' or ';'
+				final char exitChar= replacement.charAt(replacement.length() - 1);
+				ui.setExitPolicy(new ExitPolicy(exitChar, document) {
 					@Override
 					public ExitFlags doExit(LinkedModeModel model2, VerifyEvent event, int offset2, int length) {
 						if (event.character == ',') {
@@ -164,6 +166,12 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 									event.keyCode= SWT.TAB;
 									return null;
 								}
+							}
+						} else if (event.character == ')' && exitChar != ')') {
+							// exit from link mode when user is in the last ')' position.
+							Position position= fPositions[fPositions.length - 1];
+							if (position.offset <= offset2 && offset2 + length <= position.offset + position.length) {
+								return new ExitFlags(ILinkedModeListener.UPDATE_CARET, false);
 							}
 						}
 						return super.doExit(model2, event, offset2, length);

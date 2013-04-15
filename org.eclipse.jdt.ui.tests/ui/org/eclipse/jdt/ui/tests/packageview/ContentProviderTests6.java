@@ -67,7 +67,7 @@ public class ContentProviderTests6 extends TestCase {
 	}
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite("org.eclipse.jdt.ui.tests.ContentProviderTests6"); //$NON-NLS-1$
+		TestSuite suite= new TestSuite(ContentProviderTests6.class.getName());
 		//$JUnit-BEGIN$
 		suite.addTestSuite(ContentProviderTests6.class);
 		//$JUnit-END$

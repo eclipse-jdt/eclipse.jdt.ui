@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,14 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
+import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
+
+/**
+ * JDT-UI-internal helper methods to create new {@link ASTNode}s.
+ * Complements <code>AST#new*(..)</code>.
+ * 
+ * @see JDTUIHelperClasses
+ */
 public class ASTNodeFactory {
 
 	private static final String STATEMENT_HEADER= "class __X__ { void __x__() { "; //$NON-NLS-1$

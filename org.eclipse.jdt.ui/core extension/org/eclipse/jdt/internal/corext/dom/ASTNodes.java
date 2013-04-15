@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -89,6 +89,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -96,6 +97,16 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
+/**
+ * JDT-UI-internal helper methods that deal with {@link ASTNode}s:
+ * <ul>
+ * <li>additional operations on {@link ASTNode}s and subtypes</li>
+ * <li>finding related nodes in an AST</li>
+ * <li>some methods that deal with bindings (new such methods should go into {@link Bindings})</li>
+ * </ul>
+ * 
+ * @see JDTUIHelperClasses
+ */
 public class ASTNodes {
 
 	public static final int NODE_ONLY=				0;

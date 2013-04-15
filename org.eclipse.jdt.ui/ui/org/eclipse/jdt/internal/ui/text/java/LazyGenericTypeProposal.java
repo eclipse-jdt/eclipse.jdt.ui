@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,10 +28,14 @@ import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension;
+import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationExtension;
+import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.LinkedPosition;
@@ -239,7 +243,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 					if (getTextViewer() != null) {
 						if (hasAmbiguousProposals(typeArgumentProposals)) {
 							adaptOffsets(offsets, buffer);
-							installLinkedMode(document, offsets, lengths, typeArgumentProposals, insertClosingParenthesis);
+							installLinkedMode(document, offsets, lengths, typeArgumentProposals, insertClosingParenthesis, onlyAppendArguments);
 						} else {
 							if (insertClosingParenthesis)
 								setUpLinkedMode(document, ')');
@@ -715,7 +719,8 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 		return buffer;
 	}
 
-	private void installLinkedMode(IDocument document, int[] offsets, int[] lengths, TypeArgumentProposal[] typeArgumentProposals, boolean withParentheses) {
+	private void installLinkedMode(final IDocument document, int[] offsets, int[] lengths,
+			TypeArgumentProposal[] typeArgumentProposals, boolean withParentheses, final boolean onlyAppendArguments) {
 		int replacementOffset= getReplacementOffset();
 		String replacementString= getReplacementString();
 
@@ -738,6 +743,55 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 			JavaEditor editor= getJavaEditor();
 			if (editor != null) {
 				model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
+			}
+			
+			if (!onlyAppendArguments && (document instanceof IDocumentExtension)) { // see bug 301990
+				FormatterPrefs prefs= getFormatterPrefs();
+				final Position firstBracketPosition;
+				final Position secondBracketPosition;
+
+				int firstBracketOffset= replacementOffset + offsets[0] - 1;
+				if (prefs.afterOpeningBracket) {
+					firstBracketOffset--;
+				}
+				firstBracketPosition= new Position(firstBracketOffset, 1);
+				document.addPosition(firstBracketPosition);
+
+				int secondBracketOffset= replacementOffset + offsets[offsets.length - 1] + lengths[offsets.length - 1] + 1;
+				if (prefs.beforeClosingBracket) {
+					secondBracketOffset++;
+				}
+				secondBracketPosition= new Position(secondBracketOffset, 1);
+				document.addPosition(secondBracketPosition);
+
+				model.addLinkingListener(new ILinkedModeListener() {
+					public void left(LinkedModeModel environment, int flags) {
+						try {
+							if (getTextViewer().getSelectedRange().y > 1 || flags != ILinkedModeListener.EXTERNAL_MODIFICATION)
+								return;
+							((IDocumentExtension) document).registerPostNotificationReplace(null, new IDocumentExtension.IReplace() {
+								public void perform(IDocument d, IDocumentListener owner) {
+									try {
+										if ((firstBracketPosition.length == 0 || firstBracketPosition.isDeleted) && !secondBracketPosition.isDeleted) {
+											d.replace(firstBracketPosition.offset, secondBracketPosition.offset - firstBracketPosition.offset, ""); //$NON-NLS-1$
+										}
+									} catch (BadLocationException e) {
+										JavaPlugin.log(e);
+									}
+								}
+							});
+						} finally {
+							document.removePosition(firstBracketPosition);
+							document.removePosition(secondBracketPosition);
+						}
+					}
+
+					public void suspend(LinkedModeModel environment) {
+					}
+
+					public void resume(LinkedModeModel environment, int flags) {
+					}
+				});
 			}
 
 			LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());

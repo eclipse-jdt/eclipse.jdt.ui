@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ import junit.framework.TestSuite;
 public class JarExportTests {
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite("Test for org.eclipse.jdt.ui.tests.jarexport");
+		TestSuite suite= new TestSuite(JarExportTests.class.getName());
 		//$JUnit-BEGIN$
 		suite.addTest(PlainJarExportTests.suite());
 		suite.addTest(FatJarExportTests.suite());

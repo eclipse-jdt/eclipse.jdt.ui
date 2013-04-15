@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -361,14 +361,28 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 
 			String replacement;
 			if (isSmartTrigger || trigger == (char) 0) {
+				int referenceOffset= getReplacementOffset() + getReplacementLength();
 				replacement= getReplacementString();
+				//add ; to the replacement string if replacement string do not end with a semicolon and the document do not already have a ; at the reference offset.
+				if (trigger == ';' && replacement.charAt(replacement.length() - 1) != ';' && (referenceOffset >= document.getLength() || document.getChar(referenceOffset) != ';')) {
+					replacement= replacement + ";"; //$NON-NLS-1$
+					setReplacementString(replacement);
+				}
 			} else {
 				StringBuffer buffer= new StringBuffer(getReplacementString());
 
 				// fix for PR #5533. Assumes that no eating takes place.
 				if ((getCursorPosition() > 0 && getCursorPosition() <= buffer.length() && buffer.charAt(getCursorPosition() - 1) != trigger)) {
-					buffer.insert(getCursorPosition(), trigger);
-					setCursorPosition(getCursorPosition() + 1);
+					// insert trigger ';' for methods with parameter at the end of the replacement string and not at the cursor position.
+					int length= getReplacementString().length();
+					if (trigger == ';' && getCursorPosition() != length) {
+						if (buffer.charAt(length - 1) != trigger) {
+							buffer.insert(length, trigger);
+						}
+					} else {
+						buffer.insert(getCursorPosition(), trigger);
+						setCursorPosition(getCursorPosition() + 1);
+					}
 				}
 
 				replacement= buffer.toString();
@@ -386,8 +400,12 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			setReplacementOffset(referenceOffset - (replacement == null ? 0 : replacement.length()));
 
 			// PR 47097
-			if (isSmartTrigger)
-				handleSmartTrigger(document, trigger, referenceOffset);
+			if (isSmartTrigger) {
+				// avoid inserting redundant semicolon when smart insert is enabled.
+				if (!(trigger == ';' && (replacement.endsWith(";") || document.getChar(referenceOffset) == ';'))) { //$NON-NLS-1$
+					handleSmartTrigger(document, trigger, referenceOffset);
+				}
+			}
 
 		} catch (BadLocationException x) {
 			// ignore
