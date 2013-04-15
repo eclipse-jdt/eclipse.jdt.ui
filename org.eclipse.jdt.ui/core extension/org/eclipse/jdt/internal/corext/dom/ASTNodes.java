@@ -89,6 +89,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -103,6 +104,8 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
  * <li>finding related nodes in an AST</li>
  * <li>some methods that deal with bindings (new such methods should go into {@link Bindings})</li>
  * </ul>
+ * 
+ * @see JDTUIHelperClasses
  */
 public class ASTNodes {
 

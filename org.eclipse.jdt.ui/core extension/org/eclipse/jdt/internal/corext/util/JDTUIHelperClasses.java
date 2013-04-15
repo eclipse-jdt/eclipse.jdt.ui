@@ -1,4 +1,4 @@
-package org.eclipse.jdt.testplugin;
+package org.eclipse.jdt.internal.corext.util;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -22,17 +22,12 @@ import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
-import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 /**
  * The org.eclipse.jdt.ui bundle contains a few internal helper classes that simplify
- * common tasks when dealing with JDT Core or UI APIs. Here's a list:
+ * common tasks when dealing with JDT Core or UI APIs. Here's a list of the most important ones:
  * 
  * <h2>Java Model</h2>
  * <p>
@@ -105,6 +100,10 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
  * <li>{@link VariableDeclarationRewrite}</li>
  * </ul>
  * 
+ * @noreference This class is not intended to be referenced by clients
  */
-final class JDTUIHelperClasses {
+public final class JDTUIHelperClasses {
+	private JDTUIHelperClasses() {
+		// no instances
+	}
 }

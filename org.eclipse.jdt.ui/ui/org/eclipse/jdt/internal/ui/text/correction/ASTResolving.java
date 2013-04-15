@@ -87,6 +87,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
+import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -96,6 +97,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * JDT-UI-internal helper methods to find AST nodes or bindings.
+ * 
+ * @see JDTUIHelperClasses
  */
 public class ASTResolving {
 

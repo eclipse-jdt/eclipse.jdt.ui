@@ -39,6 +39,8 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
  * <p>
  * <code>JdtFlags</code> is the right choice for most analysis tasks and for presentation in the UI.
  * </p>
+ * 
+ * @see JDTUIHelperClasses
  */
 public class JdtFlags {
 	private JdtFlags(){

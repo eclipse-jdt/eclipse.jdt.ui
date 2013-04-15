@@ -19,10 +19,13 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
+import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 
 /**
  * Helper class to check if objects are assignable to each other.
  * Methods with multiple arguments also work across bindings environments.
+ * 
+ * @see JDTUIHelperClasses
  */
 public class TypeRules {
 

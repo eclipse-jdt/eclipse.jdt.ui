@@ -100,6 +100,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.CodeGeneration;
@@ -115,7 +116,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
 /**
  * Implementations for {@link CodeGeneration} APIs, and other helper methods
  * to create source code stubs based on {@link IJavaElement}s.
+ * 
  * @see StubUtility2
+ * @see JDTUIHelperClasses
  */
 public class StubUtility {
 

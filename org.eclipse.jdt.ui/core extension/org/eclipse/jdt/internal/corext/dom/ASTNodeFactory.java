@@ -51,9 +51,13 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
+import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
+
 /**
  * JDT-UI-internal helper methods to create new {@link ASTNode}s.
  * Complements <code>AST#new*(..)</code>.
+ * 
+ * @see JDTUIHelperClasses
  */
 public class ASTNodeFactory {
 

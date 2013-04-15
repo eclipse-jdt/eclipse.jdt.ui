@@ -60,6 +60,7 @@ import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
@@ -69,6 +70,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * <li>finding corresponding elements in the type hierarchy</li>
  * <li>resolve bindings from a family of {@link ASTNode} types</li>
  * </ul>
+ * 
+ * @see JDTUIHelperClasses
  */
 public class Bindings {
 

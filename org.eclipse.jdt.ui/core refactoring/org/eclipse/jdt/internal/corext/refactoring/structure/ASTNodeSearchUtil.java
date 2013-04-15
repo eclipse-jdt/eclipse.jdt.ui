@@ -52,10 +52,13 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 /**
  * JDT-UI-internal helper methods to find AST nodes for {@link SearchMatch}es or {@link IJavaElement}s. :
+ * 
+ * @see JDTUIHelperClasses
  */
 public class ASTNodeSearchUtil {
 

@@ -39,10 +39,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
+import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 
 /**
  * Helper class to check if an expression requires parentheses.
  * 
+ * @see JDTUIHelperClasses
  * @since 3.7
  */
 public class NecessaryParenthesesChecker {
