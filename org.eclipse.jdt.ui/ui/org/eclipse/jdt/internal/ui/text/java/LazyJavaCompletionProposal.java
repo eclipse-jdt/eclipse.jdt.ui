@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	protected static final String RPAREN= ")"; //$NON-NLS-1$
 	protected static final String COMMA= ","; //$NON-NLS-1$
 	protected static final String SPACE= " "; //$NON-NLS-1$
+	protected static final String SEMICOLON= ";"; //$NON-NLS-1$
 
 	protected static final class FormatterPrefs {
 		/* Methods & constructors */

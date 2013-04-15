@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -895,16 +895,16 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		int i= 0;
 		assertAppliedProposal(contents, proposals[i++], "clone()");
 		assertAppliedProposal(contents, proposals[i++], "equals()");
-		assertAppliedProposal(contents, proposals[i++], "finalize()");
+		assertAppliedProposal(contents, proposals[i++], "finalize();");
 		assertAppliedProposal(contents, proposals[i++], "getClass()");
 		assertAppliedProposal(contents, proposals[i++], "hashCode()");
-		assertAppliedProposal(contents, proposals[i++], "notify()");
-		assertAppliedProposal(contents, proposals[i++], "notifyAll()");
-		assertAppliedProposal(contents, proposals[i++], "run()");
+		assertAppliedProposal(contents, proposals[i++], "notify();");
+		assertAppliedProposal(contents, proposals[i++], "notifyAll();");
+		assertAppliedProposal(contents, proposals[i++], "run();");
 		assertAppliedProposal(contents, proposals[i++], "toString()");
-		assertAppliedProposal(contents, proposals[i++], "wait()");
-		assertAppliedProposal(contents, proposals[i++], "wait()");
-		assertAppliedProposal(contents, proposals[i++], "wait()");
+		assertAppliedProposal(contents, proposals[i++], "wait();");
+		assertAppliedProposal(contents, proposals[i++], "wait();");
+		assertAppliedProposal(contents, proposals[i++], "wait();");
 	}
 
 	public void testNormalAllMethodCompletionWithParametersGuessed() throws Exception {
@@ -946,16 +946,16 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		int i= 0;
 		assertAppliedProposal(contents, proposals[i++], "clone()");
 		assertAppliedProposal(contents, proposals[i++], "equals(run)");
-		assertAppliedProposal(contents, proposals[i++], "finalize()");
+		assertAppliedProposal(contents, proposals[i++], "finalize();");
 		assertAppliedProposal(contents, proposals[i++], "getClass()");
 		assertAppliedProposal(contents, proposals[i++], "hashCode()");
-		assertAppliedProposal(contents, proposals[i++], "notify()");
-		assertAppliedProposal(contents, proposals[i++], "notifyAll()");
-		assertAppliedProposal(contents, proposals[i++], "run()");
+		assertAppliedProposal(contents, proposals[i++], "notify();");
+		assertAppliedProposal(contents, proposals[i++], "notifyAll();");
+		assertAppliedProposal(contents, proposals[i++], "run();");
 		assertAppliedProposal(contents, proposals[i++], "toString()");
-		assertAppliedProposal(contents, proposals[i++], "wait()");
-		assertAppliedProposal(contents, proposals[i++], "wait(longVal)");
-		assertAppliedProposal(contents, proposals[i++], "wait(longVal, intVal)");
+		assertAppliedProposal(contents, proposals[i++], "wait();");
+		assertAppliedProposal(contents, proposals[i++], "wait(longVal);");
+		assertAppliedProposal(contents, proposals[i++], "wait(longVal, intVal);");
 
 		assertEquals(i, proposals.length);
 	}
@@ -996,16 +996,16 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		int i= 0;
 		assertAppliedProposal(contents, proposals[i++], "clone()");
 		assertAppliedProposal(contents, proposals[i++], "equals(arg0)");
-		assertAppliedProposal(contents, proposals[i++], "finalize()");
+		assertAppliedProposal(contents, proposals[i++], "finalize();");
 		assertAppliedProposal(contents, proposals[i++], "getClass()");
 		assertAppliedProposal(contents, proposals[i++], "hashCode()");
-		assertAppliedProposal(contents, proposals[i++], "notify()");
-		assertAppliedProposal(contents, proposals[i++], "notifyAll()");
-		assertAppliedProposal(contents, proposals[i++], "run()");
+		assertAppliedProposal(contents, proposals[i++], "notify();");
+		assertAppliedProposal(contents, proposals[i++], "notifyAll();");
+		assertAppliedProposal(contents, proposals[i++], "run();");
 		assertAppliedProposal(contents, proposals[i++], "toString()");
-		assertAppliedProposal(contents, proposals[i++], "wait()");
-		assertAppliedProposal(contents, proposals[i++], "wait(arg0)");
-		assertAppliedProposal(contents, proposals[i++], "wait(arg0, arg1)");
+		assertAppliedProposal(contents, proposals[i++], "wait();");
+		assertAppliedProposal(contents, proposals[i++], "wait(arg0);");
+		assertAppliedProposal(contents, proposals[i++], "wait(arg0, arg1);");
 
 		assertEquals(i, proposals.length);
 	}
@@ -1051,7 +1051,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				 "public class Completion {\n" +
 				 "    \n" +
 				 "    void foomethod() {\n" +
-				 "        this.foomethod()//here\n" +
+				"        this.foomethod();//here\n" +
 				 "    }\n" +
 				 "}\n";
 
@@ -1888,7 +1888,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			buf.append("\n");
 			buf.append("public class B {\n");
 			buf.append("    public void bar() {\n");
-			buf.append("        foo()//here\n");
+			buf.append("        foo();//here\n");
 			buf.append("    }\n");
 			buf.append("}\n");
 			assertEquals(buf.toString(), doc.get());
@@ -1966,7 +1966,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			buf.append("\n");
 			buf.append("public class B {\n");
 			buf.append("    public void bar() {\n");
-			buf.append("        A.foo()//here\n");
+			buf.append("        A.foo();//here\n");
 			buf.append("    }\n");
 			buf.append("    public void foo(int x) {\n");
 			buf.append("    }\n");

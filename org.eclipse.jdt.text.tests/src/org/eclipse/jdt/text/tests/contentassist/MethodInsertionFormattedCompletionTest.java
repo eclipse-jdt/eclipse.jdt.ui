@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -96,7 +96,7 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 	public void testFormattedMethodWithParameterFilling2() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 		addMembers("private java.util.List fList;");
-		assertMethodBodyProposal("fList.", "add(int", "fList.add ( |arg0|, arg1 )");
+		assertMethodBodyProposal("fList.", "add(int", "fList.add ( |arg0|, arg1 );");
 	}
 
 	public void testFormattedMethodWithParameterGuessing1() throws Exception {
@@ -114,7 +114,7 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 		addMembers("private java.util.List fList;");
 		addLocalVariables("int foo= 3; Object obj= null;\n");
 
-		assertMethodBodyProposal("fList.", "add(int", "fList.add ( |foo|, obj )");
+		assertMethodBodyProposal("fList.", "add(int", "fList.add ( |foo|, obj );");
 	}
 
 }

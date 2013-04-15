@@ -281,6 +281,9 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 
 		buffer.append(RPAREN);
 
+		if (canAutomaticallyAppendSemicolon())
+			buffer.append(SEMICOLON);
+
 		return buffer.toString();
 	}
 

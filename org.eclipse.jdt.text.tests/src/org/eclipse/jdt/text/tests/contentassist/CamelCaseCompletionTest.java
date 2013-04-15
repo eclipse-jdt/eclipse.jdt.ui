@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,12 +42,12 @@ public class CamelCaseCompletionTest extends AbstractCompletionTest {
 
 	public void testMethod() throws Exception {
 		addMembers("void methodCallWithParams(int par) {}");
-		assertMethodBodyProposal("this.mCW|", "methodCallWith", "this.methodCallWithParams(|)");
+		assertMethodBodyProposal("this.mCW|", "methodCallWith", "this.methodCallWithParams(|);");
 	}
 
 	public void testMethodWithTrailing() throws Exception {
 		addMembers("void methodCallWithParams(int par) {}");
-		assertMethodBodyProposal("this.mCWith|", "methodCallWith", "this.methodCallWithParams(|)");
+		assertMethodBodyProposal("this.mCWith|", "methodCallWith", "this.methodCallWithParams(|);");
 	}
 
 	public void testField() throws Exception {
