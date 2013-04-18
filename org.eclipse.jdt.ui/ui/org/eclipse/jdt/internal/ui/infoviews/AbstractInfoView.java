@@ -803,7 +803,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	private void doSetInput(Object input, String description) {
 		doSetInput(input);
 
-		fGotoInputAction.setEnabled(true);
+		fGotoInputAction.setEnabled(input != null);
 
 		IJavaElement inputElement= getInput();
 		String toolTip= inputElement != null ? JavaElementLabels.getElementLabel(inputElement, TOOLTIP_LABEL_FLAGS) : ""; //$NON-NLS-1$
