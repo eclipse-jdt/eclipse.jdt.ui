@@ -698,7 +698,7 @@ public class JavadocView extends AbstractInfoView {
 		fOpenBrowserAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_ATTACHED_JAVADOC);
 		fInputSelectionProvider.addSelectionChangedListener(fOpenBrowserAction);
 
-		IJavaElement input= getInput();
+		IJavaElement input= getOrignalInput();
 		StructuredSelection selection;
 		if (input != null) {
 			selection= new StructuredSelection(input);
@@ -805,7 +805,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @since 3.3
 	 */
 	private void refresh() {
-		doSetInput(computeInput(getInput()));
+		doSetInput(computeInput(getOrignalInput()));
 	}
 
 	/*
@@ -962,7 +962,7 @@ public class JavadocView extends AbstractInfoView {
 		fOriginalInput= javadocHtml;
 
 		if (fInputSelectionProvider != null) {
-			IJavaElement inputElement= getInput();
+			IJavaElement inputElement= getOrignalInput();
 			StructuredSelection selection= inputElement == null ? StructuredSelection.EMPTY : new StructuredSelection(inputElement);
 			fInputSelectionProvider.setSelection(selection);
 		}
@@ -1477,7 +1477,7 @@ public class JavadocView extends AbstractInfoView {
 			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleTextSet()
 			 */
 			public void handleTextSet() {
-				IJavaElement input= getInput();
+				IJavaElement input= getOrignalInput();
 				if (input == null)
 					return;
 
