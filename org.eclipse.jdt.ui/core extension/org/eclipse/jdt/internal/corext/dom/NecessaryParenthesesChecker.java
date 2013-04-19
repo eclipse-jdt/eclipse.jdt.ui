@@ -275,6 +275,10 @@ public class NecessaryParenthesesChecker {
 
 		if (parent instanceof Expression) {
 			Expression parentExpression= (Expression)parent;
+			
+			if (expression instanceof PrefixExpression) { // see bug 405096
+				return needsParenthesesForPrefixExpression(parentExpression, ((PrefixExpression) expression).getOperator());
+			}
 
 			int expressionPrecedence= OperatorPrecedence.getExpressionPrecedence(expression);
 			int parentPrecedence= OperatorPrecedence.getExpressionPrecedence(parentExpression);
@@ -297,25 +301,33 @@ public class NecessaryParenthesesChecker {
 				return true;
 			}
 
-			if (parentExpression instanceof PrefixExpression && expression instanceof PrefixExpression) { // see bug 405096
-				return needsParenthesesInPrefixExpression(((PrefixExpression) parentExpression).getOperator(),
-						((PrefixExpression) expression).getOperator());
-			}
-			
 			return false;
 		}
 
 		return true;
 	}
 	
-	private static boolean needsParenthesesInPrefixExpression(PrefixExpression.Operator parentOperator, PrefixExpression.Operator expressionOperator) {
-		if (parentOperator == PrefixExpression.Operator.PLUS &&
-				(expressionOperator == PrefixExpression.Operator.PLUS || expressionOperator == PrefixExpression.Operator.INCREMENT)) {
-			return true;
-		}
-		if (parentOperator == PrefixExpression.Operator.MINUS &&
-				(expressionOperator == PrefixExpression.Operator.MINUS || expressionOperator == PrefixExpression.Operator.DECREMENT)) {
-			return true;
+	private static boolean needsParenthesesForPrefixExpression(Expression parentExpression, PrefixExpression.Operator expressionOperator) {
+		if (parentExpression instanceof PrefixExpression) {
+			PrefixExpression.Operator parentOperator= ((PrefixExpression) parentExpression).getOperator();
+			if (parentOperator == PrefixExpression.Operator.PLUS &&
+					(expressionOperator == PrefixExpression.Operator.PLUS || expressionOperator == PrefixExpression.Operator.INCREMENT)) {
+				return true;
+			}
+			if (parentOperator == PrefixExpression.Operator.MINUS &&
+					(expressionOperator == PrefixExpression.Operator.MINUS || expressionOperator == PrefixExpression.Operator.DECREMENT)) {
+				return true;
+			}
+		} else if (parentExpression instanceof InfixExpression) {
+			InfixExpression.Operator parentOperator= ((InfixExpression) parentExpression).getOperator();
+			if (parentOperator == InfixExpression.Operator.PLUS &&
+					(expressionOperator == PrefixExpression.Operator.PLUS || expressionOperator == PrefixExpression.Operator.INCREMENT)) {
+				return true;
+			}
+			if (parentOperator == InfixExpression.Operator.MINUS &&
+					(expressionOperator == PrefixExpression.Operator.MINUS || expressionOperator == PrefixExpression.Operator.DECREMENT)) {
+				return true;
+			}
 		}
 		return false;
 	}
