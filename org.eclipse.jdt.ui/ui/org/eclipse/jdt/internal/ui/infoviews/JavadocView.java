@@ -1443,7 +1443,9 @@ public class JavadocView extends AbstractInfoView {
 			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleExternalLink(java.net.URL, org.eclipse.swt.widgets.Display)
 			 */
 			public boolean handleExternalLink(final URL url, Display display) {
-				if (fCurrent == null || (fCurrent.getInputElement() instanceof URL && !url.toExternalForm().equals(((URL) fCurrent.getInputElement()).toExternalForm()))) {
+				if (fCurrent == null ||
+						!(fCurrent.getInputElement() instanceof URL
+								&& url.toExternalForm().equals(((URL) fCurrent.getInputElement()).toExternalForm()))) {
 					fCurrent= new URLBrowserInput(fCurrent, url);
 
 					if (fBackAction != null) {
