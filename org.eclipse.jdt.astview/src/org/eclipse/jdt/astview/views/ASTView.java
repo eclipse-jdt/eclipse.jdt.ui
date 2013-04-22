@@ -18,6 +18,7 @@ package org.eclipse.jdt.astview.views;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -97,7 +98,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.astview.ASTViewImages;
 import org.eclipse.jdt.astview.ASTViewPlugin;
 import org.eclipse.jdt.astview.EditorUtility;
-import org.eclipse.jdt.astview.NodeFinder;
 import org.eclipse.jdt.astview.TreeInfoCollector;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -117,6 +117,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.NodeFinder;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.SharedASTProvider;
@@ -1213,9 +1214,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		int offset= textSelection.getOffset();
 		int length= textSelection.getLength();
 		
-		NodeFinder finder= new NodeFinder(offset, length);
-		fRoot.accept(finder);
-		ASTNode covering= finder.getCoveringNode();
+		ASTNode covering= NodeFinder.perform(fRoot, offset, length);
 		if (covering != null) {
 			fViewer.reveal(covering);
 			fViewer.setSelection(new StructuredSelection(covering));
@@ -1449,7 +1448,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			}
 		}
 		
-		ASTNode node= null;
+		ASTNode node= null, nodeEnd= null;
 		if (obj instanceof ASTNode) {
 			node= (ASTNode) obj;
 			
@@ -1457,6 +1456,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 			Object val= ((NodeProperty) obj).getNode();
 			if (val instanceof ASTNode) {
 				node= (ASTNode) val;
+			} else if (val instanceof List) {
+				List list= (List) val;
+				if (list.size() > 0) {
+					node= (ASTNode) list.get(0);
+					nodeEnd= (ASTNode) list.get(list.size() - 1);
+				} else {
+					fViewer.getTree().getDisplay().beep();
+				}
 			}
 			
 		} else if (obj instanceof Binding) {
@@ -1503,8 +1510,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 		
 		if (node != null) {
 			int offset= isTripleClick ? fRoot.getExtendedStartPosition(node) : node.getStartPosition();
-			int length= isTripleClick ? fRoot.getExtendedLength(node) : node.getLength();
-
+			int length;
+			if (nodeEnd == null) {
+				length= isTripleClick ? fRoot.getExtendedLength(node) : node.getLength();
+			} else {
+				length= isTripleClick
+						? fRoot.getExtendedStartPosition(nodeEnd) + fRoot.getExtendedLength(nodeEnd) - fRoot.getExtendedStartPosition(node)
+						: nodeEnd.getStartPosition() + nodeEnd.getLength() - node.getStartPosition();
+			}
 			EditorUtility.selectInEditor(fEditor, offset, length);
 		}
 	}
