@@ -967,6 +967,9 @@ public class JavadocView extends AbstractInfoView {
 			fInputSelectionProvider.setSelection(selection);
 		}
 
+		if (fOpenBrowserAction != null)
+			fOpenBrowserAction.setEnabled(input != null);
+
 		if (fIsUsingBrowserWidget) {
 			if (javadocHtml != null && javadocHtml.length() > 0) {
 				boolean RTL= (getSite().getShell().getStyle() & SWT.RIGHT_TO_LEFT) != 0;
