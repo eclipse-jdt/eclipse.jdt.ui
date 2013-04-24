@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsFix;
+import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.ChangeKind;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -46,18 +47,21 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
  */
 public class NullAnnotationsCorrectionProcessor {
 
-	public static void addReturnAndArgumentTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	// pre: changeKind != OVERRIDDEN
+	public static void addReturnAndArgumentTypeProposal(IInvocationContext context, IProblemLocation problem, ChangeKind changeKind, 
+			Collection<ICommandAccess> proposals) {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 
 		boolean isArgumentProblem= NullAnnotationsFix.isComplainingAboutArgument(selectedNode);
 		if (isArgumentProblem || NullAnnotationsFix.isComplainingAboutReturn(selectedNode))
-			addNullAnnotationInSignatureProposal(context, problem, proposals, false, isArgumentProblem);
+			addNullAnnotationInSignatureProposal(context, problem, proposals, changeKind, isArgumentProblem);
 	}
 
-	public static void addNullAnnotationInSignatureProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals, boolean modifyOverridden,
-			boolean isArgumentProblem) {
-		NullAnnotationsFix fix= NullAnnotationsFix.createNullAnnotationInSignatureFix(context.getASTRoot(), problem, modifyOverridden, isArgumentProblem);
+	public static void addNullAnnotationInSignatureProposal(IInvocationContext context, IProblemLocation problem,
+			Collection<ICommandAccess> proposals, ChangeKind changeKind, boolean isArgumentProblem) {
+		NullAnnotationsFix fix= NullAnnotationsFix.createNullAnnotationInSignatureFix(context.getASTRoot(), problem,
+				changeKind, isArgumentProblem);
 
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -92,7 +96,7 @@ public class NullAnnotationsCorrectionProcessor {
 					}
 				};
 			}
-			int relevance= modifyOverridden ? IProposalRelevance.CHANGE_NULLNESS_ANNOTATION_IN_OVERRIDDEN_METHOD : IProposalRelevance.CHANGE_NULLNESS_ANNOTATION; //raise local change above change in overridden method
+			int relevance= (changeKind == ChangeKind.OVERRIDDEN) ? IProposalRelevance.CHANGE_NULLNESS_ANNOTATION_IN_OVERRIDDEN_METHOD : IProposalRelevance.CHANGE_NULLNESS_ANNOTATION; //raise local change above change in overridden method
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, problem.getProblemId()), relevance, image, context);
 			proposals.add(proposal);
 		}
