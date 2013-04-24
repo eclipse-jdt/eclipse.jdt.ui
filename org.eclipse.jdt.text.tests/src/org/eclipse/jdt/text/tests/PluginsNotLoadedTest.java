@@ -166,7 +166,6 @@ public class PluginsNotLoadedTest extends TestCase {
 			"org.eclipse.jdt.source",
 			"org.eclipse.jsch.ui",
 			"org.eclipse.osgi.util",
-			"org.eclipse.pde.junit.runtime",
 			"org.eclipse.pde.source",
 			"org.eclipse.pde.ui.templates",
 			"org.eclipse.platform",
@@ -250,6 +249,8 @@ public class PluginsNotLoadedTest extends TestCase {
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < NOT_LOADED_BUNDLES.length; i++) {
 			Bundle bundle= Platform.getBundle(NOT_LOADED_BUNDLES[i]);
+			if (NOT_LOADED_BUNDLES[i].contains("org.junit"))
+				System.out.println();
 			if (bundle == null) {
 				// log bundles that cannot be found:
 //				buf.append("- not found: ");

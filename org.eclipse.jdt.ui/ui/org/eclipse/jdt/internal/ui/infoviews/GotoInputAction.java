@@ -41,7 +41,7 @@ class GotoInputAction extends Action {
 
 	@Override
 	public void run() {
-		IJavaElement inputElement= fInfoView.getInput();
+		IJavaElement inputElement= fInfoView.getOrignalInput();
 		new OpenAction(fInfoView.getViewSite()).run(new Object[] { inputElement });
 	}
 }

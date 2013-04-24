@@ -23,6 +23,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -57,6 +58,8 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		super.apply(document, trigger, offset);
 		if (needsLinkedMode()) {
 			setUpLinkedMode(document, ')');
+		} else if (!fProposal.isConstructor() && getReplacementString().endsWith(";")) { //$NON-NLS-1$
+			setUpLinkedMode(document, ';');
 		}
 	}
 
@@ -126,6 +129,17 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		return fHasParameters;
 	}
 
+	/**
+	 * Returns whether we automatically complete the method with a semicolon.
+	 * 
+	 * @return <code>true</code> if the return type of the method is void, <code>false</code>
+	 *         otherwise
+	 * @since 3.9
+	 */
+	protected final boolean canAutomaticallyAppendSemicolon() {
+		return !fProposal.isConstructor() && CharOperation.equals(new char[] { Signature.C_VOID }, Signature.getReturnType(fProposal.getSignature()));
+	}
+
 	private boolean computeHasParameters() throws IllegalArgumentException {
 		return Signature.getParameterCount(fProposal.getSignature()) > 0;
 	}
@@ -187,6 +201,9 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		}
 
 		buffer.append(RPAREN);
+
+		if (canAutomaticallyAppendSemicolon())
+			buffer.append(SEMICOLON);
 
 		return buffer.toString();
 

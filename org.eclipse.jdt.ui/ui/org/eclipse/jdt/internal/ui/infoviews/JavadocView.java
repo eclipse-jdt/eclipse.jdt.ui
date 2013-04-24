@@ -698,7 +698,7 @@ public class JavadocView extends AbstractInfoView {
 		fOpenBrowserAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_ATTACHED_JAVADOC);
 		fInputSelectionProvider.addSelectionChangedListener(fOpenBrowserAction);
 
-		IJavaElement input= getInput();
+		IJavaElement input= getOrignalInput();
 		StructuredSelection selection;
 		if (input != null) {
 			selection= new StructuredSelection(input);
@@ -805,7 +805,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @since 3.3
 	 */
 	private void refresh() {
-		doSetInput(computeInput(getInput()));
+		doSetInput(computeInput(getOrignalInput()));
 	}
 
 	/*
@@ -962,10 +962,13 @@ public class JavadocView extends AbstractInfoView {
 		fOriginalInput= javadocHtml;
 
 		if (fInputSelectionProvider != null) {
-			IJavaElement inputElement= getInput();
+			IJavaElement inputElement= getOrignalInput();
 			StructuredSelection selection= inputElement == null ? StructuredSelection.EMPTY : new StructuredSelection(inputElement);
 			fInputSelectionProvider.setSelection(selection);
 		}
+
+		if (fOpenBrowserAction != null)
+			fOpenBrowserAction.setEnabled(input != null);
 
 		if (fIsUsingBrowserWidget) {
 			if (javadocHtml != null && javadocHtml.length() > 0) {
@@ -1443,7 +1446,9 @@ public class JavadocView extends AbstractInfoView {
 			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleExternalLink(java.net.URL, org.eclipse.swt.widgets.Display)
 			 */
 			public boolean handleExternalLink(final URL url, Display display) {
-				if (fCurrent == null || (fCurrent.getInputElement() instanceof URL && !url.toExternalForm().equals(((URL) fCurrent.getInputElement()).toExternalForm()))) {
+				if (fCurrent == null ||
+						!(fCurrent.getInputElement() instanceof URL
+								&& url.toExternalForm().equals(((URL) fCurrent.getInputElement()).toExternalForm()))) {
 					fCurrent= new URLBrowserInput(fCurrent, url);
 
 					if (fBackAction != null) {
@@ -1477,7 +1482,7 @@ public class JavadocView extends AbstractInfoView {
 			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleTextSet()
 			 */
 			public void handleTextSet() {
-				IJavaElement input= getInput();
+				IJavaElement input= getOrignalInput();
 				if (input == null)
 					return;
 

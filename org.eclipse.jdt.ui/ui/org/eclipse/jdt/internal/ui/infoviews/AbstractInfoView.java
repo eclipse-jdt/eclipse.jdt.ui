@@ -307,11 +307,11 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	}
 
 	/**
-	 * Returns the input of this view.
-	 *
-	 * @return input the input object or <code>null</code> if not input is set
+	 * Returns the Java element for which info should be shown.
+	 * 
+	 * @return input the input object or <code>null</code> if no input is set
 	 */
-	protected IJavaElement getInput() {
+	protected IJavaElement getOrignalInput() {
 		return fCurrentViewInput;
 	}
 
@@ -803,10 +803,11 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	private void doSetInput(Object input, String description) {
 		doSetInput(input);
 
-		fGotoInputAction.setEnabled(true);
+		boolean hasValidInput= input != null;
+		fGotoInputAction.setEnabled(hasValidInput);
 
-		IJavaElement inputElement= getInput();
-		String toolTip= inputElement != null ? JavaElementLabels.getElementLabel(inputElement, TOOLTIP_LABEL_FLAGS) : ""; //$NON-NLS-1$
+		IJavaElement inputElement= getOrignalInput();
+		String toolTip= hasValidInput && inputElement != null ? JavaElementLabels.getElementLabel(inputElement, TOOLTIP_LABEL_FLAGS) : ""; //$NON-NLS-1$
 
 		setContentDescription(description);
 		setTitleToolTip(toolTip);

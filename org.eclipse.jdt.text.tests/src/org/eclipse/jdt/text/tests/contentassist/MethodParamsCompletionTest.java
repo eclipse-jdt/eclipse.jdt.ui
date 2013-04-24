@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,7 +44,7 @@ public class MethodParamsCompletionTest extends AbstractCompletionTest {
 	}
 
 	public void testMethodWithParam2() throws Exception {
-		assertMethodBodyProposal("fList.", "add(int", "fList.add(|arg0|, arg1)");
+		assertMethodBodyProposal("fList.", "add(int", "fList.add(|arg0|, arg1);");
 	}
 
 	public void testInsertMethodWithParam1() throws Exception {
@@ -52,7 +52,7 @@ public class MethodParamsCompletionTest extends AbstractCompletionTest {
 	}
 
 	public void testInsertMethodWithParam2() throws Exception {
-		assertMethodBodyProposal("fList.|bar", "add(int", "fList.add(|arg0|, arg1)bar");
+		assertMethodBodyProposal("fList.|bar", "add(int", "fList.add(|arg0|, arg1);bar");
 	}
 
 	public void testOverwriteMethodWithParam1() throws Exception {
@@ -62,7 +62,7 @@ public class MethodParamsCompletionTest extends AbstractCompletionTest {
 
 	public void testOverwriteMethodWithParam2() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, false);
-		assertMethodBodyProposal("fList.|bar", "add(int", "fList.add(|arg0|, arg1)");
+		assertMethodBodyProposal("fList.|bar", "add(int", "fList.add(|arg0|, arg1);");
 	}
 
 }

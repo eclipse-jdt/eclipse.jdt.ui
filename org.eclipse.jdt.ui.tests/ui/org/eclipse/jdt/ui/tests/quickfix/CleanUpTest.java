@@ -7024,6 +7024,52 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	public void testRemoveParenthesesBug405096_7() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    String a= \"\";\n");
+		buf.append("    int n= 0;\n");
+		buf.append("    \n");
+		buf.append("    int i1 = 1+(1+(+128));\n");
+		buf.append("    int j1 = 1+(1+(+n));\n");
+		buf.append("    int i2 = 1-(-128);\n");
+		buf.append("    int j2 = 1-(-n);\n");
+		buf.append("    int i3 = 1+(++n);\n");
+		buf.append("    int j3 = 1-(--n);\n");
+		buf.append("    String s1 = a+(++n);\n");
+		buf.append("    String s2 = a+(+128);\n");
+		buf.append("    int i5 = 1+(--n);\n");
+		buf.append("    int j5 = 1-(++n);\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    String a= \"\";\n");
+		buf.append("    int n= 0;\n");
+		buf.append("    \n");
+		buf.append("    int i1 = 1+1+(+128);\n");
+		buf.append("    int j1 = 1+1+(+n);\n");
+		buf.append("    int i2 = 1-(-128);\n");
+		buf.append("    int j2 = 1-(-n);\n");
+		buf.append("    int i3 = 1+(++n);\n");
+		buf.append("    int j3 = 1-(--n);\n");
+		buf.append("    String s1 = a+(++n);\n");
+		buf.append("    String s2 = a+(+128);\n");
+		buf.append("    int i5 = 1+--n;\n");
+		buf.append("    int j5 = 1-++n;\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+	
 	public void testRemoveQualifier01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
