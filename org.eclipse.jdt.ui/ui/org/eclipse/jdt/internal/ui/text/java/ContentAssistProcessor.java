@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Paul Fullbright <paul.fullbright@oracle.com> - content assist category enablement - http://bugs.eclipse.org/345213
  *     Marcel Bruch <bruch@cs.tu-darmstadt.de> - [content assist] Allow to re-sort proposals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=350991
+ *     Lars Vogel  <lars.vogel@gmail.com> - convert to foreach loop - https://bugs.eclipse.org/bugs/show_bug.cgi?id=406478
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -114,8 +115,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 			// This may show the warning dialog if all categories are disabled
 			setCategoryIteration();
-			for (Iterator<CompletionProposalCategory> it= getCategoriesToNotify().iterator(); it.hasNext();) {
-				CompletionProposalCategory cat= it.next();
+			for (CompletionProposalCategory cat : getCategoriesToNotify()) {
 				cat.sessionStarted();
 			}
 
@@ -157,8 +157,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			}
 
 			// Backwards compatibility: notify all categories which have no enablement expression
-			for (Iterator<CompletionProposalCategory> it= fCategories.iterator(); it.hasNext();) {
-				CompletionProposalCategory cat= it.next();
+			for (CompletionProposalCategory cat : fCategories) {
 				if (cat.getEnablementExpression() == null)
 					currentCategories.add(cat);
 			}
@@ -173,8 +172,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			if (event.processor != ContentAssistProcessor.this)
 				return;
 
-			for (Iterator<CompletionProposalCategory> it= getCategoriesToNotify().iterator(); it.hasNext();) {
-				CompletionProposalCategory cat= it.next();
+			for (CompletionProposalCategory cat : getCategoriesToNotify()) {
 				cat.sessionEnded();
 			}
 
@@ -323,8 +321,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		boolean needsSortingAfterFiltering= false;
 		List<ICompletionProposal> proposals= new ArrayList<ICompletionProposal>();
 		List<CompletionProposalCategory> providers= getCategories();
-		for (Iterator<CompletionProposalCategory> it= providers.iterator(); it.hasNext();) {
-			CompletionProposalCategory cat= it.next();
+		for (CompletionProposalCategory cat : providers) {
 			List<ICompletionProposal> computed= cat.computeCompletionProposals(context, fPartition, new SubProgressMonitor(monitor, 1));
 			proposals.addAll(computed);
 			needsSortingAfterFiltering= needsSortingAfterFiltering || (cat.isSortingAfterFilteringNeeded() && !computed.isEmpty());
@@ -378,8 +375,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		ContentAssistInvocationContext context= createContext(viewer, offset);
 
 		List<CompletionProposalCategory> providers= getCategories();
-		for (Iterator<CompletionProposalCategory> it= providers.iterator(); it.hasNext();) {
-			CompletionProposalCategory cat= it.next();
+		for (CompletionProposalCategory cat : providers) {
 			List<IContextInformation> computed= cat.computeContextInformation(context, fPartition, new SubProgressMonitor(monitor, 1));
 			proposals.addAll(computed);
 			if (fErrorMessage == null)
@@ -494,8 +490,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	private List<List<CompletionProposalCategory>> getCategoryIteration() {
 		List<List<CompletionProposalCategory>> sequence= new ArrayList<List<CompletionProposalCategory>>();
 		sequence.add(getDefaultCategories());
-		for (Iterator<CompletionProposalCategory> it= getSeparateCategories().iterator(); it.hasNext();) {
-			CompletionProposalCategory cat= it.next();
+		for (CompletionProposalCategory cat : getSeparateCategories()) {
 			sequence.add(Collections.singletonList(cat));
 		}
 		return sequence;
@@ -517,8 +512,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 	private List<CompletionProposalCategory> getDefaultCategoriesUnchecked() {
 		List<CompletionProposalCategory> included= new ArrayList<CompletionProposalCategory>();
-		for (Iterator<CompletionProposalCategory> it= fCategories.iterator(); it.hasNext();) {
-			CompletionProposalCategory category= it.next();
+		for (CompletionProposalCategory category : fCategories) {
 			if (checkDefaultEnablement(category)) 
 				included.add(category);
 		}
@@ -623,8 +617,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 	private List<CompletionProposalCategory> getSeparateCategories() {
 		ArrayList<CompletionProposalCategory> sorted= new ArrayList<CompletionProposalCategory>();
-		for (Iterator<CompletionProposalCategory> it= fCategories.iterator(); it.hasNext();) {
-			CompletionProposalCategory category= it.next();
+		for (CompletionProposalCategory category : fCategories) {
 			if (checkSeparateEnablement(category))
 				sorted.add(category);
 		}
