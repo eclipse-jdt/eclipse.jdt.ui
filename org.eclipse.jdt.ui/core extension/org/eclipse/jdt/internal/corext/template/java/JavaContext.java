@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Lars Vogel  <lars.vogel@gmail.com> - [templates][content assist] Ctrl+Space without any starting letter shows to no templates - https://bugs.eclipse.org/406463
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
@@ -216,7 +217,7 @@ public class JavaContext extends CompilationUnitContext {
 			return true;
 
 		String key= getKey();
-		return key.length() != 0 && template.getName().toLowerCase().startsWith(key.toLowerCase());
+		return template.getName().toLowerCase().startsWith(key.toLowerCase());
 	}
 
 	private boolean hasCompatibleContextType(Template template) {
