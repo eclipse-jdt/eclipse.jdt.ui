@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -683,15 +683,23 @@ public class TestRunSession implements ITestRunSession {
 		}
 
 		public void testEnded(String testId, String testName) {
+			boolean isIgnored= testName.startsWith(MessageIds.IGNORED_TEST_PREFIX);
+			
 			TestElement testElement= getTestElement(testId);
 			if (testElement == null) {
 				testElement= createUnrootedTestElement(testId, testName);
 			} else if (! (testElement instanceof TestCaseElement)) {
-				logUnexpectedTest(testId, testElement);
+				if (isIgnored) {
+					testElement.setAssumptionFailed(true);
+					fAssumptionFailureCount++;
+					setStatus(testElement, Status.OK);
+				} else {
+					logUnexpectedTest(testId, testElement);
+				}
 				return;
 			}
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
-			if (testName.startsWith(MessageIds.IGNORED_TEST_PREFIX)) {
+			if (isIgnored) {
 				testCaseElement.setIgnored(true);
 				fIgnoredCount++;
 			}
@@ -716,7 +724,7 @@ public class TestRunSession implements ITestRunSession {
 			}
 
 			Status status;
-			if (testElement != null && testName.startsWith(MessageIds.ASSUMPTION_FAILED_TEST_PREFIX)) {
+			if (testName.startsWith(MessageIds.ASSUMPTION_FAILED_TEST_PREFIX)) {
 				testElement.setAssumptionFailed(true);
 				fAssumptionFailureCount++;
 				status = Status.OK;

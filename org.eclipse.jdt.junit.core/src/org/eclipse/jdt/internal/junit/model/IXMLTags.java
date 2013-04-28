@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,10 +59,6 @@ public interface IXMLTags {
 	 */
 	public static final String ATTR_IGNORED= "ignored"; //$NON-NLS-1$
 	/**
-	 * value: Boolean
-	 */
-	public static final String ATTR_ASSUMPTION_FAILED= "assumptionFailed"; //$NON-NLS-1$
-	/**
 	 * value: String
 	 */
 	public static final String ATTR_PACKAGE= "package"; //$NON-NLS-1$
@@ -82,6 +78,9 @@ public interface IXMLTags {
 	 * value: Double
 	 */
 	public static final String ATTR_TIME= "time"; //$NON-NLS-1$
-//	public static final String ATTR_MESSAGE= "message"; //$NON-NLS-1$
+	/**
+	 * value: String
+	 */
+	public static final String ATTR_MESSAGE= "message"; //$NON-NLS-1$
 //	public static final String ATTR_TYPE= "type"; //$NON-NLS-1$
 }
