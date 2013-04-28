@@ -107,6 +107,10 @@ public class TestRunSession implements ITestRunSession {
 	 */
 	volatile int fIgnoredCount;
 	/**
+	 * Number of tests whose assumption failed during this test run.
+	 */
+	volatile int fAssumptionFailureCount;
+	/**
 	 * Number of errors during this test run.
 	 */
 	volatile int fErrorCount;
@@ -209,6 +213,7 @@ public class TestRunSession implements ITestRunSession {
 	void reset() {
 		fStartedCount= 0;
 		fFailureCount= 0;
+		fAssumptionFailureCount = 0;
 		fErrorCount= 0;
 		fIgnoredCount= 0;
 		fTotalCount= 0;
@@ -305,6 +310,10 @@ public class TestRunSession implements ITestRunSession {
 
 	public int getFailureCount() {
 		return fFailureCount;
+	}
+
+	public int getAssumptionFailureCount() {
+		return fAssumptionFailureCount;
 	}
 
 	public int getStartedCount() {
@@ -575,6 +584,7 @@ public class TestRunSession implements ITestRunSession {
 			fStartedCount= 0;
 			fIgnoredCount= 0;
 			fFailureCount= 0;
+			fAssumptionFailureCount = 0;
 			fErrorCount= 0;
 			fTotalCount= testCount;
 
@@ -705,7 +715,15 @@ public class TestRunSession implements ITestRunSession {
 				testElement= createUnrootedTestElement(testId, testName);
 			}
 
-			Status status= Status.convert(statusCode);
+			Status status;
+			if (testElement != null && testName.startsWith(MessageIds.ASSUMPTION_FAILED_TEST_PREFIX)) {
+				testElement.setAssumptionFailed(true);
+				fAssumptionFailureCount++;
+				status = Status.OK;
+			} else {
+				status= Status.convert(statusCode);
+			}
+
 			registerTestFailureStatus(testElement, status, trace, expected, actual);
 
 			Object[] listeners= fSessionListeners.getListeners();
@@ -754,10 +772,12 @@ public class TestRunSession implements ITestRunSession {
 
 	public void registerTestFailureStatus(TestElement testElement, Status status, String trace, String expected, String actual) {
 		testElement.setStatus(status, trace, expected, actual);
-		if (status.isError()) {
-			fErrorCount++;
-		} else if (status.isFailure()) {
-			fFailureCount++;
+		if (!testElement.isAssumptionFailure()) {
+			if (status.isError()) {
+				fErrorCount++;
+			} else if (status.isFailure()) {
+				fFailureCount++;
+			}
 		}
 	}
 
@@ -773,6 +793,10 @@ public class TestRunSession implements ITestRunSession {
 			}
 			if (! testElement.getStatus().isErrorOrFailure())
 				setStatus(testElement, Status.OK);
+		}
+
+		if (testElement.isAssumptionFailure()) {
+			fAssumptionFailureCount++;
 		}
 	}
 

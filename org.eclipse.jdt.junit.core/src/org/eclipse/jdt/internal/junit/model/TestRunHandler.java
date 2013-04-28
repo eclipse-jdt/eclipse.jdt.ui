@@ -128,6 +128,7 @@ public class TestRunHandler extends DefaultHandler {
 			fTestSuite= (TestSuiteElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), suiteName, true, 0);
 			readTime(fTestSuite, attributes);
 			fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
+			fTestSuite.setAssumptionFailed(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_ASSUMPTION_FAILED)).booleanValue());
 
 		} else if (qName.equals(IXMLTags.NODE_PROPERTIES) || qName.equals(IXMLTags.NODE_PROPERTY)) {
 			// not interested
@@ -138,6 +139,7 @@ public class TestRunHandler extends DefaultHandler {
 			fTestCase= (TestCaseElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), name + '(' + classname + ')', false, 0);
 			fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
 			fTestCase.setIgnored(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_IGNORED)).booleanValue());
+			fTestCase.setAssumptionFailed(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_ASSUMPTION_FAILED)).booleanValue());
 			readTime(fTestCase, attributes);
 
 		} else if (qName.equals(IXMLTags.NODE_ERROR)) {

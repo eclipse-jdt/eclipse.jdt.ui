@@ -59,6 +59,10 @@ public interface IXMLTags {
 	 */
 	public static final String ATTR_IGNORED= "ignored"; //$NON-NLS-1$
 	/**
+	 * value: Boolean
+	 */
+	public static final String ATTR_ASSUMPTION_FAILED= "assumptionFailed"; //$NON-NLS-1$
+	/**
 	 * value: String
 	 */
 	public static final String ATTR_PACKAGE= "package"; //$NON-NLS-1$

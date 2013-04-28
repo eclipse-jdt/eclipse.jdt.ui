@@ -172,6 +172,8 @@ public abstract class TestElement implements ITestElement {
 	private String fExpected;
 	private String fActual;
 
+	private boolean fAssumptionFailed;
+
 	/**
 	 * Running time in seconds. Contents depend on the current {@link #getProgressState()}:
 	 * <ul>
@@ -346,6 +348,14 @@ public abstract class TestElement implements ITestElement {
 		}
 
 		return fTime;
+	}
+
+	public void setAssumptionFailed(boolean assumptionFailed) {
+		fAssumptionFailed= assumptionFailed;
+	}
+
+	public boolean isAssumptionFailure() {
+		return fAssumptionFailed;
 	}
 
 	public String toString() {

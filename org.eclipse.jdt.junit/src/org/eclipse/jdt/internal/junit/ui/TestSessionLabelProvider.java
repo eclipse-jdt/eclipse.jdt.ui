@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelP
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
+import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 
@@ -129,6 +130,9 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 
 	@Override
 	public Image getImage(Object element) {
+		if (element instanceof TestElement && ((TestElement) element).isAssumptionFailure())
+			return fTestRunnerPart.fTestAssumptionFailureIcon;
+
 		if (element instanceof TestCaseElement) {
 			TestCaseElement testCaseElement= ((TestCaseElement) element);
 			if (testCaseElement.isIgnored())

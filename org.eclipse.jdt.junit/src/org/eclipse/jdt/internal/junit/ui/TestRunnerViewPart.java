@@ -239,6 +239,7 @@ public class TestRunnerViewPart extends ViewPart {
 	final Image fTestOkIcon;
 	final Image fTestErrorIcon;
 	final Image fTestFailIcon;
+	final Image fTestAssumptionFailureIcon;
 	final Image fTestRunningIcon;
 	final Image fTestIgnoredIcon;
 
@@ -1081,6 +1082,7 @@ public class TestRunnerViewPart extends ViewPart {
 		fTestFailIcon= createManagedImage("obj16/testfail.gif"); //$NON-NLS-1$
 		fTestRunningIcon= createManagedImage("obj16/testrun.gif"); //$NON-NLS-1$
 		fTestIgnoredIcon= createManagedImage("obj16/testignored.gif"); //$NON-NLS-1$
+		fTestAssumptionFailureIcon = createManagedImage("obj16/testassumptionfailed.gif"); //$NON-NLS-1$
 
 		fSuiteIcon= createManagedImage(fSuiteIconDescriptor);
 		fSuiteOkIcon= createManagedImage(fSuiteOkIconDescriptor);
@@ -1594,6 +1596,7 @@ action enablement
 		int totalCount;
 		int errorCount;
 		int failureCount;
+		int assumptionFailureCount;
 		boolean hasErrorsOrFailures;
 		boolean stopped;
 
@@ -1603,6 +1606,7 @@ action enablement
 			totalCount= fTestRunSession.getTotalCount();
 			errorCount= fTestRunSession.getErrorCount();
 			failureCount= fTestRunSession.getFailureCount();
+			assumptionFailureCount = fTestRunSession.getAssumptionFailureCount();
 			hasErrorsOrFailures= errorCount + failureCount > 0;
 			stopped= fTestRunSession.isStopped();
 		} else {
@@ -1611,12 +1615,13 @@ action enablement
 			totalCount= 0;
 			errorCount= 0;
 			failureCount= 0;
+			assumptionFailureCount = 0;
 			hasErrorsOrFailures= false;
 			stopped= false;
 		}
 
 		fCounterPanel.setTotal(totalCount);
-		fCounterPanel.setRunValue(startedCount, ignoredCount);
+		fCounterPanel.setRunValue(startedCount, ignoredCount, assumptionFailureCount);
 		fCounterPanel.setErrorValue(errorCount);
 		fCounterPanel.setFailureValue(failureCount);
 

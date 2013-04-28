@@ -100,6 +100,8 @@ public class TestRunSessionSerializer implements XMLReader {
 				addCDATA(atts, IXMLTags.ATTR_TIME, timeFormat.format(testSuiteElement.getElapsedTimeInSeconds()));
 			if (testElement.getProgressState() != ProgressState.COMPLETED || testElement.getTestResult(false) != Result.UNDEFINED)
 				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
+			if (testSuiteElement.isAssumptionFailure())
+				addCDATA(atts, IXMLTags.ATTR_ASSUMPTION_FAILED, Boolean.TRUE.toString());
 
 			startElement(IXMLTags.NODE_TESTSUITE, atts);
 			addFailure(testElement);
@@ -122,6 +124,8 @@ public class TestRunSessionSerializer implements XMLReader {
 				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
 			if (testCaseElement.isIgnored())
 				addCDATA(atts, IXMLTags.ATTR_IGNORED, Boolean.TRUE.toString());
+			if (testCaseElement.isAssumptionFailure())
+				addCDATA(atts, IXMLTags.ATTR_ASSUMPTION_FAILED, Boolean.TRUE.toString());
 
 			startElement(IXMLTags.NODE_TESTCASE, atts);
 			addFailure(testElement);

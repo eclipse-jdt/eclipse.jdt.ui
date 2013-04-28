@@ -130,6 +130,11 @@ public class MessageIds {
 	 * Test identifier prefix for ignored tests.
 	 */
 	public static final String IGNORED_TEST_PREFIX= "@Ignore: "; //$NON-NLS-1$
+
+	/**
+	 * Test identifier prefix for tests with assumption failures.
+	 */
+	public static final String ASSUMPTION_FAILED_TEST_PREFIX= "@AssumptionFailure: "; //$NON-NLS-1$
 }
 
 

@@ -39,7 +39,9 @@ public final class JUnitMessages extends NLS {
 	public static String CounterPanel_label_failures;
 	public static String CounterPanel_label_runs;
 	public static String CounterPanel_runcount;
+	public static String CounterPanel_runcount_assumptionsFailed;
 	public static String CounterPanel_runcount_ignored;
+	public static String CounterPanel_runcount_ignored_assumptionsFailed;
 	public static String EnableStackFilterAction_action_description;
 	public static String EnableStackFilterAction_action_label;
 	public static String EnableStackFilterAction_action_tooltip;
