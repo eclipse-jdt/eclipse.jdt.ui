@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,8 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -48,6 +50,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -67,6 +70,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatu
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.RemoveDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ImplementInterfaceProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
@@ -450,10 +454,26 @@ public class TypeMismatchSubProcessor {
 
 		SingleVariableDeclaration parameter= forStatement.getParameter();
 
+		ICompilationUnit cu= context.getCompilationUnit();
+		if (parameter.getName().getLength() == 0
+				&& parameter.getType() instanceof SimpleType) {
+			SimpleType type= (SimpleType) parameter.getType();
+			if (type.getName() instanceof SimpleName) {
+				SimpleName simpleName= (SimpleName) type.getName();
+				String name= simpleName.getIdentifier();
+				int relevance= StubUtility.hasLocalVariableName(cu.getJavaProject(), name) ? 10 : 7;
+				String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_create_loop_variable_description, BasicElementLabels.getJavaElementName(name));
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+				
+				proposals.add(new NewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposal.LOCAL, simpleName, null, relevance, image));
+				return;
+			}
+		}
+		
 		String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_incompatible_for_each_type_description, new String[] { BasicElementLabels.getJavaElementName(parameter.getName().getIdentifier()), BindingLabelProvider.getBindingLabel(expectedBinding, BindingLabelProvider.DEFAULT_TEXTFLAGS) });
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.INCOMPATIBLE_FOREACH_TYPE, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, IProposalRelevance.INCOMPATIBLE_FOREACH_TYPE, image);
 
 		ImportRewrite importRewrite= proposal.createImportRewrite(astRoot);
 		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(selectedNode), importRewrite);

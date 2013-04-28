@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
@@ -196,6 +197,16 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 	}
 
 
+	private boolean isEnhancedForStatementVariable(Statement statement, SimpleName name) {
+		if (statement instanceof EnhancedForStatement) {
+			EnhancedForStatement forStatement= (EnhancedForStatement) statement;
+			SingleVariableDeclaration param= forStatement.getParameter();
+			return param.getType() == name.getParent(); // strange recovery, see https://bugs.eclipse.org/180456
+		}
+		return false;
+	}
+	
+	
 	private ASTRewrite doAddLocal(CompilationUnit cu) {
 		AST ast= cu.getAST();
 
@@ -267,7 +278,50 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			setEndPosition(rewrite.track(expression));
 
 			return rewrite;
+			
+		} else if ((dominant != dominantStatement) && isEnhancedForStatementVariable(dominantStatement, node)) {
+			//	for (x: collectionOfT) -> for (T x: collectionOfT)
+			
+			EnhancedForStatement enhancedForStatement= (EnhancedForStatement) dominantStatement;
+			SingleVariableDeclaration parameter= enhancedForStatement.getParameter();
+			Expression expression= enhancedForStatement.getExpression();
+			
+			SimpleName newName= (SimpleName) rewrite.createMoveTarget(node);
+			rewrite.set(parameter, SingleVariableDeclaration.NAME_PROPERTY, newName, null);
+			
+			ITypeBinding elementBinding= null;
+			ITypeBinding typeBinding= expression.resolveTypeBinding();
+			if (typeBinding != null) {
+				if (typeBinding.isArray()) {
+					elementBinding= typeBinding.getElementType();
+				} else {
+					ITypeBinding iterable= Bindings.findTypeInHierarchy(typeBinding, "java.lang.Iterable"); //$NON-NLS-1$
+					if (iterable != null) {
+						ITypeBinding[] typeArguments= iterable.getTypeArguments();
+						if (typeArguments.length == 1) {
+							elementBinding= typeArguments[0];
+							elementBinding= Bindings.normalizeForDeclarationUse(elementBinding, ast);
+						}
+					}
+				}
+			}
+			Type type;
+			if (elementBinding != null) {
+				type= imports.addImport(elementBinding, ast, importRewriteContext);
+			} else {
+				type= ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+			}
+
+			rewrite.set(parameter, SingleVariableDeclaration.TYPE_PROPERTY, type, null);
+			
+			addLinkedPosition(rewrite.track(type), false, KEY_TYPE);
+			addLinkedPosition(rewrite.track(newName), true, KEY_NAME);
+			
+			setEndPosition(rewrite.track(expression));
+			
+			return rewrite;
 		}
+		
 		//	foo(x) -> int x; foo(x)
 
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();

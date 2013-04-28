@@ -1552,4 +1552,41 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	public void testForEachMissingType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(ArrayList<? extends HashSet<? super Integer>> list) {\n");
+		buf.append("        for (element: list) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 3, 1);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 6);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(ArrayList<? extends HashSet<? super Integer>> list) {\n");
+		buf.append("        for (HashSet<? super Integer> element: list) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
 }
