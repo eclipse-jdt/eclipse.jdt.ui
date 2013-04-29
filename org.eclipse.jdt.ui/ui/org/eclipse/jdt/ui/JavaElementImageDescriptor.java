@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and
+ * is made available for testing and evaluation purposes only.
+ * The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -102,6 +106,20 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 * @since 3.8
 	 */
 	public final static int IGNORE_OPTIONAL_PROBLEMS= 0x8000;
+
+	/**
+	 * Flag to render the 'default' method adornment.
+	 * 
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public final static int DEFAULT_METHOD= 0x10000;
+
+	/**
+	 * Flag to render the 'default' annotation adornment.
+	 * 
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public final static int ANNOTATION_DEFAULT= 0x20000;
 
 	private ImageDescriptor fBaseImage;
 	private int fFlags;
@@ -274,6 +292,12 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		}
 		if ((fFlags & NATIVE) != 0) {
 			addTopRightImage(JavaPluginImages.DESC_OVR_NATIVE, pos);
+		}
+		if ((fFlags & DEFAULT_METHOD) != 0) {
+			addTopRightImage(JavaPluginImages.DESC_OVR_ANNOTATION_DEFAULT_METHOD, pos);
+		}
+		if ((fFlags & ANNOTATION_DEFAULT) != 0) {
+			addTopRightImage(JavaPluginImages.DESC_OVR_ANNOTATION_DEFAULT_METHOD, pos);
 		}
 	}
 

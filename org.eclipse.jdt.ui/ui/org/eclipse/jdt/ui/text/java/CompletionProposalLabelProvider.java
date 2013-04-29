@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and
+ * is made available for testing and evaluation purposes only.
+ * The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -724,15 +728,21 @@ public class CompletionProposalLabelProvider {
 		if (deprecated)
 			adornments |= JavaElementImageDescriptor.DEPRECATED;
 
-		if (kind == CompletionProposal.FIELD_REF || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_NAME_REFERENCE
+		if (kind == CompletionProposal.FIELD_REF || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_NAME_REFERENCE
 				|| kind == CompletionProposal.METHOD_REF || kind == CompletionProposal.CONSTRUCTOR_INVOCATION)
 			if (Flags.isStatic(flags))
 				adornments |= JavaElementImageDescriptor.STATIC;
 
-		if (kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_NAME_REFERENCE || kind == CompletionProposal.METHOD_REF
+		if (kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_NAME_REFERENCE || kind == CompletionProposal.METHOD_REF
 				|| kind == CompletionProposal.CONSTRUCTOR_INVOCATION)
 			if (Flags.isSynchronized(flags))
 				adornments |= JavaElementImageDescriptor.SYNCHRONIZED;
+		if (kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_NAME_REFERENCE || kind == CompletionProposal.METHOD_REF)
+			if (Flags.isDefaultMethod(flags))
+				adornments|= JavaElementImageDescriptor.DEFAULT_METHOD;
+		if (kind == CompletionProposal.ANNOTATION_ATTRIBUTE_REF)
+			if (Flags.isAnnnotationDefault(flags))
+				adornments|= JavaElementImageDescriptor.ANNOTATION_DEFAULT;
 
 		if (kind == CompletionProposal.TYPE_REF && Flags.isAbstract(flags) && !Flags.isInterface(flags))
 			adornments |= JavaElementImageDescriptor.ABSTRACT;
