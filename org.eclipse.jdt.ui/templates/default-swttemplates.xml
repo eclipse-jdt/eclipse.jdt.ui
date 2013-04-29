@@ -11,7 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [templates] new SWT templates - ToolBar and ToolItem - https://bugs.eclipse.org/bugs/show_bug.cgi?id=264052
- *     Lars Vogel <lars.vogel@gmail.com> - [templates] SWT templates - add SelectionListener and put selection into quotes - https://bugs.eclipse.org/387272
+ *     Lars Vogel <lars.vogel@gmail.com> - [templates] SWT templates - add SelectionListener - https://bugs.eclipse.org/387272
  *******************************************************************************/
 -->
 
