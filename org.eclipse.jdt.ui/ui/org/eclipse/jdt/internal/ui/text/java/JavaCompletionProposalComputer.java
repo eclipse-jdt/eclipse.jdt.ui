@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -140,7 +140,7 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 
 		IDocument document= context.getDocument();
 		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
-		int bound= Math.max(-1, contextPosition - 200);
+		int bound= Math.max(-1, contextPosition - 2000);
 
 		// try the innermost scope of parentheses that looks like a method call
 		int pos= contextPosition - 1;
