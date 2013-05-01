@@ -139,5 +139,6 @@ Require-Bundle:
  org.eclipse.ui.navigator;bundle-version="[3.3.200,4.0.0)",
  org.eclipse.ui.navigator.resources;bundle-version="[3.4.0,4.0.0)",
  org.eclipse.jdt.core.manipulation;bundle-version="[1.4.0,2.0.0)",
- com.ibm.icu;bundle-version="4.4.2"
+ com.ibm.icu;bundle-version="4.4.2",
+ org.eclipse.equinox.bidi;bundle-version="[0.10.0,2.0.0)"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

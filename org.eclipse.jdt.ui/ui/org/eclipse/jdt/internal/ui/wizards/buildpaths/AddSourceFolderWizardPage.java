@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -44,6 +46,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -100,7 +103,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 			fLinkLocation.setLabelText(NewWizardMessages.LinkFolderDialog_dependenciesGroup_locationLabel_desc);
 			fLinkLocation.setButtonLabel(NewWizardMessages.LinkFolderDialog_dependenciesGroup_browseButton_desc);
-			fLinkLocation.setDialogFieldListener(this);
+			fLinkLocation.setDialogFieldListener(this);			
 
 			fVariables= new SelectionButtonDialogField(SWT.PUSH);
 			fVariables.setLabelText(NewWizardMessages.LinkFolderDialog_dependenciesGroup_variables_desc);
@@ -120,6 +123,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 			LayoutUtil.setHorizontalSpan(fLinkLocation.getLabelControl(null), numColumns);
 			LayoutUtil.setHorizontalGrabbing(fLinkLocation.getTextControl(null));
+			BidiUtils.applyBidiProcessing(fLinkLocation.getTextControl(null), StructuredTextTypeHandlerFactory.FILE);
 
 			fVariables.doFillIntoGrid(parent, 1);
 		}

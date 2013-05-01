@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.List;
 
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -24,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
@@ -151,6 +154,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		Text text= fNameDialogField.getTextControl(null);
 		LayoutUtil.setWidthHint(text, fieldWidthHint);
 		LayoutUtil.setHorizontalGrabbing(text);
+		BidiUtils.applyBidiProcessing(text, StructuredTextTypeHandlerFactory.JAVA);
 		TextFieldNavigationHandler.install(text);
 
 		DialogField.createEmptySpace(composite, 1);

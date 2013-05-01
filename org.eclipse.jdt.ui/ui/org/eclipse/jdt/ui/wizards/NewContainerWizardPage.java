@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
+
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.core.runtime.CoreException;
@@ -23,6 +25,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -271,6 +274,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	protected void createContainerControls(Composite parent, int nColumns) {
 		fContainerDialogField.doFillIntoGrid(parent, nColumns);
 		LayoutUtil.setWidthHint(fContainerDialogField.getTextControl(null), getMaxFieldWidth());
+		BidiUtils.applyBidiProcessing(fContainerDialogField.getTextControl(null), StructuredTextTypeHandlerFactory.FILE);
 	}
 
 	/**

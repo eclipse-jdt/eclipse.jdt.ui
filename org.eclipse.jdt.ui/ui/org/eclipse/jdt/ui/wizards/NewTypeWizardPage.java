@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -55,6 +57,7 @@ import org.eclipse.jface.contentassist.SubjectControlContentAssistant;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ISelection;
@@ -778,6 +781,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected void createPackageControls(Composite composite, int nColumns) {
 		fPackageDialogField.doFillIntoGrid(composite, nColumns);
 		Text text= fPackageDialogField.getTextControl(null);
+		BidiUtils.applyBidiProcessing(text, StructuredTextTypeHandlerFactory.JAVA);
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
 		LayoutUtil.setHorizontalGrabbing(text);
 		ControlContentAssistHelper.createTextContentAssistant(text, fCurrPackageCompletionProcessor);
@@ -891,6 +895,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fSuperClassDialogField.doFillIntoGrid(composite, nColumns);
 		Text text= fSuperClassDialogField.getTextControl(null);
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
+		BidiUtils.applyBidiProcessing(text, StructuredTextTypeHandlerFactory.JAVA);
 
 		JavaTypeCompletionProcessor superClassCompletionProcessor= new JavaTypeCompletionProcessor(false, false, true);
 		superClassCompletionProcessor.setCompletionContextRequestor(new CompletionContextRequestor() {
@@ -918,6 +923,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		tableViewer.setColumnProperties(new String[] {INTERFACE});
 
 		TableTextCellEditor cellEditor= new TableTextCellEditor(tableViewer, 0) {
+			@Override
+			protected Control createControl(Composite parent) {
+				Control control= super.createControl(parent);
+				BidiUtils.applyBidiProcessing(text, StructuredTextTypeHandlerFactory.JAVA);
+				return control;
+			}
+			
 		    @Override
 			protected void doSetFocus() {
 		        if (text != null) {

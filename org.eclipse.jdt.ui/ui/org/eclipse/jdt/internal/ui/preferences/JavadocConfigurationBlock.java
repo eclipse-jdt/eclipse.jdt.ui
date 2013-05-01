@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipFile;
 
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.graphics.Image;
@@ -46,6 +48,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.PixelConverter;
+import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -195,6 +198,7 @@ public class JavadocConfigurationBlock {
 		fURLField.doFillIntoGrid(topComp, 2);
 		LayoutUtil.setWidthHint(fURLField.getTextControl(null), converter.convertWidthInCharsToPixels(43));
 		LayoutUtil.setHorizontalGrabbing(fURLField.getTextControl(null));
+		BidiUtils.applyBidiProcessing(fURLField.getTextControl(null), StructuredTextTypeHandlerFactory.URL);
 
 		fBrowseFolder.doFillIntoGrid(topComp, 1);
 
@@ -224,6 +228,7 @@ public class JavadocConfigurationBlock {
 			fArchiveField.doFillIntoGrid(topComp, 2);
 			LayoutUtil.setWidthHint(fArchiveField.getTextControl(null), converter.convertWidthInCharsToPixels(43));
 			LayoutUtil.setHorizontalGrabbing(fArchiveField.getTextControl(null));
+			BidiUtils.applyBidiProcessing(fArchiveField.getTextControl(null), StructuredTextTypeHandlerFactory.FILE);
 
 			fBrowseArchive.doFillIntoGrid(topComp, 1);
 
@@ -231,6 +236,7 @@ public class JavadocConfigurationBlock {
 			fArchivePathField.doFillIntoGrid(topComp, 2);
 			LayoutUtil.setWidthHint(fArchivePathField.getTextControl(null), converter.convertWidthInCharsToPixels(43));
 			LayoutUtil.setHorizontalGrabbing(fArchivePathField.getTextControl(null));
+			BidiUtils.applyBidiProcessing(fArchivePathField.getTextControl(null), StructuredTextTypeHandlerFactory.FILE);
 
 			fBrowseArchivePath.doFillIntoGrid(topComp, 1);
 
