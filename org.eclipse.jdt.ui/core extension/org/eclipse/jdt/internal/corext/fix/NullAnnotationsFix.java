@@ -233,7 +233,13 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 //		return problemId == IProblem.NonNullLocalVariableComparisonYieldsFalse || problemId == IProblem.RedundantNullCheckOnNonNullLocalVariable;
 //	}
 
-	@SuppressWarnings("unused")
+	/**
+	 * Tells whether an explicit null annotation exists on the given compilation unit.
+	 * 
+	 * @param compilationUnit the compilation unit
+	 * @param offset the offset
+	 * @return <code>true</code> if the compilation unit has an explicit null annotation
+	 */
 	public static boolean hasExplicitNullAnnotation(ICompilationUnit compilationUnit, int offset) {
 // FIXME(SH): check for existing annotations disabled due to lack of precision:
 //		      should distinguish what is actually annotated (return? param? which?)
