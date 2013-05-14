@@ -471,7 +471,7 @@ public class JavaContext extends CompilationUnitContext {
 	}
 
 	/**
-	 * Adds an import for type with type name <code>type</cod> if possible.
+	 * Adds an import for type with type name <code>type</code> if possible.
 	 * Returns a string which can be used to reference the type.
 	 *
 	 * @param type the fully qualified name of the type to import
