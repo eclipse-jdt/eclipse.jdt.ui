@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
@@ -38,6 +40,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -199,6 +202,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		LayoutUtil.setWidthHint(fProjectField.getTextControl(null), maxFieldWidth);
 		LayoutUtil.setHorizontalGrabbing(fProjectField.getTextControl(null));
 		LayoutUtil.setWidthHint(fRootDialogField.getTextControl(null), maxFieldWidth);
+		BidiUtils.applyBidiProcessing(fRootDialogField.getTextControl(null), StructuredTextTypeHandlerFactory.FILE);
 
 		setControl(composite);
 		Dialog.applyDialogFont(composite);

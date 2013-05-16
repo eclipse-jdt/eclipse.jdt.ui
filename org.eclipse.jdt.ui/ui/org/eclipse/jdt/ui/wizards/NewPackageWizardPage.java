@@ -19,6 +19,8 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -46,6 +48,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.PlatformUI;
@@ -257,6 +260,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		TextFieldNavigationHandler.install(text);
 		
 		fCreatePackageInfoJavaDialogField.doFillIntoGrid(composite, nColumns);
+		BidiUtils.applyBidiProcessing(fPackageDialogField.getTextControl(null), StructuredTextTypeHandlerFactory.JAVA);
 	}
 
 	// -------- PackageFieldAdapter --------

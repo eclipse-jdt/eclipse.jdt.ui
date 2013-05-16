@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.List;
+
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
@@ -24,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
@@ -151,6 +154,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		Text text= fNameDialogField.getTextControl(null);
 		LayoutUtil.setWidthHint(text, fieldWidthHint);
 		LayoutUtil.setHorizontalGrabbing(text);
+		BidiUtils.applyBidiProcessing(text, StructuredTextTypeHandlerFactory.JAVA);
 		TextFieldNavigationHandler.install(text);
 
 		DialogField.createEmptySpace(composite, 1);

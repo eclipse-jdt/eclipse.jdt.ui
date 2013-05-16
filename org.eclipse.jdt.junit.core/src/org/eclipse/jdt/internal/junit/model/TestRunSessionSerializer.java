@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -102,7 +102,7 @@ public class TestRunSessionSerializer implements XMLReader {
 				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
 
 			startElement(IXMLTags.NODE_TESTSUITE, atts);
-			addFailure(testElement);
+			addFailure(testSuiteElement);
 
 			ITestElement[] children= testSuiteElement.getChildren();
 			for (int i= 0; i < children.length; i++) {
@@ -124,7 +124,7 @@ public class TestRunSessionSerializer implements XMLReader {
 				addCDATA(atts, IXMLTags.ATTR_IGNORED, Boolean.TRUE.toString());
 
 			startElement(IXMLTags.NODE_TESTCASE, atts);
-			addFailure(testElement);
+			addFailure(testCaseElement);
 
 			endElement(IXMLTags.NODE_TESTCASE);
 
@@ -134,9 +134,17 @@ public class TestRunSessionSerializer implements XMLReader {
 
 	}
 
-	private void addFailure(ITestElement testElement) throws SAXException {
+	private void addFailure(TestElement testElement) throws SAXException {
 		FailureTrace failureTrace= testElement.getFailureTrace();
-		if (failureTrace != null) {
+		
+		if (testElement.isAssumptionFailure()) {
+			startElement(IXMLTags.NODE_SKIPPED, NO_ATTS);
+			if (failureTrace != null) {
+				addCharacters(failureTrace.getTrace());
+			}
+			endElement(IXMLTags.NODE_SKIPPED);
+			
+		} else if (failureTrace != null) {
 			AttributesImpl failureAtts= new AttributesImpl();
 //				addCDATA(failureAtts, IXMLTags.ATTR_MESSAGE, xx);
 //				addCDATA(failureAtts, IXMLTags.ATTR_TYPE, xx);

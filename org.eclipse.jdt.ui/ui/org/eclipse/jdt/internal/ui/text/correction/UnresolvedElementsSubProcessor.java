@@ -81,6 +81,7 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -100,6 +101,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
@@ -595,6 +597,10 @@ public class UnresolvedElementsSubProcessor {
 		}
 
 		int kind= evauateTypeKind(selectedNode, cu.getJavaProject());
+		
+		if (kind == SimilarElementsRequestor.REF_TYPES) {
+			addEnhancedForWithoutTypeProposals(cu, selectedNode, proposals);
+		}
 
 		while (selectedNode.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
 			selectedNode= selectedNode.getParent();
@@ -632,6 +638,26 @@ public class UnresolvedElementsSubProcessor {
 		addNewTypeProposals(cu, node, kind, IProposalRelevance.NEW_TYPE, proposals);
 		
 		ReorgCorrectionsSubProcessor.addProjectSetupFixProposal(context, problem, node.getFullyQualifiedName(), proposals);
+	}
+
+	private static void addEnhancedForWithoutTypeProposals(ICompilationUnit cu, ASTNode selectedNode, Collection<ICommandAccess> proposals) {
+		if (selectedNode instanceof SimpleName && selectedNode.getLocationInParent() == SimpleType.NAME_PROPERTY) {
+			ASTNode type= selectedNode.getParent();
+			if (type.getLocationInParent() == SingleVariableDeclaration.TYPE_PROPERTY) {
+				SingleVariableDeclaration svd= (SingleVariableDeclaration) type.getParent();
+				if (svd.getLocationInParent() == EnhancedForStatement.PARAMETER_PROPERTY) {
+					if (svd.getName().getLength() == 0) {
+						SimpleName simpleName= (SimpleName) selectedNode;
+						String name= simpleName.getIdentifier();
+						int relevance= StubUtility.hasLocalVariableName(cu.getJavaProject(), name) ? 10 : 7;
+						String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_create_loop_variable_description, BasicElementLabels.getJavaElementName(name));
+						Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+						
+						proposals.add(new NewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposal.LOCAL, simpleName, null, relevance, image));
+					}
+				}
+			}
+		}
 	}
 
 	private static void addNullityAnnotationTypesProposals(ICompilationUnit cu, Name node, Collection<ICommandAccess> proposals) throws CoreException {

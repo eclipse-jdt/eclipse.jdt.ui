@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ public class CounterPanel extends Composite {
 	protected Text fNumberOfRuns;
 	protected int fTotal;
 	protected int fIgnoredCount;
+	protected int fAssumptionFailedCount;
 
 	private final Image fErrorIcon= JUnitPlugin.createImage("ovr16/error_ovr.gif"); //$NON-NLS-1$
 	private final Image fFailureIcon= JUnitPlugin.createImage("ovr16/failed_ovr.gif"); //$NON-NLS-1$
@@ -84,7 +85,7 @@ public class CounterPanel extends Composite {
 	public void reset() {
 		setErrorValue(0);
 		setFailureValue(0);
-		setRunValue(0, 0);
+		setRunValue(0, 0, 0);
 		fTotal= 0;
 	}
 
@@ -96,21 +97,35 @@ public class CounterPanel extends Composite {
 		return fTotal;
 	}
 
-	public void setRunValue(int value, int ignoredCount) {
+	public void setRunValue(int value, int ignoredCount, int assumptionFailureCount) {
 		String runString;
-		if (ignoredCount == 0)
+		String runStringTooltip;
+		if (ignoredCount == 0 && assumptionFailureCount == 0) {
 			runString= Messages.format(JUnitMessages.CounterPanel_runcount, new String[] { Integer.toString(value), Integer.toString(fTotal) });
-		else
-			runString= Messages.format(JUnitMessages.CounterPanel_runcount_ignored, new String[] { Integer.toString(value), Integer.toString(fTotal), Integer.toString(ignoredCount) });
+			runStringTooltip= runString;
+		} else if (ignoredCount != 0 && assumptionFailureCount == 0) {
+			runString= Messages.format(JUnitMessages.CounterPanel_runcount_skipped, new String[] { Integer.toString(value), Integer.toString(fTotal), Integer.toString(ignoredCount) });
+			runStringTooltip= Messages.format(JUnitMessages.CounterPanel_runcount_ignored, new String[] { Integer.toString(value), Integer.toString(fTotal), Integer.toString(ignoredCount) });
+		} else if (ignoredCount == 0 && assumptionFailureCount != 0) {
+			runString= Messages.format(JUnitMessages.CounterPanel_runcount_skipped, new String[] { Integer.toString(value), Integer.toString(fTotal), Integer.toString(assumptionFailureCount) });
+			runStringTooltip= Messages.format(JUnitMessages.CounterPanel_runcount_assumptionsFailed, new String[] { Integer.toString(value), Integer.toString(fTotal), Integer.toString(assumptionFailureCount) });
+		} else {
+			runString= Messages.format(JUnitMessages.CounterPanel_runcount_skipped, new String[] { Integer.toString(value), Integer.toString(fTotal), Integer.toString(ignoredCount + assumptionFailureCount) });
+			runStringTooltip= Messages.format(JUnitMessages.CounterPanel_runcount_ignored_assumptionsFailed, new String[] { Integer.toString(value), Integer.toString(fTotal), Integer.toString(ignoredCount), Integer.toString(assumptionFailureCount) });
+		}
 		fNumberOfRuns.setText(runString);
+		fNumberOfRuns.setToolTipText(runStringTooltip);
 
 		if (fIgnoredCount == 0 && ignoredCount > 0	|| fIgnoredCount != 0 && ignoredCount == 0) {
+			layout();
+		} else if (fAssumptionFailedCount == 0 && assumptionFailureCount > 0 || fAssumptionFailedCount != 0 && assumptionFailureCount == 0) {
 			layout();
 		} else {
 			fNumberOfRuns.redraw();
 			redraw();
 		}
 		fIgnoredCount= ignoredCount;
+		fAssumptionFailedCount= assumptionFailureCount;
 	}
 
 	public void setErrorValue(int value) {

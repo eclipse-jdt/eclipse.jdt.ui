@@ -42,9 +42,10 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 		prefs.put(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST, ""); //$NON-NLS-1$
 		prefs.putInt(JUnitPreferencesConstants.MAX_TEST_RUNS, 10);
 
-		// see http://sourceforge.net/tracker/index.php?func=detail&aid=1877429&group_id=15278&atid=115278
-		prefs.put(JUnitPreferencesConstants.JUNIT3_JAVADOC, "http://www.junit.org/junit/javadoc/3.8.1"); //$NON-NLS-1$
-		prefs.put(JUnitPreferencesConstants.JUNIT4_JAVADOC, "http://kentbeck.github.com/junit/javadoc/4.10"); //$NON-NLS-1$
+		// see https://github.com/junit-team/junit/issues/570
+		prefs.put(JUnitPreferencesConstants.JUNIT3_JAVADOC, "http://junit.sourceforge.net/junit3.8.1/javadoc/"); //$NON-NLS-1$
+		prefs.put(JUnitPreferencesConstants.JUNIT4_JAVADOC, "http://junit-team.github.io/junit/javadoc/latest/"); //$NON-NLS-1$
+		prefs.put(JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC, "http://hamcrest.org/JavaHamcrest/javadoc/1.3/"); //$NON-NLS-1$
 		
 		// migrate old instance scope prefs
 		try {

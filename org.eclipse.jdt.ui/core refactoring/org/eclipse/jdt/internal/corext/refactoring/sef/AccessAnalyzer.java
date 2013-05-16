@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -121,23 +121,24 @@ class AccessAnalyzer extends ASTVisitor {
 
 	@Override
 	public boolean visit(Assignment node) {
-		Expression lhs= node.getLeftHandSide();
-		if (!considerBinding(resolveBinding(lhs), lhs))
+		Expression leftHandSide= node.getLeftHandSide();
+		if (!considerBinding(resolveBinding(leftHandSide), leftHandSide))
 			return true;
 
 		checkParent(node);
+		Expression rightHandSide= node.getRightHandSide();
 		if (!fIsFieldFinal) {
 			// Write access.
 			AST ast= node.getAST();
 			MethodInvocation invocation= ast.newMethodInvocation();
 			invocation.setName(ast.newSimpleName(fSetter));
 			fReferencingSetter= true;
-			Expression receiver= getReceiver(lhs);
+			Expression receiver= getReceiver(leftHandSide);
 			if (receiver != null)
 				invocation.setExpression((Expression)fRewriter.createCopyTarget(receiver));
 			List<Expression> arguments= invocation.arguments();
 			if (node.getOperator() == Assignment.Operator.ASSIGN) {
-				arguments.add((Expression)fRewriter.createCopyTarget(node.getRightHandSide()));
+				arguments.add((Expression)fRewriter.createCopyTarget(rightHandSide));
 			} else {
 				// This is the compound assignment case: field+= 10;
 				InfixExpression exp= ast.newInfixExpression();
@@ -148,9 +149,8 @@ class AccessAnalyzer extends ASTVisitor {
 				if (receiver != null)
 					getter.setExpression((Expression)fRewriter.createCopyTarget(receiver));
 				exp.setLeftOperand(getter);
-				Expression rhs= (Expression)fRewriter.createCopyTarget(node.getRightHandSide());
-				if (NecessaryParenthesesChecker.needsParentheses(node.getRightHandSide(), exp, InfixExpression.RIGHT_OPERAND_PROPERTY)) {
-					//TODO: this introduces extra parentheses as the new 'exp' node doesn't have bindings
+				Expression rhs= (Expression)fRewriter.createCopyTarget(rightHandSide);
+				if (NecessaryParenthesesChecker.needsParenthesesForRightOperand(rightHandSide, exp, leftHandSide.resolveTypeBinding())) {
 					ParenthesizedExpression p= ast.newParenthesizedExpression();
 					p.setExpression(rhs);
 					rhs= p;
@@ -160,7 +160,7 @@ class AccessAnalyzer extends ASTVisitor {
 			}
 			fRewriter.replace(node, invocation, createGroupDescription(WRITE_ACCESS));
 		}
-		node.getRightHandSide().accept(this);
+		rightHandSide.accept(this);
 		return false;
 	}
 

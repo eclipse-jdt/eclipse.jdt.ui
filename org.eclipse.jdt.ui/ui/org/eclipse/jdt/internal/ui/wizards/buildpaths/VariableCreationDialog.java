@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.io.File;
 import java.util.List;
+
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
@@ -26,6 +28,7 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
+import org.eclipse.jface.util.BidiUtils;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -139,6 +142,7 @@ public class VariableCreationDialog extends StatusDialog {
 
 		fPathField.doFillIntoGrid(inner, 3);
 		LayoutUtil.setWidthHint(fPathField.getTextControl(null), fieldWidthHint);
+		BidiUtils.applyBidiProcessing(fPathField.getTextControl(null), StructuredTextTypeHandlerFactory.FILE);
 
 		fDirButton.doFillIntoGrid(inner, 1);
 

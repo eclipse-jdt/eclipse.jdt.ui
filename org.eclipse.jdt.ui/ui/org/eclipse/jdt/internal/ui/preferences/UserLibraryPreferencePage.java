@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Point;
@@ -77,6 +79,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.StringConverter;
+import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -350,6 +353,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			fExportImportList.getListControl(null).setLayoutData(new GridData(GridData.FILL_BOTH));
 
 			fLocationField.postSetFocusOnDialogField(parent.getDisplay());
+			BidiUtils.applyBidiProcessing(fLocationField.getTextControl(parent), StructuredTextTypeHandlerFactory.FILE);
 
 			Dialog.applyDialogFont(composite);
 

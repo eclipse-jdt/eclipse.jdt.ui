@@ -880,6 +880,8 @@ public class ASTResolving {
 				int superParent= parent.getParent().getNodeType();
 				if (superParent == ASTNode.CATCH_CLAUSE) {
 					kind= SimilarElementsRequestor.CLASSES;
+				} else if (superParent == ASTNode.ENHANCED_FOR_STATEMENT) {
+					kind= SimilarElementsRequestor.REF_TYPES;
 				}
 				break;
 			case ASTNode.TAG_ELEMENT:

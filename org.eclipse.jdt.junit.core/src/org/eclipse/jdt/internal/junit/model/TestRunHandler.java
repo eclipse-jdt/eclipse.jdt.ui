@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -162,8 +162,14 @@ public class TestRunHandler extends DefaultHandler {
 			// not interested
 
 		} else if (qName.equals(IXMLTags.NODE_SKIPPED)) {
-			// not an Ant JUnit tag, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=276068
-			fTestCase.setIgnored(true);
+			// before Ant 1.9.0: not an Ant JUnit tag, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=276068
+			// later: child of <suite> or <test>, see https://issues.apache.org/bugzilla/show_bug.cgi?id=43969
+			fStatus= Status.OK;
+			fFailureBuffer= new StringBuffer();
+			String message= attributes.getValue(IXMLTags.ATTR_MESSAGE);
+			if (message != null) {
+				fFailureBuffer.append(message).append('\n');
+			}
 
 		} else {
 			throw new SAXParseException("unknown node '" + qName + "'", fLocator);  //$NON-NLS-1$//$NON-NLS-2$
@@ -235,7 +241,18 @@ public class TestRunHandler extends DefaultHandler {
 			// OK
 
 		} else if (qName.equals(IXMLTags.NODE_SKIPPED)) {
-			// OK
+			TestElement testElement= fTestCase;
+			if (testElement == null)
+				testElement= fTestSuite;
+			
+			if (fFailureBuffer != null && fFailureBuffer.length() > 0) {
+				handleFailure(testElement);
+				testElement.setAssumptionFailed(true);
+			} else if (fTestCase != null) {
+				fTestCase.setIgnored(true);
+			} else { // not expected
+				testElement.setAssumptionFailed(true);
+			}
 
 		} else {
 

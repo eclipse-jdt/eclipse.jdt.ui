@@ -102,12 +102,12 @@ public class NecessaryParenthesesChecker {
 	/*
 	 * Do all operands in expression have same type
 	 */
-	private static boolean isAllOperandsHaveSameType(InfixExpression expression) {
-		ITypeBinding binding= expression.getLeftOperand().resolveTypeBinding();
+	private static boolean isAllOperandsHaveSameType(InfixExpression expression, ITypeBinding leftOperandType, ITypeBinding rightOperandType) {
+		ITypeBinding binding= leftOperandType;
 		if (binding == null)
 			return false;
 	
-		ITypeBinding current= expression.getRightOperand().resolveTypeBinding();
+		ITypeBinding current= rightOperandType;
 		if (binding != current)
 			return false;
 	
@@ -121,11 +121,7 @@ public class NecessaryParenthesesChecker {
 		return true;
 	}
 
-	/*
-	 * Is the expression of integer type
-	 */
-	private static boolean isExpressionIntegerType(Expression expression) {
-		ITypeBinding binding= expression.resolveTypeBinding();
+	private static boolean isIntegerType(ITypeBinding binding) {
 		if (binding == null)
 			return false;
 
@@ -139,8 +135,7 @@ public class NecessaryParenthesesChecker {
 		return false;
 	}
 
-	private static boolean isExpressionStringType(Expression expression) {
-		ITypeBinding binding= expression.resolveTypeBinding();
+	private static boolean isStringType(ITypeBinding binding) {
 		if (binding == null)
 			return false;
 
@@ -153,14 +148,12 @@ public class NecessaryParenthesesChecker {
 	 * This is true if and only if:<br>
 	 * <code>left operator (right) == (right) operator left == right operator left</code>
 	 */
-	private static boolean isAssociative(InfixExpression expression) {
-		Operator operator= expression.getOperator();
-
+	private static boolean isAssociative(InfixExpression.Operator operator, ITypeBinding infixExprType, boolean isAllOperandsHaveSameType) {
 		if (operator == InfixExpression.Operator.PLUS)
-			return isExpressionStringType(expression) || isExpressionIntegerType(expression) && isAllOperandsHaveSameType(expression);
+			return isStringType(infixExprType) || isIntegerType(infixExprType) && isAllOperandsHaveSameType;
 
 		if (operator == InfixExpression.Operator.TIMES)
-			return isExpressionIntegerType(expression) && isAllOperandsHaveSameType(expression);
+			return isIntegerType(infixExprType) && isAllOperandsHaveSameType;
 
 		if (operator == InfixExpression.Operator.CONDITIONAL_AND
 				|| operator == InfixExpression.Operator.CONDITIONAL_OR
@@ -176,30 +169,44 @@ public class NecessaryParenthesesChecker {
 		return "int".equals(name) || "long".equals(name) || "byte".equals(name) || "char".equals(name) || "short".equals(name); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	}
 
-	private static boolean needsParenthesesInInfixExpression(Expression expression, InfixExpression parentInfix, StructuralPropertyDescriptor locationInParent) {
+	private static boolean needsParenthesesInInfixExpression(Expression expression, InfixExpression parentInfix, StructuralPropertyDescriptor locationInParent,
+			ITypeBinding leftOperandType) {
+		InfixExpression.Operator parentInfixOperator= parentInfix.getOperator();
+		ITypeBinding rightOperandType;
+		ITypeBinding parentInfixExprType;
+		if (leftOperandType == null) { // parentInfix has bindings
+			leftOperandType= parentInfix.getLeftOperand().resolveTypeBinding();
+			rightOperandType= parentInfix.getRightOperand().resolveTypeBinding();
+			parentInfixExprType= parentInfix.resolveTypeBinding();
+		} else {
+			rightOperandType= expression.resolveTypeBinding();
+			parentInfixExprType= getInfixExpressionType(parentInfixOperator, leftOperandType, rightOperandType);
+		}
+		boolean isAllOperandsHaveSameType= isAllOperandsHaveSameType(parentInfix, leftOperandType, rightOperandType);
+
 		if (locationInParent == InfixExpression.LEFT_OPERAND_PROPERTY) {
 			//we have (expr op expr) op expr
 			//infix expressions are evaluated from left to right -> parentheses not needed
 			return false;
-		} else if (isAssociative(parentInfix)) {
+		} else if (isAssociative(parentInfixOperator, parentInfixExprType, isAllOperandsHaveSameType)) {
 			//we have parent op (expr op expr) and op is associative
 			//left op (right) == (right) op left == right op left
 			if (expression instanceof InfixExpression) {
 				InfixExpression infixExpression= (InfixExpression)expression;
 				Operator operator= infixExpression.getOperator();
 
-				if (isExpressionStringType(parentInfix)) {
-					if (parentInfix.getOperator() == InfixExpression.Operator.PLUS && operator == InfixExpression.Operator.PLUS && isExpressionStringType(infixExpression)) {
+				if (isStringType(parentInfixExprType)) {
+					if (parentInfixOperator == InfixExpression.Operator.PLUS && operator == InfixExpression.Operator.PLUS && isStringType(infixExpression.resolveTypeBinding())) {
 						// 1 + ("" + 2) == 1 + "" + 2
 						// 1 + (2 + "") != 1 + 2 + ""
 						// "" + (2 + "") == "" + 2 + ""
-						return !isExpressionStringType(infixExpression.getLeftOperand()) && !isExpressionStringType(parentInfix.getLeftOperand());
+						return !isStringType(infixExpression.getLeftOperand().resolveTypeBinding()) && !isStringType(leftOperandType);
 					}
 					//"" + (1 + 2), "" + (1 - 2) etc
 					return true;
 				}
 
-				if (parentInfix.getOperator() != InfixExpression.Operator.TIMES)
+				if (parentInfixOperator != InfixExpression.Operator.TIMES)
 					return false;
 	
 				if (operator == InfixExpression.Operator.TIMES)
@@ -216,6 +223,33 @@ public class NecessaryParenthesesChecker {
 		} else {
 			return true;
 		}
+	}
+
+	/**
+	 * Returns the type of infix expression based on its operands and operator.
+	 * 
+	 * @param operator the operator of infix expression
+	 * @param leftOperandType the type of left operand of infix expression
+	 * @param rightOperandType the type of right operand of infix expression
+	 * @return the type of infix expression if the type of both the operands is same or if the type
+	 *         of either operand of a + operator is String, <code>null</code> otherwise.
+	 * 
+	 * @since 3.9
+	 */
+	private static ITypeBinding getInfixExpressionType(InfixExpression.Operator operator, ITypeBinding leftOperandType, ITypeBinding rightOperandType) {
+		if (leftOperandType == rightOperandType) {
+			return leftOperandType;
+		}
+		if (operator == InfixExpression.Operator.PLUS) {
+			if (isStringType(leftOperandType)) {
+				return leftOperandType;
+			} else if (isStringType(rightOperandType)) {
+				return rightOperandType;
+			}
+		}
+		// If the left and right operand types are different, we assume that parentheses are needed.
+		// This is to avoid complications of numeric promotions and for readability of complicated code.
+		return null;
 	}
 
 	/**
@@ -253,6 +287,32 @@ public class NecessaryParenthesesChecker {
 	}
 
 	/**
+	 * Does the <code>rightOperand</code> need parentheses when inserted into
+	 * <code>infixExpression</code> ?
+	 * 
+	 * <p>
+	 * <b>Note:</b>
+	 * <ul>
+	 * <li>The <code>infixExpression</code> can be a new node (not from a resolved AST) with no
+	 * bindings.</li>
+	 * <li>The <code>infixExpression</code> must not have additional operands.</li>
+	 * <li>The <code>rightOperand</code> node must have bindings.</li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * @param rightOperand the right operand in <code>infixExpression</code>
+	 * @param infixExpression the parent infix expression
+	 * @param leftOperandType the type of the left operand in <code>infixExpression</code>
+	 * @return <code>true</code> if <code>rightOperand</code> needs parentheses, <code>false</code>
+	 *         otherwise.
+	 * 
+	 * @since 3.9
+	 */
+	public static boolean needsParenthesesForRightOperand(Expression rightOperand, InfixExpression infixExpression, ITypeBinding leftOperandType) {
+		return needsParentheses(rightOperand, infixExpression, InfixExpression.RIGHT_OPERAND_PROPERTY, leftOperandType);
+	}
+
+	/**
 	 * Does the <code>expression</code> need parentheses when inserted into <code>parent</code> at
 	 * <code>locationInParent</code> ?
 	 * 
@@ -263,9 +323,29 @@ public class NecessaryParenthesesChecker {
 	 * @param expression the expression
 	 * @param parent the parent node
 	 * @param locationInParent location of expression in the parent
-	 * @return <code>true</code> if the expression needs parentheses, <code>false</code> otherwise.
+	 * @return <code>true</code> if <code>expression</code> needs parentheses, <code>false</code>
+	 *         otherwise.
 	 */
 	public static boolean needsParentheses(Expression expression, ASTNode parent, StructuralPropertyDescriptor locationInParent) {
+		return needsParentheses(expression, parent, locationInParent, null);
+	}
+
+	/**
+	 * Does the <code>expression</code> need parentheses when inserted into <code>parent</code> at
+	 * <code>locationInParent</code> ?
+	 * 
+	 * @param expression the expression
+	 * @param parent the parent node
+	 * @param locationInParent location of expression in the parent
+	 * @param leftOperandType the type of the left operand in <code>parent</code> if
+	 *            <code>parent</code> is an infix expression with no bindings and
+	 *            <code>expression</code> is the right operand in it, <code>null</code> otherwise
+	 * @return <code>true</code> if <code>expression</code> needs parentheses, <code>false</code>
+	 *         otherwise.
+	 * 
+	 * @since 3.9
+	 */
+	private static boolean needsParentheses(Expression expression, ASTNode parent, StructuralPropertyDescriptor locationInParent, ITypeBinding leftOperandType) {
 		if (!expressionTypeNeedsParentheses(expression))
 			return false;
 
@@ -294,7 +374,7 @@ public class NecessaryParenthesesChecker {
 			//(opEx) opParent binds equal
 
 			if (parentExpression instanceof InfixExpression) {
-				return needsParenthesesInInfixExpression(expression, (InfixExpression)parentExpression, locationInParent);
+				return needsParenthesesInInfixExpression(expression, (InfixExpression) parentExpression, locationInParent, leftOperandType);
 			}
 
 			if (parentExpression instanceof ConditionalExpression && locationInParent == ConditionalExpression.EXPRESSION_PROPERTY) {

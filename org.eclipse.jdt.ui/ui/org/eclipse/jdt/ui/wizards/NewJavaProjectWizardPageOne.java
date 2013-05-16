@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -97,6 +97,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
+import org.eclipse.jface.util.BidiUtils;
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 /**
  * The first page of the New Java Project wizard. This page is typically used in combination with
@@ -200,6 +202,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fUseDefaults.doFillIntoGrid(locationComposite, numColumns);
 			fLocation.doFillIntoGrid(locationComposite, numColumns);
 			LayoutUtil.setHorizontalGrabbing(fLocation.getTextControl(null));
+			BidiUtils.applyBidiProcessing(fLocation.getTextControl(null), StructuredTextTypeHandlerFactory.FILE);
 
 			return locationComposite;
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.Arrays;
 import java.util.List;
+
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -30,6 +32,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
@@ -164,6 +167,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			LayoutUtil.setWidthHint(text, fieldWidthHint);
 			LayoutUtil.setHorizontalGrabbing(text);
 			LayoutUtil.setHorizontalSpan(text, fIsEditingMember ? 2 : 1);
+			BidiUtils.applyBidiProcessing(text, StructuredTextTypeHandlerFactory.JAVA);
 			TextFieldNavigationHandler.install(text);
 
 			DialogField.createEmptySpace(composite, 1);

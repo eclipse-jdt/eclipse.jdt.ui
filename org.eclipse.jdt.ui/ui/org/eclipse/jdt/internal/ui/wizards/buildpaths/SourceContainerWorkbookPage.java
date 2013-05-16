@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -31,6 +33,7 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.layout.PixelConverter;
+import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -233,6 +236,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		Composite composite= new Composite(parent, SWT.NONE);
 
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fFoldersList, fUseFolderOutputs , fOutputLocationField}, true, SWT.DEFAULT, SWT.DEFAULT);
+		BidiUtils.applyBidiProcessing(fOutputLocationField.getTextControl(null), StructuredTextTypeHandlerFactory.FILE);
 		LayoutUtil.setHorizontalGrabbing(fFoldersList.getTreeControl(null));
 
 		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -172,6 +172,8 @@ public abstract class TestElement implements ITestElement {
 	private String fExpected;
 	private String fActual;
 
+	private boolean fAssumptionFailed;
+
 	/**
 	 * Running time in seconds. Contents depend on the current {@link #getProgressState()}:
 	 * <ul>
@@ -210,6 +212,9 @@ public abstract class TestElement implements ITestElement {
 	 * @see org.eclipse.jdt.junit.ITestElement#getTestResult()
 	 */
 	public Result getTestResult(boolean includeChildren) {
+		if (fAssumptionFailed) {
+			return Result.IGNORED;
+		}
 		return getStatus().convertToResult();
 	}
 
@@ -235,7 +240,8 @@ public abstract class TestElement implements ITestElement {
 	 */
 	public FailureTrace getFailureTrace() {
 		Result testResult= getTestResult(false);
-		if (testResult == Result.ERROR || testResult == Result.FAILURE) {
+		if (testResult == Result.ERROR || testResult == Result.FAILURE
+				|| (testResult == Result.IGNORED && fTrace != null)) {
 			return new FailureTrace(fTrace, fExpected, fActual);
 		}
 		return null;
@@ -346,6 +352,14 @@ public abstract class TestElement implements ITestElement {
 		}
 
 		return fTime;
+	}
+
+	public void setAssumptionFailed(boolean assumptionFailed) {
+		fAssumptionFailed= assumptionFailed;
+	}
+
+	public boolean isAssumptionFailure() {
+		return fAssumptionFailed;
 	}
 
 	public String toString() {

@@ -4,7 +4,7 @@ public class TestCompoundWrite4 {
 	private int field;
 	
 	public void foo() {
-		setField(getField() + (1 + 2));
+		setField(getField() + 1 + 2);
 	}
 
 	int getField() {

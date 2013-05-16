@@ -24,11 +24,15 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.ChangeKind;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.RemoveRedundantAnnotationRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.SignatureAnnotationRewriteOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -49,6 +53,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		return cu;
 	}
 
+	/* recognizes any simple name referring to a parameter binding */
 	public static boolean isComplainingAboutArgument(ASTNode selectedNode) {
 		if (!(selectedNode instanceof SimpleName))
 			return false;
@@ -64,11 +69,19 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		return false;
 	}
 
+	/* recognizes the expression of a return statement and the return type of a method declaration. */
 	public static boolean isComplainingAboutReturn(ASTNode selectedNode) {
-		return selectedNode.getParent().getNodeType() == ASTNode.RETURN_STATEMENT;
+		if (selectedNode.getParent().getNodeType() == ASTNode.RETURN_STATEMENT)
+			return true;
+		while (!(selectedNode instanceof Type)) {
+			if (selectedNode == null) return false;
+			selectedNode = selectedNode.getParent();
+		}
+		return selectedNode.getLocationInParent() == MethodDeclaration.RETURN_TYPE2_PROPERTY;			
 	}
 
-	public static NullAnnotationsFix createNullAnnotationInSignatureFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean modifyOverridden, boolean isArgumentProblem) {
+	public static NullAnnotationsFix createNullAnnotationInSignatureFix(CompilationUnit compilationUnit, IProblemLocation problem, 
+			ChangeKind changeKind, boolean isArgumentProblem) {
 		String nullableAnnotationName= getNullableAnnotationName(compilationUnit.getJavaElement(), false);
 		String nonNullAnnotationName= getNonNullAnnotationName(compilationUnit.getJavaElement(), false);
 		String annotationToAdd= nullableAnnotationName;
@@ -78,14 +91,14 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 			case IProblem.IllegalDefinitionToNonNullParameter:
 			case IProblem.IllegalRedefinitionToNonNullParameter:
 				// case ParameterLackingNullableAnnotation: // never proposed with modifyOverridden
-				if (modifyOverridden) {
+				if (changeKind == ChangeKind.OVERRIDDEN) {
 					annotationToAdd= nonNullAnnotationName;
 					annotationToRemove= nullableAnnotationName;
 				}
 				break;
 			case IProblem.ParameterLackingNonNullAnnotation:
 			case IProblem.IllegalReturnNullityRedefinition:
-				if (!modifyOverridden) {
+				if (changeKind != ChangeKind.OVERRIDDEN) {
 					annotationToAdd= nonNullAnnotationName;
 					annotationToRemove= nullableAnnotationName;
 				}
@@ -94,20 +107,30 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 			case IProblem.RequiredNonNullButProvidedPotentialNull:
 			case IProblem.RequiredNonNullButProvidedUnknown:
 			case IProblem.RequiredNonNullButProvidedSpecdNullable:
-				if (isArgumentProblem) {
+				if (isArgumentProblem == (changeKind != ChangeKind.TARGET)) {
 					annotationToAdd= nonNullAnnotationName;
 					annotationToRemove= nullableAnnotationName;
 				}
 				break;
-		// all others propose to add @Nullable
+			case IProblem.ConflictingNullAnnotations:
+			case IProblem.ConflictingInheritedNullAnnotations:
+				if (changeKind == ChangeKind.INVERSE) {
+					annotationToAdd= nonNullAnnotationName;
+					annotationToRemove= nullableAnnotationName;
+				}
+			// all others propose to add @Nullable
 		}
 
 		// when performing one change at a time we can actually modify another CU than the current one:
 		NullAnnotationsRewriteOperations.SignatureAnnotationRewriteOperation operation= NullAnnotationsRewriteOperations.createAddAnnotationOperation(compilationUnit, problem, annotationToAdd, annotationToRemove, null,
-				false/*thisUnitOnly*/, true/*allowRemove*/, modifyOverridden);
+				false/*thisUnitOnly*/, true/*allowRemove*/, isArgumentProblem, changeKind);
 		if (operation == null)
 			return null;
 
+		if (annotationToAdd == nonNullAnnotationName) {
+			operation.fRemoveIfNonNullByDefault= true;
+			operation.fNonNullByDefaultName= getNonNullByDefaultAnnotationName(compilationUnit.getJavaElement(), false);
+		}
 		return new NullAnnotationsFix(operation.getMessage(), operation.getCompilationUnit(), // note that this uses the findings from createAddAnnotationOperation(..)
 				new NullAnnotationsRewriteOperations.SignatureAnnotationRewriteOperation[] { operation });
 	}
@@ -149,10 +172,14 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 			IProblemLocation problem= locations[i];
 			if (problem == null)
 				continue; // problem was filtered out by createCleanUp()
+			boolean isArgumentProblem= isComplainingAboutArgument(problem.getCoveredNode(compilationUnit));
 			String annotationToAdd= nullableAnnotationName;
 			String annotationToRemove= nonNullAnnotationName;
-			// cf. createNullAnnotationInSignatureFix() but modifyOverridden is constantly false:
+			// cf. createNullAnnotationInSignatureFix() but changeKind is constantly LOCAL
 			switch (problem.getProblemId()) {
+				case IProblem.IllegalDefinitionToNonNullParameter:
+				case IProblem.IllegalRedefinitionToNonNullParameter:
+					break;
 				case IProblem.ParameterLackingNonNullAnnotation:
 				case IProblem.IllegalReturnNullityRedefinition:
 					annotationToAdd= nonNullAnnotationName;
@@ -162,19 +189,23 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 				case IProblem.RequiredNonNullButProvidedPotentialNull:
 				case IProblem.RequiredNonNullButProvidedUnknown:
 				case IProblem.RequiredNonNullButProvidedSpecdNullable:
-					ASTNode selectedNode= problem.getCoveredNode(compilationUnit);
-					if (isComplainingAboutArgument(selectedNode)) {
+					if (isArgumentProblem) {
 						annotationToAdd= nonNullAnnotationName;
 						annotationToRemove= nullableAnnotationName;
 					}
 					break;
-			// all others propose to add @Nullable
+				// all others propose to add @Nullable
 			}
 			// when performing multiple changes we can only modify the one CU that the CleanUp infrastructure provides to the operation.
-			CompilationUnitRewriteOperation fix= NullAnnotationsRewriteOperations.createAddAnnotationOperation(compilationUnit, problem, annotationToAdd, annotationToRemove, handledPositions,
-					true/*thisUnitOnly*/, false/*allowRemove*/, false/*modifyOverridden*/);
-			if (fix != null)
+			SignatureAnnotationRewriteOperation fix= NullAnnotationsRewriteOperations.createAddAnnotationOperation(compilationUnit, problem, annotationToAdd, annotationToRemove, handledPositions,
+					true/*thisUnitOnly*/, false/*allowRemove*/, isArgumentProblem, ChangeKind.LOCAL);
+			if (fix != null) {
+				if (annotationToAdd == nonNullAnnotationName) {
+					fix.fRemoveIfNonNullByDefault= true;
+					fix.fNonNullByDefaultName= getNonNullByDefaultAnnotationName(compilationUnit.getJavaElement(), false);
+				}
 				result.add(fix);
+			}
 		}
 	}
 
@@ -202,6 +233,13 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 //		return problemId == IProblem.NonNullLocalVariableComparisonYieldsFalse || problemId == IProblem.RedundantNullCheckOnNonNullLocalVariable;
 //	}
 
+	/**
+	 * Tells whether an explicit null annotation exists on the given compilation unit.
+	 * 
+	 * @param compilationUnit the compilation unit
+	 * @param offset the offset
+	 * @return <code>true</code> if the compilation unit has an explicit null annotation
+	 */
 	public static boolean hasExplicitNullAnnotation(ICompilationUnit compilationUnit, int offset) {
 // FIXME(SH): check for existing annotations disabled due to lack of precision:
 //		      should distinguish what is actually annotated (return? param? which?)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -156,7 +156,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 	 * @see ISubjectControlContentAssistProcessor#computeCompletionProposals(IContentAssistSubjectControl, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubjectControl, int documentOffset) {
-		if (fCompletionContextRequestor.getOriginalCu() == null)
+		if (fCompletionContextRequestor == null || fCompletionContextRequestor.getOriginalCu() == null)
 			return null;
 		String input= contentAssistSubjectControl.getDocument().get();
 		if (documentOffset == 0)

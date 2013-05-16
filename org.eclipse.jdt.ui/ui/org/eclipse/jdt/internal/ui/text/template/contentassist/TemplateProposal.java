@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -135,7 +135,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 				IDocument document= templateContext.getDocument();
 
 				String content= document.get(fRegion.getOffset(), fRegion.getLength());
-				if (fTemplate.getName().startsWith(content))
+				if (content.length() > 0 && fTemplate.getName().startsWith(content))
 					base += R_CASE;
 				if (fTemplate.getName().equalsIgnoreCase(content))
 					base += R_EXACT_NAME;

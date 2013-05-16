@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,12 +9,12 @@
  *     IBM Corporation - initial API and implementation
  *     Paul Fullbright <paul.fullbright@oracle.com> - content assist category enablement - http://bugs.eclipse.org/345213
  *     Marcel Bruch <bruch@cs.tu-darmstadt.de> - [content assist] Allow to re-sort proposals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=350991
+ *     Lars Vogel  <lars.vogel@gmail.com> - convert to foreach loop - https://bugs.eclipse.org/bugs/show_bug.cgi?id=406478
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.osgi.framework.Bundle;
@@ -249,8 +249,7 @@ public final class CompletionProposalCategory {
 	 */
 	public boolean hasComputers() {
 		List<CompletionProposalComputerDescriptor> descriptors= fRegistry.getProposalComputerDescriptors();
-		for (Iterator<CompletionProposalComputerDescriptor> it= descriptors.iterator(); it.hasNext();) {
-			CompletionProposalComputerDescriptor desc= it.next();
+		for (CompletionProposalComputerDescriptor desc : descriptors) {
 			if (desc.getCategory() == this)
 				return true;
 		}
@@ -267,8 +266,7 @@ public final class CompletionProposalCategory {
 	 */
 	public boolean hasComputers(String partition) {
 		List<CompletionProposalComputerDescriptor> descriptors= fRegistry.getProposalComputerDescriptors(partition);
-		for (Iterator<CompletionProposalComputerDescriptor> it= descriptors.iterator(); it.hasNext();) {
-			CompletionProposalComputerDescriptor desc= it.next();
+		for (CompletionProposalComputerDescriptor desc : descriptors) {
 			if (desc.getCategory() == this)
 				return true;
 		}
@@ -334,8 +332,7 @@ public final class CompletionProposalCategory {
 		fLastError= null;
 		List<ICompletionProposal> result= new ArrayList<ICompletionProposal>();
 		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<CompletionProposalComputerDescriptor>(fRegistry.getProposalComputerDescriptors(partition));
-		for (Iterator<CompletionProposalComputerDescriptor> it= descriptors.iterator(); it.hasNext();) {
-			CompletionProposalComputerDescriptor desc= it.next();
+		for (CompletionProposalComputerDescriptor desc : descriptors) {
 			if (desc.getCategory() == this)
 				result.addAll(desc.computeCompletionProposals(context, monitor));
 			if (fLastError == null && desc.getErrorMessage() != null)
@@ -359,8 +356,7 @@ public final class CompletionProposalCategory {
 		fLastError= null;
 		List<IContextInformation> result= new ArrayList<IContextInformation>();
 		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<CompletionProposalComputerDescriptor>(fRegistry.getProposalComputerDescriptors(partition));
-		for (Iterator<CompletionProposalComputerDescriptor> it= descriptors.iterator(); it.hasNext();) {
-			CompletionProposalComputerDescriptor desc= it.next();
+		for (CompletionProposalComputerDescriptor desc : descriptors) {
 			if (desc.getCategory() == this && (isIncluded() || isSeparateCommand()))
 				result.addAll(desc.computeContextInformation(context, monitor));
 			if (fLastError == null)
@@ -383,9 +379,8 @@ public final class CompletionProposalCategory {
 	 */
 	public void sessionStarted() {
 		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<CompletionProposalComputerDescriptor>(fRegistry.getProposalComputerDescriptors());
-		for (Iterator<CompletionProposalComputerDescriptor> it= descriptors.iterator(); it.hasNext();) {
-			CompletionProposalComputerDescriptor desc= it.next();
-			if (desc.getCategory() == this){
+		for (CompletionProposalComputerDescriptor desc : descriptors) {
+			if (desc.getCategory() == this) {
 				desc.sessionStarted();
 				fNeedsSortingAfterFiltering= fNeedsSortingAfterFiltering || desc.isSortingAfterFilteringNeeded();
 		    }
@@ -400,8 +395,7 @@ public final class CompletionProposalCategory {
 	public void sessionEnded() {
 		fNeedsSortingAfterFiltering= false;
 		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<CompletionProposalComputerDescriptor>(fRegistry.getProposalComputerDescriptors());
-		for (Iterator<CompletionProposalComputerDescriptor> it= descriptors.iterator(); it.hasNext();) {
-			CompletionProposalComputerDescriptor desc= it.next();
+		for (CompletionProposalComputerDescriptor desc : descriptors) {
 			if (desc.getCategory() == this)
 				desc.sessionEnded();
 			if (fLastError == null)

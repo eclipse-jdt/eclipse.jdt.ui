@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -796,7 +796,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			IDocument document= viewer.getDocument();
 			LinkedModeModel model= LinkedModeModel.getModel(document, position);
-			if (model != null) {
+			if (model != null && next != BreakIterator.DONE) {
 				LinkedPosition linkedPosition= model.findPosition(new LinkedPosition(document, position, 0));
 				if (linkedPosition != null) {
 					int linkedPositionEnd= linkedPosition.getOffset() + linkedPosition.getLength();
@@ -1013,7 +1013,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			IDocument document= viewer.getDocument();
 			LinkedModeModel model= LinkedModeModel.getModel(document, position);
-			if (model != null) {
+			if (model != null && previous != BreakIterator.DONE) {
 				LinkedPosition linkedPosition= model.findPosition(new LinkedPosition(document, position, 0));
 				if (linkedPosition != null) {
 					int linkedPositionOffset= linkedPosition.getOffset();
