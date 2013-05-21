@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -476,7 +476,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			return pof.createTopLevelParameterObject(packageRoot, fieldUpdate);
 		else {
 			CompilationUnit root= fBaseCURewrite.getRoot();
-			TypeDeclaration typeDecl= (TypeDeclaration) NodeFinder.perform(root, fDescriptor.getType().getSourceRange());
+			TypeDeclaration typeDecl= ASTNodeSearchUtil.getTypeDeclarationNode(fDescriptor.getType(), root);
 			ASTRewrite rewrite= fBaseCURewrite.getASTRewrite();
 			ListRewrite listRewrite= rewrite.getListRewrite(typeDecl, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 			TypeDeclaration paramClass= pof.createClassDeclaration(typeDecl.getName().getFullyQualifiedName(), fBaseCURewrite, fieldUpdate);
