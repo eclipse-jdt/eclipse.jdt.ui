@@ -148,6 +148,8 @@ org.sat4j.pb/*
 org.w3c.*/*
 
 Git/eclipse/*
+Git/pde/*
+
 www*eclipse.org-root/*
 www*eclipse.org-eclipse-root/*
 www*eclipse.org-development/*
