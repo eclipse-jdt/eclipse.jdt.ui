@@ -366,11 +366,11 @@ public class JavaProjectHelper {
 		 * may still be reading a file that has just been created, but a test already tries to delete
 		 * the file again.
 		 * 
-		 * This can theoretically also happen in a real life, but it's expected to be very rare,
+		 * This can theoretically also happen in real life, but it's expected to be very rare,
 		 * and there's no good solution for the problem, since the Java indexer should not
 		 * take a workspace lock for these files.
 		 * 
-		 * performDummySearch() was found to be a performance bottleneck, so we've diabled it in most situations.
+		 * performDummySearch() was found to be a performance bottleneck, so we've disabled it in most situations.
 		 * Use a mustPerformDummySearch() method if you really need it and you can't
 		 * use a delete(..) method that retries a few times before failing.
 		 */
