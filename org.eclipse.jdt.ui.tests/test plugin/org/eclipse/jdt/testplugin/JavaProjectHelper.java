@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -348,6 +348,10 @@ public class JavaProjectHelper {
 		performDummySearch(SearchEngine.createWorkspaceScope(), true);
 	}
 
+	public static void mustPerformDummySearch(IJavaElement element) throws JavaModelException {
+		performDummySearch(SearchEngine.createJavaSearchScope(new IJavaElement[] { element }), true);
+	}
+	
 	public static void performDummySearch() throws JavaModelException {
 		performDummySearch(SearchEngine.createWorkspaceScope(), PERFORM_DUMMY_SEARCH);
 	}
@@ -357,6 +361,19 @@ public class JavaProjectHelper {
 	}
 
 	private static void performDummySearch(IJavaSearchScope searchScope, boolean doIt) throws JavaModelException {
+		/*
+		 * Workaround for intermittent test failures. The problem is that the Java indexer
+		 * may still be reading a file that has just been created, but a test already tries to delete
+		 * the file again.
+		 * 
+		 * This can theoretically also happen in a real life, but it's expected to be very rare,
+		 * and there's no good solution for the problem, since the Java indexer should not
+		 * take a workspace lock for these files.
+		 * 
+		 * performDummySearch() was found to be a performance bottleneck, so we've diabled it in most situations.
+		 * Use a mustPerformDummySearch() method if you really need it and you can't
+		 * use a delete(..) method that retries a few times before failing.
+		 */
 		if (!doIt)
 			return;
 		
