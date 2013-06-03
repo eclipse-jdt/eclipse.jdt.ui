@@ -23,7 +23,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.zip.ZipFile;
 
-import junit.framework.Assert;
+import junit.framework.TestCase;
 
 import org.osgi.framework.Bundle;
 
@@ -52,6 +52,7 @@ import org.eclipse.ui.wizards.datatransfer.ZipFileStructureProvider;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -96,6 +97,7 @@ public class JavaProjectHelper {
 	public static final IPath NLS_LIB= new Path("testresources/nls.jar");
 
 	private static final int MAX_RETRY= 5;
+	private static final int RETRY_DELAY= 1000;
 
 	public static final int COUNT_CLASSES_RT_STUBS_15= 661;
 	public static final int COUNT_INTERFACES_RT_STUBS_15= 135;
@@ -176,10 +178,10 @@ public class JavaProjectHelper {
 		IJavaProject project= createJavaProject(projectName, outputFolderName);
 
 		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(project, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
-		Assert.assertNotNull(jdk);
+		TestCase.assertNotNull(jdk);
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JUNIT_SRC_381);
-		Assert.assertTrue(junitSrcArchive != null && junitSrcArchive.exists());
+		TestCase.assertTrue(junitSrcArchive != null && junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(project, srcContainerName, junitSrcArchive, JUNIT_SRC_ENCODING);
 
@@ -311,7 +313,33 @@ public class JavaProjectHelper {
 				}
 				try {
 					JavaPlugin.log(new IllegalStateException("sleep before retrying JavaProjectHelper.delete() for " + resource.getLocationURI()));
-					Thread.sleep(1000); // give other threads time to close the file
+					Thread.sleep(RETRY_DELAY); // give other threads time to close the file
+				} catch (InterruptedException e1) {
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Removes a package fragment. Retries if deletion failed (e.g. because the indexer
+	 * still locks a file).
+	 * 
+	 * @param pack the package to delete
+	 * @throws CoreException if operation failed
+	 */
+	public static void deletePackage(IPackageFragment pack) throws CoreException {
+		for (int i= 0; i < MAX_RETRY; i++) {
+			try {
+				pack.delete(true, null);
+				i= MAX_RETRY;
+			} catch (CoreException e) {
+				if (i == MAX_RETRY - 1) {
+					JavaPlugin.log(e);
+					throw e;
+				}
+				try {
+					JavaPlugin.log(new IllegalStateException("sleep before retrying JavaProjectHelper.delete() for package " + pack.getHandleIdentifier()));
+					Thread.sleep(RETRY_DELAY); // give other threads time to close the file
 				} catch (InterruptedException e1) {
 				}
 			}
@@ -781,8 +809,8 @@ public class JavaProjectHelper {
 	 */
 	public static IPath[] findRtJar(IPath rtStubsPath) throws CoreException {
 		File rtStubs= JavaTestPlugin.getDefault().getFileInPlugin(rtStubsPath);
-		Assert.assertNotNull(rtStubs);
-		Assert.assertTrue(rtStubs.exists());
+		TestCase.assertNotNull(rtStubs);
+		TestCase.assertTrue(rtStubs.exists());
 		return new IPath[] {
 			Path.fromOSString(rtStubs.getPath()),
 			null,

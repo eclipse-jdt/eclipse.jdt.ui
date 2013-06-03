@@ -138,7 +138,7 @@ public abstract class RefactoringTest extends TestCase {
 				IPackageFragment pack= (IPackageFragment)packages[i];
 				if (!pack.equals(getPackageP()) && pack.exists() && !pack.isReadOnly())
 					if (pack.isDefaultPackage())
-						pack.delete(true, null);
+						JavaProjectHelper.deletePackage(pack); // also delete packages with subpackages
 					else
 						JavaProjectHelper.delete(pack.getResource()); // also delete packages with subpackages
 			}
