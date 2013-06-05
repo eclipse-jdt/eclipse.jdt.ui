@@ -7,11 +7,16 @@
       </appInfo>
       <documentation>
          This extension point allows to contribute Java completion proposal computers to participate in the content assist process of the Java editor.
+
 &lt;p&gt;
-This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Properties to test on are:
-&lt;dl&gt;
-&lt;li&gt;project: type IJavaProject; the current project&lt;/li&gt;
-&lt;/dl&gt;
+This extension point supports the &lt;code&gt;&amp;lt;enablement&amp;gt;&lt;/code&gt; element.
+&lt;!-- see org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory#matches(IJavaProject): --&gt;
+The default variable is the containing &lt;code&gt;org.eclipse.jdt.core.IJavaProject&lt;/code&gt;.
+&lt;br&gt;Defined variables for &lt;code&gt;&amp;lt;with&amp;gt;&lt;/code&gt; expressions are:
+&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&quot;project&quot;: type &lt;code&gt;org.eclipse.jdt.core.IJavaProject&lt;/code&gt;; the current project (same as the default variable)&lt;/li&gt;
+&lt;/ul&gt;
       </documentation>
    </annotation>
 
@@ -179,7 +184,6 @@ and must have a public 0-argument constructor.
       <documentation>
          The following is an example of a Java completion proposal computer contribution:
 
-&lt;p&gt;
 &lt;pre&gt;
  &lt;extension point=&quot;org.eclipse.jdt.ui.javaCompletionProposalComputer&quot;
    id=&quot;textual_proposals&quot;
@@ -196,7 +200,6 @@ and must have a public 0-argument constructor.
    &lt;/javaCompletionProposalComputer&gt;
  &lt;/extension&gt;
 &lt;/pre&gt;
-&lt;/p&gt;
       </documentation>
    </annotation>
 
@@ -223,7 +226,7 @@ and must have a public 0-argument constructor.
          <meta.section type="copyright"/>
       </appInfo>
       <documentation>
-         Copyright (c) 2006, 2012 IBM Corporation and others.&lt;br&gt;
+         Copyright (c) 2006, 2013 IBM Corporation and others.&lt;br&gt;
 All rights reserved. This program and the accompanying materials are made available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at &lt;a href=&quot;http://www.eclipse.org/legal/epl-v10.html&quot;&gt;http://www.eclipse.org/legal/epl-v10.html&lt;/a&gt;
       </documentation>
    </annotation>

@@ -8,18 +8,19 @@
       <documentation>
          This extension point allows to add a Quick Fix processor to offer new Quick Fixes on Java problems.
 &lt;p&gt;
-Since 3.2 an extension can specify which problem marker types it can handle. It will only get problems of these types to process.
-If no handled marker type are specified, the processor will only get problems of types org.eclipse.jdt.core.problem, org.eclipse.jdt.core.buildpath_problem and org.eclipse.jdt.core.task (compatible to the behaviour prior to 3.2).
+Since 3.2, an extension can specify which problem marker types it can handle. It will only get problems of these types to process.
+If no handled marker types are specified, the processor will only get problems of types org.eclipse.jdt.core.problem, org.eclipse.jdt.core.buildpath_problem and org.eclipse.jdt.core.task (compatible to the behaviour prior to 3.2).
 &lt;/p&gt;
-&lt;p&gt;
-This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Properties to test on are:
-&lt;dl&gt;
-&lt;li&gt;compilationUnit: type ICompilationUnit; the compilation unit the quick assist is applied on&lt;/li&gt;
 
-&lt;li&gt;projectNatures: type Collection; all project natures of the current project&lt;/li&gt;
-&lt;li&gt;sourceLevel: type String; the source compliance of the current project&lt;/li&gt;
-&lt;/dl&gt;
-&lt;/p&gt;
+This extension point supports the &lt;code&gt;&amp;lt;enablement&amp;gt;&lt;/code&gt; element.
+&lt;!-- see org.eclipse.jdt.internal.ui.text.correction.ContributedProcessorDescriptor#matches(ICompilationUnit): --&gt;
+The default variable is the containing &lt;code&gt;org.eclipse.jdt.core.ICompilationUnit&lt;/code&gt;.
+&lt;br&gt;Defined variables for &lt;code&gt;&amp;lt;with&amp;gt;&lt;/code&gt; expressions are:
+&lt;ul&gt;
+&lt;li&gt;&quot;compilationUnit&quot;: type &lt;code&gt;org.eclipse.jdt.core.ICompilationUnit&lt;/code&gt;; the compilation unit the quick assist is applied on (same as the default variable)&lt;/li&gt;
+&lt;li&gt;&quot;projectNatures&quot;: type &lt;code&gt;java.util.Collection&amp;lt;String&amp;gt;&lt;/code&gt;; all project natures of the current project&lt;/li&gt;
+&lt;li&gt;&quot;sourceLevel&quot;: type &lt;code&gt;java.lang.String&lt;/code&gt;; the source compliance level of the current project&lt;/li&gt;
+&lt;/ul&gt;
       </documentation>
    </annotation>
 
@@ -139,7 +140,6 @@ If no handled marker type are specified, the processor will get problems of type
       <documentation>
          The following is an example of a Quick Fix processor contribution:
 
-&lt;p&gt;
 &lt;pre&gt;
  &lt;extension point=&quot;org.eclipse.jdt.ui.quickFixProcessors&quot;&gt;
   &lt;quickFixProcessor
@@ -160,7 +160,6 @@ If no handled marker type are specified, the processor will get problems of type
   &lt;/quickFixProcessor&gt;
  &lt;/extension&gt;
 &lt;/pre&gt;
-&lt;/p&gt;
       </documentation>
    </annotation>
 
@@ -196,7 +195,7 @@ If no handled marker type are specified, the processor will get problems of type
          <meta.section type="copyright"/>
       </appInfo>
       <documentation>
-         Copyright (c) 2001, 2008 IBM Corporation and others.&lt;br&gt;
+         Copyright (c) 2001, 2013 IBM Corporation and others.&lt;br&gt;
 All rights reserved. This program and the accompanying materials are made available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at &lt;a href=&quot;http://www.eclipse.org/legal/epl-v10.html&quot;&gt;http://www.eclipse.org/legal/epl-v10.html&lt;/a&gt;
       </documentation>
    </annotation>
