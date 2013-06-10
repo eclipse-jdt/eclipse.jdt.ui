@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -202,7 +202,7 @@ public class DeleteTest extends RefactoringTest {
 		String[] deleteHandles= ParticipantTesting.createHandles(all);
 
 		verifyEnabled(markedForDelete);
-		performDummySearch();
+		mustPerformDummySearch();
 		DeleteRefactoring ref= createRefactoring(markedForDelete);
 		((JavaDeleteProcessor)ref.getProcessor()).setDeleteSubPackages(deleteSubs);
 		RefactoringStatus status= performRefactoring(ref, true);
@@ -744,7 +744,7 @@ public class DeleteTest extends RefactoringTest {
 		assertTrue("file does not exist", file.exists());
 		Object[] elem= {file};
 		verifyEnabled(elem);
-		performDummySearch();
+		mustPerformDummySearch();
 
 		String[] handles= ParticipantTesting.createHandles(file);
 
@@ -775,7 +775,7 @@ public class DeleteTest extends RefactoringTest {
 		assertTrue("folder does not exist", subFolder.exists());
 		Object[] elements= {subFolder};
 		verifyEnabled(elements);
-		performDummySearch();
+		mustPerformDummySearch();
 
 		String[] handles= ParticipantTesting.createHandles(subFolder);
 		DeleteRefactoring ref= createRefactoring(elements);
@@ -797,7 +797,7 @@ public class DeleteTest extends RefactoringTest {
 		assertTrue("folder does not exist", subsubFolder.exists());
 		Object[] elements= {subFolder, subsubFolder};
 		verifyEnabled(elements);
-		performDummySearch();
+		mustPerformDummySearch();
 
 		String[] handles= ParticipantTesting.createHandles(subFolder);
 		DeleteRefactoring ref= createRefactoring(elements);
@@ -830,7 +830,7 @@ public class DeleteTest extends RefactoringTest {
 		String[] handles= ParticipantTesting.createHandles(newCU, newCU.getTypes()[0], newCU.getResource());
 
 		verifyEnabled(elements);
-		performDummySearch();
+		mustPerformDummySearch();
 
 		DeleteRefactoring ref= createRefactoring(elements);
 		RefactoringStatus status= performRefactoring(ref, true);
@@ -860,7 +860,7 @@ public class DeleteTest extends RefactoringTest {
 
 		Object[] elements= {fredRoot};
 		verifyEnabled(elements);
-		performDummySearch();
+		mustPerformDummySearch();
 		String[] handles= ParticipantTesting.createHandles(fredRoot, fredRoot.getResource());
 		DeleteRefactoring ref= createRefactoring(elements);
 		RefactoringStatus status= performRefactoring(ref, true);
@@ -877,7 +877,7 @@ public class DeleteTest extends RefactoringTest {
 
 		Object[] elements= {internalJAR};
 		verifyEnabled(elements);
-		performDummySearch();
+		mustPerformDummySearch();
 		String[] handles= ParticipantTesting.createHandles(internalJAR, internalJAR.getResource());
 
 		DeleteRefactoring ref= createRefactoring(elements);
@@ -907,7 +907,7 @@ public class DeleteTest extends RefactoringTest {
 
 		Object[] elements= {newPackage};
 		verifyEnabled(elements);
-		performDummySearch();
+		mustPerformDummySearch();
 		String[] deleteHandles= ParticipantTesting.createHandles(newPackage, newPackage.getResource());
 
 		DeleteRefactoring ref= createRefactoring(elements);
@@ -943,7 +943,7 @@ public class DeleteTest extends RefactoringTest {
 
 		Object[] elements= {p1};
 		verifyEnabled(elements);
-		performDummySearch();
+		mustPerformDummySearch();
 		String[] deleteHandles= ParticipantTesting.createHandles(p1, cu.getResource(), file);
 
 		DeleteRefactoring ref= createRefactoring(elements);
@@ -1072,7 +1072,7 @@ public class DeleteTest extends RefactoringTest {
 		String[] deleteHandles= ParticipantTesting.createHandles(markedForDelete);
 
 		verifyEnabled(markedForDelete);
-		performDummySearch();
+		mustPerformDummySearch();
 		DeleteRefactoring ref= createRefactoring(markedForDelete);
 		RefactoringStatus status= performRefactoring(ref, true);
 		assertEquals("expected to pass", null, status);
@@ -1107,7 +1107,7 @@ public class DeleteTest extends RefactoringTest {
 		String[] deleteHandles= ParticipantTesting.createHandles(new Object[] { defaultP, a.getResource() });
 
 		verifyEnabled(markedForDelete);
-		performDummySearch();
+		mustPerformDummySearch();
 		DeleteRefactoring ref= createRefactoring(markedForDelete);
 		RefactoringStatus status= performRefactoring(ref, true);
 		assertEquals("expected to pass", null, status);
@@ -1153,7 +1153,7 @@ public class DeleteTest extends RefactoringTest {
 
 		Object[] elements= { folder, newPackage };
 		verifyEnabled(elements);
-		performDummySearch();
+		mustPerformDummySearch();
 		String[] deleteHandles= ParticipantTesting.createHandles(folder, newPackage, newPackage.getResource());
 
 		DeleteRefactoring ref= createRefactoring(elements);

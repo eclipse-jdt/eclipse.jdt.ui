@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,6 +108,10 @@ public abstract class RefactoringTest extends TestCase {
 		RefactoringCore.getUndoManager().flush();
 	}
 
+	protected void mustPerformDummySearch() throws Exception {
+		JavaProjectHelper.mustPerformDummySearch(getPackageP());
+	}
+
 	protected void performDummySearch() throws Exception {
 		JavaProjectHelper.performDummySearch(getPackageP());
 	}
@@ -134,7 +138,7 @@ public abstract class RefactoringTest extends TestCase {
 				IPackageFragment pack= (IPackageFragment)packages[i];
 				if (!pack.equals(getPackageP()) && pack.exists() && !pack.isReadOnly())
 					if (pack.isDefaultPackage())
-						pack.delete(true, null);
+						JavaProjectHelper.deletePackage(pack); // also delete packages with subpackages
 					else
 						JavaProjectHelper.delete(pack.getResource()); // also delete packages with subpackages
 			}

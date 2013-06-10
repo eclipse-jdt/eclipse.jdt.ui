@@ -7,15 +7,19 @@
       </appinfo>
       <documentation>
          This extension point allows to add a processor to offer fixes for incomplete class paths when types cannot be resolved.
-&lt;p&gt;
-This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Properties to test on are:
-&lt;dl&gt;
-&lt;li&gt;project: type IJavaProject; the current project&lt;/li&gt;
-&lt;li&gt;sourceLevel: type String; the source compliance of the current project&lt;/li&gt;
-&lt;/dl&gt;
-A processor can specify to override another processor. An overridden processor is only asked to provide proposals when the overriding processor returns &lt;code&gt;null&lt;/code&gt; as proposals.
 
+&lt;p&gt;
+This extension point supports the &lt;code&gt;&amp;lt;enablement&amp;gt;&lt;/code&gt; element.
+&lt;!-- see org.eclipse.jdt.internal.ui.text.correction.ClasspathFixProcessorDescriptor#matches(IJavaProject): --&gt;
+The default variable is the containing &lt;code&gt;org.eclipse.jdt.core.IJavaProject&lt;/code&gt;.
+&lt;br&gt;Defined variables for &lt;code&gt;&amp;lt;with&amp;gt;&lt;/code&gt; expressions are:
 &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&quot;project&quot;: type &lt;code&gt;org.eclipse.jdt.core.IJavaProject&lt;/code&gt;; the current project (same as the default variable)&lt;/li&gt;
+&lt;li&gt;&quot;sourceLevel&quot;: type &lt;code&gt;java.lang.String&lt;/code&gt;; the source compliance level of the current project&lt;/li&gt;
+&lt;/ul&gt;
+
+A processor can specify to override another processor. An overridden processor is only asked to provide proposals when the overriding processor returns &lt;code&gt;null&lt;/code&gt; as proposals.
       </documentation>
    </annotation>
 
@@ -97,7 +101,7 @@ with a public 0-argument constructor.
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  The id of the classspath fix processor that is overridden by the current processor. The current processor can choose to replace proposals of extended processor.
+                  The id of the classspath fix processor that is overridden by the current processor. The current processor can choose to replace proposals of the extended processor.
                </documentation>
                <appinfo>
                   <meta.attribute kind="identifier" basedOn="org.eclipse.jdt.ui.classpathFixProcessors/classpathFixProcessor/@id"/>
@@ -123,7 +127,6 @@ with a public 0-argument constructor.
       <documentation>
          The following is an example of a Classpath Fix processor contribution:
 
-&lt;p&gt;
 &lt;pre&gt;
  &lt;extension point=&quot;org.eclipse.jdt.ui.classpathFixProcessors&quot;&gt;
   &lt;classpathFixProcessor
@@ -142,7 +145,6 @@ with a public 0-argument constructor.
   &lt;/classpathFixProcessor&gt;
  &lt;/extension&gt;
 &lt;/pre&gt;
-&lt;/p&gt;
       </documentation>
    </annotation>
 
@@ -161,7 +163,7 @@ with a public 0-argument constructor.
          <meta.section type="copyright"/>
       </appinfo>
       <documentation>
-         Copyright (c) 2007, 2008 IBM Corporation and others.&lt;br&gt;
+         Copyright (c) 2007, 2013 IBM Corporation and others.&lt;br&gt;
 All rights reserved. This program and the accompanying materials are made available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at &lt;a href=&quot;http://www.eclipse.org/legal/epl-v10.html&quot;&gt;http://www.eclipse.org/legal/epl-v10.html&lt;/a&gt;
       </documentation>
    </annotation>

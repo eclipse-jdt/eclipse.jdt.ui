@@ -718,11 +718,13 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 				if (input == null && !resetIfInvalid && fCurrentViewInput != null) {
 					IJavaElement oldElement= fCurrentViewInput;
 					// update the link image only if the old view input was a valid one
-					Object oldInput= computeInput(null, null, oldElement, computeProgressMonitor);
-					if (oldInput != null && oldElement.exists()) {
-						// leave the last shown documentation until it becomes invalid
-						updateLinkImage(true);
-						return;
+					if (oldElement != null && oldElement.exists()) {
+						Object oldInput= computeInput(null, null, oldElement, computeProgressMonitor);
+						if (oldInput != null) {
+							// leave the last shown documentation until it becomes invalid
+							updateLinkImage(true);
+							return;
+						}
 					}
 				}
 				final String description= input != null ? computeDescription(part, selection, je, computeProgressMonitor) : ""; //$NON-NLS-1$
