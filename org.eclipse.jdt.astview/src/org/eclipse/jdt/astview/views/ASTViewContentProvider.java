@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -146,6 +147,9 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 				res.add(createBinding(expression, binding));
 			} else if (expression instanceof LambdaExpression) {
 				IMethodBinding binding= ((LambdaExpression) expression).resolveMethodBinding();
+				res.add(createBinding(expression, binding));
+			} else if (expression instanceof MethodReference) {
+				IMethodBinding binding= ((MethodReference) expression).resolveMethodBinding();
 				res.add(createBinding(expression, binding));
 			}
 			// Expression attributes:
