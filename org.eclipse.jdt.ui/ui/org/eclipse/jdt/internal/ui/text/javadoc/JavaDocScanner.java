@@ -176,6 +176,10 @@ public final class JavaDocScanner extends JavaCommentScanner {
 		list.add(new MultiLineRule("{@value", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
 		list.add(new MultiLineRule("{@inheritDoc", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
 
+		// Add rules for @code and @literals
+		token= getToken(IJavaColorConstants.JAVADOC_DEFAULT);
+		list.add(new MultiLineRule("{@code", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
+		list.add(new MultiLineRule("{@literal", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
 
 		// Add generic whitespace rule
 		token= getToken(IJavaColorConstants.JAVADOC_DEFAULT);
