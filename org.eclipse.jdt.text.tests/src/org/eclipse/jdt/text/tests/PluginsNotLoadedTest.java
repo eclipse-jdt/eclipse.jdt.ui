@@ -51,7 +51,6 @@ public class PluginsNotLoadedTest extends TestCase {
 			"org.eclipse.jdt.astview",
 			"org.eclipse.jdt.jeview",
 			"org.eclipse.reftracker",
-			"org.eclipse.releng.tools",
 			"org.eclipse.swt.sleak",
 			"org.eclipse.swt.spy",
 			"com.jcraft.jsch",
