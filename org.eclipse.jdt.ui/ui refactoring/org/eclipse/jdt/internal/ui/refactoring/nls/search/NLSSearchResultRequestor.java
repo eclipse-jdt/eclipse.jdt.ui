@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -301,6 +301,12 @@ class NLSSearchResultRequestor extends SearchRequestor {
 				}
 				return NO_KEY;
 			} else {
+				IJavaElement[] keys= unit.codeSelect(tokenStart, tokenEnd - tokenStart + 1);
+
+				// an interface can't be a key
+				if (keys.length == 1 && keys[0].getElementType() == IJavaElement.TYPE && ((IType) keys[0]).isInterface())
+					return null;
+
 				keyPositionResult.setOffset(tokenStart);
 				keyPositionResult.setLength(tokenEnd - tokenStart + 1);
 				return src;
