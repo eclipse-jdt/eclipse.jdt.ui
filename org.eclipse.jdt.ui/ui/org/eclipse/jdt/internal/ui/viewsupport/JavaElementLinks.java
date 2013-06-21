@@ -313,7 +313,7 @@ public class JavaElementLinks {
 	 *
 	 * @param scheme a scheme
 	 * @param element the declaring element
-	 * @param refTypeName a (possibly qualified) type name, can be <code>null</code>
+	 * @param refTypeName a (possibly qualified) type or package name, can be <code>null</code>
 	 * @param refMemberName a member name, can be <code>null</code>
 	 * @param refParameterTypes a (possibly empty) array of (possibly qualified) parameter type
 	 *            names, can be <code>null</code>
@@ -387,7 +387,13 @@ public class JavaElementLinks {
 			
 			if (element instanceof IPackageFragment) {
 				try {
-					element= resolvePackageInfoType((IPackageFragment) element, refTypeName);
+					IPackageFragment root= (IPackageFragment) element;
+					element= resolvePackageInfoType(root, refTypeName);
+					if (element == null) {
+						// find it as package
+						IJavaProject javaProject= root.getJavaProject();
+						return JavaModelUtil.findTypeContainer(javaProject, refTypeName);
+					}
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
 				}
