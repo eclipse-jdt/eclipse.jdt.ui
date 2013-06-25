@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,13 +8,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
 
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
@@ -24,6 +23,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
+
 
 class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements IStyledLabelProvider {
 
@@ -40,7 +40,7 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 	}
 
 	private String getLineNumberLabel(JavaElementLine element) {
-		return Messages.format(SearchMessages.OccurrencesSearchLabelProvider_line_number, new Integer(element.getLine()));
+		return Messages.format(SearchMessages.OccurrencesSearchLabelProvider_line_number, new Integer(element.getLineNumber() + 1));
 	}
 
 	private String internalGetText(Object element) {
