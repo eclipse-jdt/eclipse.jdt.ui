@@ -4,6 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and
+ * is made available for testing and evaluation purposes only.
+ * The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -88,6 +92,7 @@ public class JavaProjectHelper {
 	public static final IPath RT_STUBS_15= new Path("testresources/rtstubs15.jar");
 	public static final IPath RT_STUBS_16= new Path("testresources/rtstubs16.jar");
 	public static final IPath RT_STUBS_17= new Path("testresources/rtstubs17.jar");
+	public static final IPath RT_STUBS_18= new Path("testresources/rtstubs18.jar");
 	public static final IPath JUNIT_SRC_381= new Path("testresources/junit381-noUI-src.zip");
 	public static final String JUNIT_SRC_ENCODING= "ISO-8859-1";
 
@@ -189,6 +194,18 @@ public class JavaProjectHelper {
 	}
 
 	/**
+	 * Sets the compiler options to 1.8 for the given project.
+	 * 
+	 * @param project the java project
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public static void set18CompilerOptions(IJavaProject project) {
+		Map options= project.getOptions(false);
+		set18CompilerOptions(options);
+		project.setOptions(options);
+	}
+
+	/**
 	 * Sets the compiler options to 1.7 for the given project.
 	 * @param project the java project
 	 */
@@ -226,6 +243,16 @@ public class JavaProjectHelper {
 		Map options= project.getOptions(false);
 		JavaProjectHelper.set14CompilerOptions(options);
 		project.setOptions(options);
+	}
+
+	/**
+	 * Sets the compiler options to 1.8
+	 * 
+	 * @param options the compiler options to configure
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public static void set18CompilerOptions(Map options) {
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options);
 	}
 
 	/**
@@ -687,6 +714,12 @@ public class JavaProjectHelper {
 	public static IPackageFragmentRoot addRTJar17(IJavaProject jproject) throws CoreException {
 		IPath[] rtJarPath= findRtJar(RT_STUBS_17);
 		set17CompilerOptions(jproject);
+		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
+	}
+
+	public static IPackageFragmentRoot addRTJar18(IJavaProject jproject) throws CoreException {
+		IPath[] rtJarPath= findRtJar(RT_STUBS_18);
+		set18CompilerOptions(jproject);
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
 
