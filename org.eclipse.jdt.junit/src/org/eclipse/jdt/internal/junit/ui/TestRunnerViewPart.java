@@ -14,6 +14,7 @@
  *         - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102236: [JUnit] display execution time next to each test
  *     Achim Demelt <a.demelt@exxcellent.de> - [junit] Separate UI from non-UI code - https://bugs.eclipse.org/bugs/show_bug.cgi?id=278844
  *     Andrew Eisenberg <andrew@eisenberg.as> - [JUnit] Rerun failed first does not work with JUnit4 - https://bugs.eclipse.org/bugs/show_bug.cgi?id=140392
+ *     Thirumala Reddy Mutchukota <thirumala@google.com> - [JUnit] Avoid rerun test launch on UI thread - https://bugs.eclipse.org/bugs/show_bug.cgi?id=411841 
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -124,7 +125,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 
 import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.debug.ui.IDebugUIConstants;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -145,6 +145,8 @@ import org.eclipse.jdt.internal.junit.model.JUnitModel;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
+
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 import org.eclipse.jdt.internal.ui.viewsupport.ViewHistory;
 
@@ -2062,25 +2064,49 @@ action enablement
 	}
 
 	public void rerunTest(String testId, String className, String testName, String launchMode) {
-		boolean buildBeforeLaunch= Platform.getPreferencesService().getBoolean(IDebugUIConstants.PLUGIN_ID, IDebugUIConstants.PREF_BUILD_BEFORE_LAUNCH, false, null);
-		try {
-			boolean couldLaunch= fTestRunSession.rerunTest(testId, className, testName, launchMode, buildBeforeLaunch);
-			if (! couldLaunch) {
-				MessageDialog.openInformation(getSite().getShell(),
-						JUnitMessages.TestRunnerViewPart_cannotrerun_title,
-						JUnitMessages.TestRunnerViewPart_cannotrerurn_message);
-			} else if (fTestRunSession.isKeptAlive()) {
-				TestCaseElement testCaseElement= (TestCaseElement) fTestRunSession.getTestElement(testId);
-				testCaseElement.setStatus(TestElement.Status.RUNNING, null, null, null);
-				fTestViewer.registerViewerUpdate(testCaseElement);
-				postSyncProcessChanges();
-			}
-
-		} catch (CoreException e) {
-			ErrorDialog.openError(getSite().getShell(),
-				JUnitMessages.TestRunnerViewPart_error_cannotrerun, e.getMessage(), e.getStatus()
-			);
+		if (lastLaunchIsKeptAlive()) {
+			fTestRunSession.rerunTest(testId, className, testName);
+			TestCaseElement testCaseElement= (TestCaseElement) fTestRunSession.getTestElement(testId);
+			testCaseElement.setStatus(TestElement.Status.RUNNING, null, null, null);
+			fTestViewer.registerViewerUpdate(testCaseElement);
+			postSyncProcessChanges();
+			return;
 		}
+
+		if (fTestRunSession != null) {
+			ILaunch launch= fTestRunSession.getLaunch();
+			if (launch != null) {
+				// run the selected test using the previous launch configuration
+				ILaunchConfiguration launchConfiguration= launch.getLaunchConfiguration();
+				if (launchConfiguration != null) {
+					try {
+						String name= className;
+						if (testName != null)
+							name+= "."+testName; //$NON-NLS-1$
+						String configName= Messages.format(JUnitMessages.TestRunnerViewPart_configName, name);
+						ILaunchConfigurationWorkingCopy tmp = launchConfiguration.copy(configName);
+						// fix for bug: 64838  junit view run single test does not use correct class [JUnit]
+						tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, className);
+						// reset the container
+						tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
+						if (testName != null) {
+							tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, testName);
+						}
+						relaunch(tmp, launchMode);
+						return;
+						} catch (CoreException e) {
+							ErrorDialog.openError(getSite().getShell(),
+									JUnitMessages.TestRunnerViewPart_error_cannotrerun, e.getMessage(), e.getStatus()
+								);
+							return;
+						}
+				}
+			}
+		}
+
+		MessageDialog.openInformation(getSite().getShell(),
+				JUnitMessages.TestRunnerViewPart_cannotrerun_title,
+				JUnitMessages.TestRunnerViewPart_cannotrerurn_message);
 	}
 
 	private void postSyncProcessChanges() {

@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Achim Demelt <a.demelt@exxcellent.de> - [junit] Separate UI from non-UI code - https://bugs.eclipse.org/bugs/show_bug.cgi?id=278844
+ *     Thirumala Reddy Mutchukota <thirumala@google.com> - [JUnit] Avoid rerun test launch on UI thread - https://bugs.eclipse.org/bugs/show_bug.cgi?id=411841
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.model;
 
@@ -31,7 +32,6 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
 
@@ -39,13 +39,10 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.JUnitMessages;
-import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.runner.MessageIds;
-
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 
 /**
@@ -451,17 +448,14 @@ public class TestRunSession implements ITestRunSession {
 	}
 
 	/**
-	 * Reruns the given test method.
+	 * Reruns the given test method if the session is kept alive.
 	 *
 	 * @param testId test id
 	 * @param className test class name
 	 * @param testName test method name
-	 * @param launchMode launch mode, see {@link ILaunchManager}
-	 * @param buildBeforeLaunch whether a build should be done before launch 
 	 * @return <code>false</code> iff the rerun could not be started
-	 * @throws CoreException if the launch fails
 	 */
-	public boolean rerunTest(String testId, String className, String testName, String launchMode, boolean buildBeforeLaunch) throws CoreException {
+	public boolean rerunTest(String testId, String className, String testName) {
 		if (isKeptAlive()) {
 			Status status= ((TestCaseElement) getTestElement(testId)).getStatus();
 			if (status == Status.ERROR) {
@@ -471,31 +465,7 @@ public class TestRunSession implements ITestRunSession {
 			}
 			fTestRunnerClient.rerunTest(testId, className, testName);
 			return true;
-
-		} else if (fLaunch != null) {
-			// run the selected test using the previous launch configuration
-			ILaunchConfiguration launchConfiguration= fLaunch.getLaunchConfiguration();
-			if (launchConfiguration != null) {
-
-				String name= className;
-				if (testName != null)
-					name+= "."+testName; //$NON-NLS-1$
-				String configName= Messages.format(JUnitMessages.TestRunnerViewPart_configName, name);
-				ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy(configName);
-				// fix for bug: 64838  junit view run single test does not use correct class [JUnit]
-				tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, className);
-				// reset the container
-				tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
-				if (testName != null) {
-					tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, testName);
-					//	String args= "-rerun "+testId;
-					//	tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, args);
-				}
-				tmp.launch(launchMode, null, buildBeforeLaunch);
-				return true;
-			}
 		}
-
 		return false;
 	}
 
