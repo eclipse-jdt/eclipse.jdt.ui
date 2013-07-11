@@ -4,6 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -206,6 +210,8 @@ public interface IProposalRelevance {
 	public static final int EXTRACT_LOCAL_ERROR= 2;
 	public static final int ASSIGN_TO_FIELD= 2;
 	public static final int RETURN_ALLOCATED_OBJECT= 2;
+
+	public static final int CONVERT_TO_LAMBDA_EXPRESSION= 2;
 
 	public static final int JOIN_VARIABLE_DECLARATION= 1;
 	public static final int INVERT_EQUALS= 1;
