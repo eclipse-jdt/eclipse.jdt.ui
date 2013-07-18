@@ -136,11 +136,4 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="ui/org/eclipse/jdt/ui/text/IJavaColorConstants.java" type="org.eclipse.jdt.ui.text.IJavaColorConstants">
-        <filter comment="See https://bugs.eclipse.org/bugs/show_bug.cgi?id=402393#c14" id="1211105284">
-            <message_arguments>
-                <message_argument value="PREFIX"/>
-            </message_arguments>
-        </filter>
-    </resource>
 </component>
