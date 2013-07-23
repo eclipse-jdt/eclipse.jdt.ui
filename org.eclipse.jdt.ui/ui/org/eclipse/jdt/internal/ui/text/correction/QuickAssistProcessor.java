@@ -77,7 +77,6 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LabeledStatement;
-import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -126,6 +125,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
+import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
@@ -153,6 +153,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
@@ -217,7 +218,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getInlineLocalProposal(context, coveringNode, null)
 				|| getConvertLocalToFieldProposal(context, coveringNode, null)
 				|| getConvertAnonymousToNestedProposal(context, coveringNode, null)
-				|| getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, null)
+				|| getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, coveredNodes, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
 				|| getMakeVariableDeclarationFinalProposals(context, null)
 				|| getMissingCaseStatementProposals(context, coveringNode, null)
@@ -261,7 +262,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getInlineLocalProposal(context, coveringNode, resultingCollections);
 				getConvertLocalToFieldProposal(context, coveringNode, resultingCollections);
 				getConvertAnonymousToNestedProposal(context, coveringNode, resultingCollections);
-				getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, resultingCollections);
+				getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, coveredNodes, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getConvertEnhancedForLoopProposal(context, coveringNode, resultingCollections);
@@ -504,57 +505,39 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
-	private static boolean getConvertAnonymousClassCreationsToLambdaProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		if (!JavaModelUtil.is18OrHigher(context.getCompilationUnit().getJavaProject()))
-			return false;
-	
-		if (!(covering instanceof Name))
-			return false;
+	private static boolean getConvertAnonymousClassCreationsToLambdaProposals(IInvocationContext context, ASTNode covering, ArrayList<ASTNode> coveredNodes,
+			Collection<ICommandAccess> resultingCollections) {
 
-		ASTNode normalized= ASTNodes.getNormalizedNode(covering);
-		if (normalized.getLocationInParent() != ClassInstanceCreation.TYPE_PROPERTY)
-			return false;
+		ArrayList<ASTNode> nodes;
+		if (context.getSelectionLength() == 0) {
+			if (!(covering instanceof Name))
+				return false;
 
-		ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) normalized.getParent();
-		final AnonymousClassDeclaration anonymTypeDecl= classInstanceCreation.getAnonymousClassDeclaration();
-		if (anonymTypeDecl == null || anonymTypeDecl.resolveBinding() == null) {
-			return false;
+			ASTNode normalized= ASTNodes.getNormalizedNode(covering);
+			if (normalized.getLocationInParent() != ClassInstanceCreation.TYPE_PROPERTY)
+				return false;
+
+			ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) normalized.getParent();
+			nodes= new ArrayList<ASTNode>();
+			nodes.add(classInstanceCreation);
+		} else {
+			nodes= coveredNodes;
 		}
+		if (nodes.isEmpty())
+			return false;
 
-		// check for functional interface
-		//TODO: need an API from JDT Core for org.eclipse.jdt.internal.compiler.lookup.TypeBinding.isFunctionalInterface()
-		//for now do this simple but insufficient check
-		List<BodyDeclaration> bodyDeclarations= anonymTypeDecl.bodyDeclarations();
-		int size= bodyDeclarations.size();
-		if (size != 1) //cannot convert if there is are fields or additional methods from Object class
+		IProposableFix fix= LambdaExpressionsFix.createConvertToLambdaFix(context.getASTRoot(), nodes.toArray(new ASTNode[nodes.size()]));
+		if (fix == null)
 			return false;
 
 		if (resultingCollections == null)
 			return true;
-	
-		AST ast= covering.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-		Object object= bodyDeclarations.get(0);
-		if (!(object instanceof MethodDeclaration))
-			return false;
-		MethodDeclaration methodDeclaration= (MethodDeclaration) object;
 
-		LambdaExpression lambdaExpression= ast.newLambdaExpression();
-		lambdaExpression.setParentheses(true); // TODO: minor: no parentheses for single inferred-type parameter?
-		List<SingleVariableDeclaration> parameters= lambdaExpression.parameters(); // TODO: minor: do we want to create VaribaleDeclarationFragments or inferred-type parameter - never?
-		List<SingleVariableDeclaration> methodParameters= methodDeclaration.parameters();
-
-		for (Iterator<SingleVariableDeclaration> iterator= methodParameters.iterator(); iterator.hasNext();) {
-			SingleVariableDeclaration singleVariableDeclaration= iterator.next();
-			parameters.add((SingleVariableDeclaration) rewrite.createCopyTarget(singleVariableDeclaration));
-		}
-		lambdaExpression.setBody(rewrite.createCopyTarget(methodDeclaration.getBody()));
-
-		rewrite.replace(classInstanceCreation, lambdaExpression, null);
-	
+		// add correction proposal
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		String label= CorrectionMessages.QuickAssistProcessor_convert_to_lambda_expression;
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_TO_LAMBDA_EXPRESSION, image);
+		Map<String, String> options= new Hashtable<String, String>();
+		options.put(CleanUpConstants.USE_LAMBDA, CleanUpOptions.TRUE);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_LAMBDA_EXPRESSION, image, context);
 		resultingCollections.add(proposal);
 		return true;
 	}

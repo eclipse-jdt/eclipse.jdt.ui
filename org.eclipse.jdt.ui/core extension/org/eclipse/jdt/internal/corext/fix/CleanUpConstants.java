@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -644,6 +648,19 @@ public class CleanUpConstants {
 	public static final String VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES= "cleanup.make_local_variable_final"; //$NON-NLS-1$
 
 	/**
+	 * Replaces anonymous class creations with lambda expressions where possible in Java 8 source.
+	 * 
+	 * Possible values: {TRUE, FALSE}<br>
+	 * Default value: Not set<br>
+	 * <br>
+	 * 
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public static final String USE_LAMBDA= "cleanup.use_lambda"; //$NON-NLS-1$
+
+	/**
 	 * Adds type parameters to raw type references.
 	 * <p>
 	 * Example:
@@ -1136,6 +1153,8 @@ public class CleanUpConstants {
 		options.setOption(VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, CleanUpOptions.FALSE);
 		options.setOption(VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, CleanUpOptions.TRUE);
 
+		options.setOption(USE_LAMBDA, CleanUpOptions.FALSE);
+
 		//Unused Code
 		options.setOption(REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
 		options.setOption(REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, CleanUpOptions.FALSE);
@@ -1215,6 +1234,8 @@ public class CleanUpConstants {
 		options.setOption(VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, CleanUpOptions.FALSE);
 		options.setOption(VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, CleanUpOptions.FALSE);
 		options.setOption(VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, CleanUpOptions.TRUE);
+
+		options.setOption(USE_LAMBDA, CleanUpOptions.FALSE);
 
 		//Unused Code
 		options.setOption(REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.FALSE);

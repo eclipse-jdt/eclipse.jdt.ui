@@ -5,11 +5,15 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contributions for
  *								[quick fix] Add quick fixes for null annotations - https://bugs.eclipse.org/337977
- *								[quick fix] The fix change parameter type to @Nonnull generated a null change - https://bugs.eclipse.org/400668 
+ *								[quick fix] The fix change parameter type to @Nonnull generated a null change - https://bugs.eclipse.org/400668
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -132,6 +136,7 @@ public final class FixMessages extends NLS {
 	public static String ExtractToNullCheckedLocalProposal_extractCheckedLocal_editName;
 	public static String ExtractToNullCheckedLocalProposal_extractToCheckedLocal_proposalName;
 	public static String ExtractToNullCheckedLocalProposal_todoHandleNullDescription;
+	public static String LambdaExpressionsFix_convert_to_lambda_expression;
 
 	static {
 		// initialize resource bundle

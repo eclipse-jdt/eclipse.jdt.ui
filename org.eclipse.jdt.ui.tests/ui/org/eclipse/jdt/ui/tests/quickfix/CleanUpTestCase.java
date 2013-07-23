@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -73,7 +77,7 @@ public class CleanUpTestCase extends QuickFixTest {
 	protected IPackageFragmentRoot fSourceFolder;
 	protected IJavaProject fJProject1;
 
-	private CustomProfile fProfile;
+	protected CustomProfile fProfile;
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite(CleanUpTestCase.class.getName());
@@ -136,7 +140,7 @@ public class CleanUpTestCase extends QuickFixTest {
 		fProfile= null;
 	}
 
-	private void disableAll() throws CoreException {
+	protected void disableAll() throws CoreException {
 		Map settings= fProfile.getSettings();
 		CleanUpOptions options= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
 		Set keys= options.getKeys();

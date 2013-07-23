@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -21,6 +25,7 @@ import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 
 public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
@@ -37,7 +42,8 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
         		new ControlStatementsCleanUp(values),
         		new ConvertLoopCleanUp(values),
         		new ExpressionsCleanUp(values),
-        		new VariableDeclarationCleanUp(values)
+				new VariableDeclarationCleanUp(values),
+				new LambdaExpressionsCleanUp(values)
         };
     }
 
@@ -74,5 +80,10 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 		final CheckboxPreference useFinalParametersPref= createCheckboxPref(variableGroup, 1, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseFinalForParameters, CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, CleanUpModifyDialog.FALSE_TRUE);
 		final CheckboxPreference useFinalVariablesPref= createCheckboxPref(variableGroup, 1, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseFinalForLocals, CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(useFinalPref, new CheckboxPreference[] {useFinalFieldsPref, useFinalParametersPref, useFinalVariablesPref});
+
+		Group lambdaGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_LambdaExpressions);
+
+		createCheckboxPref(lambdaGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseLambdaWherePossible, CleanUpConstants.USE_LAMBDA, CleanUpModifyDialog.FALSE_TRUE);
+		intent(lambdaGroup);
     }
 }

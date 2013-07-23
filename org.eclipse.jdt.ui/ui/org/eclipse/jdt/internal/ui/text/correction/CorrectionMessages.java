@@ -48,7 +48,6 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_convert_local_to_field_description;
 	public static String QuickAssistProcessor_convert_to_indexed_for_loop;
 	public static String QuickAssistProcessor_convert_to_iterator_for_loop;
-	public static String QuickAssistProcessor_convert_to_lambda_expression;
 	public static String QuickAssistProcessor_convert_to_message_format;
 	public static String QuickAssistProcessor_convert_to_multiple_singletype_catch_blocks;
 	public static String QuickAssistProcessor_convert_to_single_multicatch_block;
