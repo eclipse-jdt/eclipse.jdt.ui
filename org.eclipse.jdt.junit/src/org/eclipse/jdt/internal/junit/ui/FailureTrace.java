@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids: sdavids@gmx.de bug 37333, 26653
  *     Johan Walles: walles@mailblocks.com bug 68737
+ *     Andrew Eisenberg: andrew@eisenberg.as bug 411794
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -29,8 +30,11 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IOpenEventListener;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.OpenStrategy;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 import org.eclipse.jdt.internal.junit.model.TestElement;
@@ -39,7 +43,27 @@ import org.eclipse.jdt.internal.junit.model.TestElement;
  * A pane that shows a stack trace of a failed test.
  */
 public class FailureTrace implements IMenuListener {
+	
+	/**
+	 * Internal property change listener for handling workbench font changes.
+	 */
+	private class FontPropertyChangeListener implements IPropertyChangeListener {
+		/*
+		 * @see IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+		 */
+		public void propertyChange(PropertyChangeEvent event) {
+			if (fTable == null)
+				return;
+
+			String property= event.getProperty();
+
+			if (FAILURE_FONT.equals(property))
+				fTable.setFont(JFaceResources.getFont(FAILURE_FONT));
+		}
+	}
+
     private static final int MAX_LABEL_LENGTH = 256;
+    private static final String FAILURE_FONT = "org.eclipse.jdt.junit.failurePaneFont"; //$NON-NLS-1$
 
     static final String FRAME_PREFIX= "at "; //$NON-NLS-1$
 	private Table fTable;
@@ -49,6 +73,7 @@ public class FailureTrace implements IMenuListener {
     private TestElement fFailure;
     private CompareResultsAction fCompareAction;
 	private final FailureTableDisplay fFailureTableDisplay;
+	private IPropertyChangeListener fFontPropertyChangeListener;
 
 	public FailureTrace(Composite parent, Clipboard clipboard, TestRunnerViewPart testRunner, ToolBar toolBar) {
 		Assert.isNotNull(clipboard);
@@ -62,6 +87,7 @@ public class FailureTrace implements IMenuListener {
 		failureToolBarmanager.update(true);
 
 		fTable= new Table(parent, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
+		fTable.setFont(JFaceResources.getFont(FAILURE_FONT));
 		fTestRunner= testRunner;
 		fClipboard= clipboard;
 
@@ -78,6 +104,9 @@ public class FailureTrace implements IMenuListener {
 				}
 			}
 		});
+		
+		fFontPropertyChangeListener = new FontPropertyChangeListener();
+		JFaceResources.getFontRegistry().addListener(fFontPropertyChangeListener);
 
 		initMenu();
 
@@ -219,5 +248,9 @@ public class FailureTrace implements IMenuListener {
 
 	public FailureTableDisplay getFailureTableDisplay() {
 		return fFailureTableDisplay;
+	}
+
+	public void dispose() {
+		JFaceResources.getFontRegistry().removeListener(fFontPropertyChangeListener);
 	}
 }
