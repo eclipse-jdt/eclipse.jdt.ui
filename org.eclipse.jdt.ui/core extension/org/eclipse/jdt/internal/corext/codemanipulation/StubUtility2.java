@@ -547,8 +547,10 @@ public final class StubUtility2 {
 				if (impl == null || !Bindings.isVisibleInHierarchy(impl, currPack)) {
 					if (impl != null)
 						allMethods.remove(impl);
-					toImplement.add(curr);
-					allMethods.add(curr);
+					if (Modifier.isAbstract(curr.getModifiers())) {
+						toImplement.add(curr);
+						allMethods.add(curr);
+					}
 				}
 			}
 			ITypeBinding[] superInterfaces= typeBinding.getInterfaces();
