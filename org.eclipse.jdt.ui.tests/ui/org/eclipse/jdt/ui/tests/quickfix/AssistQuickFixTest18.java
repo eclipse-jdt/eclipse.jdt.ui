@@ -305,4 +305,62 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		}
 	}
 
+	public void testConvertToLambda6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface I {\n");
+		buf.append("    boolean equals(Object obj);\n");
+		buf.append("}\n");
+		buf.append("public class E {\n");
+		buf.append("    void bar(I i) {\n");
+		buf.append("    }\n");
+		buf.append("    void foo() {\n");
+		buf.append("        bar(new I() {\n");
+		buf.append("            public boolean equals(Object obj) {\n");
+		buf.append("                return false;\n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("I()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
+	}
+
+	public void testConvertToLambda7() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("abstract class C {\n");
+		buf.append("    abstract void method();\n");
+		buf.append("}\n");
+		buf.append("public class E {\n");
+		buf.append("    void bar(C c) {\n");
+		buf.append("    }\n");
+		buf.append("    void foo() {\n");
+		buf.append("        bar(new C() {\n");
+		buf.append("            public void method(){\n");
+		buf.append("                System.out.println();\n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("C()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
+	}
+
 }

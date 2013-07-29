@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -52,14 +53,19 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 		@Override
 		public boolean visit(ClassInstanceCreation node) {
+			ITypeBinding typeBinding= node.resolveTypeBinding();
+			if (typeBinding == null)
+				return true;
+			ITypeBinding[] interfaces= typeBinding.getInterfaces();
+			if (interfaces.length != 1)
+				return true;
+			if (!interfaces[0].isFunctionalInterface())
+				return true;
+
 			final AnonymousClassDeclaration anonymTypeDecl= node.getAnonymousClassDeclaration();
 			if (anonymTypeDecl == null || anonymTypeDecl.resolveBinding() == null) {
 				return true;
 			}
-
-			// check for functional interface
-			//TODO: need an API from JDT Core for org.eclipse.jdt.internal.compiler.lookup.TypeBinding.isFunctionalInterface()
-			//for now do this simple but insufficient check
 			List<BodyDeclaration> bodyDeclarations= anonymTypeDecl.bodyDeclarations();
 			int size= bodyDeclarations.size();
 			if (size != 1) //cannot convert if there is are fields or additional methods from Object class

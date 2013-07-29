@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials 
+ * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
@@ -188,10 +188,10 @@ public class Binding extends ASTAttribute {
 					res.add(new Binding(this, "WILDCARD", typeBinding.getWildcard(), isType(typeKind, CAPTURE_TYPE))); //$NON-NLS-1$
 
 					res.add(new Binding(this, "SUPERCLASS", typeBinding.getSuperclass(), isRefType)); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "INTERFACES", typeBinding.getInterfaces(), isRefType)); //$NON-NLS-1$			
-					res.add(new BindingProperty(this, "DECLARED TYPES", typeBinding.getDeclaredTypes(), isRefType)); //$NON-NLS-1$			
-					res.add(new BindingProperty(this, "DECLARED FIELDS", typeBinding.getDeclaredFields(), isRefType)); //$NON-NLS-1$			
-					res.add(new BindingProperty(this, "DECLARED METHODS", typeBinding.getDeclaredMethods(), isRefType)); //$NON-NLS-1$			
+					res.add(new BindingProperty(this, "INTERFACES", typeBinding.getInterfaces(), isRefType)); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "DECLARED TYPES", typeBinding.getDeclaredTypes(), isRefType)); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "DECLARED FIELDS", typeBinding.getDeclaredFields(), isRefType)); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "DECLARED METHODS", typeBinding.getDeclaredMethods(), isRefType)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic(), isNonPrimitive)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated(), isRefType)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE ANNOTATIONS", typeBinding.getTypeAnnotations(), true)); //$NON-NLS-1$			
@@ -216,7 +216,7 @@ public class Binding extends ASTAttribute {
 					
 					res.add(new Binding(this, "METHOD DECLARATION", methodBinding.getMethodDeclaration(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE PARAMETERS", methodBinding.getTypeParameters(), true)); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "TYPE ARGUMENTS", methodBinding.getTypeArguments(), true)); //$NON-NLS-1$			
+					res.add(new BindingProperty(this, "TYPE ARGUMENTS", methodBinding.getTypeArguments(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated(), true)); //$NON-NLS-1$
 					
@@ -309,7 +309,7 @@ public class Binding extends ASTAttribute {
 					} else {
 						buf.append(variableBinding.getDeclaringClass().getName());
 						buf.append('.');
-						buf.append(variableBinding.getName());				
+						buf.append(variableBinding.getName());
 					}
 					break;
 				case IBinding.PACKAGE:
