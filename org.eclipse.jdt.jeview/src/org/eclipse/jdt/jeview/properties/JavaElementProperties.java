@@ -631,7 +631,7 @@ public class JavaElementProperties implements IPropertySource {
 			rest&= ~ appendFlag(sb, flags, Flags.AccSynchronized, "synchronized ");
 			rest&= ~ appendFlag(sb, flags, Flags.AccBridge, "bridge ");
 			rest&= ~ appendFlag(sb, flags, Flags.AccVarargs, "varargs ");
-			rest&= ~ appendFlag(sb, flags, Flags.AccDefaultMethod, "default ");
+			rest&= ~ appendFlag(sb, flags, Flags.AccDefaultMethod, "default(method) ");
 		} else {
 			rest&= ~ appendFlag(sb, flags, Flags.AccSuper, "super ");
 			rest&= ~ appendFlag(sb, flags, Flags.AccVolatile, "volatile ");
@@ -646,7 +646,7 @@ public class JavaElementProperties implements IPropertySource {
 		rest&= ~ appendFlag(sb, flags, Flags.AccEnum, "enum ");
 		rest&= ~ appendFlag(sb, flags, Flags.AccDeprecated, "deprecated ");
 		if (isMethod) {
-			rest&= ~ appendFlag(sb, flags, Flags.AccAnnotationDefault, "default ");
+			rest&= ~ appendFlag(sb, flags, Flags.AccAnnotationDefault, "default(annotation) ");
 		}
 		
 		if (rest != 0)
