@@ -105,7 +105,6 @@ public class PluginsNotLoadedTest extends TestCase {
 			"org.eclipse.osgi.services",
 			"org.eclipse.pde",
 			"org.eclipse.pde.build",
-			"org.eclipse.pde.core",
 			"org.eclipse.pde.doc.user",
 			"org.eclipse.pde.runtime",
 			"org.eclipse.platform.doc.isv",
