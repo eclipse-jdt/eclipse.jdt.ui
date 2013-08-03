@@ -83,7 +83,8 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 
 		Group lambdaGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_LambdaExpressions);
 
-		createCheckboxPref(lambdaGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseLambdaWherePossible, CleanUpConstants.USE_LAMBDA, CleanUpModifyDialog.FALSE_TRUE);
+		CheckboxPreference convertToLambda= createCheckboxPref(lambdaGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseLambdaWherePossible, CleanUpConstants.USE_LAMBDA, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(convertToLambda);
 		intent(lambdaGroup);
     }
 }

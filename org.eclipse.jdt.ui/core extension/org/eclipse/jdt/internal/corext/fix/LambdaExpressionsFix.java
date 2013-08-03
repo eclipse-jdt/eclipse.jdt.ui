@@ -27,13 +27,17 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -116,8 +120,23 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 					SingleVariableDeclaration singleVariableDeclaration= iterator1.next();
 					parameters.add((SingleVariableDeclaration) rewrite.createCopyTarget(singleVariableDeclaration));
 				}
-				lambdaExpression.setBody(rewrite.createCopyTarget(methodDeclaration.getBody()));
-
+				Block body= methodDeclaration.getBody();
+				List<Statement> statements= body.statements();
+				ASTNode lambdaBody;
+				if (statements.size() == 1) {
+					//lambda should use short form with just an expression body if possible
+					Statement statement= statements.get(0);
+					if (statement instanceof ExpressionStatement) {
+						lambdaBody= ((ExpressionStatement) statement).getExpression();
+					} else if (statement instanceof ReturnStatement) {
+						lambdaBody= ((ReturnStatement) statement).getExpression();
+					} else {
+						lambdaBody= body;
+					}
+				} else {
+					lambdaBody= body;
+				}
+				lambdaExpression.setBody(rewrite.createCopyTarget(lambdaBody));
 				rewrite.replace(classInstanceCreation, lambdaExpression, group);
 
 			}

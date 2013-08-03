@@ -233,7 +233,7 @@ public final class JavaModelUtil {
 	 * Returns whether the two names match. They match if they
 	 * are equal, or if they are the same name but one is missing a dot-separated qualifier.
 	 * 
-	 * @param nameA a potentially qualified name
+	 * @param nameA a potentially qualified name 
 	 * @param nameB a potentially qualified name
 	 * @return <code>true</code> iff the given names match
 	 * @since 3.8
@@ -794,11 +794,13 @@ public final class JavaModelUtil {
 	public static boolean is17OrHigher(IJavaProject project) {
 		return is17OrHigher(getSourceCompliance(project));
 	}
+	
 	/**
 	 * Checks if the given project or workspace has source compliance 1.8 or greater.
-	 *
+	 * 
 	 * @param project the project to test or <code>null</code> to test the workspace settings
-	 * @return <code>true</code> if the given project or workspace has source compliance 1.8 or greater.
+	 * @return <code>true</code> if the given project or workspace has source compliance 1.8 or
+	 *         greater.
 	 */
 	public static boolean is18OrHigher(IJavaProject project) {
 		return is18OrHigher(getSourceCompliance(project));

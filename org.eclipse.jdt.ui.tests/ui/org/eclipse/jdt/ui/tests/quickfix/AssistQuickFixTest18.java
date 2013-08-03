@@ -126,6 +126,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("        bar(new I() {\n");
 		buf.append("            public void method(){\n");
 		buf.append("                System.out.println();\n");
+		buf.append("                System.out.println();\n");
 		buf.append("            }\n");
 		buf.append("        });\n");
 		buf.append("    }\n");
@@ -151,6 +152,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    void foo() {\n");
 		buf.append("        bar(() -> {\n");
 		buf.append("            System.out.println();\n");
+		buf.append("            System.out.println();\n");
 		buf.append("        });\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -172,6 +174,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    void foo() {\n");
 		buf.append("        bar(new I() {\n");
 		buf.append("            public void method(int a, int b){\n");
+		buf.append("                System.out.println(a+b);\n");
 		buf.append("                System.out.println(a+b);\n");
 		buf.append("            }\n");
 		buf.append("        });\n");
@@ -197,6 +200,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("    void foo() {\n");
 		buf.append("        bar((int a, int b) -> {\n");
+		buf.append("            System.out.println(a+b);\n");
 		buf.append("            System.out.println(a+b);\n");
 		buf.append("        });\n");
 		buf.append("    }\n");
@@ -361,6 +365,96 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
+	}
+
+	public void testConvertToLambda8() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface I {\n");
+		buf.append("    void method();\n");
+		buf.append("}\n");
+		buf.append("public class E {\n");
+		buf.append("    void bar(I i) {\n");
+		buf.append("    }\n");
+		buf.append("    void foo() {\n");
+		buf.append("        bar(new I() {\n");
+		buf.append("            public void method(){\n");
+		buf.append("                System.out.println();\n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("I()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface I {\n");
+		buf.append("    void method();\n");
+		buf.append("}\n");
+		buf.append("public class E {\n");
+		buf.append("    void bar(I i) {\n");
+		buf.append("    }\n");
+		buf.append("    void foo() {\n");
+		buf.append("        bar(() -> System.out.println());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertToLambda9() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface I {\n");
+		buf.append("    int method();\n");
+		buf.append("}\n");
+		buf.append("public class E {\n");
+		buf.append("    void bar(I i) {\n");
+		buf.append("    }\n");
+		buf.append("    void foo() {\n");
+		buf.append("        bar(new I() {\n");
+		buf.append("            public int method(){\n");
+		buf.append("                return 1;\n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("I()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface I {\n");
+		buf.append("    int method();\n");
+		buf.append("}\n");
+		buf.append("public class E {\n");
+		buf.append("    void bar(I i) {\n");
+		buf.append("    }\n");
+		buf.append("    void foo() {\n");
+		buf.append("        bar(() -> 1);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
 }
