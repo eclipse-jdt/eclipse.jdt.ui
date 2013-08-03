@@ -210,7 +210,7 @@ public interface IProposalRelevance {
 	public static final int EXTRACT_LOCAL_ERROR= 2;
 	public static final int ASSIGN_TO_FIELD= 2;
 	public static final int RETURN_ALLOCATED_OBJECT= 2;
-
+	public static final int CONVERT_TO_ANONYMOUS_CLASS_CREATION= 2;
 	public static final int CONVERT_TO_LAMBDA_EXPRESSION= 2;
 
 	public static final int JOIN_VARIABLE_DECLARATION= 1;

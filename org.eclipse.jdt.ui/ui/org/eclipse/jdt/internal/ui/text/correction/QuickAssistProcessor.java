@@ -77,6 +77,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -154,6 +155,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
@@ -219,6 +221,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getConvertLocalToFieldProposal(context, coveringNode, null)
 				|| getConvertAnonymousToNestedProposal(context, coveringNode, null)
 				|| getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, coveredNodes, null)
+				|| getConvertLambdaToAnonymousClassCreationsProposals(context, coveringNode, coveredNodes, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
 				|| getMakeVariableDeclarationFinalProposals(context, null)
 				|| getMissingCaseStatementProposals(context, coveringNode, null)
@@ -263,6 +266,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertLocalToFieldProposal(context, coveringNode, resultingCollections);
 				getConvertAnonymousToNestedProposal(context, coveringNode, resultingCollections);
 				getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, coveredNodes, resultingCollections);
+				getConvertLambdaToAnonymousClassCreationsProposals(context, coveringNode, coveredNodes, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getConvertEnhancedForLoopProposal(context, coveringNode, resultingCollections);
@@ -538,6 +542,38 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Map<String, String> options= new Hashtable<String, String>();
 		options.put(CleanUpConstants.USE_LAMBDA, CleanUpOptions.TRUE);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_LAMBDA_EXPRESSION, image, context);
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private static boolean getConvertLambdaToAnonymousClassCreationsProposals(IInvocationContext context, ASTNode covering, ArrayList<ASTNode> coveredNodes,
+			Collection<ICommandAccess> resultingCollections) {
+
+		ArrayList<ASTNode> nodes;
+		if (context.getSelectionLength() == 0) {
+			if (!(covering instanceof LambdaExpression))
+				return false;
+
+			nodes= new ArrayList<ASTNode>();
+			nodes.add(covering);
+		} else {
+			nodes= coveredNodes;
+		}
+		if (nodes.isEmpty())
+			return false;
+
+		IProposableFix fix= LambdaExpressionsFix.createConvertToAnonymousClassCreationsFix(context.getASTRoot(), nodes.toArray(new ASTNode[nodes.size()]));
+		if (fix == null)
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		// add correction proposal
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		Map<String, String> options= new Hashtable<String, String>();
+		options.put(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION, CleanUpOptions.TRUE);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new LambdaExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_ANONYMOUS_CLASS_CREATION, image, context);
 		resultingCollections.add(proposal);
 		return true;
 	}

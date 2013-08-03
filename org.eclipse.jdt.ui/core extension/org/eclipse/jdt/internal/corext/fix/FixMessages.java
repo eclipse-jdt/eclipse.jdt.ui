@@ -136,6 +136,7 @@ public final class FixMessages extends NLS {
 	public static String ExtractToNullCheckedLocalProposal_extractCheckedLocal_editName;
 	public static String ExtractToNullCheckedLocalProposal_extractToCheckedLocal_proposalName;
 	public static String ExtractToNullCheckedLocalProposal_todoHandleNullDescription;
+	public static String LambdaExpressionsFix_convert_to_anonymous_class_creation;
 	public static String LambdaExpressionsFix_convert_to_lambda_expression;
 
 	static {

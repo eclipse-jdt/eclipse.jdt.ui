@@ -661,6 +661,19 @@ public class CleanUpConstants {
 	public static final String USE_LAMBDA= "cleanup.use_lambda"; //$NON-NLS-1$
 
 	/**
+	 * Replaces lambda expressions with anonymous class creations.
+	 * 
+	 * Possible values: {TRUE, FALSE}<br>
+	 * Default value: Not set<br>
+	 * <br>
+	 * 
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public static final String USE_ANONYMOUS_CLASS_CREATION= "cleanup.use_anonymous_class_creation"; //$NON-NLS-1$
+
+	/**
 	 * Adds type parameters to raw type references.
 	 * <p>
 	 * Example:
@@ -1154,6 +1167,7 @@ public class CleanUpConstants {
 		options.setOption(VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, CleanUpOptions.TRUE);
 
 		options.setOption(USE_LAMBDA, CleanUpOptions.FALSE);
+		options.setOption(USE_ANONYMOUS_CLASS_CREATION, CleanUpOptions.FALSE);
 
 		//Unused Code
 		options.setOption(REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
@@ -1236,6 +1250,7 @@ public class CleanUpConstants {
 		options.setOption(VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, CleanUpOptions.TRUE);
 
 		options.setOption(USE_LAMBDA, CleanUpOptions.FALSE);
+		options.setOption(USE_ANONYMOUS_CLASS_CREATION, CleanUpOptions.FALSE);
 
 		//Unused Code
 		options.setOption(REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.FALSE);
