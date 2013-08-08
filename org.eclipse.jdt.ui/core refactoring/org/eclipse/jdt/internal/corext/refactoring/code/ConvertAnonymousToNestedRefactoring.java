@@ -7,13 +7,11 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     NikolayMetchev@gmail.com - contributed fixes for
+ *     N.Metchev@teamphone.com - contributed fixes for
  *     - convert anonymous to nested should sometimes declare class as static [refactoring]
  *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=43360)
  *     - Convert anonymous to nested: should show error if field form outer anonymous type is references [refactoring]
  *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=48282)
- *     - [refactoring][convert anonymous] gets confused with generic methods
- *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=124978)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -138,12 +136,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			}
 			return true;
 		}
-		
-		@Override
-		public final boolean visit(TypeParameter parameter) {
-			return parameter.getParent().getNodeType() != ASTNode.METHOD_DECLARATION;
-		}
-		
+
 		public final ITypeBinding[] getResult() {
 			final ITypeBinding[] result= new ITypeBinding[fFound.size()];
 			fFound.toArray(result);
