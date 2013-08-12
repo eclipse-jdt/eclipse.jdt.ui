@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [extract class] Extract class refactoring on a field in an inner non-static class yields compilation error - https://bugs.eclipse.org/394547
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -410,4 +411,25 @@ public class ExtractClassTests extends RefactoringTest {
 		runRefactoring(false);
 	}
 	
+	// see bug 394547
+	public void testNested1() throws Exception {
+		IType outer= setupType();
+		IType inner= outer.getType("Inner");
+		assertTrue(inner.exists());
+		fDescriptor.setType(inner);
+		fDescriptor.setClassName("Extracted");
+		fDescriptor.setCreateTopLevel(false);
+		runRefactoring(false);
+	}
+
+	// see bug 394547
+	public void testNested2() throws Exception {
+		IType outer= setupType();
+		IType inner= outer.getType("Inner");
+		assertTrue(inner.exists());
+		fDescriptor.setType(inner);
+		fDescriptor.setClassName("Extracted");
+		fDescriptor.setCreateTopLevel(false);
+		runRefactoring(false);
+	}
 }
