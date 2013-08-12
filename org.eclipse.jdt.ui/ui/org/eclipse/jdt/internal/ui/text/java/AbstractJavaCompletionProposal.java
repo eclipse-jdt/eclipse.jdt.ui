@@ -351,7 +351,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 					 * In 3.3 we only support the above required proposals, see
 					 * CompletionProposal#getRequiredProposals()
 					 */
-					Assert.isTrue(false);
+					 Assert.isTrue(false);
 				}
 			}
 		}
@@ -1003,7 +1003,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			return null;
 
 		int length= getReplacementOffset() + getReplacementLength() - modelCaret;
-		getReplacementString();
 
 		Color foreground= getForegroundColor();
 		Color background= getBackgroundColor();
@@ -1022,7 +1021,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			StyleRange range= createStyleRange(viewer);
 			if (range == null)
 				return;
-
+			
 			fRememberedStyleRange= range;
 
 			if (viewer instanceof ITextViewerExtension4) {
