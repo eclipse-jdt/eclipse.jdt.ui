@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
@@ -76,6 +77,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
@@ -452,13 +454,39 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     	try{
 	        RefactoringStatus result= new RefactoringStatus();
 	        result.merge(checkClashesWithExistingFields());
-	        if (fInitializeIn == INITIALIZE_IN_CONSTRUCTOR)
-		        result.merge(checkClashesInConstructors());
+			if (fInitializeIn == INITIALIZE_IN_CONSTRUCTOR)
+				result.merge(checkClashesInConstructors());
+			result.merge(checkClashesInCurrentMethod());
 	        return result;
     	} finally {
     		pm.done();
     	}
     }
+
+	private RefactoringStatus checkClashesInCurrentMethod() {
+		final List<String> names= new ArrayList<String>();
+		getMethodDeclaration().accept(new GenericVisitor() {
+			@Override
+			public boolean visit(VariableDeclarationFragment fragment) {
+				names.add(fragment.getName().getIdentifier());
+				return false;
+			}
+
+			@Override
+			public boolean visit(SingleVariableDeclaration node) {
+				names.add(node.getName().getIdentifier());
+				return false;
+			}
+		});
+		names.remove(fTempDeclarationNode.getName().getIdentifier());
+		if (names.contains(fFieldName)) {
+			String[] keys= { BasicElementLabels.getJavaElementName(fFieldName),
+					BindingLabelProvider.getBindingLabel(getMethodDeclaration().resolveBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED) };
+			String msg= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_Name_conflict, keys);
+			return RefactoringStatus.createWarningStatus(msg);
+		}
+		return null;
+	}
 
     private RefactoringStatus checkClashesInConstructors() {
 		Assert.isTrue(fInitializeIn == INITIALIZE_IN_CONSTRUCTOR);
