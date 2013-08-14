@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=44417)
  *       o Allow 'this' constructor to be inlined
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38093)
+ *	   Nikolay Metchev <nikolaymetchev@gmail.com> - Anonymous class using final parameter breaks method inlining - https://bugs.eclipse.org/269401
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -65,6 +66,7 @@ import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -163,6 +165,9 @@ public class CallInliner {
 			IBinding binding= node.resolveBinding();
 			if (binding instanceof IVariableBinding) {
 				int accessMode = fFormalArgument.getSimplifiedAccessMode();
+				if (fFormalArgument.isFinal() && !Modifier.isFinal(binding.getModifiers())) {
+					return setResult(false);
+				}
 				if (accessMode == FlowInfo.READ || accessMode == FlowInfo.UNUSED)
 					return setResult(true);
 				// from now on we only have write accesses.
@@ -515,9 +520,11 @@ public class CallInliner {
 			} else {
 				String name= fInvocationScope.createName(parameter.getName(), true);
 				realArguments[i]= ast.newSimpleName(name);
-				fLocals.add(createLocalDeclaration(
-					parameter.getTypeBinding(), name,
-					(Expression)fRewrite.createCopyTarget(expression)));
+				VariableDeclarationStatement local= createLocalDeclaration(parameter.getTypeBinding(), name, (Expression) fRewrite.createCopyTarget(expression));
+				if (parameter.isFinal()) {
+					local.modifiers().add(fInvocation.getAST().newModifier(ModifierKeyword.FINAL_KEYWORD));
+				}
+				fLocals.add(local);
 			}
 		}
 		if (needsVarargBoxing) {
