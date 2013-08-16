@@ -12,6 +12,8 @@
  *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=43360)
  *     - [refactoring][convert anonymous] gets confused with generic methods
  *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=124978)
+ *     - [convert anonymous] Convert Anonymous to nested generates wrong code
+ *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=159917)
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -385,4 +387,12 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	public void test33() throws Exception { // for bug 124978
 		helper1(9, 21, 12, 7, true, true, "AImpl", Modifier.PRIVATE);
 	}
+    
+	public void test34() throws Exception { // for bug 159917
+		helper1(16, 27, 22, 9, false, false, "Nested", Modifier.PRIVATE);
+    }
+
+	public void test35() throws Exception { // for bug 159917
+		helper1(16, 26, 22, 9, false, false, "Nested", Modifier.PRIVATE);
+    }
 }

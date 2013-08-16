@@ -14,6 +14,8 @@
  *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=48282)
  *     - [refactoring][convert anonymous] gets confused with generic methods
  *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=124978)
+ *     - [convert anonymous] Convert Anonymous to nested generates wrong code
+ *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=159917)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -1092,7 +1094,10 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         boolean ans = false;
         while(current != null) {
             switch(current.getNodeType()) {
-                case ASTNode.ANONYMOUS_CLASS_DECLARATION:
+				case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
+				case ASTNode.CONSTRUCTOR_INVOCATION:
+					return true;
+				case ASTNode.ANONYMOUS_CLASS_DECLARATION:
                 {
                     AnonymousClassDeclaration enclosingAnonymousClassDeclaration= (AnonymousClassDeclaration)current;
                     ITypeBinding binding= enclosingAnonymousClassDeclaration.resolveBinding();
