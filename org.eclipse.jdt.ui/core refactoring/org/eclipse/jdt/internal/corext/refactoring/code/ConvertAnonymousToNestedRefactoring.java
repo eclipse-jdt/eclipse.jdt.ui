@@ -143,7 +143,12 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		
 		@Override
 		public final boolean visit(TypeParameter parameter) {
-			return parameter.getParent().getNodeType() != ASTNode.METHOD_DECLARATION;
+			ITypeBinding binding= parameter.resolveBinding();
+			if (binding != null) {
+				// don't collect type parameters declared inside the anonymous
+				fBindings.put(binding.getKey(), binding);
+			}
+			return false;
 		}
 		
 		public final ITypeBinding[] getResult() {

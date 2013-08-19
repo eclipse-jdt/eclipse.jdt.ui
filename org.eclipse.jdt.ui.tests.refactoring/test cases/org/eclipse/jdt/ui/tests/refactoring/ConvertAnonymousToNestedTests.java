@@ -376,6 +376,10 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		helper1(7, 20, 7, 20, true, true, "Inner", Modifier.PRIVATE);
 	}
 
+	public void testGenerics7() throws Exception{ // test for bug 124978
+		helper1(6, 18, 6, 18, true, true, "Inner", Modifier.PRIVATE);
+	}
+	
     public void test31() throws Exception{ // for bug 181054
     	helper1(10, 24, 10, 30, true, false, "Inner1Extension", Modifier.PRIVATE);
     }
