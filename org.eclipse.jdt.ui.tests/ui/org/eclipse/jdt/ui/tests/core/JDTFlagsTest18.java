@@ -15,6 +15,7 @@
 package org.eclipse.jdt.ui.tests.core;
 
 import java.io.File;
+import java.util.Hashtable;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -32,15 +33,24 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
@@ -77,6 +87,15 @@ public class JDTFlagsTest18 extends TestCase {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
 
+	protected CompilationUnit getCompilationUnitNode(String source) {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setSource(source.toCharArray());
+		Hashtable options= JavaCore.getOptions();
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options);
+		parser.setCompilerOptions(options);
+		CompilationUnit cuNode = (CompilationUnit) parser.createAST(null);
+		return cuNode;
+	}
 
 	public void testIsStaticInSrcFile() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -103,6 +122,9 @@ public class JDTFlagsTest18 extends TestCase {
 			Assert.assertFalse(JdtFlags.isDefaultMethod(binding));
 		} catch (OperationCanceledException e) {
 		}
+
+		MethodDeclaration methodNode= ASTNodeSearchUtil.getMethodDeclarationNode(method, getCompilationUnitNode(buf.toString()));
+		Assert.assertTrue(JdtFlags.isStatic(methodNode));
 	}
 
 	public void testNestedEnumInInterface() throws Exception {
@@ -131,10 +153,14 @@ public class JDTFlagsTest18 extends TestCase {
 		buf.append("}\n");
 		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
 		int offset= cUnit.getSource().indexOf("enum CoffeeSize");
-		IMember type= (IMember)cUnit.getElementAt(offset);
+		IJavaElement elem= cUnit.getElementAt(offset);
+		IMember type= (IMember)elem;
 		Assert.assertTrue(JdtFlags.isStatic(type));
 		Assert.assertFalse(JdtFlags.isAbstract(type));
 		Assert.assertFalse(JdtFlags.isDefaultMethod(type));
+
+		EnumDeclaration enumNode= ASTNodeSearchUtil.getEnumDeclarationNode((IType)elem, getCompilationUnitNode(buf.toString()));
+		Assert.assertTrue(JdtFlags.isStatic(enumNode));
 
 		// testcase for isF an enum
 		Assert.assertFalse(JdtFlags.isFinal(type));
@@ -165,17 +191,26 @@ public class JDTFlagsTest18 extends TestCase {
 		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
 		// testing nested enum
 		int offset= cUnit.getSource().indexOf("enum");
-		IMember element= (IMember)cUnit.getElementAt(offset);
+		CompilationUnit cuNode= getCompilationUnitNode(buf.toString());
+		IJavaElement javaElem= cUnit.getElementAt(offset);
+		IMember element= (IMember)javaElem;
 		Assert.assertTrue(JdtFlags.isStatic(element));
 		Assert.assertFalse(JdtFlags.isAbstract(element));
 		Assert.assertFalse(JdtFlags.isDefaultMethod(element));
 
+		EnumDeclaration enumNode= ASTNodeSearchUtil.getEnumDeclarationNode((IType)javaElem, cuNode);
+		Assert.assertTrue(JdtFlags.isStatic(enumNode));
+
 		// testing enum constant
 		offset= cUnit.getSource().indexOf("RED");
-		element= (IMember)cUnit.getElementAt(offset);
+		javaElem= cUnit.getElementAt(offset);
+		element= (IMember)javaElem;
 		Assert.assertTrue(JdtFlags.isStatic(element));
 		Assert.assertFalse(JdtFlags.isAbstract(element));
 		Assert.assertFalse(JdtFlags.isDefaultMethod(element));
+
+		EnumConstantDeclaration enumConst= ASTNodeSearchUtil.getEnumConstantDeclaration((IField)javaElem, cuNode);
+		Assert.assertTrue(JdtFlags.isStatic(enumConst));
 
 		// testing enum constant
 		offset= cUnit.getSource().indexOf("Runnable r");
@@ -276,6 +311,9 @@ public class JDTFlagsTest18 extends TestCase {
 		Assert.assertFalse(JdtFlags.isStatic(method));
 		Assert.assertFalse(JdtFlags.isDefaultMethod(method));
 		Assert.assertTrue(JdtFlags.isAbstract(method));
+
+		MethodDeclaration methodNode= ASTNodeSearchUtil.getMethodDeclarationNode(method, getCompilationUnitNode(buf.toString()));
+		Assert.assertFalse(JdtFlags.isStatic(methodNode));
 
 		ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		p.setProject(pack1.getJavaProject());
