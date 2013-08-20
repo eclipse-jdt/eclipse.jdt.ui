@@ -37,7 +37,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -273,14 +275,27 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 						return null; // variableBinding.getDeclaringClass() is null for array.length
 					}
 					if (Modifier.isStatic(binding.getModifiers())) {
-						if (Modifier.isPrivate(declaringClass.getModifiers())) {
-							fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_not_visible_class, BasicElementLabels.getJavaElementName(declaringClass.getName())), null);
-							return null;
-						}
-
 						if (containerName.length() > 0) {
 							if (containerName.equals(declaringClass.getName()) || containerName.equals(declaringClass.getQualifiedName()) ) {
-								if (!Modifier.isPrivate(binding.getModifiers()) && !Modifier.isPrivate(declaringClass.getModifiers())) {
+								ASTNode node= nameNode.getParent();
+								boolean isDirectlyAccessible= false;
+								while (node != null) {
+									if (node instanceof AbstractTypeDeclaration && declaringClass.equals(((AbstractTypeDeclaration) node).resolveBinding())) {
+										isDirectlyAccessible= true;
+										break;
+									} else if (node instanceof AnonymousClassDeclaration && declaringClass.equals(((AnonymousClassDeclaration) node).resolveBinding())) {
+										isDirectlyAccessible= true;
+										break;
+									}
+									node= node.getParent();
+								}
+								if (!isDirectlyAccessible) {
+									if (Modifier.isPrivate(declaringClass.getModifiers())) {
+										fStatus= JavaUIStatus.createError(IStatus.ERROR,
+												Messages.format(CodeGenerationMessages.AddImportsOperation_error_not_visible_class, BasicElementLabels.getJavaElementName(declaringClass.getName())),
+												null);
+										return null;
+									}
 									String res= importRewrite.addStaticImport(declaringClass.getQualifiedName(), binding.getName(), isField);
 									if (!res.equals(simpleName)) {
 										// adding import failed

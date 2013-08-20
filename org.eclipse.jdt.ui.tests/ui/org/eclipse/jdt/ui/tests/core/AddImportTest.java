@@ -1044,8 +1044,6 @@ public class AddImportTest extends CoreTests {
 		String expected = 
 				"package p;\n" + 
 				"\n" + 
-				"import static p.A.bar;\n" + 
-				"\n" + 
 				"class A {\n" + 
 				"	static void foo() {\n" + 
 				"		bar();\n" + 
@@ -1095,6 +1093,72 @@ public class AddImportTest extends CoreTests {
 		assertEqualString(cu.getSource(), expected);
 	}
 
+	public void testAddImportActionBug_409594_test4() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("class SnippetY {\n");
+		buf.append("    static class Test {\n");
+		buf.append("        static void bar() {}\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Test.bar();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		int selOffset= buf.indexOf("bar();");
+
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 3, null, true);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import static p.SnippetY.Test.bar;\n");
+		buf.append("\n");
+		buf.append("class SnippetY {\n");
+		buf.append("    static class Test {\n");
+		buf.append("        static void bar() {}\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void foo() {\n");
+		buf.append("        bar();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testAddImportActionBug_409594_test5() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package organize.imports.pvtStaticMembers.bug409594;\n");
+		buf.append("\n");
+		buf.append("class SnippetY {    \n");
+		buf.append("    private static class Test {\n");
+		buf.append("        static void bar() {}        \n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("    void foo() {\n");
+		buf.append("         Test.bar();\n");
+		buf.append("     }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		int selOffset= buf.indexOf("bar();");
+
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 3, null, true);
+		op.run(null);
+
+		assertEqualString(cu.getSource(), cu.getSource());
+	}
+	
 	public void testAddImports_bug107206() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
