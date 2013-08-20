@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - Import static (Ctrl+Shift+M) creates imports for private methods - https://bugs.eclipse.org/409594
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
@@ -279,10 +280,12 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 
 						if (containerName.length() > 0) {
 							if (containerName.equals(declaringClass.getName()) || containerName.equals(declaringClass.getQualifiedName()) ) {
-								String res= importRewrite.addStaticImport(declaringClass.getQualifiedName(), binding.getName(), isField);
-								if (!res.equals(simpleName)) {
-									// adding import failed
-									return null;
+								if (!Modifier.isPrivate(binding.getModifiers()) && !Modifier.isPrivate(declaringClass.getModifiers())) {
+									String res= importRewrite.addStaticImport(declaringClass.getQualifiedName(), binding.getName(), isField);
+									if (!res.equals(simpleName)) {
+										// adding import failed
+										return null;
+									}
 								}
 								return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
 							}

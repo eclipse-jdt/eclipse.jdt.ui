@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - Import static (Ctrl+Shift+M) creates imports for private methods - https://bugs.eclipse.org/409594
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
@@ -980,6 +981,118 @@ public class AddImportTest extends CoreTests {
 		buf.append("    Serializable s;\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testAddImportActionBug_409594_test1() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
+		String input =
+				"package p;\n" + 
+				"\n" + 
+				"class A {\n" + 
+				"	static void foo() {\n" + 
+				"		A.bar();\n" + 
+				"	}\n" + 
+				"\n" + 
+				"	private static void bar() {\n" + 
+				"	}\n" + 
+				"}";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", input, false, null);
+		
+		int selOffset= input.indexOf("bar");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 3, null, true);
+		op.run(null);
+		
+		String expected = 
+				"package p;\n" + 
+				"\n" + 
+				"class A {\n" + 
+				"	static void foo() {\n" + 
+				"		bar();\n" + 
+				"	}\n" + 
+				"\n" + 
+				"	private static void bar() {\n" + 
+				"	}\n" + 
+				"}";
+		assertEqualString(cu.getSource(), expected);
+	}
+	
+	public void testAddImportActionBug_409594_test2() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
+		String input =
+				"package p;\n" + 
+				"\n" + 
+				"class A {\n" + 
+				"	static void foo() {\n" + 
+				"		A.bar();\n" + 
+				"	}\n" + 
+				"\n" + 
+				"	public static void bar() {\n" + 
+				"	}\n" + 
+				"}";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", input, false, null);
+		
+		int selOffset= input.indexOf("bar");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 3, null, true);
+		op.run(null);
+		
+		String expected = 
+				"package p;\n" + 
+				"\n" + 
+				"import static p.A.bar;\n" + 
+				"\n" + 
+				"class A {\n" + 
+				"	static void foo() {\n" + 
+				"		bar();\n" + 
+				"	}\n" + 
+				"\n" + 
+				"	public static void bar() {\n" + 
+				"	}\n" + 
+				"}";
+		assertEqualString(cu.getSource(), expected);
+	}
+	
+	public void testAddImportActionBug_409594_test3() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
+		String input =
+				"package p;\n" + 
+				"class SnippetX {\n" + 
+				"    private static class Test {\n" + 
+				"        class X {\n" + 
+				"            void foo() {\n" + 
+				"                Test.bar();\n" + 
+				"            }\n" + 
+				"        }\n" + 
+				"        public static void bar() {}\n" + 
+				"    }\n" + 
+				"}";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", input, false, null);
+		
+		int selOffset= input.indexOf("bar");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 3, null, true);
+		op.run(null);
+		
+		String expected = 
+				"package p;\n" + 
+				"class SnippetX {\n" + 
+				"    private static class Test {\n" + 
+				"        class X {\n" + 
+				"            void foo() {\n" + 
+				"                bar();\n" + 
+				"            }\n" + 
+				"        }\n" + 
+				"        public static void bar() {}\n" + 
+				"    }\n" + 
+				"}";
+		assertEqualString(cu.getSource(), expected);
 	}
 
 	public void testAddImports_bug107206() throws Exception {
