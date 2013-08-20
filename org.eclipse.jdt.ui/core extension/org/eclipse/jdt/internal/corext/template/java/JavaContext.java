@@ -217,7 +217,17 @@ public class JavaContext extends CompilationUnitContext {
 			return true;
 
 		String key= getKey();
-		return template.getName().toLowerCase().startsWith(key.toLowerCase());
+		return (key.length() > 0 || !isAfterDot()) && template.getName().toLowerCase().startsWith(key.toLowerCase());
+	}
+
+	private boolean isAfterDot() {
+		try {
+			IDocument document= getDocument();
+			int offset= getCompletionOffset();
+			return document.get(offset - 1, 1).charAt(0) == '.';
+		} catch (BadLocationException e) {
+			return false;
+		}
 	}
 
 	private boolean hasCompatibleContextType(Template template) {

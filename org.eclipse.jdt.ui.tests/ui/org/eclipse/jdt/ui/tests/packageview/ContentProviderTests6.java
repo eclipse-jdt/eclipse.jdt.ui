@@ -29,8 +29,11 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -154,6 +157,25 @@ public class ContentProviderTests6 extends TestCase {
 
 		assertTrue("No remove happened", !fMyPart.hasRemoveHappened()); //$NON-NLS-1$
 		assertions();
+	}
+
+	public void testChangeClassInProject() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", "hello", false, null);
+
+		//send a delta indicating file changed
+		JavaElementDelta delta= new JavaElementDelta(sourceFolder.getJavaModel());
+		delta.changed(cu, IJavaElementDelta.F_CHILDREN);
+		IElementChangedListener listener= (IElementChangedListener)fProvider;
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		//force events from display
+		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
+		}
+
+		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
+		assertTrue("Project not refreshed", !fMyPart.wasObjectRefreshed(fJProject)); //$NON-NLS-1$
 	}
 
 	private void assertions() {
