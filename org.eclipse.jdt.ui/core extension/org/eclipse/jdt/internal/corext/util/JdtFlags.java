@@ -4,7 +4,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
+ * This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and
+ * is made available for testing and evaluation purposes only.
+ * The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Rabea Gransberger <rgransberger@gmx.de> - [quick fix] Fix several visibility issues - https://bugs.eclipse.org/394692
@@ -14,6 +18,7 @@ package org.eclipse.jdt.internal.corext.util;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -54,16 +59,40 @@ public class JdtFlags {
 
 	public static final int VISIBILITY_CODE_INVALID= 	-1;
 
+	public static boolean isDefaultMethod(IMethodBinding member) {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=405517#c7
+		return !Modifier.isAbstract(member.getModifiers()) && !Modifier.isStatic(member.getModifiers());
+	}
+
+	public static boolean isDefaultMethod(IMember member) throws JavaModelException {
+		return Flags.isDefaultMethod(member.getFlags());
+	}
+
 	public static boolean isAbstract(IMember member) throws JavaModelException{
-		if (isInterfaceOrAnnotationMethod(member))
-			return true;
-		return Flags.isAbstract(member.getFlags());
+		int flags= member.getFlags();
+		if (!member.isBinary() && isInterfaceOrAnnotationMethod(member)) {
+			return !Flags.isStatic(flags) && !Flags.isDefaultMethod(flags);
+		}
+		return Flags.isAbstract(flags);
 	}
 
 	public static boolean isAbstract(IMethodBinding member) {
-		if (isInterfaceOrAnnotationMember(member))
-			return true;
 		return Modifier.isAbstract(member.getModifiers());
+	}
+
+	public static boolean isStatic(IMember member) throws JavaModelException {
+		if (isNestedInterfaceOrAnnotation(member))
+			return true;
+		if (member.getElementType() != IJavaElement.METHOD
+				&& isInterfaceOrAnnotationMember(member))
+			return true;
+		if (isEnum(member) && (member.getElementType() == IJavaElement.FIELD || member.getDeclaringType() != null))
+			return true;
+		return Flags.isStatic(member.getFlags());
+	}
+
+	public static boolean isStatic(IMethodBinding methodBinding){
+		return Modifier.isStatic(methodBinding.getModifiers());
 	}
 
 	public static boolean isDeprecated(IMember member) throws JavaModelException{
@@ -75,9 +104,23 @@ public class JdtFlags {
 			return true;
 		if (isAnonymousType(member))
 			return true;
-		if (isEnumConstant(member))
+		if (isEnumConstant(member) || isEnumTypeFinal(member))
 			return true;
 		return Flags.isFinal(member.getFlags());
+	}
+
+	private static boolean isEnumTypeFinal(IMember member) throws JavaModelException {
+		if (!isEnum(member) && member.getElementType() != IJavaElement.TYPE)
+			return false;
+
+		// An enum type is implicitly final unless it contains at least one enum constant that has a class body.
+		IJavaElement[] children= member.getChildren();
+		for (IJavaElement child : children) {
+			if (isEnumConstant((IMember) child) && ((IField) child).getChildren().length != 0) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public static boolean isNative(IMember member) throws JavaModelException{
@@ -141,28 +184,10 @@ public class JdtFlags {
 		return Modifier.isPublic(bodyDeclaration.getModifiers());
 	}
 
-	public static boolean isStatic(IMember member) throws JavaModelException{
-		if (isNestedInterfaceOrAnnotation(member))
-			return true;
-		if (member.getElementType() != IJavaElement.METHOD && isInterfaceOrAnnotationMember(member))
-			return true;
-		if (isEnumConstant(member))
-			return true;
-		return Flags.isStatic(member.getFlags());
-	}
-
-	public static boolean isStatic(IMethodBinding methodBinding){
-		return Modifier.isStatic(methodBinding.getModifiers());
-	}
-
 	public static boolean isStatic(IVariableBinding variableBinding){
 		if (isInterfaceOrAnnotationMember(variableBinding))
 			return true;
 		return Modifier.isStatic(variableBinding.getModifiers());
-	}
-
-	public static boolean isStrictfp(IMember member) throws JavaModelException{
-		return Flags.isStrictfp(member.getFlags());
 	}
 
 	public static boolean isSynchronized(IMember member) throws JavaModelException{
