@@ -725,10 +725,12 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=357450
 			int result= flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN);
-			if (result == IJavaElementDelta.F_CONTENT || result == IJavaElementDelta.F_CHILDREN) {
-				Object parent= internalGetParent(element);
+			Object parent= internalGetParent(element);
+			boolean isParentLibrayContainer= parent instanceof LibraryContainer;
+			if (result == IJavaElementDelta.F_CONTENT ||
+					(result == IJavaElementDelta.F_CHILDREN && isParentLibrayContainer)) {
 				postRefresh(parent, PARENT, element, runnables);
-				if (parent instanceof LibraryContainer) {
+				if (isParentLibrayContainer) {
 					IResource resource= element.getResource();
 					if (resource != null && ((LibraryContainer) parent).getJavaProject().getResource().equals(resource.getProject()))
 						postRefresh(resource, ORIGINAL, element, runnables);
