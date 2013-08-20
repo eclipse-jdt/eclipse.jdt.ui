@@ -185,11 +185,13 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 				case ';':
 					return new ExitFlags(ILinkedModeListener.NONE, true);
 				case SWT.CR:
-					// when entering an anonymous class as a parameter, we don't want
+					// 1) when entering an anonymous class as a parameter, we don't want
 					// to jump after the parenthesis when return is pressed
+					// 2) after auto completion of methods without parameters, exit from linked mode when return is pressed
 					if (offset > 0) {
 						try {
-							if (fDocument.getChar(offset - 1) == '{')
+							char prevOffsetChar= fDocument.getChar(offset - 1);
+							if (prevOffsetChar == '{' || prevOffsetChar == ';')
 								return new ExitFlags(ILinkedModeListener.EXIT_ALL, true);
 						} catch (BadLocationException e) {
 						}
