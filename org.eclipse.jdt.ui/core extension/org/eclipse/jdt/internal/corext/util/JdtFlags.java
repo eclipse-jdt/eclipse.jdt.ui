@@ -62,13 +62,18 @@ public class JdtFlags {
 
 	public static final int VISIBILITY_CODE_INVALID= 	-1;
 
-	public static boolean isDefaultMethod(IMethodBinding member) {
+	public static boolean isDefaultMethod(IMethodBinding method) {
+		int modifiers= method.getModifiers();
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=405517#c7
-		return !Modifier.isAbstract(member.getModifiers()) && !Modifier.isStatic(member.getModifiers());
+		ITypeBinding declaringClass= method.getDeclaringClass();
+		if (declaringClass != null && declaringClass.isInterface()) {
+			return !Modifier.isAbstract(modifiers) && !Modifier.isStatic(modifiers);
+		}
+		return false;
 	}
 
-	public static boolean isDefaultMethod(IMember member) throws JavaModelException {
-		return Flags.isDefaultMethod(member.getFlags());
+	public static boolean isDefaultMethod(IMethod method) throws JavaModelException {
+		return Flags.isDefaultMethod(method.getFlags());
 	}
 
 	public static boolean isAbstract(IMember member) throws JavaModelException{
@@ -128,9 +133,8 @@ public class JdtFlags {
 	}
 
 	private static boolean isEnumTypeFinal(IMember member) throws JavaModelException {
-		if (!isEnum(member) && member.getElementType() != IJavaElement.TYPE)
+		if (!(isEnum(member) && member.getElementType() == IJavaElement.TYPE))
 			return false;
-
 		// An enum type is implicitly final unless it contains at least one enum constant that has a class body.
 		IJavaElement[] children= member.getChildren();
 		for (IJavaElement child : children) {

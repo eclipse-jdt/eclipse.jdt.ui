@@ -157,7 +157,6 @@ public class JDTFlagsTest18 extends TestCase {
 		IMember type= (IMember)elem;
 		Assert.assertTrue(JdtFlags.isStatic(type));
 		Assert.assertFalse(JdtFlags.isAbstract(type));
-		Assert.assertFalse(JdtFlags.isDefaultMethod(type));
 
 		EnumDeclaration enumNode= ASTNodeSearchUtil.getEnumDeclarationNode((IType)elem, getCompilationUnitNode(buf.toString()));
 		Assert.assertTrue(JdtFlags.isStatic(enumNode));
@@ -196,7 +195,6 @@ public class JDTFlagsTest18 extends TestCase {
 		IMember element= (IMember)javaElem;
 		Assert.assertTrue(JdtFlags.isStatic(element));
 		Assert.assertFalse(JdtFlags.isAbstract(element));
-		Assert.assertFalse(JdtFlags.isDefaultMethod(element));
 
 		EnumDeclaration enumNode= ASTNodeSearchUtil.getEnumDeclarationNode((IType)javaElem, cuNode);
 		Assert.assertTrue(JdtFlags.isStatic(enumNode));
@@ -207,7 +205,6 @@ public class JDTFlagsTest18 extends TestCase {
 		element= (IMember)javaElem;
 		Assert.assertTrue(JdtFlags.isStatic(element));
 		Assert.assertFalse(JdtFlags.isAbstract(element));
-		Assert.assertFalse(JdtFlags.isDefaultMethod(element));
 
 		EnumConstantDeclaration enumConst= ASTNodeSearchUtil.getEnumConstantDeclaration((IField)javaElem, cuNode);
 		Assert.assertTrue(JdtFlags.isStatic(enumConst));
@@ -252,7 +249,7 @@ public class JDTFlagsTest18 extends TestCase {
 		Assert.assertFalse(JdtFlags.isDefaultMethod(method));
 	}
 
-	public void testIsDefaultInSrcFile() throws Exception {
+	public void testIsDefaultInInterface() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -295,6 +292,54 @@ public class JDTFlagsTest18 extends TestCase {
 		Assert.assertTrue(JdtFlags.isDefaultMethod(method));
 		Assert.assertFalse(JdtFlags.isStatic(method));
 		Assert.assertFalse(JdtFlags.isAbstract(method));
+	}
+
+	public void testIsDefaultInClass() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("class Snippet {\n");
+		buf.append("     public String notDefaultMethod(){\n");
+		buf.append("         return \"not default\";\n");
+		buf.append("     }\n");
+		buf.append("    public @interface A_test109 {\n");
+		buf.append("        public String notDefaultIntMet() default \"not default\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+		int offset= cUnit.getSource().indexOf("public String notDefaultMethod");
+		IMethod method= (IMethod)cUnit.getElementAt(offset);
+		Assert.assertFalse(JdtFlags.isStatic(method));
+		Assert.assertFalse(JdtFlags.isAbstract(method));
+		Assert.assertFalse(JdtFlags.isDefaultMethod(method));
+
+		ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		p.setProject(pack1.getJavaProject());
+		p.setBindingsRecovery(true);
+		try {
+			IMethodBinding binding= (IMethodBinding)p.createBindings(new IJavaElement[] { method }, null)[0];
+			Assert.assertFalse(JdtFlags.isStatic(binding));
+			Assert.assertFalse(JdtFlags.isAbstract(binding));
+			Assert.assertFalse(JdtFlags.isDefaultMethod(binding));
+		} catch (OperationCanceledException e) {
+		}
+
+		offset= cUnit.getSource().indexOf("public String notDefaultIntMet");
+		method= (IMethod)cUnit.getElementAt(offset);
+		Assert.assertFalse(JdtFlags.isStatic(method));
+		Assert.assertTrue(JdtFlags.isAbstract(method));
+		Assert.assertFalse(JdtFlags.isDefaultMethod(method));
+
+		p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		p.setProject(pack1.getJavaProject());
+		p.setBindingsRecovery(true);
+		try {
+			IMethodBinding binding= (IMethodBinding)p.createBindings(new IJavaElement[] { method }, null)[0];
+			Assert.assertFalse(JdtFlags.isStatic(binding));
+			Assert.assertTrue(JdtFlags.isAbstract(binding));
+			Assert.assertFalse(JdtFlags.isDefaultMethod(binding));
+		} catch (OperationCanceledException e) {
+		}
 	}
 
 	public void testImplicitAbstractInSrcFile() throws Exception {
