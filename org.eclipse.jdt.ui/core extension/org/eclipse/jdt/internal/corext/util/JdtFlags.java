@@ -66,7 +66,7 @@ public class JdtFlags {
 		int modifiers= method.getModifiers();
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=405517#c7
 		ITypeBinding declaringClass= method.getDeclaringClass();
-		if (declaringClass != null && declaringClass.isInterface()) {
+		if (declaringClass.isInterface()) {
 			return !Modifier.isAbstract(modifiers) && !Modifier.isStatic(modifiers);
 		}
 		return false;
