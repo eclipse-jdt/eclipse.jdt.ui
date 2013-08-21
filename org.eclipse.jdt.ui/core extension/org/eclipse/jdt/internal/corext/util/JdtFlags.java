@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
@@ -91,14 +92,13 @@ public class JdtFlags {
 	public static boolean isStatic(BodyDeclaration bodyDeclaration) {
 		if (isNestedInterfaceOrAnnotation(bodyDeclaration))
 			return true;
-		if (bodyDeclaration.getNodeType() != ASTNode.METHOD_DECLARATION && isInterfaceOrAnnotationMember(bodyDeclaration))
+		int nodeType= bodyDeclaration.getNodeType();
+		if (!(nodeType == ASTNode.METHOD_DECLARATION || nodeType == ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION) &&
+				isInterfaceOrAnnotationMember(bodyDeclaration))
 			return true;
 		if (bodyDeclaration instanceof EnumConstantDeclaration)
 			return true;
-		if (bodyDeclaration instanceof EnumDeclaration &&
-				bodyDeclaration.getParent() != null &&
-				(bodyDeclaration.getParent().getNodeType() == ASTNode.TYPE_DECLARATION ||
-				bodyDeclaration.getParent().getNodeType() == ASTNode.ANNOTATION_TYPE_DECLARATION))
+		if (bodyDeclaration instanceof EnumDeclaration && bodyDeclaration.getParent() instanceof AbstractTypeDeclaration)
 			return true;
 		return Modifier.isStatic(bodyDeclaration.getModifiers());
 	}
@@ -265,24 +265,17 @@ public class JdtFlags {
 	}
 
 	private static boolean isInterfaceOrAnnotationMember(BodyDeclaration bodyDeclaration) {
-		ASTNode parent= bodyDeclaration.getParent();
-		if (parent != null && parent instanceof BodyDeclaration) {
-			return isInterfaceOrAnnotation((BodyDeclaration) parent);
-		}
-		return false;
+		return isInterfaceOrAnnotation(bodyDeclaration.getParent());
 	}
 
-	private static boolean isInterfaceOrAnnotation(BodyDeclaration bodyDeclaration) {
-		boolean isInterface= (bodyDeclaration instanceof TypeDeclaration) && ((TypeDeclaration) bodyDeclaration).isInterface();
-		boolean isAnnotation= bodyDeclaration instanceof AnnotationTypeDeclaration;
+	private static boolean isInterfaceOrAnnotation(ASTNode node) {
+		boolean isInterface= (node instanceof TypeDeclaration) && ((TypeDeclaration) node).isInterface();
+		boolean isAnnotation= node instanceof AnnotationTypeDeclaration;
 		return isInterface || isAnnotation;
 	}
 
 	private static boolean isNestedInterfaceOrAnnotation(BodyDeclaration bodyDeclaration) {
-		ASTNode parent= bodyDeclaration.getParent();
-		return parent != null &&
-				(parent.getNodeType() == ASTNode.TYPE_DECLARATION || parent.getNodeType() == ASTNode.ANNOTATION_TYPE_DECLARATION) &&
-				isInterfaceOrAnnotation(bodyDeclaration);
+		return bodyDeclaration.getParent() instanceof AbstractTypeDeclaration && isInterfaceOrAnnotation(bodyDeclaration);
 	}
 	
 	private static boolean isNestedInterfaceOrAnnotation(IMember member) throws JavaModelException{

@@ -44,9 +44,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
@@ -125,6 +127,24 @@ public class JDTFlagsTest18 extends TestCase {
 
 		MethodDeclaration methodNode= ASTNodeSearchUtil.getMethodDeclarationNode(method, getCompilationUnitNode(buf.toString()));
 		Assert.assertTrue(JdtFlags.isStatic(methodNode));
+	}
+
+	public void testNestedEnumInEnum() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("enum Snippet {\n");
+		buf.append("    A;\n");
+		buf.append("    enum E {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+		int offset= cUnit.getSource().indexOf("enum E");
+		IJavaElement elem= cUnit.getElementAt(offset);
+		EnumDeclaration enumNode= ASTNodeSearchUtil.getEnumDeclarationNode((IType)elem, getCompilationUnitNode(buf.toString()));
+		Assert.assertTrue(JdtFlags.isStatic(enumNode));
+		Assert.assertTrue(JdtFlags.isStatic((IType)elem));
 	}
 
 	public void testNestedEnumInInterface() throws Exception {
@@ -433,4 +453,28 @@ public class JDTFlagsTest18 extends TestCase {
 		Assert.assertTrue(JdtFlags.isAbstract(method));
 	}
 
+	public void testIsStaticAnnotationType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public @interface Snippet {\n");
+		buf.append("    int i= 0;\n");
+		buf.append("    public String name();\n");
+		buf.append("}\n");
+		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+		CompilationUnit cuNode= getCompilationUnitNode(buf.toString());
+
+		int offset= cUnit.getSource().indexOf("i=");
+		IJavaElement elem= cUnit.getElementAt(offset);
+		FieldDeclaration field= ASTNodeSearchUtil.getFieldDeclarationNode((IField)elem, cuNode);
+		Assert.assertTrue(JdtFlags.isStatic(field));
+		Assert.assertTrue(JdtFlags.isStatic((IField)elem));
+
+		offset= cUnit.getSource().indexOf("name");
+		elem= cUnit.getElementAt(offset);
+		AnnotationTypeMemberDeclaration annotationMember= ASTNodeSearchUtil.getAnnotationTypeMemberDeclarationNode((IMethod)elem, cuNode);
+		Assert.assertFalse(JdtFlags.isStatic(annotationMember));
+		Assert.assertFalse(JdtFlags.isStatic((IMethod)elem));
+	}
 }
