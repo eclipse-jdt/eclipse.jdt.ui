@@ -16,7 +16,6 @@
     <groupId>eclipse.jdt.ui</groupId>
     <version>4.4.0-SNAPSHOT</version>
   </parent>
-  <groupId>org.eclipse.jdt</groupId>
   <artifactId>tests-pom</artifactId>
   <version>4.4.0-SNAPSHOT</version>
   <packaging>pom</packaging>
