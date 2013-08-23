@@ -280,10 +280,10 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 								ASTNode node= nameNode.getParent();
 								boolean isDirectlyAccessible= false;
 								while (node != null) {
-									if (node instanceof AbstractTypeDeclaration && declaringClass.equals(((AbstractTypeDeclaration) node).resolveBinding())) {
+									if (node instanceof AbstractTypeDeclaration && ((AbstractTypeDeclaration) node).resolveBinding().isAssignmentCompatible(declaringClass)) {
 										isDirectlyAccessible= true;
 										break;
-									} else if (node instanceof AnonymousClassDeclaration && declaringClass.equals(((AnonymousClassDeclaration) node).resolveBinding())) {
+									} else if (node instanceof AnonymousClassDeclaration && ((AnonymousClassDeclaration) node).resolveBinding().isAssignmentCompatible(declaringClass)) {
 										isDirectlyAccessible= true;
 										break;
 									}

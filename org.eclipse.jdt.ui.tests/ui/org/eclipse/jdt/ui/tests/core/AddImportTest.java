@@ -1159,6 +1159,50 @@ public class AddImportTest extends CoreTests {
 		assertEqualString(cu.getSource(), cu.getSource());
 	}
 	
+	public void testAddImportActionBug_409594_test6() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
+		String inputA=
+				"package q;\n" +
+						"\n" +
+						"public class A {\n" +
+						"	protected static void bar() {\n" +
+						"	}\n" +
+						"}";
+		String inputB=
+				"package p;\n" +
+						"\n" +
+						"import q.A;\n" +
+						"\n" +
+						"class B extends A {\n" +
+						"	void foo() {\n" +
+						"		A.bar();\n" +
+						"	}\n" +
+						"}\n" +
+						"";
+		pack1.createCompilationUnit("A.java", inputA, false, null);
+		ICompilationUnit cuB= pack1.createCompilationUnit("B.java", inputB, false, null);
+
+		int selOffset= inputB.indexOf("bar");
+
+		AddImportsOperation op= new AddImportsOperation(cuB, selOffset, 3, null, true);
+		op.run(null);
+
+		String expected=
+				"package p;\n" +
+						"\n" +
+						"import q.A;\n" +
+						"\n" +
+						"class B extends A {\n" +
+						"	void foo() {\n" +
+						"		bar();\n" +
+						"	}\n" +
+						"}\n" +
+						"";
+		assertEqualString(cuB.getSource(), expected);
+	}
+	
 	public void testAddImports_bug107206() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
