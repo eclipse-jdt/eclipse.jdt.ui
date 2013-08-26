@@ -19,16 +19,7 @@
   <artifactId>tests-pom</artifactId>
   <version>4.4.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-compiler-plugin</artifactId>
-        <version>${tycho.version}</version>
-        <configuration>
-          <compilerArgument>${tests.ignoredWarnings}</compilerArgument>
-        </configuration>
-      </plugin>
-    </plugins>
- </build>
+  <properties>
+    <code.ignoredWarnings>${tests.ignoredWarnings}</code.ignoredWarnings>
+  </properties>
 </project>
