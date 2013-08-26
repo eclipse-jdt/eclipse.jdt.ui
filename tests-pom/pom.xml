@@ -26,9 +26,7 @@
         <artifactId>tycho-compiler-plugin</artifactId>
         <version>${tycho.version}</version>
         <configuration>
-          <compilerArgs>
-            <arg>-warn:-discouraged</arg>
-          </compilerArgs>
+          <compilerArgument>${tests.ignoredWarnings}</compilerArgument>
         </configuration>
       </plugin>
     </plugins>
