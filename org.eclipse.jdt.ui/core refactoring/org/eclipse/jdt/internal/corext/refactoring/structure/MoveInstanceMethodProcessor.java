@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] super method invocation does not compile after refactoring - https://bugs.eclipse.org/356687
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -1875,7 +1876,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *             if a problem occurred while creating the inlined target
 	 *             expression for field targets
 	 */
-	protected boolean createInlinedMethodInvocation(final CompilationUnitRewrite rewriter, final MethodDeclaration declaration, final SearchMatch match, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final boolean target, final RefactoringStatus status) throws JavaModelException {
+	protected boolean createInlinedMethodInvocation(final CompilationUnitRewrite rewriter, final MethodDeclaration declaration, final SearchMatch match,
+			final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final boolean target, final RefactoringStatus status) throws JavaModelException {
 		Assert.isNotNull(rewriter);
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(match);
@@ -1885,7 +1887,47 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		final ASTRewrite rewrite= rewriter.getASTRewrite();
 		final ASTNode node= ASTNodeSearchUtil.findNode(match, rewriter.getRoot());
 		final TextEditGroup group= rewriter.createGroupDescription(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_method_invocation);
-		if (node instanceof MethodInvocation) {
+		if (node instanceof SuperMethodInvocation) {
+			SuperMethodInvocation invocation= (SuperMethodInvocation) node;
+			MethodInvocation newMethodInvocation= rewrite.getAST().newMethodInvocation();
+			newMethodInvocation.setName(rewrite.getAST().newSimpleName(fMethodName));
+			if (fTarget.isField()) {
+				newMethodInvocation.setStructuralProperty(MethodInvocation.EXPRESSION_PROPERTY, rewrite.getAST().newSimpleName(fTarget.getName()));
+				if (target) {
+					newMethodInvocation.arguments().add(rewrite.getAST().newThisExpression());
+				}
+				for (ASTNode astNode : (List<ASTNode>) invocation.arguments()) {
+					newMethodInvocation.arguments().add(rewrite.createCopyTarget(astNode));
+				}
+			} else {
+				final IVariableBinding[] bindings= getArgumentBindings(declaration);
+				List<ASTNode> arguments= invocation.arguments();
+				for (int i= 0; i < arguments.size(); i++) {
+					ASTNode arg= arguments.get(i);
+					if (bindings.length > i && Bindings.equals(bindings[i], fTarget)) {
+						if (arg.getNodeType() == ASTNode.NULL_LITERAL) {
+							status.merge(RefactoringStatus.createErrorStatus(
+									Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_null_argument,
+											BindingLabelProvider.getBindingLabel(declaration.resolveBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED)),
+											JavaStatusContext.create(rewriter.getCu(), invocation)));
+							result= false;
+						} else {
+							if (arg.getNodeType() != ASTNode.THIS_EXPRESSION) {
+								newMethodInvocation.setStructuralProperty(MethodInvocation.EXPRESSION_PROPERTY, rewrite.createCopyTarget(arg));
+							}
+							if (target) {
+								newMethodInvocation.arguments().add(rewrite.getAST().newThisExpression());
+							}
+						}
+					} else {
+						newMethodInvocation.arguments().add(rewrite.createCopyTarget(arg));
+					}
+				}
+			}
+			if (result) {
+				rewrite.replace(node, newMethodInvocation, group);
+			}
+		} else if (node instanceof MethodInvocation) {
 			final MethodInvocation invocation= (MethodInvocation) node;
 			final ListRewrite list= rewrite.getListRewrite(invocation, MethodInvocation.ARGUMENTS_PROPERTY);
 			if (fTarget.isField()) {

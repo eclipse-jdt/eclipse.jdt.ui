@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] super method invocation does not compile after refactoring - https://bugs.eclipse.org/356687
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -475,6 +476,51 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		helper1(new String[] { "p.A", "p.B", "q.C" }, "p.B", 3, 17, 3, 17, PARAMETER, "c", true, true);
 	}
 	
+	//bug 356687
+	public void test49() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 5, 10, 5, 11, FIELD, "b", true, true);
+	}
+	
+	//bug 356687
+	public void test50() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 4, 10, 4, 11, PARAMETER, "b", true, true);
+	}
+
+	//bug 356687
+	public void test51() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 4, 10, 4, 11, PARAMETER, "b", true, true);
+	}
+
+	//bug 356687
+	public void test52() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 5, 10, 5, 11, FIELD, "b", true, true);
+	}
+	
+	//bug 356687
+	public void test53() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 4, 10, 4, 11, PARAMETER, "b", true, true);
+	}
+	
+	//bug 356687
+	public void test54() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 4, 15, 4, 16, PARAMETER, "b", false, false);
+	}
+	
+	//bug 356687
+	public void test55() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 4, 17, 4, 18, FIELD, "b", true, true);
+	}
+	
+	//bug 356687
+	public void test56() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 3, 17, 3, 18, PARAMETER, "b", true, true);
+	}
+	
+	//bug 356687
+	public void test57() throws Exception {
+		helper1(new String[] { "p.A" }, "p.A", 5, 17, 5, 18, PARAMETER, "b", true, true);
+	}
+
 	// Move mA1 to field fB, do not inline delegator
 	public void test3() throws Exception {
 		helper1(new String[] { "p1.A", "p2.B", "p3.C"}, "p1.A", 9, 17, 9, 20, FIELD, "fB", false, false);
