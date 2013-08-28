@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] super method invocation does not compile after refactoring - https://bugs.eclipse.org/356687
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Move method with static imported method calls introduces compiler error - https://bugs.eclipse.org/217753
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -519,6 +520,36 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	//bug 356687
 	public void test57() throws Exception {
 		helper1(new String[] { "p.A" }, "p.A", 5, 17, 5, 18, PARAMETER, "b", true, true);
+	}
+
+	//bug 217753
+	public void test58() throws Exception {
+		helper1(new String[] { "p.A", "p.B" }, "p.A", 8, 25, 8, 28, PARAMETER, "b", true, true);
+	}
+
+	// bug 217753
+	public void test59() throws Exception {
+		helper1(new String[] { "p.A", "p.B" }, "p.A", 5, 14, 5, 15, PARAMETER, "b", true, true);
+	}
+
+	// bug 217753
+	public void test60() throws Exception {
+		helper1(new String[] { "p.A" }, "p.A", 5, 14, 5, 15, PARAMETER, "b", true, true);
+	}
+
+	// bug 217753
+	public void test61() throws Exception {
+		helper1(new String[] { "p.A" }, "p.A", 5, 14, 5, 15, PARAMETER, "b", true, true);
+	}
+
+	// bug 217753
+	public void test62() throws Exception {
+		helper1(new String[] { "p.A", "q.B" }, "p.A", 8, 14, 8, 15, PARAMETER, "c", true, true);
+	}
+
+	// bug 217753
+	public void test63() throws Exception {
+		helper1(new String[] { "A" }, "A", 2, 10, 2, 11, PARAMETER, "b", true, true);
 	}
 
 	// Move mA1 to field fB, do not inline delegator

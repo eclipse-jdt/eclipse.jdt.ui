@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] super method invocation does not compile after refactoring - https://bugs.eclipse.org/356687
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Move method with static imported method calls introduces compiler error - https://bugs.eclipse.org/217753
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -585,8 +586,15 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					final AST ast= node.getAST();
 					if (!JdtFlags.isStatic(method))
 						rewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, ast.newSimpleName(fTargetName), null);
-					else
-						rewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, ast.newSimpleType(ast.newSimpleName(fMethod.getDeclaringType().getElementName())), null);
+					else if (!fStaticImports.contains(method)) {
+						ITypeBinding declaring= method.getDeclaringClass();
+						if (declaring != null) {
+							IType type= (IType) declaring.getJavaElement();
+							if (type != null) {
+								rewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, ast.newName(type.getTypeQualifiedName('.')), null);
+							}
+						}
+					}
 					return true;
 				} else {
 					if (expression instanceof FieldAccess) {
