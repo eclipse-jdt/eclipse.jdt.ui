@@ -331,16 +331,17 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		
 		int indent= LayoutUtil.getIndent();
 
-		String[] versions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6, VERSION_1_7 };
+		String[] versions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8 };
 		String[] versionsLabels= new String[] {
-			PreferencesMessages.ComplianceConfigurationBlock_versionCLDC11,
-			PreferencesMessages.ComplianceConfigurationBlock_version11,
-			PreferencesMessages.ComplianceConfigurationBlock_version12,
-			PreferencesMessages.ComplianceConfigurationBlock_version13,
-			PreferencesMessages.ComplianceConfigurationBlock_version14,
-			PreferencesMessages.ComplianceConfigurationBlock_version15,
-			PreferencesMessages.ComplianceConfigurationBlock_version16,
-			PreferencesMessages.ComplianceConfigurationBlock_version17
+				PreferencesMessages.ComplianceConfigurationBlock_versionCLDC11,
+				PreferencesMessages.ComplianceConfigurationBlock_version11,
+				PreferencesMessages.ComplianceConfigurationBlock_version12,
+				PreferencesMessages.ComplianceConfigurationBlock_version13,
+				PreferencesMessages.ComplianceConfigurationBlock_version14,
+				PreferencesMessages.ComplianceConfigurationBlock_version15,
+				PreferencesMessages.ComplianceConfigurationBlock_version16,
+				PreferencesMessages.ComplianceConfigurationBlock_version17,
+				PreferencesMessages.ComplianceConfigurationBlock_version18
 		};
 
 		boolean showJsr14= ComplianceConfigurationBlock.VERSION_JSR14.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM));
