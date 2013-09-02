@@ -35,6 +35,7 @@ public final class FixMessages extends NLS {
 	public static String CleanUpRefactoring_Refactoring_name;
 	public static String CleanUpRefactoring_ProcessingCompilationUnit_message;
 	public static String CleanUpRefactoring_Initialize_message;
+	public static String CleanUpRefactoring_exception;
 
 	public static String CleanUpRegistry_ErrorTabPage_description;
 	public static String CleanUpRegistry_ErrorTabPage_preview;
