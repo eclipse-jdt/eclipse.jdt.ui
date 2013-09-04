@@ -13,9 +13,10 @@ package org.eclipse.jdt.ui.tests.packageHover;
 import java.io.File;
 import java.net.URL;
 
-import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.junit.Assert;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;

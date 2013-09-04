@@ -16,9 +16,10 @@ package org.eclipse.jdt.ui.tests.core.source;
 
 import java.util.ArrayList;
 
-import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.junit.Assert;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
