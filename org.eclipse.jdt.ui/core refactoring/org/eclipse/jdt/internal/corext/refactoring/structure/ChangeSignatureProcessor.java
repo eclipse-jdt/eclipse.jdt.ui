@@ -895,8 +895,11 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 		int flags= getMethod().getFlags();
 		buff.append(getVisibilityString(flags));
-		if (Flags.isStatic(flags))
+		if (Flags.isStatic(flags)) {
 			buff.append("static "); //$NON-NLS-1$
+		} else if (Flags.isDefaultMethod(flags)) {
+			buff.append("default "); //$NON-NLS-1$
+		}
 		if (! getMethod().isConstructor())
 			buff.append(fReturnTypeInfo.getOldTypeName())
 				.append(' ');
@@ -917,8 +920,12 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		StringBuffer buff= new StringBuffer();
 
 		buff.append(getVisibilityString(fVisibility));
-		if (Flags.isStatic(getMethod().getFlags()))
+		int flags= getMethod().getFlags();
+		if (Flags.isStatic(flags)) {
 			buff.append("static "); //$NON-NLS-1$
+		} else if (Flags.isDefaultMethod(flags)) {
+			buff.append("default "); //$NON-NLS-1$
+		}
 		if (! getMethod().isConstructor())
 			buff.append(getReturnTypeString())
 				.append(' ');
