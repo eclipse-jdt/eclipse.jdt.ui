@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -31,6 +35,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -64,6 +69,7 @@ import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -86,10 +92,12 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
@@ -198,11 +206,30 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 	//---- Activation checking ---------------------------------------------------------------------------
 
+	boolean isValidDestination(ASTNode node) {
+		boolean isInterface= node instanceof TypeDeclaration && ((TypeDeclaration) node).isInterface();
+		return !(node instanceof AnnotationTypeDeclaration) &&
+				!(isInterface && !JavaModelUtil.is18OrHigher(fCUnit.getJavaProject()));
+	}
+
 	public RefactoringStatus checkInitialConditions(ImportRewrite rewriter) {
 		RefactoringStatus result= getStatus();
 		checkExpression(result);
 		if (result.hasFatalError())
 			return result;
+
+		List<ASTNode> validDestinations= new ArrayList<ASTNode>();
+		ASTNode destination= ASTResolving.findParentType(fEnclosingBodyDeclaration.getParent());
+		while (destination != null) {
+			if (isValidDestination(destination)) {
+				validDestinations.add(destination);
+			}
+			destination= ASTResolving.findParentType(destination.getParent());
+		}
+		if (validDestinations.size() == 0) {
+			result.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_no_valid_destination_type);
+			return result;
+		}
 
 		fReturnKind= UNDEFINED;
 		fMaxVariableId= LocalVariableIndex.perform(fEnclosingBodyDeclaration);
@@ -318,7 +345,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		ITypeBinding[] arguments= getArgumentTypes();
 		ITypeBinding type= ASTNodes.getEnclosingType(destination);
 		status.merge(Checks.checkMethodInType(type, methodName, arguments));
-		status.merge(Checks.checkMethodInHierarchy(type.getSuperclass(), methodName, null, arguments));
+		ITypeBinding superClass= type.getSuperclass();
+		if (superClass != null) {
+			status.merge(Checks.checkMethodInHierarchy(superClass, methodName, null, arguments));			
+		}
+		for (ITypeBinding superInterface : type.getInterfaces()) {
+			status.merge(Checks.checkMethodInHierarchy(superInterface, methodName, null, arguments));
+		}
 	}
 
 	private ITypeBinding[] getArgumentTypes() {

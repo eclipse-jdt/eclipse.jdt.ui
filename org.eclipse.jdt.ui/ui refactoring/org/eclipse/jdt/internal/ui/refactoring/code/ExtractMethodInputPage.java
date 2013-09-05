@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -24,6 +28,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -70,6 +75,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 	private boolean fFirstTime;
 	private JavaSourceViewer fSignaturePreview;
 	private IDialogSettings fSettings;
+	private Composite accessModifiersGroup;
 
 	private static final String DESCRIPTION = RefactoringMessages.ExtractMethodInputPage_description;
 	private static final String THROW_RUNTIME_EXCEPTIONS= "ThrowRuntimeExceptions"; //$NON-NLS-1$
@@ -121,6 +127,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fRefactoring.setDestination(combo.getSelectionIndex());
+					updateAccessModifiers();
 					updatePreview(getText());
 				}
 			});
@@ -129,11 +136,11 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		label= new Label(result, SWT.NONE);
 		label.setText(RefactoringMessages.ExtractMethodInputPage_access_Modifiers);
 
-		Composite group= new Composite(result, SWT.NONE);
-		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		accessModifiersGroup= new Composite(result, SWT.NONE);
+		accessModifiersGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		layout= new GridLayout();
 		layout.numColumns= 4; layout.marginWidth= 0;
-		group.setLayout(layout);
+		accessModifiersGroup.setLayout(layout);
 
 		String[] labels= new String[] {
 			RefactoringMessages.ExtractMethodInputPage_public,
@@ -144,7 +151,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		Integer[] data= new Integer[] {new Integer(Modifier.PUBLIC), new Integer(Modifier.PROTECTED), new Integer(Modifier.NONE), new Integer(Modifier.PRIVATE)};
 		Integer visibility= new Integer(fRefactoring.getVisibility());
 		for (int i= 0; i < labels.length; i++) {
-			Button radio= new Button(group, SWT.RADIO);
+			Button radio= new Button(accessModifiersGroup, SWT.RADIO);
 			radio.setText(labels[i]);
 			radio.setData(data[i]);
 			if (data[i].equals(visibility))
@@ -158,7 +165,8 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 				}
 			});
 		}
-		layouter.perform(label, group, 1);
+		updateAccessModifiers();
+		layouter.perform(label, accessModifiersGroup, 1);
 
 		if (!fRefactoring.getParameterInfos().isEmpty()) {
 			ChangeParametersControl cp= new ChangeParametersControl(result, SWT.NONE,
@@ -234,7 +242,35 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		Dialog.applyDialogFont(result);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_METHOD_WIZARD_PAGE);
 	}
-
+	
+	private void updateAccessModifiers() {
+		final Control[] radioButtons= accessModifiersGroup.getChildren();
+		if (fRefactoring.isDestinationInterface()) {
+			Integer visibility= new Integer(Modifier.PUBLIC);
+			fRefactoring.setVisibility(visibility.intValue());
+			for (int i= 0; i < radioButtons.length; i++) {
+				radioButtons[i].setEnabled(false);
+				if (radioButtons[i].getData().equals(visibility)) {
+					((Button) radioButtons[i]).setSelection(true);
+				} else {
+					((Button) radioButtons[i]).setSelection(false);
+				}
+			}
+		} else {
+			final String accessModifier= fSettings.get(ACCESS_MODIFIER);
+			Integer visibility= accessModifier != null ? new Integer(accessModifier) : new Integer(fRefactoring.getVisibility());
+			fRefactoring.setVisibility(visibility.intValue());
+			for (int i= 0; i < radioButtons.length; i++) {
+				radioButtons[i].setEnabled(true);
+				if (radioButtons[i].getData().equals(visibility)) {
+					((Button) radioButtons[i]).setSelection(true);
+				} else {
+					((Button) radioButtons[i]).setSelection(false);
+				}
+			}
+		}
+	}
+	
 	private String getLabel(ASTNode node) {
 		if (node instanceof AbstractTypeDeclaration) {
 			return ((AbstractTypeDeclaration)node).getName().getIdentifier();

@@ -531,7 +531,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			TextEditGroup insertDesc= new TextEditGroup(Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_add_method, BasicElementLabels.getJavaElementName(fMethodName)));
 			result.addTextEditGroup(insertDesc);
 
-			if (fDestination == fDestinations[0]) {
+			if (fDestination == ASTResolving.findParentType(declaration.getParent())) {
 				ChildListPropertyDescriptor desc= (ChildListPropertyDescriptor)declaration.getLocationInParent();
 				ListRewrite container= fRewriter.getListRewrite(declaration.getParent(), desc);
 				container.insertAfter(mm, declaration, insertDesc);
@@ -744,6 +744,10 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return fGenerateJavadoc;
 	}
 
+	public boolean isDestinationInterface() {
+		return fDestination instanceof TypeDeclaration && ((TypeDeclaration) fDestination).isInterface();
+	}
+
 	//---- Helper methods ------------------------------------------------------------------------
 
 	private void initializeParameterInfos() {
@@ -792,27 +796,24 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private void initializeDestinations() {
 		List<ASTNode> result= new ArrayList<ASTNode>();
 		BodyDeclaration decl= fAnalyzer.getEnclosingBodyDeclaration();
-		ASTNode current= getNextParent(decl);
-		result.add(current);
-		if (decl instanceof MethodDeclaration || decl instanceof Initializer || decl instanceof FieldDeclaration) {
+		ASTNode current= ASTResolving.findParentType(decl.getParent());
+		if (fAnalyzer.isValidDestination(current)) {
+			result.add(current);
+		}
+		if (current != null && (decl instanceof MethodDeclaration || decl instanceof Initializer || decl instanceof FieldDeclaration)) {
 			ITypeBinding binding= ASTNodes.getEnclosingType(current);
-			ASTNode next= getNextParent(current);
+			ASTNode next= ASTResolving.findParentType(current.getParent());
 			while (next != null && binding != null && binding.isNested()) {
-				result.add(next);
+				if (fAnalyzer.isValidDestination(next)) {
+					result.add(next);
+				}
 				current= next;
 				binding= ASTNodes.getEnclosingType(current);
-				next= getNextParent(next);
+				next= ASTResolving.findParentType(next.getParent());
 			}
 		}
 		fDestinations= result.toArray(new ASTNode[result.size()]);
 		fDestination= fDestinations[fDestinationIndex];
-	}
-
-	private ASTNode getNextParent(ASTNode node) {
-		do {
-			node= node.getParent();
-		} while (node != null && !(node instanceof AbstractTypeDeclaration || node instanceof AnonymousClassDeclaration));
-		return node;
 	}
 
 	private RefactoringStatus mergeTextSelectionStatus(RefactoringStatus status) {
@@ -977,18 +978,27 @@ public class ExtractMethodRefactoring extends Refactoring {
 		MethodDeclaration result= fAST.newMethodDeclaration();
 
 		int modifiers= fVisibility;
-		ASTNode enclosingBodyDeclaration= fAnalyzer.getEnclosingBodyDeclaration();
-		while (enclosingBodyDeclaration != null && enclosingBodyDeclaration.getParent() != fDestination) {
-			enclosingBodyDeclaration= enclosingBodyDeclaration.getParent();
+		BodyDeclaration enclosingBodyDeclaration= fAnalyzer.getEnclosingBodyDeclaration();
+		boolean isDestinationInterface= isDestinationInterface();
+		if (isDestinationInterface && !(enclosingBodyDeclaration instanceof MethodDeclaration &&
+				enclosingBodyDeclaration.getParent() == fDestination &&
+				Modifier.isPublic(enclosingBodyDeclaration.getModifiers()))) {
+			modifiers= Modifier.NONE;
 		}
-		if (enclosingBodyDeclaration instanceof BodyDeclaration) { // should always be the case
-			int enclosingModifiers= ((BodyDeclaration)enclosingBodyDeclaration).getModifiers();
-			boolean shouldBeStatic= Modifier.isStatic(enclosingModifiers)
-					|| enclosingBodyDeclaration instanceof EnumDeclaration
-					|| fAnalyzer.getForceStatic();
-			if (shouldBeStatic) {
-				modifiers|= Modifier.STATIC;
+
+		boolean shouldBeStatic= false;
+		ASTNode currentParent= enclosingBodyDeclaration;
+		do {
+			if (currentParent instanceof BodyDeclaration) {
+				shouldBeStatic= shouldBeStatic || JdtFlags.isStatic((BodyDeclaration) currentParent);
 			}
+			currentParent= currentParent.getParent();
+		} while (!shouldBeStatic && currentParent != null && currentParent != fDestination);
+
+		if (shouldBeStatic || fAnalyzer.getForceStatic()) {
+			modifiers|= Modifier.STATIC;
+		} else if (isDestinationInterface) {
+			modifiers|= Modifier.DEFAULT;
 		}
 
 		ITypeBinding[] typeVariables= computeLocalTypeVariables();

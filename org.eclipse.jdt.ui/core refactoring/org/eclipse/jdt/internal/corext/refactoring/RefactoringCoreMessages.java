@@ -565,6 +565,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodAnalyzer_leftHandSideOfAssignment;
 
+	public static String ExtractMethodAnalyzer_no_valid_destination_type;
+
 	public static String ExtractMethodAnalyzer_only_method_body;
 
 	public static String ExtractMethodAnalyzer_parent_mismatch;

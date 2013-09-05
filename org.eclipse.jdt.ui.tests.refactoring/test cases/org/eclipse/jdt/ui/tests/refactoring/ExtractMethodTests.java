@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -84,11 +88,15 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 
 	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder, String[] newNames, int[] newOrder, int destination) throws Exception {
+		performTest(packageFragment, id, mode, outputFolder, newNames, newOrder, destination, Modifier.PROTECTED);
+	}
+
+	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder, String[] newNames, int[] newOrder, int destination, int visibility) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		int[] selection= getSelection();
 		ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(unit, selection[0], selection[1]);
 		refactoring.setMethodName("extracted");
-		refactoring.setVisibility(Modifier.PROTECTED);
+		refactoring.setVisibility(visibility);
 		TestModelProvider.clearDelta();
 		RefactoringStatus status= refactoring.checkInitialConditions(new NullProgressMonitor());
 		switch (mode) {
@@ -1971,6 +1979,22 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 
 	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=318609
 	public void test1058() throws Exception {
+		destinationTest(2);
+	}
+	
+	public void test1059() throws Exception {
+		destinationTest(0);
+	}
+	
+	public void test1060() throws Exception {
+		destinationTest(1);
+	}
+	
+	public void test1061() throws Exception {
+		destinationTest(1);
+	}
+	
+	public void test1062() throws Exception {
 		destinationTest(2);
 	}
 	
