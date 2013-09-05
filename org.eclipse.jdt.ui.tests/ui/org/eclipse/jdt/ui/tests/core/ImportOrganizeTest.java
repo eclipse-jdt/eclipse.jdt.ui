@@ -4,6 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -76,7 +80,7 @@ public class ImportOrganizeTest extends CoreTests {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
-	private IChooseImportQuery createQuery(final String name, final String[] choices, final int[] nEntries) {
+	protected IChooseImportQuery createQuery(final String name, final String[] choices, final int[] nEntries) {
 		return new IChooseImportQuery() {
 			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
 				assertTrue(name + "-query-nchoices1", choices.length == openChoices.length);
@@ -3209,12 +3213,12 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 
 
-	private OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) {
+	protected OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) {
 		setOrganizeImportSettings(order, threshold, threshold, cu.getJavaProject());
 		return new OrganizeImportsOperation(cu, null, ignoreLowerCaseNames, save, allowSyntaxErrors, chooseImportQuery);
 	}
 
-	private void setOrganizeImportSettings(String[] order, int threshold, int staticThreshold, IJavaProject project) {
+	protected void setOrganizeImportSettings(String[] order, int threshold, int staticThreshold, IJavaProject project) {
 		IEclipsePreferences scope= new ProjectScope(project.getProject()).getNode(JavaUI.ID_PLUGIN);
 		if (order == null) {
 			scope.remove(PreferenceConstants.ORGIMPORTS_IMPORTORDER);
