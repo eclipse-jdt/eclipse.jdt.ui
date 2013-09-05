@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -488,21 +492,24 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 	private RefactoringStatus checkFieldsForInterface() throws JavaModelException {
 		//could be more clever and make field final if it is only written once...
+		boolean is18OrHigher= JavaModelUtil.is18OrHigher(getDeclaringType().getJavaProject());
+		String moveMembersMsg= is18OrHigher ? RefactoringCoreMessages.MoveMembersRefactoring_only_public_static_18 : RefactoringCoreMessages.MoveMembersRefactoring_only_public_static;
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < fMembersToMove.length; i++) {
-			if (! canMoveToInterface(fMembersToMove[i])) {
-				String message= RefactoringCoreMessages.MoveMembersRefactoring_only_public_static;
-				result.addError(message, JavaStatusContext.create(fMembersToMove[i]));
+			if (!canMoveToInterface(fMembersToMove[i], is18OrHigher)) {
+				result.addError(moveMembersMsg, JavaStatusContext.create(fMembersToMove[i]));
+			} else if (!Flags.isPublic(fMembersToMove[i].getFlags())) {
+				result.addWarning(moveMembersMsg, JavaStatusContext.create(fMembersToMove[i]));
 			}
 		}
 		return result;
 	}
 
-	private boolean canMoveToInterface(IMember member) throws JavaModelException {
+	private boolean canMoveToInterface(IMember member, boolean is18OrHigher) throws JavaModelException {
 		int flags= member.getFlags();
 		switch (member.getElementType()) {
 			case IJavaElement.FIELD:
-				if (!(Flags.isPublic(flags) && Flags.isStatic(flags) && Flags.isFinal(flags)))
+				if (!(Flags.isStatic(flags) && Flags.isFinal(flags)))
 					return false;
 				if (Flags.isEnum(flags))
 					return false;
@@ -514,7 +521,10 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				IType type= (IType) member;
 				if (type.isInterface() && !Checks.isTopLevel(type))
 					return true;
-				return Flags.isPublic(flags) && Flags.isStatic(flags);
+				return Flags.isStatic(flags);
+			}
+			case IJavaElement.METHOD: {
+				return is18OrHigher && Flags.isStatic(flags);
 			}
 			default:
 				return false;
@@ -943,6 +953,12 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					int psModifiers= Modifier.PUBLIC | Modifier.STATIC;
 					if ((typeDecl.getModifiers() & psModifiers) != psModifiers) {
 						ModifierRewrite.create(fSource.getASTRewrite(), typeDecl).setModifiers(typeDecl.getModifiers() | psModifiers, null);
+					}
+				} else if (declaration instanceof MethodDeclaration) {
+					MethodDeclaration methodDecl= (MethodDeclaration) declaration;
+					int psModifiers= Modifier.PUBLIC | Modifier.STATIC;
+					if ((methodDecl.getModifiers() & psModifiers) != psModifiers) {
+						ModifierRewrite.create(fSource.getASTRewrite(), methodDecl).setModifiers(methodDecl.getModifiers() | psModifiers, null);
 					}
 				}
 			}
