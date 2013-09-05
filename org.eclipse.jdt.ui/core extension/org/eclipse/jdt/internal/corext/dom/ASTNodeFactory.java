@@ -4,6 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and
+ * is made available for testing and evaluation purposes only.
+ * The code is not compatible with any specification of the JCP.
  *
  * This is an implementation of an early-draft specification developed under the Java
  * Community Process (JCP) and is made available for testing and evaluation purposes
@@ -27,9 +31,11 @@ import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -42,6 +48,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
@@ -175,8 +182,27 @@ public class ASTNodeFactory {
 	 * @since 3.7.1
 	 */
 	public static Type newType(AST ast, VariableDeclaration declaration, ImportRewrite importRewrite, ImportRewriteContext context) {
-		Type type= ASTNodes.getType(declaration);
+		if (declaration instanceof VariableDeclarationFragment && declaration.getParent() instanceof LambdaExpression) {
+			LambdaExpression lambdaExpr= (LambdaExpression) declaration.getParent();
+			IMethodBinding method= lambdaExpr.resolveMethodBinding();
+			if (method != null) {
+				ITypeBinding[] parameterTypes= method.getParameterTypes();
+				int index= lambdaExpr.parameters().indexOf(declaration);
+				ITypeBinding typeBinding= parameterTypes[index];
+				if (importRewrite != null) {
+					return importRewrite.addImport(typeBinding, ast, context);
+				} else {
+					String qualifiedName= typeBinding.getQualifiedName();
+					if (qualifiedName.length() > 0) {
+						return newType(ast, qualifiedName);
+					}
+				}
+			}
+			// fall-back
+			return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+		}
 
+		Type type= ASTNodes.getType(declaration);
 		if (declaration instanceof SingleVariableDeclaration) {
 			Type type2= ((SingleVariableDeclaration) declaration).getType();
 			if (type2 instanceof UnionType) {

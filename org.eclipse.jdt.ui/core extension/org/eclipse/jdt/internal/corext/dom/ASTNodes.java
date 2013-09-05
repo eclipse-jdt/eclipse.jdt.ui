@@ -277,8 +277,10 @@ public class ASTNodes {
 
 	/**
 	 * Returns the type node for the given declaration.
+	 * 
 	 * @param declaration the declaration
-	 * @return the type node
+	 * @return the type node or <code>null</code> if the given declaration represents a type
+	 *         inferred parameter in lambda expression
 	 */
 	public static Type getType(VariableDeclaration declaration) {
 		if (declaration instanceof SingleVariableDeclaration) {
