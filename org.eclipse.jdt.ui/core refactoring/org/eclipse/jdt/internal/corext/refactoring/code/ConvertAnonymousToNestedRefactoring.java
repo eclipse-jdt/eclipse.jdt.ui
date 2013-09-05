@@ -780,7 +780,6 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
 		for (int i= 0; i < varBindings.length; i++) {
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
-			fragment.setExtraDimensions(0);
 			fragment.setInitializer(null);
 			fragment.setName(ast.newSimpleName(fieldNames[i]));
 			FieldDeclaration field= ast.newFieldDeclaration(fragment);
@@ -859,7 +858,6 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
 		MethodDeclaration newConstructor= ast.newMethodDeclaration();
 		newConstructor.setConstructor(true);
-		newConstructor.setExtraDimensions(0);
 		newConstructor.setJavadoc(null);
 		newConstructor.modifiers().addAll(ASTNodeFactory.newModifiers(ast, fVisibility));
 		newConstructor.setName(ast.newSimpleName(fClassName));

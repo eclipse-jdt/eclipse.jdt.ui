@@ -68,6 +68,7 @@ import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ExtraDimension;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -751,7 +752,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			rewrite.replace(fragment.getParent(), assignment, null);
 			VariableDeclarationFragment newFrag= ast.newVariableDeclarationFragment();
 			newFrag.setName(ast.newSimpleName(fragment.getName().getIdentifier()));
-			newFrag.setExtraDimensions(fragment.getExtraDimensions());
+			copyExtraDimensions(fragment, newFrag);
 
 			VariableDeclarationExpression oldVarDecl= (VariableDeclarationExpression) fragParent;
 
@@ -766,6 +767,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		resultingCollections.add(proposal);
 		return true;
+	}
+
+	private static void copyExtraDimensions(final VariableDeclaration oldVarDeclaration, final VariableDeclaration newVarDeclaration) {
+		final AST ast= newVarDeclaration.getAST();
+		for (int index= 0, n= oldVarDeclaration.extraDimensions().size(); index < n; index++)
+			newVarDeclaration.extraDimensions().add(ASTNode.copySubtree(ast, (ExtraDimension) oldVarDeclaration.extraDimensions().get(index)));
 	}
 
 	private static boolean getConvertStringConcatenationProposals(IInvocationContext context, Collection<ICommandAccess> resultingCollections) {
@@ -2319,7 +2326,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			
 			// create 'for' body element variable
 			VariableDeclarationFragment elementFragment= ast.newVariableDeclarationFragment();
-			elementFragment.setExtraDimensions(parameter.getExtraDimensions());
+			copyExtraDimensions(parameter, elementFragment);
 			elementFragment.setName((SimpleName) rewrite.createCopyTarget(parameter.getName()));
 			
 			SimpleName elementIterName= ast.newSimpleName(iterName);
@@ -2459,7 +2466,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			
 			// create 'for' body element variable
 			VariableDeclarationFragment elementFragment= ast.newVariableDeclarationFragment();
-			elementFragment.setExtraDimensions(parameter.getExtraDimensions());
+			copyExtraDimensions(parameter, elementFragment);
 			elementFragment.setName((SimpleName) rewrite.createCopyTarget(parameter.getName()));
 			
 			SimpleName elementVarName= ast.newSimpleName(varName);

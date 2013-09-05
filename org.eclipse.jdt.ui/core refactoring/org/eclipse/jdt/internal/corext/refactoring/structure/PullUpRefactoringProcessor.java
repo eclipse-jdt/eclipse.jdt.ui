@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -503,7 +507,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final MethodDeclaration newMethod= ast.newMethodDeclaration();
 		newMethod.setBody(createMethodStub(methodToCreateStubFor, ast));
 		newMethod.setConstructor(false);
-		newMethod.setExtraDimensions(methodToCreateStubFor.getExtraDimensions());
+		copyExtraDimensions(methodToCreateStubFor, newMethod);
 		newMethod.modifiers().addAll(ASTNodeFactory.newModifiers(ast, getModifiersWithUpdatedVisibility(sourceMethod, JdtFlags.clearFlag(Modifier.NATIVE | Modifier.ABSTRACT, methodToCreateStubFor.getModifiers()), adjustments, new SubProgressMonitor(monitor, 1), false, status)));
 		newMethod.setName(((SimpleName) ASTNode.copySubtree(ast, methodToCreateStubFor.getName())));
 		final TypeVariableMaplet[] mapping= TypeVariableUtil.composeMappings(TypeVariableUtil.subTypeToSuperType(getDeclaringType(), getDestinationType()), TypeVariableUtil.superTypeToInheritedType(getDestinationType(), ((IType) typeToCreateStubIn.resolveBinding().getJavaElement())));
@@ -1023,7 +1027,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final MethodDeclaration newMethod= targetRewrite.getAST().newMethodDeclaration();
 		newMethod.setBody(null);
 		newMethod.setConstructor(false);
-		newMethod.setExtraDimensions(oldMethod.getExtraDimensions());
+		copyExtraDimensions(oldMethod, newMethod);
 		newMethod.setJavadoc(null);
 		int modifiers= getModifiersWithUpdatedVisibility(sourceMethod, Modifier.ABSTRACT | JdtFlags.clearFlag(Modifier.NATIVE | Modifier.FINAL, sourceMethod.getFlags()), adjustments, monitor, false, status);
 		if (oldMethod.isVarargs())
@@ -1323,7 +1327,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		if (!getDestinationType().isInterface())
 			copyBodyOfPulledUpMethod(sourceRewrite, targetRewrite, sourceMethod, oldMethod, newMethod, mapping, monitor);
 		newMethod.setConstructor(oldMethod.isConstructor());
-		newMethod.setExtraDimensions(oldMethod.getExtraDimensions());
+		copyExtraDimensions(oldMethod, newMethod);
 		copyJavadocNode(rewrite, oldMethod, newMethod);
 		int modifiers= getModifiersWithUpdatedVisibility(sourceMethod, sourceMethod.getFlags(), adjustments, monitor, true, status);
 		if (fDeletedMethods.length == 0 || getDestinationType().isInterface()) {

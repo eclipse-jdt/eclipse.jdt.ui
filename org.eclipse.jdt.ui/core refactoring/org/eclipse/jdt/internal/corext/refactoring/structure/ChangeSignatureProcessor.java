@@ -69,6 +69,7 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExtraDimension;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -1515,7 +1516,6 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		MethodDeclaration newConstructor= ast.newMethodDeclaration();
 		newConstructor.setName(ast.newSimpleName(subclass.getName().getIdentifier()));
 		newConstructor.setConstructor(true);
-		newConstructor.setExtraDimensions(0);
 		newConstructor.setJavadoc(null);
 		newConstructor.modifiers().addAll(ASTNodeFactory.newModifiers(ast, getAccessModifier(subclass)));
 		newConstructor.setReturnType2(ast.newPrimitiveType(PrimitiveType.VOID));
@@ -2083,8 +2083,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 
 		private void removeExtraDimensions(SingleVariableDeclaration oldParam) {
-			if (oldParam.getExtraDimensions() != 0) {
-				getASTRewrite().set(oldParam, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), fDescription);
+			ListRewrite listRewrite= getASTRewrite().getListRewrite(oldParam, SingleVariableDeclaration.EXTRA_DIMENSIONS2_PROPERTY);
+			for (ExtraDimension dimension : (List<ExtraDimension>) oldParam.extraDimensions()) {
+				listRewrite.remove(dimension, fDescription);
 			}
 		}
 
@@ -2098,8 +2099,10 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 
 		private void removeExtraDimensions(MethodDeclaration methDecl) {
-			if (methDecl.getExtraDimensions() != 0)
-				getASTRewrite().set(methDecl, MethodDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), fDescription);
+			ListRewrite listRewrite= getASTRewrite().getListRewrite(methDecl, MethodDeclaration.EXTRA_DIMENSIONS2_PROPERTY);
+			for (ExtraDimension dimension : (List<ExtraDimension>) methDecl.extraDimensions()) {
+				listRewrite.remove(dimension, fDescription);
+			}
 		}
 
 		private boolean needsVisibilityUpdate() throws JavaModelException {
