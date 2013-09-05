@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -424,7 +428,7 @@ class RenameAnalyzeUtil {
 			return result;
 
 		for (int i= 0; i < analyzePackages.length; i++) {
-			ASTNode enclosing= getEnclosingBlockOrMethod(analyzePackages[i].fDeclarationEdit, cuChange, newCUNode);
+			ASTNode enclosing= getEnclosingBlockOrMethodOrLambda(analyzePackages[i].fDeclarationEdit, cuChange, newCUNode);
 
 			// get new declaration
 			IRegion newRegion= RefactoringAnalyzeUtil.getNewTextRange(analyzePackages[i].fDeclarationEdit, cuChange);
@@ -452,10 +456,12 @@ class RenameAnalyzeUtil {
 		return null;
 	}
 
-	private static ASTNode getEnclosingBlockOrMethod(TextEdit declarationEdit, TextChange change, CompilationUnit newCUNode) {
+	private static ASTNode getEnclosingBlockOrMethodOrLambda(TextEdit declarationEdit, TextChange change, CompilationUnit newCUNode) {
 		ASTNode enclosing= RefactoringAnalyzeUtil.getBlock(declarationEdit, change, newCUNode);
 		if (enclosing == null)
 			enclosing= RefactoringAnalyzeUtil.getMethodDeclaration(declarationEdit, change, newCUNode);
+		if (enclosing == null)
+			enclosing= RefactoringAnalyzeUtil.getLambdaExpression(declarationEdit, change, newCUNode);
 		return enclosing;
 	}
 
