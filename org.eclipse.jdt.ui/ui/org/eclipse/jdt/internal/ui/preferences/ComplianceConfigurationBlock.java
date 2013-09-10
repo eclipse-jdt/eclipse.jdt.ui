@@ -561,6 +561,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				updateControls();
 				updateComplianceEnableState();
 				validateComplianceStatus();
+				updateInlineJSREnableState();
 			}
 		}
 	}
@@ -732,21 +733,25 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 		boolean enabled= JavaModelUtil.isVersionLessThan(target, VERSION_1_5);
 		Button checkBox= getCheckBox(PREF_CODEGEN_INLINE_JSR_BYTECODE);
+		boolean wasCheckBoxEnabled= checkBox.isEnabled();
 		checkBox.setEnabled(enabled);
 
 		if (!enabled) {
 			String val= getValue(PREF_CODEGEN_INLINE_JSR_BYTECODE);
-			fRememberedUserCompliance[IDX_INLINE_JSR_BYTECODE]= val;
+			if (wasCheckBoxEnabled)
+				fRememberedUserCompliance[IDX_INLINE_JSR_BYTECODE]= val;
 
 			if (!ENABLED.equals(val)) {
 				setValue(PREF_CODEGEN_INLINE_JSR_BYTECODE, ENABLED);
 				updateCheckBox(checkBox);
 			}
 		} else {
-			String val= fRememberedUserCompliance[IDX_INLINE_JSR_BYTECODE];
-			if (!ENABLED.equals(val)) {
-				setValue(PREF_CODEGEN_INLINE_JSR_BYTECODE, val);
-				updateCheckBox(checkBox);
+			if (!wasCheckBoxEnabled) {
+				String val= fRememberedUserCompliance[IDX_INLINE_JSR_BYTECODE];
+				if (!ENABLED.equals(val)) {
+					setValue(PREF_CODEGEN_INLINE_JSR_BYTECODE, val);
+					updateCheckBox(checkBox);
+				}
 			}
 		}
 	}
