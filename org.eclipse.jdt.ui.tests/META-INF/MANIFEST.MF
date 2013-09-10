@@ -3,7 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Plugin.name
 Bundle-SymbolicName: org.eclipse.jdt.ui.tests; singleton:=true
 Bundle-Version: 3.10.0.qualifier
-Bundle-ClassPath: javauitests.jar
 Bundle-Activator: org.eclipse.jdt.testplugin.JavaTestPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %Plugin.providerName
