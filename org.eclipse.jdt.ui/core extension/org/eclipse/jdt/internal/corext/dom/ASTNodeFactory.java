@@ -171,7 +171,7 @@ public class ASTNodeFactory {
 	/**
 	 * Returns the new type node corresponding to the type of the given declaration
 	 * including the extra dimensions. If the type is a {@link UnionType}, use the LUB type.
-	 * If the <code>importRewrite</code> is <code>null</code>, the type may be fully-qualified. 
+	 * If the <code>importRewrite</code> is <code>null</code>, the type may be fully-qualified.
 	 * 
 	 * @param ast The AST to create the resulting type with.
 	 * @param declaration The variable declaration to get the type from
@@ -183,23 +183,7 @@ public class ASTNodeFactory {
 	 */
 	public static Type newType(AST ast, VariableDeclaration declaration, ImportRewrite importRewrite, ImportRewriteContext context) {
 		if (declaration instanceof VariableDeclarationFragment && declaration.getParent() instanceof LambdaExpression) {
-			LambdaExpression lambdaExpr= (LambdaExpression) declaration.getParent();
-			IMethodBinding method= lambdaExpr.resolveMethodBinding();
-			if (method != null) {
-				ITypeBinding[] parameterTypes= method.getParameterTypes();
-				int index= lambdaExpr.parameters().indexOf(declaration);
-				ITypeBinding typeBinding= parameterTypes[index];
-				if (importRewrite != null) {
-					return importRewrite.addImport(typeBinding, ast, context);
-				} else {
-					String qualifiedName= typeBinding.getQualifiedName();
-					if (qualifiedName.length() > 0) {
-						return newType(ast, qualifiedName);
-					}
-				}
-			}
-			// fall-back
-			return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+			return newType((LambdaExpression) declaration.getParent(), (VariableDeclarationFragment) declaration, ast, importRewrite, context);
 		}
 
 		Type type= ASTNodes.getType(declaration);
@@ -239,6 +223,55 @@ public class ASTNodeFactory {
 			arrayType.dimensions().addAll(ASTNode.copySubtrees(ast, extraDimensions));
 		}
 		return type;
+	}
+
+	private static Type newType(LambdaExpression lambdaExpression, VariableDeclarationFragment declaration, AST ast, ImportRewrite importRewrite, ImportRewriteContext context) {
+		IMethodBinding method= lambdaExpression.resolveMethodBinding();
+		if (method != null) {
+			ITypeBinding[] parameterTypes= method.getParameterTypes();
+			int index= lambdaExpression.parameters().indexOf(declaration);
+			ITypeBinding typeBinding= parameterTypes[index];
+			if (importRewrite != null) {
+				return importRewrite.addImport(typeBinding, ast, context);
+			} else {
+				String qualifiedName= typeBinding.getQualifiedName();
+				if (qualifiedName.length() > 0) {
+					return newType(ast, qualifiedName);
+				}
+			}
+		}
+		// fall-back
+		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+	}
+
+	/**
+	 * Returns the new type node representing the return type of <code>lambdaExpression</code>
+	 * including the extra dimensions.
+	 * 
+	 * @param lambdaExpression the lambda expression
+	 * @param ast the AST to create the return type with
+	 * @param importRewrite the import rewrite to use, or <code>null</code>
+	 * @param context the import rewrite context, or <code>null</code>
+	 * @return a new type node created with the given AST representing the return type of
+	 *         <code>lambdaExpression</code>
+	 * 
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public static Type newReturnType(LambdaExpression lambdaExpression, AST ast, ImportRewrite importRewrite, ImportRewriteContext context) {
+		IMethodBinding method= lambdaExpression.resolveMethodBinding();
+		if (method != null) {
+			ITypeBinding returnTypeBinding= method.getReturnType();
+			if (importRewrite != null) {
+				return importRewrite.addImport(returnTypeBinding, ast);
+			} else {
+				String qualifiedName= returnTypeBinding.getQualifiedName();
+				if (qualifiedName.length() > 0) {
+					return newType(ast, qualifiedName);
+				}
+			}
+		}
+		// fall-back
+		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}
 
 	/**

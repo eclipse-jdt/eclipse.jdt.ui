@@ -721,6 +721,30 @@ public class ASTResolving {
 		return null;
 	}
 
+	/**
+	 * Returns the lambda expression node which encloses the given <code>node</code>, or
+	 * <code>null</code> if none.
+	 * 
+	 * @param node the node
+	 * @return the enclosing lambda expression node for the given <code>node</code>, or
+	 *         <code>null</code> if none
+	 * 
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public static LambdaExpression findEnclosingLambdaExpression(ASTNode node) {
+		node= node.getParent();
+		while (node != null) {
+			if (node instanceof LambdaExpression) {
+				return (LambdaExpression) node;
+			}
+			if (node instanceof BodyDeclaration || node instanceof AnonymousClassDeclaration) {
+				return null;
+			}
+			node= node.getParent();
+		}
+		return null;
+	}
+
 	public static ASTNode findAncestor(ASTNode node, int nodeType) {
 		while ((node != null) && (node.getNodeType() != nodeType)) {
 			node= node.getParent();

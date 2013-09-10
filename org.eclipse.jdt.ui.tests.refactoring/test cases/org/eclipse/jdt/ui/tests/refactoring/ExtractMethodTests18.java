@@ -47,6 +47,10 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 		performTest(fgTestSetup.getDestinationPackage(), "A", COMPARE_WITH_OUTPUT, "destination18_out", null, null, destination, visibility);
 	}
 
+	protected void lambdaExpressionTest(int destination, int visibility) throws Exception {
+		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", COMPARE_WITH_OUTPUT, "lambdaExpression18_out", null, null, destination, visibility);
+	}
+
 	//====================================================================================
 	// Testing Default Methods
 	//====================================================================================
@@ -133,5 +137,105 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 
 	public void test204() throws Exception {
 		destinationTest(1, Modifier.PROTECTED);
+	}
+
+	//====================================================================================
+	// Testing Lambda Expressions
+	//====================================================================================
+
+	public void test301() throws Exception {
+		lambdaExpressionTest(0, Modifier.PRIVATE);
+	}
+
+	public void test302() throws Exception {
+		lambdaExpressionTest(1, Modifier.PRIVATE);
+	}
+
+	public void test303() throws Exception {
+		lambdaExpressionTest(0, Modifier.PRIVATE);
+	}
+
+	public void test304() throws Exception {
+		lambdaExpressionTest(0, Modifier.PRIVATE);
+	}
+
+	public void test305() throws Exception {
+		lambdaExpressionTest(0, Modifier.PUBLIC);
+	}
+
+	public void test306() throws Exception {
+		lambdaExpressionTest(0, Modifier.PUBLIC);
+	}
+
+	public void test307() throws Exception {
+		lambdaExpressionTest(0, Modifier.PRIVATE);
+	}
+
+	public void test308() throws Exception {
+		lambdaExpressionTest(0, Modifier.PRIVATE);
+	}
+
+	public void test309() throws Exception {
+		lambdaExpressionTest(0, Modifier.PRIVATE);
+	}
+
+	public void test310() throws Exception {
+		lambdaExpressionTest(0, Modifier.PRIVATE);
+	}
+
+	public void test311() throws Exception {
+		lambdaExpressionTest(0, Modifier.PRIVATE);
+	}
+
+	public void test312() throws Exception {
+		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
+	}
+
+	public void test313() throws Exception {
+		lambdaExpressionTest(0, Modifier.PRIVATE);
+	}
+
+	public void test314() throws Exception {
+		lambdaExpressionTest(0, Modifier.PRIVATE);
+	}
+
+	public void test315() throws Exception {
+		lambdaExpressionTest(0, Modifier.PRIVATE);
+	}
+
+	public void test316() throws Exception {
+		lambdaExpressionTest(0, Modifier.PUBLIC);
+	}
+
+	public void test317() throws Exception {
+		lambdaExpressionTest(0, Modifier.PUBLIC);
+	}
+
+	public void test318() throws Exception {
+		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
+	}
+
+	public void test319() throws Exception {
+		lambdaExpressionTest(0, Modifier.PUBLIC);
+	}
+
+	public void test320() throws Exception {
+		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
+	}
+
+	public void test321() throws Exception {
+		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
+	}
+	
+	public void test322() throws Exception {
+		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
+	}
+
+	public void test323() throws Exception {
+		lambdaExpressionTest(0, Modifier.PUBLIC);
+	}
+
+	public void test324() throws Exception {
+		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", VALID_SELECTION, null);
 	}
 }

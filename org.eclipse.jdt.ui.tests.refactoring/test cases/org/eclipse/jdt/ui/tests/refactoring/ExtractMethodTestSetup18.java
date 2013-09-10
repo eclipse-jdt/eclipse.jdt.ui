@@ -26,6 +26,7 @@ public class ExtractMethodTestSetup18 extends Java18Setup {
 	private IPackageFragment fDefaultMethodsPackage;
 	private IPackageFragment fStaticMethodsPackage;
 	private IPackageFragment fDestinationPackage;
+	private IPackageFragment fLambdaExpressionPackage;
 
 	public ExtractMethodTestSetup18(Test test) {
 		super(test);
@@ -40,6 +41,7 @@ public class ExtractMethodTestSetup18 extends Java18Setup {
 		fDefaultMethodsPackage= root.createPackageFragment("defaultMethods18_in", true, null);
 		fStaticMethodsPackage= root.createPackageFragment("staticMethods18_in", true, null);
 		fDestinationPackage= root.createPackageFragment("destination18_in", true, null);
+		fLambdaExpressionPackage= root.createPackageFragment("lambdaExpression18_in", true, null);
 	}
 
 	public IPackageFragment getDefaultMethodsPackage() {
@@ -53,5 +55,8 @@ public class ExtractMethodTestSetup18 extends Java18Setup {
 	public IPackageFragment getDestinationPackage() {
 		return fDestinationPackage;
 	}
-}
 
+	public IPackageFragment getLambdaExpressionPackage() {
+		return fLambdaExpressionPackage;
+	}
+}

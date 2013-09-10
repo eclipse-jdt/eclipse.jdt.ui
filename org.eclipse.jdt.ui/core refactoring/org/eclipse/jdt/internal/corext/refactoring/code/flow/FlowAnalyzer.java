@@ -64,6 +64,7 @@ import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -685,6 +686,16 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		FlowInfo info= assignFlowInfo(node, node.getBody());
 		if (info != null)
 			info.removeLabel(node.getLabel());
+	}
+
+	@Override
+	public void endVisit(LambdaExpression node) {
+		if (skipNode(node))
+			return;
+		GenericSequentialFlowInfo info= createSequential(node);
+		process(info, node.parameters());
+		process(info, node.getBody());
+		info.setNoReturn();
 	}
 
 	@Override
