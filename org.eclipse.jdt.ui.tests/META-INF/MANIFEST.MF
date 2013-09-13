@@ -59,7 +59,6 @@ Require-Bundle:
  org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.ui.ide,
- org.eclipse.ui.ide,
  org.eclipse.ui.navigator,
  org.eclipse.ui.views,
  org.eclipse.ui.workbench.texteditor,
