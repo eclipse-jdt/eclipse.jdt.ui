@@ -106,6 +106,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_LINE_NUMBER_ATTR= getJDTCoreKey(JavaCore.COMPILER_LINE_NUMBER_ATTR);
 	private static final Key PREF_SOURCE_FILE_ATTR= getJDTCoreKey(JavaCore.COMPILER_SOURCE_FILE_ATTR);
 	private static final Key PREF_CODEGEN_UNUSED_LOCAL= getJDTCoreKey(JavaCore.COMPILER_CODEGEN_UNUSED_LOCAL);
+	private static final Key PREF_CODEGEN_METHOD_PARAMETERS_ATTR= getJDTCoreKey(JavaCore.COMPILER_CODEGEN_METHOD_PARAMETERS_ATTR);
 	
 	// values
 	private static final String GENERATE= JavaCore.GENERATE;
@@ -142,14 +143,16 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private PixelConverter fPixelConverter;
 
 	/**
-	 * Remembered user compliance (stored when {@link #INTR_DEFAULT_COMPLIANCE} is switched to {@link #DEFAULT_CONF}).
-	 * Elements are identified by <code>IDX_*</code> constants.
+	 * Remembered user compliance (stored when {@link #INTR_DEFAULT_COMPLIANCE} is switched to
+	 * {@link #DEFAULT_CONF}). Elements are identified by <code>IDX_*</code> constants.
+	 *
 	 * @see #IDX_ASSERT_AS_IDENTIFIER
 	 * @see #IDX_ENUM_AS_IDENTIFIER
 	 * @see #IDX_SOURCE_COMPATIBILITY
 	 * @see #IDX_CODEGEN_TARGET_PLATFORM
 	 * @see #IDX_COMPLIANCE
 	 * @see #IDX_INLINE_JSR_BYTECODE
+	 * @see #IDX_METHOD_PARAMETERS_ATTR
 	 */
 	private String[] fRememberedUserCompliance;
 	
@@ -162,6 +165,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	 * @see #IDX_CODEGEN_TARGET_PLATFORM
 	 * @see #IDX_COMPLIANCE
 	 * @see #IDX_INLINE_JSR_BYTECODE
+	 * @see #IDX_METHOD_PARAMETERS_ATTR
 	 */
 	private String[] fOriginalStoredCompliance;
 
@@ -171,6 +175,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final int IDX_CODEGEN_TARGET_PLATFORM= 3;
 	private static final int IDX_COMPLIANCE= 4;
 	private static final int IDX_INLINE_JSR_BYTECODE= 5;
+	private static final int IDX_METHOD_PARAMETERS_ATTR= 6;
 
 	private IStatus fComplianceStatus;
 
@@ -197,6 +202,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			getValue(PREF_CODEGEN_TARGET_PLATFORM),
 			getValue(PREF_COMPLIANCE),
 			getValue(PREF_CODEGEN_INLINE_JSR_BYTECODE),
+			getValue(PREF_CODEGEN_METHOD_PARAMETERS_ATTR)
 		};
 	}
 
@@ -204,7 +210,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		Key[] keys= new Key[] {
 				PREF_LOCAL_VARIABLE_ATTR, PREF_LINE_NUMBER_ATTR, PREF_SOURCE_FILE_ATTR, PREF_CODEGEN_UNUSED_LOCAL, PREF_CODEGEN_INLINE_JSR_BYTECODE, INTR_DEFAULT_COMPLIANCE,
 				PREF_COMPLIANCE, PREF_SOURCE_COMPATIBILITY,
-				PREF_CODEGEN_TARGET_PLATFORM, PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_ENUM_AS_IDENTIFIER
+				PREF_CODEGEN_TARGET_PLATFORM, PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_ENUM_AS_IDENTIFIER, PREF_CODEGEN_METHOD_PARAMETERS_ATTR
 			};
 		
 		if (projectSpecific) {
@@ -402,6 +408,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_inline_jsr_bytecode_label;
 		addCheckBox(group, label, PREF_CODEGEN_INLINE_JSR_BYTECODE, enableDisableValues, 0);
 		
+		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_method_parameters_attr;
+		addCheckBox(group, label, PREF_CODEGEN_METHOD_PARAMETERS_ATTR, generateValues, 0);
+		
 		Composite infoComposite= new Composite(fControlsComposite, SWT.NONE);
 		infoComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		infoComposite.setLayout(new GridLayout(2, false));
@@ -509,6 +518,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				}
 				updateControls();
 				updateInlineJSREnableState();
+				updatePreserveMethodParamNamesEnableState();
 				updateAssertEnumAsIdentifierEnableState();
 				fComplianceStatus= validateCompliance();
 			} else if (PREF_PB_ENUM_AS_IDENTIFIER.equals(changedKey) ||
@@ -523,6 +533,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			updateComplianceEnableState();
 			updateAssertEnumAsIdentifierEnableState();
 			updateInlineJSREnableState();
+			updatePreserveMethodParamNamesEnableState();
 			fComplianceStatus= validateCompliance();
 			validateComplianceStatus();
 		}
@@ -539,6 +550,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 						getOriginalStoredValue(PREF_CODEGEN_TARGET_PLATFORM),
 						getOriginalStoredValue(PREF_COMPLIANCE),
 						getOriginalStoredValue(PREF_CODEGEN_INLINE_JSR_BYTECODE),
+						getOriginalStoredValue(PREF_CODEGEN_METHOD_PARAMETERS_ATTR)
 					};
 				
 			} else {
@@ -549,6 +561,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 						getOriginalStoredValue(PREF_CODEGEN_TARGET_PLATFORM),
 						getOriginalStoredValue(PREF_COMPLIANCE),
 						getOriginalStoredValue(PREF_CODEGEN_INLINE_JSR_BYTECODE),
+						getOriginalStoredValue(PREF_CODEGEN_METHOD_PARAMETERS_ATTR)
 					};
 				if (!Arrays.equals(fOriginalStoredCompliance, storedCompliance)) {
 					// compliance changed on disk -> override user modifications
@@ -561,6 +574,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 					setValue(PREF_CODEGEN_TARGET_PLATFORM, storedCompliance[IDX_CODEGEN_TARGET_PLATFORM]);
 					setValue(PREF_COMPLIANCE, storedCompliance[IDX_COMPLIANCE]);
 					setValue(PREF_CODEGEN_INLINE_JSR_BYTECODE, storedCompliance[IDX_INLINE_JSR_BYTECODE]);
+					setValue(PREF_CODEGEN_METHOD_PARAMETERS_ATTR, storedCompliance[IDX_METHOD_PARAMETERS_ATTR]);
 					
 				}
 				
@@ -569,6 +583,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				updateComplianceEnableState();
 				validateComplianceStatus();
 				updateInlineJSREnableState();
+				updatePreserveMethodParamNamesEnableState();
 			}
 		}
 	}
@@ -771,6 +786,33 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		}
 	}
 
+	private void updatePreserveMethodParamNamesEnableState() {
+		String target= getValue(PREF_CODEGEN_TARGET_PLATFORM);
+		boolean enabled= JavaModelUtil.is18OrHigher(target);
+		Button checkBox= getCheckBox(PREF_CODEGEN_METHOD_PARAMETERS_ATTR);
+		boolean wasCheckBoxEnabled= checkBox.isEnabled();
+		checkBox.setEnabled(enabled);
+
+		if (enabled) {
+			if (!wasCheckBoxEnabled) {
+				String val= fRememberedUserCompliance[IDX_METHOD_PARAMETERS_ATTR];
+				if (GENERATE.equals(val)) {
+					setValue(PREF_CODEGEN_METHOD_PARAMETERS_ATTR, val);
+					updateCheckBox(checkBox);
+				}
+			}
+		} else {
+			String val= getValue(PREF_CODEGEN_METHOD_PARAMETERS_ATTR);
+			if (wasCheckBoxEnabled)
+				fRememberedUserCompliance[IDX_METHOD_PARAMETERS_ATTR]= val;
+
+			if (GENERATE.equals(val)) {
+				setValue(PREF_CODEGEN_METHOD_PARAMETERS_ATTR, DO_NOT_GENERATE);
+				updateCheckBox(checkBox);
+			}
+		}
+	}
+
 	/**
 	 * Sets the default compliance values derived from the chosen level or restores the user
 	 * compliance settings.
@@ -858,6 +900,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			} else {
 				updateInlineJSREnableState();
 				updateAssertEnumAsIdentifierEnableState();
+				updatePreserveMethodParamNamesEnableState();
 				return;
 			}
 		}
@@ -868,6 +911,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		updateControls();
 		updateInlineJSREnableState();
 		updateAssertEnumAsIdentifierEnableState();
+		updatePreserveMethodParamNamesEnableState();
 	}
 
 	/**
