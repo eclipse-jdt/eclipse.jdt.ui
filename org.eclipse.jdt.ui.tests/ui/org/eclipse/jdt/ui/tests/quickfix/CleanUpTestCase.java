@@ -45,6 +45,7 @@ import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -77,7 +78,7 @@ public class CleanUpTestCase extends QuickFixTest {
 	protected IPackageFragmentRoot fSourceFolder;
 	protected IJavaProject fJProject1;
 
-	protected CustomProfile fProfile;
+	private CustomProfile fProfile;
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite(CleanUpTestCase.class.getName());
@@ -120,7 +121,7 @@ public class CleanUpTestCase extends QuickFixTest {
 		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
 		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -133,14 +134,22 @@ public class CleanUpTestCase extends QuickFixTest {
 	}
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, getDefaultClasspath());
 		disableAll();
 		fJProject1= null;
 		fSourceFolder= null;
 		fProfile= null;
 	}
 
-	protected void disableAll() throws CoreException {
+	protected IJavaProject getProject() {
+		return ProjectTestSetup.getProject();
+	}
+
+	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
+		return ProjectTestSetup.getDefaultClasspath();
+	}
+
+	private void disableAll() throws CoreException {
 		Map settings= fProfile.getSettings();
 		CleanUpOptions options= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
 		Set keys= options.getKeys();
