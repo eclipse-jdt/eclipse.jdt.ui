@@ -13,5 +13,8 @@ interface I2 {
 		};		
 	}
 
-	public default int extracted(int a){/*[*/int b = a;/*]*/return b;}
+	public default int extracted(int a) {
+		/*[*/int b = a;/*]*/
+		return b;
+	}
 }

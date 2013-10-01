@@ -11,5 +11,7 @@ interface C_Test {
 		return "";
 	}
 
-	default int extracted(int a){return a++;}	
+	default int extracted(int a) {
+		return a++;
+	}	
 }

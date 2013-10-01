@@ -312,10 +312,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 				LambdaExpression enclosingLambdaExpr= ASTResolving.findEnclosingLambdaExpression(getFirstSelectedNode());
 				if (enclosingLambdaExpr != null) {
 					fReturnType= ASTNodeFactory.newReturnType(enclosingLambdaExpr, ast, rewriter, null);
+					IMethodBinding methodBinding= enclosingLambdaExpr.resolveMethodBinding();
+					fReturnTypeBinding= methodBinding != null ? methodBinding.getReturnType() : null;
 				} else if (fEnclosingBodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
 					fReturnType= ((MethodDeclaration) fEnclosingBodyDeclaration).getReturnType2();
+					fReturnTypeBinding= fReturnType != null ? fReturnType.resolveBinding() : null;
 				}
-				fReturnTypeBinding= fReturnType != null ? fReturnType.resolveBinding() : null;
 				break;
 			default:
 				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);

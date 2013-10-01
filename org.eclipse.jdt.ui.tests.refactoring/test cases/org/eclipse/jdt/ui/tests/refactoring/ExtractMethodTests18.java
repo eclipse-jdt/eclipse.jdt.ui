@@ -238,4 +238,8 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 	public void test324() throws Exception {
 		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", VALID_SELECTION, null);
 	}
+
+	public void test325() throws Exception {
+		lambdaExpressionTest(0, Modifier.PRIVATE);
+	}
 }
