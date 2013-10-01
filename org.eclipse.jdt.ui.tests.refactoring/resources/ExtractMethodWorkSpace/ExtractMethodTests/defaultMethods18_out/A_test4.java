@@ -10,5 +10,7 @@ interface A_test4 {
 		};		
 	}
 
-	default void extracted(){/*[*/int i = 0;/*]*/}
+	default void extracted() {
+		/*[*/int i = 0;/*]*/
+	}
 }

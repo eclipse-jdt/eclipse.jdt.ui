@@ -5,5 +5,7 @@ public interface A_test1 {
 		return extracted();
 	}
 
-	default int extracted(){/*[*/return 0;/*]*/}
+	default int extracted() {
+		/*[*/return 0;/*]*/
+	}
 }

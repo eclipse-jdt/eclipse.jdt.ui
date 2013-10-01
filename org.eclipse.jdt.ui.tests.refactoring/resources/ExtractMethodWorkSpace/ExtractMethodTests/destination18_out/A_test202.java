@@ -7,7 +7,9 @@ public class A_test202 {
 				int i= /*[*/extracted();/*]*/				
 			}
 
-			default int extracted(){return 0;}
+			default int extracted() {
+				return 0;
+			}
 		}
 	}		
 }
