@@ -20,4 +20,26 @@
   <artifactId>org.eclipse.jdt.ui</artifactId>
   <version>3.9.100-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
+
+  <!--
+     In the workspace we ignore all optional compile problems in
+     the 'internal compatibility' source folder. For the Tycho build
+     we can't specify this, hence we ignoring raw type usage warnings
+     in the entire bundle for now.
+  -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-compiler-plugin</artifactId>
+        <version>${tycho.version}</version>
+        <configuration>
+          <compilerArgs>
+            <arg>-warn:-raw</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+    </plugins>
+ </build>
+
 </project>
