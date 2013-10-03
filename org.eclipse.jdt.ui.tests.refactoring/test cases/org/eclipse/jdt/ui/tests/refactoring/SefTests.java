@@ -231,6 +231,10 @@ public class SefTests extends AbstractSelectionTestCase {
 		objectTest("field");
 	}
 
+	public void testCompoundParenthesizedWrite() throws Exception {
+		objectTest("field");
+	}
+
 	public void testCompoundWrite() throws Exception {
 		objectTest("field");
 	}

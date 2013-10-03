@@ -295,6 +295,8 @@ class AccessAnalyzer extends ASTVisitor {
 				return ((QualifiedName)expression).getQualifier();
 			case ASTNode.FIELD_ACCESS:
 				return ((FieldAccess)expression).getExpression();
+			case ASTNode.PARENTHESIZED_EXPRESSION:
+				return getReceiver(((ParenthesizedExpression)expression).getExpression());
 		}
 		return null;
 	}
