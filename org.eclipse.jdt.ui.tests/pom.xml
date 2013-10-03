@@ -8,6 +8,7 @@
  
   Contributors:
      Igor Fedorenko - initial implementation
+     Mickael Istria (Red Hat Inc.) - 416915: tycho-surefire-plugin configuration
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -23,5 +24,42 @@
   <packaging>eclipse-test-plugin</packaging>
   <properties>
     <defaultSigning-excludeInnerJars>true</defaultSigning-excludeInnerJars>
+    <testSuite>${project.artifactId}</testSuite>
+    <testClass>org.eclipse.jdt.ui.tests.AutomatedSuite</testClass>
   </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-surefire-plugin</artifactId>
+        <version>${tycho.version}</version>
+        <configuration>
+          <useUIHarness>true</useUIHarness>
+          <useUIThread>true</useUIThread>
+          <explodedBundles>
+            <bundle>org.junit</bundle>
+          </explodedBundles>
+          <dependencies>
+            <dependency>
+              <type>eclipse-plugin</type>
+              <artifactId>org.eclipse.jdt.annotation</artifactId>
+              <version>0.0.0</version>
+            </dependency>
+            <dependency>
+              <type>eclipse-plugin</type>
+              <artifactId>org.eclipse.jdt.junit4.runtime</artifactId>
+              <version>0.0.0</version>
+            </dependency>
+            <dependency>
+              <type>eclipse-plugin</type>
+              <artifactId>org.eclipse.equinox.event</artifactId>
+              <version>0.0.0</version>
+            </dependency>
+          </dependencies>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
