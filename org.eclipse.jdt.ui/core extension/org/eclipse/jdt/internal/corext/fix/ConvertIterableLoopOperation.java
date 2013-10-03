@@ -357,7 +357,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			if (resultStatus.getSeverity() == IStatus.ERROR)
 				return resultStatus;
 
-			List<Expression> updateExpressions= (List<Expression>) getForStatement().getStructuralProperty(ForStatement.UPDATERS_PROPERTY);
+			List<Expression> updateExpressions= getForStatement().updaters();
 			if (updateExpressions.size() == 1) {
 				resultStatus= new StatusInfo(IStatus.WARNING, Messages.format(FixMessages.ConvertIterableLoopOperation_RemoveUpdateExpression_Warning, BasicElementLabels.getJavaCodeString(updateExpressions.get(0).toString())));
 			} else if (updateExpressions.size() > 1) {

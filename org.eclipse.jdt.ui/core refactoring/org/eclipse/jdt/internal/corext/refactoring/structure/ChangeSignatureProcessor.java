@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2777,9 +2777,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	protected <T extends ASTNode> T moveNode(T oldNode, ASTRewrite rewrite) {
 		T movedNode;
 		if (ASTNodes.isExistingNode(oldNode))
-			movedNode= (T) rewrite.createMoveTarget(oldNode); //node must be one of ast
+			movedNode= ASTNodes.createMoveTarget(rewrite, oldNode); //node must be one of ast
 		else
-			movedNode= (T) ASTNode.copySubtree(rewrite.getAST(), oldNode);
+			movedNode= ASTNodes.copySubtree(rewrite.getAST(), oldNode);
 		return movedNode;
 	}
 

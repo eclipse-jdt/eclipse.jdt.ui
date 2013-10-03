@@ -94,6 +94,7 @@ public class VariableDeclarationRewrite {
 		while (iter.hasNext()) {
 			VariableDeclarationFragment currentFragment= iter.next();
 			
+			@SuppressWarnings("unchecked")
 			Map<VariableDeclarationFragment, MovedFragment> lookup= (Map<VariableDeclarationFragment, MovedFragment>) rewrite.getProperty(MovedFragment.class.getName());
 			if (lookup == null) {
 				lookup= new HashMap<VariableDeclarationFragment, MovedFragment>();

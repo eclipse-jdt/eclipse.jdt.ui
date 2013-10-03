@@ -694,7 +694,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		List<? extends ASTNode> list= (List<? extends ASTNode>) statementParent.getStructuralProperty(property);
+		List<? extends ASTNode> list= ASTNodes.getChildListProperty(statementParent, (ChildListPropertyDescriptor) property);
 
 		if (resultingCollections == null) {
 			return true;

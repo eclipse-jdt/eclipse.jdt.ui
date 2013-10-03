@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,8 +16,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
+
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 /**
  * A source range computer that uses the shortest possible source range for a given set of nodes.
@@ -51,7 +54,7 @@ public class TightSourceRangeComputer extends TargetSourceRangeComputer {
 	        		addTightSourceNode(child);
 	        	}
 	        } else if (descriptor.isChildListProperty()) {
-	        	List<? extends ASTNode> children= (List<? extends ASTNode>) reference.getStructuralProperty(descriptor);
+	        	List<? extends ASTNode> children= ASTNodes.getChildListProperty(reference, (ChildListPropertyDescriptor) descriptor);
 	        	for (Iterator<? extends ASTNode> iterator2= children.iterator(); iterator2.hasNext();) {
 	                ASTNode child= iterator2.next();
 	                if (isExtending(child, reference)) {

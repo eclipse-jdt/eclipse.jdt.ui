@@ -86,7 +86,7 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 
 				MethodDeclaration toStringMethod= fGenerator.generateToStringMethod();
 
-				final List<BodyDeclaration> list= (List<BodyDeclaration>) declaration.getStructuralProperty(declaration.getBodyDeclarationsProperty());
+				List<BodyDeclaration> list= declaration.bodyDeclarations();
 				BodyDeclaration replace= findMethodToReplace(list, toStringMethod);
 				if (replace == null || ((Boolean)toStringMethod.getProperty(AbstractToStringGenerator.OVERWRITE_METHOD_PROPERTY)).booleanValue())
 					insertMethod(toStringMethod, rewriter, replace);

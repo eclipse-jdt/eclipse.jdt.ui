@@ -86,6 +86,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -191,10 +192,28 @@ public class ASTNodes {
     public static List<? extends ASTNode> getContainingList(ASTNode node) {
     	StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
     	if (locationInParent != null && locationInParent.isChildListProperty()) {
-    		return (List<? extends ASTNode>) node.getParent().getStructuralProperty(locationInParent);
+    		return getChildListProperty(node.getParent(), (ChildListPropertyDescriptor) locationInParent);
     	}
     	return null;
     }
+
+	/**
+	 * Variant of {@link ASTNode#getStructuralProperty(StructuralPropertyDescriptor)} that avoids
+	 * unchecked casts in the caller.
+	 * <p>
+	 * To improve type-safety, callers can add the expected element type as explicit type argument, e.g.:
+	 * <p>
+	 * {@code ASTNodes.<BodyDeclaration>getChildListProperty(typeDecl, bodyDeclarationsProperty)}
+	 * 
+	 * @param node the node
+	 * @param propertyDescriptor the child list property to get
+	 * @return the child list
+	 * @exception RuntimeException if this node does not have the given property
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends ASTNode> List<T> getChildListProperty(ASTNode node, ChildListPropertyDescriptor propertyDescriptor) {
+		return (List<T>) node.getStructuralProperty(propertyDescriptor);
+	}
 
 	/**
 	 * Returns a list of the direct children of a node. The siblings are ordered by start offset.
@@ -986,6 +1005,33 @@ public class ASTNodes {
 		CharacterLiteral characterLiteral= AST.newAST(ASTProvider.SHARED_AST_LEVEL).newCharacterLiteral();
 		characterLiteral.setCharValue(ch);
 		return characterLiteral.getEscapedValue();
+	}
+
+	/**
+	 * Type-safe variant of {@link ASTRewrite#createMoveTarget(ASTNode)}.
+	 * 
+	 * @param rewrite ASTRewrite for the given node
+	 * @param node the node to create a move placeholder for
+	 * @return the new placeholder node
+	 * @throws IllegalArgumentException if the node is null, or if the node
+	 * is not part of the rewrite's AST
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends ASTNode> T createMoveTarget(ASTRewrite rewrite, T node) {
+		return (T) rewrite.createMoveTarget(node);
+	}
+
+	/**
+	 * Type-safe variant of {@link ASTNode#copySubtree(AST, ASTNode)}.
+	 * 
+	 * @param target the AST that is to own the nodes in the result
+	 * @param node the node to copy, or <code>null</code> if none
+	 * @return the copied node, or <code>null</code> if <code>node</code>
+	 *    is <code>null</code>
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends ASTNode> T copySubtree(AST target, T node) {
+		return (T) ASTNode.copySubtree(target, node);
 	}
 
 }

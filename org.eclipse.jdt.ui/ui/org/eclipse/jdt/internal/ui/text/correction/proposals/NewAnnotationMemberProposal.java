@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -35,7 +34,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
@@ -68,15 +66,16 @@ public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
 		createImportRewrite(astRoot);
 
 		if (newTypeDecl instanceof AnnotationTypeDeclaration) {
+			AnnotationTypeDeclaration newAnnotationTypeDecl= (AnnotationTypeDeclaration) newTypeDecl;
+			
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 
-			AnnotationTypeMemberDeclaration newStub= getStub(rewrite, (AnnotationTypeDeclaration) newTypeDecl);
+			AnnotationTypeMemberDeclaration newStub= getStub(rewrite, newAnnotationTypeDecl);
 
-			ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
-			List<? extends ASTNode> members= (List<? extends ASTNode>) newTypeDecl.getStructuralProperty(property);
+			List<BodyDeclaration> members= newAnnotationTypeDecl.bodyDeclarations();
 			int insertIndex= members.size();
 
-			ListRewrite listRewriter= rewrite.getListRewrite(newTypeDecl, property);
+			ListRewrite listRewriter= rewrite.getListRewrite(newAnnotationTypeDecl, AnnotationTypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 			listRewriter.insertAt(newStub, insertIndex, null);
 
 			return rewrite;

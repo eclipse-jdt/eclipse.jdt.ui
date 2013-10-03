@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
@@ -1090,7 +1091,7 @@ public class LocalCorrectionsSubProcessor {
 			
 		} else if (selectedNode instanceof Statement && selectedNode.getLocationInParent().isChildListProperty()) {
 			// remove all statements following the unreachable:
-			List<Statement> statements= (List<Statement>) selectedNode.getParent().getStructuralProperty(selectedNode.getLocationInParent());
+			List<Statement> statements= ASTNodes.<Statement>getChildListProperty(selectedNode.getParent(), (ChildListPropertyDescriptor) selectedNode.getLocationInParent());
 			int idx= statements.indexOf(selectedNode);
 			
 			ASTRewrite rewrite= ASTRewrite.create(selectedNode.getAST());

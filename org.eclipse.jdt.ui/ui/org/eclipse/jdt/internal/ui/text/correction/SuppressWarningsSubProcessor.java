@@ -167,7 +167,7 @@ public class SuppressWarningsSubProcessor {
 			StringLiteral newStringLiteral= ast.newStringLiteral();
 			newStringLiteral.setLiteralValue(fWarningToken);
 
-			Annotation existing= findExistingAnnotation((List<? extends ASTNode>) fNode.getStructuralProperty(fProperty));
+			Annotation existing= findExistingAnnotation(ASTNodes.getChildListProperty(fNode, fProperty));
 			if (existing == null) {
 				ListRewrite listRewrite= rewrite.getListRewrite(fNode, fProperty);
 
