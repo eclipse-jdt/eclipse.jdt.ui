@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
  *       bug Encapuslate field can fail when two variables in one variable declaration (see
  *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=51540).
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [encapsulate field] Encapsulating parenthesized field assignment yields compilation error - https://bugs.eclipse.org/177095
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -182,6 +183,10 @@ public class SefTests extends AbstractSelectionTestCase {
 	}
 
 	public void testSimpleWrite() throws Exception {
+		objectTest("field");
+	}
+
+	public void testSimpleParenthesizedWrite() throws Exception {
 		objectTest("field");
 	}
 
