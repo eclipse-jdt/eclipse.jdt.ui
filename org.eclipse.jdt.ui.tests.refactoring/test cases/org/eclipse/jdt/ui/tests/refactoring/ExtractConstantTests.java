@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [extract local] Extract to local variable not replacing multiple occurrences in same statement - https://bugs.eclipse.org/406347
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -347,6 +348,14 @@ public class ExtractConstantTests extends RefactoringTest {
 
 	public void test44() throws Exception { // bug 211529
 		helper1(7, 18, 7, 19, false, false, "CONSTANT", "_1");
+	}
+
+	public void test45() throws Exception { // bug 406347
+		helper1(7, 17, 7, 22, false, false, "CONSTANT", "INT");
+	}
+
+	public void test46() throws Exception { // bug 406347
+		helper1(8, 17, 8, 22, false, false, "CONSTANT", "INT");
 	}
 
 	public void testZeroLengthSelection0() throws Exception {
