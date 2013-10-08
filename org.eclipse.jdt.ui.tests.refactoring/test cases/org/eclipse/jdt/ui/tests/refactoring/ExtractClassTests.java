@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [extract class] Extract class refactoring on a field in an inner non-static class yields compilation error - https://bugs.eclipse.org/394547
+ *     Samrat Dhillon samrat.dhillon@gmail.com - [extract class] Extract class on a field with generic type yields compilation error  - https://bugs.eclipse.org/bugs/show_bug.cgi?id=394548
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -430,6 +431,14 @@ public class ExtractClassTests extends RefactoringTest {
 		fDescriptor.setType(inner);
 		fDescriptor.setClassName("Extracted");
 		fDescriptor.setCreateTopLevel(false);
+		runRefactoring(false);
+	}
+	// see bug 394548
+	public void testTypeParameter() throws Exception {
+		fDescriptor.setType(setupType());
+		fDescriptor.setCreateTopLevel(false);
+		fDescriptor.setFieldName("data");
+		fDescriptor.setClassName("FooParameter");
 		runRefactoring(false);
 	}
 }
