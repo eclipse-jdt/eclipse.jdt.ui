@@ -692,6 +692,11 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(8, 17, 8, 22, true, false, "temp", "i");
 	}
 
+	public void test115() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=406347
+		helper1(7, 17, 7, 22, true, false, "temp", "i");
+	}
+	
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");
 		helper1(4, 18, 4, 18, true, false, "temp", "j");

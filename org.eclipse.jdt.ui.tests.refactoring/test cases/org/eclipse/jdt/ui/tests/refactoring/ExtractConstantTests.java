@@ -355,7 +355,7 @@ public class ExtractConstantTests extends RefactoringTest {
 	}
 
 	public void test46() throws Exception { // bug 406347
-		helper1(8, 17, 8, 22, false, false, "CONSTANT", "INT");
+		helper1(8, 17, 8, 22, true, false, "CONSTANT", "INT");
 	}
 
 	public void testZeroLengthSelection0() throws Exception {

@@ -417,10 +417,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		IASTFragment[] fragmentsToReplace= retainOnlyReplacableMatches(getMatchingFragments());
 		//TODO: should not have to prune duplicates here...
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
-		HashSet<ASTNode> seen= new HashSet<ASTNode>();
+		HashSet<IASTFragment> seen= new HashSet<IASTFragment>();
 		for (int i= 0; i < fragmentsToReplace.length; i++) {
 			IASTFragment fragment= fragmentsToReplace[i];
-			if (!seen.add(fragment.getAssociatedNode()))
+			if (! seen.add(fragment))
 				continue;
 			SimpleName tempName= fCURewrite.getAST().newSimpleName(fTempName);
 			TextEditGroup description= fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_replace);

@@ -7,7 +7,6 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Nikolay Metchev <nikolaymetchev@gmail.com> - [extract local] Extract to local variable not replacing multiple occurrences in same statement - https://bugs.eclipse.org/406347
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom.fragments;
 
@@ -15,8 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -35,7 +32,6 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.SourceRangeFactory;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.JdtASTMatcher;
 
@@ -405,42 +401,12 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 			return;
 		}
 
-		// Could maybe be done with less edits.
-		// Problem is that the nodes to replace may not be all in the same InfixExpression.
-		ArrayList<Expression> newOperands= new ArrayList<Expression>();
-		// Have to replace all matching fragments in one go for the associated node.
-		SortedSet<Integer> indices= getStartingIndicesOfMatchingFragments(allOperands);
-		Iterator<Integer> it= indices.iterator();
-		int currentFragmentIndex= it.next().intValue();
-		boolean createCopyReplacement= false;
-		for (int i= 0; i < allOperands.size(); i++) {
-			if (i == currentFragmentIndex) {
-				if (createCopyReplacement) {
-					replacement= ASTNode.copySubtree(rewrite.getAST(), replacement);
-				} else {
-					createCopyReplacement= true;
-				}
-				newOperands.add((Expression) replacement);
-				i+= fOperands.size() - 1;
-				if (it.hasNext()) {
-					currentFragmentIndex= it.next().intValue();
-				}
-			} else {
-				newOperands.add((Expression) rewrite.createCopyTarget(allOperands.get(i)));
-			}
+		rewrite.replace(fOperands.get(0), replacement, textEditGroup);
+		int first= allOperands.indexOf(fOperands.get(0));
+		int after= first + fOperands.size();
+		for (int i= first + 1; i < after; i++) {
+			rewrite.remove(allOperands.get(i), textEditGroup);
 		}
-		Expression newExpression= ASTNodeFactory.newInfixExpression(rewrite.getAST(), getOperator(), newOperands);
-		rewrite.replace(groupNode, newExpression, textEditGroup);
-	}
-
-	private SortedSet<Integer> getStartingIndicesOfMatchingFragments(List<Expression> allOperands) {
-		SortedSet<Integer> indices= new TreeSet<Integer>();
-		indices.add(Integer.valueOf(allOperands.indexOf(this.fOperands.get(0))));
-		for (IASTFragment fragment : getMatchingFragmentsWithNode(getGroupRoot())) {
-			Expression firstOperand= ((AssociativeInfixExpressionFragment) fragment).fOperands.get(0);
-			indices.add(Integer.valueOf(allOperands.indexOf(firstOperand)));
-		}
-		return indices;
 	}
 
 	private static ArrayList<Expression> findGroupMembersInOrderFor(InfixExpression groupRoot) {

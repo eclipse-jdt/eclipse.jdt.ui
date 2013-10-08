@@ -5,6 +5,6 @@ public class A {
 	private static final int y = 10;
 	private static final int CONSTANT= x + y;
     void m() {
-        int j = CONSTANT + CONSTANT;
+        int j = CONSTANT + x + y;
     }
 }
