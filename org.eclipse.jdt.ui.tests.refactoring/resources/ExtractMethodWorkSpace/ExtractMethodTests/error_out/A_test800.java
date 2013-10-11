@@ -2,7 +2,7 @@ package error_out;
 
 public class A_test800 {
 	public void fails() {
-		foo()
+		extracted();
 	}
 	public void foo() {
 		extracted();
