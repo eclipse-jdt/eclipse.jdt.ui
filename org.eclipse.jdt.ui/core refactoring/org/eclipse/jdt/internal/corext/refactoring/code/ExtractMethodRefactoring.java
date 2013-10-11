@@ -722,7 +722,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			return 0;
 		int result=0;
 		for (int i= 0; i < fDuplicates.length; i++) {
-			if (!fDuplicates[i].isMethodBody())
+			if (!fDuplicates[i].isInvalidNode())
 				result++;
 		}
 		return result;
@@ -935,7 +935,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 		for (int d= 0; d < fDuplicates.length; d++) {
 			SnippetFinder.Match duplicate= fDuplicates[d];
-			if (!duplicate.isMethodBody()) {
+			if (!duplicate.isInvalidNode()) {
 				if (isDestinationReachable(duplicate.getEnclosingMethod())) {
 					ASTNode[] callNodes= createCallNodes(duplicate, modifiers);
 					ASTNode[] duplicateNodes= duplicate.getNodes();

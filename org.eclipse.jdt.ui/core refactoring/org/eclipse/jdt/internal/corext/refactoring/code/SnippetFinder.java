@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,23 +83,24 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 		public boolean isEmpty() {
 			return fNodes.isEmpty() && fLocalMappings.isEmpty();
 		}
+		
 		/**
-		 * Tests if the whole duplicate is the full body of a method. If so
-		 * don't replace it since we would replace a method body with a new
-		 * method body which doesn't make to much sense.
-		 *
-		 * @return whether the duplicte is the whole method body
+		 * Tests whether the node to be replaced is invalid.
+		 * 
+		 * @return true if the node is invalid, false otherwise
+		 * 
 		 */
-		public boolean isMethodBody() {
+		public boolean isInvalidNode() {
 			ASTNode first= fNodes.get(0);
-			if (first.getParent() == null)
+			ASTNode candidate= first.getParent();
+			if (candidate == null)
 				return false;
-			ASTNode candidate= first.getParent().getParent();
-			if (candidate == null || candidate.getNodeType() != ASTNode.METHOD_DECLARATION)
-				return false;
-			MethodDeclaration method= (MethodDeclaration)candidate;
-			return method.getBody().statements().size() == fNodes.size();
+			// return invalid if the opening and closing parenthesis of the method signature is part of the node to be replaced
+			if (candidate.getNodeType() == ASTNode.METHOD_DECLARATION)
+				return true;
+			return false;
 		}
+		
 		public MethodDeclaration getEnclosingMethod() {
 			ASTNode first= fNodes.get(0);
 			return (MethodDeclaration)ASTNodes.getParent(first, ASTNode.METHOD_DECLARATION);
