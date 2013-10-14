@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] remember selected access modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=101233
+ *     Samrat Dhillon <samrat.dhillon@gmail.com> -  [extract method] Extracted method should be declared static if extracted expression is also used in another static method https://bugs.eclipse.org/bugs/show_bug.cgi?id=393098
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.code;
 
@@ -221,6 +222,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fRefactoring.setReplaceDuplicates(((Button)e.widget).getSelection());
+				updatePreview(getText());
 			}
 		});
 		layouter.perform(checkBox);
