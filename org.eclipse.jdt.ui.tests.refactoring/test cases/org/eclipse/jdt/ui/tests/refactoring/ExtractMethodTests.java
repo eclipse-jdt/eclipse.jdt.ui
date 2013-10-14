@@ -17,6 +17,7 @@
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] should declare method static if extracted from anonymous in static method - https://bugs.eclipse.org/bugs/show_bug.cgi?id=152004
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] extracting return value results in compile error - https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
+ *     Samrat Dhillon <samrat.dhillon@gmail.com> -  [extract method] Extracted method should be declared static if extracted expression is also used in another static method https://bugs.eclipse.org/bugs/show_bug.cgi?id=393098
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -1921,6 +1922,14 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 
 	public void test987() throws Exception {
 		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
+	}
+	
+	public void test988() throws Exception{
+		duplicatesTest();
+	}
+	
+	public void test989() throws Exception{
+		duplicatesTest();
 	}
 
 	//---- Test code in initializers -----------------------------------------------

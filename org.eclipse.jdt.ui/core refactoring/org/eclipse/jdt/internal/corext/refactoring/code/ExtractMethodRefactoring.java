@@ -14,6 +14,7 @@
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Does not replace similar code in parent class of anonymous class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=160853
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] should declare method static if extracted from anonymous in static method - https://bugs.eclipse.org/bugs/show_bug.cgi?id=152004
+ *     Samrat Dhillon <samrat.dhillon@gmail.com> -  [extract method] Extracted method should be declared static if extracted expression is also used in another static method https://bugs.eclipse.org/bugs/show_bug.cgi?id=393098
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -949,6 +950,19 @@ public class ExtractMethodRefactoring extends Refactoring {
 				}
 			}
 		}
+	}
+	
+	private boolean forceStatic(){
+		if(!fReplaceDuplicates){
+			return false;
+		}
+		for(int i= 0;i < fDuplicates.length; i++) {
+			SnippetFinder.Match duplicate= fDuplicates[i];
+			if(!duplicate.isInvalidNode() && duplicate.isNodeInStaticContext()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean isDestinationReachable(MethodDeclaration methodDeclaration) {

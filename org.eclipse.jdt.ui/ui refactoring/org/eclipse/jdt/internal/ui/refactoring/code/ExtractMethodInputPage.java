@@ -12,6 +12,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] remember selected access modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=101233
+ *     Samrat Dhillon <samrat.dhillon@gmail.com> -  [extract method] Extracted method should be declared static if extracted expression is also used in another static method https://bugs.eclipse.org/bugs/show_bug.cgi?id=393098
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.code;
 
@@ -229,6 +230,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fRefactoring.setReplaceDuplicates(((Button)e.widget).getSelection());
+				updatePreview(getText());
 			}
 		});
 		layouter.perform(checkBox);

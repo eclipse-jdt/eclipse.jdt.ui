@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] extracting return value results in compile error - https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
+ *     Samrat Dhillon <samrat.dhillon@gmail.com> -  [extract method] Extracted method should be declared static if extracted expression is also used in another static method https://bugs.eclipse.org/bugs/show_bug.cgi?id=393098
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -39,6 +40,8 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
+
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 
 /* package */ class SnippetFinder extends GenericVisitor {
@@ -104,6 +107,11 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 		public MethodDeclaration getEnclosingMethod() {
 			ASTNode first= fNodes.get(0);
 			return (MethodDeclaration)ASTNodes.getParent(first, ASTNode.METHOD_DECLARATION);
+		}
+		
+		public boolean isNodeInStaticContext(){
+			ASTNode first= fNodes.get(0);
+			return ASTResolving.isInStaticContext(first);
 		}
 	}
 
