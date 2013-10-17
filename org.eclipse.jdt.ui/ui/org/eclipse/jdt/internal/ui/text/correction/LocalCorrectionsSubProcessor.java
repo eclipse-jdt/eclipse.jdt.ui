@@ -13,6 +13,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -287,7 +288,8 @@ public class LocalCorrectionsSubProcessor {
 				List<CatchClause> catchClauses= surroundingTry.catchClauses();
 
 				if (catchClauses != null && catchClauses.size() == 1) {
-					String label= uncaughtExceptions.length > 1
+					List<ITypeBinding> filteredExceptions= filterSubtypeExceptions(uncaughtExceptions);
+					String label= filteredExceptions.size() > 1
 							? CorrectionMessages.LocalCorrectionsSubProcessor_addexceptionstoexistingcatch_description
 							: CorrectionMessages.LocalCorrectionsSubProcessor_addexceptiontoexistingcatch_description;
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
@@ -301,8 +303,8 @@ public class LocalCorrectionsSubProcessor {
 					if (type instanceof UnionType) {
 						UnionType unionType= (UnionType) type;
 						ListRewrite listRewrite= rewrite.getListRewrite(unionType, UnionType.TYPES_PROPERTY);
-						for (int i= 0; i < uncaughtExceptions.length; i++) {
-							ITypeBinding excBinding= uncaughtExceptions[i];
+						for (int i= 0; i < filteredExceptions.size(); i++) {
+							ITypeBinding excBinding= filteredExceptions.get(i);
 							Type type2= imports.addImport(excBinding, ast, importRewriteContext);
 							listRewrite.insertLast(type2, null);
 
@@ -315,8 +317,8 @@ public class LocalCorrectionsSubProcessor {
 						List<Type> types= newUnionType.types();
 
 						types.add((Type) rewrite.createCopyTarget(type));
-						for (int i= 0; i < uncaughtExceptions.length; i++) {
-							ITypeBinding excBinding= uncaughtExceptions[i];
+						for (int i= 0; i < filteredExceptions.size(); i++) {
+							ITypeBinding excBinding= filteredExceptions.get(i);
 							Type type2= imports.addImport(excBinding, ast, importRewriteContext);
 							types.add(type2);
 
@@ -431,6 +433,23 @@ public class LocalCorrectionsSubProcessor {
 				proposals.add(proposal);
 			}
 		}
+	}
+
+	private static List<ITypeBinding> filterSubtypeExceptions(ITypeBinding[] exceptions) {
+		List<ITypeBinding> filteredExceptions= new ArrayList<ITypeBinding>();
+		filteredExceptions.addAll(Arrays.asList(exceptions));
+
+		for (Iterator<ITypeBinding> subtypeIterator= filteredExceptions.iterator(); subtypeIterator.hasNext();) {
+			ITypeBinding iTypeBinding= subtypeIterator.next();
+			for (Iterator<ITypeBinding> supertypeIterator= filteredExceptions.iterator(); supertypeIterator.hasNext();) {
+				ITypeBinding superTypeBinding= supertypeIterator.next();
+				if (!iTypeBinding.equals(superTypeBinding) && iTypeBinding.isSubTypeCompatible(superTypeBinding)) {
+					subtypeIterator.remove();
+					break;
+				}
+			}
+		}
+		return filteredExceptions;
 	}
 
 	private static void addExceptionTypeLinkProposals(LinkedCorrectionProposal proposal, ITypeBinding exc, String key) {

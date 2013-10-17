@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.surround;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -257,6 +258,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				fLinkedProposalModel.getPositionGroup(GROUP_EXC_NAME + i, true).addPosition(fRewriter.track(decl.getName()), false);
 			}
 		} else {
+			List<ITypeBinding> filteredExceptions= filterSubtypeExceptions(exceptions);
 			CatchClause catchClause= getAST().newCatchClause();
 			SingleVariableDeclaration decl= getAST().newSingleVariableDeclaration();
 			String varName= StubUtility.getExceptionVariableName(fCUnit.getJavaProject());
@@ -265,11 +267,12 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 
 			UnionType unionType= getAST().newUnionType();
 			List<Type> types= unionType.types();
-			for (int i= 0; i < exceptions.length; i++) {
-				ITypeBinding exception= exceptions[i];
+			int i=0;
+			for (ITypeBinding exception : filteredExceptions) {
 				Type type= fImportRewrite.addImport(exception, getAST(), context);
 				types.add(type);
 				fLinkedProposalModel.getPositionGroup(GROUP_EXC_TYPE + i, true).addPosition(fRewriter.track(type), i == 0);
+				i++;
 			}
 
 			decl.setType(unionType);
@@ -372,6 +375,23 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				replacementNode, null);
 			statements.insertLast(toMove, null);
 		}
+	}
+
+	private List<ITypeBinding> filterSubtypeExceptions(ITypeBinding[] exceptions) {
+		List<ITypeBinding> filteredExceptions= new ArrayList<ITypeBinding>();
+		filteredExceptions.addAll(Arrays.asList(exceptions));
+
+		for (Iterator<ITypeBinding> subtypeIterator= filteredExceptions.iterator(); subtypeIterator.hasNext();) {
+			ITypeBinding iTypeBinding= subtypeIterator.next();
+			for (Iterator<ITypeBinding> supertypeIterator= filteredExceptions.iterator(); supertypeIterator.hasNext();) {
+				ITypeBinding superTypeBinding= supertypeIterator.next();
+				if (!iTypeBinding.equals(superTypeBinding) && iTypeBinding.isSubTypeCompatible(superTypeBinding)) {
+					subtypeIterator.remove();
+					break;
+				}
+			}
+		}
+		return filteredExceptions;
 	}
 
 	private List<ASTNode> getSpecialVariableDeclarationStatements() {
