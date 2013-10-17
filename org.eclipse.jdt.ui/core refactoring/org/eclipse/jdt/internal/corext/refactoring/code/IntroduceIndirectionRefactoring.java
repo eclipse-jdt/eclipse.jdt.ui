@@ -117,6 +117,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
@@ -1127,6 +1128,13 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 	private CompilationUnitRewrite getCachedCURewrite(ICompilationUnit unit) {
 		CompilationUnitRewrite rewrite= fRewrites.get(unit);
+		if (rewrite == null && fSelectionMethodInvocation != null) {
+			CompilationUnit cuNode= ASTResolving.findParentCompilationUnit(fSelectionMethodInvocation);
+			if (cuNode != null && cuNode.getJavaElement().equals(unit)) {
+				rewrite= new CompilationUnitRewrite(unit, cuNode);
+				fRewrites.put(unit, rewrite);
+			}
+		}
 		if (rewrite == null) {
 			rewrite= new CompilationUnitRewrite(unit);
 			fRewrites.put(unit, rewrite);
