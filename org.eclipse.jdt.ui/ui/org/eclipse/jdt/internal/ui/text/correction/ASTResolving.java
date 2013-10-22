@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -49,6 +53,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -229,12 +234,11 @@ public class ASTResolving {
 					return getReducedDimensionBinding(annotMember.getReturnType(), dim);
 				}
 			}
-			if (creationType != null) {
-				while ((creationType instanceof ArrayType) && dim > 0) {
-					creationType= ((ArrayType) creationType).getComponentType();
-					dim--;
+			if (creationType instanceof ArrayType) {
+				ITypeBinding creationTypeBinding= ((ArrayType) creationType).resolveBinding();
+				if (creationTypeBinding != null) {
+					return Bindings.getComponentType(creationTypeBinding, dim);
 				}
-				return creationType.resolveBinding();
 			}
 			break;
 		case ASTNode.CONDITIONAL_EXPRESSION:
@@ -419,11 +423,7 @@ public class ASTResolving {
 		ASTNode parent= node.getParent();
 		switch (parent.getNodeType()) {
 			case ASTNode.ARRAY_TYPE: {
-				int dim= 1;
-				while (parent.getParent() instanceof ArrayType) {
-					parent= parent.getParent();
-					dim++;
-				}
+				int dim= ((ArrayType) parent).getDimensions();
 				ITypeBinding parentBinding= getPossibleTypeBinding(parent);
 				if (parentBinding != null && parentBinding.getDimensions() == dim) {
 					return parentBinding.getElementType();
@@ -497,9 +497,9 @@ public class ASTResolving {
 				if (TagElement.TAG_THROWS.equals(tagElement.getTagName()) || TagElement.TAG_EXCEPTION.equals(tagElement.getTagName())) {
 					ASTNode methNode= tagElement.getParent().getParent();
 					if (methNode instanceof MethodDeclaration) {
-						List<Name> thrownExceptions= ((MethodDeclaration) methNode).thrownExceptions();
+						List<Type> thrownExceptions= ((MethodDeclaration) methNode).thrownExceptionTypes();
 						if (thrownExceptions.size() == 1) {
-							return thrownExceptions.get(0).resolveTypeBinding();
+							return thrownExceptions.get(0).resolveBinding();
 						}
 					}
 				}
@@ -680,19 +680,17 @@ public class ASTResolving {
 	}
 
 	/**
-	 * Returns the method binding of the node's parent method declaration or <code>null</code> if
-	 * the node is not inside a method.
+	 * The node's enclosing method declaration or <code>null</code> if
+	 * the node is not inside a method and is not a method declaration itself.
 	 * 
-	 * @param node the ast node
-	 * @return the method binding of the node's parent method declaration or <code>null</code> if
-	 *         the node
+	 * @param node a node
+	 * @return the enclosing method declaration or <code>null</code>
 	 */
 	public static MethodDeclaration findParentMethodDeclaration(ASTNode node) {
 		while (node != null) {
-			if (node.getNodeType() == ASTNode.METHOD_DECLARATION) {
+			if (node instanceof MethodDeclaration) {
 				return (MethodDeclaration) node;
-			}
-			if (node instanceof AbstractTypeDeclaration || node instanceof AnonymousClassDeclaration) {
+			} else if (node instanceof BodyDeclaration || node instanceof AnonymousClassDeclaration || node instanceof LambdaExpression) {
 				return null;
 			}
 			node= node.getParent();
@@ -854,7 +852,7 @@ public class ASTResolving {
 				kind= SimilarElementsRequestor.INTERFACES;
 				break;
 			case ASTNode.METHOD_DECLARATION:
-				if (node.getLocationInParent() == MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY) {
+				if (node.getLocationInParent() == MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY) {
 					kind= SimilarElementsRequestor.CLASSES;
 				} else if (node.getLocationInParent() == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
 					kind= SimilarElementsRequestor.ALL_TYPES | SimilarElementsRequestor.VOIDTYPE;

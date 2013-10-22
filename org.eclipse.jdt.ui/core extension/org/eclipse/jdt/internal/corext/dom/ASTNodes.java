@@ -4,6 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and
+ * is made available for testing and evaluation purposes only.
+ * The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -42,6 +46,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -64,12 +69,14 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.PackageQualifiedType;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
@@ -81,6 +88,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -370,6 +378,15 @@ public class ASTNodes {
 		return null;
 	}
 
+	/**
+	 * Returns the simple name of the type, followed by array dimensions.
+	 * Skips qualifiers, type arguments, and type annotations.
+	 * 
+	 * @param type a type
+	 * @return the simple name
+	 * @see #getSimpleNameIdentifier(Name)
+	 * @since 3.9 BETA_JAVA8
+	 */
 	public static String getTypeName(Type type) {
 		final StringBuffer buffer= new StringBuffer();
 		ASTVisitor visitor= new ASTVisitor() {
@@ -389,8 +406,20 @@ public class ASTNodes {
 				return false;
 			}
 			@Override
+			public boolean visit(QualifiedType node) {
+				buffer.append(node.getName().getIdentifier());
+				return false;
+			}
+			@Override
+			public boolean visit(PackageQualifiedType node) {
+				buffer.append(node.getName().getIdentifier());
+				return false;
+			}
+			@Override
 			public void endVisit(ArrayType node) {
-				buffer.append("[]"); //$NON-NLS-1$
+				for (int i= 0; i < node.dimensions().size(); i++) {
+					buffer.append("[]"); //$NON-NLS-1$
+				}
 			}
 		};
 		type.accept(visitor);
@@ -871,6 +900,14 @@ public class ASTNodes {
 		return result[0];
 	}
 
+	/**
+	 * Returns the topmost ancestor of <code>name</code> that is still a {@link Name}.
+	 * <p>
+	 * <b>Note:</b> The returned node may resolve to a different binding than the given <code>name</code>!
+	 * 
+	 * @param name a name node
+	 * @return the topmost name
+	 */
 	public static Name getTopMostName(Name name) {
 		Name result= name;
 		while(result.getParent() instanceof Name) {
@@ -879,12 +916,28 @@ public class ASTNodes {
 		return result;
 	}
 
-	public static Type getTopMostType(Type type) {
-		Type result= type;
-		while(result.getParent() instanceof Type) {
-			result= (Type)result.getParent();
+	/**
+	 * Returns the topmost ancestor of <code>node</code> that is a {@link Type} (but not a {@link UnionType}).
+	 * <p>
+	 * <b>Note:</b> The returned node often resolves to a different binding than the given <code>node</code>!
+	 * 
+	 * @param node the starting node, can be <code>null</code>
+	 * @return the topmost type or <code>null</code> if the node is not a descendant of a type node
+	 */
+	public static Type getTopMostType(ASTNode node) {
+		ASTNode result= null;
+		while (node instanceof Type && !(node instanceof UnionType)
+				|| node instanceof Name
+				|| node instanceof Annotation || node instanceof MemberValuePair
+				|| node instanceof Expression) { // Expression could maybe be reduced to expression node types that can appear in an annotation
+			result= node;
+			node= node.getParent();
 		}
-		return result;
+		
+		if (result instanceof Type)
+			return (Type) result;
+		
+		return null;
 	}
 
 	public static int changeVisibility(int modifiers, int visibility) {

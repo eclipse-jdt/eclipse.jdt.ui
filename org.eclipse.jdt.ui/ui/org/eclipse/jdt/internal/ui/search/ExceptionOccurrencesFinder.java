@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -14,8 +18,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -36,6 +38,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
@@ -48,6 +51,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrencesFinder {
@@ -57,7 +61,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	public static final String IS_EXCEPTION= "isException"; //$NON-NLS-1$
 
 	private CompilationUnit fASTRoot;
-	private Name fSelectedName;
+	private ASTNode fSelectedNode;
 
 	private ITypeBinding fException;
 	private ASTNode fStart;
@@ -76,27 +80,55 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 
 	public String initialize(CompilationUnit root, ASTNode node) {
 		fASTRoot= root;
-		if (!(node instanceof Name)) {
+		if (node == null)
 			return SearchMessages.ExceptionOccurrencesFinder_no_exception;
+		
+		MethodDeclaration method= ASTResolving.findParentMethodDeclaration(node);
+		if (method == null)
+			return SearchMessages.ExceptionOccurrencesFinder_no_exception;
+		
+		// The ExceptionOccurrencesFinder selects the whole type, no matter what part of it was selected. MethodExitsFinder behaves similar.
+		
+		if (node instanceof Name) {
+			node= ASTNodes.getTopMostName((Name) node);
 		}
-		fSelectedName= ASTNodes.getTopMostName((Name)node);
-		ASTNode parent= fSelectedName.getParent();
-		MethodDeclaration decl= resolveMethodDeclaration(parent);
-		if (decl != null && methodThrowsException(decl, fSelectedName)) {
-			fException= fSelectedName.resolveTypeBinding();
-			fStart= decl.getBody();
-		} else if (parent instanceof Type) {
-			parent= parent.getParent();
-			if (parent instanceof UnionType) {
-				parent= parent.getParent();
+		ASTNode parent= node.getParent();
+		if (node.getLocationInParent() == TagElement.FRAGMENTS_PROPERTY) {
+			// in Javadoc tag:
+			TagElement tagElement= (TagElement) parent;
+			String tagName= tagElement.getTagName();
+			if (node instanceof Name
+					&& node == tagElement.fragments().get(0)
+					&& (TagElement.TAG_EXCEPTION.equals(tagName) || TagElement.TAG_THROWS.equals(tagName))) {
+				fSelectedNode= node;
+				fException= ((Name) node).resolveTypeBinding();
+				fStart= method;
 			}
-			if (parent instanceof SingleVariableDeclaration && parent.getParent() instanceof CatchClause) {
-				CatchClause catchClause= (CatchClause)parent.getParent();
-				fTryStatement= (TryStatement)catchClause.getParent();
-				if (fTryStatement != null) {
-					fException= fSelectedName.resolveTypeBinding();
-					fStart= fTryStatement.getBody();
-				}
+			
+		} else {
+			Type type= ASTNodes.getTopMostType(node);
+			if (type == null) {
+				return SearchMessages.ExceptionOccurrencesFinder_no_exception;
+			}
+			
+			// in method's "throws" list:
+			if (type.getLocationInParent() == MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY) {
+				fSelectedNode= type;
+				fException= type.resolveBinding();
+				fStart= method;
+			}
+			
+			// in catch clause:
+			Type topType= type;
+			if (type.getLocationInParent() == UnionType.TYPES_PROPERTY) {
+				topType= (Type) type.getParent();
+			}
+			if (topType.getLocationInParent() == SingleVariableDeclaration.TYPE_PROPERTY
+					&& topType.getParent().getLocationInParent() == CatchClause.EXCEPTION_PROPERTY) {
+				fSelectedNode= type;
+				fException= type.resolveBinding();
+				fTryStatement= (TryStatement) topType.getParent().getParent().getParent();
+				fStart= fTryStatement.getBody();
 			}
 		}
 		if (fException == null || fStart == null)
@@ -105,67 +137,44 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return null;
 	}
 
-	private MethodDeclaration resolveMethodDeclaration(ASTNode node) {
-		if (node instanceof MethodDeclaration)
-			return (MethodDeclaration)node;
-		Javadoc doc= (Javadoc) ASTNodes.getParent(node, ASTNode.JAVADOC);
-		if (doc == null)
-			return null;
-		if (doc.getParent() instanceof MethodDeclaration)
-			return (MethodDeclaration) doc.getParent();
-		return null;
-	}
-
-	private boolean methodThrowsException(MethodDeclaration method, Name exception) {
-		ASTMatcher matcher = new ASTMatcher();
-		for (Iterator<Name> iter = method.thrownExceptions().iterator(); iter.hasNext();) {
-			Name thrown = iter.next();
-			if (exception.subtreeMatch(matcher, thrown))
-				return true;
-		}
-		return false;
-	}
-
 	private void performSearch() {
 		fCaughtExceptions= new ArrayList<ITypeBinding>();
 		fStart.accept(this);
 		if (fTryStatement != null) {
 			handleResourceDeclarations(fTryStatement);
 		}
-		if (fSelectedName != null) {
-			fResult.add(new OccurrenceLocation(fSelectedName.getStartPosition(), fSelectedName.getLength(), F_EXCEPTION_DECLARATION, fDescription));
+		if (fSelectedNode != null) {
+			fResult.add(new OccurrenceLocation(fSelectedNode.getStartPosition(), fSelectedNode.getLength(), F_EXCEPTION_DECLARATION, fDescription));
 		}
 	}
 
 	private void handleResourceDeclarations(TryStatement tryStatement) {
-		if (tryStatement.getAST().apiLevel() >= AST.JLS4) {
-			List<VariableDeclarationExpression> resources= tryStatement.resources();
-			for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
-				iterator.next().accept(this);
-			}
+		List<VariableDeclarationExpression> resources= tryStatement.resources();
+		for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
+			iterator.next().accept(this);
+		}
 
-			//check if the exception is thrown as a result of resource#close()
-			boolean exitMarked= false;
-			for (VariableDeclarationExpression variable : resources) {
-				Type type= variable.getType();
-				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$
-				if (methodBinding != null) {
-					ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
-					for (int j= 0; j < exceptionTypes.length; j++) {
-						if (matches(exceptionTypes[j])) { // a close() throws the caught exception
-							// mark name of resource
-							for (VariableDeclarationFragment fragment : (List<VariableDeclarationFragment>) variable.fragments()) {
-								SimpleName name= fragment.getName();
-								fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fDescription));
-							}
-							if (!exitMarked) {
-								// mark exit position
-								exitMarked= true;
-								Block body= tryStatement.getBody();
-								int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
-								fResult.add(new OccurrenceLocation(offset, 1, 0, Messages.format(SearchMessages.ExceptionOccurrencesFinder_occurrence_implicit_close_description,
-										BasicElementLabels.getJavaElementName(fException.getName()))));
-							}
+		//check if the exception is thrown as a result of resource#close()
+		boolean exitMarked= false;
+		for (VariableDeclarationExpression variable : resources) {
+			Type type= variable.getType();
+			IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$
+			if (methodBinding != null) {
+				ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
+				for (int j= 0; j < exceptionTypes.length; j++) {
+					if (matches(exceptionTypes[j])) { // a close() throws the caught exception
+						// mark name of resource
+						for (VariableDeclarationFragment fragment : (List<VariableDeclarationFragment>) variable.fragments()) {
+							SimpleName name= fragment.getName();
+							fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fDescription));
+						}
+						if (!exitMarked) {
+							// mark exit position
+							exitMarked= true;
+							Block body= tryStatement.getBody();
+							int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
+							fResult.add(new OccurrenceLocation(offset, 1, 0, Messages.format(SearchMessages.ExceptionOccurrencesFinder_occurrence_implicit_close_description,
+									BasicElementLabels.getJavaElementName(fException.getName()))));
 						}
 					}
 				}
@@ -195,8 +204,8 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	}
 
 	public String getElementName() {
-		if (fSelectedName != null) {
-			return ASTNodes.asString(fSelectedName);
+		if (fSelectedNode != null) {
+			return ASTNodes.asString(fSelectedNode);
 		}
 		return null;
 	}
@@ -242,6 +251,34 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	}
 
 	@Override
+	public boolean visit(MethodDeclaration node) {
+		Javadoc javadoc= node.getJavadoc();
+		if (javadoc != null) {
+			List<TagElement> tags= javadoc.tags();
+			for (TagElement tag : tags) {
+				String tagName= tag.getTagName();
+				if (TagElement.TAG_EXCEPTION.equals(tagName) || TagElement.TAG_THROWS.equals(tagName)) {
+					ASTNode name= (ASTNode) tag.fragments().get(0);
+					if (name instanceof Name) {
+						if (name != fSelectedNode && Bindings.equals(fException, ((Name) name).resolveBinding())) {
+							fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fDescription));
+						}
+					}
+				}
+			}
+		}
+		List<Type> thrownExceptionTypes= node.thrownExceptionTypes();
+		for (Iterator<Type> iter= thrownExceptionTypes.iterator(); iter.hasNext(); ) {
+			Type type = iter.next();
+			if (type != fSelectedNode && Bindings.equals(fException, type.resolveBinding())) {
+				fResult.add(new OccurrenceLocation(type.getStartPosition(), type.getLength(), 0, fDescription));
+			}
+		}
+		node.getBody().accept(this);
+		return false;
+	}
+
+	@Override
 	public boolean visit(MethodInvocation node) {
 		if (matches(node.resolveMethodBinding())) {
 			SimpleName name= node.getName();
@@ -249,7 +286,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		}
 		return super.visit(node);
 	}
-
+	
 	@Override
 	public boolean visit(SuperConstructorInvocation node) {
 		if (matches(node.resolveConstructorBinding())) {

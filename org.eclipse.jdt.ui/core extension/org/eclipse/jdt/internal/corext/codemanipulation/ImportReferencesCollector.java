@@ -5,20 +5,22 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -38,6 +40,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.PackageQualifiedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -192,20 +195,22 @@ public class ImportReferencesCollector extends GenericVisitor {
 	}
 
 	/*
-	 * @see ASTVisitor#visit(ArrayType)
-	 */
-	@Override
-	public boolean visit(ArrayType node) {
-		doVisitNode(node.getElementType());
-		return false;
-	}
-
-	/*
 	 * @see ASTVisitor#visit(SimpleType)
 	 */
 	@Override
 	public boolean visit(SimpleType node) {
 		typeRefFound(node.getName());
+		doVisitChildren(node.annotations());
+		return false;
+	}
+	
+	/*
+	 * @see ASTVisitor#visit(PackageQualifiedType)
+	 */
+	@Override
+	public boolean visit(PackageQualifiedType node) {
+		typeRefFound(node.getName());
+		doVisitChildren(node.annotations());
 		return false;
 	}
 
@@ -214,8 +219,9 @@ public class ImportReferencesCollector extends GenericVisitor {
 	 */
 	@Override
 	public boolean visit(QualifiedType node) {
-		// nothing to do here, let the qualifier be visited
-		return true;
+		doVisitNode(node.getQualifier());
+		doVisitChildren(node.annotations());
+		return false;
 	}
 
 	/*
@@ -385,11 +391,12 @@ public class ImportReferencesCollector extends GenericVisitor {
 		if (!node.isConstructor()) {
 			doVisitNode(node.getReturnType2());
 		}
+		// name not visited
+		// receiverType and receiverQualifier not visited:
+		//   These type names cannot be shadowed by an import (qualification is always redundant except for type annotations).
 		doVisitChildren(node.parameters());
-		Iterator<Name> iter=node.thrownExceptions().iterator();
-		while (iter.hasNext()) {
-			typeRefFound(iter.next());
-		}
+		doVisitChildren(node.extraDimensions());
+		doVisitChildren(node.thrownExceptionTypes());
 		if (!fSkipMethodBodies) {
 			doVisitNode(node.getBody());
 		}

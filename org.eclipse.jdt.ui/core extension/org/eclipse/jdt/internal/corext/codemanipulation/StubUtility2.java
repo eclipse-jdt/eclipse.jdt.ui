@@ -102,6 +102,7 @@ public final class StubUtility2 {
 		rewrite.getListRewrite(decl, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(marker, null);
 	}
 
+	/* This method should work with all AST levels. */
 	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context, IMethodBinding binding, String type, int modifiers, boolean omitSuperForDefConst, boolean todo, CodeGenerationSettings settings) throws CoreException {
 		AST ast= rewrite.getAST();
 		MethodDeclaration decl= ast.newMethodDeclaration();
@@ -127,12 +128,7 @@ public final class StubUtility2 {
 
 		List<SingleVariableDeclaration> parameters= createParameters(unit.getJavaProject(), imports, context, ast, binding, decl);
 
-		List<Name> thrownExceptions= decl.thrownExceptions();
-		ITypeBinding[] excTypes= binding.getExceptionTypes();
-		for (int i= 0; i < excTypes.length; i++) {
-			String excTypeName= imports.addImport(excTypes[i], context);
-			thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
-		}
+		createThrownExceptions(decl, binding, imports, context, ast);
 
 		Block body= ast.newBlock();
 		decl.setBody(body);
@@ -198,12 +194,7 @@ public final class StubUtility2 {
 
 			createParameters(unit.getJavaProject(), imports, context, ast, superConstructor, decl);
 
-			List<Name> thrownExceptions= decl.thrownExceptions();
-			ITypeBinding[] excTypes= superConstructor.getExceptionTypes();
-			for (int i= 0; i < excTypes.length; i++) {
-				String excTypeName= imports.addImport(excTypes[i], context);
-				thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
-			}
+			createThrownExceptions(decl, superConstructor, imports, context, ast);
 		}
 
 		Block body= ast.newBlock();
@@ -322,12 +313,7 @@ public final class StubUtility2 {
 			parameters.add(varDecl);
 		}
 
-		List<Name> thrownExceptions= decl.thrownExceptions();
-		ITypeBinding[] excTypes= delegate.getExceptionTypes();
-		for (int i= 0; i < excTypes.length; i++) {
-			String excTypeName= imports.addImport(excTypes[i], context);
-			thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
-		}
+		createThrownExceptions(decl, delegate, imports, context, ast);
 
 		Block body= ast.newBlock();
 		decl.setBody(body);
@@ -427,12 +413,7 @@ public final class StubUtility2 {
 
 		List<SingleVariableDeclaration> parameters= createParameters(unit.getJavaProject(), imports, context, ast, binding, decl);
 
-		List<Name> thrownExceptions= decl.thrownExceptions();
-		ITypeBinding[] excTypes= binding.getExceptionTypes();
-		for (int i= 0; i < excTypes.length; i++) {
-			String excTypeName= imports.addImport(excTypes[i], context);
-			thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
-		}
+		createThrownExceptions(decl, binding, imports, context, ast);
 
 		String delimiter= unit.findRecommendedLineSeparator();
 		if (!inInterface) {
@@ -521,6 +502,32 @@ public final class StubUtility2 {
 			parameters.add(var);
 		}
 		return parameters;
+	}
+
+	private static void createThrownExceptions(MethodDeclaration decl, IMethodBinding method, ImportRewrite imports, ImportRewriteContext context, AST ast) {
+		ITypeBinding[] excTypes= method.getExceptionTypes();
+		if (ast.apiLevel() >= AST.JLS8) {
+			List<Type> thrownExceptions= decl.thrownExceptionTypes();
+			for (int i= 0; i < excTypes.length; i++) {
+				Type excType= imports.addImport(excTypes[i], ast, context);
+				thrownExceptions.add(excType);
+			}
+		} else {
+			List<Name> thrownExceptions= getThrownExceptions(decl);
+			for (int i= 0; i < excTypes.length; i++) {
+				String excTypeName= imports.addImport(excTypes[i], context);
+				thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
+			}
+		}
+	}
+
+	/**
+	 * @param decl method declaration
+	 * @return thrown exception names
+	 * @deprecated to avoid deprecation warnings
+	 */
+	private static List<Name> getThrownExceptions(MethodDeclaration decl) {
+		return decl.thrownExceptions();
 	}
 
 	private static IMethodBinding findMethodBinding(IMethodBinding method, List<IMethodBinding> allMethods) {

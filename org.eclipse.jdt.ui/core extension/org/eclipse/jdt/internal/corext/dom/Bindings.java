@@ -1472,4 +1472,22 @@ public class Bindings {
 				|| qualifiedName.equals(project.getOption(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, true));
 	}
 
+	/**
+	 * Returns the n-th component type of the given type, or <code>null</code> if
+	 * the type binding is not an array type or has not that many dimensions.
+	 * 
+	 * @param arrayType an array type binding
+	 * @param n number of dimensions to cut
+	 * @return arrayType with n dimensions removed, or <code>null</code>
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public static ITypeBinding getComponentType(ITypeBinding arrayType, int n) {
+		ITypeBinding type= arrayType;
+		while (n > 0 && type != null) {
+			type= type.getComponentType();
+			n--;
+		}
+		return type;
+	}
+
 }

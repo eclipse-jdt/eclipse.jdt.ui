@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,10 +25,12 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotatableType;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
@@ -36,6 +38,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 
+@SuppressWarnings("javadoc")
 public class HierarchicalASTVisitorTest extends TestCase {
 	private static class TestHierarchicalASTVisitor extends HierarchicalASTVisitor {
 
@@ -93,6 +96,20 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			super.visit(node);
 		}
 
+		public boolean visit(AnnotatableType node) {
+			registerCall(AnnotatableType.class);
+			return false;
+		}
+		public void superVisit(AnnotatableType node) {
+			super.visit(node);
+		}
+		public void endVisit(AnnotatableType node) {
+			registerCall(AnnotatableType.class);
+		}
+		public void superEndVisit(AnnotatableType node) {
+			super.visit(node);
+		}
+
 		public boolean visit(Annotation node) {
 			registerCall(Annotation.class);
 			return false;
@@ -104,6 +121,20 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			registerCall(Annotation.class);
 		}
 		public void superEndVisit(Annotation node) {
+			super.visit(node);
+		}
+
+		public boolean visit(MethodReference node) {
+			registerCall(MethodReference.class);
+			return false;
+		}
+		public void superVisit(MethodReference node) {
+			super.visit(node);
+		}
+		public void endVisit(MethodReference node) {
+			registerCall(MethodReference.class);
+		}
+		public void superEndVisit(MethodReference node) {
 			super.visit(node);
 		}
 
@@ -323,6 +354,10 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			superEndVisit((Expression) null);
 			superVisit((Annotation) null);
 			superEndVisit((Annotation) null);
+			superVisit((AnnotatableType) null);
+			superEndVisit((AnnotatableType) null);
+			superVisit((MethodReference) null);
+			superEndVisit((MethodReference) null);
 			superVisit((Name) null);
 			superEndVisit((Name) null);
 			superVisit((BodyDeclaration) null);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -29,7 +28,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -85,19 +83,10 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 
 		}
 
-		Type type= null;
-		if (node instanceof Type) {
-			type= (Type)node;
-		} else if (node instanceof Name) {
-			Name name= ASTNodes.getTopMostName((Name)node);
-			if (name.getParent() instanceof Type) {
-				type= (Type)name.getParent();
-			}
-		}
+		Type type= ASTNodes.getTopMostType(node);
 		if (type == null)
 			return SearchMessages.MethodExitsFinder_no_return_type_selected;
-		type= ASTNodes.getTopMostType(type);
-		if (!(type.getParent() instanceof MethodDeclaration))
+		if (type.getLocationInParent() != MethodDeclaration.RETURN_TYPE2_PROPERTY)
 			return SearchMessages.MethodExitsFinder_no_return_type_selected;
 		fMethodDeclaration= (MethodDeclaration)type.getParent();
 
@@ -203,34 +192,32 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 		node.getBody().accept(this);
 
-		if (node.getAST().apiLevel() >= AST.JLS4) {
-			List<VariableDeclarationExpression> resources= node.resources();
-			for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
-				iterator.next().accept(this);
-			}
+		List<VariableDeclarationExpression> resources= node.resources();
+		for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
+			iterator.next().accept(this);
+		}
 
-			//check if the method could exit as a result of resource#close()
-			boolean exitMarked= false;
-			for (VariableDeclarationExpression variable : resources) {
-				Type type= variable.getType();
-				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$
-				if (methodBinding != null) {
-					ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
-					for (int j= 0; j < exceptionTypes.length; j++) {
-						if (isExitPoint(exceptionTypes[j])) { // a close() throws an uncaught exception
-							// mark name of resource
-							for (VariableDeclarationFragment fragment : (List<VariableDeclarationFragment>) variable.fragments()) {
-								SimpleName name= fragment.getName();
-								fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fExitDescription));
-							}
-							if (!exitMarked) {
-								// mark exit position
-								exitMarked= true;
-								Block body= node.getBody();
-								int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
-								fResult.add(new OccurrenceLocation(offset, 1, 0, Messages.format(SearchMessages.MethodExitsFinder_occurrence_exit_impclict_close_description,
-										BasicElementLabels.getJavaElementName(fMethodDeclaration.getName().toString()))));
-							}
+		//check if the method could exit as a result of resource#close()
+		boolean exitMarked= false;
+		for (VariableDeclarationExpression variable : resources) {
+			Type type= variable.getType();
+			IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$
+			if (methodBinding != null) {
+				ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
+				for (int j= 0; j < exceptionTypes.length; j++) {
+					if (isExitPoint(exceptionTypes[j])) { // a close() throws an uncaught exception
+						// mark name of resource
+						for (VariableDeclarationFragment fragment : (List<VariableDeclarationFragment>) variable.fragments()) {
+							SimpleName name= fragment.getName();
+							fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fExitDescription));
+						}
+						if (!exitMarked) {
+							// mark exit position
+							exitMarked= true;
+							Block body= node.getBody();
+							int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
+							fResult.add(new OccurrenceLocation(offset, 1, 0, Messages.format(SearchMessages.MethodExitsFinder_occurrence_exit_impclict_close_description,
+									BasicElementLabels.getJavaElementName(fMethodDeclaration.getName().toString()))));
 						}
 					}
 				}

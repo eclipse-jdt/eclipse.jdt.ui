@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -125,6 +129,7 @@ public class Binding extends ASTAttribute {
 					if (typeBinding.isAnnotation()) kinds.append(" isAnnotation"); //$NON-NLS-1$
 					if (typeBinding.isClass()) kinds.append(" isClass"); //$NON-NLS-1$
 					if (typeBinding.isInterface()) kinds.append(" isInterface"); //$NON-NLS-1$
+					if (typeBinding.isFunctionalInterface()) kinds.append(" isFunctionalInterface"); //$NON-NLS-1$
 					if (typeBinding.isEnum()) kinds.append(" isEnum"); //$NON-NLS-1$
 					res.add(new BindingProperty(this, kinds, true)); //$NON-NLS-1$
 					
@@ -189,6 +194,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "DECLARED METHODS", typeBinding.getDeclaredMethods(), isRefType)); //$NON-NLS-1$			
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic(), isNonPrimitive)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated(), isRefType)); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "TYPE ANNOTATIONS", typeBinding.getTypeAnnotations(), true)); //$NON-NLS-1$			
 					break;
 					
 				case IBinding.METHOD:
@@ -460,13 +466,13 @@ public class Binding extends ASTAttribute {
 	}
 	
 	public static String getEscapedStringLiteral(String stringValue) {
-		StringLiteral stringLiteral= AST.newAST(AST.JLS4).newStringLiteral();
+		StringLiteral stringLiteral= AST.newAST(ASTView.JLS_LATEST).newStringLiteral();
 		stringLiteral.setLiteralValue(stringValue);
 		return stringLiteral.getEscapedValue();
 	}
 	
 	public static String getEscapedCharLiteral(char charValue) {
-		CharacterLiteral charLiteral= AST.newAST(AST.JLS4).newCharacterLiteral();
+		CharacterLiteral charLiteral= AST.newAST(ASTView.JLS_LATEST).newCharacterLiteral();
 		charLiteral.setCharValue(charValue);
 		return charLiteral.getEscapedValue();
 	}

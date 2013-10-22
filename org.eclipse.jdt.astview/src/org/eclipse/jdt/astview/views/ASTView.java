@@ -125,6 +125,8 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 
 public class ASTView extends ViewPart implements IShowInSource {
 	
+	static final int JLS_LATEST= AST.JLS8;
+	
 	private static final int JLS8= AST.JLS8;
 	
 	/**
@@ -469,7 +471,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fStatementsRecovery= !fDialogSettings.getBoolean(SETTINGS_NO_STATEMENTS_RECOVERY); // inverse so that default is use recovery
 		fBindingsRecovery= !fDialogSettings.getBoolean(SETTINGS_NO_BINDINGS_RECOVERY); // inverse so that default is use recovery
 		fIgnoreMethodBodies= fDialogSettings.getBoolean(SETTINGS_IGNORE_METHOD_BODIES);
-		fCurrentASTLevel= JLS8;
+		fCurrentASTLevel= JLS_LATEST;
 		try {
 			int level= fDialogSettings.getInt(SETTINGS_JLS);
 			switch (level) {
