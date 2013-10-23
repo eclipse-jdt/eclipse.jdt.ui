@@ -1216,7 +1216,12 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			typeBinding= expression.resolveTypeBinding();
 		}
 		if (typeBinding != null && typeBinding.isTypeVariable()) {
-			typeBinding= fTargetMethodBinding.getDeclaringClass();
+			ITypeBinding[] typeBounds= typeBinding.getTypeBounds();
+			if (typeBounds.length > 0) {
+				typeBinding= typeBounds[0].getTypeDeclaration();
+			} else {
+				typeBinding= invocation.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+			}
 		}
 		Assert.isNotNull(typeBinding, "Type binding of target expression may not be null"); //$NON-NLS-1$
 		return typeBinding;
