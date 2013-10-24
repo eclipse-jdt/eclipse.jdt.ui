@@ -201,7 +201,7 @@ public class JavadocTagsSubProcessor {
 				newTag= ast.newTagElement();
 				newTag.setTagName(TagElement.TAG_THROWS);
 				TextElement excNode= ast.newTextElement();
-				excNode.setText(ASTNodes.asString(missingNode));
+				excNode.setText(ASTNodes.getQualifiedTypeName((Type) missingNode));
 				newTag.fragments().add(excNode);
 				List<Type> exceptions= ((MethodDeclaration) bodyDecl).thrownExceptionTypes();
 				insertTag(tagsRewriter, newTag, getPreviousExceptionNames(exceptions, missingNode));
@@ -305,7 +305,7 @@ public class JavadocTagsSubProcessor {
 		 				TagElement newTag= ast.newTagElement();
 		 				newTag.setTagName(TagElement.TAG_THROWS);
 						TextElement excNode= ast.newTextElement();
-						excNode.setText(ASTNodes.asString(exception));
+						excNode.setText(ASTNodes.getQualifiedTypeName(exception));
 		 				newTag.fragments().add(excNode);
 						insertTabStop(rewriter, newTag.fragments(), "exception" + i); //$NON-NLS-1$
 		 				insertTag(tagsRewriter, newTag, getPreviousExceptionNames(thrownExceptions, exception));
@@ -421,6 +421,7 @@ public class JavadocTagsSubProcessor {
 		} else if (isUnusedParam) {
 			label= CorrectionMessages.JavadocTagsSubProcessor_document_parameter_description;
 		} else {
+			node= ASTNodes.getNormalizedNode(node);
 			label= CorrectionMessages.JavadocTagsSubProcessor_document_exception_description;
 		}
 		ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), bodyDecl, node, IProposalRelevance.DOCUMENT_UNUSED_ITEM);

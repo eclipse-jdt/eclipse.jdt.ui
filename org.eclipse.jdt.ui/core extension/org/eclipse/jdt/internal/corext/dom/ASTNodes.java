@@ -5,9 +5,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
- * This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and
- * is made available for testing and evaluation purposes only.
- * The code is not compatible with any specification of the JCP.
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -381,9 +381,11 @@ public class ASTNodes {
 	/**
 	 * Returns the simple name of the type, followed by array dimensions.
 	 * Skips qualifiers, type arguments, and type annotations.
+	 * <p>
+	 * Does <b>not</b> work for WildcardTypes, etc.!
 	 * 
-	 * @param type a type
-	 * @return the simple name
+	 * @param type a type that has a simple name
+	 * @return the simple name, followed by array dimensions
 	 * @see #getSimpleNameIdentifier(Name)
 	 * @since 3.9 BETA_JAVA8
 	 */
@@ -396,13 +398,8 @@ public class ASTNodes {
 				return false;
 			}
 			@Override
-			public boolean visit(SimpleName node) {
-				buffer.append(node.getIdentifier());
-				return false;
-			}
-			@Override
-			public boolean visit(QualifiedName node) {
-				buffer.append(node.getName().getIdentifier());
+			public boolean visit(SimpleType node) {
+				buffer.append(getSimpleNameIdentifier(node.getName()));
 				return false;
 			}
 			@Override
@@ -416,6 +413,11 @@ public class ASTNodes {
 				return false;
 			}
 			@Override
+			public boolean visit(ParameterizedType node) {
+				node.getType().accept(this);
+				return false;
+			}
+			@Override
 			public void endVisit(ArrayType node) {
 				for (int i= 0; i < node.dimensions().size(); i++) {
 					buffer.append("[]"); //$NON-NLS-1$
@@ -426,6 +428,52 @@ public class ASTNodes {
 		return buffer.toString();
 	}
 
+	/**
+	 * Returns the (potentially qualified) name of a type, followed by array dimensions.
+	 * Skips type arguments and type annotations.
+	 * 
+	 * @param type a type that has a name
+	 * @return the name, followed by array dimensions
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public static String getQualifiedTypeName(Type type) {
+		final StringBuffer buffer= new StringBuffer();
+		ASTVisitor visitor= new ASTVisitor() {
+			@Override
+			public boolean visit(SimpleType node) {
+				buffer.append(node.getName().getFullyQualifiedName());
+				return false;
+			}
+			@Override
+			public boolean visit(QualifiedType node) {
+				node.getQualifier().accept(this);
+				buffer.append('.');
+				buffer.append(node.getName().getIdentifier());
+				return false;
+			}
+			@Override
+			public boolean visit(PackageQualifiedType node) {
+				buffer.append(node.getQualifier().getFullyQualifiedName());
+				buffer.append('.');
+				buffer.append(node.getName().getIdentifier());
+				return false;
+			}
+			@Override
+			public boolean visit(ParameterizedType node) {
+				node.getType().accept(this);
+				return false;
+			}
+			@Override
+			public void endVisit(ArrayType node) {
+				for (int i= 0; i < node.dimensions().size(); i++) {
+					buffer.append("[]"); //$NON-NLS-1$
+				}
+			}
+		};
+		type.accept(visitor);
+		return buffer.toString();
+	}
+	
 	public static InfixExpression.Operator convertToInfixOperator(Assignment.Operator operator) {
 		if (operator.equals(Assignment.Operator.PLUS_ASSIGN))
 			return InfixExpression.Operator.PLUS;

@@ -391,7 +391,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				if (javadoc != null && JavadocTagsSubProcessor.findThrowsTag(javadoc, type) == null) {
 					TagElement newTagElement= ast.newTagElement();
 					newTagElement.setTagName(TagElement.TAG_THROWS);
-					ASTNode newRef= ASTNodeFactory.newType(ast, type);
+					ASTNode newRef= ASTNodeFactory.newName(ast, type);
 					newTagElement.fragments().add(newRef);
 					insertTabStop(rewrite, newTagElement.fragments(), "throws_tagcomment" + i); //$NON-NLS-1$
 					insertThrowsTag(rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), exceptions, k, newTagElement);
