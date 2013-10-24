@@ -1359,12 +1359,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static void addExceptionToThrows(AST ast, MethodDeclaration methodDeclaration, ASTRewrite rewrite, SimpleType type2) {
 		ITypeBinding binding= type2.resolveBinding();
-		if (binding == null || isNotYetThrown(binding, methodDeclaration.thrownExceptions())) {
-			Name name= type2.getName();
-			Name newName= (Name) ASTNode.copySubtree(ast, name);
+		if (binding == null || isNotYetThrown(binding, methodDeclaration.thrownExceptionTypes())) {
+			Type newType= (Type) ASTNode.copySubtree(ast, type2);
 
-			ListRewrite listRewriter= rewrite.getListRewrite(methodDeclaration, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY);
-			listRewriter.insertLast(newName, null);
+			ListRewrite listRewriter= rewrite.getListRewrite(methodDeclaration, MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY);
+			listRewriter.insertLast(newType, null);
 		}
 	}
 
@@ -1396,10 +1395,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 	}
 
-	private static boolean isNotYetThrown(ITypeBinding binding, List<Name> thrownExceptions) {
+	private static boolean isNotYetThrown(ITypeBinding binding, List<Type> thrownExceptions) {
 		for (int i= 0; i < thrownExceptions.size(); i++) {
-			Name name= thrownExceptions.get(i);
-			ITypeBinding elem= (ITypeBinding) name.resolveBinding();
+			Type name= thrownExceptions.get(i);
+			ITypeBinding elem= name.resolveBinding();
 			if (elem != null) {
 				if (Bindings.isSuperType(elem, binding)) { // existing exception is base class of new
 					return false;

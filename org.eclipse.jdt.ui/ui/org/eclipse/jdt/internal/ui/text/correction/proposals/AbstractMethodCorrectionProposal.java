@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -32,7 +36,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -151,7 +154,7 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 		}
 
 		addNewParameters(rewrite, takenNames, decl.parameters());
-		addNewExceptions(rewrite, decl.thrownExceptions());
+		addNewExceptions(rewrite, decl.thrownExceptionTypes());
 
 		Block body= null;
 		if (!fSenderBinding.isInterface()) {
@@ -206,7 +209,7 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 	protected abstract void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> exceptions);
 	protected abstract void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params) throws CoreException;
 	protected abstract void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params) throws CoreException;
-	protected abstract void addNewExceptions(ASTRewrite rewrite, List<Name> exceptions) throws CoreException;
+	protected abstract void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions) throws CoreException;
 
 	protected abstract SimpleName getNewName(ASTRewrite rewrite);
 	protected abstract Type getNewMethodType(ASTRewrite rewrite) throws CoreException;

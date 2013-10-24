@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     N.Metchev@teamphone.com - contributed fixes for
@@ -926,7 +930,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			}
 		}
 
-		addExceptionsToNewConstructor(newConstructor);
+		addExceptionsToNewConstructor(newConstructor, importRewrite);
 
 		if (doAddComments()) {
 			try {
@@ -1027,14 +1031,14 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         return true;
     }
 
-    private void addExceptionsToNewConstructor(MethodDeclaration newConstructor) {
+	private void addExceptionsToNewConstructor(MethodDeclaration newConstructor, ImportRewrite importRewrite) {
         IMethodBinding constructorBinding= getSuperConstructorBinding();
         if (constructorBinding == null)
             return;
         ITypeBinding[] exceptions= constructorBinding.getExceptionTypes();
         for (int i= 0; i < exceptions.length; i++) {
-            Name exceptionTypeName= fAnonymousInnerClassNode.getAST().newName(Bindings.getNameComponents(exceptions[i]));
-            newConstructor.thrownExceptions().add(exceptionTypeName);
+			Type exceptionType= importRewrite.addImport(exceptions[i], fAnonymousInnerClassNode.getAST());
+			newConstructor.thrownExceptionTypes().add(exceptionType);
         }
     }
 

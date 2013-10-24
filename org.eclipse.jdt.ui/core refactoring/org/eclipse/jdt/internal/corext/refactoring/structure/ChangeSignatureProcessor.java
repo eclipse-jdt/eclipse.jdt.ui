@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -780,11 +784,11 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				if (nameNode == null || !(nameNode instanceof Name) || !(nameNode.getParent() instanceof MethodDeclaration))
 					return null;
 				MethodDeclaration methodDeclaration= (MethodDeclaration) nameNode.getParent();
-				List<Name> exceptions= methodDeclaration.thrownExceptions();
+				List<Type> exceptions= methodDeclaration.thrownExceptionTypes();
 				List<ExceptionInfo> result= new ArrayList<ExceptionInfo>(exceptions.size());
 				for (int i= 0; i < exceptions.size(); i++) {
-					Name name= exceptions.get(i);
-					ITypeBinding typeBinding= name.resolveTypeBinding();
+					Type type= exceptions.get(i);
+					ITypeBinding typeBinding= type.resolveBinding();
 					if (typeBinding == null)
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_no_exception_binding);
 					IJavaElement element= typeBinding.getJavaElement();
@@ -2121,17 +2125,17 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				if (info.isOld())
 					continue;
 				if (info.isDeleted())
-					removeExceptionFromNodeList(info, fMethDecl.thrownExceptions());
+					removeExceptionFromNodeList(info, fMethDecl.thrownExceptionTypes());
 				else
-					addExceptionToNodeList(info, getASTRewrite().getListRewrite(fMethDecl, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY));
+					addExceptionToNodeList(info, getASTRewrite().getListRewrite(fMethDecl, MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY));
 			}
 		}
 
-		private void removeExceptionFromNodeList(ExceptionInfo toRemove, List<Name> list) {
+		private void removeExceptionFromNodeList(ExceptionInfo toRemove, List<Type> list) {
 			ITypeBinding typeToRemove= toRemove.getTypeBinding();
-			for (Iterator<Name> iter= list.iterator(); iter.hasNext(); ) {
-				Name currentName= iter.next();
-				ITypeBinding currentType= currentName.resolveTypeBinding();
+			for (Iterator<Type> iter= list.iterator(); iter.hasNext();) {
+				Type currentExcType= iter.next();
+				ITypeBinding currentType= currentExcType.resolveBinding();
 				/* Maybe remove all subclasses of typeToRemove too.
 				 * Problem:
 				 * - B extends A;
@@ -2143,8 +2147,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				if (currentType == null)
 					continue; // newly added or unresolvable type
 				if (Bindings.equals(currentType, typeToRemove) || toRemove.getElement().getElementName().equals(currentType.getName())) {
-					getASTRewrite().remove(currentName, fDescription);
-					registerImportRemoveNode(currentName);
+					getASTRewrite().remove(currentExcType, fDescription);
+					registerImportRemoveNode(currentExcType);
 				}
 			}
 		}
@@ -2152,9 +2156,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		private void addExceptionToNodeList(ExceptionInfo exceptionInfo, ListRewrite exceptionListRewrite) {
 			String fullyQualified= exceptionInfo.getFullyQualifiedName();
 			for (Iterator<? extends ASTNode> iter= exceptionListRewrite.getOriginalList().iterator(); iter.hasNext(); ) {
-				Name exName= (Name) iter.next();
+				Type exType= (Type) iter.next();
 				//XXX: existing superclasses of the added exception are redundant and could be removed
-				ITypeBinding typeBinding= exName.resolveTypeBinding();
+				ITypeBinding typeBinding= exType.resolveBinding();
 				if (typeBinding == null)
 					continue; // newly added or unresolvable type
 				if (typeBinding.getQualifiedName().equals(fullyQualified))
@@ -2162,7 +2166,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			}
 			String importedType= getImportRewrite().addImport(exceptionInfo.getFullyQualifiedName());
 			getImportRemover().registerAddedImport(importedType);
-			ASTNode exNode= getASTRewrite().createStringPlaceholder(importedType, ASTNode.SIMPLE_NAME);
+			ASTNode exNode= getASTRewrite().createStringPlaceholder(importedType, ASTNode.SIMPLE_TYPE);
 			exceptionListRewrite.insertLast(exNode, fDescription);
 		}
 

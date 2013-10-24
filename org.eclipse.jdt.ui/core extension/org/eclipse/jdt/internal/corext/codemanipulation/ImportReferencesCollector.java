@@ -392,8 +392,9 @@ public class ImportReferencesCollector extends GenericVisitor {
 			doVisitNode(node.getReturnType2());
 		}
 		// name not visited
-		// receiverType and receiverQualifier not visited:
-		//   These type names cannot be shadowed by an import (qualification is always redundant except for type annotations).
+		doVisitNode(node.getReceiverType());
+		// receiverQualifier not visited:
+		//   Enclosing class names cannot be shadowed by an import (qualification is always redundant).
 		doVisitChildren(node.parameters());
 		doVisitChildren(node.extraDimensions());
 		doVisitChildren(node.thrownExceptionTypes());

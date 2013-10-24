@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -25,10 +29,10 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -69,9 +73,9 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 		enclosingNode.accept(analyzer);
 		List<ITypeBinding> exceptions= analyzer.getCurrentExceptions();
 		if (enclosingNode.getNodeType() == ASTNode.METHOD_DECLARATION) {
-			List<Name> thrownExceptions= ((MethodDeclaration)enclosingNode).thrownExceptions();
-			for (Iterator<Name> thrown= thrownExceptions.iterator(); thrown.hasNext();) {
-				ITypeBinding thrownException= thrown.next().resolveTypeBinding();
+			List<Type> thrownExceptions= ((MethodDeclaration) enclosingNode).thrownExceptionTypes();
+			for (Iterator<Type> thrown= thrownExceptions.iterator(); thrown.hasNext();) {
+				ITypeBinding thrownException= thrown.next().resolveBinding();
 				if (thrownException != null) {
 					for (Iterator<ITypeBinding> excep= exceptions.iterator(); excep.hasNext();) {
 						ITypeBinding exception= excep.next();

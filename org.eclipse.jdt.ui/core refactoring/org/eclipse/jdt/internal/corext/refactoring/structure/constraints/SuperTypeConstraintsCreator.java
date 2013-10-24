@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -503,13 +507,13 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 					}
 				}
 			}
-			final List<Name> exceptions= node.thrownExceptions();
+			final List<Type> exceptions= node.thrownExceptionTypes();
 			if (!exceptions.isEmpty()) {
 				final ITypeBinding throwable= node.getAST().resolveWellKnownType("java.lang.Throwable"); //$NON-NLS-1$
 				if (throwable != null) {
 					ancestor= fModel.createImmutableTypeVariable(throwable);
 					if (ancestor != null) {
-						Name exception= null;
+						Type exception= null;
 						for (int index= 0; index < exceptions.size(); index++) {
 							exception= exceptions.get(index);
 							descendant= (ConstraintVariable2) exception.getProperty(PROPERTY_CONSTRAINT_VARIABLE);

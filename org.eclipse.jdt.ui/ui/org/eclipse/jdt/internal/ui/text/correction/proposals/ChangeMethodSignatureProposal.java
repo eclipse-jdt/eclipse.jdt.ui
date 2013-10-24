@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -30,7 +34,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TagElement;
@@ -364,9 +367,9 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 
 		ImportRewrite imports= getImportRewrite();
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(methodDecl, imports);
-		ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY);
 
-		List<Name> exceptions= methodDecl.thrownExceptions(); // old exceptions
+		List<Type> exceptions= methodDecl.thrownExceptionTypes(); // old exceptions
 		int k= 0; // index over the old exceptions
 
 		for (int i= 0; i < fExceptionChanges.length; i++) {
@@ -377,7 +380,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			} else if (curr instanceof InsertDescription) {
 				InsertDescription desc= (InsertDescription) curr;
 				String type= imports.addImport(desc.type, context);
-				ASTNode newNode= ASTNodeFactory.newName(ast, type);
+				ASTNode newNode= ASTNodeFactory.newType(ast, type);
 
 				listRewrite.insertAt(newNode, i, null);
 
@@ -388,7 +391,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				if (javadoc != null && JavadocTagsSubProcessor.findThrowsTag(javadoc, type) == null) {
 					TagElement newTagElement= ast.newTagElement();
 					newTagElement.setTagName(TagElement.TAG_THROWS);
-					ASTNode newRef= ASTNodeFactory.newName(ast, type);
+					ASTNode newRef= ASTNodeFactory.newType(ast, type);
 					newTagElement.fragments().add(newRef);
 					insertTabStop(rewrite, newTagElement.fragments(), "throws_tagcomment" + i); //$NON-NLS-1$
 					insertThrowsTag(rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), exceptions, k, newTagElement);
@@ -397,7 +400,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				}
 
 			} else if (curr instanceof RemoveDescription) {
-				Name node= exceptions.get(k);
+				Type node= exceptions.get(k);
 
 				listRewrite.remove(node, null);
 				k++;
@@ -409,10 +412,10 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			} else if (curr instanceof EditDescription) {
 				EditDescription desc= (EditDescription) curr;
 
-				Name oldNode= exceptions.get(k);
+				Type oldNode= exceptions.get(k);
 
 				String type= imports.addImport(desc.type, context);
-				ASTNode newNode= ASTNodeFactory.newName(ast, type);
+				ASTNode newNode= ASTNodeFactory.newType(ast, type);
 
 				listRewrite.replace(oldNode, newNode, null);
 				String key= getExceptionTypeGroupId(i);
@@ -422,14 +425,14 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 
 				TagElement tagNode= findThrowsTag(methodDecl, oldNode);
 				if (tagNode != null) {
-					ASTNode newRef= ASTNodeFactory.newName(ast, type);
+					ASTNode newRef= ASTNodeFactory.newType(ast, type);
 					rewrite.replace((ASTNode) tagNode.fragments().get(0), newRef, null);
 					addLinkedPosition(rewrite.track(newRef), false, key);
 				}
 
 			} else if (curr instanceof SwapDescription) {
-				Name decl1= exceptions.get(k);
-				Name decl2= exceptions.get(((SwapDescription) curr).index);
+				Type decl1= exceptions.get(k);
+				Type decl2= exceptions.get(((SwapDescription) curr).index);
 
 				rewrite.replace(decl1, rewrite.createCopyTarget(decl2), null);
 				rewrite.replace(decl2, rewrite.createCopyTarget(decl1), null);
@@ -453,20 +456,20 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		addLinkedPosition(rewriter.track(textElement), false, linkedName);
 	}
 
-	private TagElement findThrowsTag(MethodDeclaration decl, Name exception) {
+	private TagElement findThrowsTag(MethodDeclaration decl, Type exception) {
 		Javadoc javadoc= decl.getJavadoc();
 		if (javadoc != null) {
-			String name= ASTNodes.getSimpleNameIdentifier(exception);
+			String name= ASTNodes.getTypeName(exception);
 			return JavadocTagsSubProcessor.findThrowsTag(javadoc, name);
 		}
 		return null;
 	}
 
-	private TagElement insertThrowsTag(ListRewrite tagRewriter, List<Name> exceptions, int currentIndex, TagElement newTagElement) {
+	private TagElement insertThrowsTag(ListRewrite tagRewriter, List<Type> exceptions, int currentIndex, TagElement newTagElement) {
 		HashSet<String> previousNames= new HashSet<String>();
 		for (int n = 0; n < currentIndex; n++) {
-			Name curr= exceptions.get(n);
-			previousNames.add(ASTNodes.getSimpleNameIdentifier(curr));
+			Type curr= exceptions.get(n);
+			previousNames.add(ASTNodes.getTypeName(curr));
 		}
 
 		JavadocTagsSubProcessor.insertTag(tagRewriter, newTagElement, previousNames);

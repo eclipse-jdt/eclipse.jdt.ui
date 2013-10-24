@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -27,7 +31,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -162,8 +165,8 @@ public class ReferenceFinderUtil {
 				result.add(binding);
 		}
 
-		for (Iterator<Name> iter= methodDeclaration.thrownExceptions().iterator(); iter.hasNext();) {
-			binding = iter.next().resolveTypeBinding();
+		for (Iterator<Type> iter= methodDeclaration.thrownExceptionTypes().iterator(); iter.hasNext();) {
+			binding= iter.next().resolveBinding();
 			if (binding != null)
 				result.add(binding);
 		}

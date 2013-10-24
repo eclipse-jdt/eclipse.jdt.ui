@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -708,12 +712,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		}
 
 		ITypeBinding[] ctorExcepts= fCtorBinding.getExceptionTypes();
-		List<Name> exceptions= newMethod.thrownExceptions();
+		List<Type> exceptions= newMethod.thrownExceptionTypes();
 
 		for(int i=0; i < ctorExcepts.length; i++) {
-			String excName= fImportRewriter.addImport(ctorExcepts[i]);
-
-			exceptions.add(ASTNodeFactory.newName(ast, excName));
+			exceptions.add(fImportRewriter.addImport(ctorExcepts[i], ast));
 		}
 
         copyTypeParameters(ast, newMethod);

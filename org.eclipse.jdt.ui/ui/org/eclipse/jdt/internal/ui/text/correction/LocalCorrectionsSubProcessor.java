@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Renaud Waldura &lt;renaud+eclipse@waldura.com&gt; - Access to static proposal
@@ -406,12 +410,12 @@ public class LocalCorrectionsSubProcessor {
 				}
 				uncaughtExceptions= unhandledExceptions.toArray(new ITypeBinding[unhandledExceptions.size()]);
 
-				List<Name> exceptions= methodDecl.thrownExceptions();
+				List<Type> exceptions= methodDecl.thrownExceptionTypes();
 				int nExistingExceptions= exceptions.size();
 				ChangeDescription[] desc= new ChangeDescription[nExistingExceptions + uncaughtExceptions.length];
 				for (int i= 0; i < exceptions.size(); i++) {
-					Name elem= exceptions.get(i);
-					if (isSubtype(elem.resolveTypeBinding(), uncaughtExceptions)) {
+					Type elem= exceptions.get(i);
+					if (isSubtype(elem.resolveBinding(), uncaughtExceptions)) {
 						desc[i]= new RemoveDescription();
 					}
 				}
@@ -751,7 +755,7 @@ public class LocalCorrectionsSubProcessor {
 		MethodDeclaration decl= (MethodDeclaration) selectedNode.getParent();
 		IMethodBinding binding= decl.resolveBinding();
 		if (binding != null) {
-			List<Name> thrownExceptions= decl.thrownExceptions();
+			List<Type> thrownExceptions= decl.thrownExceptionTypes();
 			int index= thrownExceptions.indexOf(selectedNode);
 			if (index == -1) {
 				return;

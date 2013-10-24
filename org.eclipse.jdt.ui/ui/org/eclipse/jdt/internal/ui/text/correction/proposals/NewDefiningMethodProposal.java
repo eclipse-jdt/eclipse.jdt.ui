@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -24,7 +28,6 @@ import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -33,7 +36,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -135,16 +137,15 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 	 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.AbstractMethodCorrectionProposal#addNewExceptions(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List)
 	 */
 	@Override
-	protected void addNewExceptions(ASTRewrite rewrite, List<Name> exceptions) throws CoreException {
+	protected void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions) throws CoreException {
 		AST ast= rewrite.getAST();
 		ImportRewrite importRewrite= getImportRewrite();
 		ITypeBinding[] bindings= fMethod.getExceptionTypes();
 		for (int i= 0; i < bindings.length; i++) {
-			String typeName= importRewrite.addImport(bindings[i]);
-			Name newNode= ASTNodeFactory.newName(ast, typeName);
-			exceptions.add(newNode);
+			Type newType= importRewrite.addImport(bindings[i], ast);
+			exceptions.add(newType);
 
-			addLinkedPosition(rewrite.track(newNode), false, "exc_type_" + i); //$NON-NLS-1$
+			addLinkedPosition(rewrite.track(newType), false, "exc_type_" + i); //$NON-NLS-1$
 		}
 	}
 
