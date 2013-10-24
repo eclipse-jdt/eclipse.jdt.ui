@@ -274,7 +274,10 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 				fResult.add(new OccurrenceLocation(type.getStartPosition(), type.getLength(), 0, fDescription));
 			}
 		}
-		node.getBody().accept(this);
+		Block body= node.getBody();
+		if (body != null) {
+			node.getBody().accept(this);
+		}
 		return false;
 	}
 
