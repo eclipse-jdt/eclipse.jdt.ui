@@ -182,3 +182,6 @@ platform-text/*
 tk.eclipse.plugin.htmleditor/*
 bug/
 zz*/*
+config/*
+org.eclipse.osgi.tests/*
+org.eclipse.e4.sdk/*
