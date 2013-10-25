@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ExtraDimension;
+import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -217,7 +217,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				Type newType= imports.addImport(newTypeBinding, ast, context);
 				rewrite.replace(decl.getType(), newType, null);
 				ListRewrite listRewrite1= rewrite.getListRewrite(decl, SingleVariableDeclaration.EXTRA_DIMENSIONS2_PROPERTY);
-				for (ExtraDimension dimension : (List<ExtraDimension>) decl.extraDimensions()) {
+				for (Dimension dimension : (List<Dimension>) decl.extraDimensions()) {
 					listRewrite1.remove(dimension, null);
 				}
 

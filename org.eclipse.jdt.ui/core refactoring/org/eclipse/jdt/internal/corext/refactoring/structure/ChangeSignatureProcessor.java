@@ -66,10 +66,10 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExtraDimension;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -2084,7 +2084,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 		private void removeExtraDimensions(SingleVariableDeclaration oldParam) {
 			ListRewrite listRewrite= getASTRewrite().getListRewrite(oldParam, SingleVariableDeclaration.EXTRA_DIMENSIONS2_PROPERTY);
-			for (ExtraDimension dimension : (List<ExtraDimension>) oldParam.extraDimensions()) {
+			for (Dimension dimension : (List<Dimension>) oldParam.extraDimensions()) {
 				listRewrite.remove(dimension, fDescription);
 			}
 		}
@@ -2100,7 +2100,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 		private void removeExtraDimensions(MethodDeclaration methDecl) {
 			ListRewrite listRewrite= getASTRewrite().getListRewrite(methDecl, MethodDeclaration.EXTRA_DIMENSIONS2_PROPERTY);
-			for (ExtraDimension dimension : (List<ExtraDimension>) methDecl.extraDimensions()) {
+			for (Dimension dimension : (List<Dimension>) methDecl.extraDimensions()) {
 				listRewrite.remove(dimension, fDescription);
 			}
 		}

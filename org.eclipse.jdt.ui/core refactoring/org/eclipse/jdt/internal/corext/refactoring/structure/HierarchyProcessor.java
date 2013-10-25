@@ -59,9 +59,9 @@ import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExtraDimension;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -218,13 +218,13 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	public static void copyExtraDimensions(final VariableDeclaration oldVarDeclaration, final VariableDeclaration newVarDeclaration) {
 		final AST ast= newVarDeclaration.getAST();
 		for (int index= 0, n= oldVarDeclaration.extraDimensions().size(); index < n; index++)
-			newVarDeclaration.extraDimensions().add(ASTNode.copySubtree(ast, (ExtraDimension) oldVarDeclaration.extraDimensions().get(index)));
+			newVarDeclaration.extraDimensions().add(ASTNode.copySubtree(ast, (Dimension) oldVarDeclaration.extraDimensions().get(index)));
 	}
 
 	protected static void copyExtraDimensions(final MethodDeclaration oldMethod, final MethodDeclaration newMethod) {
 		final AST ast= newMethod.getAST();
 		for (int index= 0, n= oldMethod.extraDimensions().size(); index < n; index++)
-			newMethod.extraDimensions().add(ASTNode.copySubtree(ast, (ExtraDimension) oldMethod.extraDimensions().get(index)));
+			newMethod.extraDimensions().add(ASTNode.copySubtree(ast, (Dimension) oldMethod.extraDimensions().get(index)));
 	}
 
 	protected static void copyAnnotations(final FieldDeclaration oldField, final FieldDeclaration newField) {
