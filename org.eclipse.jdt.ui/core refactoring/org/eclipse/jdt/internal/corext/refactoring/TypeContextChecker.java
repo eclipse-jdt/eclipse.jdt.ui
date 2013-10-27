@@ -60,6 +60,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.PackageQualifiedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
@@ -269,7 +270,12 @@ public class TypeContextChecker {
 				}
 				@Override
 				public boolean visit(QualifiedType node) {
-					appendResolved(ASTNodes.asString(node));
+					appendResolved(ASTNodes.getQualifiedTypeName(node));
+					return false;
+				}
+				@Override
+				public boolean visit(PackageQualifiedType node) {
+					appendResolved(ASTNodes.getQualifiedTypeName(node));
 					return false;
 				}
 				private void appendResolved(String typeName) {

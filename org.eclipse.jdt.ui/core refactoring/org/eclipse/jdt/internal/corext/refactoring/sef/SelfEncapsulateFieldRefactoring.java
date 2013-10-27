@@ -57,13 +57,13 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -93,6 +93,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
@@ -103,7 +104,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
-import org.eclipse.jdt.internal.corext.refactoring.structure.HierarchyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -631,7 +631,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		result.parameters().add(param);
 		param.setName(ast.newSimpleName(fArgName));
 		param.setType((Type)rewriter.createCopyTarget(type));
-		HierarchyProcessor.copyExtraDimensions(fFieldDeclaration, param);
+		List<Dimension> extraDimensions= DimensionRewrite.copyDimensions(fFieldDeclaration.extraDimensions(), rewriter);
+		param.extraDimensions().addAll(extraDimensions);
 
 		Block block= ast.newBlock();
 		result.setBody(block);
@@ -672,19 +673,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		MethodDeclaration result= ast.newMethodDeclaration();
 		result.setName(ast.newSimpleName(fGetterName));
 		result.modifiers().addAll(ASTNodeFactory.newModifiers(ast, createModifiers()));
-		Type returnType;
-		if (fFieldDeclaration.getExtraDimensions() > 0) {
-			if (type instanceof ArrayType) {
-				ArrayType arrayType= (ArrayType)type;
-				returnType= (Type)rewriter.createCopyTarget(arrayType.getElementType());
-				returnType= ast.newArrayType(returnType, fFieldDeclaration.getExtraDimensions() + arrayType.getDimensions());
-
-			} else {
-				returnType= (Type)rewriter.createCopyTarget(type);
-				returnType= ast.newArrayType(returnType, fFieldDeclaration.getExtraDimensions());
-			}
-		} else
-			returnType= (Type)rewriter.createCopyTarget(type);
+		Type returnType= DimensionRewrite.copyTypeAndAddDimensions(type, fFieldDeclaration.extraDimensions(), rewriter);
 		result.setReturnType2(returnType);
 
 		Block block= ast.newBlock();

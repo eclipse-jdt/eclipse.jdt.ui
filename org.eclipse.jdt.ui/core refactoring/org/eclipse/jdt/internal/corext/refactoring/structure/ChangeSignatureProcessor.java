@@ -2578,8 +2578,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			Type newTypeNode= createNewDocRefType(info);
 			if (info.isNewVarargs()) {
 				if (info.isOldVarargs() && ! oldParam.isVarargs()) {
-					// leave as array reference of old reference was not vararg
-					newTypeNode= getASTRewrite().getAST().newArrayType(newTypeNode);
+					// leave as array reference if old reference was not vararg
+					newTypeNode= ASTNodeFactory.newArrayType(newTypeNode);
 				} else {
 					getASTRewrite().set(oldParam, MethodRefParameter.VARARGS_PROPERTY, Boolean.TRUE, fDescription);
 				}

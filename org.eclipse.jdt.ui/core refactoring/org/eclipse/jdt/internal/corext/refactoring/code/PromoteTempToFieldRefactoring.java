@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -80,6 +81,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
@@ -93,7 +95,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.structure.HierarchyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -847,7 +848,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		SimpleName variableName= ast.newSimpleName(fFieldName);
 		fragment.setName(variableName);
 		addLinkedName(rewrite, variableName, false);
-		HierarchyProcessor.copyExtraDimensions(fTempDeclarationNode, fragment);
+		List<Dimension> extraDimensions= DimensionRewrite.copyDimensions(fTempDeclarationNode.extraDimensions(), rewrite);
+		fragment.extraDimensions().addAll(extraDimensions);
 		if (fInitializeIn == INITIALIZE_IN_FIELD && tempHasInitializer()){
 		    Expression initializer= (Expression)rewrite.createCopyTarget(getTempInitializer());
 		    fragment.setInitializer(initializer);

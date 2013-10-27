@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -50,6 +49,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 
@@ -216,10 +216,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 
 				Type newType= imports.addImport(newTypeBinding, ast, context);
 				rewrite.replace(decl.getType(), newType, null);
-				ListRewrite listRewrite1= rewrite.getListRewrite(decl, SingleVariableDeclaration.EXTRA_DIMENSIONS2_PROPERTY);
-				for (Dimension dimension : (List<Dimension>) decl.extraDimensions()) {
-					listRewrite1.remove(dimension, null);
-				}
+				DimensionRewrite.removeAllChildren(decl, SingleVariableDeclaration.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
 
 				IBinding binding= decl.getName().resolveBinding();
 				if (binding != null) {

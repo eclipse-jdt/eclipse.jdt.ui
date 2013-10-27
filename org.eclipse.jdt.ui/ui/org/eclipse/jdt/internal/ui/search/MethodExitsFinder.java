@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
@@ -76,7 +77,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		fASTRoot= root;
 
 		if (node instanceof ReturnStatement) {
-			fMethodDeclaration= (MethodDeclaration)ASTNodes.getParent(node, ASTNode.METHOD_DECLARATION);
+			fMethodDeclaration= ASTResolving.findParentMethodDeclaration(node);
 			if (fMethodDeclaration == null)
 				return SearchMessages.MethodExitsFinder_no_return_type_selected;
 			return null;

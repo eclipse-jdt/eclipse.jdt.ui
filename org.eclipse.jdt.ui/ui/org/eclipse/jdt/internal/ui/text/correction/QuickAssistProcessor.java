@@ -64,7 +64,6 @@ import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
-import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -116,6 +115,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -752,12 +752,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			rewrite.replace(fragment.getParent(), assignment, null);
 			VariableDeclarationFragment newFrag= ast.newVariableDeclarationFragment();
 			newFrag.setName(ast.newSimpleName(fragment.getName().getIdentifier()));
-			copyExtraDimensions(fragment, newFrag);
+			newFrag.extraDimensions().addAll(DimensionRewrite.copyDimensions(fragment.extraDimensions(), rewrite));
 
 			VariableDeclarationExpression oldVarDecl= (VariableDeclarationExpression) fragParent;
 
 			VariableDeclarationStatement newVarDec= ast.newVariableDeclarationStatement(newFrag);
-			newVarDec.setType((Type) ASTNode.copySubtree(ast, oldVarDecl.getType()));
+			newVarDec.setType((Type) rewrite.createCopyTarget(oldVarDecl.getType()));
 			newVarDec.modifiers().addAll(ASTNodeFactory.newModifiers(ast, oldVarDecl.getModifiers()));
 			newStatement= newVarDec;
 		}
@@ -767,12 +767,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		resultingCollections.add(proposal);
 		return true;
-	}
-
-	private static void copyExtraDimensions(final VariableDeclaration oldVarDeclaration, final VariableDeclaration newVarDeclaration) {
-		final AST ast= newVarDeclaration.getAST();
-		for (int index= 0, n= oldVarDeclaration.extraDimensions().size(); index < n; index++)
-			newVarDeclaration.extraDimensions().add(ASTNode.copySubtree(ast, (Dimension) oldVarDeclaration.extraDimensions().get(index)));
 	}
 
 	private static boolean getConvertStringConcatenationProposals(IInvocationContext context, Collection<ICommandAccess> resultingCollections) {
@@ -1376,7 +1370,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static void removeCatchBlock(ASTRewrite rewrite, CatchClause catchClause) {
 		TryStatement tryStatement= (TryStatement) catchClause.getParent();
-		if (tryStatement.catchClauses().size() > 1 || tryStatement.getFinally() != null || (tryStatement.getAST().apiLevel() >= AST.JLS4 && !tryStatement.resources().isEmpty())) {
+		if (tryStatement.catchClauses().size() > 1 || tryStatement.getFinally() != null || !tryStatement.resources().isEmpty()) {
 			rewrite.remove(catchClause, null);
 		} else {
 			Block block= tryStatement.getBody();
@@ -1806,7 +1800,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			label= CorrectionMessages.QuickAssistProcessor_unwrap_dostatement;
 		} else if (outer instanceof TryStatement) {
 			TryStatement tryStatement= (TryStatement) outer;
-			if (tryStatement.catchClauses().isEmpty() && (tryStatement.getAST().apiLevel() >= AST.JLS4 && tryStatement.resources().isEmpty())) {
+			if (tryStatement.catchClauses().isEmpty() && tryStatement.resources().isEmpty()) {
 				body= tryStatement.getBody();
 			}
 			label= CorrectionMessages.QuickAssistProcessor_unwrap_trystatement;
@@ -2326,7 +2320,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			
 			// create 'for' body element variable
 			VariableDeclarationFragment elementFragment= ast.newVariableDeclarationFragment();
-			copyExtraDimensions(parameter, elementFragment);
+			elementFragment.extraDimensions().addAll(DimensionRewrite.copyDimensions(parameter.extraDimensions(), rewrite));
 			elementFragment.setName((SimpleName) rewrite.createCopyTarget(parameter.getName()));
 			
 			SimpleName elementIterName= ast.newSimpleName(iterName);
@@ -2395,7 +2389,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				VariableDeclarationStatement varDeclaration= ast.newVariableDeclarationStatement(varFragment);
 				Type varType;
 				if (initializerIsArray) {
-					varType= ast.newArrayType((Type) rewrite.createCopyTarget(parameter.getType()), parameter.getExtraDimensions() + 1);
+					ArrayType varArrayType= (ArrayType) DimensionRewrite.copyTypeAndAddDimensions(parameter.getType(), parameter.extraDimensions(), rewrite);
+					varArrayType.dimensions().add(0, ast.newDimension());
+					varType= varArrayType;
 				} else {
 					ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
 					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, imports);
@@ -2466,7 +2462,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			
 			// create 'for' body element variable
 			VariableDeclarationFragment elementFragment= ast.newVariableDeclarationFragment();
-			copyExtraDimensions(parameter, elementFragment);
+			elementFragment.extraDimensions().addAll(DimensionRewrite.copyDimensions(parameter.extraDimensions(), rewrite));
 			elementFragment.setName((SimpleName) rewrite.createCopyTarget(parameter.getName()));
 			
 			SimpleName elementVarName= ast.newSimpleName(varName);

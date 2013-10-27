@@ -350,7 +350,7 @@ public class ASTResolving {
 					if (!((ArrayAccess) parent).getIndex().equals(node)) {
 						Type type= guessTypeForReference(ast, parent);
 						if (type != null) {
-							return ast.newArrayType(type);
+							return ASTNodeFactory.newArrayType(type);
 						}
 					}
 					return null;

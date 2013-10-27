@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -19,8 +23,10 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
@@ -137,6 +143,26 @@ public class ASTNodeFactory {
 	}
 
 	/**
+	 * Returns an {@link ArrayType} that adds one dimension to the given type node.
+	 * If the given node is already an ArrayType, then a new {@link Dimension}
+	 * without annotations is inserted at the first position.
+	 * 
+	 * @param type the type to be wrapped
+	 * @return the array type
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public static ArrayType newArrayType(Type type) {
+		if (type instanceof ArrayType) {
+			Dimension dimension= type.getAST().newDimension();
+			ArrayType arrayType= (ArrayType) type;
+			arrayType.dimensions().add(0, dimension); // first dimension is outermost
+			return arrayType;
+		} else {
+			return type.getAST().newArrayType(type);
+		}
+	}
+
+	/**
 	 * Returns the new type node corresponding to the type of the given declaration
 	 * including the extra dimensions.
 	 * @param ast The AST to create the resulting type with.
@@ -184,10 +210,19 @@ public class ASTNodeFactory {
 				return type;
 			}
 		}
-		int extraDim= declaration.getExtraDimensions();
+		
 		type= (Type) ASTNode.copySubtree(ast, type);
-		for (int i= 0; i < extraDim; i++) {
-			type= ast.newArrayType(type);
+		
+		List<Dimension> extraDimensions= declaration.extraDimensions();
+		if (!extraDimensions.isEmpty()) {
+			ArrayType arrayType;
+			if (type instanceof ArrayType) {
+				arrayType= (ArrayType) type;
+			} else {
+				arrayType= ast.newArrayType(type, 0);
+				type= arrayType;
+			}
+			arrayType.dimensions().addAll(ASTNode.copySubtrees(ast, extraDimensions));
 		}
 		return type;
 	}
@@ -380,5 +415,4 @@ public class ASTNodeFactory {
 			return null;
 		}
 	}
-
 }

@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -29,7 +28,6 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -52,6 +50,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -127,10 +126,7 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
 				Type origReturnType= methodDecl.getReturnType2();
 				rewrite.set(methodDecl, MethodDeclaration.RETURN_TYPE2_PROPERTY, type, null);
-				ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.EXTRA_DIMENSIONS2_PROPERTY);
-				for (Dimension dimension : (List<Dimension>) methodDecl.extraDimensions()) {
-					listRewrite.remove(dimension, null);
-				}
+				DimensionRewrite.removeAllChildren(methodDecl, MethodDeclaration.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
 				// add javadoc tag
 				Javadoc javadoc= methodDecl.getJavadoc();
 				if (javadoc != null && origReturnType != null && origReturnType.isPrimitiveType()
@@ -170,10 +166,7 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 						}
 					} else {
 						rewrite.set(fieldDecl, FieldDeclaration.TYPE_PROPERTY, type, null);
-						ListRewrite listRewrite= rewrite.getListRewrite(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY);
-						for (Dimension dimension : (List<Dimension>) ((VariableDeclarationFragment) declNode).extraDimensions()) {
-							listRewrite.remove(dimension, null);
-						}
+						DimensionRewrite.removeAllChildren(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
 					}
 				} else if (parent instanceof VariableDeclarationStatement) {
 					VariableDeclarationStatement varDecl= (VariableDeclarationStatement) parent;
@@ -190,27 +183,18 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 						}
 					} else {
 						rewrite.set(varDecl, VariableDeclarationStatement.TYPE_PROPERTY, type, null);
-						ListRewrite listRewrite= rewrite.getListRewrite(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY);
-						for (Dimension dimension : (List<Dimension>) ((VariableDeclarationFragment) declNode).extraDimensions()) {
-							listRewrite.remove(dimension, null);
-						}
+						DimensionRewrite.removeAllChildren(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
 					}
 				} else if (parent instanceof VariableDeclarationExpression) {
 					VariableDeclarationExpression varDecl= (VariableDeclarationExpression) parent;
 
 					rewrite.set(varDecl, VariableDeclarationExpression.TYPE_PROPERTY, type, null);
-					ListRewrite listRewrite= rewrite.getListRewrite(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY);
-					for (Dimension dimension : (List<Dimension>) ((VariableDeclarationFragment) declNode).extraDimensions()) {
-						listRewrite.remove(dimension, null);
-					}
+					DimensionRewrite.removeAllChildren(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
 				}
 			} else if (declNode instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration variableDeclaration= (SingleVariableDeclaration) declNode;
 				rewrite.set(variableDeclaration, SingleVariableDeclaration.TYPE_PROPERTY, type, null);
-				ListRewrite listRewrite= rewrite.getListRewrite(declNode, SingleVariableDeclaration.EXTRA_DIMENSIONS2_PROPERTY);
-				for (Dimension dimension : (List<Dimension>) ((SingleVariableDeclaration) declNode).extraDimensions()) {
-					listRewrite.remove(dimension, null);
-				}
+				DimensionRewrite.removeAllChildren(declNode, SingleVariableDeclaration.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
 			}
 
 			// set up linked mode

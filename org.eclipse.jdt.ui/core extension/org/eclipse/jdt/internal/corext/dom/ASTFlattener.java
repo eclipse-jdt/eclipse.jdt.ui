@@ -1262,17 +1262,8 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	@Override
 	public boolean visit(SimpleType node) {
-		Name name = node.getName();
-		if (name.isQualifiedName()) {
-			QualifiedName qualifiedName = (QualifiedName) name;
-			qualifiedName.getQualifier().accept(this);
-			this.fBuffer.append(".");//$NON-NLS-1$
-			printTypeAnnotations(node);
-			qualifiedName.getName().accept(this);
-		} else {
-			printTypeAnnotations(node);
-			node.getName().accept(this);			
-		}
+		printTypeAnnotations(node);
+		node.getName().accept(this);
 		return false;
 	}
 

@@ -215,7 +215,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		return status;
 	}
 
-	public static void copyExtraDimensions(final VariableDeclaration oldVarDeclaration, final VariableDeclaration newVarDeclaration) {
+	protected static void copyExtraDimensions(final VariableDeclaration oldVarDeclaration, final VariableDeclaration newVarDeclaration) {
 		final AST ast= newVarDeclaration.getAST();
 		for (int index= 0, n= oldVarDeclaration.extraDimensions().size(); index < n; index++)
 			newVarDeclaration.extraDimensions().add(ASTNode.copySubtree(ast, (Dimension) oldVarDeclaration.extraDimensions().get(index)));

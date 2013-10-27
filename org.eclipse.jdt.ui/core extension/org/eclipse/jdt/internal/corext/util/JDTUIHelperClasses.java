@@ -21,6 +21,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
+import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
@@ -104,6 +105,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
  * <ul>
  * <li>{@link CompilationUnitRewrite}</li>
  * <li>{@link BodyDeclarationRewrite}</li>
+ * <li>{@link DimensionRewrite}</li>
  * <li>{@link ModifierRewrite}</li>
  * <li>{@link ReplaceRewrite}</li>
  * <li>{@link StatementRewrite}</li>
