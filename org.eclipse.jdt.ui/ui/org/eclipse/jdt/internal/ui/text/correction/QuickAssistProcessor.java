@@ -220,8 +220,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getInlineLocalProposal(context, coveringNode, null)
 				|| getConvertLocalToFieldProposal(context, coveringNode, null)
 				|| getConvertAnonymousToNestedProposal(context, coveringNode, null)
-				|| getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, coveredNodes, null)
-				|| getConvertLambdaToAnonymousClassCreationsProposals(context, coveringNode, coveredNodes, null)
+				|| getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, null)
+				|| getConvertLambdaToAnonymousClassCreationsProposals(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
 				|| getMakeVariableDeclarationFinalProposals(context, null)
 				|| getMissingCaseStatementProposals(context, coveringNode, null)
@@ -265,8 +265,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getInlineLocalProposal(context, coveringNode, resultingCollections);
 				getConvertLocalToFieldProposal(context, coveringNode, resultingCollections);
 				getConvertAnonymousToNestedProposal(context, coveringNode, resultingCollections);
-				getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, coveredNodes, resultingCollections);
-				getConvertLambdaToAnonymousClassCreationsProposals(context, coveringNode, coveredNodes, resultingCollections);
+				getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, resultingCollections);
+				getConvertLambdaToAnonymousClassCreationsProposals(context, coveringNode, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getConvertEnhancedForLoopProposal(context, coveringNode, resultingCollections);
@@ -509,28 +509,28 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
-	private static boolean getConvertAnonymousClassCreationsToLambdaProposals(IInvocationContext context, ASTNode covering, ArrayList<ASTNode> coveredNodes,
-			Collection<ICommandAccess> resultingCollections) {
-
-		ArrayList<ASTNode> nodes;
-		if (context.getSelectionLength() == 0) {
-			if (!(covering instanceof Name))
-				return false;
-
+	private static boolean getConvertAnonymousClassCreationsToLambdaProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+		while (covering.getLocationInParent() == MethodDeclaration.NAME_PROPERTY
+				|| covering.getLocationInParent() == MethodDeclaration.BODY_PROPERTY
+				|| covering.getLocationInParent() == AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY) {
+			covering= covering.getParent();
+		}
+		
+		ClassInstanceCreation cic;
+		if (covering instanceof ClassInstanceCreation) {
+			cic= (ClassInstanceCreation) covering;
+		} else if (covering.getLocationInParent() == ClassInstanceCreation.ANONYMOUS_CLASS_DECLARATION_PROPERTY) {
+			cic= (ClassInstanceCreation) covering.getParent();
+		} else if (covering instanceof Name) {
 			ASTNode normalized= ASTNodes.getNormalizedNode(covering);
 			if (normalized.getLocationInParent() != ClassInstanceCreation.TYPE_PROPERTY)
 				return false;
-
-			ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) normalized.getParent();
-			nodes= new ArrayList<ASTNode>();
-			nodes.add(classInstanceCreation);
+			cic= (ClassInstanceCreation) normalized.getParent();
 		} else {
-			nodes= coveredNodes;
-		}
-		if (nodes.isEmpty())
 			return false;
+		}
 
-		IProposableFix fix= LambdaExpressionsFix.createConvertToLambdaFix(context.getASTRoot(), nodes.toArray(new ASTNode[nodes.size()]));
+		IProposableFix fix= LambdaExpressionsFix.createConvertToLambdaFix(cic);
 		if (fix == null)
 			return false;
 
@@ -540,29 +540,24 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		// add correction proposal
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map<String, String> options= new Hashtable<String, String>();
+		options.put(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.USE_LAMBDA, CleanUpOptions.TRUE);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_LAMBDA_EXPRESSION, image, context);
 		resultingCollections.add(proposal);
 		return true;
 	}
 
-	private static boolean getConvertLambdaToAnonymousClassCreationsProposals(IInvocationContext context, ASTNode covering, ArrayList<ASTNode> coveredNodes,
-			Collection<ICommandAccess> resultingCollections) {
-
-		ArrayList<ASTNode> nodes;
-		if (context.getSelectionLength() == 0) {
-			if (!(covering instanceof LambdaExpression))
-				return false;
-
-			nodes= new ArrayList<ASTNode>();
-			nodes.add(covering);
+	private static boolean getConvertLambdaToAnonymousClassCreationsProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+		LambdaExpression lambda;
+		if (covering instanceof LambdaExpression) {
+			lambda= (LambdaExpression) covering;
+		} else if (covering.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
+			lambda= (LambdaExpression) covering.getParent();
 		} else {
-			nodes= coveredNodes;
-		}
-		if (nodes.isEmpty())
 			return false;
+		}
 
-		IProposableFix fix= LambdaExpressionsFix.createConvertToAnonymousClassCreationsFix(context.getASTRoot(), nodes.toArray(new ASTNode[nodes.size()]));
+		IProposableFix fix= LambdaExpressionsFix.createConvertToAnonymousClassCreationsFix(lambda);
 		if (fix == null)
 			return false;
 
@@ -572,6 +567,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		// add correction proposal
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map<String, String> options= new Hashtable<String, String>();
+		options.put(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION, CleanUpOptions.TRUE);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new LambdaExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_ANONYMOUS_CLASS_CREATION, image, context);
 		resultingCollections.add(proposal);

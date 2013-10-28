@@ -58,18 +58,21 @@ public class CleanUpMessages extends NLS {
 	public static String CodeStyleTabPage_CheckboxName_UseFinalForLocals;
 	public static String CodeStyleTabPage_CheckboxName_UseFinalForParameters;
 
-	public static String CodeStyleTabPage_CheckboxName_UseLambdaWherePossible;
 	public static String CodeStyleTabPage_CheckboxName_UseParentheses;
 	public static String CodeStyleTabPage_GroupName_ControlStatments;
 	public static String CodeStyleTabPage_GroupName_Expressions;
 
-	public static String CodeStyleTabPage_GroupName_LambdaExpressions;
 	public static String CodeStyleTabPage_GroupName_VariableDeclarations;
 	public static String CodeStyleTabPage_RadioName_AlwaysUseBlocks;
 	public static String CodeStyleTabPage_RadioName_AlwaysUseParantheses;
 	public static String CodeStyleTabPage_RadioName_NeverUseBlocks;
 	public static String CodeStyleTabPage_RadioName_NeverUseParantheses;
 	public static String CodeStyleTabPage_RadioName_UseBlocksSpecial;
+	
+	public static String CodeStyleTabPage_GroupName_FunctionalInterfaces;
+	public static String CodeStyleTabPage_CheckboxName_ConvertFunctionalInterfaces;
+	public static String CodeStyleTabPage_RadioName_UseLambdaWherePossible;
+	public static String CodeStyleTabPage_RadioName_UseAnonymous;
 
 	public static String ContributedCleanUpTabPage_ErrorPage_message;
 

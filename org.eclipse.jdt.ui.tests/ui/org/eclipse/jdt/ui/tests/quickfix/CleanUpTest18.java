@@ -68,6 +68,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
 		enable(CleanUpConstants.USE_LAMBDA);
 
 		buf= new StringBuffer();
@@ -97,13 +98,15 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("        Runnable r2 = new Runnable() {\n");
 		buf.append("            @Override\n");
 		buf.append("            public void run() {\n");
-		buf.append("                System.out.println(\"do something\");\n");
+		buf.append("                System.out.println(\"do one thing\");\n");
+		buf.append("                System.out.println(\"do another thing\");\n");
 		buf.append("            }\n");
 		buf.append("        };\n");
 		buf.append("    };\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
 		enable(CleanUpConstants.USE_LAMBDA);
 
 		buf= new StringBuffer();
@@ -111,11 +114,53 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("public class E {\n");
 		buf.append("    void foo(){\n");
 		buf.append("        Runnable r1 = () -> System.out.println(\"do something\");\n");
-		buf.append("        Runnable r2 = () -> System.out.println(\"do something\");\n");
+		buf.append("        Runnable r2 = () -> {\n");
+		buf.append("            System.out.println(\"do one thing\");\n");
+		buf.append("            System.out.println(\"do another thing\");\n");
+		buf.append("        };\n");
 		buf.append("    };\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+	
+	public void testConvertToLambdaNestedWithImports() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.util.concurrent.Callable;\n");
+		buf.append("import java.util.concurrent.Executors;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        new Thread(new Runnable() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public void run() {\n");
+		buf.append("                Executors.newSingleThreadExecutor().submit(new Callable<String>() {\n");
+		buf.append("                    @Override\n");
+		buf.append("                    public String call() throws Exception {\n");
+		buf.append("                        return \"hi\";\n");
+		buf.append("                    }\n");
+		buf.append("                });\n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.util.concurrent.Executors;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        new Thread(() -> Executors.newSingleThreadExecutor().submit(() -> \"hi\"));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 

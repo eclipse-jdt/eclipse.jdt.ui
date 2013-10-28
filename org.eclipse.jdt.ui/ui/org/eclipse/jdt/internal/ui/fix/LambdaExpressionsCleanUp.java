@@ -48,7 +48,12 @@ public class LambdaExpressionsCleanUp extends AbstractCleanUp {
 	}
 
 	private boolean requireAST() {
-		return isEnabled(CleanUpConstants.USE_LAMBDA);
+		boolean convertFunctionalInterfaces= isEnabled(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		if (!convertFunctionalInterfaces)
+			return false;
+		
+		return isEnabled(CleanUpConstants.USE_LAMBDA)
+				|| isEnabled(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 	}
 
 	/**
@@ -60,11 +65,13 @@ public class LambdaExpressionsCleanUp extends AbstractCleanUp {
 		if (compilationUnit == null)
 			return null;
 
-		if (!isEnabled(CleanUpConstants.USE_LAMBDA))
+		boolean convertFunctionalInterfaces= isEnabled(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		if (!convertFunctionalInterfaces)
 			return null;
 
 		return LambdaExpressionsFix.createCleanUp(compilationUnit,
-				isEnabled(CleanUpConstants.USE_LAMBDA));
+				isEnabled(CleanUpConstants.USE_LAMBDA),
+				isEnabled(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION));
 	}
 
 	/**
@@ -73,8 +80,14 @@ public class LambdaExpressionsCleanUp extends AbstractCleanUp {
 	@Override
 	public String[] getStepDescriptions() {
 		List<String> result= new ArrayList<String>();
-		if (isEnabled(CleanUpConstants.USE_LAMBDA))
-			result.add(MultiFixMessages.LambdaExpressionsCleanUp_use_lambda_where_possible);
+		if (isEnabled(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES)) {
+			if (isEnabled(CleanUpConstants.USE_LAMBDA)) {
+				result.add(MultiFixMessages.LambdaExpressionsCleanUp_use_lambda_where_possible);
+			}
+			if (isEnabled(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION)) {
+				result.add(MultiFixMessages.LambdaExpressionsCleanUp_use_anonymous);
+			}
+		}
 
 		return result.toArray(new String[result.size()]);
 	}
@@ -85,15 +98,37 @@ public class LambdaExpressionsCleanUp extends AbstractCleanUp {
 	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
-
-		if (isEnabled(CleanUpConstants.USE_LAMBDA)) {
-			buf.append("Runnable r = () -> {\n"); //$NON-NLS-1$
-			buf.append("    //do something\n"); //$NON-NLS-1$
+		
+		boolean convert= isEnabled(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		boolean useLambda= isEnabled(CleanUpConstants.USE_LAMBDA);
+		boolean useAnonymous= isEnabled(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
+		
+		boolean firstLambda= convert && useLambda;
+		boolean secondLambda= !(convert && useAnonymous);
+		
+		if (firstLambda) {
+			buf.append("IntConsumer c = i -> {\n"); //$NON-NLS-1$
+			buf.append("    System.out.println(i);\n"); //$NON-NLS-1$
 			buf.append("};\n"); //$NON-NLS-1$
+			buf.append("\n"); //$NON-NLS-1$
+			buf.append("\n"); //$NON-NLS-1$
+		} else {
+			buf.append("IntConsumer c = new IntConsumer() {\n"); //$NON-NLS-1$
+			buf.append("    @Override public void accept(int value) {\n"); //$NON-NLS-1$
+			buf.append("        System.out.println(i);\n"); //$NON-NLS-1$
+			buf.append("    }\n"); //$NON-NLS-1$
+			buf.append("};\n"); //$NON-NLS-1$
+		}
+		
+		if (secondLambda) {
+			buf.append("Runnable r = () -> { /* do something */ };\n"); //$NON-NLS-1$
+			buf.append("\n"); //$NON-NLS-1$
+			buf.append("\n"); //$NON-NLS-1$
+			buf.append("\n"); //$NON-NLS-1$
+			buf.append("\n"); //$NON-NLS-1$
 		} else {
 			buf.append("Runnable r = new Runnable() {\n"); //$NON-NLS-1$
-			buf.append("    @Override\n"); //$NON-NLS-1$
-			buf.append("    public void run() {\n"); //$NON-NLS-1$
+			buf.append("    @Override public void run() {\n"); //$NON-NLS-1$
 			buf.append("        //do something\n"); //$NON-NLS-1$
 			buf.append("    }\n"); //$NON-NLS-1$
 			buf.append("};\n"); //$NON-NLS-1$

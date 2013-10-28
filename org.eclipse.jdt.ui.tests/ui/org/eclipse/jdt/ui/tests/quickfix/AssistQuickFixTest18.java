@@ -206,7 +206,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    void bar(I i) {\n");
 		buf.append("    }\n");
 		buf.append("    void foo() {\n");
-		buf.append("        bar((int a, int b) -> {\n");
+		buf.append("        bar((a, b) -> {\n");
 		buf.append("            System.out.println(a+b);\n");
 		buf.append("            System.out.println(a+b);\n");
 		buf.append("        });\n");
@@ -464,62 +464,6 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
-	public void testConvertToLambda10() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("interface I {\n");
-		buf.append("    int method();\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(I i) {\n");
-		buf.append("    }\n");
-		buf.append("    void foo() {\n");
-		buf.append("        //selection start\n");
-		buf.append("        bar(new I() {\n");
-		buf.append("            public int method() {\n");
-		buf.append("                return 1;\n");
-		buf.append("            }\n");
-		buf.append("        });\n");
-		buf.append("        bar(new I() {\n");
-		buf.append("            public int method() {\n");
-		buf.append("                return 2;\n");
-		buf.append("            }\n");
-		buf.append("        });\n");
-		buf.append("        //selection end\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
-		int offset1= buf.toString().indexOf("//selection start");
-		int offset2= buf.toString().indexOf("//selection end");
-		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
-		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
-
-		assertNumberOfProposals(proposals, 3);
-		assertCorrectLabels(proposals);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("interface I {\n");
-		buf.append("    int method();\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(I i) {\n");
-		buf.append("    }\n");
-		buf.append("    void foo() {\n");
-		buf.append("        //selection start\n");
-		buf.append("        bar(() -> 1);\n");
-		buf.append("        bar(() -> 2);\n");
-		buf.append("        //selection end\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1 });
-	}
-
 	public void testConvertToAnonymousClassCreation1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -544,7 +488,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -594,7 +538,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -641,7 +585,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -687,7 +631,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -712,61 +656,37 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
-	public void testConvertToAnonymousClassCreation5() throws Exception {
+	public void testConvertToAnonymousClassCreationWithParameterName() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("interface I {\n");
-		buf.append("    void method();\n");
-		buf.append("}\n");
+		buf.append("import java.util.function.IntFunction;\n");
 		buf.append("public class E {\n");
-		buf.append("    void bar(I i) {\n");
-		buf.append("    }\n");
-		buf.append("    void foo() {\n");
-		buf.append("        //selection start\n");
-		buf.append("        bar(() -> System.out.println());\n");
-		buf.append("        bar(() -> System.out.println());\n");
-		buf.append("        //selection end\n");
-		buf.append("    }\n");
+		buf.append("    IntFunction<String> toString= (int i) -> Integer.toString(i);\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
-		int offset1= buf.toString().indexOf("//selection start");
-		int offset2= buf.toString().indexOf("//selection end");
-		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
+	
+		int offset= buf.toString().indexOf("->");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
-
-		assertNumberOfProposals(proposals, 3);
+	
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-
+	
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("interface I {\n");
-		buf.append("    void method();\n");
-		buf.append("}\n");
+		buf.append("import java.util.function.IntFunction;\n");
 		buf.append("public class E {\n");
-		buf.append("    void bar(I i) {\n");
-		buf.append("    }\n");
-		buf.append("    void foo() {\n");
-		buf.append("        //selection start\n");
-		buf.append("        bar(new I() {\n");
-		buf.append("            @Override\n");
-		buf.append("            public void method() {\n");
-		buf.append("                System.out.println();\n");
-		buf.append("            }\n");
-		buf.append("        });\n");
-		buf.append("        bar(new I() {\n");
-		buf.append("            @Override\n");
-		buf.append("            public void method() {\n");
-		buf.append("                System.out.println();\n");
-		buf.append("            }\n");
-		buf.append("        });\n");
-		buf.append("        //selection end\n");
-		buf.append("    }\n");
+		buf.append("    IntFunction<String> toString= new IntFunction<String>() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public String apply(int i) {\n");
+		buf.append("            return Integer.toString(i);\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-
+	
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 }

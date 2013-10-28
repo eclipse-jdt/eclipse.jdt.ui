@@ -126,7 +126,7 @@ public final class StubUtility2 {
 			typeParameters.add(newTypeParam);
 		}
 
-		List<SingleVariableDeclaration> parameters= createParameters(unit.getJavaProject(), imports, context, ast, binding, decl);
+		List<SingleVariableDeclaration> parameters= createParameters(unit.getJavaProject(), imports, context, ast, binding, null, decl);
 
 		createThrownExceptions(decl, binding, imports, context, ast);
 
@@ -192,7 +192,7 @@ public final class StubUtility2 {
 				typeParameters.add(newTypeParam);
 			}
 
-			createParameters(unit.getJavaProject(), imports, context, ast, superConstructor, decl);
+			createParameters(unit.getJavaProject(), imports, context, ast, superConstructor, null, decl);
 
 			createThrownExceptions(decl, superConstructor, imports, context, ast);
 		}
@@ -372,9 +372,14 @@ public final class StubUtility2 {
 		}
 		return decl;
 	}
-
+	
 	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports,
 			ImportRewriteContext context, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean inInterface) throws CoreException {
+		return createImplementationStub(unit, rewrite, imports, context, binding, null, type, settings, inInterface);
+	}
+	
+	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports,
+			ImportRewriteContext context, IMethodBinding binding, String[] parameterNames, String type, CodeGenerationSettings settings, boolean inInterface) throws CoreException {
 		Assert.isNotNull(imports);
 		Assert.isNotNull(rewrite);
 
@@ -411,7 +416,7 @@ public final class StubUtility2 {
 		
 		decl.setReturnType2(imports.addImport(bindingReturnType, ast, context));
 
-		List<SingleVariableDeclaration> parameters= createParameters(unit.getJavaProject(), imports, context, ast, binding, decl);
+		List<SingleVariableDeclaration> parameters= createParameters(unit.getJavaProject(), imports, context, ast, binding, parameterNames, decl);
 
 		createThrownExceptions(decl, binding, imports, context, ast);
 
@@ -471,11 +476,13 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	private static List<SingleVariableDeclaration> createParameters(IJavaProject project, ImportRewrite imports, ImportRewriteContext context, AST ast, IMethodBinding binding, MethodDeclaration decl) {
+	private static List<SingleVariableDeclaration> createParameters(IJavaProject project, ImportRewrite imports, ImportRewriteContext context, AST ast, IMethodBinding binding, String[] paramNames, MethodDeclaration decl) {
 		boolean is50OrHigher= JavaModelUtil.is50OrHigher(project);
 		List<SingleVariableDeclaration> parameters= decl.parameters();
 		ITypeBinding[] params= binding.getParameterTypes();
-		String[] paramNames= StubUtility.suggestArgumentNames(project, binding);
+		if (paramNames == null) {
+			paramNames= StubUtility.suggestArgumentNames(project, binding);
+		}
 		for (int i= 0; i < params.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			if (binding.isVarargs() && params[i].isArray() && i == params.length - 1) {

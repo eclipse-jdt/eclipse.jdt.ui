@@ -81,10 +81,12 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 		final CheckboxPreference useFinalVariablesPref= createCheckboxPref(variableGroup, 1, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseFinalForLocals, CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(useFinalPref, new CheckboxPreference[] {useFinalFieldsPref, useFinalParametersPref, useFinalVariablesPref});
 
-		Group lambdaGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_LambdaExpressions);
+		Group functionalInterfacesGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_FunctionalInterfaces);
 
-		CheckboxPreference convertToLambda= createCheckboxPref(lambdaGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseLambdaWherePossible, CleanUpConstants.USE_LAMBDA, CleanUpModifyDialog.FALSE_TRUE);
-		registerPreference(convertToLambda);
-		intent(lambdaGroup);
-    }
+		CheckboxPreference convertFunctionalInterfaces= createCheckboxPref(functionalInterfacesGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ConvertFunctionalInterfaces, CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES, CleanUpModifyDialog.FALSE_TRUE);
+		intent(functionalInterfacesGroup);
+		RadioPreference useLambdaPref= createRadioPref(functionalInterfacesGroup, 1, CleanUpMessages.CodeStyleTabPage_RadioName_UseLambdaWherePossible, CleanUpConstants.USE_LAMBDA, CleanUpModifyDialog.FALSE_TRUE);
+		RadioPreference useAnonymousPref= createRadioPref(functionalInterfacesGroup, 1, CleanUpMessages.CodeStyleTabPage_RadioName_UseAnonymous, CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION, CleanUpModifyDialog.FALSE_TRUE);
+		registerSlavePreference(convertFunctionalInterfaces, new RadioPreference[] { useLambdaPref, useAnonymousPref });
+	}
 }

@@ -99,6 +99,7 @@ public class MultiFixMessages extends NLS {
 	public static String CodeFormatCleanUp_description;
 	public static String CodeFormatFix_description;
 	public static String LambdaExpressionsCleanUp_use_lambda_where_possible;
+	public static String LambdaExpressionsCleanUp_use_anonymous;
 
 	public static String NullAnnotationsCleanUp_add_nullable_annotation;
 	public static String NullAnnotationsCleanUp_add_nonnull_annotation;

@@ -18,6 +18,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 /**
  * Interface defining relevance values for quick fixes/assists.
  * 
+ * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
  * @since 3.9
  */
 public interface IProposalRelevance {
@@ -122,6 +123,8 @@ public interface IProposalRelevance {
 	public static final int EXTRACT_LOCAL_ALL= 6;
 	public static final int CHANGE_TO_ATTRIBUTE_SIMILAR_NAME= 6;
 	public static final int CREATE_FIELD= 6;
+	public static final int CONVERT_TO_ANONYMOUS_CLASS_CREATION= 6;
+	public static final int CONVERT_TO_LAMBDA_EXPRESSION= 6;
 
 	public static final int ADD_ALL_MISSING_TAGS= 5;
 	public static final int QUALIFY_INNER_TYPE_NAME= 5;
@@ -210,8 +213,6 @@ public interface IProposalRelevance {
 	public static final int EXTRACT_LOCAL_ERROR= 2;
 	public static final int ASSIGN_TO_FIELD= 2;
 	public static final int RETURN_ALLOCATED_OBJECT= 2;
-	public static final int CONVERT_TO_ANONYMOUS_CLASS_CREATION= 2;
-	public static final int CONVERT_TO_LAMBDA_EXPRESSION= 2;
 
 	public static final int JOIN_VARIABLE_DECLARATION= 1;
 	public static final int INVERT_EQUALS= 1;
