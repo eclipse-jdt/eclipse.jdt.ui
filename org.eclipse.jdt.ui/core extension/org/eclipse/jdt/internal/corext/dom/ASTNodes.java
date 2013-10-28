@@ -643,6 +643,13 @@ public class ASTNodes {
 		return null;
 	}
 
+	/**
+	 * For {@link Name} or {@link Type} nodes, returns the topmost {@link Type} node
+	 * that shares the same type binding as the given node.
+	 * 
+	 * @param node an ASTNode
+	 * @return the normalized {@link Type} node or the original node
+	 */
 	public static ASTNode getNormalizedNode(ASTNode node) {
 		ASTNode current= node;
 		// normalize name
@@ -650,8 +657,9 @@ public class ASTNodes {
 			current= current.getParent();
 		}
 		// normalize type
-		if (QualifiedType.NAME_PROPERTY.equals(current.getLocationInParent()) ||
-			SimpleType.NAME_PROPERTY.equals(current.getLocationInParent())) {
+		if (QualifiedType.NAME_PROPERTY.equals(current.getLocationInParent())
+				|| SimpleType.NAME_PROPERTY.equals(current.getLocationInParent())
+				|| PackageQualifiedType.NAME_PROPERTY.equals(current.getLocationInParent())) {
 			current= current.getParent();
 		}
 		// normalize parameterized types
