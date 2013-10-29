@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
-import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -50,7 +49,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.PageBook;
 
 import org.eclipse.debug.core.ILaunchManager;
@@ -176,15 +174,14 @@ public class TestViewer {
 		fTreeContentProvider= new TestSessionTreeContentProvider();
 		fTreeViewer.setContentProvider(fTreeContentProvider);
 		fTreeLabelProvider= new TestSessionLabelProvider(fTestRunnerPart, TestRunnerViewPart.LAYOUT_HIERARCHICAL);
-		ILabelDecorator labelDecorator= PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
-		fTreeViewer.setLabelProvider(new ColoringLabelProvider(fTreeLabelProvider, labelDecorator, null));
+		fTreeViewer.setLabelProvider(new ColoringLabelProvider(fTreeLabelProvider));
 
 		fTableViewer= new TableViewer(fViewerbook, SWT.V_SCROLL | SWT.H_SCROLL | SWT.SINGLE);
 		fTableViewer.setUseHashlookup(true);
 		fTableContentProvider= new TestSessionTableContentProvider();
 		fTableViewer.setContentProvider(fTableContentProvider);
 		fTableLabelProvider= new TestSessionLabelProvider(fTestRunnerPart, TestRunnerViewPart.LAYOUT_FLAT);
-		fTableViewer.setLabelProvider(new ColoringLabelProvider(fTableLabelProvider, labelDecorator, null));
+		fTableViewer.setLabelProvider(new ColoringLabelProvider(fTableLabelProvider));
 
 		fSelectionProvider= new SelectionProviderMediator(new StructuredViewer[] { fTreeViewer, fTableViewer }, fTreeViewer);
 		fSelectionProvider.addSelectionChangedListener(new TestSelectionListener());
