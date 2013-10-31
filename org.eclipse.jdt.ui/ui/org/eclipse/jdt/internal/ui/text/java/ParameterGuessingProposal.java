@@ -94,7 +94,7 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 
 	private final CompletionContext fCoreContext;
 
- 	private ParameterGuessingProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context, CompletionContext coreContext, boolean fillBestGuess) {
+ 	public ParameterGuessingProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context, CompletionContext coreContext, boolean fillBestGuess) {
  		super(proposal, context);
 		fCoreContext= coreContext;
 		fFillBestGuess= fillBestGuess;
