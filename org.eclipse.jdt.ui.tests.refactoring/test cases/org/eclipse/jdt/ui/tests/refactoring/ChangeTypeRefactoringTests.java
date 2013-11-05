@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Samrat Dhillon samrat.dhillon@gmail.com  - [generalize type] Generalize Declared Type offers types that are not visible - https://bugs.eclipse.org/bugs/show_bug.cgi?id=395992
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -88,6 +89,11 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		String fullName= TEST_PATH_PREFIX + getRefactoringPath() + "positive/" + fileName + ".java";
 		return createCU(pack, fileName + ".java", getFileContents(fullName));
 	}
+	
+	private ICompilationUnit createAdditionalCUForNegative(String fileName, IPackageFragment pack) throws Exception {
+		String fullName= TEST_PATH_PREFIX + getRefactoringPath() + "negative/" + fileName + ".java";
+		return createCU(pack, fileName + ".java", getFileContents(fullName));
+	}
 
 	protected ChangeTypeRefactoring helper1(int startLine, int startColumn, int endLine, int endColumn, String selectedTypeName)
 		throws Exception {
@@ -133,6 +139,16 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 
 		assertEqualLines(getFileContents(canonAfterSrcName), cu.getSource());
 	}
+	
+	protected ChangeTypeRefactoring failHelper2(int startLine, int startColumn, int endLine, int endColumn, 
+			String selectedTypeName, IPackageFragment pack) throws Exception {
+		ICompilationUnit	cu= createCUfromTestFile(pack, false, true);
+		ISourceRange		selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
+		ChangeTypeRefactoring	ref= new ChangeTypeRefactoring(cu, selection.getOffset(), selection.getLength(), selectedTypeName);
+		performRefactoring(ref);
+		return ref;
+	}
+	
 
 	//--- TESTS
 	public void testLocalVarName() throws Exception {
@@ -625,5 +641,11 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	}
 	public void testQualifiedFieldRef() throws Exception {
 		failHelper1(4, 9, 4, 15, 4, "java.lang.Object");
+	}
+	public void testInVisibleType() throws Exception {
+		createAdditionalCUForNegative("A_InVisibleType", getPackageP());
+		createAdditionalCUForNegative("A_VisibleType", getPackageP());
+		Collection types= failHelper2(6, 9, 6, 21, "p.A_VisibleType", getRoot().getPackageFragment("")).getValidTypeNames();
+		Assert.assertFalse(types.contains("p.A_InVisibleType"));
 	}
 }
