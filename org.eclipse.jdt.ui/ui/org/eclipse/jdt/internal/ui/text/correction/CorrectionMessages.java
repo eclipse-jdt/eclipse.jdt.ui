@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [quick fix] Quick fix for missing synchronized modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245250
  *     Billy Huang <billyhuang31@gmail.com> - [quick assist] concatenate/merge string literals - https://bugs.eclipse.org/77632
+ *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -44,6 +45,9 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_convert_local_to_field_description;
 	public static String QuickAssistProcessor_convert_to_indexed_for_loop;
 	public static String QuickAssistProcessor_convert_to_iterator_for_loop;
+	public static String QuickAssistProcessor_generate_enhanced_for_loop;
+	public static String QuickAssistProcessor_generate_iterator_for_loop;
+	public static String QuickAssistProcessor_generate_iterate_array_for_loop;
 	public static String QuickAssistProcessor_convert_to_message_format;
 	public static String QuickAssistProcessor_convert_to_multiple_singletype_catch_blocks;
 	public static String QuickAssistProcessor_convert_to_single_multicatch_block;

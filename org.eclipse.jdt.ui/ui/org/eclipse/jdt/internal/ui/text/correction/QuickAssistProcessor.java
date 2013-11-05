@@ -10,6 +10,7 @@
  *     Sebastian Davids <sdavids@gmx.de> - Bug 37432 getInvertEqualsProposal
  *     Benjamin Muskalla <b.muskalla@gmx.net> - Bug 36350 convertToStringBufferPropsal
  *     Chris West (Faux) <eclipse@goeswhere.com> - [quick assist] "Use 'StringBuilder' for string concatenation" could fix existing misuses - https://bugs.eclipse.org/bugs/show_bug.cgi?id=282755
+ *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -64,6 +65,7 @@ import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -151,6 +153,7 @@ import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.GenerateForLoopAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodProposal;
@@ -206,6 +209,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getConvertForLoopProposal(context, coveringNode, null)
 				|| getConvertIterableLoopProposal(context, coveringNode, null)
 				|| getConvertEnhancedForLoopProposal(context, coveringNode, null)
+				|| getGenerateForLoopProposals(context, coveringNode, null)
 				|| getExtractVariableProposal(context, false, null)
 				|| getExtractMethodProposal(context, coveringNode, false, null)
 				|| getInlineLocalProposal(context, coveringNode, null)
@@ -257,6 +261,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getConvertEnhancedForLoopProposal(context, coveringNode, resultingCollections);
+				getGenerateForLoopProposals(context, coveringNode, resultingCollections);
 				getRemoveBlockProposals(context, coveringNode, resultingCollections);
 				getMakeVariableDeclarationFinalProposals(context, resultingCollections);
 				getConvertStringConcatenationProposals(context, resultingCollections);
@@ -2548,6 +2553,47 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		proposal.setCommandId(CONVERT_FOR_LOOP_ID);
 
 		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private boolean getGenerateForLoopProposals(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
+		Statement statement= ASTResolving.findParentStatement(coveringNode);
+		if (!(statement instanceof ExpressionStatement)) {
+			return false;
+		}
+
+		Expression expression= ((ExpressionStatement) statement).getExpression();
+		ICompilationUnit cu= context.getCompilationUnit();
+		ITypeBinding expressionType= null;
+		
+		if (expression instanceof MethodInvocation 
+				|| expression instanceof SimpleName
+				|| expression instanceof FieldAccess) {
+			expressionType= expression.resolveTypeBinding();
+		} else if (expression instanceof Assignment
+				&& ((Assignment) expression).getRightHandSide().resolveTypeBinding() == null
+				&& ((Assignment) expression).getLeftHandSide().resolveTypeBinding() != null) {
+			expressionType= ((Assignment) expression).getLeftHandSide().resolveTypeBinding();
+		}
+
+		if (expressionType == null)
+			return false;
+		
+		if (Bindings.findTypeInHierarchy(expressionType, "java.lang.Iterable") != null) { //$NON-NLS-1$
+			GenerateForLoopAssistProposal iteratorForProposal= new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATOR_FOR);
+			resultingCollections.add(iteratorForProposal);
+		} else if (expressionType.isArray()) {
+			GenerateForLoopAssistProposal iterateArrayProposal= new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATE_ARRAY);
+			resultingCollections.add(iterateArrayProposal);
+		} else {
+			return false;
+		}
+
+		if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
+			GenerateForLoopAssistProposal foreachProposal= new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_FOREACH);
+			resultingCollections.add(foreachProposal);
+		}
+
 		return true;
 	}
 
