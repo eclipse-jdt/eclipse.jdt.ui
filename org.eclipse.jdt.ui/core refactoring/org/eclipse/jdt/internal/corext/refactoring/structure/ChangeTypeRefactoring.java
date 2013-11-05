@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -105,6 +107,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstrain
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
@@ -1207,6 +1210,13 @@ public class ChangeTypeRefactoring extends Refactoring {
 						    Collection<ITypeConstraint> constraints,
 							IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, constraints.size());
+
+		for(ICompilationUnit cu: fAffectedUnits){
+			if (!JavaModelUtil.isVisibleInHierarchy((IMember) (type.getJavaElement()), (IPackageFragment) cu.getParent())) {
+				return false;
+			}
+		}
+
 		for (Iterator<ITypeConstraint> it= constraints.iterator(); it.hasNext(); ) {
 			ITypeConstraint tc= it.next();
 			if (tc instanceof SimpleTypeConstraint) {
