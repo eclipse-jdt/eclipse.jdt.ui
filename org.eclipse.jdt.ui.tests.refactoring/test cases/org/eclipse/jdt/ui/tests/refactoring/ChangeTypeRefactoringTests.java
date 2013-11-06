@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Samrat Dhillon samrat.dhillon@gmail.com  - [generalize type] Generalize Declared Type offers types that are not visible - https://bugs.eclipse.org/bugs/show_bug.cgi?id=395992
+ *     Samrat Dhillon samrat.dhillon@gmail.com [generalize type] Generalize Declared Type does not consider use of variable in throw statement, which yields compilation error - https://bugs.eclipse.org/bugs/show_bug.cgi?id=395989
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -647,5 +648,11 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		createAdditionalCUForNegative("A_VisibleType", getPackageP());
 		Collection types= failHelper2(6, 9, 6, 21, "p.A_VisibleType", getRoot().getPackageFragment("")).getValidTypeNames();
 		Assert.assertFalse(types.contains("p.A_InVisibleType"));
+	}
+
+	public void testThrowableSubtype() throws Exception {
+		Collection types= failHelper2(3, 9, 3, 17, "java.lang.Exception", getPackageP()).getValidTypeNames();
+		Assert.assertTrue(types.contains("java.lang.Throwable"));
+		Assert.assertFalse(types.contains("java.lang.Object"));
 	}
 }
