@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Samrat Dhillon samrat.dhillon@gmail.com - [move member type] Moving a member interface to its own file adds the host's type parameters to it - https://bugs.eclipse.org/bugs/show_bug.cgi?id=385237
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -38,7 +39,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -346,7 +346,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 					map.put(binding.getKey(), binding);
 			}
 			final IType declaring= type.getDeclaringType();
-			if (declaring != null && !Flags.isStatic(type.getFlags()))
+			if (declaring != null && !JdtFlags.isStatic(type))
 				addTypeParameters(unit, declaring, map);
 		}
 	}
