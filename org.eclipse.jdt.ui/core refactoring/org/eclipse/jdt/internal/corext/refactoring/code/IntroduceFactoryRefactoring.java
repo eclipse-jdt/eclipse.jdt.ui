@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Samrat Dhillon <samrat.dhillon@gmail.com> - [introduce factory] Introduce Factory on an abstract class adds a statement to create an instance of that class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=395016
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -45,6 +46,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -72,6 +74,7 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
@@ -83,7 +86,10 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -102,11 +108,13 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.MethodsSourcePositionComparator;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
@@ -546,6 +554,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			if (fCallSitesInBinaryUnits)
 				result.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.IntroduceFactory_callSitesInBinaryClass));
 
+			if(Modifier.isAbstract(fCtorBinding.getDeclaringClass().getModifiers())){
+				result.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.IntroduceFactory_abstractClass));
+			}
+
 			return result;
 		} finally {
 			pm.done();
@@ -584,14 +596,16 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	}
 
 	/**
-	 * Creates and returns a new MethodDeclaration that represents the factory
-	 * method to be used in place of direct calls to the constructor in question.
+	 * Creates and returns a new MethodDeclaration that represents the factory method to be used in
+	 * place of direct calls to the constructor in question.
+	 * 
 	 * @param ast An AST used as a factory for various AST nodes
 	 * @param ctorBinding binding for the constructor being wrapped
 	 * @param unitRewriter the ASTRewrite to be used
 	 * @return the new method declaration
+	 * @throws CoreException if an exception occurs while accessing its corresponding resource
 	 */
-	private MethodDeclaration createFactoryMethod(AST ast, IMethodBinding ctorBinding, ASTRewrite unitRewriter) {
+	private MethodDeclaration createFactoryMethod(AST ast, IMethodBinding ctorBinding, ASTRewrite unitRewriter) throws CoreException{
 		MethodDeclaration		newMethod= ast.newMethodDeclaration();
 		SimpleName				newMethodName= ast.newSimpleName(fNewMethodName);
 		ClassInstanceCreation	newCtorCall= ast.newClassInstanceCreation();
@@ -605,20 +619,41 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		newMethod.setName(newMethodName);
 		newMethod.setBody(body);
 
-        ITypeBinding[] ctorOwnerTypeParameters= fCtorBinding.getDeclaringClass().getTypeParameters();
+		ITypeBinding declaringClass= fCtorBinding.getDeclaringClass();
+		ITypeBinding[] ctorOwnerTypeParameters= declaringClass.getTypeParameters();
 
-        setMethodReturnType(newMethod, retTypeName, ctorOwnerTypeParameters, ast);
+		setMethodReturnType(newMethod, retTypeName, ctorOwnerTypeParameters, ast);
 
 		newMethod.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.STATIC | Modifier.PUBLIC));
 
-        setCtorTypeArguments(newCtorCall, retTypeName, ctorOwnerTypeParameters, ast);
+		setCtorTypeArguments(newCtorCall, retTypeName, ctorOwnerTypeParameters, ast);
 
-        createFactoryMethodConstructorArgs(ast, newCtorCall);
+		createFactoryMethodConstructorArgs(ast, newCtorCall);
+
+		if (Modifier.isAbstract(declaringClass.getModifiers())) {
+			AnonymousClassDeclaration decl= ast.newAnonymousClassDeclaration();
+			IMethodBinding[] unimplementedMethods= getUnimplementedMethods(declaringClass);
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fCUHandle.getJavaProject());
+			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fFactoryCU, decl.getStartPosition(), fImportRewriter);
+			for (int i= 0; i < unimplementedMethods.length; i++) {
+				IMethodBinding unImplementedMethod= unimplementedMethods[i];
+				MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(fCUHandle, unitRewriter, fImportRewriter, context, unImplementedMethod, unImplementedMethod.getDeclaringClass()
+						.getName(), settings, false);
+				decl.bodyDeclarations().add(newMethodDecl);
+			}
+			newCtorCall.setAnonymousClassDeclaration(decl);
+		}
 
 		ret.setExpression(newCtorCall);
 		stmts.add(ret);
 
 		return newMethod;
+	}
+	
+	private IMethodBinding[] getUnimplementedMethods(ITypeBinding binding) {
+		IMethodBinding[] unimplementedMethods= StubUtility2.getUnimplementedMethods(binding, true);
+		Arrays.sort(unimplementedMethods, new MethodsSourcePositionComparator(binding));
+		return unimplementedMethods;
 	}
 
 	/**
@@ -1093,14 +1128,16 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	}
 
 	/**
-	 * Perform the AST rewriting necessary on the given <code>CompilationUnit</code>
-	 * to create the factory method. The method will reside on the type identified by
+	 * Perform the AST rewriting necessary on the given <code>CompilationUnit</code> to create the
+	 * factory method. The method will reside on the type identified by
 	 * <code>fFactoryOwningClass</code>.
-	 * @param unitRewriter
-	 * @param unit
+	 * 
+	 * @param unitRewriter the ASTRewrite to be used
+	 * @param unit the <code>CompilationUnit</code> where factory method will be created
 	 * @param gd the <code>GroupDescription</code> to associate with the changes made
+	 * @throws CoreException if an exception occurs while accessing its corresponding resource
 	 */
-	private void createFactoryChange(ASTRewrite unitRewriter, CompilationUnit unit, TextEditGroup gd) {
+	private void createFactoryChange(ASTRewrite unitRewriter, CompilationUnit unit, TextEditGroup gd) throws CoreException {
 		// ================================================================================
 		// First add the factory itself (method, class, and interface as needed/directed by user)
 		AST				ast= unit.getAST();
