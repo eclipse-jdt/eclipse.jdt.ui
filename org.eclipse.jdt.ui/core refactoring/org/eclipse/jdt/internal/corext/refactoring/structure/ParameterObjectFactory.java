@@ -299,7 +299,7 @@ public class ParameterObjectFactory {
 
 
 	public static Type importBinding(ITypeBinding typeBinding, CompilationUnitRewrite cuRewrite) {
-		int declaredModifiers= typeBinding.getDeclaredModifiers();
+		int declaredModifiers= typeBinding.getModifiers();
 		AST ast= cuRewrite.getAST();
 		if (Modifier.isPrivate(declaredModifiers) || Modifier.isProtected(declaredModifiers)) {
 			return ast.newSimpleType(ast.newSimpleName(typeBinding.getName()));

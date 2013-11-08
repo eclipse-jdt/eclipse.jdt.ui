@@ -753,9 +753,9 @@ public class ExtractClassRefactoring extends Refactoring {
 						status.addFatalError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_fatal_error_cannot_resolve_binding, BasicElementLabels.getJavaElementName(pi.name)), JavaStatusContext.create(typeRoot, vdf));
 					} else {
 						ITypeBinding typeBinding= binding.getType();
-						if (Modifier.isPrivate(typeBinding.getDeclaredModifiers())){
+						if (Modifier.isPrivate(typeBinding.getModifiers())){
 							status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_referencing_private_class, BasicElementLabels.getJavaElementName(typeBinding.getName())), JavaStatusContext.create(typeRoot, vdf));
-						} else if (Modifier.isProtected(typeBinding.getDeclaredModifiers())){
+						} else if (Modifier.isProtected(typeBinding.getModifiers())){
 							ITypeBinding declaringClass= typeBinding.getDeclaringClass();
 							if (declaringClass != null) {
 								IPackageBinding package1= declaringClass.getPackage();
