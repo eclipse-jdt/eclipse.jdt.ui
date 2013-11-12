@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -88,13 +88,8 @@ public class CodeFormatFix implements ICleanUpFix {
 		}
 
 		MultiTextEdit otherEdit= new MultiTextEdit();
-		if ((removeTrailingWhitespacesAll || removeTrailingWhitespacesIgnorEmpty || correctIndentation) && (!format || regions != null)) {
+		if ((removeTrailingWhitespacesAll || removeTrailingWhitespacesIgnorEmpty || correctIndentation)) {
 			try {
-				if (correctIndentation && removeTrailingWhitespacesAll) {
-					removeTrailingWhitespacesAll= false;
-					removeTrailingWhitespacesIgnorEmpty= true;
-				}
-
 				Document document= new Document(cu.getBuffer().getContents());
 				if (removeTrailingWhitespacesAll || removeTrailingWhitespacesIgnorEmpty) {
 					String label= MultiFixMessages.CodeFormatFix_RemoveTrailingWhitespace_changeDescription;
@@ -155,13 +150,13 @@ public class CodeFormatFix implements ICleanUpFix {
 							for (int i= 0; i < children.length; i++) {
 								TextEdit child= children[i];
 								edit.removeChild(child);
-								if (!TextEditUtil.overlaps(formatEdit, child)) {
+								if (!TextEditUtil.overlaps(formatEdit, child) && !TextEditUtil.overlaps(otherEdit, child)) {
 									otherEdit.addChild(child);
 									group.addTextEdit(child);
 								}
 							}
 						} else {
-							if (!TextEditUtil.overlaps(formatEdit, edit)) {
+							if (!TextEditUtil.overlaps(formatEdit, edit) && !TextEditUtil.overlaps(otherEdit, edit)) {
 								otherEdit.addChild(edit);
 								group.addTextEdit(edit);
 							}
