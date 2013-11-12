@@ -8514,8 +8514,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.Iterator;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(Collection<String> collection) {\n");
-			buf.append("        for (Iterator<String> iterator = collection.iterator(); iterator\n");
-			buf.append("                .hasNext();) {\n");
+			buf.append("        for (Iterator<String> iterator = collection.iterator(); iterator.hasNext();) {\n");
 			buf.append("            String string = iterator.next();\n");
 			buf.append("            \n");
 			buf.append("        }\n");
@@ -8651,6 +8650,67 @@ public class AssistQuickFixTest extends QuickFixTest {
 			fJProject1.setOptions(saveOptions);
 		}
 	}
+	
+	public void testGenerateForGenerics() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Collection;\n");
+		buf.append("import java.util.Date;\n");
+		buf.append("public class E {\n");
+		buf.append("    void <T extends Date> foo(Collection<T> collection) {\n");
+		buf.append("        collection\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		Map saveOptions= fJProject1.getOptions(false);
+		Map newOptions= new HashMap(saveOptions);
+		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
+		try {
+			fJProject1.setOptions(newOptions);
+			String selection= "collection";
+			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
+			List proposals= collectAssists(context, false);
+
+			assertNumberOfProposals(proposals, 2);
+			assertCorrectLabels(proposals);
+
+			String[] expected= new String[2];
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Collection;\n");
+			buf.append("import java.util.Date;\n");
+			buf.append("public class E {\n");
+			buf.append("    void <T extends Date> foo(Collection<T> collection) {\n");
+			buf.append("        for (T t : collection) {\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Collection;\n");
+			buf.append("import java.util.Date;\n");
+			buf.append("import java.util.Iterator;\n");
+			buf.append("public class E {\n");
+			buf.append("    void <T extends Date> foo(Collection<T> collection) {\n");
+			buf.append("        for (Iterator<T> iterator = collection.iterator(); iterator\n");
+			buf.append("                .hasNext();) {\n");
+			buf.append("            T t = iterator.next();\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[1]= buf.toString();
+
+			assertExpectedExistInProposals(proposals, expected);
+		} finally {
+			fJProject1.setOptions(saveOptions);
+		}
+	}
 
 	public void testGenerateForMissingParametrization() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -8695,7 +8755,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.Iterator;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(Collection collection) {\n");
-			buf.append("        for (Iterator<Object> iterator = collection.iterator(); iterator\n");
+			buf.append("        for (Iterator iterator = collection.iterator(); iterator\n");
 			buf.append("                .hasNext();) {\n");
 			buf.append("            Object object = iterator.next();\n");
 			buf.append("            \n");
@@ -8746,7 +8806,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.Iterator;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(Collection collection) {\n");
-			buf.append("        for (Iterator iterator = collection.iterator(); iterator.hasNext();) {\n");
+			buf.append("        for (Iterator iterator = collection.iterator(); iterator\n");
+			buf.append("                .hasNext();) {\n");
 			buf.append("            Object object = iterator.next();\n");
 			buf.append("            \n");
 			buf.append("        }\n");
@@ -8778,7 +8839,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		String[] expected= new String[1];
+		String[] expected= new String[2];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -8799,7 +8860,224 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
+		expected[1]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+	
+	public void testGenerateForImportsAndFormat1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    class Iterator {}\n");	
+		buf.append("    void foo() {\n");
+		buf.append("        B.get( /*important: empty*/ );\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		StringBuffer buf2= new StringBuffer();
+		buf2.append("package test1;\n");
+		buf2.append("import java.util.ArrayList;\n");
+		buf2.append("import java.util.Date;\n");
+		buf2.append("import java.util.Set;\n");
+		buf2.append("public class B {\n");
+		buf2.append("    static ArrayList<Date> get() {\n");
+		buf2.append("        return new ArrayList<Date>();\n");
+		buf2.append("    }\n");
+		buf2.append("    static Set raw(int i) {\n");
+		buf2.append("        return java.util.Collections.emptySet();\n");
+		buf2.append("    }\n");
+		buf2.append("}");
+		
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		pack1.createCompilationUnit("B.java", buf2.toString(), false, null);
+
+		Map saveOptions= fJProject1.getOptions(false);
+		Map newOptions= new HashMap();
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_5, newOptions);
+		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
+		try {
+			fJProject1.setOptions(newOptions);
+		
+			String selection= "B.get( /*important: empty*/ );";
+			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
+			List proposals= collectAssists(context, false);
+	
+			assertNumberOfProposals(proposals, 4);
+			assertCorrectLabels(proposals);
+	
+			String[] expected= new String[2];
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.util.Date;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("    class Iterator {}\n");	
+			buf.append("    void foo() {\n");
+			buf.append("        for (Date date : B.get( /*important: empty*/ )) {\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+	
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.util.Date;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("    class Iterator {}\n");	
+			buf.append("    void foo() {\n");
+			buf.append("        for (java.util.Iterator<Date> iterator = B.get( /*important: empty*/ ).iterator(); iterator\n");
+			buf.append("                .hasNext();) {\n");
+			buf.append("            Date date = iterator.next();\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[1]= buf.toString();
+	
+			assertExpectedExistInProposals(proposals, expected);
+		} finally {
+			fJProject1.setOptions(saveOptions);
+		}
+	}
+	
+	public void testGenerateForImportsAndFormat2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    class Object {}\n");
+		buf.append("    class Iterator {}\n");	
+		buf.append("    void foo() {\n");
+		buf.append("        B.raw(1+ 2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		StringBuffer buf2= new StringBuffer();
+		buf2.append("package test1;\n");
+		buf2.append("import java.util.ArrayList;\n");
+		buf2.append("import java.util.Date;\n");
+		buf2.append("import java.util.Set;\n");
+		buf2.append("public class B {\n");
+		buf2.append("    static ArrayList<Date> get() {\n");
+		buf2.append("        return new ArrayList<Date>();\n");
+		buf2.append("    }\n");
+		buf2.append("    static Set raw(int i) {\n");
+		buf2.append("        return java.util.Collections.emptySet();\n");
+		buf2.append("    }\n");
+		buf2.append("}");
+		
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		pack1.createCompilationUnit("B.java", buf2.toString(), false, null);
+
+		Map saveOptions= fJProject1.getOptions(false);
+		Map newOptions= new HashMap();
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_5, newOptions);
+		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
+		try {
+			fJProject1.setOptions(newOptions);
+		
+			String selection= "B.raw(1+ 2);";
+			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
+			List proposals= collectAssists(context, false);
+	
+			assertNumberOfProposals(proposals, 4);
+			assertCorrectLabels(proposals);
+	
+			String[] expected= new String[2];
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class A {\n");
+			buf.append("    class Object {}\n");	
+			buf.append("    class Iterator {}\n");	
+			buf.append("    void foo() {\n");
+			buf.append("        for (java.lang.Object object : B.raw(1+ 2)) {\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+	
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class A {\n");
+			buf.append("    class Object {}\n");
+			buf.append("    class Iterator {}\n");	
+			buf.append("    void foo() {\n");
+			buf.append("        for (java.util.Iterator iterator = B.raw(1+ 2).iterator(); iterator\n");
+			buf.append("                .hasNext();) {\n");
+			buf.append("            java.lang.Object object = iterator.next();\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[1]= buf.toString();
+	
+			assertExpectedExistInProposals(proposals, expected);
+		} finally {
+			fJProject1.setOptions(saveOptions);
+		}
+	}
+	
+	public void testGenerateForImportsArray() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    class Date {}\n");	
+		buf.append("    void foo() {\n");
+		buf.append("        B.get();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		StringBuffer buf2= new StringBuffer();
+		buf2.append("package test1;\n");
+		buf2.append("import java.util.Date;\n");
+		buf2.append("public class B {\n");
+		buf2.append("    static Date[] get() {\n");
+		buf2.append("        return new Date[1];\n");
+		buf2.append("    }\n");
+		buf2.append("}");
+		
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		pack1.createCompilationUnit("B.java", buf2.toString(), false, null);
+
+		Map saveOptions= fJProject1.getOptions(false);
+		Map newOptions= new HashMap();
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_5, newOptions);
+		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
+		try {
+			fJProject1.setOptions(newOptions);
+		
+			String selection= "B.get();";
+			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
+			List proposals= collectAssists(context, false);
+	
+			assertNumberOfProposals(proposals, 4);
+			assertCorrectLabels(proposals);
+	
+			String[] expected= new String[1];
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class A {\n");
+			buf.append("    class Date {}\n");
+			buf.append("    void foo() {\n");
+			buf.append("        for (java.util.Date date : B.get()) {\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+	
+			assertExpectedExistInProposals(proposals, expected);
+		} finally {
+			fJProject1.setOptions(saveOptions);
+		}
+	}
+	
 }

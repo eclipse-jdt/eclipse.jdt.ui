@@ -2556,7 +2556,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private boolean getGenerateForLoopProposals(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getGenerateForLoopProposals(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
 		Statement statement= ASTResolving.findParentStatement(coveringNode);
 		if (!(statement instanceof ExpressionStatement)) {
 			return false;

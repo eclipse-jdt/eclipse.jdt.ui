@@ -27,26 +27,24 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
-import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
@@ -113,6 +111,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	protected ASTRewrite getRewrite() throws CoreException {
 
 		AST ast= fCurrentNode.getAST();
+		createImportRewrite((CompilationUnit) fCurrentExpression.getRoot());
 
 		// generate the subexpression which represents the expression to iterate over
 		if (fCurrentExpression instanceof Assignment) {
@@ -144,19 +143,17 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		EnhancedForStatement loopStatement= ast.newEnhancedForStatement();
 
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		String loopOverTypename= extractElementTypeName(ast);
-		if (loopOverTypename == null) {
-			loopOverTypename= Object.class.getSimpleName();
-		}
+		ITypeBinding loopOverType= extractElementType(ast);
+
 		// generate name proposals and add them to the variable declaration
-		SimpleName forDeclarationName= resolveLinkedVariableNameWithProposals(ast, rewrite, loopOverTypename, true);
+		SimpleName forDeclarationName= resolveLinkedVariableNameWithProposals(rewrite, loopOverType.getName(), true);
 
 		SingleVariableDeclaration forLoopInitializer= ast.newSingleVariableDeclaration();
-		forLoopInitializer.setType(ast.newSimpleType(ast.newSimpleName(loopOverTypename)));
+		forLoopInitializer.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentNode, getImportRewrite())));
 		forLoopInitializer.setName(forDeclarationName);
 
 		loopStatement.setParameter(forLoopInitializer);
-		loopStatement.setExpression((Expression) ASTNode.copySubtree(ast, fSubExpression));
+		loopStatement.setExpression((Expression) rewrite.createCopyTarget(fSubExpression));
 
 		Block forLoopBody= ast.newBlock();
 		forLoopBody.statements().add(createBlankLineStatementWithCursorPosition(rewrite));
@@ -179,13 +176,10 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		ForStatement loopStatement= ast.newForStatement();
 
-		String loopOverTypename= extractElementTypeName(ast);
-		if (loopOverTypename == null && JavaModelUtil.is50OrHigher(getCompilationUnit().getJavaProject())) {
-			loopOverTypename= Object.class.getSimpleName();
-		}
+		ITypeBinding loopOverType= extractElementType(ast);
 
-		SimpleName loopVariableName= resolveLinkedVariableNameWithProposals(ast, rewrite, "iterator", true); //$NON-NLS-1$
-		loopStatement.initializers().add(getIteratorBasedForInitializer(ast, rewrite, loopOverTypename, loopVariableName));
+		SimpleName loopVariableName= resolveLinkedVariableNameWithProposals(rewrite, "iterator", true); //$NON-NLS-1$
+		loopStatement.initializers().add(getIteratorBasedForInitializer(rewrite, loopVariableName));
 
 		MethodInvocation loopExpression= ast.newMethodInvocation();
 		loopExpression.setName(ast.newSimpleName("hasNext")); //$NON-NLS-1$
@@ -196,14 +190,11 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		loopStatement.setExpression(loopExpression);
 
 		Block forLoopBody= ast.newBlock();
-		Assignment assignResolvedVariable= getIteratorBasedForBodyAssignment(ast, rewrite, loopOverTypename, loopVariableName);
+		Assignment assignResolvedVariable= getIteratorBasedForBodyAssignment(rewrite, loopOverType, loopVariableName);
 		forLoopBody.statements().add(ast.newExpressionStatement(assignResolvedVariable));
 		forLoopBody.statements().add(createBlankLineStatementWithCursorPosition(rewrite));
 
 		loopStatement.setBody(forLoopBody);
-
-		ImportRewrite fixImports= createImportRewrite((CompilationUnit) fCurrentExpression.getRoot());
-		fixImports.addImport("java.util.Iterator"); //$NON-NLS-1$
 
 		rewrite.replace(fCurrentNode, loopStatement, null);
 
@@ -214,31 +205,24 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	 * Generates the initializer for an iterator based <code>for</code> loop, which declares and
 	 * initializes the variable to loop over.
 	 * 
-	 * @param ast the current {@link AST}
 	 * @param rewrite the instance of {@link ASTRewrite}
-	 * @param loopOverTypename the type of the loop variable represented as {@link String}
 	 * @param loopVariableName the proposed name of the loop variable
 	 * @return a {@link VariableDeclarationExpression} to use as initializer
 	 */
-	private VariableDeclarationExpression getIteratorBasedForInitializer(AST ast, ASTRewrite rewrite, String loopOverTypename, SimpleName loopVariableName) {
+	private VariableDeclarationExpression getIteratorBasedForInitializer(ASTRewrite rewrite, SimpleName loopVariableName) {
+		AST ast= rewrite.getAST();
+		IMethodBinding iteratorMethodBinding= Bindings.findMethodInHierarchy(fCurrentExpression.resolveTypeBinding(), "iterator", new ITypeBinding[] {}); //$NON-NLS-1$
 		// initializing fragment
 		VariableDeclarationFragment varDeclarationFragment= ast.newVariableDeclarationFragment();
 		varDeclarationFragment.setName(loopVariableName);
 		MethodInvocation iteratorExpression= ast.newMethodInvocation();
-		iteratorExpression.setName(ast.newSimpleName("iterator")); //$NON-NLS-1$
-		iteratorExpression.setExpression((Expression) ASTNode.copySubtree(ast, fSubExpression));
+		iteratorExpression.setName(ast.newSimpleName(iteratorMethodBinding.getName()));
+		iteratorExpression.setExpression((Expression) rewrite.createCopyTarget(fCurrentExpression));
 		varDeclarationFragment.setInitializer(iteratorExpression);
 
 		// declaration
 		VariableDeclarationExpression varDeclarationExpression= ast.newVariableDeclarationExpression(varDeclarationFragment);
-		SimpleType type= ast.newSimpleType(ast.newSimpleName("Iterator")); //$NON-NLS-1$
-		if (loopOverTypename != null) {
-			ParameterizedType parameterizedType= ast.newParameterizedType(type);
-			parameterizedType.typeArguments().add(ast.newSimpleType(ast.newSimpleName(loopOverTypename)));
-			varDeclarationExpression.setType(parameterizedType);
-		} else {
-			varDeclarationExpression.setType(type);
-		}
+		varDeclarationExpression.setType(getImportRewrite().addImport(iteratorMethodBinding.getReturnType(), ast, new ContextSensitiveImportRewriteContext(fCurrentNode, getImportRewrite())));
 
 		return varDeclarationExpression;
 	}
@@ -248,24 +232,22 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	 * based <code>for</code> loop body, to retrieve the next element of the {@link Iterable}
 	 * instance.
 	 * 
-	 * @param ast the current {@link AST}
 	 * @param rewrite the current instance of {@link ASTRewrite}
-	 * @param loopOverTypename the type of the loop variable in string representation
+	 * @param loopOverType the {@link ITypeBinding} of the loop variable
 	 * @param loopVariableName the name of the loop variable
 	 * @return an {@link Assignment}, which retrieves the next element of the {@link Iterable} using
 	 *         the active {@link Iterator}
 	 */
-	private Assignment getIteratorBasedForBodyAssignment(AST ast, ASTRewrite rewrite, String loopOverTypename, SimpleName loopVariableName) {
+	private Assignment getIteratorBasedForBodyAssignment(ASTRewrite rewrite, ITypeBinding loopOverType, SimpleName loopVariableName) {
+		AST ast= rewrite.getAST();
 		Assignment assignResolvedVariable= ast.newAssignment();
 
-		// in case no generics were given we get instances of Object.class using iterator.next()
-		String elementTypename= (loopOverTypename == null ? Object.class.getSimpleName() : loopOverTypename);
 		// left hand side
-		SimpleName resolvedVariableName= resolveLinkedVariableNameWithProposals(ast, rewrite, elementTypename, false);
+		SimpleName resolvedVariableName= resolveLinkedVariableNameWithProposals(rewrite, loopOverType.getName(), false);
 		VariableDeclarationFragment resolvedVariableDeclarationFragment= ast.newVariableDeclarationFragment();
 		resolvedVariableDeclarationFragment.setName(resolvedVariableName);
 		VariableDeclarationExpression resolvedVariableDeclaration= ast.newVariableDeclarationExpression(resolvedVariableDeclarationFragment);
-		resolvedVariableDeclaration.setType(ast.newSimpleType(ast.newSimpleName(elementTypename)));
+		resolvedVariableDeclaration.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentNode, getImportRewrite())));
 		assignResolvedVariable.setLeftHandSide(resolvedVariableDeclaration);
 
 		// right hand side
@@ -291,10 +273,10 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
 		ForStatement loopStatement= ast.newForStatement();
-		SimpleName loopVariableName= resolveLinkedVariableNameWithProposals(ast, rewrite, "i", true); //$NON-NLS-1$
+		SimpleName loopVariableName= resolveLinkedVariableNameWithProposals(rewrite, "i", true); //$NON-NLS-1$
 		loopStatement.initializers().add(getIndexBasedForInitializer(ast, loopVariableName));
-		loopStatement.setExpression(getLinkedInfixExpression(ast, rewrite, loopVariableName.getIdentifier()));
-		loopStatement.updaters().add(getLinkedIncrementExpression(ast, rewrite, loopVariableName.getIdentifier()));
+		loopStatement.setExpression(getLinkedInfixExpression(rewrite, loopVariableName.getIdentifier()));
+		loopStatement.updaters().add(getLinkedIncrementExpression(rewrite, loopVariableName.getIdentifier()));
 
 		Block forLoopBody= ast.newBlock();
 		forLoopBody.statements().add(createBlankLineStatementWithCursorPosition(rewrite));
@@ -307,13 +289,13 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	/**
 	 * Creates an {@link InfixExpression} which is linked to the group of the variableToIncrement.
 	 * 
-	 * @param ast the current {@link AST} instance
 	 * @param rewrite the current {@link ASTRewrite} instance
 	 * @param variableToIncrement the name of the variable to generate the {@link InfixExpression}
 	 *            for
 	 * @return a filled, new {@link InfixExpression} instance
 	 */
-	private InfixExpression getLinkedInfixExpression(AST ast, ASTRewrite rewrite, String variableToIncrement) {
+	private InfixExpression getLinkedInfixExpression(ASTRewrite rewrite, String variableToIncrement) {
+		AST ast= rewrite.getAST();
 		InfixExpression loopExpression= ast.newInfixExpression();
 		SimpleName name= ast.newSimpleName(variableToIncrement);
 		addLinkedPosition(rewrite.track(name), false, name.getIdentifier());
@@ -321,7 +303,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		loopExpression.setOperator(InfixExpression.Operator.LESS);
 
 		FieldAccess getArrayLengthExpression= ast.newFieldAccess();
-		getArrayLengthExpression.setExpression((Expression) ASTNode.copySubtree(ast, fSubExpression));
+		getArrayLengthExpression.setExpression((Expression) rewrite.createCopyTarget(fSubExpression));
 		getArrayLengthExpression.setName(ast.newSimpleName("length")); //$NON-NLS-1$
 
 		loopExpression.setRightOperand(getArrayLengthExpression);
@@ -332,13 +314,13 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	 * Creates a {@link PostfixExpression} used to increment the loop variable of a <code>for</code>
 	 * loop to iterate over an array.
 	 * 
-	 * @param ast the current {@link AST} instance
 	 * @param rewrite the current {@link ASTRewrite} instance
 	 * @param variableToIncrement the name of the variable to increment
 	 * @return a filled {@link PostfixExpression} realizing an incrementation of the specified
 	 *         variable
 	 */
-	private Expression getLinkedIncrementExpression(AST ast, ASTRewrite rewrite, String variableToIncrement) {
+	private Expression getLinkedIncrementExpression(ASTRewrite rewrite, String variableToIncrement) {
+		AST ast= rewrite.getAST();
 		PostfixExpression incrementLoopVariable= ast.newPostfixExpression();
 		SimpleName name= ast.newSimpleName(variableToIncrement);
 		addLinkedPosition(rewrite.track(name), false, name.getIdentifier());
@@ -348,7 +330,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	}
 
 	/**
-	 * Generates an {@link VariableDeclarationExpression}, which initializes the loop variable to
+	 * Generates a {@link VariableDeclarationExpression}, which initializes the loop variable to
 	 * iterate over an array.
 	 * 
 	 * @param ast the current {@link AST} instance
@@ -375,14 +357,14 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	 * Resolves name proposals by the given basename and adds a {@link LinkedPosition} to the
 	 * returned {@link SimpleName} expression.
 	 * 
-	 * @param ast the current {@link AST}
 	 * @param rewrite the current instance of an {@link ASTRewrite}
 	 * @param basename the base string to use for proposal calculation
 	 * @param firstLinkedProposal true if the generated name is the first {@link LinkedPosition} to
 	 *            edit in the current {@link CompilationUnit}, false otherwise
 	 * @return the linked {@link SimpleName} instance based on the name proposals
 	 */
-	private SimpleName resolveLinkedVariableNameWithProposals(AST ast, ASTRewrite rewrite, String basename, boolean firstLinkedProposal) {
+	private SimpleName resolveLinkedVariableNameWithProposals(ASTRewrite rewrite, String basename, boolean firstLinkedProposal) {
+		AST ast= rewrite.getAST();
 		String[] nameProposals= getVariableNameProposals(basename);
 		SimpleName forDeclarationName= (nameProposals.length > 0 ? ast.newSimpleName(nameProposals[0]) : ast.newSimpleName(basename));
 		for (int i= 0; i < nameProposals.length; i++) {
@@ -430,19 +412,19 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	 * to iterate over an array using <code>foreach</code>.
 	 * 
 	 * @param ast the current {@link AST} instance
-	 * @return the string representation of the type's unqualified name
+	 * @return the {@link ITypeBinding} of the elements to iterate over
 	 */
-	private String extractElementTypeName(AST ast) {
+	private ITypeBinding extractElementType(AST ast) {
 		ITypeBinding binding= fSubExpression.resolveTypeBinding();
 		if (binding.isArray()) {
-			return Bindings.normalizeForDeclarationUse(binding.getElementType(), ast).getName();
-		}
-		ITypeBinding[] typeArguments= Bindings.findTypeInHierarchy(binding, "java.lang.Iterable").getTypeArguments(); //$NON-NLS-1$
-		if (typeArguments != null && typeArguments.length > 0) {
-			return Bindings.normalizeForDeclarationUse(typeArguments[0], ast).getName();
+			return Bindings.normalizeForDeclarationUse(binding.getElementType(), ast);
 		}
 
-		return null;
+		// extract elements type directly out of the bindings
+		IMethodBinding iteratorMethodBinding= Bindings.findMethodInHierarchy(fCurrentExpression.resolveTypeBinding(), "iterator", new ITypeBinding[] {}); //$NON-NLS-1$
+		IMethodBinding iteratorNextMethodBinding= Bindings.findMethodInHierarchy(iteratorMethodBinding.getReturnType(), "next", new ITypeBinding[] {}); //$NON-NLS-1$
+
+		return iteratorNextMethodBinding.getReturnType();
 	}
 
 }
