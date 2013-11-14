@@ -314,7 +314,9 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 				if (initializer instanceof CastExpression) {
 					initializer= ((CastExpression) initializer).getExpression();
 				}
-				boolean sideEffectInitializer = initializer instanceof MethodInvocation || initializer instanceof ClassInstanceCreation;
+				boolean sideEffectInitializer= initializer instanceof MethodInvocation || initializer instanceof SuperMethodInvocation || initializer instanceof ClassInstanceCreation
+						|| initializer instanceof PostfixExpression
+						|| initializer instanceof PrefixExpression;
 				if (fragments.size() == fUnusedNames.length) {
 					if (fForceRemove) {
 						rewrite.remove(varDecl, group);
