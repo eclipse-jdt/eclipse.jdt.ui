@@ -217,21 +217,21 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	}
 	
 	private void doSingleUnitTestWithWarning(boolean protectConstructor, ICompilationUnit cu, String outputFileName) throws Exception, JavaModelException, IOException {
-		ISourceRange		selection= findSelectionInSource(cu.getSource());
-		IntroduceFactoryRefactoring	ref= new IntroduceFactoryRefactoring(cu, selection.getOffset(), selection.getLength());
+		ISourceRange selection= findSelectionInSource(cu.getSource());
+		IntroduceFactoryRefactoring ref= new IntroduceFactoryRefactoring(cu, selection.getOffset(), selection.getLength());
 
 		ref.setProtectConstructor(protectConstructor);
 
-		RefactoringStatus	activationResult= ref.checkInitialConditions(new NullProgressMonitor());
+		RefactoringStatus activationResult= ref.checkInitialConditions(new NullProgressMonitor());
 
 		assertTrue("activation was supposed to be successful", activationResult.isOK());
 
-		RefactoringStatus	checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 
 		assertEquals(RefactoringStatus.WARNING, checkInputResult.getSeverity());
 		performChange(ref, false);
 
-		String newSource = cu.getSource();
+		String newSource= cu.getSource();
 
 		assertEqualLines(getName() + ": ", getFileContents(outputFileName), newSource);
 	}
@@ -272,9 +272,9 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	}
 	
 	protected void singleUnitBugHelperWithWarning(String baseFileName, boolean protectConstructor)
-		throws Exception
+			throws Exception
 	{
-		ICompilationUnit	cu= createCUForBugTestCase(null, getPackageP(), baseFileName, true);
+		ICompilationUnit cu= createCUForBugTestCase(null, getPackageP(), baseFileName, true);
 
 		doSingleUnitTestWithWarning(protectConstructor, cu, getBugTestFileName(null, getPackageP(), baseFileName, false));
 	}
