@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?><component id="org.eclipse.jdt.ui" version="2">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.jdt.ui" version="2">
     <resource path="META-INF/MANIFEST.MF">
         <filter comment="BETA_JAVA8" id="924844039">
             <message_arguments>
                 <message_argument value="3.9.1"/>
-                <message_argument value="3.9.0"/>
+                <message_argument value="3.9.1"/>
             </message_arguments>
         </filter>
     </resource>
@@ -140,13 +141,6 @@
             <message_arguments>
                 <message_argument value="ITextEditorActionDefinitionIds"/>
                 <message_argument value="IJavaEditorActionDefinitionIds"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="ui/org/eclipse/jdt/ui/text/IJavaColorConstants.java" type="org.eclipse.jdt.ui.text.IJavaColorConstants">
-        <filter comment="See https://bugs.eclipse.org/bugs/show_bug.cgi?id=402393#c14" id="1211105284">
-            <message_arguments>
-                <message_argument value="PREFIX"/>
             </message_arguments>
         </filter>
     </resource>
