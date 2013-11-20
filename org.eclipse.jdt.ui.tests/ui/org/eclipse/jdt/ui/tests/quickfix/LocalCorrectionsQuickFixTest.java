@@ -4519,7 +4519,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    int f;\n");
 		buf.append("    void foo() {\n");
-		buf.append("        int a = 1, b= f++, c= a;\n");
+		buf.append("        int a = 1, b= f++ - --f, c= a;\n");
 		buf.append("        System.out.println(a);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -4552,6 +4552,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    void foo() {\n");
 		buf.append("        int a = 1;\n");
 		buf.append("        f++;\n");
+		buf.append("        --f;\n");
 		buf.append("        int c= a;\n");
 		buf.append("        System.out.println(a);\n");
 		buf.append("    }\n");

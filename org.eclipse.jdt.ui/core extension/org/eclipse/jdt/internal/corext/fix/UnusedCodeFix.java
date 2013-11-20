@@ -380,8 +380,9 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 				for (int i= 0; i < sideEffects.size(); i++) {
 					Expression sideEffect= sideEffects.get(i);
 					Expression movedInit= (Expression) rewrite.createMoveTarget(sideEffect);
-					previousStatement= rewrite.getAST().newExpressionStatement(movedInit);
-					statementRewrite.insertAfter(previousStatement, originalStatement, group);
+					ExpressionStatement wrapped= rewrite.getAST().newExpressionStatement(movedInit);
+					statementRewrite.insertAfter(wrapped, previousStatement, group);
+					previousStatement= wrapped;
 				}
 
 				VariableDeclarationStatement newDeclaration= null;
