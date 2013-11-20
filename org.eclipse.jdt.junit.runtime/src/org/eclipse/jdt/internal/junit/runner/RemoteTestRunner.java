@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -511,7 +511,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	protected IClassifiesThrowables getClassifier() {
-		return new DefaultClassifier(fVersion);
+		return new DefaultClassifier();
 	}
 
 	public void visitTreeEntry(ITestIdentifier id, boolean b, int i) {
