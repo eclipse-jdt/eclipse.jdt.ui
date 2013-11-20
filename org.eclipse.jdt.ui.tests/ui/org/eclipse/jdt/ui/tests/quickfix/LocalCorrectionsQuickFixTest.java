@@ -4383,8 +4383,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
-
-
 	public void testUnusedVariableBug120579() throws Exception {
 		Hashtable hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
@@ -4406,6 +4404,215 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 0);
 		assertCorrectLabels(proposals);
+	}
+
+
+	public void testUnusedVariableWithSideEffectAssignments() throws Exception {
+		// https://bugs.eclipse.org/421717
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        int h= super.hashCode();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+		
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        super.hashCode();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testUnusedVariableWithSideEffectAssignments2() throws Exception {
+		// https://bugs.eclipse.org/421717
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+	
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(int a) {\n");
+		buf.append("        int f= 1 + a-- + (int) Math.ceil(a);\n");
+		buf.append("        f= -a;\n");
+		buf.append("        f= ~a;\n");
+		buf.append("        f= a++;\n");
+		buf.append("        f= Math.abs(a);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+	
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+	
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+	
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(int a) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+	
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(int a) {\n");
+		buf.append("        a--;\n");
+		buf.append("        Math.ceil(a);\n");
+		buf.append("        a++;\n");
+		buf.append("        Math.abs(a);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+	
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUnusedVariableWithSideEffectAssignments3() throws Exception {
+		// https://bugs.eclipse.org/421717
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+	
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    int f;\n");
+		buf.append("    void foo() {\n");
+		buf.append("        int a = 1, b= f++, c= a;\n");
+		buf.append("        System.out.println(a);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+	
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+	
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+	
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    int f;\n");
+		buf.append("    void foo() {\n");
+		buf.append("        int a = 1, c= a;\n");
+		buf.append("        System.out.println(a);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+	
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    int f;\n");
+		buf.append("    void foo() {\n");
+		buf.append("        int a = 1;\n");
+		buf.append("        f++;\n");
+		buf.append("        int c= a;\n");
+		buf.append("        System.out.println(a);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+	
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUnusedVariableWithSideEffectAssignments4() throws Exception {
+		// https://bugs.eclipse.org/421717
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+	
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    int f;\n");
+		buf.append("    void foo() {\n");
+		buf.append("        int a = 1, b = \"\".hashCode() + 1;\n");
+		buf.append("        System.out.println(a);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+	
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+	
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+	
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    int f;\n");
+		buf.append("    void foo() {\n");
+		buf.append("        int a = 1;\n");
+		buf.append("        System.out.println(a);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+	
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    int f;\n");
+		buf.append("    void foo() {\n");
+		buf.append("        int a = 1;\n");
+		buf.append("        \"\".hashCode();\n");
+		buf.append("        System.out.println(a);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+	
+		assertExpectedExistInProposals(proposals, expected);
 	}
 
 	public void testUnusedParam() throws Exception {
