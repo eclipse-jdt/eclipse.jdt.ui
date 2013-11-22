@@ -67,11 +67,6 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	private TestExecution fExecution;
 
 	/**
-	 * The version expected by the client
-	 */
-	private String fVersion= ""; //$NON-NLS-1$
-
-	/**
 	 * The client socket.
 	 */
 	private Socket fClientSocket;
@@ -280,10 +275,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 			}
 			else if(args[i].toLowerCase().equals("-debugging") || args[i].toLowerCase().equals("-debug")){ //$NON-NLS-1$ //$NON-NLS-2$
 			    fDebugMode= true;
-			}
-			else if(args[i].toLowerCase().equals("-version")){ //$NON-NLS-1$
-			    fVersion= args[i+1];
-			    i++;
+
 			} else if (args[i].toLowerCase().equals("-junitconsole")) { //$NON-NLS-1$
 			    fConsoleMode  = true;
 			} else if (args[i].toLowerCase().equals("-testloaderclass")) { //$NON-NLS-1$
