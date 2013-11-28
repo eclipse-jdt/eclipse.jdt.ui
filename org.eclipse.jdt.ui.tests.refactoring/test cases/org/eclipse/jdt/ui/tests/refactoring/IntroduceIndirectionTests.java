@@ -318,4 +318,18 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 		helper(new String[] { "p.Test" }, "foo", "p.Test0", 8, 9, 8, 20, false, false, false, false);
 	}
 
+	public void test34() throws Exception {
+		// test for bug 395231
+		helperPass(new String[] { "p.Test" }, "foo", "p.Test0", 6, 9, 6, 13);
+	}
+
+	public void test35() throws Exception {
+		// test for bug 395231
+		helperPass(new String[] { "p.Test" }, "foo", "p.Test0", 6, 9, 6, 13);
+	}
+
+	public void test36() throws Exception {
+		// test for bug 395231
+		helperPass(new String[] { "p.Test" }, "foo", "p.Test0", 6, 9, 6, 13);
+	}
 }

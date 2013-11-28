@@ -1218,6 +1218,12 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		if (typeBinding != null && typeBinding.isTypeVariable()) {
 			ITypeBinding[] typeBounds= typeBinding.getTypeBounds();
 			if (typeBounds.length > 0) {
+				for (ITypeBinding typeBound : typeBounds) {
+					ITypeBinding expressionType= getExpressionType(invocation, typeBound);
+					if (expressionType != null) {
+						return expressionType;
+					}
+				}
 				typeBinding= typeBounds[0].getTypeDeclaration();
 			} else {
 				typeBinding= invocation.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
@@ -1225,6 +1231,26 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		}
 		Assert.isNotNull(typeBinding, "Type binding of target expression may not be null"); //$NON-NLS-1$
 		return typeBinding;
+	}
+
+	private ITypeBinding getExpressionType(final MethodInvocation invocation, ITypeBinding typeBinding) {
+		if (typeBinding == null)
+			return null;
+		for (IMethodBinding iMethodBinding : typeBinding.getDeclaredMethods()) {
+			if (invocation.resolveMethodBinding() == iMethodBinding)
+				return typeBinding.getTypeDeclaration();
+		}
+		ITypeBinding expressionType= getExpressionType(invocation, typeBinding.getSuperclass());
+		if (expressionType != null) {
+			return expressionType;
+		}
+		for (ITypeBinding interfaceBinding : typeBinding.getInterfaces()) {
+			expressionType= getExpressionType(invocation, interfaceBinding);
+			if (expressionType != null) {
+				return expressionType;
+			}
+		}
+		return null;
 	}
 
 	private IFile[] getAllFilesToModify() {
