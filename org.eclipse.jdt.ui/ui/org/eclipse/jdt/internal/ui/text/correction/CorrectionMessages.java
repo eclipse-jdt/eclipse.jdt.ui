@@ -47,7 +47,8 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_convert_to_iterator_for_loop;
 	public static String QuickAssistProcessor_generate_enhanced_for_loop;
 	public static String QuickAssistProcessor_generate_iterator_for_loop;
-	public static String QuickAssistProcessor_generate_iterate_array_for_loop;
+	public static String QuickAssistProcessor_generate_for_loop;
+	public static String QuickAssistProcessor_generate_index_for_loop;
 	public static String QuickAssistProcessor_convert_to_message_format;
 	public static String QuickAssistProcessor_convert_to_multiple_singletype_catch_blocks;
 	public static String QuickAssistProcessor_convert_to_single_multicatch_block;

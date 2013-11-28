@@ -209,7 +209,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getConvertForLoopProposal(context, coveringNode, null)
 				|| getConvertIterableLoopProposal(context, coveringNode, null)
 				|| getConvertEnhancedForLoopProposal(context, coveringNode, null)
-				|| getGenerateForLoopProposals(context, coveringNode, null)
+				|| getGenerateForLoopProposals(context, coveringNode, null, null)
 				|| getExtractVariableProposal(context, false, null)
 				|| getExtractMethodProposal(context, coveringNode, false, null)
 				|| getInlineLocalProposal(context, coveringNode, null)
@@ -237,6 +237,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			getAssignToVariableProposals(context, coveringNode, locations, resultingCollections);
 			getAssignParamToFieldProposals(context, coveringNode, resultingCollections);
 			getInferDiamondArgumentsProposal(context, coveringNode, locations, resultingCollections);
+			getGenerateForLoopProposals(context, coveringNode, locations, resultingCollections);
 
 			if (noErrorsAtLocation) {
 				boolean problemsAtLocation= locations.length != 0;
@@ -261,7 +262,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getConvertEnhancedForLoopProposal(context, coveringNode, resultingCollections);
-				getGenerateForLoopProposals(context, coveringNode, resultingCollections);
 				getRemoveBlockProposals(context, coveringNode, resultingCollections);
 				getMakeVariableDeclarationFinalProposals(context, resultingCollections);
 				getConvertStringConcatenationProposals(context, resultingCollections);
@@ -2556,17 +2556,20 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getGenerateForLoopProposals(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
+	public static boolean getGenerateForLoopProposals(IInvocationContext context, ASTNode coveringNode, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
 		Statement statement= ASTResolving.findParentStatement(coveringNode);
 		if (!(statement instanceof ExpressionStatement)) {
 			return false;
 		}
 
+		if (containsMatchingProblem(locations, IProblem.ParsingErrorInsertToComplete))
+			return false;
+
 		Expression expression= ((ExpressionStatement) statement).getExpression();
 		ICompilationUnit cu= context.getCompilationUnit();
 		ITypeBinding expressionType= null;
-		
-		if (expression instanceof MethodInvocation 
+
+		if (expression instanceof MethodInvocation
 				|| expression instanceof SimpleName
 				|| expression instanceof FieldAccess) {
 			expressionType= expression.resolveTypeBinding();
@@ -2578,20 +2581,24 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		if (expressionType == null)
 			return false;
-		
+
 		if (Bindings.findTypeInHierarchy(expressionType, "java.lang.Iterable") != null) { //$NON-NLS-1$
-			GenerateForLoopAssistProposal iteratorForProposal= new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATOR_FOR);
-			resultingCollections.add(iteratorForProposal);
+			if (resultingCollections == null)
+				return true;
+			resultingCollections.add(new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATOR_FOR));
+			if (Bindings.findTypeInHierarchy(expressionType, "java.util.List") != null) { //$NON-NLS-1$
+				resultingCollections.add(new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATE_LIST));
+			}
 		} else if (expressionType.isArray()) {
-			GenerateForLoopAssistProposal iterateArrayProposal= new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATE_ARRAY);
-			resultingCollections.add(iterateArrayProposal);
+			if (resultingCollections == null)
+				return true;
+			resultingCollections.add(new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATE_ARRAY));
 		} else {
 			return false;
 		}
 
 		if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
-			GenerateForLoopAssistProposal foreachProposal= new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_FOREACH);
-			resultingCollections.add(foreachProposal);
+			resultingCollections.add(new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_FOREACH));
 		}
 
 		return true;

@@ -8610,10 +8610,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 2);
+			assertNumberOfProposals(proposals, 3);
 			assertCorrectLabels(proposals);
 
-			String[] expected= new String[2];
+			String[] expected= new String[3];
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("import java.util.LinkedList;\n");
@@ -8644,6 +8644,21 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("private class MySecondOwnIterable extends MyFirstOwnIterable<Integer, String>{}");
 			buf.append("}\n");
 			expected[1]= buf.toString();
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.LinkedList;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(MySecondOwnIterable collection) {\n");
+			buf.append("        for (int i = 0; i < collection.size(); i++) {\n");
+			buf.append("            String string = collection.get(i);\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("private class MyFirstOwnIterable<T, K> extends LinkedList<K>{}");
+			buf.append("private class MySecondOwnIterable extends MyFirstOwnIterable<Integer, String>{}");
+			buf.append("}\n");
+			expected[2]= buf.toString();
 
 			assertExpectedExistInProposals(proposals, expected);
 		} finally {
@@ -8702,6 +8717,293 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("            T t = iterator.next();\n");
 			buf.append("            \n");
 			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[1]= buf.toString();
+
+			assertExpectedExistInProposals(proposals, expected);
+		} finally {
+			fJProject1.setOptions(saveOptions);
+		}
+	}
+	
+	public void testGenerateForComplexGenerics() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        getIterable()\n");
+		buf.append("    }\n");
+		buf.append("    <T extends Iterable<? super Number> & Comparable<Number>> Iterable<T> getIterable() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		Map saveOptions= fJProject1.getOptions(false);
+		Map newOptions= new HashMap(saveOptions);
+		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
+		try {
+			fJProject1.setOptions(newOptions);
+			String selection= "getIterable()";
+			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection) + selection.length(), 0);
+			List proposals= collectAssists(context, false);
+
+			assertNumberOfProposals(proposals, 6);
+			assertCorrectLabels(proposals);
+
+			String[] expected= new String[2];
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo() {\n");
+			buf.append("        for (Iterable<? super Number> iterable : getIterable()) {\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("    <T extends Iterable<? super Number> & Comparable<Number>> Iterable<T> getIterable() {\n");
+			buf.append("        return null;\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Iterator;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo() {\n");
+			buf.append("        for (Iterator<? extends Iterable<? super Number>> iterator = getIterable()\n");
+			buf.append("                .iterator(); iterator.hasNext();) {\n");
+			buf.append("            Iterable<? super Number> iterable = iterator.next();\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("    <T extends Iterable<? super Number> & Comparable<Number>> Iterable<T> getIterable() {\n");
+			buf.append("        return null;\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[1]= buf.toString();
+
+			assertExpectedExistInProposals(proposals, expected);
+		} finally {
+			fJProject1.setOptions(saveOptions);
+		}
+	}
+	
+	public void testGenerateForUpperboundWildcard() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.Date;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(List<? extends Date> list) {\n");
+		buf.append("        list\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		Map saveOptions= fJProject1.getOptions(false);
+		Map newOptions= new HashMap(saveOptions);
+		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
+		try {
+			fJProject1.setOptions(newOptions);
+			String selection= "list";
+			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
+			List proposals= collectAssists(context, false);
+
+			assertNumberOfProposals(proposals, 3);
+			assertCorrectLabels(proposals);
+
+			String[] expected= new String[3];
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("import java.util.Date;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(List<? extends Date> list) {\n");
+			buf.append("        for (Date date : list) {\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Iterator;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("import java.util.Date;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(List<? extends Date> list) {\n");
+			buf.append("        for (Iterator<? extends Date> iterator = list.iterator(); iterator\n");
+			buf.append("                .hasNext();) {\n");
+			buf.append("            Date date = iterator.next();\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[1]= buf.toString();
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("import java.util.Date;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(List<? extends Date> list) {\n");
+			buf.append("        for (int i = 0; i < list.size(); i++) {\n");
+			buf.append("            Date date = list.get(i);\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[2]= buf.toString();
+
+			assertExpectedExistInProposals(proposals, expected);
+		} finally {
+			fJProject1.setOptions(saveOptions);
+		}
+	}
+
+	public void testGenerateForLowerboundWildcard() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.Date;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(List<? super Date> list) {\n");
+		buf.append("        list\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		Map saveOptions= fJProject1.getOptions(false);
+		Map newOptions= new HashMap(saveOptions);
+		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
+		try {
+			fJProject1.setOptions(newOptions);
+			String selection= "list";
+			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
+			List proposals= collectAssists(context, false);
+
+			assertNumberOfProposals(proposals, 3);
+			assertCorrectLabels(proposals);
+
+			String[] expected= new String[3];
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("import java.util.Date;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(List<? super Date> list) {\n");
+			buf.append("        for (Object object : list) {\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Iterator;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("import java.util.Date;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(List<? super Date> list) {\n");
+			buf.append("        for (Iterator<? super Date> iterator = list.iterator(); iterator\n");
+			buf.append("                .hasNext();) {\n");
+			buf.append("            Object object = iterator.next();\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[1]= buf.toString();
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("import java.util.Date;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(List<? super Date> list) {\n");
+			buf.append("        for (int i = 0; i < list.size(); i++) {\n");
+			buf.append("            Object object = list.get(i);\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[2]= buf.toString();
+
+			assertExpectedExistInProposals(proposals, expected);
+		} finally {
+			fJProject1.setOptions(saveOptions);
+		}
+	}
+
+	public void testGenerateForComplexInnerLowerboundWildcard() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    private abstract class Inner<T, K> implements Iterable<K>{}\n");
+		buf.append("    void foo() {\n");
+		buf.append("        getList()\n");
+		buf.append("    }\n");
+		buf.append("    Inner<? super List<Number>, ? super List<List<Number>>> getList() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		Map saveOptions= fJProject1.getOptions(false);
+		Map newOptions= new HashMap(saveOptions);
+		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
+		try {
+			fJProject1.setOptions(newOptions);
+			String selection= "getList()";
+			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection) + selection.length(), 0);
+			List proposals= collectAssists(context, false);
+
+			assertNumberOfProposals(proposals, 6);
+			assertCorrectLabels(proposals);
+
+			String[] expected= new String[2];
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("public class E {\n");
+			buf.append("    private abstract class Inner<T, K> implements Iterable<K>{}\n");
+			buf.append("    void foo() {\n");
+			buf.append("        for (Object object : getList()) {\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("    Inner<? super List<Number>, ? super List<List<Number>>> getList() {\n");
+			buf.append("        return null;\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Iterator;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("public class E {\n");
+			buf.append("    private abstract class Inner<T, K> implements Iterable<K>{}\n");
+			buf.append("    void foo() {\n");
+			buf.append("        for (Iterator<? super List<List<Number>>> iterator = getList()\n");
+			buf.append("                .iterator(); iterator.hasNext();) {\n");
+			buf.append("            Object object = iterator.next();\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("    Inner<? super List<Number>, ? super List<List<Number>>> getList() {\n");
+			buf.append("        return null;\n");
 			buf.append("    }\n");
 			buf.append("}\n");
 			expected[1]= buf.toString();
@@ -8832,37 +9134,46 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		String selection= "array";
-		AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
-		List proposals= collectAssists(context, false);
-
-		assertNumberOfProposals(proposals, 2);
-		assertCorrectLabels(proposals);
-
-		String[] expected= new String[2];
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(String[] array) {\n");
-		buf.append("        for (int i = 0; i < array.length; i++) {\n");
-		buf.append("            \n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(String[] array) {\n");
-		buf.append("        for (String string : array) {\n");
-		buf.append("            \n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
-
-		assertExpectedExistInProposals(proposals, expected);
+		Map saveOptions= fJProject1.getOptions(false);
+		Map newOptions= new HashMap(saveOptions);
+		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
+		try {
+			fJProject1.setOptions(newOptions);
+			String selection= "array";
+			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
+			List proposals= collectAssists(context, false);
+	
+			assertNumberOfProposals(proposals, 2);
+			assertCorrectLabels(proposals);
+	
+			String[] expected= new String[2];
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(String[] array) {\n");
+			buf.append("        for (int i = 0; i < array.length; i++) {\n");
+			buf.append("            String string = array[i];\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+	
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(String[] array) {\n");
+			buf.append("        for (String string : array) {\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[1]= buf.toString();
+	
+			assertExpectedExistInProposals(proposals, expected);
+		} finally {
+			fJProject1.setOptions(saveOptions);
+		}
 	}
 	
 	public void testGenerateForImportsAndFormat1() throws Exception {
@@ -8904,10 +9215,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 	
-			assertNumberOfProposals(proposals, 4);
+			assertNumberOfProposals(proposals, 5);
 			assertCorrectLabels(proposals);
 	
-			String[] expected= new String[2];
+			String[] expected= new String[3];
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("\n");
@@ -8939,6 +9250,22 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("    }\n");
 			buf.append("}\n");
 			expected[1]= buf.toString();
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.util.Date;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("    class Iterator {}\n");	
+			buf.append("    void foo() {\n");
+			buf.append("        for (int i = 0; i < B.get( /*important: empty*/ ).size(); i++) {\n");
+			buf.append("            Date date = B.get( /*important: empty*/ ).get(i);\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[2]= buf.toString();
 	
 			assertExpectedExistInProposals(proposals, expected);
 		} finally {

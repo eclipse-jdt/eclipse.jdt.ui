@@ -8,11 +8,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@innoopract.com> - [quick fix] Shouldn't offer "Add throws declaration" quickfix for overriding signature if result would conflict with overridden signature
+ *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -39,6 +43,7 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 
 public class LocalCorrectionsQuickFixTest extends QuickFixTest {
@@ -9567,5 +9572,182 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+	
+	/**
+	 * Tests if the quick fix to loop over a variable name is added correctly. The complete
+	 * functionality of the for loop generation is tested in {@link AssistQuickFixTest}
+	 * 
+	 * @throws Exception
+	 */
+	public void testLoopOverAddedToFixesForVariable() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Collection;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Collection<String> collection) {\n");
+		buf.append("        collection\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
+		Map saveOptions= fJProject1.getOptions(false);
+		Map newOptions= new HashMap(saveOptions);
+		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
+		try {
+			fJProject1.setOptions(newOptions);
+			List proposals= collectCorrections(cu, getASTRoot(cu), 2, null);
+
+			assertNumberOfProposals(proposals, 2);
+			assertCorrectLabels(proposals);
+
+			String[] expected= new String[2];
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Collection;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(Collection<String> collection) {\n");
+			buf.append("        for (String string : collection) {\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Collection;\n");
+			buf.append("import java.util.Iterator;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(Collection<String> collection) {\n");
+			buf.append("        for (Iterator<String> iterator = collection.iterator(); iterator\n");
+			buf.append("                .hasNext();) {\n");
+			buf.append("            String string = iterator.next();\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[1]= buf.toString();
+
+			assertExpectedExistInProposals(proposals, expected);
+		} finally {
+			fJProject1.setOptions(saveOptions);
+		}
+	}
+
+	/**
+	 * Tests if the quick fix to loop over a method invocation is added correctly. The complete
+	 * functionality of the for loop generation is tested in {@link AssistQuickFixTest}
+	 * 
+	 * @throws Exception
+	 */
+	public void testLoopOverAddedToFixesForMethodInvocation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Map<String, String> map) {\n");
+		buf.append("        map.keySet()\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		Map saveOptions= fJProject1.getOptions(false);
+		Map newOptions= new HashMap(saveOptions);
+		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
+		try {
+			fJProject1.setOptions(newOptions);
+			List proposals= collectCorrections(cu, getASTRoot(cu));
+
+			assertNumberOfProposals(proposals, 2);
+			assertCorrectLabels(proposals);
+
+			String[] expected= new String[2];
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Map;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(Map<String, String> map) {\n");
+			buf.append("        for (String string : map.keySet()) {\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Iterator;\n");
+			buf.append("import java.util.Map;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(Map<String, String> map) {\n");
+			buf.append("        for (Iterator<String> iterator = map.keySet().iterator(); iterator\n");
+			buf.append("                .hasNext();) {\n");
+			buf.append("            String string = iterator.next();\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[1]= buf.toString();
+
+			assertExpectedExistInProposals(proposals, expected);
+		} finally {
+			fJProject1.setOptions(saveOptions);
+		}
+	}
+
+	/**
+	 * Tests if the quick fix to loop over a method invocation is added correctly. The complete
+	 * functionality of the for loop generation is tested in {@link AssistQuickFixTest}
+	 * 
+	 * @throws Exception
+	 */
+	public void testGenerateForeachNotAddedForLowVersion() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Collection;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Collection collection) {\n");
+		buf.append("        collection\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		Map saveOptions= fJProject1.getOptions(false);
+		Map newOptions= new HashMap();
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
+		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
+		try {
+			fJProject1.setOptions(newOptions);
+			List proposals= collectCorrections(cu, getASTRoot(cu), 2, null);
+
+			assertNumberOfProposals(proposals, 1);
+			assertCorrectLabels(proposals);
+			assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_generate_enhanced_for_loop);
+
+			String[] expected= new String[1];
+
+			// no generics should be added to iterator since the version is too low
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Collection;\n");
+			buf.append("import java.util.Iterator;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(Collection collection) {\n");
+			buf.append("        for (Iterator iterator = collection.iterator(); iterator\n");
+			buf.append("                .hasNext();) {\n");
+			buf.append("            Object object = iterator.next();\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+
+			assertExpectedExistInProposals(proposals, expected);
+		} finally {
+			fJProject1.setOptions(saveOptions);
+		}
+	}
 }
