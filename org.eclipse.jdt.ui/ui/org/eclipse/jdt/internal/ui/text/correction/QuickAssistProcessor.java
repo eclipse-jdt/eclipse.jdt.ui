@@ -2270,7 +2270,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ITypeBinding initializerListType= Bindings.findTypeInHierarchy(initializerTypeBinding, "java.util.List"); //$NON-NLS-1$
 		ITypeBinding initializerIterableType= Bindings.findTypeInHierarchy(initializerTypeBinding, "java.lang.Iterable"); //$NON-NLS-1$
 		
-		if (initializerIterableType != null && initializerIterableType.getTypeArguments().length == 1) {
+		if (initializerIterableType != null) {
 			String label= CorrectionMessages.QuickAssistProcessor_convert_to_iterator_for_loop;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			
@@ -2286,9 +2286,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			iterInitializer.setName(ast.newSimpleName("iterator")); //$NON-NLS-1$
 			ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
 			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, imports);
-			Type iterTypeArgument= imports.addImport(Bindings.normalizeTypeBinding(initializerIterableType.getTypeArguments()[0]), ast, importRewriteContext);
-			ParameterizedType iterType= ast.newParameterizedType(ast.newSimpleType(ast.newName(imports.addImport("java.util.Iterator", importRewriteContext)))); //$NON-NLS-1$
-			iterType.typeArguments().add(iterTypeArgument);
+			Type iterType= ast.newSimpleType(ast.newName(imports.addImport("java.util.Iterator", importRewriteContext))); //$NON-NLS-1$
+			if (initializerIterableType.getTypeArguments().length == 1) {
+				Type iterTypeArgument= imports.addImport(Bindings.normalizeTypeBinding(initializerIterableType.getTypeArguments()[0]), ast, importRewriteContext);
+				ParameterizedType parameterizedIterType= ast.newParameterizedType(iterType);
+				parameterizedIterType.typeArguments().add(iterTypeArgument);
+				iterType= parameterizedIterType;
+			}
 			String[] iterNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, project, iterType, iterInitializer, usedVarNames);
 			String iterName= iterNames[0];
 			SimpleName initializerIterName= ast.newSimpleName(iterName);
