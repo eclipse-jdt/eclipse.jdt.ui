@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PackageQualifiedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -37,6 +38,19 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
+/**
+ * Removes imports that are no longer required.
+ * <p>
+ * {@link #registerRemovedNode(ASTNode)} registers nodes that got removed from the AST.
+ * Do not register nodes that are moved to a different place in the same AST.
+ * <p>
+ * If a node is removed but some parts of it are moved to a different place in the same AST,
+ * then use {@link #registerRetainedNode(ASTNode)} to keep imports for the retained nodes.
+ * <p>
+ * Additional imports that will be added to the AST need to be registered with one of the
+ * {@code register*Import*(..)} methods. Such imports have typically been created with
+ * {@link ImportRewrite#addImport(ITypeBinding)} etc.
+ */
 public class ImportRemover {
 
 	private static class StaticImportData {
@@ -54,13 +68,17 @@ public class ImportRemover {
 		}
 	}
 
+	private final String PROPERTY_KEY= String.valueOf(System.currentTimeMillis());
+	private final String REMOVED= "removed"; //$NON-NLS-1$
+	private final String RETAINED= "retained"; //$NON-NLS-1$
+	
 	private Set<String> fAddedImports= new HashSet<String>();
 
 	private Set<StaticImportData> fAddedStaticImports= new HashSet<StaticImportData>();
 
 	private final IJavaProject fProject;
 
-	private List<ASTNode> fRemovedNodes= new ArrayList<ASTNode>();
+	private boolean fHasRemovedNodes;
 
 	private List<ImportDeclaration> fInlinedStaticImports= new ArrayList<ImportDeclaration>();
 
@@ -72,13 +90,55 @@ public class ImportRemover {
 	}
 
 	private void divideTypeRefs(List<SimpleName> importNames, List<SimpleName> staticNames, List<SimpleName> removedRefs, List<SimpleName> unremovedRefs) {
-		int[] removedStartsEnds= new int[2 * fRemovedNodes.size()];
-		for (int index= 0; index < fRemovedNodes.size(); index++) {
-			ASTNode node= fRemovedNodes.get(index);
-			int start= node.getStartPosition();
-			removedStartsEnds[2 * index]= start;
-			removedStartsEnds[2 * index + 1]= start + node.getLength();
-		}
+		final List<int[]> removedStartsEnds= new ArrayList<int[]>();
+		fRoot.accept(new ASTVisitor(true) {
+			int fRemovingStart= -1;
+			@Override
+			public void preVisit(ASTNode node) {
+				Object property= node.getProperty(PROPERTY_KEY);
+				if (property == REMOVED) {
+					if (fRemovingStart == -1) {
+						fRemovingStart= node.getStartPosition();
+					} else {
+						/*
+						 * Bug in client code: REMOVED node should not be nested inside another REMOVED node without
+						 * an intermediate RETAINED node.
+						 * Drop REMOVED property to prevent problems later (premature end of REMOVED section).
+						 */
+						node.setProperty(PROPERTY_KEY, null);
+					}
+				} else if (property == RETAINED) {
+					if (fRemovingStart != -1) {
+						removedStartsEnds.add(new int[] { fRemovingStart, node.getStartPosition() });
+						fRemovingStart= -1;
+					} else {
+						/*
+						 * Bug in client code: RETAINED node should not be nested inside another RETAINED node without
+						 * an intermediate REMOVED node and must have an enclosing REMOVED node.
+						 * Drop RETAINED property to prevent problems later (premature restart of REMOVED section).
+						 */
+						node.setProperty(PROPERTY_KEY, null);
+					}
+				}
+				super.preVisit(node);
+			}
+			@Override
+			public void postVisit(ASTNode node) {
+				Object property= node.getProperty(PROPERTY_KEY);
+				if (property == RETAINED) {
+					int end= node.getStartPosition() + node.getLength();
+					fRemovingStart= end;
+				} else if (property == REMOVED) {
+					if (fRemovingStart != -1) {
+						int end= node.getStartPosition() + node.getLength();
+						removedStartsEnds.add(new int[] { fRemovingStart, end });
+						fRemovingStart= -1;
+					}
+				}
+				super.postVisit(node);
+			}
+		});
+		
 		for (Iterator<SimpleName> iterator= importNames.iterator(); iterator.hasNext();) {
 			SimpleName name= iterator.next();
 			if (isInRemoved(name, removedStartsEnds))
@@ -102,6 +162,17 @@ public class ImportRemover {
 		}
 	}
 
+	private boolean isInRemoved(SimpleName ref, List<int[]> removedStartsEnds) {
+		int start= ref.getStartPosition();
+		int end= start + ref.getLength();
+		for (int[] removedStartsEnd : removedStartsEnds) {
+			if (start >= removedStartsEnd[0] && end <= removedStartsEnd[1]) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public IBinding[] getImportsToRemove() {
 		ArrayList<SimpleName> importNames= new ArrayList<SimpleName>();
 		ArrayList<SimpleName> staticNames= new ArrayList<SimpleName>();
@@ -114,7 +185,7 @@ public class ImportRemover {
 		if (removedRefs.size() == 0)
 			return new IBinding[0];
 
-		HashMap<String, IBinding>potentialRemoves= getPotentialRemoves(removedRefs);
+		HashMap<String, IBinding> potentialRemoves= getPotentialRemoves(removedRefs);
 		for (Iterator<SimpleName> iterator= unremovedRefs.iterator(); iterator.hasNext();) {
 			SimpleName name= iterator.next();
 			potentialRemoves.remove(name.getIdentifier());
@@ -160,17 +231,7 @@ public class ImportRemover {
 	}
 
 	public boolean hasRemovedNodes() {
-		return fRemovedNodes.size() != 0 || fInlinedStaticImports.size() != 0;
-	}
-
-	private boolean isInRemoved(SimpleName ref, int[] removedStartsEnds) {
-		int start= ref.getStartPosition();
-		int end= start + ref.getLength();
-		for (int index= 0; index < removedStartsEnds.length; index+= 2) {
-			if (start >= removedStartsEnds[index] && end <= removedStartsEnds[index + 1])
-				return true;
-		}
-		return false;
+		return fHasRemovedNodes || fInlinedStaticImports.size() != 0;
 	}
 
 	public void registerAddedImport(String typeName) {
@@ -188,6 +249,12 @@ public class ImportRemover {
 				fAddedImports.add(name.getIdentifier());
 			}
 
+			@Override
+			public boolean visit(PackageQualifiedType node) {
+				addName(node.getName());
+				return false;
+			}
+			
 			@Override
 			public boolean visit(QualifiedName node) {
 				addName(node.getName());
@@ -227,9 +294,13 @@ public class ImportRemover {
 	}
 
 	public void registerRemovedNode(ASTNode removed) {
-		fRemovedNodes.add(removed);
+		fHasRemovedNodes= true;
+		removed.setProperty(PROPERTY_KEY, REMOVED);
 	}
 
+	public void registerRetainedNode(ASTNode retained) {
+		retained.setProperty(PROPERTY_KEY, RETAINED);
+	}
 
 	public void applyRemoves(ImportRewrite importRewrite) {
 		IBinding[] bindings= getImportsToRemove();
