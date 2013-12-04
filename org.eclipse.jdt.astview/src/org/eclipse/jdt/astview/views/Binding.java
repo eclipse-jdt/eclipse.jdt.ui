@@ -101,6 +101,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "CONSTANT VALUE", variableBinding.getConstantValue(), true)); //$NON-NLS-1$ //$NON-NLS-2$
+					res.add(new BindingProperty(this, "IS EFFECTIVELY FINAL", variableBinding.isEffectivelyFinal(), true)); //$NON-NLS-1$
 					break;
 					
 				case IBinding.PACKAGE:
@@ -194,7 +195,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "DECLARED METHODS", typeBinding.getDeclaredMethods(), isRefType)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic(), isNonPrimitive)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated(), isRefType)); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "TYPE ANNOTATIONS", typeBinding.getTypeAnnotations(), true)); //$NON-NLS-1$			
+					res.add(new BindingProperty(this, "TYPE ANNOTATIONS", typeBinding.getTypeAnnotations(), true)); //$NON-NLS-1$
 					break;
 					
 				case IBinding.METHOD:
