@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,7 +65,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 	/**
 	 * Creates an import rewrite context at the given start position.
 	 * 
-	 * @param compilationUnit the root
+	 * @param compilationUnit the root (must have resolved bindings)
 	 * @param position the context position
 	 * @param importRewrite the import rewrite
 	 */

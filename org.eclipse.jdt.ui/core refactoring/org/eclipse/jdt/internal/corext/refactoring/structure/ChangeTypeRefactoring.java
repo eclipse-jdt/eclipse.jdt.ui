@@ -76,6 +76,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -536,7 +537,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * @throws CoreException
 	 */
 	private void addAllChangesFor(ICompilationUnit icu, Set<ConstraintVariable> vars, CompilationUnitChange unitChange) throws CoreException {
-		CompilationUnit	unit= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(icu, false);
+		CompilationUnit	unit= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(icu, true);
 		ASTRewrite unitRewriter= ASTRewrite.create(unit.getAST());
 		MultiTextEdit root= new MultiTextEdit();
 		unitChange.setEdit(root); // Adam sez don't need this, but then unitChange.addGroupDescription() fails an assertion!
@@ -1326,7 +1327,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	private String updateImports(CompilationUnit astRoot, MultiTextEdit rootEdit) throws CoreException{
 		ImportRewrite rewrite= StubUtility.createImportRewrite(astRoot, true);
-		String typeName= rewrite.addImport(fSelectedType.getQualifiedName());
+		ContextSensitiveImportRewriteContext context= new ContextSensitiveImportRewriteContext(astRoot, fSelectionStart, rewrite);
+		String typeName= rewrite.addImport(fSelectedType.getQualifiedName(), context);
 		rootEdit.addChild(rewrite.rewriteImports(null));
 		return typeName;
 	}
