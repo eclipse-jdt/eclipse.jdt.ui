@@ -874,10 +874,6 @@ public class InlineConstantRefactoring extends Refactoring {
 			return result;
 
 		} finally {
-			fSelectionCuRewrite= null;
-			fSelectedConstantName= null;
-			fDeclarationCuRewrite= null;
-			fDeclaration= null;
 			pm.done();
 		}
 	}
