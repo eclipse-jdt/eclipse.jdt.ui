@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
@@ -365,7 +366,7 @@ public class JavaElementImageProvider {
 					IMember member= (IMember)element;
 
 					int modifiers= member.getFlags();
-					if (Flags.isAbstract(modifiers) && confirmAbstract(member))
+					if (confirmAbstract(member) && JdtFlags.isAbstract(member))
 						flags|= JavaElementImageDescriptor.ABSTRACT;
 					if (Flags.isFinal(modifiers) || isInterfaceOrAnnotationField(member) || isEnumConstant(member, modifiers))
 						flags|= JavaElementImageDescriptor.FINAL;
@@ -413,11 +414,11 @@ public class JavaElementImageProvider {
 
 
 	private static boolean confirmAbstract(IMember element) throws JavaModelException {
-		// never show the abstract symbol on interfaces or members in interfaces
+		// never show the abstract symbol on interfaces
 		if (element.getElementType() == IJavaElement.TYPE) {
 			return ! JavaModelUtil.isInterfaceOrAnnotation((IType) element);
 		}
-		return ! JavaModelUtil.isInterfaceOrAnnotation(element.getDeclaringType());
+		return true;
 	}
 
 	private static boolean isInterfaceOrAnnotationField(IMember element) throws JavaModelException {
