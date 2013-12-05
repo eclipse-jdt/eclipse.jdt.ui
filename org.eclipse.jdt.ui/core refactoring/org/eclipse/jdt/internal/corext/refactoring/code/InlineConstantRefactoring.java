@@ -810,6 +810,8 @@ public class InlineConstantRefactoring extends Refactoring {
 		pm.beginTask("", 3); //$NON-NLS-1$
 
 		try {
+			fSelectionCuRewrite.clearASTAndImportRewrites();
+			fDeclarationCuRewrite.clearASTAndImportRewrites();
 			List<CompilationUnitChange>changes= new ArrayList<CompilationUnitChange>();
 			HashSet<SimpleName> staticImportsInInitializer= new HashSet<SimpleName>();
 			ImportReferencesCollector.collect(getInitializer(), fField.getJavaProject(), null, new ArrayList<SimpleName>(), staticImportsInInitializer);

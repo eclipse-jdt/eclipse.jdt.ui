@@ -158,11 +158,12 @@ public class CompilationUnitRewrite {
 
 	public void clearImportRewrites() {
 		fImportRewrite= null;
+		fImportRemover= null;
 	}
 
 	public void clearASTAndImportRewrites() {
 		clearASTRewrite();
-		fImportRewrite= null;
+		clearImportRewrites();
 	}
 
 	public CategorizedTextEditGroup createCategorizedGroupDescription(String name, GroupCategorySet set) {
